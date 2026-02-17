@@ -12,7 +12,9 @@ fixtures = [
     {"dt": "Workflow Action"},
     {"dt": "Role"},
     {"dt": "Custom Field"},
-    {"dt": "Property Setter"}
+    {"dt": "Property Setter"},
+    {"dt": "Email Template"},
+    {"dt": "Notification"}
 ]
 
 # Translations

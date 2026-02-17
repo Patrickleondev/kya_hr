@@ -1,0 +1,92 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "question-sign",
+  "modified": "2026-02-06 18:22:38.239673",
+  "name": "Pending",
+  "style": "",
+  "workflow_state_name": "Pending"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "ok-sign",
+  "modified": "2026-02-06 18:22:38.243151",
+  "name": "Approved",
+  "style": "Success",
+  "workflow_state_name": "Approved"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "remove",
+  "modified": "2026-02-06 18:22:38.245268",
+  "name": "Rejected",
+  "style": "Danger",
+  "workflow_state_name": "Rejected"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-02-17 10:04:23.335304",
+  "name": "Brouillon",
+  "style": "Warning",
+  "workflow_state_name": "Brouillon"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-02-17 10:04:26.541867",
+  "name": "En attente du Supérieur Immédiat",
+  "style": "Warning",
+  "workflow_state_name": "En attente du Supérieur Immédiat"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-02-17 10:04:26.572242",
+  "name": "En attente du Responsable des Stagiaires",
+  "style": "Warning",
+  "workflow_state_name": "En attente du Responsable des Stagiaires"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-02-17 10:04:26.621587",
+  "name": "En attente RH",
+  "style": "Warning",
+  "workflow_state_name": "En attente RH"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-02-17 10:04:26.637491",
+  "name": "En attente du DG",
+  "style": "Warning",
+  "workflow_state_name": "En attente du DG"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-02-17 10:04:26.661343",
+  "name": "Approuvé",
+  "style": "Primary",
+  "workflow_state_name": "Approuvé"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-02-17 10:04:26.687941",
+  "name": "Rejeté",
+  "style": "Danger",
+  "workflow_state_name": "Rejeté"
+ }
+]
