@@ -1,0 +1,37 @@
+[
+    {
+        "doctype": "Role",
+        "name": "Directeur Général",
+        "role_name": "Directeur Général"
+    },
+    {
+        "doctype": "Role",
+        "name": "Responsable RH",
+        "role_name": "Responsable RH"
+    },
+    {
+        "doctype": "Role",
+        "name": "Stagiaire",
+        "role_name": "Stagiaire"
+    },
+    {
+        "doctype": "Role",
+        "name": "Supérieur Immédiat",
+        "role_name": "Supérieur Immédiat"
+    },
+    {
+        "doctype": "Role",
+        "name": "Responsable des Stagiaires",
+        "role_name": "Responsable des Stagiaires"
+    },
+    {
+        "doctype": "Role",
+        "name": "Maître de Stage",
+        "role_name": "Maître de Stage"
+    },
+    {
+        "doctype": "Role",
+        "name": "Auditeur Interne",
+        "role_name": "Auditeur Interne"
+    }
+]

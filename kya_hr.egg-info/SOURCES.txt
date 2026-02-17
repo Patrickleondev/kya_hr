@@ -1,0 +1,14 @@
+MANIFEST.in
+requirements.txt
+setup.py
+kya_hr/__init__.py
+kya_hr/create_workflows.py
+kya_hr/hooks.py
+kya_hr/setup_insurance.py
+kya_hr/setup_kya_fields.py
+kya_hr.egg-info/PKG-INFO
+kya_hr.egg-info/SOURCES.txt
+kya_hr.egg-info/dependency_links.txt
+kya_hr.egg-info/not-zip-safe
+kya_hr.egg-info/top_level.txt
+kya_hr/translations/fr.csv

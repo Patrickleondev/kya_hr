@@ -1,0 +1,16 @@
+include MANIFEST.in
+include requirements.txt
+include *.py
+include *.md
+recursive-include kya_hr *.py
+recursive-include kya_hr *.html
+recursive-include kya_hr *.md
+recursive-include kya_hr *.csv
+recursive-include kya_hr *.rb
+recursive-include kya_hr *.js
+recursive-include kya_hr *.css
+recursive-include kya_hr *.png
+recursive-include kya_hr *.jpg
+recursive-include kya_hr *.jpeg
+recursive-include kya_hr *.svg
+recursive-include kya_hr *.txt
