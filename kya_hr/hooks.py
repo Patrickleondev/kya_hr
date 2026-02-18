@@ -14,7 +14,6 @@ fixtures = [
     {"dt": "Custom Field"},
     {"dt": "Property Setter"},
     {"dt": "Email Template"},
-    {"dt": "Notification"},
     {"dt": "Workspace"}
 ]
 
