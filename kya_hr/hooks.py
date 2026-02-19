@@ -13,8 +13,7 @@ fixtures = [
     {"dt": "Role"},
     {"dt": "Custom Field"},
     {"dt": "Property Setter"},
-    {"dt": "Email Template"},
-    {"dt": "Workspace"}
+    {"dt": "Email Template"}
 ]
 
 # Translations
