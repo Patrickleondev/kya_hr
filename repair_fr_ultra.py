@@ -298,6 +298,27 @@ def repair_ultra():
         "Today": "Aujourd'hui",
         "This Week": "Cette semaine",
         "This Month": "Ce mois-ci",
+
+        # Additional MISSING PWA strings from user feedback
+        "Expense Claim Summary": "Résumé des notes de frais",
+        "Recent Expenses": "Dépenses récentes",
+        "Employee Advance Balance": "Solde d'avance de l'employé",
+        "You have no advances": "Vous n'avez pas d'avances",
+        "Congés et jours non travaillés": "Congés et jours non travaillés", # Already FR but for completeness
+        "Solde de Congés": "Solde de Congés", # Already FR
+        "View Leave History": "Voir l'historique des congés",
+        "Recent Leaves": "Congés récents",
+        "Upcoming Holidays": "Congés à venir",
+        "You have no upcoming holidays": "Vous n'avez pas de congés à venir",
+        "Total Amount Claimed": "Montant total réclamé",
+        "Wait": "En attente",
+        "Approved": "Approuvé",
+        "Rejected": "Rejeté",
+        "Request a Leave": "Demander un congé",
+        "Declaring a expense": "Déclarer une dépense",
+        "Claim an Expense": "Déclarer une dépense",
+        "See the List": "Voir la liste",
+        "Voir La Liste": "Voir la liste",
     }
     
     for k, v in overrides.items():
@@ -307,14 +328,20 @@ def repair_ultra():
     sorted_keys = sorted(translations.keys())
     
     # 4. Write back to fr.csv in PURE UTF-8
-    print(f"Writing {len(translations)} translations to {os.path.basename(fr_csv)}...")
-    with open(fr_csv, 'w', encoding='utf-8', newline='') as f:
-        # Frappe likes all fields quoted
-        writer = csv.writer(f, quoting=csv.QUOTE_ALL)
-        for key in sorted_keys:
-            writer.writerow([key, translations[key]])
+    try:
+        print(f"Writing {len(translations)} translations to {os.path.basename(fr_csv)}...")
+        with open(fr_csv, 'w', encoding='utf-8', newline='') as f:
+            # Frappe likes all fields quoted
+            writer = csv.writer(f, quoting=csv.QUOTE_ALL)
+            for key in sorted_keys:
+                writer.writerow([key, translations[key]])
+        print("File write complete!")
+    except PermissionError:
+        print(f"⚠️ Permission denied for {fr_csv}. Skipping file write (database sync will proceed).")
+    except Exception as e:
+        print(f"⚠️ Error writing file: {e}")
 
-    print("Repair complete!")
+    print("Repair logic execution finished!")
 
     # Write to database if in frappe environment
     try:
@@ -333,6 +360,22 @@ def repair_ultra():
                         }).insert(ignore_permissions=True)
                     else:
                         frappe.db.set_value("Translation", {"source_text": key, "language": "fr"}, "translated_text", val)
+            
+            # Translate specific Notifications
+            notifications_to_fix = {
+                "Exit Interview Scheduled": ("Entretien de sortie planifi\u00e9", "Entretien de sortie planifi\u00e9: {{ doc.name }}"),
+                "Material Request Receipt Notification": ("Notification de r\u00e9ception de mat\u00e9riel", "{{ doc.name }} a \u00e9t\u00e9 re\u00e7u"),
+                "Retention Bonus": ("Prime de fid\u00e9lisation", "Alerte de prime de fid\u00e9lisation pour {{ doc.employee }}"),
+                "Notification for new fiscal year": ("Nouvelle ann\u00e9e fiscale", "Notification pour la nouvelle ann\u00e9e fiscale {{ doc.name }}"),
+                "Training Feedback": ("Commentaires sur la formation", "Merci de partager vos commentaires sur {{ doc.training_event }}"),
+                "Training Scheduled": ("Formation planifi\u00e9e", "Formation planifi\u00e9e: {{ doc.name }}")
+            }
+            
+            for notif_name, (new_subject, new_msg_prefix) in notifications_to_fix.items():
+                if frappe.db.exists("Notification", notif_name):
+                    frappe.db.set_value("Notification", notif_name, "subject", new_subject)
+                    # We only update subject to keep it simple and avoid breaking complex message templates
+            
             frappe.db.commit()
             print("✅ Database sync complete")
     except ImportError:
