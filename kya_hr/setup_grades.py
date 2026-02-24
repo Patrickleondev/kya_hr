@@ -1,41 +1,85 @@
 import frappe
+import json
 
-def create_employee_grades():
-    grades = [
-        # Agents d'exécution (AE)
-        {"name": "AE-A", "employee_grade_name": "Agents d'exécution (A)"},
-        {"name": "AE-B", "employee_grade_name": "Agents d'exécution (B)"},
-        {"name": "AE-C", "employee_grade_name": "Agents d'exécution (C)"},
-        {"name": "AE-D", "employee_grade_name": "Agents d'exécution (D)"},
-        # Agents de maîtrise (AM)
-        {"name": "AM-E", "employee_grade_name": "Agents de maîtrise (E)"},
-        {"name": "AM-F", "employee_grade_name": "Agents de maîtrise (F)"},
-        {"name": "AM-G", "employee_grade_name": "Agents de maîtrise (G)"},
-        # Cadres (C)
-        {"name": "C-H", "employee_grade_name": "Cadres (H)"},
-        {"name": "C-I", "employee_grade_name": "Cadres (I)"},
-        {"name": "C-J", "employee_grade_name": "Cadres (J)"},
-        {"name": "C-K", "employee_grade_name": "Cadres (K)"},
-        {"name": "C-L", "employee_grade_name": "Cadres (L)"},
-        # Hauts Cadres (HC)
-        {"name": "HC-M", "employee_grade_name": "Hauts Cadres (M)"},
-        {"name": "HC-N", "employee_grade_name": "Hauts Cadres (N)"},
-        {"name": "HC-O", "employee_grade_name": "Hauts Cadres (O)"},
-        {"name": "HC-P", "employee_grade_name": "Hauts Cadres (P)"},
-    ]
+def execute():
+    # 1. Update Custom Field Options for Employee
+    fields_to_update = {
+        "custom_kya_categorie": "AE\nAM\nC\nHC",
+        "custom_kya_classe": "A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM\nN\nO\nP",
+        "custom_kya_echelon": "1\n2\n3\n4\n5\n6\n7\n8"
+    }
+    
+    for fieldname, options in fields_to_update.items():
+        if frappe.db.exists("Custom Field", {"dt": "Employee", "fieldname": fieldname}):
+            frappe.db.set_value("Custom Field", {"dt": "Employee", "fieldname": fieldname}, "options", options)
+            print(f"Updated options for {fieldname}")
 
-    for grade_data in grades:
-        if not frappe.db.exists("Employee Grade", grade_data["name"]):
-            doc = frappe.get_doc({
-                "doctype": "Employee Grade",
-                "employee_grade_name": grade_data["employee_grade_name"],
-                "name": grade_data["name"]
-            })
-            doc.insert()
-            print(f"Created Grade: {grade_data['name']}")
-        else:
-            print(f"Grade {grade_data['name']} already exists.")
+    # 2. Salary Index Data Grid
+    salary_grid = {
+        "A": [270, 276, 282, 288, 294, 300, 306, 312],
+        "B": [319, 326, 333, 340, 347, 354, 361, 368],
+        "C": [377, 386, 395, 404, 413, 422, 431, 440],
+        "D": [450, 460, 470, 480, 490, 500, 510, 520],
+        "E": [540, 553, 566, 579, 592, 605, 618, 631],
+        "F": [644, 657, 670, 683, 697, 710, 723, 736],
+        "G": [749, 762, 775, 789, 802, 815, 828, 841],
+        "H": [855, 868, 881, 895, 908, 921, 935, 948],
+        "I": [864, 885, 907, 928, 949, 970, 992, 1013],
+        "J": [1035, 1058, 1080, 1102, 1124, 1147, 1169, 1191],
+        "K": [1214, 1238, 1261, 1284, 1308, 1331, 1354, 1377],
+        "L": [1402, 1426, 1450, 1475, 1499, 1523, 1547, 1572],
+        "M": [1728, 1777, 1825, 1874, 1922, 1971, 2019, 2068],
+        "N": [2117, 2167, 2217, 2266, 2316, 2365, 2415, 2464],
+        "O": [2465, 2516, 2567, 2617, 2668, 2718, 2769, 2819],
+        "P": [2871, 2922, 2974, 3026, 3077, 3129, 3180, 3232]
+    }
+
+    # 3. Client Script for Employee
+    script_name = "Employee Salary Index Automation"
+    script_content = """
+frappe.ui.form.on('Employee', {
+    custom_kya_classe: function(frm) {
+        update_salary_index(frm);
+    },
+    custom_kya_echelon: function(frm) {
+        update_salary_index(frm);
+    },
+    custom_kya_categorie: function(frm) {
+        // Optionnel: peut servir a filtrer les classes dispo
+        update_salary_index(frm);
+    }
+});
+
+function update_salary_index(frm) {
+    const grid = %s;
+    
+    if (frm.doc.custom_kya_classe && frm.doc.custom_kya_echelon) {
+        let classe = frm.doc.custom_kya_classe;
+        let echelon = parseInt(frm.doc.custom_kya_echelon);
+        
+        if (grid[classe] && echelon >= 1 && echelon <= 8) {
+            let index = grid[classe][echelon - 1];
+            frm.set_value('custom_kya_indice', index);
+        }
+    }
+}
+""" % json.dumps(salary_grid, indent=4)
+
+    if not frappe.db.exists("Client Script", {"name": script_name}):
+        frappe.get_doc({
+            "doctype": "Client Script",
+            "name": script_name,
+            "dt": "Employee",
+            "script": script_content,
+            "enabled": 1
+        }).insert()
+        print(f"Created Client Script: {script_name}")
+    else:
+        frappe.db.set_value("Client Script", script_name, "script", script_content)
+        print(f"Updated Client Script: {script_name}")
+
+    frappe.db.commit()
+    print("✅ Salary Index Automation Setup Complete!")
 
 if __name__ == "__main__":
-    create_employee_grades()
-    frappe.db.commit()
+    execute()
