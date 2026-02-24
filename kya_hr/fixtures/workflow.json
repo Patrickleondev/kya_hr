@@ -13,36 +13,50 @@
             {
                 "allow_edit": "Employ\u00e9",
                 "doc_status": "0",
+                "next_action_email_template": "KYA - Demande de Cong\u00e9 \u00c0 Approuver",
+                "send_email": 1,
                 "state": "Brouillon"
             },
             {
                 "allow_edit": "Sup\u00e9rieur Imm\u00e9diat",
                 "doc_status": "0",
+                "next_action_email_template": "KYA - Demande de Cong\u00e9 \u00c0 Approuver",
+                "send_email": 1,
                 "state": "En attente du Sup\u00e9rieur Imm\u00e9diat"
             },
             {
                 "allow_edit": "Responsable des Stagiaires",
                 "doc_status": "0",
+                "next_action_email_template": "KYA - Demande de Cong\u00e9 \u00c0 Approuver",
+                "send_email": 1,
                 "state": "En attente Resp. Stagiaires"
             },
             {
                 "allow_edit": "Responsable RH",
                 "doc_status": "0",
+                "next_action_email_template": "KYA - Demande de Cong\u00e9 \u00c0 Approuver",
+                "send_email": 1,
                 "state": "En attente RH"
             },
             {
                 "allow_edit": "Directeur G\u00e9n\u00e9ral",
                 "doc_status": "0",
+                "next_action_email_template": "KYA - Demande de Cong\u00e9 \u00c0 Approuver",
+                "send_email": 1,
                 "state": "En attente DG"
             },
             {
                 "allow_edit": "Directeur G\u00e9n\u00e9ral",
                 "doc_status": "1",
+                "next_action_email_template": "KYA - Cong\u00e9 Accord\u00e9",
+                "send_email": 1,
                 "state": "Approuv\u00e9"
             },
             {
                 "allow_edit": "Directeur G\u00e9n\u00e9ral",
                 "doc_status": "0",
+                "next_action_email_template": "KYA - Cong\u00e9 Rejet\u00e9",
+                "send_email": 1,
                 "state": "Rejet\u00e9"
             }
         ],
