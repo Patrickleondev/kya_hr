@@ -1,1 +1,22 @@
-[]
+[
+    {
+        "docstatus": 0,
+        "doctype": "Workflow Action",
+        "name": "Soumettre"
+    },
+    {
+        "docstatus": 0,
+        "doctype": "Workflow Action",
+        "name": "Approuver"
+    },
+    {
+        "docstatus": 0,
+        "doctype": "Workflow Action",
+        "name": "Rejeter"
+    },
+    {
+        "docstatus": 0,
+        "doctype": "Workflow Action",
+        "name": "Envoyer pour Validation"
+    }
+]
