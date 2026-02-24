@@ -41,7 +41,12 @@ def clean_value(val):
     return val
 
 def repair_ultra():
-    base_path = r'd:\Stage_KYA_Energie\ERPNext_v16_Port8084\kya_hr\kya_hr'
+    # Detect if we are in Docker or local
+    if os.path.exists('/home/frappe/frappe-bench'):
+        base_path = '/home/frappe/frappe-bench/apps/kya_hr/kya_hr'
+    else:
+        base_path = r'd:\Stage_KYA_Energie\ERPNext_v16_Port8084\kya_hr\kya_hr'
+    
     trans_path = os.path.join(base_path, 'translations')
     
     fr_csv = os.path.join(trans_path, 'fr.csv')
@@ -113,14 +118,30 @@ def repair_ultra():
         "Employees by Age": "Employés par âge",
         "Hiring Count": "Nombre d'embauches",
         "Attrition Count": "Nombre de départs",
+        "New Hires (This Month)": "Nouvelles embauches (ce mois-ci)",
+        "Exits (This Month)": "Départs (ce mois-ci)",
+        "Trainings (This Week)": "Formations (cette semaine)",
+        "Trainings (This Month)": "Formations (ce mois-ci)",
+        "Onboardings (This Month)": "Intégrations (ce mois-ci)",
+        "Separations (This Month)": "Séparations (ce mois-ci)",
+        "Promotions (This Month)": "Promotions (ce mois-ci)",
+        "Transfers (This Month)": "Transferts (ce mois-ci)",
+        "Grievance Type": "Type de grief",
+        "Training Type": "Type de formation",
+        "Y-O-Y Transfers": "Transferts d'une année sur l'autre",
+        "Y-O-Y Promotions": "Promotions d'une année sur l'autre",
+        "No Data...": "Aucune donnée...",
         
-        # Core Frappe buttons from screenshots
+        # Core Frappe buttons and Nav from screenshots
         "List View": "Vue de liste",
         "Saved Filters": "Filtres enregistrés",
         "Add Employee": "Ajouter un employé",
-        "Add Employee": "Ajouter un Employé",
         "Add {0}": "Ajouter {0}",
         "Select...": "Sélectionner...",
+        "Events": "Événements",
+        "What's New": "Quoi de neuf",
+        "No New notifications": "Aucune nouvelle notification",
+        "Looks like you haven't received any notifications.": "Il semble que vous n'ayez reçu aucune notification.",
         
         # Tabs and Headers
         "Employee Attendance": "Présence de l'employé",
@@ -147,6 +168,9 @@ def repair_ultra():
         "Create your first {0}": "Créez votre premier {0}",
         "No {0} found": "Aucun {0} trouvé",
         "No matching records found": "Aucun enregistrement correspondant trouvé",
+        "No {0} found with matching filters. Clear filters to see all {0}.": "Aucun {0} trouvé avec les filtres correspondants. Effacez les filtres pour voir tous les {0}.",
+        "Clear filters to see all {0}.": "Effacez les filtres pour voir tous les {0}.",
+        "Create a new {0}": "Créer un(e) nouveau(elle) {0}",
         
         # More Workspace / Dashboard missing terms
         "Employee Attendance Tool": "Outil de présence des employés",
@@ -173,6 +197,107 @@ def repair_ultra():
         "Employee": "Employé",
         "Graphique organisationnel": "Organigramme",
         "Configuration": "Configuration",
+
+        # ── HRMS PWA Mobile Interface (urgent) ──────────────────────────
+        # Menu principal /hrms
+        "Request Attendance": "Demander une attestation de présence",
+        "Request a Shift": "Demander un créneau horaire",
+        "Request Leave": "Demander un congé",
+        "Claim an Expense": "Déclarer une dépense",
+        "Request an Advance": "Demander une avance sur salaire",
+        "View Salary Slips": "Voir mes fiches de paie",
+
+        # Onglets / tabs PWA
+        "My Requests": "Mes Demandes",
+        "Team Requests": "Demandes de l'équipe",
+        "You have no requests": "Vous n'avez aucune demande en cours",
+        "No requests found": "Aucune demande trouvée",
+
+        # Barre navigation inférieure HRMS
+        "Attendance": "Présence",
+        "Leaves": "Congés",
+        "Expenses": "Dépenses",
+        "Salary": "Salaire",
+
+        # Header HRMS
+        "Frappe HR": "KYA RH",
+        "HRMS": "Système RH",
+
+        # Statuts des demandes
+        "Open": "En cours",
+        "Approved": "Approuvé",
+        "Rejected": "Rejeté",
+        "Pending": "En attente",
+        "Cancelled": "Annulé",
+        "Draft": "Brouillon",
+
+        # Formulaires congés PWA
+        "Leave Application": "Demande de Congé",
+        "Leave Type": "Type de Congé",
+        "From Date": "Date de début",
+        "To Date": "Date de fin",
+        "Half Day": "Demi-journée",
+        "Reason": "Motif",
+        "Leave Balance": "Solde de Congés",
+        "Available Leaves": "Congés disponibles",
+        "Total Leave Days": "Nombre de jours",
+        "Leave Approver": "Approbateur de congé",
+        "Follow Through": "Suivi",
+        "Apply": "Valider",
+        "Submit": "Soumettre",
+        "Cancel": "Annuler",
+
+        # Formulaire présence PWA
+        "Attendance Request": "Demande de présence",
+        "Explanation": "Explication",
+        "Shift": "Créneau",
+        "Work From Home": "Télétravail",
+        "On Duty": "En service",
+
+        # Formulaire avance / dépenses PWA
+        "Expense Claim": "Note de frais",
+        "Expense Type": "Type de dépense",
+        "Amount": "Montant",
+        "Total Claimed Amount": "Montant total réclamé",
+        "Total Sanctioned Amount": "Montant total approuvé",
+        "Employee Advance": "Avance employé",
+        "Purpose": "Objet",
+        "Advance Amount": "Montant de l'avance",
+        "Mode of Payment": "Mode de paiement",
+        "Repay Unclaimed Amount from Salary": "Déduire le montant non réclamé du salaire",
+
+        # Fiches de paie PWA
+        "Salary Slip": "Fiche de Paie",
+        "Gross Pay": "Salaire brut",
+        "Net Pay": "Salaire net",
+        "Total Deduction": "Total des déductions",
+        "Month": "Mois",
+        "Year": "Année",
+        "Earnings": "Revenus",
+        "Deductions": "Déductions",
+        "Download": "Télécharger",
+
+        # Messages d'état généraux PWA
+        "Loading...": "Chargement...",
+        "Save": "Enregistrer",
+        "Edit": "Modifier",
+        "Delete": "Supprimer",
+        "Back": "Retour",
+        "Close": "Fermer",
+        "Confirm": "Confirmer",
+        "Are you sure?": "Êtes-vous sûr(e) ?",
+        "Success": "Succès",
+        "Error": "Erreur",
+        "Warning": "Avertissement",
+        "Update": "Mettre à jour",
+        "New": "Nouveau",
+        "View All": "Voir tout",
+        "See All": "Voir tout",
+        "Show More": "Afficher plus",
+        "No Data": "Aucune donnée",
+        "Today": "Aujourd'hui",
+        "This Week": "Cette semaine",
+        "This Month": "Ce mois-ci",
     }
     
     for k, v in overrides.items():
@@ -190,6 +315,31 @@ def repair_ultra():
             writer.writerow([key, translations[key]])
 
     print("Repair complete!")
+
+    # Write to database if in frappe environment
+    try:
+        import frappe
+        if frappe.db:
+            print("Syncing translations to database...")
+            for key, val in translations.items():
+                if key and val:
+                    # Update or insert into tabTranslation
+                    if not frappe.db.exists("Translation", {"source_text": key, "language": "fr"}):
+                        frappe.get_doc({
+                            "doctype": "Translation",
+                            "language": "fr",
+                            "source_text": key,
+                            "translated_text": val
+                        }).insert(ignore_permissions=True)
+                    else:
+                        frappe.db.set_value("Translation", {"source_text": key, "language": "fr"}, "translated_text", val)
+            frappe.db.commit()
+            print("✅ Database sync complete")
+    except ImportError:
+        pass
+
+def execute():
+    repair_ultra()
 
 if __name__ == "__main__":
     repair_ultra()

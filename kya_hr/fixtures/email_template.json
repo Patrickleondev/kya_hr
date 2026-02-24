@@ -1,62 +1,52 @@
 [
- {
-  "docstatus": 0,
-  "doctype": "Email Template",
-  "modified": "2026-02-19 17:07:43.388152",
-  "name": "Interview Reminder",
-  "response": "<h1>Interview Reminder</h1>\n\n<p>\n\tInterview: {{name}} is scheduled on {{scheduled_on}} from {{from_time}} to {{to_time}}\n</p>\n",
-  "response_html": null,
-  "subject": "Interview Reminder",
-  "use_html": 0
- },
- {
-  "docstatus": 0,
-  "doctype": "Email Template",
-  "modified": "2026-02-19 17:07:43.403366",
-  "name": "Interview Feedback Reminder",
-  "response": "<h1>Interview Feedback Reminder</h1>\n\n<p>\n\tInterview Feedback for Interview {{ name }} is not submitted yet. Please submit your feedback. Thank you, good day!\n</p>\n",
-  "response_html": null,
-  "subject": "Interview Feedback Reminder",
-  "use_html": 0
- },
- {
-  "docstatus": 0,
-  "doctype": "Email Template",
-  "modified": "2026-02-19 17:07:43.482881",
-  "name": "Exit Questionnaire Notification",
-  "response": "<h2>Exit Questionnaire</h2>\n<br>\n\n<p>\n\tDear {{ employee_name }},\n\t<br><br>\n\n\tThank you for the contribution you have made during your time at {{ company }}. We value your opinion and welcome the feedback on your experience working with us.\n\tRequest you to take out a few minutes to fill up this Exit Questionnaire.\n\t{% set web_form = frappe.db.get_single_value('HR Settings','exit_questionnaire_web_form') %}\n\t{% set web_form_link = frappe.utils.get_url(uri=frappe.db.get_value('Web Form', web_form, 'route')) %}\n\n\t<br><br>\n\t<a class=\"btn btn-primary\" href=\"{{ web_form_link }}\" target=\"_blank\">{{ _('Submit Now') }}</a>\n</p>\n",
-  "response_html": null,
-  "subject": "Exit Questionnaire Notification",
-  "use_html": 0
- },
- {
-  "docstatus": 0,
-  "doctype": "Email Template",
-  "modified": "2026-02-06 13:06:42.005785",
-  "name": "Dispatch Notification",
-  "response": "<h1>Dispatch Notification</h1>\n<h3>Details:</h3>\n<table class=\"table table-bordered small\" style=\"max-width: 500px;\">\n    <tbody>\n        <tr>\n            <td>Customer's Name</td>\n            <td>{{ customer }}</td>\n        </tr>\n        <tr>\n            <td>Contact's Name</td>\n            <td>{{ first_name }} {{ last_name }}</td>\n        </tr>\n        <tr>\n            <td>Address Name</td>\n            <td>{{ address }}</td>\n        </tr>\n        <tr>\n            <td>Address Details</td>\n            <td>{{ customer_address }}</td>\n        </tr>\n        <tr>\n            <td>Order Number</td>\n            <td>{{ delivery_note }}</td>\n        </tr>\n        <tr>\n            <td>Order Total</td>\n            <td>{{ grand_total }}</td>\n        </tr>\n        <tr>\n            <td>Departure Time</td>\n            <td>{{ departure_time }}</td>\n        </tr>\n        <tr>\n            <td>Estimated Arrival</td>\n            <td>{{ estimated_arrival }}</td>\n        </tr>\n        <tr>\n            <td>Driver's Name</td>\n            <td>{{ driver_name }}</td>\n        </tr>\n        <tr>\n            <td>Driver's Number</td>\n            <td>{{ cell_number }}</td>\n        </tr>\n        <tr>\n            <td>Vehicle Number</td>\n            <td>{{ vehicle }}</td>\n        </tr>\n    </tbody>\n</table>\n",
-  "response_html": null,
-  "subject": "Your order is out for delivery!",
-  "use_html": 0
- },
- {
-  "docstatus": 0,
-  "doctype": "Email Template",
-  "modified": "2026-02-06 18:24:57.278803",
-  "name": "Leave Approval Notification",
-  "response": "<h1>Leave Application Notification</h1>\n<h3>Details:</h3>\n\n\t<table class=\"table table-bordered small\" style=\"max-width: 500px;\">\n\t\t<tbody><tr>\n\t\t\t<td>Employee</td>\n\t\t\t<td>{{employee_name}}</td>\n\t\t</tr>\n\t\t<tr>\n\t\t\t<td>Leave Type</td>\n\t\t\t<td>{{leave_type}}</td>\n\t\t</tr>\n\t\t<tr>\n\t\t\t<td>From Date</td>\n\t\t\t<td>{{from_date}}</td>\n\t\t</tr>\n\t\t<tr>\n\t\t\t<td>To Date</td>\n\t\t\t<td>{{to_date}}</td>\n\t\t</tr>\n\t\t<tr>\n\t\t\t<td>Status</td>\n\t\t\t<td>{{status}}</td>\n\t\t</tr>\n\t</tbody></table>\n\n\t{% set doc_link = frappe.utils.get_url_to_form('Leave Application', name) %}\n\n\t<br><br>\n\t<a class=\"btn btn-primary\" href=\"{{ doc_link }}\" target=\"_blank\">{{ _('Open Now') }}</a>",
-  "response_html": null,
-  "subject": "Leave Approval Notification",
-  "use_html": 0
- },
- {
-  "docstatus": 0,
-  "doctype": "Email Template",
-  "modified": "2026-02-06 18:24:57.287402",
-  "name": "Leave Status Notification",
-  "response": "<h1>Leave Application Notification</h1>\n<h3>Details:</h3>\n\n\t<table class=\"table table-bordered small\" style=\"max-width: 500px;\">\n\t\t<tbody><tr>\n\t\t\t<td>Employee</td>\n\t\t\t<td>{{employee_name}}</td>\n\t\t</tr>\n\t\t<tr>\n\t\t\t<td>Leave Type</td>\n\t\t\t<td>{{leave_type}}</td>\n\t\t</tr>\n\t\t<tr>\n\t\t\t<td>From Date</td>\n\t\t\t<td>{{from_date}}</td>\n\t\t</tr>\n\t\t<tr>\n\t\t\t<td>To Date</td>\n\t\t\t<td>{{to_date}}</td>\n\t\t</tr>\n\t\t<tr>\n\t\t\t<td>Status</td>\n\t\t\t<td>{{status}}</td>\n\t\t</tr>\n\t</tbody></table>\n\n\t{% set doc_link = frappe.utils.get_url_to_form('Leave Application', name) %}\n\n\t<br><br>\n\t<a class=\"btn btn-primary\" href=\"{{ doc_link }}\" target=\"_blank\">{{ _('Open Now') }}</a>",
-  "response_html": null,
-  "subject": "Leave Status Notification",
-  "use_html": 0
- }
+    {
+        "docstatus": 0,
+        "doctype": "Email Template",
+        "modified": "2026-02-24 11:10:00.000000",
+        "name": "KYA - Demande de Congé À Approuver",
+        "response_html": null,
+        "use_html": 1,
+        "subject": "Action requise : Demande de congé de {{ employee_name }}",
+        "response": "<!DOCTYPE html><html lang=\"fr\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"></head><body style=\"margin:0;padding:0;font-family:Arial,sans-serif;background:#f5f5f5\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\"><tr><td align=\"center\" style=\"padding:24px 16px\">\n<table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.10);max-width:600px\">\n\n  <!-- HEADER LOGO -->\n  <tr><td style=\"background:#ffffff;padding:16px 32px;border-bottom:3px solid #1a6b4a;text-align:center\">\n    <img src=\"{{ frappe.utils.get_url('/assets/kya_hr/images/image010.png') }}\" alt=\"KYA-Energy Group\" style=\"max-height:80px;max-width:260px\">\n  </td></tr>\n\n  <!-- BODY -->\n  <tr><td style=\"padding:28px 32px\">\n    <p style=\"color:#333;font-size:15px;margin:0 0 10px\">Bonjour,</p>\n    <p style=\"color:#555;font-size:15px;line-height:1.6;margin:0 0 20px\">\n      Une demande de congé est en attente de <strong>votre approbation</strong>.\n    </p>\n\n    <!-- TABLE DETAILS -->\n    <table style=\"width:100%;border-collapse:collapse;font-size:14px;margin-bottom:24px\">\n      <tr style=\"background:#1a6b4a\"><th colspan=\"2\" style=\"color:#fff;padding:9px 14px;text-align:left;font-weight:600\">Détails de la demande</th></tr>\n      <tr><td style=\"padding:9px 14px;background:#f0f8f4;border:1px solid #d0ead8;color:#555;width:42%\">Employé</td><td style=\"padding:9px 14px;border:1px solid #d0ead8;font-weight:600;color:#222\">{{ employee_name }}</td></tr>\n      <tr><td style=\"padding:9px 14px;background:#f0f8f4;border:1px solid #d0ead8;color:#555\">Type de congé</td><td style=\"padding:9px 14px;border:1px solid #d0ead8;color:#222\">{{ leave_type }}</td></tr>\n      <tr><td style=\"padding:9px 14px;background:#f0f8f4;border:1px solid #d0ead8;color:#555\">Date de début</td><td style=\"padding:9px 14px;border:1px solid #d0ead8;color:#222\">{{ from_date }}</td></tr>\n      <tr><td style=\"padding:9px 14px;background:#f0f8f4;border:1px solid #d0ead8;color:#555\">Date de fin</td><td style=\"padding:9px 14px;border:1px solid #d0ead8;color:#222\">{{ to_date }}</td></tr>\n      <tr><td style=\"padding:9px 14px;background:#f0f8f4;border:1px solid #d0ead8;color:#555\">Nombre de jours</td><td style=\"padding:9px 14px;border:1px solid #d0ead8;color:#222\">{{ total_leave_days }}</td></tr>\n      <tr><td style=\"padding:9px 14px;background:#f0f8f4;border:1px solid #d0ead8;color:#555\">Statut</td><td style=\"padding:9px 14px;border:1px solid #d0ead8\"><span style=\"background:#fff3cd;color:#856404;padding:2px 10px;border-radius:10px;font-size:12px;font-weight:600\">{{ workflow_state }}</span></td></tr>\n    </table>\n\n    {% set doc_link = frappe.utils.get_url_to_form('Leave Application', name) %}\n    <div style=\"text-align:center;margin:4px 0 20px\">\n      <a href=\"{{ doc_link }}\" target=\"_blank\" style=\"background:#1a6b4a;color:#ffffff;padding:12px 30px;border-radius:6px;text-decoration:none;font-size:14px;font-weight:600;display:inline-block\">→ Examiner la demande</a>\n    </div>\n  </td></tr>\n\n  <!-- FOOTER IMAGE (adresse + contacts) -->\n  <tr><td style=\"padding:0;border-top:2px solid #f0f0f0\">\n    <img src=\"{{ frappe.utils.get_url('/assets/kya_hr/images/image011.png') }}\" alt=\"KYA-Energy Group - Coordonnées\" style=\"width:100%;display:block\">\n  </td></tr>\n\n</table></td></tr></table></body></html>"
+    },
+    {
+        "docstatus": 0,
+        "doctype": "Email Template",
+        "modified": "2026-02-24 11:10:00.000000",
+        "name": "KYA - Congé Accordé",
+        "response_html": null,
+        "use_html": 1,
+        "subject": "✅ Votre demande de congé a été accordée",
+        "response": "<!DOCTYPE html><html lang=\"fr\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"></head><body style=\"margin:0;padding:0;font-family:Arial,sans-serif;background:#f5f5f5\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\"><tr><td align=\"center\" style=\"padding:24px 16px\">\n<table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.10);max-width:600px\">\n\n  <!-- HEADER -->\n  <tr><td style=\"background:#ffffff;padding:16px 32px;border-bottom:3px solid #1a6b4a;text-align:center\">\n    <img src=\"{{ frappe.utils.get_url('/assets/kya_hr/images/image010.png') }}\" alt=\"KYA-Energy Group\" style=\"max-height:80px;max-width:260px\">\n  </td></tr>\n\n  <!-- BADGE ACCORDÉ -->\n  <tr><td style=\"background:#d4edda;text-align:center;padding:16px\">\n    <span style=\"font-size:28px\">✅</span>\n    <p style=\"color:#155724;font-size:16px;font-weight:700;margin:6px 0 0\">Demande de Congé Accordée</p>\n  </td></tr>\n\n  <!-- BODY -->\n  <tr><td style=\"padding:28px 32px\">\n    <p style=\"color:#333;font-size:15px;margin:0 0 10px\">Bonjour <strong>{{ employee_name }}</strong>,</p>\n    <p style=\"color:#555;font-size:15px;line-height:1.6;margin:0 0 20px\">\n      Votre demande de congé a été <strong style=\"color:#1a6b4a\">accordée</strong> par la Direction Générale.\n    </p>\n\n    <table style=\"width:100%;border-collapse:collapse;font-size:14px;margin-bottom:20px\">\n      <tr style=\"background:#1a6b4a\"><th colspan=\"2\" style=\"color:#fff;padding:9px 14px;text-align:left;font-weight:600\">Récapitulatif</th></tr>\n      <tr><td style=\"padding:9px 14px;background:#f0f8f4;border:1px solid #d0ead8;color:#555;width:42%\">Employé</td><td style=\"padding:9px 14px;border:1px solid #d0ead8;font-weight:600;color:#222\">{{ employee_name }}</td></tr>\n      <tr><td style=\"padding:9px 14px;background:#f0f8f4;border:1px solid #d0ead8;color:#555\">Type de congé</td><td style=\"padding:9px 14px;border:1px solid #d0ead8;color:#222\">{{ leave_type }}</td></tr>\n      <tr><td style=\"padding:9px 14px;background:#f0f8f4;border:1px solid #d0ead8;color:#555\">Du</td><td style=\"padding:9px 14px;border:1px solid #d0ead8;color:#222\">{{ from_date }}</td></tr>\n      <tr><td style=\"padding:9px 14px;background:#f0f8f4;border:1px solid #d0ead8;color:#555\">Au</td><td style=\"padding:9px 14px;border:1px solid #d0ead8;color:#222\">{{ to_date }}</td></tr>\n      <tr><td style=\"padding:9px 14px;background:#f0f8f4;border:1px solid #d0ead8;color:#555\">Nombre de jours</td><td style=\"padding:9px 14px;border:1px solid #d0ead8;color:#222\">{{ total_leave_days }}</td></tr>\n    </table>\n\n    <p style=\"color:#555;font-size:13px;background:#f0f8f4;padding:10px 14px;border-left:4px solid #1a6b4a;border-radius:4px;margin:0\">\n      Veuillez informer votre équipe de votre absence et organiser la passation de service avant votre départ.\n    </p>\n  </td></tr>\n\n  <!-- FOOTER -->\n  <tr><td style=\"padding:0;border-top:2px solid #f0f0f0\">\n    <img src=\"{{ frappe.utils.get_url('/assets/kya_hr/images/image011.png') }}\" alt=\"KYA-Energy Group - Coordonnées\" style=\"width:100%;display:block\">\n  </td></tr>\n\n</table></td></tr></table></body></html>"
+    },
+    {
+        "docstatus": 0,
+        "doctype": "Email Template",
+        "modified": "2026-02-24 11:10:00.000000",
+        "name": "KYA - Congé Rejeté",
+        "response_html": null,
+        "use_html": 1,
+        "subject": "❌ Votre demande de congé n'a pas été retenue",
+        "response": "<!DOCTYPE html><html lang=\"fr\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"></head><body style=\"margin:0;padding:0;font-family:Arial,sans-serif;background:#f5f5f5\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\"><tr><td align=\"center\" style=\"padding:24px 16px\">\n<table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.10);max-width:600px\">\n\n  <!-- HEADER -->\n  <tr><td style=\"background:#ffffff;padding:16px 32px;border-bottom:3px solid #1a6b4a;text-align:center\">\n    <img src=\"{{ frappe.utils.get_url('/assets/kya_hr/images/image010.png') }}\" alt=\"KYA-Energy Group\" style=\"max-height:80px;max-width:260px\">\n  </td></tr>\n\n  <!-- BADGE REJETÉ -->\n  <tr><td style=\"background:#f8d7da;text-align:center;padding:16px\">\n    <span style=\"font-size:28px\">❌</span>\n    <p style=\"color:#721c24;font-size:16px;font-weight:700;margin:6px 0 0\">Demande de Congé Non Retenue</p>\n  </td></tr>\n\n  <!-- BODY -->\n  <tr><td style=\"padding:28px 32px\">\n    <p style=\"color:#333;font-size:15px;margin:0 0 10px\">Bonjour <strong>{{ employee_name }}</strong>,</p>\n    <p style=\"color:#555;font-size:15px;line-height:1.6;margin:0 0 20px\">\n      Nous vous informons que votre demande de congé n'a pas pu être accordée à ce stade.\n    </p>\n\n    <table style=\"width:100%;border-collapse:collapse;font-size:14px;margin-bottom:20px\">\n      <tr style=\"background:#721c24\"><th colspan=\"2\" style=\"color:#fff;padding:9px 14px;text-align:left;font-weight:600\">Récapitulatif de la demande</th></tr>\n      <tr><td style=\"padding:9px 14px;background:#fdf2f2;border:1px solid #f0d0d0;color:#555;width:42%\">Employé</td><td style=\"padding:9px 14px;border:1px solid #f0d0d0;font-weight:600;color:#222\">{{ employee_name }}</td></tr>\n      <tr><td style=\"padding:9px 14px;background:#fdf2f2;border:1px solid #f0d0d0;color:#555\">Type de congé</td><td style=\"padding:9px 14px;border:1px solid #f0d0d0;color:#222\">{{ leave_type }}</td></tr>\n      <tr><td style=\"padding:9px 14px;background:#fdf2f2;border:1px solid #f0d0d0;color:#555\">Du</td><td style=\"padding:9px 14px;border:1px solid #f0d0d0;color:#222\">{{ from_date }}</td></tr>\n      <tr><td style=\"padding:9px 14px;background:#fdf2f2;border:1px solid #f0d0d0;color:#555\">Au</td><td style=\"padding:9px 14px;border:1px solid #f0d0d0;color:#222\">{{ to_date }}</td></tr>\n    </table>\n\n    <p style=\"color:#555;font-size:13px;background:#fdf2f2;padding:10px 14px;border-left:4px solid #721c24;border-radius:4px;margin:0\">\n      Pour plus d'informations, veuillez contacter votre responsable direct ou le service des Ressources Humaines.\n    </p>\n  </td></tr>\n\n  <!-- FOOTER -->\n  <tr><td style=\"padding:0;border-top:2px solid #f0f0f0\">\n    <img src=\"{{ frappe.utils.get_url('/assets/kya_hr/images/image011.png') }}\" alt=\"KYA-Energy Group - Coordonnées\" style=\"width:100%;display:block\">\n  </td></tr>\n\n</table></td></tr></table></body></html>"
+    },
+    {
+        "docstatus": 0,
+        "doctype": "Email Template",
+        "modified": "2026-02-24 11:10:00.000000",
+        "name": "KYA - Rappel Entretien",
+        "response_html": null,
+        "use_html": 1,
+        "subject": "Rappel : Entretien {{ name }} prévu le {{ scheduled_on }}",
+        "response": "<!DOCTYPE html><html lang=\"fr\"><head><meta charset=\"UTF-8\"></head><body style=\"margin:0;padding:0;font-family:Arial,sans-serif;background:#f5f5f5\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\"><tr><td align=\"center\" style=\"padding:24px 16px\">\n<table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.10);max-width:600px\">\n  <tr><td style=\"background:#fff;padding:16px 32px;border-bottom:3px solid #1a6b4a;text-align:center\">\n    <img src=\"{{ frappe.utils.get_url('/assets/kya_hr/images/image010.png') }}\" alt=\"KYA-Energy Group\" style=\"max-height:80px;max-width:260px\">\n  </td></tr>\n  <tr><td style=\"padding:28px 32px\">\n    <p style=\"color:#333;font-size:15px;margin:0 0 10px\">Bonjour,</p>\n    <p style=\"color:#555;font-size:15px\">Rappel pour l'entretien <strong>{{ name }}</strong> prévu le <strong>{{ scheduled_on }}</strong> de <strong>{{ from_time }}</strong> à <strong>{{ to_time }}</strong>.</p>\n  </td></tr>\n  <tr><td style=\"padding:0;border-top:2px solid #f0f0f0\">\n    <img src=\"{{ frappe.utils.get_url('/assets/kya_hr/images/image011.png') }}\" alt=\"KYA-Energy Group\" style=\"width:100%;display:block\">\n  </td></tr>\n</table></td></tr></table></body></html>"
+    },
+    {
+        "docstatus": 0,
+        "doctype": "Email Template",
+        "modified": "2026-02-24 11:10:00.000000",
+        "name": "KYA - Retour Entretien En Attente",
+        "response_html": null,
+        "use_html": 1,
+        "subject": "Action requise : Retour d'entretien {{ name }} non soumis",
+        "response": "<!DOCTYPE html><html lang=\"fr\"><head><meta charset=\"UTF-8\"></head><body style=\"margin:0;padding:0;font-family:Arial,sans-serif;background:#f5f5f5\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\"><tr><td align=\"center\" style=\"padding:24px 16px\">\n<table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.10);max-width:600px\">\n  <tr><td style=\"background:#fff;padding:16px 32px;border-bottom:3px solid #1a6b4a;text-align:center\">\n    <img src=\"{{ frappe.utils.get_url('/assets/kya_hr/images/image010.png') }}\" alt=\"KYA-Energy Group\" style=\"max-height:80px;max-width:260px\">\n  </td></tr>\n  <tr><td style=\"padding:28px 32px\">\n    <p style=\"color:#333;font-size:15px;margin:0 0 10px\">Bonjour,</p>\n    <p style=\"color:#555;font-size:15px\">Le retour d'entretien pour <strong>{{ name }}</strong> n'a pas encore été soumis. Merci de le soumettre dès que possible.</p>\n  </td></tr>\n  <tr><td style=\"padding:0;border-top:2px solid #f0f0f0\">\n    <img src=\"{{ frappe.utils.get_url('/assets/kya_hr/images/image011.png') }}\" alt=\"KYA-Energy Group\" style=\"width:100%;display:block\">\n  </td></tr>\n</table></td></tr></table></body></html>"
+    }
 ]
