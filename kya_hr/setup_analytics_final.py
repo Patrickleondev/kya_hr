@@ -1,26 +1,12 @@
+
 import frappe
 import json
 
 def execute():
-    # 1. Create Dashboard Charts for Interns
-    create_intern_charts()
-    
-    # 2. Create Dashboard Charts for Logistics
-    create_logistics_charts()
-    
-    # 3. Create Number Cards
-    create_number_cards()
-
-    frappe.db.commit()
-    print("✅ Dashboards and Charts for KYA Extensions created successfully!")
-
-def create_intern_charts():
-    # Chart: Distribution by Status
-    chart_name = "Répartition par Statut Stagiaire"
-    if not frappe.db.exists("Dashboard Chart", chart_name):
-        frappe.get_doc({
-            "doctype": "Dashboard Chart",
-            "chart_name": chart_name,
+    # Dashboard Charts
+    charts = [
+        {
+            "chart_name": "Répartition par Statut Stagiaire",
             "chart_type": "Count",
             "document_type": "Employee",
             "filters_json": json.dumps([["Employee", "employment_type", "=", "Intern", False]]),
@@ -30,63 +16,58 @@ def create_intern_charts():
             "label": "Stagiaires par Statut",
             "is_standard": 1,
             "module": "KYA HR"
-        }).insert()
-        print(f"Chart {chart_name} created")
-
-    # Chart: Permissions by Month
-    chart_name = "Permissions par Mois"
-    if not frappe.db.exists("Dashboard Chart", chart_name):
-        frappe.get_doc({
-            "doctype": "Dashboard Chart",
-            "chart_name": chart_name,
+        },
+        {
+            "chart_name": "Permissions par Mois",
             "chart_type": "Count",
             "document_type": "KYA Permission Request",
-            "based_on": "from_date",
-            "timeseries": 1,
-            "time_interval": "Monthly",
+            "filters_json": json.dumps([]),
+            "group_by_based_on": "creation",
+            "group_by_type": "Monthly",
             "type": "Bar",
-            "label": "Volume de Permissions",
+            "label": "Permissions mensuelles",
             "is_standard": 1,
             "module": "KYA HR"
-        }).insert()
-        print(f"Chart {chart_name} created")
-
-def create_logistics_charts():
-    # Chart: Fuel consumption per Vehicle
-    chart_name = "Consommation Carburant par Véhicule"
-    if not frappe.db.exists("Dashboard Chart", chart_name):
-        frappe.get_doc({
-            "doctype": "Dashboard Chart",
-            "chart_name": chart_name,
+        },
+        {
+            "chart_name": "Consommation Carburant par Véhicule",
             "chart_type": "Sum",
             "document_type": "KYA Fuel Log",
-            "based_on_sum_field": "amount",
+            "filters_json": json.dumps([]),
             "group_by_based_on": "vehicle",
+            "aggregate_function_based_on": "cost",
             "type": "Bar",
-            "number_of_groups": 10,
-            "label": "Dépenses Carburant Total",
+            "label": "Coût Carburant",
             "is_standard": 1,
             "module": "KYA HR"
-        }).insert()
-        print(f"Chart {chart_name} created")
-
-    # Chart: Exit Tickets by Vehicle
-    chart_name = "Utilisation des Véhicules (Sorties)"
-    if not frappe.db.exists("Dashboard Chart", chart_name):
-        frappe.get_doc({
-            "doctype": "Dashboard Chart",
-            "chart_name": chart_name,
+        },
+        {
+            "chart_name": "Utilisation des Véhicules (Sorties)",
             "chart_type": "Count",
             "document_type": "KYA Exit Ticket",
+            "filters_json": json.dumps([]),
             "group_by_based_on": "vehicle",
-            "type": "Donut",
-            "label": "Fréquence de Sortie",
+            "type": "Bar",
+            "label": "Nombre de Sorties",
             "is_standard": 1,
             "module": "KYA HR"
-        }).insert()
-        print(f"Chart {chart_name} created")
+        }
+    ]
 
-def create_number_cards():
+    for chart in charts:
+        if not frappe.db.exists("Dashboard Chart", chart["chart_name"]):
+            frappe.get_doc({
+                "doctype": "Dashboard Chart",
+                **chart
+            }).insert()
+            print(f"Chart {chart['chart_name']} created")
+        else:
+            doc = frappe.get_doc("Dashboard Chart", chart["chart_name"])
+            doc.update(chart)
+            doc.save()
+            print(f"Chart {chart['chart_name']} updated")
+
+    # Number Cards
     cards = [
         {
             "name": "Stagiaires Actifs",
@@ -120,6 +101,18 @@ def create_number_cards():
                 "module": "KYA HR"
             }).insert()
             print(f"Number Card {card['name']} created")
+        else:
+            doc = frappe.get_doc("Number Card", card["name"])
+            doc.update({
+                "document_type": card["dt"],
+                "function": card["function"],
+                "filters_json": json.dumps(card["filters"]),
+                "module": "KYA HR"
+            })
+            doc.save()
+            print(f"Number Card {card['name']} updated")
+
+    frappe.db.commit()
 
 if __name__ == "__main__":
     execute()
