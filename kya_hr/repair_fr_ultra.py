@@ -28,7 +28,7 @@ def clean_value(val):
         "A0": "à",
         "A©": "é",
         "A?": "à",
-        "A": "à", 
+        # "A": "à", # REMOVED: This causes mass corruption of initial 'A' (Analyse -> ànalyse)
         "&quot;": '"',
         "&apos;": "'",
     }
@@ -197,6 +197,19 @@ def repair_ultra():
         "Employee": "Employé",
         "Graphique organisationnel": "Organigramme",
         "Configuration": "Configuration",
+        
+        # Fixing common corruption leftovers
+        "ccueil": "Accueil",
+        "àccueil": "Accueil",
+        "ànalyse": "Analyse",
+        "àutres": "Autres",
+        "ànniversaire": "Anniversaire",
+        "Analyse": "Analyse",
+        "Anniversaire": "Anniversaire",
+        "Autres rapports": "Autres rapports",
+        "Analyse de recrutement": "Analyse de recrutement",
+        "Analyse des employés": "Analyse des employés",
+        "Anniversaire de l'employé": "Anniversaire de l'employé",
 
         # ── HRMS PWA Mobile Interface (urgent) ──────────────────────────
         # Menu principal /hrms
