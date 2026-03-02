@@ -12,17 +12,19 @@ Ce document détaille la stratégie pour étendre le module `kya_hr` avec deux c
 ## 1. Analyse du Contexte Existant
 
 ### Ce qui existe dans ERPNext HRMS
+
 - `Job Applicant`, `Job Opening`, `Interview`, `Interview Feedback` — déjà disponibles.
 - `Web Form` — Frappe supporte des formulaires publics accessibles sans connexion.
 - `/hrms` — interface mobile PWA fournie par `hrms` app.
 
 ### Les Lacunes Identifiées
-| Problème | Impact |
-|---|---|
-| Pas de banque de questions d'entretien réutilisables | Chaque interview repart de zéro |
-| Pas de grille de scoring/critères pondérés | Évaluation subjective |
-| Pas d'enquêtes internes RH (satisfaction, climat, onboarding) | Données RH manquantes |
-| Pas d'interface mobile dédiée pour répondre aux enquêtes | Faible taux de réponse |
+
+| Problème                                                      | Impact                           |
+| -------------------------------------------------------------- | -------------------------------- |
+| Pas de banque de questions d'entretien réutilisables          | Chaque interview repart de zéro |
+| Pas de grille de scoring/critères pondérés                  | Évaluation subjective           |
+| Pas d'enquêtes internes RH (satisfaction, climat, onboarding) | Données RH manquantes           |
+| Pas d'interface mobile dédiée pour répondre aux enquêtes   | Faible taux de réponse          |
 
 ---
 
@@ -52,39 +54,44 @@ kya_hr/
 ### 3.1 Banque de Questions (`KYA Question Bank`)
 
 **Champs :**
-| Champ | Type | Description |
-|---|---|---|
-| `question_text` | Text | La question |
-| `category` | Select | Technique / RH / Comportemental / Culture |
-| `competency` | Link → `Competency` | Compétence évaluée |
-| `expected_answer` | Long Text | (Optionnel) Réponse attendue |
-| `scoring_guide` | Long Text | Grille de niveau 1–5 |
-| `is_active` | Check | Actif/Inactif |
+
+| Champ               | Type                  | Description                               |
+| ------------------- | --------------------- | ----------------------------------------- |
+| `question_text`   | Text                  | La question                               |
+| `category`        | Select                | Technique / RH / Comportemental / Culture |
+| `competency`      | Link →`Competency` | Compétence évaluée                     |
+| `expected_answer` | Long Text             | (Optionnel) Réponse attendue             |
+| `scoring_guide`   | Long Text             | Grille de niveau 1–5                     |
+| `is_active`       | Check                 | Actif/Inactif                             |
 
 ### 3.2 Critères d'Entretien (`KYA Interview Criteria`)
 
 **DocType Parent :**
-| Champ | Type | Description |
-|---|---|---|
-| `job_opening` | Link → `Job Opening` | Poste ciblé |
-| `designation` | Link → `Designation` | Alternative : par désignation |
-| `criteria_items` | Table → `KYA Interview Criteria Item` | |
+
+| Champ              | Type                                    | Description                    |
+| ------------------ | --------------------------------------- | ------------------------------ |
+| `job_opening`    | Link →`Job Opening`                  | Poste ciblé                   |
+| `designation`    | Link →`Designation`                  | Alternative : par désignation |
+| `criteria_items` | Table →`KYA Interview Criteria Item` |                                |
 
 **DocType Enfant `KYA Interview Criteria Item` :**
-| Champ | Type | Description |
-|---|---|---|
-| `criterion_name` | Data | Ex: "Maîtrise Python" |
-| `weight` | Float | Pondération (ex: 30%) |
-| `max_score` | Int | Score max (ex: 10) |
+
+| Champ                | Type  | Description                   |
+| -------------------- | ----- | ----------------------------- |
+| `criterion_name`   | Data  | Ex: "Maîtrise Python"        |
+| `weight`           | Float | Pondération (ex: 30%)        |
+| `max_score`        | Int   | Score max (ex: 10)            |
 | `linked_questions` | Table | Questions de la banque liées |
 
 ### 3.3 Intégration avec `Interview Feedback`
 
 Un **Custom Field** sera ajouté sur `Interview Feedback` :
+
 - `kya_criteria_scores` (Table HTML) — affiche les critères avec score saisi par l'intervieweur.
 - `kya_total_score` (Float, Read Only) — score pondéré calculé automatiquement.
 
 **Logique (via `doc_events`) :**
+
 ```python
 # kya_hr/hooks.py
 doc_events = {
@@ -100,42 +107,44 @@ doc_events = {
 
 ### 4.1 Template d'Enquête (`KYA Survey`)
 
-| Champ | Type | Description |
-|---|---|---|
-| `survey_title` | Data | "Enquête de satisfaction T1 2026" |
-| `target_audience` | Select | Tous / Par département / Nominatif |
-| `department` | Link → `Department` | (Si target = département) |
-| `employees` | Table | Liste nominative (si target = nominatif) |
-| `start_date` | Date | Date d'ouverture |
-| `end_date` | Date | Date de clôture |
-| `is_anonymous` | Check | Réponses anonymisées |
-| `status` | Select | Brouillon / Publié / Clôturé |
-| `questions` | Table → `KYA Survey Question` | |
+| Champ               | Type                            | Description                              |
+| ------------------- | ------------------------------- | ---------------------------------------- |
+| `survey_title`    | Data                            | "Enquête de satisfaction T1 2026"       |
+| `target_audience` | Select                          | Tous / Par département / Nominatif      |
+| `department`      | Link →`Department`           | (Si target = département)               |
+| `employees`       | Table                           | Liste nominative (si target = nominatif) |
+| `start_date`      | Date                            | Date d'ouverture                         |
+| `end_date`        | Date                            | Date de clôture                         |
+| `is_anonymous`    | Check                           | Réponses anonymisées                   |
+| `status`          | Select                          | Brouillon / Publié / Clôturé          |
+| `questions`       | Table →`KYA Survey Question` |                                          |
 
 **DocType Enfant `KYA Survey Question` :**
-| Champ | Type | Description |
-|---|---|---|
-| `question_text` | Text | La question |
-| `question_type` | Select | Texte / Note 1-5 / Oui-Non / Choix Multiple |
-| `choices` | Text | (Si Choix Multiple) options séparées par `\n` |
-| `required` | Check | Obligatoire |
+
+| Champ             | Type   | Description                                       |
+| ----------------- | ------ | ------------------------------------------------- |
+| `question_text` | Text   | La question                                       |
+| `question_type` | Select | Texte / Note 1-5 / Oui-Non / Choix Multiple       |
+| `choices`       | Text   | (Si Choix Multiple) options séparées par `\n` |
+| `required`      | Check  | Obligatoire                                       |
 
 ### 4.2 Réponses (`KYA Survey Response`)
 
-| Champ | Type | Description |
-|---|---|---|
-| `survey` | Link → `KYA Survey` | |
-| `employee` | Link → `Employee` | (Null si anonyme) |
-| `submission_date` | Datetime | |
-| `answers` | Table → `KYA Survey Answer` | |
+| Champ               | Type                          | Description       |
+| ------------------- | ----------------------------- | ----------------- |
+| `survey`          | Link →`KYA Survey`         |                   |
+| `employee`        | Link →`Employee`           | (Null si anonyme) |
+| `submission_date` | Datetime                      |                   |
+| `answers`         | Table →`KYA Survey Answer` |                   |
 
 **DocType Enfant `KYA Survey Answer` :**
-| Champ | Type | Description |
-|---|---|---|
+
+| Champ               | Type        | Description                |
+| ------------------- | ----------- | -------------------------- |
 | `survey_question` | Link / Data | Référence à la question |
-| `answer_text` | Long Text | Réponse libre |
-| `answer_score` | Int | Score (si Note) |
-| `answer_choice` | Data | Choix sélectionné |
+| `answer_text`     | Long Text   | Réponse libre             |
+| `answer_score`    | Int         | Score (si Note)            |
+| `answer_choice`   | Data        | Choix sélectionné        |
 
 ---
 
@@ -168,24 +177,26 @@ Admin voit les réponses dans le dashboard ERPNext
 ### 5.3 Mise en Œuvre Technique
 
 **Fichier `www/enquetes.py` :**
+
 ```python
 import frappe
 
 def get_context(context):
     token = frappe.request.args.get("token")
     survey_name = frappe.request.args.get("survey")
-    
+  
     # Valider le token
     employee = frappe.db.get_value("Employee", {"survey_token": token}, "name")
     if not employee:
         frappe.throw("Lien invalide ou expiré.")
-    
+  
     context.survey = frappe.get_doc("KYA Survey", survey_name)
     context.employee = employee
     context.token = token
 ```
 
 **Fichier `www/enquetes.html` (PWA) :**
+
 ```html
 <!DOCTYPE html>
 <html lang="fr">
@@ -205,6 +216,7 @@ def get_context(context):
 ```
 
 **API de soumission (`kya_hr/api.py`) :**
+
 ```python
 @frappe.whitelist(allow_guest=True)
 def submit_survey_response(survey, token, answers):
@@ -218,7 +230,7 @@ def submit_survey_response(survey, token, answers):
 ```json
 // enquetes/manifest.json
 {
-  "name": "KYA Enquêtes RH",
+  "name": "KYA Enquêtes de Satisfaction",
   "short_name": "KYA Enquêtes",
   "start_url": "/enquetes",
   "display": "standalone",
@@ -245,27 +257,32 @@ Implémenté via **Frappe Dashboard Charts** (DocType `Dashboard Chart`) avec de
 ## 7. Plan d'Implémentation — Étapes
 
 ### Phase 1 : Fondations (Semaine 1–2)
+
 - [ ] Créer les DocTypes : `KYA Question Bank`, `KYA Interview Criteria`, `KYA Interview Criteria Item`
 - [ ] Ajouter les Custom Fields sur `Interview Feedback`
 - [ ] Implémenter le calcul de score pondéré via `doc_events`
 
 ### Phase 2 : Module Enquêtes (Semaine 3–4)
+
 - [ ] Créer les DocTypes : `KYA Survey`, `KYA Survey Question`, `KYA Survey Response`, `KYA Survey Answer`
 - [ ] Implémenter la logique de génération de tokens (`uuid`) par employé
 - [ ] Créer l'API `submit_survey_response`
 
 ### Phase 3 : Interface PWA (Semaine 5–6)
+
 - [ ] Développer `www/enquetes.py` + `www/enquetes.html`
 - [ ] Créer le `manifest.json` et le `service_worker.js` pour offline-first
 - [ ] Design mobile-first inspiré de HRMS (Frappe UI components)
 - [ ] Tester sur mobile (Android/iOS)
 
 ### Phase 4 : Dashboard & Notifications (Semaine 7)
+
 - [ ] Créer les Dashboard Charts pour le suivi de participation
 - [ ] Ajouter une Notification Frappe quand une nouvelle réponse est soumise
 - [ ] Export Excel des réponses via une API dédiée
 
 ### Phase 5 : Tests & Déploiement (Semaine 8)
+
 - [ ] Tests utilisateur : Envoyer une enquête pilote à 3–5 employés tests
 - [ ] Corriger les UX bugs
 - [ ] Exporter les fixtures (`bench export-fixtures`) et pousser en production
@@ -287,13 +304,13 @@ Implémenté via **Frappe Dashboard Charts** (DocType `Dashboard Chart`) avec de
 
 ## 9. Stack Technologique Résumé
 
-| Couche | Technologie |
-|---|---|
-| Backend | Frappe Framework (Python), MariaDB |
-| DocTypes | Frappe DocType (ORM automatique) |
-| API | Frappe Whitelist (`@frappe.whitelist`) |
-| Frontend Mobile | HTML5 + CSS3 + Vanilla JS (PWA) |
-| Manifest PWA | `manifest.json` + `service_worker.js` |
-| Notifications | Frappe Notification DocType |
-| Dashboard | Frappe Dashboard Charts |
-| Auth Tokens | UUID4 stocké côté Employee |
+| Couche          | Technologie                               |
+| --------------- | ----------------------------------------- |
+| Backend         | Frappe Framework (Python), MariaDB        |
+| DocTypes        | Frappe DocType (ORM automatique)          |
+| API             | Frappe Whitelist (`@frappe.whitelist`)  |
+| Frontend Mobile | HTML5 + CSS3 + Vanilla JS (PWA)           |
+| Manifest PWA    | `manifest.json` + `service_worker.js` |
+| Notifications   | Frappe Notification DocType               |
+| Dashboard       | Frappe Dashboard Charts                   |
+| Auth Tokens     | UUID4 stocké côté Employee             |

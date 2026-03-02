@@ -160,13 +160,95 @@ def setup_workspaces():
     except Exception as e:
         print(f"Error setting up workspaces: {repr(e)}")
 
+def fix_web_form_fields():
+    print("--- 5. Fix Web Form Fields ---")
+    try:
+        wf_name = "KYA Purchase Request Web Form"
+        if frappe.db.exists("Web Form", wf_name):
+            wf = frappe.get_doc("Web Form", wf_name)
+        else:
+            wf = frappe.get_doc({
+                "doctype": "Web Form",
+                "title": "Demande d'Achat KYA",
+                "route": "demande-achat-kya",
+                "doc_type": "KYA Purchase Request",
+                "published": 1,
+                "is_standard": 0,
+                "login_required": 1,
+                "allow_multiple": 1,
+            })
+
+        # Clear existing fields
+        wf.web_form_fields = []
+        wf.route = "demande-achat-kya"
+        wf.published = 1
+
+        fields = [
+            {"fieldname": "requester", "label": "Demandeur", "fieldtype": "Link", "options": "Employee", "reqd": 1},
+            {"fieldname": "department", "label": "Departement", "fieldtype": "Link", "options": "Department", "reqd": 0},
+            {"fieldname": "purpose", "label": "Objet de Achat", "fieldtype": "Data", "reqd": 1},
+            {"fieldname": "description", "label": "Description", "fieldtype": "Text Editor", "reqd": 0},
+            {"fieldname": "urgency", "label": "Urgence", "fieldtype": "Select", "options": "Normale\nUrgente", "reqd": 0},
+        ]
+        for f in fields:
+            wf.append("web_form_fields", f)
+
+        if frappe.db.exists("Web Form", wf_name):
+            wf.save(ignore_permissions=True)
+        else:
+            wf.insert(ignore_permissions=True)
+
+        count = len(wf.web_form_fields)
+        print(f"Web Form saved with {count} fields at /demande-achat-kya")
+    except Exception as e:
+        print(f"Error fixing web form: {repr(e)}")
+
+
+def fix_intern_visibility_script():
+    print("--- 6. Intern Fields Client Script ---")
+    try:
+        cs_name = "KYA Intern Fields Visibility"
+        script_code = """frappe.ui.form.on('Employee', {
+    employment_type: function(frm) {
+        var is_intern = (frm.doc.employment_type === 'Intern');
+        frm.set_df_property('stage_domain', 'hidden', is_intern ? 0 : 1);
+        frm.set_df_property('maitre_de_stage', 'hidden', is_intern ? 0 : 1);
+        frm.refresh_fields(['stage_domain', 'maitre_de_stage']);
+    },
+    onload: function(frm) {
+        var is_intern = (frm.doc.employment_type === 'Intern');
+        frm.set_df_property('stage_domain', 'hidden', is_intern ? 0 : 1);
+        frm.set_df_property('maitre_de_stage', 'hidden', is_intern ? 0 : 1);
+    }
+});"""
+        if frappe.db.exists("Client Script", cs_name):
+            frappe.db.set_value("Client Script", cs_name, "script", script_code)
+            frappe.db.set_value("Client Script", cs_name, "enabled", 1)
+            print("Client Script updated.")
+        else:
+            frappe.get_doc({
+                "doctype": "Client Script",
+                "name": cs_name,
+                "dt": "Employee",
+                "view": "Form",
+                "enabled": 1,
+                "script": script_code,
+            }).insert(ignore_permissions=True)
+            print("Client Script created.")
+    except Exception as e:
+        print(f"Error creating client script: {repr(e)}")
+
+
 def main():
     try:
         deploy_procurement()
         deploy_procurement_workflow()
         update_exit_workflow()
         setup_workspaces()
+        fix_web_form_fields()
+        fix_intern_visibility_script()
         frappe.db.commit()
-        print("✅ Finished.")
+        frappe.clear_cache()
+        print("Finished.")
     except Exception as e:
         print(f"Global error: {repr(e)}")
