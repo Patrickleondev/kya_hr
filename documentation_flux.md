@@ -10,9 +10,11 @@ Ce guide détaille les processus digitaux, les rôles et les scénarios d'utilis
 | **Chef Service** | Premier validateur (Approuve la pertinence métier). | *M. Diallo valide que le départ d'Alice ne bloque pas le projet.* |
 | **Responsable Stagiaires**| Validateur pédagogique (Suivi du parcours). | *Mme. Traore valide l'impact sur les thèmes d'apprentissage.* |
 | **RH** | Validateur conformité (Vérifie le solde et les règles). | *La RH confirme qu'Alice a droit à cette sortie.* |
-| **Auditeur** | Validateur ressource/financier (Contrôle devis et stocks). | *L'Auditeur vérifie le devis pour une dépense ou le stock matériel.* |
+| **Auditeur** | Contrôle procédure (Vérifie le respect des règles internes). | *L'Auditeur vérifie la conformité du bon de commande.* |
+| **DAAF** | Directeur Administratif & Financier (Contrôle budgétaire). | *Le DAAF valide la disponibilité des fonds avant paiement.* |
 | **DGA / Direction** | Décisionnaire final (Impact budgétaire ou stratégique). | *Le DGA valide l'achat d'un nouveau laptop.* |
 | **Guérite** | Contrôleur physique (Vérifie le Ticket de Sortie). | *L'agent à la guérite scanne le ticket d'Alice ou le PV avant la sortie.* |
+| **Comptable** | Exécution paiement (Décaissement et archivage dossier). | *Le comptable classe les documents et effectue le virement.* |
 
 ---
 
