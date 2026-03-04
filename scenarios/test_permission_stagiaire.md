@@ -1,39 +1,70 @@
-# Scénario de Test : Permission Stagiaire & PWA
+# Scénario de Test : Permission de Sortie Stagiaire (PWA)
 
-Ce document décrit les étapes pour tester le flux de permission spécifique aux stagiaires.
+Ce document décrit les étapes pour tester le flux de permission de sortie des **Stagiaires**, accessible via l'interface **PWA KYA Stagiaires**, avec validation à 3 niveaux.
 
-## 🏁 Pré-requis
+---
 
-- Un utilisateur avec le rôle **Stagiaire**.
-- Un utilisateur avec le rôle **RH** (Tuteur par défaut pour le test).
+## 🏁 Rôles & Pré-requis
+
+| Rôle | Description |
+|------|-------------|
+| **Stagiaire** | Demande la permission de sortie via la PWA. |
+| **Chef Service** | Supérieur immédiat — 1er validateur. |
+| **Responsable des Stagiaires** | Garant du parcours pédagogique — 2e validateur. |
+| **Directeur Général (DG)** | Validateur final et stratégique. |
+| **RH** | Peut créer ou corriger manuellement une permission. |
+| **Guérite** | Contrôle physique du Ticket de Sortie (PDF). |
+
+> ⚠️ **Différence avec les Employés** : Le flux de sortie des stagiaires nécessite **3 niveaux d'approbation** (Chef Service → Responsable Stagiaires → DG), contrairement aux employés permanents (Chef Service → RH uniquement). Le Workspace **KYA Stagiaires** n'est accessible qu'avec le rôle `Stagiaire`.
+
+---
 
 ## 🚀 Étapes du Scénario
 
-1. **Accès Stagiaire (Interface PWA)** :
-    - Connectez-vous en tant que **Stagiaire**.
-    - Accédez au Workspace **KYA Stagiaires**.
-    - *Vérification* : Les menus de paie/salaire ne sont pas visibles. Le dashboard affiche les graphiques stagiaires.
+### Étape 1 : Connexion PWA & Vérification de l'Espace de Travail
 
-2. **Demande de Permission** :
-    - Cliquez sur le raccourci **Autorisation de Sortie** ou **Permission de Sortie**.
-    - Remplissez le motif, la date et l'heure de sortie.
-    - Cliquez sur **Enregistrer** (Brouillon) puis **Soumettre**.
-    - *Vérification* : Le document est `En attente du Supérieur Immédiat`.
-    - *Email* : Le Chef Service reçoit une notification avec le branding KYA (Signature DG).
+1. **Accès** : Se connecter via l'URL de la PWA en tant que **Stagiaire**.
+2. **Vérification de l'Isolation** :
+    - ✅ Visible : Workspace **KYA Stagiaires** (graphiques stagiaires, permissions, planning stage).
+    - ❌ Non visible : Workspace **Leaves** (Congés employés), Paie, Grille Salariale.
+3. **Dashboard** : Vérifier la présence des graphiques : Statut, Présence Mensuelle, Fins de Contrat, Bilan Permissions.
 
-3. **Validation 3 Niveaux (Chef -> Responsable -> DG)** :
-    - **Niveau 1** : Le Chef Service approuve via le lien mail. L'état passe à `En attente du Responsable des Stagiaires`.
-    - **Niveau 2** : Le Responsable des Stagiaires (rôle dédié) approuve. L'état passe à `En attente du DG`.
-    - **Niveau 3** : Le DG (Directeur Général) approuve. L'état passe à `Approuvé`.
-    - *Vérification* : Le ticket de sortie PDF est généré et prêt pour la guérite.
+### Étape 2 : Création d'une Demande de Permission de Sortie
 
-4. **Validation RH (Accès Manuel)** :
-    - Connectez-vous en tant que **RH**.
-    - Accédez au module **KYA Stagiaires**.
-    - Ouvrez la liste des **Permissions de Sortie**.
-    - *Note* : La RH peut entrer ou modifier manuellement une permission pour un stagiaire.
-    - Approuvez la demande.
+1. **Navigation** : Cliquer sur **Permission de Sortie** dans le Workspace KYA Stagiaires.
+2. **Saisie** :
+    - Motif : `Consultation médicale`.
+    - Date et heure de sortie prévue.
+3. **Actions** :
+    - Cliquer **Enregistrer** → État : `Brouillon`.
+    - Cliquer **Soumettre** → État : `En attente du Supérieur Immédiat`.
+    - 📧 *Email auto envoyé au Chef Service* avec footer KYA (logo + signature DG).
 
-5. **Visualisation Graphique & Bilan** :
-    - Retournez sur le Workspace **KYA Stagiaires**.
-    - *Vérification* : Le "Bilan Permissions Stagiaires" (Graphique) et les compteurs sont mis à jour en temps réel.
+### Étape 3 : Validation à 3 Niveaux
+
+1. **Niveau 1 — Chef Service** :
+    - Ouve notification (mail ou To-Do) → Ouvre document via **lien direct**.
+    - Cliquer **Approuver** → État : `En attente du Responsable des Stagiaires`.
+    - 📧 *Email auto envoyé au Responsable des Stagiaires*.
+
+2. **Niveau 2 — Responsable des Stagiaires** :
+    - Accède à la liste "Permission de Sortie" depuis son Workspace.
+    - Cliquer **Approuver** → État : `En attente du DG`.
+    - 📧 *Email auto envoyé au DG* avec lien direct.
+
+3. **Niveau 3 — Directeur Général** :
+    - Ouvre le document via lien mail.
+    - Cliquer **Approuver** → État : `Approuvé`.
+    - 🖨️ *Le Ticket de Sortie PDF est généré automatiquement*.
+
+### Étape 4 : Contrôle Physique (Guérite)
+
+1. Le stagiaire se présente avec son **Ticket de Sortie** (imprimé ou sur écran).
+2. L'agent **Guérite** se connecte sur sa vue dédiée et vérifie que le document est bien en état **Approuvé**.
+3. Le stagiaire est autorisé à sortir des locaux.
+
+### Étape 5 : Traçabilité & Bilan
+
+1. **Navigation** : Retourner sur le Workspace **KYA Stagiaires**.
+2. **Vérification Graphique** : Le compteur "Bilan Permissions Stagiaires" est mis à jour.
+3. **RH (Accès Manuel)** : Si nécessaire, la RH peut ouvrir la liste de toutes les permissions et en créer ou corriger une manuellement pour un stagiaire.
