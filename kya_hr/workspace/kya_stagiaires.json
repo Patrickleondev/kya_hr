@@ -1,0 +1,22 @@
+{
+    "title": "KYA Stagiaires",
+    "icon": "contact-round",
+    "module": "KYA HR",
+    "public": 1,
+    "shortcuts": [
+        {
+            "label": "Permissions Sortie",
+            "type": "Shortcut",
+            "link_type": "DocType",
+            "link_to": "Permission Sortie Stagiaire",
+            "color": "Blue"
+        },
+        {
+            "label": "Bilans de Stage",
+            "type": "Shortcut",
+            "link_type": "DocType",
+            "link_to": "Bilan Fin de Stage",
+            "color": "Green"
+        }
+    ]
+}
