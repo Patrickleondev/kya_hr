@@ -3,6 +3,7 @@
     "icon": "contact-round",
     "module": "KYA HR",
     "public": 1,
+    "is_standard": 1,
     "shortcuts": [
         {
             "label": "Permissions Sortie",
