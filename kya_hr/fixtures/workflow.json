@@ -1,192 +1,346 @@
 [
-    {
-        "docstatus": 0,
-        "doctype": "Workflow",
-        "document_type": "Leave Application",
-        "enable_action_confirmation": 0,
-        "is_active": 1,
-        "modified": "2026-02-24 12:05:00.000000",
-        "name": "Flux RH Unifi\u00e9",
-        "override_status": 0,
-        "send_email_alert": 1,
-        "states": [
-            {
-                "allow_edit": "Employ\u00e9",
-                "doc_status": "0",
-                "next_action_email_template": "KYA - Demande de Cong\u00e9 \u00c0 Approuver",
-                "send_email": 1,
-                "state": "Brouillon"
-            },
-            {
-                "allow_edit": "Sup\u00e9rieur Imm\u00e9diat",
-                "doc_status": "0",
-                "next_action_email_template": "KYA - Demande de Cong\u00e9 \u00c0 Approuver",
-                "send_email": 1,
-                "state": "En attente du Sup\u00e9rieur Imm\u00e9diat"
-            },
-            {
-                "allow_edit": "Responsable des Stagiaires",
-                "doc_status": "0",
-                "next_action_email_template": "KYA - Demande de Cong\u00e9 \u00c0 Approuver",
-                "send_email": 1,
-                "state": "En attente Resp. Stagiaires"
-            },
-            {
-                "allow_edit": "Responsable RH",
-                "doc_status": "0",
-                "next_action_email_template": "KYA - Demande de Cong\u00e9 \u00c0 Approuver",
-                "send_email": 1,
-                "state": "En attente RH"
-            },
-            {
-                "allow_edit": "Directeur G\u00e9n\u00e9ral",
-                "doc_status": "0",
-                "next_action_email_template": "KYA - Demande de Cong\u00e9 \u00c0 Approuver",
-                "send_email": 1,
-                "state": "En attente DG"
-            },
-            {
-                "allow_edit": "Directeur G\u00e9n\u00e9ral",
-                "doc_status": "1",
-                "next_action_email_template": "KYA - Cong\u00e9 Accord\u00e9",
-                "send_email": 1,
-                "state": "Approuv\u00e9"
-            },
-            {
-                "allow_edit": "Directeur G\u00e9n\u00e9ral",
-                "doc_status": "0",
-                "next_action_email_template": "KYA - Cong\u00e9 Rejet\u00e9",
-                "send_email": 1,
-                "state": "Rejet\u00e9"
-            }
-        ],
-        "transitions": [
-            {
-                "action": "Soumettre",
-                "allowed": "Employ\u00e9",
-                "condition": "frappe.db.get_value('Employee', doc.employee, 'employment_type') == 'Stage'",
-                "next_state": "En attente Resp. Stagiaires",
-                "state": "Brouillon"
-            },
-            {
-                "action": "Soumettre",
-                "allowed": "Employ\u00e9",
-                "condition": "frappe.db.get_value('Employee', doc.employee, 'employment_type') in ['CDD', 'CDI'] and 'Sup\u00e9rieur Imm\u00e9diat' not in frappe.get_roles(frappe.db.get_value('Employee', doc.employee, 'user_id') or '')",
-                "next_state": "En attente du Sup\u00e9rieur Imm\u00e9diat",
-                "state": "Brouillon"
-            },
-            {
-                "action": "Soumettre",
-                "allowed": "Employ\u00e9",
-                "condition": "frappe.db.get_value('Employee', doc.employee, 'employment_type') in ['CDD', 'CDI'] and 'Sup\u00e9rieur Imm\u00e9diat' in frappe.get_roles(frappe.db.get_value('Employee', doc.employee, 'user_id') or '')",
-                "next_state": "En attente RH",
-                "state": "Brouillon"
-            },
-            {
-                "action": "Approuver",
-                "allowed": "Sup\u00e9rieur Imm\u00e9diat",
-                "next_state": "En attente RH",
-                "state": "En attente du Sup\u00e9rieur Imm\u00e9diat"
-            },
-            {
-                "action": "Rejeter",
-                "allowed": "Sup\u00e9rieur Imm\u00e9diat",
-                "next_state": "Rejet\u00e9",
-                "state": "En attente du Sup\u00e9rieur Imm\u00e9diat"
-            },
-            {
-                "action": "Approuver",
-                "allowed": "Responsable des Stagiaires",
-                "next_state": "En attente DG",
-                "state": "En attente Resp. Stagiaires"
-            },
-            {
-                "action": "Rejeter",
-                "allowed": "Responsable des Stagiaires",
-                "next_state": "Rejet\u00e9",
-                "state": "En attente Resp. Stagiaires"
-            },
-            {
-                "action": "Approuver",
-                "allowed": "Responsable RH",
-                "next_state": "En attente DG",
-                "state": "En attente RH"
-            },
-            {
-                "action": "Rejeter",
-                "allowed": "Responsable RH",
-                "next_state": "Rejet\u00e9",
-                "state": "En attente RH"
-            },
-            {
-                "action": "Approuver",
-                "allowed": "Directeur G\u00e9n\u00e9ral",
-                "next_state": "Approuv\u00e9",
-                "state": "En attente DG"
-            },
-            {
-                "action": "Rejeter",
-                "allowed": "Directeur G\u00e9n\u00e9ral",
-                "next_state": "Rejet\u00e9",
-                "state": "En attente DG"
-            }
-        ],
-        "workflow_name": "Flux RH Unifi\u00e9",
-        "workflow_state_field": "workflow_state"
-    },
-    {
-        "docstatus": 0,
-        "doctype": "Workflow",
-        "document_type": "Material Request",
-        "enable_action_confirmation": 0,
-        "is_active": 1,
-        "modified": "2026-02-24 12:05:00.000000",
-        "name": "Demande de mat\u00e9riel",
-        "override_status": 0,
-        "send_email_alert": 1,
-        "states": [
-            {
-                "allow_edit": "Employ\u00e9",
-                "doc_status": "0",
-                "state": "Brouillon"
-            },
-            {
-                "allow_edit": "Charg\u00e9 des Stocks",
-                "doc_status": "0",
-                "state": "En attente"
-            },
-            {
-                "allow_edit": "Stock Manager",
-                "doc_status": "1",
-                "state": "Approuv\u00e9"
-            },
-            {
-                "allow_edit": "Stock Manager",
-                "doc_status": "0",
-                "state": "Rejet\u00e9"
-            }
-        ],
-        "transitions": [
-            {
-                "action": "Envoyer pour Validation",
-                "allowed": "Employ\u00e9",
-                "next_state": "En attente",
-                "state": "Brouillon"
-            },
-            {
-                "action": "Approuver",
-                "allowed": "Stock Manager",
-                "next_state": "Approuv\u00e9",
-                "state": "En attente"
-            },
-            {
-                "action": "Rejeter",
-                "allowed": "Stock Manager",
-                "next_state": "Rejet\u00e9",
-                "state": "En attente"
-            }
-        ],
-        "workflow_name": "Demande de mat\u00e9riel",
-        "workflow_state_field": "workflow_state"
-    }
+ {
+  "docstatus": 0,
+  "doctype": "Workflow",
+  "document_type": "Leave Application",
+  "enable_action_confirmation": 0,
+  "is_active": 1,
+  "modified": "2026-02-24 12:05:00",
+  "name": "Flux RH Unifié",
+  "override_status": 0,
+  "send_email_alert": 1,
+  "states": [
+   {
+    "allow_edit": "Employé",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "evaluate_as_expression": 0,
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": "KYA - Demande de Congé À Approuver",
+    "send_email": 1,
+    "state": "Brouillon",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "Supérieur Immédiat",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "evaluate_as_expression": 0,
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": "KYA - Demande de Congé À Approuver",
+    "send_email": 1,
+    "state": "En attente du Supérieur Immédiat",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "Responsable des Stagiaires",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "evaluate_as_expression": 0,
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": "KYA - Demande de Congé À Approuver",
+    "send_email": 1,
+    "state": "En attente Resp. Stagiaires",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "Responsable RH",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "evaluate_as_expression": 0,
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": "KYA - Demande de Congé À Approuver",
+    "send_email": 1,
+    "state": "En attente RH",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "Directeur Général",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "evaluate_as_expression": 0,
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": "KYA - Demande de Congé À Approuver",
+    "send_email": 1,
+    "state": "En attente DG",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "Directeur Général",
+    "avoid_status_override": 0,
+    "doc_status": "1",
+    "evaluate_as_expression": 0,
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": "KYA - Congé Accordé",
+    "send_email": 1,
+    "state": "Approuvé",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "Directeur Général",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "evaluate_as_expression": 0,
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": "KYA - Congé Rejeté",
+    "send_email": 1,
+    "state": "Rejeté",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   }
+  ],
+  "transitions": [
+   {
+    "action": "Soumettre",
+    "allow_self_approval": 0,
+    "allowed": "Employé",
+    "condition": "frappe.db.get_value('Employee', doc.employee, 'employment_type') == 'Stage'",
+    "next_state": "En attente Resp. Stagiaires",
+    "send_email_to_creator": 0,
+    "state": "Brouillon",
+    "transition_tasks": null,
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Soumettre",
+    "allow_self_approval": 0,
+    "allowed": "Employé",
+    "condition": "frappe.db.get_value('Employee', doc.employee, 'employment_type') in ['CDD', 'CDI'] and 'Supérieur Immédiat' not in frappe.get_roles(frappe.db.get_value('Employee', doc.employee, 'user_id') or '')",
+    "next_state": "En attente du Supérieur Immédiat",
+    "send_email_to_creator": 0,
+    "state": "Brouillon",
+    "transition_tasks": null,
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Soumettre",
+    "allow_self_approval": 0,
+    "allowed": "Employé",
+    "condition": "frappe.db.get_value('Employee', doc.employee, 'employment_type') in ['CDD', 'CDI'] and 'Supérieur Immédiat' in frappe.get_roles(frappe.db.get_value('Employee', doc.employee, 'user_id') or '')",
+    "next_state": "En attente RH",
+    "send_email_to_creator": 0,
+    "state": "Brouillon",
+    "transition_tasks": null,
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Approuver",
+    "allow_self_approval": 0,
+    "allowed": "Supérieur Immédiat",
+    "condition": null,
+    "next_state": "En attente RH",
+    "send_email_to_creator": 0,
+    "state": "En attente du Supérieur Immédiat",
+    "transition_tasks": null,
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Rejeter",
+    "allow_self_approval": 0,
+    "allowed": "Supérieur Immédiat",
+    "condition": null,
+    "next_state": "Rejeté",
+    "send_email_to_creator": 0,
+    "state": "En attente du Supérieur Immédiat",
+    "transition_tasks": null,
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Approuver",
+    "allow_self_approval": 0,
+    "allowed": "Responsable des Stagiaires",
+    "condition": null,
+    "next_state": "En attente DG",
+    "send_email_to_creator": 0,
+    "state": "En attente Resp. Stagiaires",
+    "transition_tasks": null,
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Rejeter",
+    "allow_self_approval": 0,
+    "allowed": "Responsable des Stagiaires",
+    "condition": null,
+    "next_state": "Rejeté",
+    "send_email_to_creator": 0,
+    "state": "En attente Resp. Stagiaires",
+    "transition_tasks": null,
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Approuver",
+    "allow_self_approval": 0,
+    "allowed": "Responsable RH",
+    "condition": null,
+    "next_state": "En attente DG",
+    "send_email_to_creator": 0,
+    "state": "En attente RH",
+    "transition_tasks": null,
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Rejeter",
+    "allow_self_approval": 0,
+    "allowed": "Responsable RH",
+    "condition": null,
+    "next_state": "Rejeté",
+    "send_email_to_creator": 0,
+    "state": "En attente RH",
+    "transition_tasks": null,
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Approuver",
+    "allow_self_approval": 0,
+    "allowed": "Directeur Général",
+    "condition": null,
+    "next_state": "Approuvé",
+    "send_email_to_creator": 0,
+    "state": "En attente DG",
+    "transition_tasks": null,
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Rejeter",
+    "allow_self_approval": 0,
+    "allowed": "Directeur Général",
+    "condition": null,
+    "next_state": "Rejeté",
+    "send_email_to_creator": 0,
+    "state": "En attente DG",
+    "transition_tasks": null,
+    "workflow_builder_id": null
+   }
+  ],
+  "workflow_data": null,
+  "workflow_name": "Flux RH Unifié",
+  "workflow_state_field": "workflow_state"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow",
+  "document_type": "Material Request",
+  "enable_action_confirmation": 0,
+  "is_active": 1,
+  "modified": "2026-02-24 12:05:00",
+  "name": "Demande de matériel",
+  "override_status": 0,
+  "send_email_alert": 1,
+  "states": [
+   {
+    "allow_edit": "Employé",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "evaluate_as_expression": 0,
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "send_email": 0,
+    "state": "Brouillon",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "Chargé des Stocks",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "evaluate_as_expression": 0,
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "send_email": 0,
+    "state": "En attente",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "Stock Manager",
+    "avoid_status_override": 0,
+    "doc_status": "1",
+    "evaluate_as_expression": 0,
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "send_email": 0,
+    "state": "Approuvé",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "Stock Manager",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "evaluate_as_expression": 0,
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "send_email": 0,
+    "state": "Rejeté",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   }
+  ],
+  "transitions": [
+   {
+    "action": "Envoyer pour Validation",
+    "allow_self_approval": 0,
+    "allowed": "Employé",
+    "condition": null,
+    "next_state": "En attente",
+    "send_email_to_creator": 0,
+    "state": "Brouillon",
+    "transition_tasks": null,
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Approuver",
+    "allow_self_approval": 0,
+    "allowed": "Stock Manager",
+    "condition": null,
+    "next_state": "Approuvé",
+    "send_email_to_creator": 0,
+    "state": "En attente",
+    "transition_tasks": null,
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Rejeter",
+    "allow_self_approval": 0,
+    "allowed": "Stock Manager",
+    "condition": null,
+    "next_state": "Rejeté",
+    "send_email_to_creator": 0,
+    "state": "En attente",
+    "transition_tasks": null,
+    "workflow_builder_id": null
+   }
+  ],
+  "workflow_data": null,
+  "workflow_name": "Demande de matériel",
+  "workflow_state_field": "workflow_state"
+ }
 ]

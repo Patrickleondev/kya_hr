@@ -1,0 +1,42 @@
+{
+    "doctype": "Workspace",
+    "name": "KYA Stagiaires",
+    "is_standard": 1,
+    "title": "KYA Stagiaires",
+    "icon": "contact-round",
+    "module": "KYA HR",
+    "public": 1,
+    "parent_page": "People",
+    "shortcuts": [
+        {
+            "label": "Permission Sortie Stagiaire",
+            "type": "DocType",
+            "link_to": "Permission Sortie Stagiaire",
+            "color": "Blue"
+        },
+        {
+            "label": "Bilan Fin de Stage",
+            "type": "DocType",
+            "link_to": "Bilan Fin de Stage",
+            "color": "Green"
+        }
+    ],
+    "links": [
+        {
+            "type": "Card Break",
+            "label": "R\u00e9capitulatif Stagiaires"
+        },
+        {
+            "type": "Link",
+            "label": "Permission Sortie Stagiaire",
+            "link_type": "DocType",
+            "link_to": "Permission Sortie Stagiaire"
+        },
+        {
+            "type": "Link",
+            "label": "Bilan Fin de Stage",
+            "link_type": "DocType",
+            "link_to": "Bilan Fin de Stage"
+        }
+    ]
+}

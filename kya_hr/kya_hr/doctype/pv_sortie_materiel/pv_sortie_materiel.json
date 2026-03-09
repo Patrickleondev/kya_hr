@@ -1,0 +1,149 @@
+{
+    "name": "PV Sortie Materiel",
+    "module": "KYA HR",
+    "doctype": "DocType",
+    "is_submittable": 1,
+    "custom": 1,
+    "autoname": "format:PV-SORT-{YYYY}-{#####}",
+    "title_field": "objet",
+    "fields": [
+        {
+            "fieldname": "objet",
+            "label": "Objet",
+            "fieldtype": "Small Text",
+            "reqd": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "date_sortie",
+            "label": "Date de Sortie",
+            "fieldtype": "Date",
+            "reqd": 1,
+            "default": "Today",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "reference",
+            "label": "R\u00e9f\u00e9rence",
+            "fieldtype": "Data",
+            "default": "AEA-ENG-32-V01",
+            "read_only": 1
+        },
+        {
+            "fieldname": "section_items",
+            "label": "Mat\u00e9riels",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "items",
+            "label": "Liste du Mat\u00e9riel",
+            "fieldtype": "Table",
+            "options": "PV Sortie Materiel Item",
+            "reqd": 1
+        },
+        {
+            "fieldname": "section_signatures",
+            "label": "Approbations & Signatures",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "col_demandeur",
+            "fieldtype": "Column Break",
+            "label": "Demandeur / Chef d'\u00c9quipe"
+        },
+        {
+            "fieldname": "demandeur_nom",
+            "label": "Nom Demandeur",
+            "fieldtype": "Data"
+        },
+        {
+            "fieldname": "demandeur_date",
+            "label": "Date Signature Demandeur",
+            "fieldtype": "Date"
+        },
+        {
+            "fieldname": "col_magasin",
+            "fieldtype": "Column Break",
+            "label": "Responsable Magasin"
+        },
+        {
+            "fieldname": "magasin_nom",
+            "label": "Nom Responsable Magasin",
+            "fieldtype": "Data"
+        },
+        {
+            "fieldname": "magasin_date",
+            "label": "Date Signature Magasin",
+            "fieldtype": "Date"
+        },
+        {
+            "fieldname": "section_signatures_2",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "col_audit",
+            "fieldtype": "Column Break",
+            "label": "Audit Interne"
+        },
+        {
+            "fieldname": "audit_nom",
+            "label": "Nom Audit Interne",
+            "fieldtype": "Data"
+        },
+        {
+            "fieldname": "audit_date",
+            "label": "Date Signature Audit",
+            "fieldtype": "Date"
+        },
+        {
+            "fieldname": "col_dga",
+            "fieldtype": "Column Break",
+            "label": "Repr\u00e9sentant DG / DGA"
+        },
+        {
+            "fieldname": "dga_nom",
+            "label": "Nom DG / DGA",
+            "fieldtype": "Data"
+        },
+        {
+            "fieldname": "dga_date",
+            "label": "Date Signature DGA",
+            "fieldtype": "Date"
+        },
+        {
+            "fieldname": "statut",
+            "label": "Statut",
+            "fieldtype": "Select",
+            "options": "Brouillon\nEn attente Magasin\nEn attente Audit\nEn attente DGA\nApprouv\u00e9\nRejet\u00e9",
+            "default": "Brouillon",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "amended_from",
+            "label": "Amended From",
+            "fieldtype": "Link",
+            "options": "PV Sortie Materiel",
+            "no_copy": 1,
+            "print_hide": 1,
+            "read_only": 1
+        }
+    ],
+    "permissions": [
+        {
+            "role": "System Manager",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "delete": 1,
+            "submit": 1,
+            "cancel": 1,
+            "amend": 1
+        },
+        {
+            "role": "All",
+            "read": 1,
+            "write": 1,
+            "create": 1
+        }
+    ]
+}

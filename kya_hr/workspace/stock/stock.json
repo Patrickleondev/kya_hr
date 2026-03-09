@@ -1,0 +1,52 @@
+{
+    "doctype": "Workspace",
+    "name": "Stock",
+    "is_standard": 1,
+    "title": "Stock",
+    "icon": "boxes",
+    "module": "Stock",
+    "public": 1,
+    "parent_page": "",
+    "shortcuts": [
+        {
+            "label": "PV Sortie Matériel",
+            "type": "DocType",
+            "link_to": "PV Sortie Matériel",
+            "color": "Orange"
+        },
+        {
+            "label": "Procédure Achat (PDF)",
+            "type": "External Link",
+            "link_to": "d:/Stage_KYA_Energie/Procédure des Achats_AEA_2025-08-27.pdf",
+            "color": "Blue"
+        }
+    ],
+    "links": [
+        {
+            "type": "Card Break",
+            "label": "Flux Stock"
+        },
+        {
+            "type": "Link",
+            "label": "PV Sortie Matériel",
+            "link_type": "DocType",
+            "link_to": "PV Sortie Matériel"
+        },
+        {
+            "type": "Link",
+            "label": "Procédure Achat (PDF)",
+            "link_type": "External Link",
+            "link_to": "d:/Stage_KYA_Energie/Procédure des Achats_AEA_2025-08-27.pdf"
+        },
+        {
+            "type": "Card Break",
+            "label": "Dashboard Stock"
+        },
+        {
+            "type": "Link",
+            "label": "Statistiques Sortie Matériel",
+            "link_type": "Report",
+            "link_to": "PV Sortie Matériel Report"
+        }
+    ]
+}

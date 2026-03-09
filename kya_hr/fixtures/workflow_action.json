@@ -1,22 +1,58 @@
 [
-    {
-        "docstatus": 0,
-        "doctype": "Workflow Action",
-        "name": "Soumettre"
-    },
-    {
-        "docstatus": 0,
-        "doctype": "Workflow Action",
-        "name": "Approuver"
-    },
-    {
-        "docstatus": 0,
-        "doctype": "Workflow Action",
-        "name": "Rejeter"
-    },
-    {
-        "docstatus": 0,
-        "doctype": "Workflow Action",
-        "name": "Envoyer pour Validation"
-    }
+ {
+  "completed_by": null,
+  "completed_by_role": null,
+  "docstatus": 0,
+  "doctype": "Workflow Action",
+  "modified": "2026-03-09 14:13:40.687037",
+  "name": "Soumettre",
+  "permitted_roles": [],
+  "reference_doctype": null,
+  "reference_name": null,
+  "status": null,
+  "user": null,
+  "workflow_state": null
+ },
+ {
+  "completed_by": null,
+  "completed_by_role": null,
+  "docstatus": 0,
+  "doctype": "Workflow Action",
+  "modified": "2026-03-09 14:13:40.836100",
+  "name": "Approuver",
+  "permitted_roles": [],
+  "reference_doctype": null,
+  "reference_name": null,
+  "status": null,
+  "user": null,
+  "workflow_state": null
+ },
+ {
+  "completed_by": null,
+  "completed_by_role": null,
+  "docstatus": 0,
+  "doctype": "Workflow Action",
+  "modified": "2026-03-09 14:13:40.962272",
+  "name": "Rejeter",
+  "permitted_roles": [],
+  "reference_doctype": null,
+  "reference_name": null,
+  "status": null,
+  "user": null,
+  "workflow_state": null
+ },
+ {
+  "completed_by": null,
+  "completed_by_role": null,
+  "docstatus": 0,
+  "doctype": "Workflow Action",
+  "modified": "2026-03-09 14:13:41.134682",
+  "name": "Envoyer pour Validation",
+  "permitted_roles": [],
+  "reference_doctype": null,
+  "reference_name": null,
+  "status": null,
+  "user": null,
+  "workflow_state": null
+ }
 ]
