@@ -1,23 +1,70 @@
 {
+    "doctype": "Workspace",
+    "name": "KYA Stagiaires",
+    "is_standard": 1,
     "title": "KYA Stagiaires",
     "icon": "contact-round",
     "module": "KYA HR",
     "public": 1,
-    "is_standard": 1,
+    "parent_page": "People",
     "shortcuts": [
         {
-            "label": "Permissions Sortie",
-            "type": "Shortcut",
-            "link_type": "DocType",
+            "label": "Permission Sortie Stagiaire",
+            "type": "DocType",
             "link_to": "Permission Sortie Stagiaire",
             "color": "Blue"
         },
         {
-            "label": "Bilans de Stage",
-            "type": "Shortcut",
-            "link_type": "DocType",
+            "label": "Bilan Fin de Stage",
+            "type": "DocType",
             "link_to": "Bilan Fin de Stage",
             "color": "Green"
+        },
+        {
+            "label": "PV Sortie Matériel",
+            "type": "DocType",
+            "link_to": "PV Sortie Matériel",
+            "color": "Orange"
+        }
+    ],
+    "links": [
+        {
+            "type": "Card Break",
+            "label": "R\u00e9capitulatif Stagiaires"
+        },
+        {
+            "type": "Link",
+            "label": "Permission Sortie Stagiaire",
+            "link_type": "DocType",
+            "link_to": "Permission Sortie Stagiaire"
+        },
+        {
+            "type": "Link",
+            "label": "Bilan Fin de Stage",
+            "link_type": "DocType",
+            "link_to": "Bilan Fin de Stage"
+        },
+        {
+            "type": "Link",
+            "label": "PV Sortie Matériel",
+            "link_type": "DocType",
+            "link_to": "PV Sortie Matériel"
+        },
+        {
+            "type": "Card Break",
+            "label": "Dashboard Stagiaires"
+        },
+        {
+            "type": "Link",
+            "label": "Statistiques Stagiaires",
+            "link_type": "Report",
+            "link_to": "Bilan Fin de Stage Report"
+        },
+        {
+            "type": "Link",
+            "label": "Permissions en attente",
+            "link_type": "Report",
+            "link_to": "Permission Sortie Stagiaire Report"
         }
     ]
 }

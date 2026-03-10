@@ -1,0 +1,76 @@
+{
+    "name": "Permission Sortie Stagiaire",
+    "module": "KYA HR",
+    "doctype": "DocType",
+    "is_submittable": 1,
+    "custom": 1,
+    "autoname": "format:PSS-{YYYY}-{#####}",
+    "title_field": "employee",
+    "fields": [
+        {
+            "fieldname": "employee",
+            "label": "Stagiaire (Employ\u00e9)",
+            "fieldtype": "Link",
+            "options": "Employee",
+            "reqd": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "employee_name",
+            "label": "Nom",
+            "fieldtype": "Data",
+            "fetch_from": "employee.employee_name",
+            "read_only": 1
+        },
+        {
+            "fieldname": "date_sortie",
+            "label": "Date de Sortie",
+            "fieldtype": "Date",
+            "reqd": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "heure_depart",
+            "label": "Heure de D\u00e9part",
+            "fieldtype": "Time",
+            "reqd": 1
+        },
+        {
+            "fieldname": "heure_retour",
+            "label": "Heure de Retour Pr\u00e9vue",
+            "fieldtype": "Time"
+        },
+        {
+            "fieldname": "motif",
+            "label": "Motif",
+            "fieldtype": "Small Text",
+            "reqd": 1
+        },
+        {
+            "fieldname": "statut",
+            "label": "Statut",
+            "fieldtype": "Select",
+            "options": "Brouillon\nEn attente\nApprouv\u00e9\nRejet\u00e9",
+            "default": "Brouillon",
+            "in_list_view": 1
+        }
+    ],
+    "permissions": [
+        {
+            "role": "System Manager",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "delete": 1,
+            "submit": 1,
+            "cancel": 1,
+            "amend": 1
+        },
+        {
+            "role": "All",
+            "read": 1,
+            "write": 1,
+            "create": 1
+        }
+    ]
+}
