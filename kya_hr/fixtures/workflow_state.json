@@ -66,8 +66,8 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2026-02-17 10:04:26.637491",
-  "name": "En attente du DG",
+  "modified": "2026-03-10 17:03:30.230480",
+  "name": "En attente DG",
   "style": "Warning",
   "workflow_state_name": "En attente du DG"
  },
