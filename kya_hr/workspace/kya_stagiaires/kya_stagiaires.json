@@ -1,6 +1,7 @@
 {
     "doctype": "Workspace",
     "name": "KYA Stagiaires",
+    "type": "Workspace",
     "is_standard": 1,
     "title": "Espace Stagiaires",
     "icon": "users",

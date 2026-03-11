@@ -1,6 +1,7 @@
 {
     "doctype": "Workspace",
     "name": "Stock KYA",
+    "type": "Workspace",
     "is_standard": 1,
     "title": "Stock & Logistique",
     "icon": "truck",

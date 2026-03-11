@@ -1,6 +1,7 @@
 {
     "doctype": "Workspace",
     "name": "Cong\u00e9s & Permissions",
+    "type": "Workspace",
     "is_standard": 1,
     "title": "Cong\u00e9s & Permissions",
     "icon": "calendar",

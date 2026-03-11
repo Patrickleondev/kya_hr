@@ -1,6 +1,7 @@
 {
     "doctype": "Workspace",
     "name": "Achats KYA",
+    "type": "Workspace",
     "is_standard": 1,
     "title": "Achats & Approvisionnement",
     "icon": "shopping-cart",
