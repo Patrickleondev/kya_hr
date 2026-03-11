@@ -1,17 +1,18 @@
-// Planning Congé – Client Script
+// Planning de Congé – Script Client
 frappe.ui.form.on("Planning Conge", {
     refresh: function(frm) {
-        var colors = {
+        // Indicateur de statut coloré
+        var couleurs = {
             "Approuvé": "green",
             "Rejeté": "red",
             "Brouillon": "darkgrey"
         };
         if (frm.doc.statut) {
-            var color = colors[frm.doc.statut] || "orange";
-            frm.page.set_indicator(frm.doc.statut, color);
+            var couleur = couleurs[frm.doc.statut] || "orange";
+            frm.page.set_indicator(frm.doc.statut, couleur);
         }
 
-        // RH can add comments
+        // La RH peut ajouter des commentaires
         if (frappe.user_roles.includes("HR Manager") || frappe.user_roles.includes("HR User")) {
             frm.set_df_property("commentaire_rh", "read_only", 0);
         }
@@ -19,7 +20,7 @@ frappe.ui.form.on("Planning Conge", {
 
     onload: function(frm) {
         if (frm.is_new()) {
-            // Auto-fill employee
+            // Remplissage automatique de l'employé connecté
             if (!frm.doc.employee) {
                 frappe.db.get_value("Employee", {"user_id": frappe.session.user},
                     ["name", "employee_name", "department", "designation"],
@@ -33,7 +34,7 @@ frappe.ui.form.on("Planning Conge", {
                     }
                 );
             }
-            // Default year
+            // Année par défaut
             if (!frm.doc.annee) {
                 frm.set_value("annee", new Date().getFullYear());
             }
@@ -57,6 +58,7 @@ frappe.ui.form.on("Planning Conge", {
     }
 });
 
+// Tableau enfant : calcul automatique du nombre de jours
 frappe.ui.form.on("Planning Conge Periode", {
     date_debut: function(frm, cdt, cdn) { _calc_nb_jours(frm, cdt, cdn); },
     date_fin: function(frm, cdt, cdn) { _calc_nb_jours(frm, cdt, cdn); }
@@ -71,7 +73,7 @@ function _calc_nb_jours(frm, cdt, cdn) {
             frappe.model.set_value(cdt, cdn, "nb_jours", d2.diff(d1, "days") + 1);
         }
     }
-    // Recalculate total
+    // Recalcul du total
     var total = 0;
     (frm.doc.periodes || []).forEach(function(r) {
         total += (r.nb_jours || 0);

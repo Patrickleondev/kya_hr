@@ -45,6 +45,10 @@ class PermissionSortieEmploye(Document):
             self.db_set("date_signature_chef", today, update_modified=False)
 
         # RH signs → state moves to "Approuvé"
-        elif ws == "Approuvé" and not self.get("signataire_rh"):
+        if ws == "Approuvé" and not self.get("signataire_rh"):
             self.db_set("signataire_rh", name, update_modified=False)
             self.db_set("date_signature_rh", today, update_modified=False)
+            # If Chef was bypassed (HR Manager validated directly), mark it
+            if not self.get("signataire_chef"):
+                self.db_set("signataire_chef", name + " (Absence Chef)", update_modified=False)
+                self.db_set("date_signature_chef", today, update_modified=False)

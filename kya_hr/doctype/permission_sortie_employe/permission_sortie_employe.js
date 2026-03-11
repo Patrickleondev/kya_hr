@@ -1,23 +1,32 @@
 // Permission Sortie Employé – Client Script
 frappe.ui.form.on("Permission Sortie Employe", {
     refresh: function(frm) {
-        // Color-coded status indicator
-        var colors = {
+        // Indicateur de statut coloré
+        var couleurs = {
             "Approuvé": "green",
             "Rejeté": "red",
             "Brouillon": "darkgrey"
         };
         if (frm.doc.statut) {
-            var color = colors[frm.doc.statut] || "orange";
-            frm.page.set_indicator(frm.doc.statut, color);
+            var couleur = couleurs[frm.doc.statut] || "orange";
+            frm.page.set_indicator(frm.doc.statut, couleur);
         }
 
-        // Control signature field access
+        // Info bypass si Chef absent
+        var ws = frm.doc.workflow_state || frm.doc.statut;
+        if (ws === "En attente Chef" && frappe.user_roles.includes("HR Manager")) {
+            frm.dashboard.set_headline(
+                "Le Chef de Service est absent ? Vous pouvez valider directement via le bouton « Valider (Absence Chef) ».",
+                "orange"
+            );
+        }
+
+        // Contrôle des champs signature
         _control_pse_signatures(frm);
 
-        // Print ticket for approved permissions
+        // Bouton impression pour permission approuvée
         if (frm.doc.docstatus === 1 && frm.doc.statut === "Approuvé") {
-            frm.add_custom_button(__("Imprimer Ticket"), function() {
+            frm.add_custom_button("Imprimer le Ticket de Sortie", function() {
                 window.open(
                     frappe.urllib.get_full_url(
                         "/api/method/frappe.utils.print_format.download_pdf?"
@@ -31,7 +40,7 @@ frappe.ui.form.on("Permission Sortie Employe", {
     },
 
     onload: function(frm) {
-        // Auto-fill employee on new form
+        // Remplissage automatique de l'employé connecté
         if (frm.is_new() && !frm.doc.employee) {
             frappe.db.get_value("Employee", {"user_id": frappe.session.user},
                 ["name", "employee_name", "department", "designation"],
@@ -59,9 +68,9 @@ frappe.ui.form.on("Permission Sortie Employe", {
                         frm.set_value("designation", r.designation);
                         if (r.employment_type && r.employment_type === "Stage") {
                             frappe.msgprint({
-                                title: __("Attention"),
+                                title: "Attention",
                                 indicator: "orange",
-                                message: __("Cet employé est un stagiaire. Utilisez le module Permission de Sortie Stagiaire.")
+                                message: "Cet employé est un stagiaire. Veuillez utiliser le formulaire « Permission de Sortie Stagiaire »."
                             });
                         }
                     }
@@ -91,22 +100,24 @@ function _control_pse_signatures(frm) {
     var ws = frm.doc.workflow_state || frm.doc.statut;
     var roles = frappe.user_roles || [];
 
-    // Employé signature: editable at Brouillon for owner / Employee
-    var can_sign_employe = (ws === "Brouillon")
+    // Signature employé : modifiable au Brouillon pour le propriétaire
+    var peut_signer_employe = (ws === "Brouillon")
         && (roles.includes("Employee") || frappe.session.user === frm.doc.owner);
-    frm.set_df_property("signature_employe", "read_only", can_sign_employe ? 0 : 1);
+    frm.set_df_property("signature_employe", "read_only", peut_signer_employe ? 0 : 1);
     frm.set_df_property("signataire_employe", "read_only", 1);
     frm.set_df_property("date_signature_employe", "read_only", 1);
 
-    // Chef signature: editable at "En attente Chef" for HR User
-    var can_sign_chef = ws === "En attente Chef" && roles.includes("HR User");
-    frm.set_df_property("signature_chef", "read_only", can_sign_chef ? 0 : 1);
+    // Signature Chef : modifiable à "En attente Chef" pour HR User
+    var peut_signer_chef = ws === "En attente Chef" && roles.includes("HR User");
+    frm.set_df_property("signature_chef", "read_only", peut_signer_chef ? 0 : 1);
     frm.set_df_property("signataire_chef", "read_only", 1);
     frm.set_df_property("date_signature_chef", "read_only", 1);
 
-    // RH signature: editable at "En attente RH" for HR Manager
-    var can_sign_rh = ws === "En attente RH" && roles.includes("HR Manager");
-    frm.set_df_property("signature_rh", "read_only", can_sign_rh ? 0 : 1);
+    // Signature RH : modifiable à "En attente RH" pour HR Manager
+    // OU à "En attente Chef" si bypass (absence Chef)
+    var peut_signer_rh = (ws === "En attente RH" || ws === "En attente Chef")
+        && roles.includes("HR Manager");
+    frm.set_df_property("signature_rh", "read_only", peut_signer_rh ? 0 : 1);
     frm.set_df_property("signataire_rh", "read_only", 1);
     frm.set_df_property("date_signature_rh", "read_only", 1);
 }

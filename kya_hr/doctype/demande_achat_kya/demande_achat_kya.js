@@ -1,43 +1,44 @@
-// Demande Achat KYA – Client Script
+// Demande d'Achat KYA – Script Client
 frappe.ui.form.on("Demande Achat KYA", {
     refresh: function(frm) {
-        var colors = {
+        // Indicateur de statut coloré
+        var couleurs = {
             "Approuvé": "green",
             "Rejeté": "red",
             "Brouillon": "darkgrey"
         };
         if (frm.doc.statut) {
-            var color = colors[frm.doc.statut] || "orange";
-            frm.page.set_indicator(frm.doc.statut, color);
+            var couleur = couleurs[frm.doc.statut] || "orange";
+            frm.page.set_indicator(frm.doc.statut, couleur);
         }
 
-        // Show palier info
+        // Bandeau palier d'approbation
         if (frm.doc.montant_total) {
             var m = frm.doc.montant_total;
             if (m >= 2000000) {
                 frm.dashboard.set_headline(
-                    __("Palier 3 : approbation Chef + DGA + DG requise"),
+                    "Palier 3 : Approbation Chef + DGA + Directeur Général requise",
                     "red"
                 );
             } else if (m >= 100000) {
                 frm.dashboard.set_headline(
-                    __("Palier 2 : approbation Chef + DGA requise"),
+                    "Palier 2 : Approbation Chef + DGA requise",
                     "orange"
                 );
             } else {
                 frm.dashboard.set_headline(
-                    __("Palier 1 : approbation Chef seul"),
+                    "Palier 1 : Approbation du Chef de Département uniquement",
                     "blue"
                 );
             }
         }
 
-        // Control signature field access
+        // Contrôle des accès signatures
         _control_da_signatures(frm);
 
-        // Print button for approved
+        // Bouton impression pour demande approuvée
         if (frm.doc.docstatus === 1 && frm.doc.statut === "Approuvé") {
-            frm.add_custom_button(__("Imprimer Bon de Commande"), function() {
+            frm.add_custom_button("Imprimer le Bon de Commande", function() {
                 window.open(
                     frappe.urllib.get_full_url(
                         "/api/method/frappe.utils.print_format.download_pdf?"
@@ -51,6 +52,7 @@ frappe.ui.form.on("Demande Achat KYA", {
     },
 
     onload: function(frm) {
+        // Remplissage automatique du demandeur connecté
         if (frm.is_new() && !frm.doc.employee) {
             frappe.db.get_value("Employee", {"user_id": frappe.session.user},
                 ["name", "employee_name", "department"],
@@ -81,7 +83,7 @@ frappe.ui.form.on("Demande Achat KYA", {
     }
 });
 
-// Child table: auto-calculate montant per row
+// Tableau enfant : calcul automatique du montant par ligne
 frappe.ui.form.on("Demande Achat Item", {
     quantite: function(frm, cdt, cdn) { _calc_montant_da(frm, cdt, cdn); },
     prix_unitaire: function(frm, cdt, cdn) { _calc_montant_da(frm, cdt, cdn); },
@@ -107,28 +109,28 @@ function _control_da_signatures(frm) {
     var ws = frm.doc.workflow_state || frm.doc.statut;
     var roles = frappe.user_roles || [];
 
-    // Demandeur signature: editable at Brouillon for owner
-    var can_sign_demandeur = (ws === "Brouillon")
+    // Signature demandeur : modifiable au Brouillon pour le propriétaire
+    var peut_signer_demandeur = (ws === "Brouillon")
         && (roles.includes("Employee") || frappe.session.user === frm.doc.owner);
-    frm.set_df_property("signature_demandeur", "read_only", can_sign_demandeur ? 0 : 1);
+    frm.set_df_property("signature_demandeur", "read_only", peut_signer_demandeur ? 0 : 1);
     frm.set_df_property("signataire_demandeur", "read_only", 1);
     frm.set_df_property("date_signature_demandeur", "read_only", 1);
 
-    // Chef signature: editable at "En attente Chef" for Purchase User
-    var can_sign_chef = ws === "En attente Chef" && roles.includes("Purchase User");
-    frm.set_df_property("signature_chef", "read_only", can_sign_chef ? 0 : 1);
+    // Signature Chef : modifiable à "En attente Chef" pour Purchase User
+    var peut_signer_chef = ws === "En attente Chef" && roles.includes("Purchase User");
+    frm.set_df_property("signature_chef", "read_only", peut_signer_chef ? 0 : 1);
     frm.set_df_property("signataire_chef", "read_only", 1);
     frm.set_df_property("date_signature_chef", "read_only", 1);
 
-    // DGA signature: editable at "En attente Approbation" for Purchase Manager
-    var can_sign_dga = ws === "En attente Approbation" && roles.includes("Purchase Manager");
-    frm.set_df_property("signature_dga", "read_only", can_sign_dga ? 0 : 1);
+    // Signature DGA : modifiable à "En attente Approbation" pour Purchase Manager
+    var peut_signer_dga = ws === "En attente Approbation" && roles.includes("Purchase Manager");
+    frm.set_df_property("signature_dga", "read_only", peut_signer_dga ? 0 : 1);
     frm.set_df_property("signataire_dga", "read_only", 1);
     frm.set_df_property("date_signature_dga", "read_only", 1);
 
-    // DG signature: editable at "En attente DG" for HR Manager
-    var can_sign_dg = ws === "En attente DG" && roles.includes("HR Manager");
-    frm.set_df_property("signature_dg", "read_only", can_sign_dg ? 0 : 1);
+    // Signature DG : modifiable à "En attente DG" pour HR Manager
+    var peut_signer_dg = ws === "En attente DG" && roles.includes("HR Manager");
+    frm.set_df_property("signature_dg", "read_only", peut_signer_dg ? 0 : 1);
     frm.set_df_property("signataire_dg", "read_only", 1);
     frm.set_df_property("date_signature_dg", "read_only", 1);
 }

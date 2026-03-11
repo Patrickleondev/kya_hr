@@ -2,16 +2,64 @@
     "doctype": "Workspace",
     "name": "KYA Stagiaires",
     "is_standard": 1,
-    "title": "KYA Stagiaires",
+    "title": "Espace Stagiaires",
     "icon": "users",
     "module": "KYA HR",
     "public": 1,
     "parent_page": "",
     "sequence_id": 5,
-    "content": "[{\"id\":\"hero\",\"type\":\"header\",\"data\":{\"text\":\"<div class='ellipsis' title='KYA Stagiaires'>\\ud83c\\udf93 KYA Stagiaires</div>\",\"level\":3,\"col\":12}},{\"id\":\"shortcuts_section\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Nouvelle Permission\",\"col\":4}},{\"id\":\"shortcuts_section_2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Nouveau Bilan\",\"col\":4}},{\"id\":\"shortcuts_section_3\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"PV Sortie Mat\\u00e9riel\",\"col\":4}},{\"id\":\"spacer1\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"cards_header\",\"type\":\"header\",\"data\":{\"text\":\"Gestion Stagiaires\",\"level\":4,\"col\":12}}]",
+    "content": "[{\"id\":\"hero\",\"type\":\"header\",\"data\":{\"text\":\"<div class='ellipsis' title='Espace Stagiaires'>\\ud83c\\udf93 Espace Stagiaires KYA</div>\",\"level\":3,\"col\":12}},{\"id\":\"shortcuts_section\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Demander une Permission de Sortie\",\"col\":4}},{\"id\":\"shortcuts_section_2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Mon Bilan de Stage\",\"col\":4}},{\"id\":\"shortcuts_section_3\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"PV Sortie Mat\\u00e9riel\",\"col\":4}},{\"id\":\"spacer1\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"chart_perm\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Statut Permissions Stagiaires\",\"col\":6}},{\"id\":\"chart_presence\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Pr\\u00e9sences Mensuelles\",\"col\":6}},{\"id\":\"spacer2\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"nb_section\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Permissions en cours\",\"col\":4}},{\"id\":\"nb_bilan\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Bilans soumis\",\"col\":4}},{\"id\":\"nb_pv\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"PV Approuv\\u00e9s\",\"col\":4}},{\"id\":\"spacer3\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"cards_header\",\"type\":\"header\",\"data\":{\"text\":\"Gestion Stagiaires\",\"level\":4,\"col\":12}}]",
+    "charts": [
+        {
+            "chart_name": "Statut Permissions Stagiaires",
+            "chart_type": "Group By",
+            "document_type": "Permission Sortie Stagiaire",
+            "group_by_type": "Count",
+            "group_by_based_on": "statut",
+            "type": "Donut",
+            "filters_json": "{}",
+            "number_of_groups": 5
+        },
+        {
+            "chart_name": "Pr\u00e9sences Mensuelles",
+            "chart_type": "Group By",
+            "document_type": "Attendance",
+            "group_by_type": "Count",
+            "group_by_based_on": "status",
+            "type": "Bar",
+            "filters_json": "{\"attendance_date\":[\"Timespan\",\"this month\"]}",
+            "number_of_groups": 5
+        }
+    ],
+    "number_cards": [
+        {
+            "number_card_name": "Permissions en cours",
+            "document_type": "Permission Sortie Stagiaire",
+            "function": "Count",
+            "filters_json": "{\"statut\":[\"not in\",[\"Brouillon\",\"Approuv\\u00e9\",\"Rejet\\u00e9\"]]}",
+            "label": "En cours de validation",
+            "color": "#FF6F61"
+        },
+        {
+            "number_card_name": "Bilans soumis",
+            "document_type": "Bilan Fin de Stage",
+            "function": "Count",
+            "filters_json": "{\"docstatus\":1}",
+            "label": "Bilans valid\u00e9s",
+            "color": "#29CD42"
+        },
+        {
+            "number_card_name": "PV Approuv\u00e9s",
+            "document_type": "PV Sortie Materiel",
+            "function": "Count",
+            "filters_json": "{\"statut\":\"Approuv\\u00e9\"}",
+            "label": "PV Mat\u00e9riel approuv\u00e9s",
+            "color": "#2490EF"
+        }
+    ],
     "shortcuts": [
         {
-            "label": "Nouvelle Permission",
+            "label": "Demander une Permission de Sortie",
             "type": "DocType",
             "link_to": "Permission Sortie Stagiaire",
             "color": "#2490EF",
@@ -20,7 +68,7 @@
             "stats_filter": "[{\"fieldname\":\"statut\",\"operator\":\"in\",\"value\":[\"En attente Chef\",\"En attente Resp. Stagiaires\",\"En attente DG\"]}]"
         },
         {
-            "label": "Nouveau Bilan",
+            "label": "Mon Bilan de Stage",
             "type": "DocType",
             "link_to": "Bilan Fin de Stage",
             "color": "#29CD42",
@@ -37,15 +85,15 @@
     "links": [
         {
             "type": "Card Break",
-            "label": "Permissions & Sorties",
+            "label": "Mes Demandes",
             "icon": "file"
         },
         {
             "type": "Link",
-            "label": "Permission Sortie Stagiaire",
+            "label": "Permission de Sortie Stagiaire",
             "link_type": "DocType",
             "link_to": "Permission Sortie Stagiaire",
-            "description": "Demandes de permission de sortie",
+            "description": "Cr\u00e9er ou suivre vos demandes de sortie",
             "icon": "file"
         },
         {
@@ -53,7 +101,7 @@
             "label": "PV Sortie Mat\u00e9riel",
             "link_type": "DocType",
             "link_to": "PV Sortie Materiel",
-            "description": "Proc\u00e8s-verbaux de sortie mat\u00e9riel",
+            "description": "Proc\u00e8s-verbaux de sortie de mat\u00e9riel",
             "icon": "truck"
         },
         {
@@ -63,24 +111,32 @@
         },
         {
             "type": "Link",
-            "label": "Bilan Fin de Stage",
+            "label": "Bilan de Fin de Stage",
             "link_type": "DocType",
             "link_to": "Bilan Fin de Stage",
-            "description": "Bilans de fin de stage",
+            "description": "R\u00e9diger et soumettre votre bilan de stage",
             "icon": "edit"
         },
         {
             "type": "Card Break",
-            "label": "RH",
+            "label": "Suivi RH",
             "icon": "users"
         },
         {
             "type": "Link",
-            "label": "Stagiaires Actifs",
+            "label": "Ma Fiche Employ\u00e9",
             "link_type": "DocType",
             "link_to": "Employee",
-            "description": "Liste filtr\u00e9e des stagiaires",
+            "description": "Consulter votre fiche employ\u00e9",
             "icon": "users"
+        },
+        {
+            "type": "Link",
+            "label": "Mes Pr\u00e9sences",
+            "link_type": "DocType",
+            "link_to": "Attendance",
+            "description": "Historique de vos pr\u00e9sences",
+            "icon": "calendar"
         }
     ]
 }
