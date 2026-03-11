@@ -1,0 +1,98 @@
+<style>
+    @page { size: A5 landscape; margin: 10mm; }
+    body { font-family: Arial, sans-serif; font-size: 12px; color: #333; }
+    .ticket-container { max-width: 550px; margin: 0 auto; border: 2px solid #009688; border-radius: 12px; overflow: hidden; }
+    .ticket-header { background: linear-gradient(135deg, #009688, #00bcd4); padding: 16px 20px; text-align: center; color: white; }
+    .ticket-header img { height: 40px; margin-bottom: 6px; }
+    .ticket-header h2 { margin: 0; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; }
+    .ticket-header .ref { font-size: 10px; opacity: 0.8; margin-top: 4px; }
+    .ticket-body { padding: 16px 20px; }
+    .ticket-body table { width: 100%; border-collapse: collapse; }
+    .ticket-body td { padding: 6px 8px; vertical-align: top; }
+    .ticket-body .label { font-weight: 700; color: #009688; width: 40%; font-size: 11px; }
+    .ticket-body .value { font-size: 13px; }
+    .ticket-status { text-align: center; padding: 10px; margin: 10px 0; }
+    .ticket-status .badge { display: inline-block; padding: 6px 24px; border-radius: 20px; font-weight: 700; font-size: 13px; text-transform: uppercase; }
+    .badge-approved { background: #e8f5e9; color: #2e7d32; border: 2px solid #4caf50; }
+    .badge-pending { background: #fff3e0; color: #e65100; border: 2px solid #ff9800; }
+    .badge-rejected { background: #ffebee; color: #c62828; border: 2px solid #ef5350; }
+    .ticket-footer { background: #f5f5f5; padding: 10px 20px; text-align: center; font-size: 9px; color: #999; border-top: 1px solid #e0e0e0; }
+    .signatures { display: flex; justify-content: space-between; margin-top: 16px; padding-top: 12px; border-top: 1px dashed #ccc; }
+    .sig-block { text-align: center; width: 45%; }
+    .sig-block .line { border-top: 1px solid #333; margin-top: 30px; padding-top: 4px; font-size: 10px; }
+</style>
+
+<div class="ticket-container">
+    <div class="ticket-header">
+        <img src="/assets/kya_hr/images/image010.png" alt="KYA" onerror="this.src='https://www.kya-energy.com/wp-content/uploads/2024/02/Logo-10-ans-KYA.png'">
+        <h2>Ticket de Sortie — Stagiaire</h2>
+        <div class="ref">{{ doc.name }} | KYA-Energy Group</div>
+    </div>
+
+    <div class="ticket-body">
+        <table>
+            <tr>
+                <td class="label">Stagiaire</td>
+                <td class="value"><strong>{{ doc.employee_name or '' }}</strong></td>
+            </tr>
+            <tr>
+                <td class="label">Département</td>
+                <td class="value">{{ doc.department or '—' }}</td>
+            </tr>
+            <tr>
+                <td class="label">Date de sortie</td>
+                <td class="value">{{ frappe.utils.format_date(doc.date_sortie) }}</td>
+            </tr>
+            <tr>
+                <td class="label">Heure de départ</td>
+                <td class="value">{{ doc.heure_depart or '—' }}</td>
+            </tr>
+            <tr>
+                <td class="label">Heure de retour prévue</td>
+                <td class="value">{{ doc.heure_retour or '—' }}</td>
+            </tr>
+            {% if doc.duree %}
+            <tr>
+                <td class="label">Durée estimée</td>
+                <td class="value">{{ doc.duree }}</td>
+            </tr>
+            {% endif %}
+            <tr>
+                <td class="label">Motif</td>
+                <td class="value">{{ doc.motif or '—' }}</td>
+            </tr>
+        </table>
+
+        <div class="ticket-status">
+            {% if doc.statut == "Approuvé" %}
+                <span class="badge badge-approved">✅ APPROUVÉ</span>
+            {% elif doc.statut == "Rejeté" %}
+                <span class="badge badge-rejected">❌ REJETÉ</span>
+            {% else %}
+                <span class="badge badge-pending">⏳ {{ doc.statut }}</span>
+            {% endif %}
+        </div>
+
+        <div class="signatures">
+            <div class="sig-block">
+                {% if doc.signature_chef %}
+                    <img src="{{ doc.signature_chef }}" style="max-height:50px; display:block; margin:0 auto 4px;">
+                {% endif %}
+                <div class="line">{{ doc.signataire_chef or 'Responsable Stagiaires' }}</div>
+                {% if doc.date_signature_chef %}<div style="font-size:9px;color:#888;">{{ frappe.utils.format_date(doc.date_signature_chef) }}</div>{% endif %}
+            </div>
+            <div class="sig-block">
+                {% if doc.signature_dg %}
+                    <img src="{{ doc.signature_dg }}" style="max-height:50px; display:block; margin:0 auto 4px;">
+                {% endif %}
+                <div class="line">{{ doc.signataire_dg or 'Direction Générale' }}</div>
+                {% if doc.date_signature_dg %}<div style="font-size:9px;color:#888;">{{ frappe.utils.format_date(doc.date_signature_dg) }}</div>{% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="ticket-footer">
+        Généré le {{ frappe.utils.now_datetime().strftime('%d/%m/%Y à %H:%M') }} — KYA-Energy Group, Lomé, Togo<br>
+        Ce ticket est valable uniquement pour la date indiquée.
+    </div>
+</div>

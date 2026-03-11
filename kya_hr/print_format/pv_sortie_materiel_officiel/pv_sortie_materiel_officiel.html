@@ -1,0 +1,131 @@
+<style>
+    @page { size: A4; margin: 15mm; }
+    body { font-family: Arial, sans-serif; font-size: 12px; color: #333; }
+    .pv-container { max-width: 700px; margin: 0 auto; }
+    .pv-header { text-align: center; margin-bottom: 20px; border-bottom: 3px solid #009688; padding-bottom: 12px; }
+    .pv-header img { height: 55px; margin-bottom: 8px; }
+    .pv-header h1 { font-size: 18px; color: #009688; margin: 4px 0; text-transform: uppercase; }
+    .pv-header .ref-line { font-size: 10px; color: #888; }
+    .pv-section { margin-bottom: 16px; }
+    .pv-section h3 { font-size: 13px; color: #009688; border-bottom: 1px solid #009688; padding-bottom: 4px; margin-bottom: 8px; }
+    table.info { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+    table.info td { padding: 5px 8px; border: 1px solid #e0e0e0; }
+    table.info .lbl { background: #f5f5f5; font-weight: 700; width: 35%; color: #555; }
+    table.items-full { width: 100%; border-collapse: collapse; margin: 12px 0; }
+    table.items-full th { background: #009688; color: white; padding: 8px; text-align: left; font-size: 11px; }
+    table.items-full td { padding: 6px 8px; border: 1px solid #ddd; }
+    table.items-full tr:nth-child(even) { background: #f9fffe; }
+    .signatures-grid { display: flex; flex-wrap: wrap; justify-content: space-between; margin-top: 24px; gap: 16px; }
+    .sig-box { width: 45%; border: 1px solid #ddd; border-radius: 8px; padding: 12px; text-align: center; }
+    .sig-box .role { font-weight: 700; color: #009688; font-size: 11px; margin-bottom: 4px; }
+    .sig-box .name { font-size: 12px; margin-bottom: 2px; }
+    .sig-box .date { font-size: 10px; color: #888; }
+    .sig-box .sig-img { max-height: 55px; display: block; margin: 4px auto; }
+    .pv-footer { margin-top: 30px; text-align: center; font-size: 9px; color: #aaa; border-top: 2px solid #009688; padding-top: 8px; }
+</style>
+
+<div class="pv-container">
+    <div class="pv-header">
+        <img src="/assets/kya_hr/images/image010.png" alt="KYA-Energy Group" onerror="this.src='https://www.kya-energy.com/wp-content/uploads/2024/02/Logo-10-ans-KYA.png'">
+        <h1>Procès-Verbal de Sortie de Matériel</h1>
+        <div class="ref-line">
+            <strong>N° :</strong> {{ doc.name }} &nbsp;|&nbsp;
+            <strong>Réf :</strong> {{ doc.reference or 'AEA-ENG-32-V01' }} &nbsp;|&nbsp;
+            <strong>Date :</strong> {{ frappe.utils.format_date(doc.date_sortie) }}
+        </div>
+    </div>
+
+    <div class="pv-section">
+        <h3>1. Informations Générales</h3>
+        <table class="info">
+            <tr>
+                <td class="lbl">Objet de la sortie</td>
+                <td>{{ doc.objet }}</td>
+            </tr>
+            <tr>
+                <td class="lbl">Date de sortie</td>
+                <td>{{ frappe.utils.format_date(doc.date_sortie) }}</td>
+            </tr>
+            <tr>
+                <td class="lbl">Statut</td>
+                <td><strong>{{ doc.statut }}</strong></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="pv-section">
+        <h3>2. Liste du Matériel</h3>
+        <table class="items-full">
+            <thead>
+                <tr>
+                    <th style="width:5%">N°</th>
+                    <th style="width:50%">Désignation</th>
+                    <th style="width:20%">Quantité Demandée</th>
+                    <th style="width:25%">Quantité Réellement Sortie</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in doc.items %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ item.designation }}</td>
+                    <td style="text-align:center">{{ item.qte_demandee }}</td>
+                    <td style="text-align:center">{{ item.qte_reellement_sortie or '—' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pv-section">
+        <h3>3. Approbations & Signatures</h3>
+        <div class="signatures-grid">
+            <div class="sig-box">
+                <div class="role">Demandeur / Chef d'Équipe</div>
+                <div class="name">{{ doc.demandeur_nom or '________________' }}</div>
+                <div class="date">{{ frappe.utils.format_date(doc.demandeur_date) if doc.demandeur_date else '' }}</div>
+                {% if doc.signature_demandeur %}
+                    <img src="{{ doc.signature_demandeur }}" class="sig-img">
+                {% else %}
+                    <div style="height:55px; border-bottom:1px solid #ccc; margin-top:8px;"></div>
+                {% endif %}
+            </div>
+            <div class="sig-box">
+                <div class="role">Responsable Magasin</div>
+                <div class="name">{{ doc.magasin_nom or '________________' }}</div>
+                <div class="date">{{ frappe.utils.format_date(doc.magasin_date) if doc.magasin_date else '' }}</div>
+                {% if doc.signature_magasin %}
+                    <img src="{{ doc.signature_magasin }}" class="sig-img">
+                {% else %}
+                    <div style="height:55px; border-bottom:1px solid #ccc; margin-top:8px;"></div>
+                {% endif %}
+            </div>
+            <div class="sig-box">
+                <div class="role">Audit Interne</div>
+                <div class="name">{{ doc.audit_nom or '________________' }}</div>
+                <div class="date">{{ frappe.utils.format_date(doc.audit_date) if doc.audit_date else '' }}</div>
+                {% if doc.signature_audit %}
+                    <img src="{{ doc.signature_audit }}" class="sig-img">
+                {% else %}
+                    <div style="height:55px; border-bottom:1px solid #ccc; margin-top:8px;"></div>
+                {% endif %}
+            </div>
+            <div class="sig-box">
+                <div class="role">Représentant DG / DGA</div>
+                <div class="name">{{ doc.dga_nom or '________________' }}</div>
+                <div class="date">{{ frappe.utils.format_date(doc.dga_date) if doc.dga_date else '' }}</div>
+                {% if doc.signature_dga %}
+                    <img src="{{ doc.signature_dga }}" class="sig-img">
+                {% else %}
+                    <div style="height:55px; border-bottom:1px solid #ccc; margin-top:8px;"></div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="pv-footer">
+        KYA-Energy Group — 08BP 81101 Agoe Nyive, Logopé — Lomé, Togo<br>
+        📞 +228 70 45 34 81 | ✉️ info@kya-energy.com | 🌐 www.kya-energy.com<br>
+        Document généré le {{ frappe.utils.now_datetime().strftime('%d/%m/%Y à %H:%M') }}
+    </div>
+</div>

@@ -1,0 +1,46 @@
+{
+    "name": "Planning Conge Periode",
+    "module": "KYA HR",
+    "doctype": "DocType",
+    "istable": 1,
+    "custom": 1,
+    "fields": [
+        {
+            "fieldname": "date_debut",
+            "label": "Date D\u00e9but",
+            "fieldtype": "Date",
+            "reqd": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "date_fin",
+            "label": "Date Fin",
+            "fieldtype": "Date",
+            "reqd": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "nb_jours",
+            "label": "Nombre de Jours",
+            "fieldtype": "Int",
+            "in_list_view": 1,
+            "read_only": 1,
+            "description": "Calcul\u00e9 automatiquement"
+        },
+        {
+            "fieldname": "type_conge",
+            "label": "Type de Cong\u00e9",
+            "fieldtype": "Link",
+            "options": "Leave Type",
+            "reqd": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "remarque",
+            "label": "Remarque",
+            "fieldtype": "Small Text",
+            "in_list_view": 1
+        }
+    ],
+    "permissions": []
+}

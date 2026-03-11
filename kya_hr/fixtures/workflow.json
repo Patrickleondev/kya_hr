@@ -11,7 +11,7 @@
   "send_email_alert": 1,
   "states": [
    {
-    "allow_edit": "Employé",
+    "allow_edit": "Employee",
     "avoid_status_override": 0,
     "doc_status": "0",
     "evaluate_as_expression": 0,
@@ -34,20 +34,6 @@
     "next_action_email_template": "KYA - Demande de Congé À Approuver",
     "send_email": 1,
     "state": "En attente du Supérieur Immédiat",
-    "update_field": null,
-    "update_value": null,
-    "workflow_builder_id": null
-   },
-   {
-    "allow_edit": "Responsable des Stagiaires",
-    "avoid_status_override": 0,
-    "doc_status": "0",
-    "evaluate_as_expression": 0,
-    "is_optional_state": 0,
-    "message": null,
-    "next_action_email_template": "KYA - Demande de Congé À Approuver",
-    "send_email": 1,
-    "state": "En attente Resp. Stagiaires",
     "update_field": null,
     "update_value": null,
     "workflow_builder_id": null
@@ -113,19 +99,8 @@
    {
     "action": "Soumettre",
     "allow_self_approval": 0,
-    "allowed": "Employé",
-    "condition": "frappe.db.get_value('Employee', doc.employee, 'employment_type') == 'Stage'",
-    "next_state": "En attente Resp. Stagiaires",
-    "send_email_to_creator": 0,
-    "state": "Brouillon",
-    "transition_tasks": null,
-    "workflow_builder_id": null
-   },
-   {
-    "action": "Soumettre",
-    "allow_self_approval": 0,
-    "allowed": "Employé",
-    "condition": "frappe.db.get_value('Employee', doc.employee, 'employment_type') in ['CDD', 'CDI'] and 'Supérieur Immédiat' not in frappe.get_roles(frappe.db.get_value('Employee', doc.employee, 'user_id') or '')",
+    "allowed": "Employee",
+    "condition": "'Supérieur Immédiat' not in frappe.get_roles(frappe.db.get_value('Employee', doc.employee, 'user_id') or '')",
     "next_state": "En attente du Supérieur Immédiat",
     "send_email_to_creator": 0,
     "state": "Brouillon",
@@ -135,8 +110,8 @@
    {
     "action": "Soumettre",
     "allow_self_approval": 0,
-    "allowed": "Employé",
-    "condition": "frappe.db.get_value('Employee', doc.employee, 'employment_type') in ['CDD', 'CDI'] and 'Supérieur Immédiat' in frappe.get_roles(frappe.db.get_value('Employee', doc.employee, 'user_id') or '')",
+    "allowed": "Employee",
+    "condition": "'Supérieur Immédiat' in frappe.get_roles(frappe.db.get_value('Employee', doc.employee, 'user_id') or '')",
     "next_state": "En attente RH",
     "send_email_to_creator": 0,
     "state": "Brouillon",
@@ -162,28 +137,6 @@
     "next_state": "Rejeté",
     "send_email_to_creator": 0,
     "state": "En attente du Supérieur Immédiat",
-    "transition_tasks": null,
-    "workflow_builder_id": null
-   },
-   {
-    "action": "Approuver",
-    "allow_self_approval": 0,
-    "allowed": "Responsable des Stagiaires",
-    "condition": null,
-    "next_state": "En attente DG",
-    "send_email_to_creator": 0,
-    "state": "En attente Resp. Stagiaires",
-    "transition_tasks": null,
-    "workflow_builder_id": null
-   },
-   {
-    "action": "Rejeter",
-    "allow_self_approval": 0,
-    "allowed": "Responsable des Stagiaires",
-    "condition": null,
-    "next_state": "Rejeté",
-    "send_email_to_creator": 0,
-    "state": "En attente Resp. Stagiaires",
     "transition_tasks": null,
     "workflow_builder_id": null
    },
@@ -248,7 +201,7 @@
   "send_email_alert": 1,
   "states": [
    {
-    "allow_edit": "Employé",
+    "allow_edit": "Employee",
     "avoid_status_override": 0,
     "doc_status": "0",
     "evaluate_as_expression": 0,
@@ -308,7 +261,7 @@
    {
     "action": "Envoyer pour Validation",
     "allow_self_approval": 0,
-    "allowed": "Employé",
+    "allowed": "Employee",
     "condition": null,
     "next_state": "En attente",
     "send_email_to_creator": 0,
@@ -341,6 +294,606 @@
   ],
   "workflow_data": null,
   "workflow_name": "Demande de matériel",
+  "workflow_state_field": "workflow_state"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow",
+  "document_type": "Permission Sortie Stagiaire",
+  "enable_action_confirmation": 1,
+  "is_active": 1,
+  "modified": "2026-06-01 10:00:00",
+  "name": "Flux Permission Sortie Stagiaire",
+  "override_status": 0,
+  "send_email_alert": 1,
+  "states": [
+   {
+    "allow_edit": "Employee",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "state": "Brouillon",
+    "update_field": "statut",
+    "update_value": "Brouillon"
+   },
+   {
+    "allow_edit": "Employee",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "state": "En attente Chef",
+    "update_field": "statut",
+    "update_value": "En attente Chef"
+   },
+   {
+    "allow_edit": "HR User",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "state": "En attente Resp. Stagiaires",
+    "update_field": "statut",
+    "update_value": "En attente Resp. Stagiaires"
+   },
+   {
+    "allow_edit": "HR Manager",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "state": "En attente DG",
+    "update_field": "statut",
+    "update_value": "En attente DG"
+   },
+   {
+    "allow_edit": "HR Manager",
+    "doc_status": "1",
+    "is_optional_state": 0,
+    "state": "Approuvé",
+    "update_field": "statut",
+    "update_value": "Approuvé"
+   },
+   {
+    "allow_edit": "HR Manager",
+    "doc_status": "1",
+    "is_optional_state": 0,
+    "state": "Rejeté",
+    "update_field": "statut",
+    "update_value": "Rejeté"
+   }
+  ],
+  "transitions": [
+   {
+    "action": "Soumettre",
+    "allow_self_approval": 0,
+    "allowed": "Employee",
+    "condition": null,
+    "next_state": "En attente Chef",
+    "state": "Brouillon"
+   },
+   {
+    "action": "Approuver",
+    "allow_self_approval": 0,
+    "allowed": "HR User",
+    "condition": null,
+    "next_state": "En attente Resp. Stagiaires",
+    "state": "En attente Chef"
+   },
+   {
+    "action": "Rejeter",
+    "allow_self_approval": 0,
+    "allowed": "HR User",
+    "condition": null,
+    "next_state": "Rejeté",
+    "state": "En attente Chef"
+   },
+   {
+    "action": "Approuver",
+    "allow_self_approval": 0,
+    "allowed": "HR User",
+    "condition": null,
+    "next_state": "En attente DG",
+    "state": "En attente Resp. Stagiaires"
+   },
+   {
+    "action": "Rejeter",
+    "allow_self_approval": 0,
+    "allowed": "HR User",
+    "condition": null,
+    "next_state": "Rejeté",
+    "state": "En attente Resp. Stagiaires"
+   },
+   {
+    "action": "Approuver",
+    "allow_self_approval": 0,
+    "allowed": "HR Manager",
+    "condition": null,
+    "next_state": "Approuvé",
+    "state": "En attente DG"
+   },
+   {
+    "action": "Rejeter",
+    "allow_self_approval": 0,
+    "allowed": "HR Manager",
+    "condition": null,
+    "next_state": "Rejeté",
+    "state": "En attente DG"
+   }
+  ],
+  "workflow_data": null,
+  "workflow_name": "Flux Permission Sortie Stagiaire",
+  "workflow_state_field": "workflow_state"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow",
+  "document_type": "PV Sortie Materiel",
+  "enable_action_confirmation": 1,
+  "is_active": 1,
+  "modified": "2026-06-01 10:00:00",
+  "name": "Flux PV Sortie Matériel",
+  "override_status": 0,
+  "send_email_alert": 1,
+  "states": [
+   {
+    "allow_edit": "Employee",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "state": "Brouillon",
+    "update_field": "statut",
+    "update_value": "Brouillon"
+   },
+   {
+    "allow_edit": "Employee",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "state": "En attente Chef",
+    "update_field": "statut",
+    "update_value": "En attente Chef"
+   },
+   {
+    "allow_edit": "Stock User",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "state": "En attente Magasin",
+    "update_field": "statut",
+    "update_value": "En attente Magasin"
+   },
+   {
+    "allow_edit": "Auditor",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "state": "En attente Audit",
+    "update_field": "statut",
+    "update_value": "En attente Audit"
+   },
+   {
+    "allow_edit": "Stock Manager",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "state": "En attente DGA",
+    "update_field": "statut",
+    "update_value": "En attente DGA"
+   },
+   {
+    "allow_edit": "Stock Manager",
+    "doc_status": "1",
+    "is_optional_state": 0,
+    "state": "Approuvé",
+    "update_field": "statut",
+    "update_value": "Approuvé"
+   },
+   {
+    "allow_edit": "Stock Manager",
+    "doc_status": "1",
+    "is_optional_state": 0,
+    "state": "Rejeté",
+    "update_field": "statut",
+    "update_value": "Rejeté"
+   }
+  ],
+  "transitions": [
+   {
+    "action": "Envoyer pour Approbation",
+    "allow_self_approval": 0,
+    "allowed": "Employee",
+    "condition": null,
+    "next_state": "En attente Chef",
+    "state": "Brouillon"
+   },
+   {
+    "action": "Approuver",
+    "allow_self_approval": 0,
+    "allowed": "HR User",
+    "condition": null,
+    "next_state": "En attente Magasin",
+    "state": "En attente Chef"
+   },
+   {
+    "action": "Rejeter",
+    "allow_self_approval": 0,
+    "allowed": "HR User",
+    "condition": null,
+    "next_state": "Rejeté",
+    "state": "En attente Chef"
+   },
+   {
+    "action": "Approuver",
+    "allow_self_approval": 0,
+    "allowed": "Stock User",
+    "condition": null,
+    "next_state": "En attente Audit",
+    "state": "En attente Magasin"
+   },
+   {
+    "action": "Rejeter",
+    "allow_self_approval": 0,
+    "allowed": "Stock User",
+    "condition": null,
+    "next_state": "Rejeté",
+    "state": "En attente Magasin"
+   },
+   {
+    "action": "Approuver",
+    "allow_self_approval": 0,
+    "allowed": "Auditor",
+    "condition": null,
+    "next_state": "En attente DGA",
+    "state": "En attente Audit"
+   },
+   {
+    "action": "Rejeter",
+    "allow_self_approval": 0,
+    "allowed": "Auditor",
+    "condition": null,
+    "next_state": "Rejeté",
+    "state": "En attente Audit"
+   },
+   {
+    "action": "Approuver",
+    "allow_self_approval": 0,
+    "allowed": "Stock Manager",
+    "condition": null,
+    "next_state": "Approuvé",
+    "state": "En attente DGA"
+   },
+   {
+    "action": "Rejeter",
+    "allow_self_approval": 0,
+    "allowed": "Stock Manager",
+    "condition": null,
+    "next_state": "Rejeté",
+    "state": "En attente DGA"
+   }
+  ],
+  "workflow_data": null,
+  "workflow_name": "Flux PV Sortie Matériel",
+  "workflow_state_field": "workflow_state" },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow",
+  "document_type": "Permission Sortie Employe",
+  "enable_action_confirmation": 1,
+  "is_active": 1,
+  "modified": "2026-06-01 12:00:00",
+  "name": "Flux Permission Sortie Employ\u00e9",
+  "override_status": 0,
+  "send_email_alert": 1,
+  "states": [
+   {
+    "allow_edit": "Employee",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "state": "Brouillon",
+    "update_field": "statut",
+    "update_value": "Brouillon"
+   },
+   {
+    "allow_edit": "Employee",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "state": "En attente Chef",
+    "update_field": "statut",
+    "update_value": "En attente Chef"
+   },
+   {
+    "allow_edit": "HR Manager",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "state": "En attente RH",
+    "update_field": "statut",
+    "update_value": "En attente RH"
+   },
+   {
+    "allow_edit": "HR Manager",
+    "doc_status": "1",
+    "is_optional_state": 0,
+    "state": "Approuv\u00e9",
+    "update_field": "statut",
+    "update_value": "Approuv\u00e9"
+   },
+   {
+    "allow_edit": "HR Manager",
+    "doc_status": "1",
+    "is_optional_state": 0,
+    "state": "Rejet\u00e9",
+    "update_field": "statut",
+    "update_value": "Rejet\u00e9"
+   }
+  ],
+  "transitions": [
+   {
+    "action": "Soumettre",
+    "allow_self_approval": 0,
+    "allowed": "Employee",
+    "condition": null,
+    "next_state": "En attente Chef",
+    "state": "Brouillon"
+   },
+   {
+    "action": "Approuver",
+    "allow_self_approval": 0,
+    "allowed": "HR User",
+    "condition": null,
+    "next_state": "En attente RH",
+    "state": "En attente Chef"
+   },
+   {
+    "action": "Rejeter",
+    "allow_self_approval": 0,
+    "allowed": "HR User",
+    "condition": null,
+    "next_state": "Rejet\u00e9",
+    "state": "En attente Chef"
+   },
+   {
+    "action": "Approuver",
+    "allow_self_approval": 0,
+    "allowed": "HR Manager",
+    "condition": null,
+    "next_state": "Approuv\u00e9",
+    "state": "En attente RH"
+   },
+   {
+    "action": "Rejeter",
+    "allow_self_approval": 0,
+    "allowed": "HR Manager",
+    "condition": null,
+    "next_state": "Rejet\u00e9",
+    "state": "En attente RH"
+   }
+  ],
+  "workflow_data": null,
+  "workflow_name": "Flux Permission Sortie Employ\u00e9",
+  "workflow_state_field": "workflow_state" },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow",
+  "document_type": "Planning Conge",
+  "enable_action_confirmation": 1,
+  "is_active": 1,
+  "modified": "2026-06-01 12:00:00",
+  "name": "Flux Planning Cong\u00e9",
+  "override_status": 0,
+  "send_email_alert": 1,
+  "states": [
+   {
+    "allow_edit": "Employee",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "state": "Brouillon",
+    "update_field": "statut",
+    "update_value": "Brouillon"
+   },
+   {
+    "allow_edit": "HR User",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "state": "En attente RH",
+    "update_field": "statut",
+    "update_value": "En attente RH"
+   },
+   {
+    "allow_edit": "HR Manager",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "state": "En attente DG",
+    "update_field": "statut",
+    "update_value": "En attente DG"
+   },
+   {
+    "allow_edit": "HR Manager",
+    "doc_status": "1",
+    "is_optional_state": 0,
+    "state": "Approuv\u00e9",
+    "update_field": "statut",
+    "update_value": "Approuv\u00e9"
+   },
+   {
+    "allow_edit": "HR Manager",
+    "doc_status": "1",
+    "is_optional_state": 0,
+    "state": "Rejet\u00e9",
+    "update_field": "statut",
+    "update_value": "Rejet\u00e9"
+   }
+  ],
+  "transitions": [
+   {
+    "action": "Soumettre",
+    "allow_self_approval": 0,
+    "allowed": "Employee",
+    "condition": null,
+    "next_state": "En attente RH",
+    "state": "Brouillon"
+   },
+   {
+    "action": "Approuver",
+    "allow_self_approval": 0,
+    "allowed": "HR User",
+    "condition": null,
+    "next_state": "En attente DG",
+    "state": "En attente RH"
+   },
+   {
+    "action": "Rejeter",
+    "allow_self_approval": 0,
+    "allowed": "HR User",
+    "condition": null,
+    "next_state": "Rejet\u00e9",
+    "state": "En attente RH"
+   },
+   {
+    "action": "Approuver",
+    "allow_self_approval": 0,
+    "allowed": "HR Manager",
+    "condition": null,
+    "next_state": "Approuv\u00e9",
+    "state": "En attente DG"
+   },
+   {
+    "action": "Rejeter",
+    "allow_self_approval": 0,
+    "allowed": "HR Manager",
+    "condition": null,
+    "next_state": "Rejet\u00e9",
+    "state": "En attente DG"
+   }
+  ],
+  "workflow_data": null,
+  "workflow_name": "Flux Planning Cong\u00e9",
+  "workflow_state_field": "workflow_state"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow",
+  "document_type": "Demande Achat KYA",
+  "enable_action_confirmation": 1,
+  "is_active": 1,
+  "modified": "2026-06-01 12:00:00",
+  "name": "Flux Demande Achat KYA",
+  "override_status": 0,
+  "send_email_alert": 1,
+  "states": [
+   {
+    "allow_edit": "Employee",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "state": "Brouillon",
+    "update_field": "statut",
+    "update_value": "Brouillon"
+   },
+   {
+    "allow_edit": "Employee",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "state": "En attente Chef",
+    "update_field": "statut",
+    "update_value": "En attente Chef"
+   },
+   {
+    "allow_edit": "Purchase Manager",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "state": "En attente Approbation",
+    "update_field": "statut",
+    "update_value": "En attente Approbation"
+   },
+   {
+    "allow_edit": "HR Manager",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "state": "En attente DG",
+    "update_field": "statut",
+    "update_value": "En attente DG"
+   },
+   {
+    "allow_edit": "HR Manager",
+    "doc_status": "1",
+    "is_optional_state": 0,
+    "state": "Approuv\u00e9",
+    "update_field": "statut",
+    "update_value": "Approuv\u00e9"
+   },
+   {
+    "allow_edit": "HR Manager",
+    "doc_status": "1",
+    "is_optional_state": 0,
+    "state": "Rejet\u00e9",
+    "update_field": "statut",
+    "update_value": "Rejet\u00e9"
+   }
+  ],
+  "transitions": [
+   {
+    "action": "Soumettre",
+    "allow_self_approval": 0,
+    "allowed": "Employee",
+    "condition": null,
+    "next_state": "En attente Chef",
+    "state": "Brouillon"
+   },
+   {
+    "action": "Approuver",
+    "allow_self_approval": 0,
+    "allowed": "Purchase User",
+    "condition": "doc.montant_total < 100000",
+    "next_state": "Approuv\u00e9",
+    "state": "En attente Chef"
+   },
+   {
+    "action": "Approuver",
+    "allow_self_approval": 0,
+    "allowed": "Purchase User",
+    "condition": "doc.montant_total >= 100000",
+    "next_state": "En attente Approbation",
+    "state": "En attente Chef"
+   },
+   {
+    "action": "Rejeter",
+    "allow_self_approval": 0,
+    "allowed": "Purchase User",
+    "condition": null,
+    "next_state": "Rejet\u00e9",
+    "state": "En attente Chef"
+   },
+   {
+    "action": "Approuver",
+    "allow_self_approval": 0,
+    "allowed": "Purchase Manager",
+    "condition": "doc.montant_total < 2000000",
+    "next_state": "Approuv\u00e9",
+    "state": "En attente Approbation"
+   },
+   {
+    "action": "Approuver",
+    "allow_self_approval": 0,
+    "allowed": "Purchase Manager",
+    "condition": "doc.montant_total >= 2000000",
+    "next_state": "En attente DG",
+    "state": "En attente Approbation"
+   },
+   {
+    "action": "Rejeter",
+    "allow_self_approval": 0,
+    "allowed": "Purchase Manager",
+    "condition": null,
+    "next_state": "Rejet\u00e9",
+    "state": "En attente Approbation"
+   },
+   {
+    "action": "Approuver",
+    "allow_self_approval": 0,
+    "allowed": "HR Manager",
+    "condition": null,
+    "next_state": "Approuv\u00e9",
+    "state": "En attente DG"
+   },
+   {
+    "action": "Rejeter",
+    "allow_self_approval": 0,
+    "allowed": "HR Manager",
+    "condition": null,
+    "next_state": "Rejet\u00e9",
+    "state": "En attente DG"
+   }
+  ],
+  "workflow_data": null,
+  "workflow_name": "Flux Demande Achat KYA",
   "workflow_state_field": "workflow_state"
  }
 ]

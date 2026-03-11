@@ -1,22 +1,22 @@
 {
-    "name": "Permission Sortie Stagiaire",
+    "name": "Permission Sortie Employe",
     "module": "KYA HR",
     "doctype": "DocType",
     "is_submittable": 1,
     "custom": 1,
-    "autoname": "format:PSS-{YYYY}-{#####}",
+    "autoname": "format:PSE-{YYYY}-{#####}",
     "title_field": "employee_name",
     "search_fields": "employee_name, date_sortie, statut",
     "track_changes": 1,
     "fields": [
         {
-            "fieldname": "section_stagiaire",
-            "label": "Informations Stagiaire",
+            "fieldname": "section_employe",
+            "label": "Informations Employ\u00e9",
             "fieldtype": "Section Break"
         },
         {
             "fieldname": "employee",
-            "label": "Stagiaire (Employ\u00e9)",
+            "label": "Employ\u00e9",
             "fieldtype": "Link",
             "options": "Employee",
             "reqd": 1,
@@ -41,6 +41,13 @@
             "fieldtype": "Link",
             "options": "Department",
             "fetch_from": "employee.department",
+            "read_only": 1
+        },
+        {
+            "fieldname": "designation",
+            "label": "Poste",
+            "fieldtype": "Data",
+            "fetch_from": "employee.designation",
             "read_only": 1
         },
         {
@@ -106,25 +113,31 @@
             "description": "Chaque approbateur signe \u00e0 son niveau du flux"
         },
         {
-            "fieldname": "col_sig_stagiaire",
+            "fieldname": "col_sig_employe",
             "fieldtype": "Column Break",
-            "label": "Stagiaire"
+            "label": "Employ\u00e9"
         },
         {
-            "fieldname": "signature_stagiaire",
-            "label": "Signature Stagiaire",
+            "fieldname": "signature_employe",
+            "label": "Signature Employ\u00e9",
             "fieldtype": "Signature"
+        },
+        {
+            "fieldname": "signataire_employe",
+            "label": "Nom Signataire",
+            "fieldtype": "Data",
+            "read_only": 1
+        },
+        {
+            "fieldname": "date_signature_employe",
+            "label": "Date Signature",
+            "fieldtype": "Date",
+            "read_only": 1
         },
         {
             "fieldname": "col_sig_chef",
             "fieldtype": "Column Break",
             "label": "Chef de Service"
-        },
-        {
-            "fieldname": "chef_nom",
-            "label": "Nom Chef de Service",
-            "fieldtype": "Data",
-            "read_only": 1
         },
         {
             "fieldname": "signature_chef",
@@ -133,41 +146,42 @@
             "read_only": 1
         },
         {
+            "fieldname": "signataire_chef",
+            "label": "Nom Chef",
+            "fieldtype": "Data",
+            "read_only": 1
+        },
+        {
+            "fieldname": "date_signature_chef",
+            "label": "Date Signature Chef",
+            "fieldtype": "Date",
+            "read_only": 1
+        },
+        {
             "fieldname": "section_signatures_2",
             "fieldtype": "Section Break"
         },
         {
-            "fieldname": "col_sig_resp",
+            "fieldname": "col_sig_rh",
             "fieldtype": "Column Break",
-            "label": "Resp. Stagiaires"
+            "label": "Ressources Humaines"
         },
         {
-            "fieldname": "resp_stagiaires_nom",
-            "label": "Nom Resp. Stagiaires",
-            "fieldtype": "Data",
-            "read_only": 1
-        },
-        {
-            "fieldname": "signature_resp_stagiaires",
-            "label": "Signature Resp. Stagiaires",
+            "fieldname": "signature_rh",
+            "label": "Signature RH",
             "fieldtype": "Signature",
             "read_only": 1
         },
         {
-            "fieldname": "col_sig_dg",
-            "fieldtype": "Column Break",
-            "label": "Directeur G\u00e9n\u00e9ral"
-        },
-        {
-            "fieldname": "dg_nom",
-            "label": "Nom DG",
+            "fieldname": "signataire_rh",
+            "label": "Nom RH",
             "fieldtype": "Data",
             "read_only": 1
         },
         {
-            "fieldname": "signature_dg",
-            "label": "Signature DG",
-            "fieldtype": "Signature",
+            "fieldname": "date_signature_rh",
+            "label": "Date Signature RH",
+            "fieldtype": "Date",
             "read_only": 1
         },
         {
@@ -179,7 +193,7 @@
             "fieldname": "statut",
             "label": "Statut",
             "fieldtype": "Select",
-            "options": "Brouillon\nEn attente Chef\nEn attente Resp. Stagiaires\nEn attente DG\nApprouv\u00e9\nRejet\u00e9",
+            "options": "Brouillon\nEn attente Chef\nEn attente RH\nApprouv\u00e9\nRejet\u00e9",
             "default": "Brouillon",
             "in_list_view": 1,
             "in_standard_filter": 1,
@@ -200,7 +214,7 @@
             "fieldname": "amended_from",
             "label": "Modifi\u00e9 depuis",
             "fieldtype": "Link",
-            "options": "Permission Sortie Stagiaire",
+            "options": "Permission Sortie Employe",
             "no_copy": 1,
             "print_hide": 1,
             "read_only": 1

@@ -1,0 +1,153 @@
+<style>
+    @page { size: A4; margin: 12mm; }
+    body { font-family: Arial, sans-serif; font-size: 11px; color: #333; }
+    .da-container { max-width: 700px; margin: 0 auto; border: 2px solid #009688; border-radius: 10px; overflow: hidden; }
+    .da-header { background: linear-gradient(135deg, #009688, #00796b); padding: 18px 24px; text-align: center; color: white; }
+    .da-header img { height: 45px; margin-bottom: 6px; }
+    .da-header h2 { margin: 0; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
+    .da-header .ref { font-size: 10px; opacity: .8; margin-top: 4px; }
+    .da-body { padding: 18px 24px; }
+    .da-info { display: flex; justify-content: space-between; margin-bottom: 14px; }
+    .da-info div { width: 48%; }
+    .da-info .lbl { font-weight: 700; color: #009688; font-size: 10px; text-transform: uppercase; }
+    .da-info .val { font-size: 12px; margin-bottom: 6px; }
+    .da-items { width: 100%; border-collapse: collapse; margin: 12px 0; }
+    .da-items th { background: #009688; color: white; padding: 8px 10px; text-align: left; font-size: 10px; text-transform: uppercase; }
+    .da-items td { padding: 6px 10px; border-bottom: 1px solid #eee; font-size: 11px; }
+    .da-items .num { text-align: right; }
+    .da-total { text-align: right; font-size: 14px; font-weight: 700; color: #009688; margin: 10px 0; }
+    .da-palier { display: inline-block; padding: 4px 14px; border-radius: 12px; font-size: 10px; font-weight: 700; }
+    .palier-1 { background: #e3f2fd; color: #1565c0; border: 1px solid #90caf9; }
+    .palier-2 { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }
+    .palier-3 { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
+    .da-status { text-align: center; margin: 12px 0; }
+    .da-status .badge { display: inline-block; padding: 6px 24px; border-radius: 20px; font-weight: 700; font-size: 12px; text-transform: uppercase; }
+    .badge-approved { background: #e8f5e9; color: #2e7d32; border: 2px solid #4caf50; }
+    .badge-pending { background: #fff3e0; color: #e65100; border: 2px solid #ff9800; }
+    .badge-rejected { background: #ffebee; color: #c62828; border: 2px solid #ef5350; }
+    .da-sigs { display: flex; flex-wrap: wrap; justify-content: space-around; margin-top: 16px; padding-top: 14px; border-top: 1px dashed #ccc; }
+    .sig-block { text-align: center; width: 22%; margin-bottom: 10px; }
+    .sig-block .line { border-top: 1px solid #333; margin-top: 30px; padding-top: 4px; font-size: 9px; }
+    .sig-img { max-height: 50px; display: block; margin: 0 auto 4px; }
+    .da-footer { background: #f5f5f5; padding: 8px 20px; text-align: center; font-size: 8px; color: #999; border-top: 1px solid #e0e0e0; }
+</style>
+
+<div class="da-container">
+    <div class="da-header">
+        <img src="/assets/kya_hr/images/image010.png" alt="KYA" onerror="this.src='https://www.kya-energy.com/wp-content/uploads/2024/02/Logo-10-ans-KYA.png'">
+        <h2>Demande d'Achat</h2>
+        <div class="ref">{{ doc.name }} | {{ frappe.utils.format_date(doc.date_demande) }}</div>
+    </div>
+
+    <div class="da-body">
+        <div class="da-info">
+            <div>
+                <div class="lbl">Demandeur</div>
+                <div class="val"><strong>{{ doc.employee_name or '' }}</strong></div>
+                <div class="lbl">Département</div>
+                <div class="val">{{ doc.department or '—' }}</div>
+            </div>
+            <div>
+                <div class="lbl">Objet</div>
+                <div class="val">{{ doc.objet or '' }}</div>
+                <div class="lbl">Urgence</div>
+                <div class="val">{{ doc.urgence or 'Normal' }}</div>
+            </div>
+        </div>
+
+        {% if doc.justification %}
+        <div style="margin-bottom:10px;">
+            <span class="lbl" style="font-weight:700;color:#009688;font-size:10px;">Justification :</span>
+            <span style="font-size:11px;">{{ doc.justification }}</span>
+        </div>
+        {% endif %}
+
+        <table class="da-items">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Description</th>
+                    <th>Qté</th>
+                    <th>Unité</th>
+                    <th class="num">P.U. (XOF)</th>
+                    <th class="num">Montant (XOF)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in doc.items %}
+                <tr>
+                    <td>{{ row.idx }}</td>
+                    <td>{{ row.description or '' }}</td>
+                    <td>{{ row.quantite }}</td>
+                    <td>{{ row.unite or '' }}</td>
+                    <td class="num">{{ frappe.utils.fmt_money(row.prix_unitaire, currency='XOF') }}</td>
+                    <td class="num">{{ frappe.utils.fmt_money(row.montant, currency='XOF') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="da-total">
+            TOTAL : {{ frappe.utils.fmt_money(doc.montant_total, currency='XOF') }}
+        </div>
+
+        <div style="text-align:center;margin:8px 0;">
+            {% if doc.montant_total >= 2000000 %}
+                <span class="da-palier palier-3">PALIER 3 — Chef + DGA + DG</span>
+            {% elif doc.montant_total >= 100000 %}
+                <span class="da-palier palier-2">PALIER 2 — Chef + DGA</span>
+            {% else %}
+                <span class="da-palier palier-1">PALIER 1 — Chef seul</span>
+            {% endif %}
+        </div>
+
+        <div class="da-status">
+            {% if doc.statut == "Approuvé" %}
+                <span class="badge badge-approved">✅ APPROUVÉ</span>
+            {% elif doc.statut == "Rejeté" %}
+                <span class="badge badge-rejected">❌ REJETÉ</span>
+            {% else %}
+                <span class="badge badge-pending">⏳ {{ doc.statut }}</span>
+            {% endif %}
+        </div>
+
+        <div class="da-sigs">
+            <div class="sig-block">
+                {% if doc.signature_demandeur %}
+                    <img src="{{ doc.signature_demandeur }}" class="sig-img">
+                {% endif %}
+                <div class="line">{{ doc.signataire_demandeur or doc.employee_name or 'Demandeur' }}</div>
+                {% if doc.date_signature_demandeur %}<div style="font-size:8px;color:#888;">{{ frappe.utils.format_date(doc.date_signature_demandeur) }}</div>{% endif %}
+            </div>
+            <div class="sig-block">
+                {% if doc.signature_chef %}
+                    <img src="{{ doc.signature_chef }}" class="sig-img">
+                {% endif %}
+                <div class="line">{{ doc.signataire_chef or 'Chef de Service' }}</div>
+                {% if doc.date_signature_chef %}<div style="font-size:8px;color:#888;">{{ frappe.utils.format_date(doc.date_signature_chef) }}</div>{% endif %}
+            </div>
+            {% if doc.montant_total >= 100000 %}
+            <div class="sig-block">
+                {% if doc.signature_dga %}
+                    <img src="{{ doc.signature_dga }}" class="sig-img">
+                {% endif %}
+                <div class="line">{{ doc.signataire_dga or 'DGA' }}</div>
+                {% if doc.date_signature_dga %}<div style="font-size:8px;color:#888;">{{ frappe.utils.format_date(doc.date_signature_dga) }}</div>{% endif %}
+            </div>
+            {% endif %}
+            {% if doc.montant_total >= 2000000 %}
+            <div class="sig-block">
+                {% if doc.signature_dg %}
+                    <img src="{{ doc.signature_dg }}" class="sig-img">
+                {% endif %}
+                <div class="line">{{ doc.signataire_dg or 'Direction Générale' }}</div>
+                {% if doc.date_signature_dg %}<div style="font-size:8px;color:#888;">{{ frappe.utils.format_date(doc.date_signature_dg) }}</div>{% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="da-footer">
+        Généré le {{ frappe.utils.now_datetime().strftime('%d/%m/%Y à %H:%M') }} — KYA-Energy Group, Lomé, Togo
+    </div>
+</div>

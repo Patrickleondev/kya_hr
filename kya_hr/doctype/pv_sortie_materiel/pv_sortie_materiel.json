@@ -6,10 +6,17 @@
     "custom": 1,
     "autoname": "format:PV-SORT-{YYYY}-{#####}",
     "title_field": "objet",
+    "search_fields": "objet, demandeur_nom, date_sortie, statut",
+    "track_changes": 1,
     "fields": [
         {
+            "fieldname": "section_general",
+            "label": "Informations G\u00e9n\u00e9rales",
+            "fieldtype": "Section Break"
+        },
+        {
             "fieldname": "objet",
-            "label": "Objet",
+            "label": "Objet / Motif de la Sortie",
             "fieldtype": "Small Text",
             "reqd": 1,
             "in_list_view": 1
@@ -20,7 +27,12 @@
             "fieldtype": "Date",
             "reqd": 1,
             "default": "Today",
-            "in_list_view": 1
+            "in_list_view": 1,
+            "in_standard_filter": 1
+        },
+        {
+            "fieldname": "col_ref",
+            "fieldtype": "Column Break"
         },
         {
             "fieldname": "reference",
@@ -30,8 +42,15 @@
             "read_only": 1
         },
         {
+            "fieldname": "company",
+            "label": "Soci\u00e9t\u00e9",
+            "fieldtype": "Link",
+            "options": "Company",
+            "hidden": 1
+        },
+        {
             "fieldname": "section_items",
-            "label": "Mat\u00e9riels",
+            "label": "Mat\u00e9riels \u00e0 Sortir",
             "fieldtype": "Section Break"
         },
         {
@@ -44,12 +63,13 @@
         {
             "fieldname": "section_signatures",
             "label": "Approbations & Signatures",
-            "fieldtype": "Section Break"
+            "fieldtype": "Section Break",
+            "description": "Chaque approbateur signe \u00e0 son niveau du flux"
         },
         {
             "fieldname": "col_demandeur",
             "fieldtype": "Column Break",
-            "label": "Demandeur / Chef d'\u00c9quipe"
+            "label": "Demandeur / Chef d\u2019\u00c9quipe"
         },
         {
             "fieldname": "demandeur_nom",
@@ -62,6 +82,11 @@
             "fieldtype": "Date"
         },
         {
+            "fieldname": "signature_demandeur",
+            "label": "Signature Demandeur",
+            "fieldtype": "Signature"
+        },
+        {
             "fieldname": "col_magasin",
             "fieldtype": "Column Break",
             "label": "Responsable Magasin"
@@ -69,12 +94,20 @@
         {
             "fieldname": "magasin_nom",
             "label": "Nom Responsable Magasin",
-            "fieldtype": "Data"
+            "fieldtype": "Data",
+            "read_only": 1
         },
         {
             "fieldname": "magasin_date",
             "label": "Date Signature Magasin",
-            "fieldtype": "Date"
+            "fieldtype": "Date",
+            "read_only": 1
+        },
+        {
+            "fieldname": "signature_magasin",
+            "label": "Signature Magasin",
+            "fieldtype": "Signature",
+            "read_only": 1
         },
         {
             "fieldname": "section_signatures_2",
@@ -88,12 +121,20 @@
         {
             "fieldname": "audit_nom",
             "label": "Nom Audit Interne",
-            "fieldtype": "Data"
+            "fieldtype": "Data",
+            "read_only": 1
         },
         {
             "fieldname": "audit_date",
             "label": "Date Signature Audit",
-            "fieldtype": "Date"
+            "fieldtype": "Date",
+            "read_only": 1
+        },
+        {
+            "fieldname": "signature_audit",
+            "label": "Signature Audit",
+            "fieldtype": "Signature",
+            "read_only": 1
         },
         {
             "fieldname": "col_dga",
@@ -103,24 +144,46 @@
         {
             "fieldname": "dga_nom",
             "label": "Nom DG / DGA",
-            "fieldtype": "Data"
+            "fieldtype": "Data",
+            "read_only": 1
         },
         {
             "fieldname": "dga_date",
             "label": "Date Signature DGA",
-            "fieldtype": "Date"
+            "fieldtype": "Date",
+            "read_only": 1
+        },
+        {
+            "fieldname": "signature_dga",
+            "label": "Signature DG / DGA",
+            "fieldtype": "Signature",
+            "read_only": 1
+        },
+        {
+            "fieldname": "section_statut",
+            "label": "Statut",
+            "fieldtype": "Section Break"
         },
         {
             "fieldname": "statut",
             "label": "Statut",
             "fieldtype": "Select",
-            "options": "Brouillon\nEn attente Magasin\nEn attente Audit\nEn attente DGA\nApprouv\u00e9\nRejet\u00e9",
+            "options": "Brouillon\nEn attente Chef\nEn attente Magasin\nEn attente Audit\nEn attente DGA\nApprouv\u00e9\nRejet\u00e9",
             "default": "Brouillon",
-            "in_list_view": 1
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "read_only": 1
+        },
+        {
+            "fieldname": "workflow_state",
+            "label": "\u00c9tat du Flux",
+            "fieldtype": "Data",
+            "hidden": 1,
+            "read_only": 1
         },
         {
             "fieldname": "amended_from",
-            "label": "Amended From",
+            "label": "Modifi\u00e9 depuis",
             "fieldtype": "Link",
             "options": "PV Sortie Materiel",
             "no_copy": 1,
@@ -140,10 +203,27 @@
             "amend": 1
         },
         {
-            "role": "All",
+            "role": "Stock Manager",
             "read": 1,
             "write": 1,
-            "create": 1
+            "create": 1,
+            "submit": 1,
+            "cancel": 1,
+            "amend": 1
+        },
+        {
+            "role": "Stock User",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "submit": 1
+        },
+        {
+            "role": "Employee",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "if_owner": 1
         }
     ]
 }

@@ -3,68 +3,84 @@
     "name": "KYA Stagiaires",
     "is_standard": 1,
     "title": "KYA Stagiaires",
-    "icon": "contact-round",
+    "icon": "users",
     "module": "KYA HR",
     "public": 1,
-    "parent_page": "People",
+    "parent_page": "",
+    "sequence_id": 5,
+    "content": "[{\"id\":\"hero\",\"type\":\"header\",\"data\":{\"text\":\"<div class='ellipsis' title='KYA Stagiaires'>\\ud83c\\udf93 KYA Stagiaires</div>\",\"level\":3,\"col\":12}},{\"id\":\"shortcuts_section\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Nouvelle Permission\",\"col\":4}},{\"id\":\"shortcuts_section_2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Nouveau Bilan\",\"col\":4}},{\"id\":\"shortcuts_section_3\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"PV Sortie Mat\\u00e9riel\",\"col\":4}},{\"id\":\"spacer1\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"cards_header\",\"type\":\"header\",\"data\":{\"text\":\"Gestion Stagiaires\",\"level\":4,\"col\":12}}]",
     "shortcuts": [
         {
-            "label": "Permission Sortie Stagiaire",
+            "label": "Nouvelle Permission",
             "type": "DocType",
             "link_to": "Permission Sortie Stagiaire",
-            "color": "Blue"
+            "color": "#2490EF",
+            "icon": "file",
+            "format": "{employee_name} - {statut}",
+            "stats_filter": "[{\"fieldname\":\"statut\",\"operator\":\"in\",\"value\":[\"En attente Chef\",\"En attente Resp. Stagiaires\",\"En attente DG\"]}]"
         },
         {
-            "label": "Bilan Fin de Stage",
+            "label": "Nouveau Bilan",
             "type": "DocType",
             "link_to": "Bilan Fin de Stage",
-            "color": "Green"
+            "color": "#29CD42",
+            "icon": "edit"
         },
         {
-            "label": "PV Sortie Matériel",
+            "label": "PV Sortie Mat\u00e9riel",
             "type": "DocType",
-            "link_to": "PV Sortie Matériel",
-            "color": "Orange"
+            "link_to": "PV Sortie Materiel",
+            "color": "#FF6F61",
+            "icon": "truck"
         }
     ],
     "links": [
         {
             "type": "Card Break",
-            "label": "R\u00e9capitulatif Stagiaires"
+            "label": "Permissions & Sorties",
+            "icon": "file"
         },
         {
             "type": "Link",
             "label": "Permission Sortie Stagiaire",
             "link_type": "DocType",
-            "link_to": "Permission Sortie Stagiaire"
+            "link_to": "Permission Sortie Stagiaire",
+            "description": "Demandes de permission de sortie",
+            "icon": "file"
+        },
+        {
+            "type": "Link",
+            "label": "PV Sortie Mat\u00e9riel",
+            "link_type": "DocType",
+            "link_to": "PV Sortie Materiel",
+            "description": "Proc\u00e8s-verbaux de sortie mat\u00e9riel",
+            "icon": "truck"
+        },
+        {
+            "type": "Card Break",
+            "label": "\u00c9valuation & Bilan",
+            "icon": "edit"
         },
         {
             "type": "Link",
             "label": "Bilan Fin de Stage",
             "link_type": "DocType",
-            "link_to": "Bilan Fin de Stage"
-        },
-        {
-            "type": "Link",
-            "label": "PV Sortie Matériel",
-            "link_type": "DocType",
-            "link_to": "PV Sortie Matériel"
+            "link_to": "Bilan Fin de Stage",
+            "description": "Bilans de fin de stage",
+            "icon": "edit"
         },
         {
             "type": "Card Break",
-            "label": "Dashboard Stagiaires"
+            "label": "RH",
+            "icon": "users"
         },
         {
             "type": "Link",
-            "label": "Statistiques Stagiaires",
-            "link_type": "Report",
-            "link_to": "Bilan Fin de Stage Report"
-        },
-        {
-            "type": "Link",
-            "label": "Permissions en attente",
-            "link_type": "Report",
-            "link_to": "Permission Sortie Stagiaire Report"
+            "label": "Stagiaires Actifs",
+            "link_type": "DocType",
+            "link_to": "Employee",
+            "description": "Liste filtr\u00e9e des stagiaires",
+            "icon": "users"
         }
     ]
 }

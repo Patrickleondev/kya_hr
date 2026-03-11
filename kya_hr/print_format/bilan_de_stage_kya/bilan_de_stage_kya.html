@@ -1,0 +1,91 @@
+<style>
+    @page { size: A4; margin: 15mm; }
+    body { font-family: Arial, sans-serif; font-size: 12px; color: #333; }
+    .bilan-container { max-width: 700px; margin: 0 auto; }
+    .bilan-header { text-align: center; border-bottom: 3px solid #29CD42; padding-bottom: 14px; margin-bottom: 20px; }
+    .bilan-header img { height: 55px; margin-bottom: 8px; }
+    .bilan-header h1 { font-size: 20px; color: #29CD42; margin: 6px 0 2px; text-transform: uppercase; }
+    .bilan-header .subtitle { font-size: 11px; color: #888; }
+    .section { margin-bottom: 18px; }
+    .section h3 { color: #29CD42; font-size: 14px; border-bottom: 1px solid #29CD42; padding-bottom: 4px; margin-bottom: 10px; }
+    table.data { width: 100%; border-collapse: collapse; }
+    table.data td { padding: 7px 10px; border: 1px solid #e0e0e0; }
+    table.data .lbl { background: #f0faf0; font-weight: 700; width: 35%; color: #555; }
+    .note-display { text-align: center; margin: 16px 0; padding: 16px; background: #f0faf0; border-radius: 10px; }
+    .note-display .note { font-size: 36px; font-weight: 700; color: #29CD42; }
+    .note-display .mention { font-size: 16px; color: #555; margin-top: 4px; }
+    .evaluation-text { background: #fafafa; padding: 14px; border-radius: 8px; border: 1px solid #e0e0e0; line-height: 1.6; min-height: 80px; }
+    .signatures-row { display: flex; justify-content: space-between; margin-top: 30px; }
+    .sig { text-align: center; width: 30%; }
+    .sig .sig-line { border-top: 1px solid #333; margin-top: 36px; padding-top: 4px; font-size: 10px; color: #666; }
+    .footer { margin-top: 30px; text-align: center; font-size: 9px; color: #aaa; border-top: 2px solid #29CD42; padding-top: 8px; }
+</style>
+
+<div class="bilan-container">
+    <div class="bilan-header">
+        <img src="/assets/kya_hr/images/image010.png" alt="KYA-Energy Group" onerror="this.src='https://www.kya-energy.com/wp-content/uploads/2024/02/Logo-10-ans-KYA.png'">
+        <h1>Bilan de Fin de Stage</h1>
+        <div class="subtitle">{{ doc.name }} | KYA-Energy Group</div>
+    </div>
+
+    <div class="section">
+        <h3>1. Informations du Stagiaire</h3>
+        <table class="data">
+            <tr>
+                <td class="lbl">Nom du stagiaire</td>
+                <td><strong>{{ doc.employee_name or '' }}</strong></td>
+            </tr>
+            <tr>
+                <td class="lbl">Département</td>
+                <td>{{ doc.department or '—' }}</td>
+            </tr>
+            <tr>
+                <td class="lbl">Encadrant</td>
+                <td>{{ frappe.db.get_value('Employee', doc.encadrant, 'employee_name') if doc.encadrant else '—' }}</td>
+            </tr>
+            <tr>
+                <td class="lbl">Période de stage</td>
+                <td>
+                    Du {{ frappe.utils.format_date(doc.date_debut) }}
+                    au {{ frappe.utils.format_date(doc.date_fin) }}
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>2. Évaluation</h3>
+        <div class="note-display">
+            <div class="note">{{ doc.note_globale or '—' }} / 20</div>
+            <div class="mention">{{ doc.mention or '' }}</div>
+        </div>
+    </div>
+
+    {% if doc.evaluation %}
+    <div class="section">
+        <h3>3. Évaluation Détaillée</h3>
+        <div class="evaluation-text">{{ doc.evaluation }}</div>
+    </div>
+    {% endif %}
+
+    <div class="section">
+        <h3>{{ '4' if doc.evaluation else '3' }}. Signatures</h3>
+        <div class="signatures-row">
+            <div class="sig">
+                <div class="sig-line">Encadrant</div>
+            </div>
+            <div class="sig">
+                <div class="sig-line">Responsable RH</div>
+            </div>
+            <div class="sig">
+                <div class="sig-line">Direction Générale</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        KYA-Energy Group — 08BP 81101 Agoe Nyive, Logopé — Lomé, Togo<br>
+        📞 +228 70 45 34 81 | ✉️ info@kya-energy.com | 🌐 www.kya-energy.com<br>
+        Document généré le {{ frappe.utils.now_datetime().strftime('%d/%m/%Y à %H:%M') }}
+    </div>
+</div>
