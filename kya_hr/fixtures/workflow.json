@@ -600,6 +600,14 @@
    },
    {
     "allow_edit": "HR Manager",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "state": "En attente DGA",
+    "update_field": "statut",
+    "update_value": "En attente DGA"
+   },
+   {
+    "allow_edit": "HR Manager",
     "doc_status": "1",
     "is_optional_state": 0,
     "state": "Approuv\u00e9",
@@ -645,7 +653,7 @@
     "allow_self_approval": 0,
     "allowed": "HR Manager",
     "condition": null,
-    "next_state": "Approuv\u00e9",
+    "next_state": "En attente RH",
     "state": "En attente Chef"
    },
    {
@@ -653,7 +661,7 @@
     "allow_self_approval": 0,
     "allowed": "HR Manager",
     "condition": null,
-    "next_state": "Approuv\u00e9",
+    "next_state": "En attente DGA",
     "state": "En attente RH"
    },
    {
@@ -663,6 +671,30 @@
     "condition": null,
     "next_state": "Rejet\u00e9",
     "state": "En attente RH"
+   },
+   {
+    "action": "Approuver",
+    "allow_self_approval": 0,
+    "allowed": "HR Manager",
+    "condition": null,
+    "next_state": "Approuv\u00e9",
+    "state": "En attente DGA"
+   },
+   {
+    "action": "Rejeter",
+    "allow_self_approval": 0,
+    "allowed": "HR Manager",
+    "condition": null,
+    "next_state": "Rejet\u00e9",
+    "state": "En attente DGA"
+   },
+   {
+    "action": "Valider (Absence DGA)",
+    "allow_self_approval": 0,
+    "allowed": "HR Manager",
+    "condition": null,
+    "next_state": "Approuv\u00e9",
+    "state": "En attente DGA"
    }
   ],
   "workflow_data": null,

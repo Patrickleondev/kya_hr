@@ -44,11 +44,32 @@ class PermissionSortieEmploye(Document):
             self.db_set("signataire_chef", name, update_modified=False)
             self.db_set("date_signature_chef", today, update_modified=False)
 
-        # RH signs → state moves to "Approuvé"
-        if ws == "Approuvé" and not self.get("signataire_rh"):
+        # RH signs → state moves to "En attente DGA"
+        if ws == "En attente DGA" and not self.get("signataire_rh"):
             self.db_set("signataire_rh", name, update_modified=False)
             self.db_set("date_signature_rh", today, update_modified=False)
-            # If Chef was bypassed (HR Manager validated directly), mark it
+            # If Chef was bypassed (Absence Chef → En attente RH), mark it
             if not self.get("signataire_chef"):
                 self.db_set("signataire_chef", name + " (Absence Chef)", update_modified=False)
                 self.db_set("date_signature_chef", today, update_modified=False)
+
+        # DGA signs → state moves to "Approuvé"
+        if ws == "Approuvé" and not self.get("signataire_dga"):
+            self.db_set("signataire_dga", name, update_modified=False)
+            self.db_set("date_signature_dga", today, update_modified=False)
+            # If DGA was bypassed (Absence DGA), mark it
+            if not self.get("signataire_rh") and self.get("signataire_chef"):
+                # RH bypassed to DGA directly — shouldn't happen normally
+                pass
+            # If Chef was bypassed earlier, keep that mark
+            # If DGA absent and someone else validated
+            if self.workflow_state == "Approuvé" and not self.get("signature_dga"):
+                # Validated via "Valider (Absence DGA)" — no DGA signature drawn
+                bypass_action = frappe.db.get_value(
+                    "Workflow Action",
+                    {"reference_name": self.name, "status": "Completed"},
+                    "workflow_action",
+                    order_by="creation desc"
+                )
+                if bypass_action and "Absence DGA" in (bypass_action or ""):
+                    self.db_set("signataire_dga", name + " (Absence DGA)", update_modified=False)

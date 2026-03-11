@@ -185,6 +185,40 @@
             "read_only": 1
         },
         {
+            "fieldname": "col_sig_dga",
+            "fieldtype": "Column Break",
+            "label": "Directeur G\u00e9n\u00e9ral Adjoint"
+        },
+        {
+            "fieldname": "signature_dga",
+            "label": "Signature DGA",
+            "fieldtype": "Signature",
+            "read_only": 1
+        },
+        {
+            "fieldname": "signataire_dga",
+            "label": "Nom DGA",
+            "fieldtype": "Data",
+            "read_only": 1
+        },
+        {
+            "fieldname": "date_signature_dga",
+            "label": "Date Signature DGA",
+            "fieldtype": "Date",
+            "read_only": 1
+        },
+        {
+            "fieldname": "section_justificatif",
+            "label": "Justificatifs",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "justificatif",
+            "label": "Pi\u00e8ce Justificative",
+            "fieldtype": "Attach",
+            "description": "Joindre un justificatif si n\u00e9cessaire (certificat m\u00e9dical, convocation, etc.)"
+        },
+        {
             "fieldname": "section_workflow",
             "label": "Statut & Approbation",
             "fieldtype": "Section Break"
@@ -193,7 +227,7 @@
             "fieldname": "statut",
             "label": "Statut",
             "fieldtype": "Select",
-            "options": "Brouillon\nEn attente Chef\nEn attente RH\nApprouv\u00e9\nRejet\u00e9",
+            "options": "Brouillon\nEn attente Chef\nEn attente RH\nEn attente DGA\nApprouv\u00e9\nRejet\u00e9",
             "default": "Brouillon",
             "in_list_view": 1,
             "in_standard_filter": 1,

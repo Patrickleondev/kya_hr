@@ -15,7 +15,6 @@ fixtures = [
     {"dt": "Property Setter"},
     {"dt": "Email Template"},
     {"dt": "Notification"},
-    {"dt": "Workspace"},
 ]
 
 # DocType client scripts
