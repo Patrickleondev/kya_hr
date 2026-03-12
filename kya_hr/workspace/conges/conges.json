@@ -9,7 +9,7 @@
     "public": 1,
     "parent_page": "",
     "sequence_id": 10,
-    "content": "[{\"id\":\"hero\",\"type\":\"header\",\"data\":{\"text\":\"<div class='ellipsis' title='Cong\\u00e9s & Permissions'>\\ud83d\\udcc5 Cong\\u00e9s & Permissions</div>\",\"level\":3,\"col\":12}},{\"id\":\"s1\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Nouvelle Permission de Sortie\",\"col\":4}},{\"id\":\"s2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Mon Planning de Cong\\u00e9\",\"col\":4}},{\"id\":\"s3\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Demande de Cong\\u00e9\",\"col\":4}},{\"id\":\"spacer1\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"cards_header\",\"type\":\"header\",\"data\":{\"text\":\"Acc\\u00e8s Rapide\",\"level\":4,\"col\":12}}]",
+    "content": "[{\"id\":\"hero\",\"type\":\"header\",\"data\":{\"text\":\"<div class='ellipsis' title='Cong\\u00e9s & Permissions'>\\ud83d\\udcc5 Cong\\u00e9s & Permissions</div>\",\"level\":3,\"col\":12}},{\"id\":\"s1\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Nouvelle Permission de Sortie\",\"col\":3}},{\"id\":\"s2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Formulaire Permission\",\"col\":3}},{\"id\":\"s3\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Mon Planning de Cong\\u00e9\",\"col\":3}},{\"id\":\"s4\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Demande de Cong\\u00e9\",\"col\":3}},{\"id\":\"spacer1\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"cards_header\",\"type\":\"header\",\"data\":{\"text\":\"Acc\\u00e8s Rapide\",\"level\":4,\"col\":12}}]",
     "shortcuts": [
         {
             "label": "Nouvelle Permission de Sortie",
@@ -18,7 +18,14 @@
             "color": "#2490EF",
             "icon": "file",
             "format": "{employee_name} - {statut}",
-            "stats_filter": "[{\"fieldname\":\"statut\",\"operator\":\"in\",\"value\":[\"En attente Chef\",\"En attente RH\"]}]"
+            "stats_filter": "[[\"statut\",\"in\",[\"En attente Chef\",\"En attente RH\"]]]"
+        },
+        {
+            "label": "Formulaire Permission",
+            "type": "URL",
+            "url": "/permission-sortie-employe",
+            "color": "#29CD42",
+            "icon": "external-link"
         },
         {
             "label": "Mon Planning de Cong\u00e9",
@@ -38,6 +45,19 @@
     "links": [
         {
             "type": "Card Break",
+            "label": "\ud83d\udcdd Formulaires Web",
+            "icon": "external-link"
+        },
+        {
+            "type": "Link",
+            "label": "Permission Sortie (Web Form)",
+            "link_type": "URL",
+            "url": "/permission-sortie-employe",
+            "description": "Formulaire en ligne de demande de permission",
+            "icon": "external-link"
+        },
+        {
+            "type": "Card Break",
             "label": "Permissions de Sortie",
             "icon": "file"
         },
@@ -46,7 +66,7 @@
             "label": "Permission de Sortie Employ\u00e9",
             "link_type": "DocType",
             "link_to": "Permission Sortie Employe",
-            "description": "Demander une permission de sortie (flux Chef \u2192 RH)",
+            "description": "Demander une permission de sortie (flux Chef \u2192 RH \u2192 DGA)",
             "icon": "file"
         },
         {

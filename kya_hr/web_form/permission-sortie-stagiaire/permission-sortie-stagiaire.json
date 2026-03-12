@@ -1,0 +1,80 @@
+{
+    "allow_comments": 1,
+    "allow_delete": 0,
+    "allow_edit": 1,
+    "allow_incomplete": 0,
+    "allow_multiple": 1,
+    "allow_print": 1,
+    "anonymous": 0,
+    "apply_document_permissions": 1,
+    "creation": "2026-03-12 00:00:00.000000",
+    "doc_type": "Permission Sortie Stagiaire",
+    "docstatus": 0,
+    "doctype": "Web Form",
+    "idx": 0,
+    "introduction_text": "<p>Remplissez ce formulaire pour demander une permission de sortie. Votre demande sera transmise au Chef de Service pour approbation.</p>",
+    "is_standard": 1,
+    "login_required": 1,
+    "modified": "2026-03-12 00:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "KYA HR",
+    "name": "permission-sortie-stagiaire",
+    "owner": "Administrator",
+    "published": 1,
+    "route": "permission-sortie-stagiaire",
+    "show_sidebar": 1,
+    "success_message": "Votre demande de permission de sortie a \u00e9t\u00e9 soumise avec succ\u00e8s. Elle sera examin\u00e9e par votre Chef de Service.",
+    "title": "Demande de Permission de Sortie (Stagiaire)",
+    "web_form_fields": [
+        {
+            "fieldname": "employee",
+            "fieldtype": "Link",
+            "label": "Stagiaire (Employ\u00e9)",
+            "options": "Employee",
+            "reqd": 1
+        },
+        {
+            "fieldname": "employee_name",
+            "fieldtype": "Data",
+            "label": "Nom",
+            "read_only": 1
+        },
+        {
+            "fieldname": "department",
+            "fieldtype": "Link",
+            "label": "D\u00e9partement",
+            "options": "Department",
+            "read_only": 1
+        },
+        {
+            "fieldname": "date_sortie",
+            "fieldtype": "Date",
+            "label": "Date de Sortie",
+            "reqd": 1,
+            "default": "Today"
+        },
+        {
+            "fieldname": "heure_depart",
+            "fieldtype": "Time",
+            "label": "Heure de D\u00e9part",
+            "reqd": 1
+        },
+        {
+            "fieldname": "heure_retour",
+            "fieldtype": "Time",
+            "label": "Heure de Retour Pr\u00e9vue"
+        },
+        {
+            "fieldname": "motif",
+            "fieldtype": "Small Text",
+            "label": "Motif de la Sortie",
+            "reqd": 1,
+            "description": "Indiquez le motif d\u00e9taill\u00e9 de votre demande de sortie"
+        },
+        {
+            "fieldname": "signature_stagiaire",
+            "fieldtype": "Signature",
+            "label": "Votre Signature"
+        }
+    ]
+}

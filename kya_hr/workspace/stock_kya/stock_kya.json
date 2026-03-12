@@ -9,7 +9,7 @@
     "public": 1,
     "parent_page": "",
     "sequence_id": 12,
-    "content": "[{\"id\":\"hero\",\"type\":\"header\",\"data\":{\"text\":\"<div class='ellipsis' title='Stock & Logistique'>\\ud83d\\ude9a Stock & Logistique</div>\",\"level\":3,\"col\":12}},{\"id\":\"s1\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Nouveau PV Sortie Mat\\u00e9riel\",\"col\":6}},{\"id\":\"s2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"PV en attente\",\"col\":6}},{\"id\":\"spacer1\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"cards_header\",\"type\":\"header\",\"data\":{\"text\":\"Gestion Sortie Mat\\u00e9riel\",\"level\":4,\"col\":12}}]",
+    "content": "[{\"id\":\"hero\",\"type\":\"header\",\"data\":{\"text\":\"<div class='ellipsis' title='Stock & Logistique'>\\ud83d\\ude9a Stock & Logistique</div>\",\"level\":3,\"col\":12}},{\"id\":\"s1\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Nouveau PV Sortie Mat\\u00e9riel\",\"col\":4}},{\"id\":\"s2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"PV en attente\",\"col\":4}},{\"id\":\"s3\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Formulaire PV Sortie\",\"col\":4}},{\"id\":\"spacer1\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"cards_header\",\"type\":\"header\",\"data\":{\"text\":\"Gestion Sortie Mat\\u00e9riel\",\"level\":4,\"col\":12}}]",
     "shortcuts": [
         {
             "label": "Nouveau PV Sortie Mat\u00e9riel",
@@ -24,10 +24,30 @@
             "link_to": "PV Sortie Materiel",
             "color": "#ECAD4B",
             "icon": "alert-circle",
-            "stats_filter": "[{\"fieldname\":\"statut\",\"operator\":\"in\",\"value\":[\"En attente Chef\",\"En attente Magasin\",\"En attente Audit\",\"En attente DGA\"]}]"
+            "stats_filter": "[[\"statut\",\"in\",[\"En attente Chef\",\"En attente Magasin\",\"En attente Audit\",\"En attente DGA\"]]]"
+        },
+        {
+            "label": "Formulaire PV Sortie",
+            "type": "URL",
+            "url": "/pv-sortie-materiel",
+            "color": "#29CD42",
+            "icon": "external-link"
         }
     ],
     "links": [
+        {
+            "type": "Card Break",
+            "label": "\ud83d\udcdd Formulaires Web",
+            "icon": "external-link"
+        },
+        {
+            "type": "Link",
+            "label": "PV Sortie Mat\u00e9riel (Web Form)",
+            "link_type": "URL",
+            "url": "/pv-sortie-materiel",
+            "description": "Formulaire en ligne pour cr\u00e9er un PV de sortie",
+            "icon": "external-link"
+        },
         {
             "type": "Card Break",
             "label": "Sortie de Mat\u00e9riel",

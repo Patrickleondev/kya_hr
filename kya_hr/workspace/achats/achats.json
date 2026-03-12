@@ -9,7 +9,7 @@
     "public": 1,
     "parent_page": "",
     "sequence_id": 15,
-    "content": "[{\"id\":\"hero\",\"type\":\"header\",\"data\":{\"text\":\"<div class='ellipsis' title='Achats & Approvisionnement'>\\ud83d\\udecd\\ufe0f Achats & Approvisionnement</div>\",\"level\":3,\"col\":12}},{\"id\":\"s1\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Nouvelle Demande d'Achat\",\"col\":6}},{\"id\":\"s2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Demandes en attente\",\"col\":6}},{\"id\":\"spacer1\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"cards_header\",\"type\":\"header\",\"data\":{\"text\":\"Processus d'Achat\",\"level\":4,\"col\":12}}]",
+    "content": "[{\"id\":\"hero\",\"type\":\"header\",\"data\":{\"text\":\"<div class='ellipsis' title='Achats & Approvisionnement'>\\ud83d\\udecd\\ufe0f Achats & Approvisionnement</div>\",\"level\":3,\"col\":12}},{\"id\":\"s1\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Nouvelle Demande d'Achat\",\"col\":4}},{\"id\":\"s2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Demandes en attente\",\"col\":4}},{\"id\":\"s3\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Formulaire Demande d'Achat\",\"col\":4}},{\"id\":\"spacer1\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"cards_header\",\"type\":\"header\",\"data\":{\"text\":\"Processus d'Achat\",\"level\":4,\"col\":12}}]",
     "shortcuts": [
         {
             "label": "Nouvelle Demande d'Achat",
@@ -24,10 +24,30 @@
             "link_to": "Demande Achat KYA",
             "color": "#FF6F61",
             "icon": "alert-circle",
-            "stats_filter": "[{\"fieldname\":\"statut\",\"operator\":\"in\",\"value\":[\"En attente Chef\",\"En attente Approbation\",\"En attente DG\"]}]"
+            "stats_filter": "[[\"statut\",\"in\",[\"En attente Chef\",\"En attente Approbation\",\"En attente DG\"]]]"
+        },
+        {
+            "label": "Formulaire Demande d'Achat",
+            "type": "URL",
+            "url": "/demande-achat",
+            "color": "#29CD42",
+            "icon": "external-link"
         }
     ],
     "links": [
+        {
+            "type": "Card Break",
+            "label": "\ud83d\udcdd Formulaires",
+            "icon": "file"
+        },
+        {
+            "type": "Link",
+            "label": "Demande d'Achat (Web Form)",
+            "link_type": "URL",
+            "url": "/demande-achat",
+            "description": "Formulaire en ligne pour soumettre une demande d'achat",
+            "icon": "external-link"
+        },
         {
             "type": "Card Break",
             "label": "Demandes d'Achat",
@@ -38,7 +58,7 @@
             "label": "Demande d'Achat KYA",
             "link_type": "DocType",
             "link_to": "Demande Achat KYA",
-            "description": "Cr\u00e9er une nouvelle demande d'achat (paliers automatiques)",
+            "description": "Cr\u00e9er et suivre les demandes d'achat (paliers automatiques)",
             "icon": "file"
         },
         {
@@ -48,7 +68,7 @@
         },
         {
             "type": "Link",
-            "label": "R\u00e9quisitions d'achat ERPNext",
+            "label": "Bons de Commande",
             "link_type": "DocType",
             "link_to": "Purchase Order",
             "description": "Bons de commande ERPNext standard",

@@ -1,0 +1,61 @@
+{
+    "allow_comments": 1,
+    "allow_delete": 0,
+    "allow_edit": 1,
+    "allow_incomplete": 0,
+    "allow_multiple": 1,
+    "allow_print": 1,
+    "anonymous": 0,
+    "apply_document_permissions": 1,
+    "creation": "2026-03-12 00:00:00.000000",
+    "doc_type": "PV Sortie Materiel",
+    "docstatus": 0,
+    "doctype": "Web Form",
+    "idx": 0,
+    "introduction_text": "<p>Cr\u00e9ez un PV de sortie de mat\u00e9riel. Le document passera par 4 niveaux de validation : Demandeur \u2192 Magasin \u2192 Audit \u2192 DGA.</p>",
+    "is_standard": 1,
+    "login_required": 1,
+    "modified": "2026-03-12 00:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "KYA HR",
+    "name": "pv-sortie-materiel",
+    "owner": "Administrator",
+    "published": 1,
+    "route": "pv-sortie-materiel",
+    "show_sidebar": 1,
+    "success_message": "Le PV de sortie mat\u00e9riel a \u00e9t\u00e9 cr\u00e9\u00e9. Il sera transmis au Responsable Magasin pour validation.",
+    "title": "PV de Sortie Mat\u00e9riel",
+    "web_form_fields": [
+        {
+            "fieldname": "objet",
+            "fieldtype": "Small Text",
+            "label": "Objet / Motif de la Sortie",
+            "reqd": 1,
+            "description": "D\u00e9crivez le motif de la sortie de mat\u00e9riel"
+        },
+        {
+            "fieldname": "date_sortie",
+            "fieldtype": "Date",
+            "label": "Date de Sortie",
+            "reqd": 1,
+            "default": "Today"
+        },
+        {
+            "fieldname": "items",
+            "fieldtype": "Table",
+            "label": "Liste du Mat\u00e9riel",
+            "options": "PV Sortie Materiel Item",
+            "reqd": 1
+        },
+        {
+            "fieldname": "demandeur_nom",
+            "fieldtype": "Data",
+            "label": "Nom du Demandeur"
+        },
+        {
+            "fieldname": "signature_demandeur",
+            "fieldtype": "Signature",
+            "label": "Signature du Demandeur"
+        }
+    ]
+}
