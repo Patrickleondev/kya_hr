@@ -1,0 +1,605 @@
+/* ═══════════════════════════════════════════════════════════
+   KYA-Energy Group — Web Form Design v3
+   Style : Fiche d'Intervention / Document officiel
+   Palette : Blue #1a5276 · Orange #F58220 · Green #8DC63F
+   Font    : Plus Jakarta Sans (body) / Sora (accent)
+   "Move beyond the sky!"
+   ═══════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap');
+
+:root {
+  --kya-blue: #1a5276;
+  --kya-blue-dark: #0e3a55;
+  --kya-blue-mid: #2471a3;
+  --kya-blue-light: #eaf2f8;
+  --kya-blue-glow: rgba(26,82,118,0.12);
+  --kya-blue-accent: #3498db;
+  --kya-orange: #F58220;
+  --kya-orange-light: #fff4e8;
+  --kya-green: #27ae60;
+  --kya-green-light: #eafaf1;
+  --kya-bg: #f4f6f9;
+  --kya-surface: #FFFFFF;
+  --kya-heading: #1a1a2e;
+  --kya-body: #475569;
+  --kya-label: #555e6d;
+  --kya-border: #dee2e6;
+  --kya-border-input: #ccc;
+  --kya-r-lg: 12px;
+  --kya-r-md: 8px;
+  --kya-r-sm: 4px;
+  --kya-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  --kya-shadow-card: 0 4px 20px rgba(0,0,0,0.08);
+  --kya-font: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --kya-font-accent: 'Sora', sans-serif;
+  --kya-ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ── Page ──────────────────────────────────────────────── */
+body {
+  background: var(--kya-bg) !important;
+  min-height: 100vh;
+}
+
+.web-form-container {
+  max-width: 800px !important;
+  margin: 0 auto;
+  padding: 20px 16px 60px;
+  font-family: var(--kya-font);
+}
+
+.web-form-container .web-form {
+  border-radius: 0; box-shadow: none; border: none; overflow: visible;
+}
+
+/* V16: Hide default Frappe header when KYA header is present */
+.kya-restructured ~ .web-form-header,
+.web-form-container:has(.kya-restructured) .web-form-header,
+.web-form-container:has(.kya-wf-header) .web-form-head {
+  display: none !important;
+}
+/* Also hide via JS class */
+.web-form-head.kya-hidden { display: none !important; }
+
+/* ═══ HEADER — Clean document style (like Fiche Intervention) ═══ */
+.kya-wf-header {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center;
+  padding: 30px 24px 22px;
+  background: var(--kya-surface);
+  border-bottom: 3px solid var(--kya-blue);
+  border-radius: var(--kya-r-lg) var(--kya-r-lg) 0 0;
+  box-shadow: var(--kya-shadow);
+}
+.kya-wf-header img.kya-logo {
+  max-height: 70px; margin-bottom: 14px;
+  transition: transform .3s var(--kya-ease);
+}
+.kya-wf-header img.kya-logo:hover { transform: scale(1.05); }
+.kya-wf-header h3 {
+  color: var(--kya-blue); margin: 0 0 6px;
+  font-family: var(--kya-font-accent);
+  font-size: 22px; font-weight: 800;
+  letter-spacing: 0.02em; text-transform: uppercase;
+}
+.kya-wf-header .kya-slogan {
+  font-size: 13px; font-weight: 500;
+  color: var(--kya-blue-accent);
+  font-style: italic; margin: 2px 0 0;
+  letter-spacing: .04em;
+}
+.kya-wf-header .kya-subtitle {
+  color: var(--kya-label); font-size: 12px;
+  margin-top: 6px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .06em;
+}
+.kya-wf-header .kya-ref-badge {
+  display: inline-block; margin-top: 10px;
+  background: var(--kya-blue-light); color: var(--kya-blue);
+  padding: 4px 16px; border-radius: 20px;
+  font-size: .75rem; font-weight: 700; letter-spacing: .04em;
+  border: 1px solid var(--kya-border);
+}
+
+/* ═══ HEADER TOP — RCCM / NIF line ═══ */
+.kya-header-top {
+  width: 100%; text-align: right; margin-bottom: 8px;
+}
+.kya-header-info {
+  display: flex; justify-content: flex-end; gap: 20px;
+  font-size: 10px; font-weight: 600; color: var(--kya-label);
+  letter-spacing: .02em;
+}
+.kya-doc-ref {
+  display: inline-block; margin-top: 6px;
+  background: var(--kya-blue-light); color: var(--kya-blue);
+  padding: 3px 14px; border-radius: 16px;
+  font-size: .7rem; font-weight: 700; letter-spacing: .04em;
+  border: 1px solid var(--kya-border);
+}
+
+/* ═══ INFO BOX ═════════════════════════════════════════════ */
+.kya-wf-info {
+  background: var(--kya-blue-light);
+  border-left: 4px solid var(--kya-blue);
+  padding: 14px 20px;
+  font-size: 13px; line-height: 1.7;
+  color: var(--kya-heading); font-weight: 500;
+  margin: 0;
+}
+.kya-wf-info b { color: var(--kya-blue); font-weight: 700; }
+
+/* ═══ SECTIONS ═════════════════════════════════════════════ */
+.kya-sections-wrapper { margin-top: 0; }
+
+.kya-form-section {
+  margin-bottom: 0;
+  background: var(--kya-surface);
+  border: 1px solid var(--kya-border);
+  border-top: none;
+}
+.kya-form-section:last-of-type {
+  border-radius: 0 0 var(--kya-r-lg) var(--kya-r-lg);
+}
+
+/* Section title — solid dark blue (like Fiche Intervention) */
+.kya-section-title {
+  background: var(--kya-blue);
+  color: #fff; padding: 10px 18px;
+  font-family: var(--kya-font-accent);
+  font-weight: 700; font-size: 13px;
+  letter-spacing: .03em;
+  display: flex; align-items: center; gap: 8px;
+  border-radius: var(--kya-r-sm);
+  margin: 15px 18px 0;
+}
+.kya-section-icon { font-size: .9rem; }
+
+.kya-section-body { padding: 18px 22px; }
+
+/* Grid */
+.kya-section-body.kya-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px;
+}
+.kya-section-body.kya-grid .kya-grid-span-2 { grid-column: span 2; }
+.kya-section-body.kya-grid .kya-grid-col { grid-column: span 1; }
+
+/* Signature Grid — 4 columns like reference Fiche */
+.kya-section-body.kya-sig-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.kya-section-body.kya-sig-grid .frappe-control {
+  border: 1px solid var(--kya-border);
+  border-radius: var(--kya-r-md);
+  padding: 10px 8px 8px;
+  background: #fafbfc;
+  text-align: center;
+  min-height: 160px;
+}
+.kya-section-body.kya-sig-grid .frappe-control .control-label {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--kya-blue) !important;
+  margin-bottom: 8px;
+}
+.kya-section-body.kya-sig-grid .frappe-control canvas,
+.kya-section-body.kya-sig-grid .frappe-control .signature-pad {
+  min-height: 80px !important;
+  max-height: 100px;
+  width: 100% !important;
+}
+.kya-section-body.kya-sig-grid .frappe-control .signature-field .signature-display img {
+  max-height: 80px;
+  object-fit: contain;
+}
+/* Read-only signature box — show "En attente" for empty approver sigs */
+.kya-section-body.kya-sig-grid .frappe-control.read-only .signature-pad,
+.kya-section-body.kya-sig-grid .frappe-control[data-read-only] canvas {
+  background: var(--kya-blue-light);
+  border-style: dashed;
+}
+
+/* ═══ FORM CONTROLS ════════════════════════════════════════ */
+
+/* Labels */
+.web-form-container .web-form .form-group label,
+.web-form-container .web-form .frappe-control .control-label,
+.kya-form-section .frappe-control .control-label,
+.kya-form-section .form-group label {
+  display: block;
+  font-family: var(--kya-font);
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--kya-label);
+  margin-bottom: 6px;
+}
+/* Focus-within label highlight */
+.kya-form-section .form-group:focus-within label,
+.kya-form-section .frappe-control:focus-within .control-label {
+  color: var(--kya-blue);
+}
+
+/* Inputs — clean, simple borders */
+.web-form-container .web-form .form-control,
+.web-form-container .web-form input[type="text"],
+.web-form-container .web-form input[type="date"],
+.web-form-container .web-form input[type="time"],
+.web-form-container .web-form input[type="number"],
+.web-form-container .web-form textarea,
+.web-form-container .web-form select,
+.kya-form-section .form-control,
+.kya-form-section input[type="text"],
+.kya-form-section input[type="date"],
+.kya-form-section input[type="time"],
+.kya-form-section input[type="number"],
+.kya-form-section textarea,
+.kya-form-section select {
+  width: 100%; background: #fff;
+  border: 1px solid var(--kya-border-input);
+  border-radius: var(--kya-r-sm);
+  padding: 10px 14px; font-size: 14px; font-weight: 500;
+  color: var(--kya-heading);
+  transition: border-color .2s, box-shadow .2s;
+  box-sizing: border-box; font-family: var(--kya-font);
+}
+
+/* Focus */
+.web-form-container .web-form .form-control:focus,
+.web-form-container .web-form input:focus,
+.web-form-container .web-form textarea:focus,
+.web-form-container .web-form select:focus,
+.kya-form-section .form-control:focus,
+.kya-form-section input:focus,
+.kya-form-section textarea:focus,
+.kya-form-section select:focus {
+  border-color: var(--kya-blue);
+  box-shadow: 0 0 0 3px var(--kya-blue-glow);
+  outline: none; background: #fff;
+}
+
+/* ═══ READ-ONLY FIELDS — look like filled data, NOT disabled ═══ */
+.web-form-container .web-form .form-control[disabled],
+.web-form-container .web-form .form-control:disabled,
+.web-form-container .web-form .form-control[readonly],
+.web-form-container .web-form input[readonly],
+.web-form-container .web-form input:disabled,
+.kya-form-section .form-control[disabled],
+.kya-form-section .form-control:disabled,
+.kya-form-section .form-control[readonly],
+.kya-form-section input[readonly],
+.kya-form-section input:disabled,
+.kya-form-section textarea[readonly],
+.kya-form-section textarea:disabled,
+.kya-form-section select:disabled {
+  background: var(--kya-blue-light) !important;
+  color: var(--kya-heading) !important;
+  opacity: 1 !important;
+  cursor: default;
+  border-color: var(--kya-border) !important;
+  font-weight: 600 !important;
+  -webkit-text-fill-color: var(--kya-heading) !important;
+}
+/* Read-only label indicator */
+.kya-form-section .frappe-control.read-only .control-label::after,
+.kya-form-section .frappe-control[data-read-only="1"] .control-label::after {
+  content: ' (auto)';
+  font-size: 9px; color: var(--kya-blue-accent);
+  font-weight: 500; font-style: italic;
+  text-transform: none; letter-spacing: 0;
+}
+
+/* Required */
+.web-form-container .web-form .reqd .control-label::after,
+.kya-form-section .reqd .control-label::after {
+  content: ' *'; color: #e74c3c; font-weight: bold;
+}
+
+.web-form-container .web-form .form-group,
+.kya-form-section .form-group { margin-bottom: 16px; }
+
+/* ── Signature ─────────────────────────────────────────── */
+.web-form-container .signature-field .signature-pad,
+.kya-form-section .signature-field .signature-pad,
+.kya-form-section .frappe-control[data-fieldtype="Signature"] canvas {
+  border: 1px solid var(--kya-border-input);
+  border-radius: var(--kya-r-sm);
+  background: #fff; width: 100%; min-height: 120px;
+  touch-action: none;
+}
+.kya-form-section .frappe-control[data-fieldtype="Signature"] { text-align: center; }
+.kya-form-section .frappe-control[data-fieldtype="Signature"] .btn-xs,
+.web-form-container .signature-field .btn-xs {
+  margin-top: 6px; font-size: 10px; cursor: pointer;
+  background: none; border: 1px solid var(--kya-border-input);
+  color: var(--kya-label);
+  padding: 3px 12px; border-radius: 4px; font-weight: 500;
+  transition: all .2s;
+}
+.kya-form-section .frappe-control[data-fieldtype="Signature"] .btn-xs:hover,
+.web-form-container .signature-field .btn-xs:hover {
+  background: #f8f8f8; color: var(--kya-heading);
+}
+
+/* ── Child Table ───────────────────────────────────────── */
+.web-form-container .frappe-control[data-fieldtype="Table"] .form-group,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .form-group {
+  border: 1px solid var(--kya-border);
+  border-radius: var(--kya-r-md); overflow: hidden;
+}
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row {
+  background: var(--kya-blue); color: #fff;
+}
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row .static-area,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row .static-area {
+  color: #fff !important; font-weight: 700; font-size: 11px;
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.web-form-container .frappe-control[data-fieldtype="Table"] .rows .grid-row,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .rows .grid-row {
+  border-bottom: 1px solid var(--kya-border); transition: background .15s;
+}
+.web-form-container .frappe-control[data-fieldtype="Table"] .rows .grid-row:nth-child(even),
+.kya-form-section .frappe-control[data-fieldtype="Table"] .rows .grid-row:nth-child(even) {
+  background: #FAFBFC;
+}
+.web-form-container .frappe-control[data-fieldtype="Table"] .rows .grid-row:hover,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .rows .grid-row:hover {
+  background: var(--kya-blue-light);
+}
+.web-form-container .frappe-control[data-fieldtype="Table"] .btn-xs,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .btn-xs {
+  background: var(--kya-blue); color: #fff; border: none;
+  border-radius: 4px; padding: 6px 14px;
+  font-size: 11px; font-weight: 700;
+  transition: all .2s;
+}
+.web-form-container .frappe-control[data-fieldtype="Table"] .btn-xs:hover,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .btn-xs:hover {
+  background: var(--kya-blue-dark); transform: translateY(-1px);
+}
+
+/* ── Select / Attach / Link ────────────────────────────── */
+.web-form-container .web-form select,
+.kya-form-section select { appearance: auto; }
+.web-form-container .frappe-control[data-fieldtype="Attach"] .attached-file,
+.kya-form-section .frappe-control[data-fieldtype="Attach"] .attached-file {
+  background: var(--kya-bg); border: 1px solid var(--kya-border);
+  border-radius: var(--kya-r-sm); padding: 10px 14px;
+}
+.web-form-container .frappe-control[data-fieldtype="Link"] .link-btn,
+.kya-form-section .frappe-control[data-fieldtype="Link"] .link-btn { display: none; }
+
+/* ═══ SUBMIT BUTTON — Green like Fiche Intervention ════════ */
+.web-form-container .btn-primary,
+.web-form-container .btn-primary-dark {
+  display: block; width: 100%; padding: 15px 24px;
+  background: var(--kya-blue);
+  color: #fff; border: none;
+  border-radius: var(--kya-r-sm); cursor: pointer;
+  font-family: var(--kya-font-accent);
+  font-weight: 700; font-size: 15px;
+  text-transform: uppercase; letter-spacing: .05em;
+  box-shadow: 0 4px 12px rgba(26,82,118,0.25);
+  transition: all .25s var(--kya-ease); margin-top: 16px;
+}
+.web-form-container .btn-primary:hover,
+.web-form-container .btn-primary-dark:hover {
+  background: var(--kya-blue-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(26,82,118,0.3);
+}
+.web-form-container .btn-primary:active,
+.web-form-container .btn-primary-dark:active {
+  transform: scale(.98); box-shadow: 0 2px 8px rgba(26,82,118,.15);
+}
+
+/* ═══ TOOLBAR — Print / Download buttons ═══════════════════ */
+.kya-wf-toolbar {
+  display: flex; justify-content: flex-end; gap: 8px;
+  padding: 10px 18px;
+  background: #fafbfc; border-bottom: 1px solid var(--kya-border);
+}
+.kya-wf-toolbar button {
+  background: var(--kya-surface); border: 1px solid var(--kya-border);
+  border-radius: var(--kya-r-sm); padding: 6px 14px;
+  font-size: 12px; font-weight: 600; color: var(--kya-label);
+  cursor: pointer; transition: all .2s;
+  font-family: var(--kya-font);
+  display: flex; align-items: center; gap: 5px;
+}
+.kya-wf-toolbar button:hover {
+  background: var(--kya-blue-light); color: var(--kya-blue);
+  border-color: var(--kya-blue);
+}
+
+/* ═══ FOOTER ═══════════════════════════════════════════════ */
+.kya-wf-footer {
+  text-align: center; padding: 18px 24px; margin-top: 0;
+  border-top: 2px solid var(--kya-blue);
+  color: var(--kya-label); font-size: 11px; font-weight: 500;
+  background: var(--kya-surface);
+  border-radius: 0 0 var(--kya-r-lg) var(--kya-r-lg);
+  font-family: var(--kya-font);
+}
+.kya-wf-footer .kya-footer-brand {
+  font-weight: 800; color: var(--kya-heading);
+}
+.kya-wf-footer .kya-footer-slogan {
+  display: block; font-style: italic; color: var(--kya-blue-accent);
+  font-weight: 500; margin-top: 3px; font-size: 11px;
+}
+
+/* ── Hide Frappe header & "Powered by" ─────────────────── */
+.kya-restructured .page-header-wrapper,
+.kya-restructured .page-header { display: none; }
+
+footer .web-footer,
+.powered-by,
+.footer-powered,
+[class*="powered"],
+.web-footer .text-muted { display: none !important; }
+
+/* ═══ RESPONSIVE ═══════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .web-form-container { padding: 10px 8px 40px; }
+  .kya-wf-header { padding: 20px 14px 16px; }
+  .kya-wf-header h3 { font-size: 17px; }
+  .kya-wf-header img.kya-logo { max-height: 56px; }
+  .kya-section-body.kya-grid { grid-template-columns: 1fr; }
+  .kya-section-body.kya-grid .kya-grid-span-2,
+  .kya-section-body.kya-grid .kya-grid-col { grid-column: span 1; }
+  .kya-section-body.kya-sig-grid { grid-template-columns: repeat(2, 1fr); }
+  .kya-section-title { font-size: 12px; padding: 8px 14px; margin: 10px 12px 0; }
+  .kya-section-body { padding: 14px 14px; }
+  .web-form-container .btn-primary { font-size: 14px; padding: 14px 16px; }
+  .kya-wf-toolbar { flex-wrap: wrap; justify-content: center; }
+}
+
+/* ═══ LOGIN & GLOBAL BRANDING ══════════════════════════════ */
+.page-card .app-logo,
+.for-login .app-logo {
+  max-height: 100px !important; width: auto !important;
+}
+.page-card {
+  border-top: 4px solid var(--kya-blue) !important;
+  border-radius: var(--kya-r-lg) !important;
+  box-shadow: var(--kya-shadow-card) !important;
+}
+img[src*="erpnext-logo"],
+a[href*="erpnext"] img,
+.footer-logo-extension,
+footer .container a[href*="erpnext"] {
+  display: none !important;
+}
+footer .web-footer-menu { display: none !important; }
+.navbar-brand img,
+.sidebar-header img { max-height: 36px !important; }
+.navbar .erpnext-setup-banner { display: none !important; }
+.desk-sidebar .sidebar-item.selected {
+  border-left: 3px solid var(--kya-orange) !important;
+  background: var(--kya-blue-light) !important;
+}
+.navbar .navbar-nav .nav-link:hover {
+  color: var(--kya-blue) !important;
+}
+
+/* ═══ PRINT ════════════════════════════════════════════════ */
+@media print {
+  body { background: #fff !important; }
+  .web-form-container { max-width: 100% !important; padding: 0; margin: 0; }
+  .kya-wf-header { box-shadow: none; border-radius: 0; }
+  .kya-form-section { break-inside: avoid; border-radius: 0; box-shadow: none; }
+  .kya-section-title {
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    margin: 8px 0 0; border-radius: 2px;
+  }
+  .web-form-container .btn-primary,
+  .web-form-container .btn-primary-dark,
+  .kya-wf-toolbar,
+  .kya-wf-state { display: none !important; }
+  .kya-wf-footer {
+    border-radius: 0; border-top: 1px solid #333;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  /* Show read-only values clearly in print */
+  input[readonly], input:disabled, .form-control[disabled] {
+    border: none !important; background: transparent !important;
+    padding-left: 0 !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   WORKFLOW ACTION TOOLBAR (Mobile Approval)
+   ═══════════════════════════════════════════════════════════ */
+.kya-wf-state {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 12px 0 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.kya-state-label {
+  font-weight: 600;
+  color: #555;
+  font-size: 14px;
+}
+.kya-state-badge {
+  display: inline-block;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.3px;
+}
+.kya-state-draft { background: #f5f5f5; color: #666; }
+.kya-state-pending { background: #fff3e0; color: #e65100; }
+.kya-state-approved { background: #e8f5e9; color: #2e7d32; }
+.kya-state-rejected { background: #ffebee; color: #c62828; }
+
+.kya-wf-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+.kya-btn-approve {
+  background: linear-gradient(135deg, #2e7d32, #43a047);
+  color: #fff;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 2px 8px rgba(46,125,50,0.3);
+}
+.kya-btn-approve:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(46,125,50,0.4);
+}
+.kya-btn-reject {
+  background: linear-gradient(135deg, #c62828, #e53935);
+  color: #fff;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 2px 8px rgba(198,40,40,0.3);
+}
+.kya-btn-reject:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(198,40,40,0.4);
+}
+
+/* Mobile responsive */
+@media (max-width: 480px) {
+  .kya-wf-state {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+  .kya-wf-actions {
+    margin-left: 0;
+    justify-content: center;
+  }
+  .kya-btn-approve, .kya-btn-reject {
+    flex: 1;
+    min-width: 120px;
+    padding: 12px 16px;
+    font-size: 15px;
+  }
+}

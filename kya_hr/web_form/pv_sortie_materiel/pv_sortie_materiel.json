@@ -12,7 +12,7 @@
     "docstatus": 0,
     "doctype": "Web Form",
     "idx": 0,
-    "introduction_text": "<p>Cr\u00e9ez un PV de sortie de mat\u00e9riel. Le document passera par 4 niveaux de validation : Demandeur \u2192 Magasin \u2192 Audit \u2192 DGA.</p>",
+    "introduction_text": "",
     "is_standard": 1,
     "login_required": 1,
     "modified": "2026-03-12 00:00:00.000000",
@@ -23,7 +23,7 @@
     "published": 1,
     "route": "pv-sortie-materiel",
     "show_sidebar": 1,
-    "success_message": "Le PV de sortie mat\u00e9riel a \u00e9t\u00e9 cr\u00e9\u00e9. Il sera transmis au Responsable Magasin pour validation.",
+    "success_message": "\u2705 Le PV de sortie mat\u00e9riel a \u00e9t\u00e9 cr\u00e9\u00e9 avec succ\u00e8s. Il suivra le circuit d\u2019approbation : Chef \u2192 Audit \u2192 Direction \u2192 Magasin.",
     "title": "PV de Sortie Mat\u00e9riel",
     "web_form_fields": [
         {
@@ -55,7 +55,25 @@
         {
             "fieldname": "signature_demandeur",
             "fieldtype": "Signature",
-            "label": "Signature du Demandeur"
+            "label": "Signature Demandeur"
+        },
+        {
+            "fieldname": "signature_audit",
+            "fieldtype": "Signature",
+            "label": "Signature Audit",
+            "read_only": 1
+        },
+        {
+            "fieldname": "signature_dga",
+            "fieldtype": "Signature",
+            "label": "Signature DG / DGA",
+            "read_only": 1
+        },
+        {
+            "fieldname": "signature_magasin",
+            "fieldtype": "Signature",
+            "label": "Signature Magasin",
+            "read_only": 1
         }
     ]
 }

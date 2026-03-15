@@ -12,7 +12,7 @@
     "docstatus": 0,
     "doctype": "Web Form",
     "idx": 0,
-    "introduction_text": "<p>Remplissez ce formulaire pour demander une permission de sortie. Votre demande suivra le circuit : Chef de Service \u2192 RH \u2192 DGA.</p>",
+    "introduction_text": "",
     "is_standard": 1,
     "login_required": 1,
     "modified": "2026-03-12 00:00:00.000000",
@@ -23,7 +23,7 @@
     "published": 1,
     "route": "permission-sortie-employe",
     "show_sidebar": 1,
-    "success_message": "Votre demande de permission de sortie a \u00e9t\u00e9 soumise. Elle sera examin\u00e9e par votre Chef de Service, puis les RH et le DGA.",
+    "success_message": "\u2705 Votre demande de permission de sortie a \u00e9t\u00e9 soumise avec succ\u00e8s. Elle sera examin\u00e9e par votre Chef de Service, puis les RH et la Direction.",
     "title": "Demande de Permission de Sortie (Employ\u00e9)",
     "web_form_fields": [
         {
@@ -80,7 +80,25 @@
         {
             "fieldname": "signature_employe",
             "fieldtype": "Signature",
-            "label": "Votre Signature"
+            "label": "Signature Employ\u00e9"
+        },
+        {
+            "fieldname": "signature_chef",
+            "fieldtype": "Signature",
+            "label": "Signature Chef de Service",
+            "read_only": 1
+        },
+        {
+            "fieldname": "signature_rh",
+            "fieldtype": "Signature",
+            "label": "Signature RH",
+            "read_only": 1
+        },
+        {
+            "fieldname": "signature_dga",
+            "fieldtype": "Signature",
+            "label": "Signature DGA",
+            "read_only": 1
         }
     ]
 }

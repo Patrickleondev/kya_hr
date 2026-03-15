@@ -9,16 +9,26 @@
     "public": 1,
     "parent_page": "",
     "sequence_id": 5,
-    "content": "[{\"id\":\"hero\",\"type\":\"header\",\"data\":{\"text\":\"<div class='ellipsis' title='Espace Stagiaires'>\\ud83c\\udf93 Espace Stagiaires KYA</div>\",\"level\":3,\"col\":12}},{\"id\":\"s1\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Demander une Permission\",\"col\":4}},{\"id\":\"s2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Mes Permissions\",\"col\":4}},{\"id\":\"s3\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Bilan\",\"col\":4}},{\"id\":\"spacer1\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"nb1\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Permissions en cours\",\"col\":4}},{\"id\":\"nb2\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Bilans valid\\u00e9s\",\"col\":4}},{\"id\":\"nb3\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Retards ce mois\",\"col\":4}},{\"id\":\"spacer2\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"chart1\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Statut Permissions Stagiaires\",\"col\":6}},{\"id\":\"chart2\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Pr\\u00e9sences Mensuelles\",\"col\":6}},{\"id\":\"spacer3\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"hdr1\",\"type\":\"header\",\"data\":{\"text\":\"Administration\",\"level\":4,\"col\":12}}]",
+    "content": "[{\"id\":\"hero\",\"type\":\"header\",\"data\":{\"text\":\"<div class='ellipsis' title='Espace Stagiaires'>\\ud83c\\udf93 Espace Stagiaires KYA</div>\",\"level\":3,\"col\":12}},{\"id\":\"s1\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Demander une Permission\",\"col\":3}},{\"id\":\"s2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Permissions\",\"col\":3}},{\"id\":\"s3\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Bilan\",\"col\":3}},{\"id\":\"s4\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tableau de Bord\",\"col\":3}},{\"id\":\"spacer1\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"nb0\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Stagiaires Actifs\",\"col\":3}},{\"id\":\"nb1\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Permissions en cours\",\"col\":3}},{\"id\":\"nb2\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Bilans valid\\u00e9s\",\"col\":3}},{\"id\":\"nb3\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Retards ce mois\",\"col\":3}},{\"id\":\"spacer2\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"chart1\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Stagiaires par D\\u00e9partement\",\"col\":4}},{\"id\":\"chart3\",\"type\":\"chart\",\"data\":{\"chart_name\":\"R\\u00e9partition par Genre\",\"col\":4}},{\"id\":\"chart2\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Pr\\u00e9sences Mensuelles\",\"col\":4}},{\"id\":\"spacer3\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"hdr1\",\"type\":\"header\",\"data\":{\"text\":\"Administration\",\"level\":4,\"col\":12}}]",
     "charts": [
         {
-            "chart_name": "Statut Permissions Stagiaires",
+            "chart_name": "Stagiaires par D\u00e9partement",
             "chart_type": "Group By",
-            "document_type": "Permission Sortie Stagiaire",
+            "document_type": "Employee",
             "group_by_type": "Count",
-            "group_by_based_on": "statut",
+            "group_by_based_on": "department",
+            "type": "Bar",
+            "filters_json": "{\"employment_type\":\"Stage\",\"status\":\"Active\"}",
+            "number_of_groups": 10
+        },
+        {
+            "chart_name": "R\u00e9partition par Genre",
+            "chart_type": "Group By",
+            "document_type": "Employee",
+            "group_by_type": "Count",
+            "group_by_based_on": "gender",
             "type": "Donut",
-            "filters_json": "{}",
+            "filters_json": "{\"employment_type\":\"Stage\",\"status\":\"Active\"}",
             "number_of_groups": 5
         },
         {
@@ -33,6 +43,14 @@
         }
     ],
     "number_cards": [
+        {
+            "number_card_name": "Total Stagiaires Actifs",
+            "document_type": "Employee",
+            "function": "Count",
+            "filters_json": "{\"employment_type\":\"Stage\",\"status\":\"Active\"}",
+            "label": "Stagiaires actifs",
+            "color": "#1a3a5c"
+        },
         {
             "number_card_name": "Permissions en cours",
             "document_type": "Permission Sortie Stagiaire",
@@ -67,7 +85,7 @@
             "icon": "file"
         },
         {
-            "label": "Mes Permissions",
+            "label": "Permissions",
             "type": "DocType",
             "link_to": "Permission Sortie Stagiaire",
             "color": "#29CD42",
@@ -80,22 +98,16 @@
             "link_to": "Bilan Fin de Stage",
             "color": "#7C5CFC",
             "icon": "bar-chart"
+        },
+        {
+            "label": "Tableau de Bord",
+            "type": "Report",
+            "link_to": "Tableau de Bord Stagiaires",
+            "color": "#009688",
+            "icon": "dashboard"
         }
     ],
     "links": [
-        {
-            "type": "Card Break",
-            "label": "\ud83d\udcdd Formulaires Web",
-            "icon": "file"
-        },
-        {
-            "type": "Link",
-            "label": "Permission de Sortie (Web Form)",
-            "link_type": "URL",
-            "url": "/permission-sortie-stagiaire",
-            "description": "Formulaire en ligne pour demander une permission de sortie",
-            "icon": "file"
-        },
         {
             "type": "Card Break",
             "label": "\ud83d\udccb Listes & Suivi",
@@ -127,6 +139,19 @@
         },
         {
             "type": "Card Break",
+            "label": "\ud83d\udcdd Formulaires Web",
+            "icon": "file"
+        },
+        {
+            "type": "Link",
+            "label": "Permission de Sortie (Web Form)",
+            "link_type": "URL",
+            "link_to": "/permission-sortie-stagiaire",
+            "description": "Formulaire en ligne pour demander une permission de sortie",
+            "icon": "file"
+        },
+        {
+            "type": "Card Break",
             "label": "\ud83d\udcca Suivi RH",
             "icon": "activity"
         },
@@ -146,6 +171,24 @@
             "description": "Rapport de suivi des cong\u00e9s et statistiques",
             "icon": "bar-chart",
             "dependencies": "Leave Application"
+        },
+        {
+            "type": "Link",
+            "label": "Tableau de Bord Stagiaires",
+            "link_type": "Report",
+            "link_to": "Tableau de Bord Stagiaires",
+            "description": "Dashboard complet : genre, d\u00e9partement, pr\u00e9sences, permissions",
+            "icon": "dashboard",
+            "dependencies": "Employee"
+        },
+        {
+            "type": "Link",
+            "label": "Rapport Pr\u00e9sence Stagiaires",
+            "link_type": "Report",
+            "link_to": "Rapport Pr\u00e9sence Stagiaires",
+            "description": "Rapport journalier / mensuel des pr\u00e9sences stagiaires",
+            "icon": "bar-chart",
+            "dependencies": "Attendance"
         }
     ]
 }

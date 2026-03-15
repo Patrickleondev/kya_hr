@@ -37,19 +37,6 @@
     "links": [
         {
             "type": "Card Break",
-            "label": "\ud83d\udcdd Formulaires Web",
-            "icon": "external-link"
-        },
-        {
-            "type": "Link",
-            "label": "PV Sortie Mat\u00e9riel (Web Form)",
-            "link_type": "URL",
-            "url": "/pv-sortie-materiel",
-            "description": "Formulaire en ligne pour cr\u00e9er un PV de sortie",
-            "icon": "external-link"
-        },
-        {
-            "type": "Card Break",
             "label": "Sortie de Mat\u00e9riel",
             "icon": "truck"
         },
@@ -60,6 +47,19 @@
             "link_to": "PV Sortie Materiel",
             "description": "Cr\u00e9er un PV de sortie mat\u00e9riel (4 niveaux de signature)",
             "icon": "truck"
+        },
+        {
+            "type": "Card Break",
+            "label": "\ud83d\udcdd Formulaires Web",
+            "icon": "external-link"
+        },
+        {
+            "type": "Link",
+            "label": "PV Sortie Mat\u00e9riel (Web Form)",
+            "link_type": "URL",
+            "link_to": "/pv-sortie-materiel",
+            "description": "Formulaire en ligne pour cr\u00e9er un PV de sortie",
+            "icon": "external-link"
         },
         {
             "type": "Card Break",

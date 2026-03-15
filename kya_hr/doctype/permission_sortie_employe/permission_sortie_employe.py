@@ -10,6 +10,20 @@ class PermissionSortieEmploye(Document):
         self.validate_employee_is_not_intern()
         self.set_employee_details()
 
+    def before_insert(self):
+        """When HR creates manually via Desk, start workflow at 'En attente RH'
+        to skip the Chef step (RH is the creator)."""
+        if not self.flags.via_web_form:
+            user_roles = frappe.get_roles(frappe.session.user)
+            if "HR Manager" in user_roles or "HR User" in user_roles:
+                self.workflow_state = "En attente RH"
+                # Auto-fill chef bypass
+                name = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "employee_name")
+                if not name:
+                    name = frappe.utils.get_fullname(frappe.session.user)
+                self.signataire_chef = (name or "") + " (Créé par RH)"
+                self.date_signature_chef = frappe.utils.today()
+
     def validate_employee_is_not_intern(self):
         if self.employee:
             emp_type = frappe.db.get_value("Employee", self.employee, "employment_type")
@@ -44,8 +58,8 @@ class PermissionSortieEmploye(Document):
             self.db_set("signataire_chef", name, update_modified=False)
             self.db_set("date_signature_chef", today, update_modified=False)
 
-        # RH signs → state moves to "En attente DGA"
-        if ws == "En attente DGA" and not self.get("signataire_rh"):
+        # RH signs → state moves to "En attente Direction"
+        if ws == "En attente Direction" and not self.get("signataire_rh"):
             self.db_set("signataire_rh", name, update_modified=False)
             self.db_set("date_signature_rh", today, update_modified=False)
             # If Chef was bypassed (Absence Chef → En attente RH), mark it

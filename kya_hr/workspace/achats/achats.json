@@ -37,19 +37,6 @@
     "links": [
         {
             "type": "Card Break",
-            "label": "\ud83d\udcdd Formulaires",
-            "icon": "file"
-        },
-        {
-            "type": "Link",
-            "label": "Demande d'Achat (Web Form)",
-            "link_type": "URL",
-            "url": "/demande-achat",
-            "description": "Formulaire en ligne pour soumettre une demande d'achat",
-            "icon": "external-link"
-        },
-        {
-            "type": "Card Break",
             "label": "Demandes d'Achat",
             "icon": "file"
         },
@@ -60,6 +47,19 @@
             "link_to": "Demande Achat KYA",
             "description": "Cr\u00e9er et suivre les demandes d'achat (paliers automatiques)",
             "icon": "file"
+        },
+        {
+            "type": "Card Break",
+            "label": "\ud83d\udcdd Formulaires",
+            "icon": "file"
+        },
+        {
+            "type": "Link",
+            "label": "Demande d'Achat (Web Form)",
+            "link_type": "URL",
+            "link_to": "/demande-achat",
+            "description": "Formulaire en ligne pour soumettre une demande d'achat",
+            "icon": "external-link"
         },
         {
             "type": "Card Break",

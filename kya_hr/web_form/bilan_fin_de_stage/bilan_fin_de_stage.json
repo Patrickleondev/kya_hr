@@ -1,0 +1,89 @@
+{
+    "allow_comments": 1,
+    "allow_delete": 0,
+    "allow_edit": 1,
+    "allow_incomplete": 0,
+    "allow_multiple": 0,
+    "allow_print": 1,
+    "anonymous": 0,
+    "apply_document_permissions": 1,
+    "creation": "2026-03-15 00:00:00.000000",
+    "doc_type": "Bilan Fin de Stage",
+    "docstatus": 0,
+    "doctype": "Web Form",
+    "idx": 0,
+    "introduction_text": "Remplissez ce formulaire pour soumettre votre bilan de fin de stage. Votre encadrant compl\u00e9tera l'\u00e9valuation et la note par la suite.",
+    "is_standard": 1,
+    "login_required": 1,
+    "modified": "2026-03-15 00:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "KYA HR",
+    "name": "bilan-fin-de-stage",
+    "owner": "Administrator",
+    "published": 1,
+    "route": "bilan-fin-de-stage",
+    "show_sidebar": 1,
+    "success_message": "\u2705 Votre bilan de stage a \u00e9t\u00e9 soumis avec succ\u00e8s. Votre encadrant proc\u00e9dera \u00e0 l'\u00e9valuation.",
+    "title": "Bilan de Fin de Stage",
+    "web_form_fields": [
+        {
+            "fieldname": "employee",
+            "fieldtype": "Link",
+            "label": "Stagiaire (Employ\u00e9)",
+            "options": "Employee",
+            "reqd": 1
+        },
+        {
+            "fieldname": "employee_name",
+            "fieldtype": "Data",
+            "label": "Nom",
+            "read_only": 1
+        },
+        {
+            "fieldname": "department",
+            "fieldtype": "Link",
+            "label": "D\u00e9partement",
+            "options": "Department",
+            "read_only": 1
+        },
+        {
+            "fieldname": "encadrant",
+            "fieldtype": "Link",
+            "label": "Encadrant",
+            "options": "Employee",
+            "description": "Votre ma\u00eetre de stage / encadrant"
+        },
+        {
+            "fieldname": "date_debut",
+            "fieldtype": "Date",
+            "label": "Date D\u00e9but de Stage",
+            "reqd": 1
+        },
+        {
+            "fieldname": "date_fin",
+            "fieldtype": "Date",
+            "label": "Date Fin de Stage",
+            "reqd": 1
+        },
+        {
+            "fieldname": "evaluation",
+            "fieldtype": "Text Editor",
+            "label": "\u00c9valuation / Bilan",
+            "description": "D\u00e9crivez votre exp\u00e9rience, les comp\u00e9tences acquises, les projets r\u00e9alis\u00e9s et vos observations"
+        },
+        {
+            "fieldname": "note_globale",
+            "fieldtype": "Int",
+            "label": "Note Globale (/20)",
+            "read_only": 1,
+            "description": "Attribu\u00e9e par l'encadrant"
+        },
+        {
+            "fieldname": "mention",
+            "fieldtype": "Select",
+            "label": "Mention",
+            "options": "Insuffisant\nPassable\nAssez Bien\nBien\nTr\u00e8s Bien",
+            "read_only": 1
+        }
+    ]
+}

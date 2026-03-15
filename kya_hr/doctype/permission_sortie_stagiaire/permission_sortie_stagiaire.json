@@ -100,6 +100,12 @@
             "reqd": 1
         },
         {
+            "fieldname": "justificatif",
+            "label": "Pi\u00e8ce Justificative",
+            "fieldtype": "Attach",
+            "description": "Joindre un justificatif si n\u00e9cessaire (certificat m\u00e9dical, convocation, etc.)"
+        },
+        {
             "fieldname": "section_signatures",
             "label": "Approbations & Signatures",
             "fieldtype": "Section Break",

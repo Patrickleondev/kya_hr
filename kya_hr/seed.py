@@ -103,10 +103,22 @@ def run():
     frappe.db.commit()
 
     # ========================================
+    # 3b. EMPLOYMENT TYPES
+    # ========================================
+    print("\n=== 3b. CREATING EMPLOYMENT TYPES ===")
+    for et_name in ["CDI", "CDD", "Stage", "Prestataire"]:
+        if not frappe.db.exists("Employment Type", et_name):
+            frappe.get_doc({"doctype": "Employment Type", "employee_type_name": et_name}).insert(ignore_permissions=True)
+            print(f"  Created: {et_name}")
+        else:
+            print(f"  Exists: {et_name}")
+    frappe.db.commit()
+
+    # ========================================
     # 4. ROLES
     # ========================================
     print("\n=== 4. ENSURING ROLES ===")
-    for role in ["Employee Self Service", "KYA Survey Admin"]:
+    for role in ["Employee Self Service", "KYA Survey Admin", "KYA Destinataire Notif"]:
         if not frappe.db.exists("Role", role):
             frappe.get_doc({"doctype": "Role", "role_name": role, "is_custom": 1}).insert(ignore_permissions=True)
             print(f"  Created role: {role}")
@@ -122,48 +134,76 @@ def run():
 
     users_data = [
         {"email": "dg@kya-energy.com", "first_name": "Komlan", "last_name": "AGBEKO",
-         "roles": ["Employee", "HR Manager", "Stock Manager", "Purchase Manager"],
-         "department": dept_name("Direction Générale"), "designation": "DIRECTEUR GENERAL", "emp_type": "Full-time"},
+         "roles": ["Employee", "HR Manager", "Stock Manager", "Purchase Manager", "KYA Destinataire Notif"],
+         "department": dept_name("Direction Générale"), "designation": "DIRECTEUR GENERAL",
+         "emp_type": "CDI", "dob": "1978-03-12",
+         "classe": "P", "echelon": "5"},
         {"email": "dga@kya-energy.com", "first_name": "Afi", "last_name": "MENSAH",
-         "roles": ["Employee", "HR Manager", "Stock Manager", "Purchase Manager", "Auditor"],
-         "department": dept_name("Direction Générale"), "designation": "DIRECTEUR G. ADJOINT", "emp_type": "Full-time"},
+         "roles": ["Employee", "HR Manager", "Stock Manager", "Purchase Manager", "Auditor", "KYA Destinataire Notif"],
+         "department": dept_name("Direction Générale"), "designation": "DIRECTEUR G. ADJOINT",
+         "emp_type": "CDI", "dob": "1982-07-25",
+         "classe": "O", "echelon": "4"},
         {"email": "chef.tech@kya-energy.com", "first_name": "Koffi", "last_name": "AMOUZOU",
-         "roles": ["Employee", "HR User", "Stock User", "Purchase User"],
-         "department": dept_name("Services Technique"), "designation": "CHEF EQPE MAINTENANCE", "emp_type": "Full-time"},
+         "roles": ["Employee", "HR User", "Stock User", "Purchase User", "KYA Destinataire Notif"],
+         "department": dept_name("Services Technique"), "designation": "CHEF EQPE MAINTENANCE",
+         "emp_type": "CDI", "dob": "1985-11-03",
+         "classe": "K", "echelon": "3"},
         {"email": "rh@kya-energy.com", "first_name": "Akouvi", "last_name": "KOUDJO",
-         "roles": ["Employee", "HR User", "HR Manager"],
-         "department": dept_name("Equipe RH"), "designation": "RESP. AUDITS INTERNES", "emp_type": "Full-time"},
+         "roles": ["Employee", "HR User", "HR Manager", "KYA Destinataire Notif"],
+         "department": dept_name("Equipe RH"), "designation": "RESP. AUDITS INTERNES",
+         "emp_type": "CDI", "dob": "1988-01-18",
+         "classe": "J", "echelon": "4"},
         {"email": "achats@kya-energy.com", "first_name": "Yao", "last_name": "GNASSINGBE",
          "roles": ["Employee", "Purchase User", "Purchase Manager", "Stock User"],
-         "department": dept_name("Achat et Approvisionnement"), "designation": "RESP. ACHAT & APPROV", "emp_type": "Full-time"},
+         "department": dept_name("Achat et Approvisionnement"), "designation": "RESP. ACHAT & APPROV",
+         "emp_type": "CDI", "dob": "1990-09-07",
+         "classe": "I", "echelon": "3"},
         {"email": "magasin@kya-energy.com", "first_name": "Kodjo", "last_name": "ASSOGBA",
          "roles": ["Employee", "Stock User", "Stock Manager"],
-         "department": dept_name("Stocks et Logistics"), "designation": "ASSISTANT LOGISTIQUE", "emp_type": "Full-time"},
+         "department": dept_name("Stocks et Logistics"), "designation": "ASSISTANT LOGISTIQUE",
+         "emp_type": "CDI", "dob": "1992-04-22",
+         "classe": "F", "echelon": "2"},
         {"email": "audit@kya-energy.com", "first_name": "Essivi", "last_name": "TOGBE",
          "roles": ["Employee", "Auditor"],
-         "department": dept_name("Services Supports"), "designation": "RESP. AUDITS INTERNES", "emp_type": "Full-time"},
+         "department": dept_name("Services Supports"), "designation": "RESP. AUDITS INTERNES",
+         "emp_type": "CDI", "dob": "1987-06-14",
+         "classe": "J", "echelon": "5"},
         {"email": "compta@kya-energy.com", "first_name": "Ama", "last_name": "DJOSSOU",
          "roles": ["Employee"],
-         "department": dept_name("Finance et Comptabilité"), "designation": "COMPTABLE", "emp_type": "Full-time"},
+         "department": dept_name("Finance et Comptabilité"), "designation": "COMPTABLE",
+         "emp_type": "CDI", "dob": "1993-12-30",
+         "classe": "G", "echelon": "2"},
         {"email": "tech1@kya-energy.com", "first_name": "Messan", "last_name": "ADJAMAGBO",
          "roles": ["Employee"],
-         "department": dept_name("Services Technique"), "designation": "TECHNICIEN", "emp_type": "Full-time"},
+         "department": dept_name("Services Technique"), "designation": "TECHNICIEN",
+         "emp_type": "CDD", "dob": "1995-02-08",
+         "classe": "E", "echelon": "3"},
         {"email": "commercial@kya-energy.com", "first_name": "Akofa", "last_name": "LAWSON",
          "roles": ["Employee"],
-         "department": dept_name("Services Commercial"), "designation": "ASS. COMMERCIALE", "emp_type": "Full-time"},
+         "department": dept_name("Services Commercial"), "designation": "ASS. COMMERCIALE",
+         "emp_type": "CDD", "dob": "1994-08-19",
+         "classe": "D", "echelon": "4"},
         # STAGIAIRES
         {"email": "stagiaire1@kya-energy.com", "first_name": "Edem", "last_name": "AGBODJAN",
          "roles": ["Employee", "Employee Self Service"],
-         "department": dept_name("EQUIPE INFORMATIQUE"), "designation": "STAGE-INFORMATIQUE", "emp_type": "Intern"},
+         "department": dept_name("EQUIPE INFORMATIQUE"), "designation": "STAGE-INFORMATIQUE",
+         "emp_type": "Stage", "dob": "2001-05-15",
+         "classe": "A", "echelon": "1"},
         {"email": "stagiaire2@kya-energy.com", "first_name": "Abla", "last_name": "GBEDEMAH",
          "roles": ["Employee", "Employee Self Service"],
-         "department": dept_name("Finance et Comptabilité"), "designation": "STAGE-COMPTABILITE", "emp_type": "Intern"},
+         "department": dept_name("Finance et Comptabilité"), "designation": "STAGE-COMPTABILITE",
+         "emp_type": "Stage", "dob": "2000-10-03",
+         "classe": "A", "echelon": "1"},
         {"email": "stagiaire3@kya-energy.com", "first_name": "Kossi", "last_name": "EKUE",
          "roles": ["Employee", "Employee Self Service"],
-         "department": dept_name("Services Technique"), "designation": "STAGE-ELECTRONIQUE", "emp_type": "Intern"},
+         "department": dept_name("Services Technique"), "designation": "STAGE-ELECTRONIQUE",
+         "emp_type": "Stage", "dob": "2002-01-27",
+         "classe": "A", "echelon": "1"},
         {"email": "stagiaire4@kya-energy.com", "first_name": "Kafui", "last_name": "AMEGAH",
          "roles": ["Employee", "Employee Self Service"],
-         "department": dept_name("Services Supports"), "designation": "STAGE-QHSE", "emp_type": "Intern"},
+         "department": dept_name("Services Supports"), "designation": "STAGE-QHSE",
+         "emp_type": "Stage", "dob": "2001-08-11",
+         "classe": "A", "echelon": "1"},
     ]
 
     employee_map = {}
@@ -193,8 +233,8 @@ def run():
             existing_emp = frappe.db.get_value("Employee", {"user_id": u["email"]}, "name")
             if not existing_emp:
                 gender = "Female" if u["first_name"] in ["Afi","Akouvi","Ama","Akofa","Abla","Kafui"] else "Male"
-                doj = "2023-01-15" if u["emp_type"] == "Full-time" else "2025-03-01"
-                dob = "1990-05-15" if u["emp_type"] == "Full-time" else "2000-09-10"
+                doj = "2023-01-15" if u["emp_type"] != "Stage" else "2025-03-01"
+                dob = u.get("dob", "1990-05-15")
                 emp = frappe.get_doc({
                     "doctype": "Employee",
                     "first_name": u["first_name"],
@@ -209,6 +249,8 @@ def run():
                     "status": "Active",
                     "employment_type": u["emp_type"],
                     "user_id": u["email"],
+                    "custom_kya_classe": u.get("classe", ""),
+                    "custom_kya_echelon": u.get("echelon", ""),
                 })
                 emp.flags.ignore_permissions = True
                 emp.flags.ignore_mandatory = True
@@ -610,6 +652,91 @@ def run():
             print(f"  Leave allocated: {emp_id}")
         except Exception as e:
             print(f"  Leave alloc error: {e}")
+    frappe.db.commit()
+
+    # ========================================
+    # 12. DEFAULT ENQUETE & EVALUATION DATA (KYA Services)
+    # ========================================
+    print("\n=== 12. DEFAULT ENQUETE & EVALUATION ===")
+
+    # Create a default satisfaction survey if kya_services is installed
+    try:
+        if "KYA Form" in [d.name for d in frappe.get_all("DocType", filters={"module": "KYA Services"})]:
+            if not frappe.db.exists("KYA Form", {"titre": "Enquête de Satisfaction Trimestrielle"}):
+                survey = frappe.get_doc({
+                    "doctype": "KYA Form",
+                    "titre": "Enquête de Satisfaction Trimestrielle",
+                    "type_formulaire": "Enquête",
+                    "statut": "Brouillon",
+                    "anonyme": 1,
+                    "envoyer_tous": 1,
+                    "description": "Enquête anonyme de satisfaction des employés — T1 2026",
+                    "questions": [
+                        {"libelle": "Comment évaluez-vous votre satisfaction générale au travail ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 1},
+                        {"libelle": "L'ambiance de travail est-elle positive ?",
+                         "type_reponse": "Oui / Non", "obligatoire": 1, "ordre": 2},
+                        {"libelle": "Êtes-vous satisfait(e) de la communication interne ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 3},
+                        {"libelle": "Les conditions de travail (bureaux, équipements) sont-elles satisfaisantes ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 4},
+                        {"libelle": "Recommanderiez-vous KYA-Energy Group comme employeur ?",
+                         "type_reponse": "Oui / Non", "obligatoire": 1, "ordre": 5},
+                        {"libelle": "Quels aspects de votre travail souhaiteriez-vous améliorer ?",
+                         "type_reponse": "Texte libre", "obligatoire": 0, "ordre": 6},
+                        {"libelle": "Commentaires ou suggestions libres",
+                         "type_reponse": "Texte libre", "obligatoire": 0, "ordre": 7},
+                    ],
+                })
+                survey.flags.ignore_permissions = True
+                survey.insert(ignore_permissions=True)
+                print(f"  Enquête créée: {survey.name} (Brouillon, anonyme)")
+            else:
+                print("  Enquête satisfaction déjà existante")
+
+            # Create a default evaluation campaign template (N+1 → N) for demo
+            if not frappe.db.exists("KYA Form", {"titre": "Évaluation de Performance — Modèle"}):
+                eval_form = frappe.get_doc({
+                    "doctype": "KYA Form",
+                    "titre": "Évaluation de Performance — Modèle",
+                    "type_formulaire": "Évaluation",
+                    "statut": "Brouillon",
+                    "anonyme": 0,
+                    "envoyer_tous": 0,
+                    "description": "Modèle d'évaluation de performance trimestrielle (N+1 évalue N). À activer par l'admin pour lancer une campagne.",
+                    "questions": [
+                        {"libelle": "Niveau d'atteinte des objectifs individuels",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 1},
+                        {"libelle": "Compétences spécifiques liées au poste",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 2},
+                        {"libelle": "Qualité et précision du travail fourni",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 3},
+                        {"libelle": "Capacité à collaborer avec les autres",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 4},
+                        {"libelle": "Efficacité des compétences en communication",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 5},
+                        {"libelle": "Capacité à identifier et résoudre des problèmes",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 6},
+                        {"libelle": "Niveau d'engagement et de motivation",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 7},
+                        {"libelle": "Incarnation des valeurs de l'organisation",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 8},
+                        {"libelle": "Points forts observés",
+                         "type_reponse": "Texte libre", "obligatoire": 0, "ordre": 9},
+                        {"libelle": "Axes d'amélioration suggérés",
+                         "type_reponse": "Texte libre", "obligatoire": 0, "ordre": 10},
+                    ],
+                })
+                eval_form.flags.ignore_permissions = True
+                eval_form.insert(ignore_permissions=True)
+                print(f"  Évaluation modèle créée: {eval_form.name} (Brouillon)")
+            else:
+                print("  Évaluation modèle déjà existante")
+        else:
+            print("  KYA Services non installé — skip enquêtes/évaluations")
+    except Exception as e:
+        print(f"  Enquête/Évaluation error: {e}")
+
     frappe.db.commit()
 
     # ========================================

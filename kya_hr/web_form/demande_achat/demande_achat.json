@@ -12,7 +12,7 @@
     "docstatus": 0,
     "doctype": "Web Form",
     "idx": 0,
-    "introduction_text": "<p>Soumettez une demande d\u2019achat. Le circuit d\u2019approbation d\u00e9pend du montant : < 100 000 XOF (Chef), < 2 000 000 XOF (Chef + DGA), \u2265 2 000 000 XOF (Chef + DGA + DG).</p>",
+"introduction_text": "",
     "is_standard": 1,
     "login_required": 1,
     "modified": "2026-03-12 00:00:00.000000",
@@ -23,7 +23,7 @@
     "published": 1,
     "route": "demande-achat",
     "show_sidebar": 1,
-    "success_message": "Votre demande d\u2019achat a \u00e9t\u00e9 soumise. Elle sera transmise \u00e0 votre Chef de D\u00e9partement pour approbation.",
+    "success_message": "\u2705 Votre demande d\u2019achat a \u00e9t\u00e9 soumise avec succ\u00e8s. Elle sera transmise \u00e0 votre Chef de D\u00e9partement pour approbation.",
     "title": "Demande d'Achat",
     "web_form_fields": [
         {
@@ -77,7 +77,25 @@
         {
             "fieldname": "signature_demandeur",
             "fieldtype": "Signature",
-            "label": "Signature du Demandeur"
+            "label": "Signature Demandeur"
+        },
+        {
+            "fieldname": "signature_chef",
+            "fieldtype": "Signature",
+            "label": "Signature Chef",
+            "read_only": 1
+        },
+        {
+            "fieldname": "signature_dga",
+            "fieldtype": "Signature",
+            "label": "Signature DGA",
+            "read_only": 1
+        },
+        {
+            "fieldname": "signature_dg",
+            "fieldtype": "Signature",
+            "label": "Signature DG",
+            "read_only": 1
         }
     ]
 }
