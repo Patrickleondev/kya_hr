@@ -1,10 +1,10 @@
 {
     "doctype": "Workspace",
-    "name": "KYA Stagiaires",
+    "name": "Espace Stagiaires",
     "type": "Workspace",
     "is_standard": 1,
     "title": "Espace Stagiaires",
-    "icon": "users",
+    "icon": "education",
     "module": "KYA HR",
     "public": 1,
     "parent_page": "",

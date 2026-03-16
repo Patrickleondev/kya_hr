@@ -1,10 +1,10 @@
 {
     "doctype": "Workspace",
-    "name": "Stock KYA",
+    "name": "Stock & Logistique",
     "type": "Workspace",
     "is_standard": 1,
     "title": "Stock & Logistique",
-    "icon": "truck",
+    "icon": "stock",
     "module": "KYA HR",
     "public": 1,
     "parent_page": "",

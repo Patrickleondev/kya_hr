@@ -1,10 +1,10 @@
 {
     "doctype": "Workspace",
-    "name": "Achats KYA",
+    "name": "Achats & Approvisionnement",
     "type": "Workspace",
     "is_standard": 1,
     "title": "Achats & Approvisionnement",
-    "icon": "shopping-cart",
+    "icon": "buying",
     "module": "KYA HR",
     "public": 1,
     "parent_page": "",
