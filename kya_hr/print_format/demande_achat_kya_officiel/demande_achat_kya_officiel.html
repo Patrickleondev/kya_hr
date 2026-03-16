@@ -26,7 +26,7 @@
     .badge-pending { background: #fff3e0; color: #e65100; border: 2px solid #ff9800; }
     .badge-rejected { background: #ffebee; color: #c62828; border: 2px solid #ef5350; }
     .da-sigs { display: flex; flex-wrap: wrap; justify-content: space-around; margin-top: 16px; padding-top: 14px; border-top: 1px dashed #ccc; }
-    .sig-block { text-align: center; width: 22%; margin-bottom: 10px; }
+    .sig-block { text-align: center; width: 18%; margin-bottom: 10px; }
     .sig-block .line { border-top: 1px solid #333; margin-top: 30px; padding-top: 4px; font-size: 9px; }
     .sig-img { max-height: 50px; display: block; margin: 0 auto 4px; }
     .da-footer { background: #f5f5f5; padding: 8px 20px; text-align: center; font-size: 8px; color: #999; border-top: 1px solid #e0e0e0; }
@@ -93,9 +93,9 @@
 
         <div style="text-align:center;margin:8px 0;">
             {% if doc.montant_total >= 2000000 %}
-                <span class="da-palier palier-3">PALIER 3 — Chef + DGA + DG</span>
+                <span class="da-palier palier-3">PALIER 3 — Chef + Auditeur + DAAF + DG</span>
             {% elif doc.montant_total >= 100000 %}
-                <span class="da-palier palier-2">PALIER 2 — Chef + DGA</span>
+                <span class="da-palier palier-2">PALIER 2 — Chef + Auditeur + DAAF</span>
             {% else %}
                 <span class="da-palier palier-1">PALIER 1 — Chef seul</span>
             {% endif %}
@@ -131,8 +131,15 @@
                 {% if doc.signature_dga %}
                     <img src="{{ doc.signature_dga }}" class="sig-img">
                 {% endif %}
-                <div class="line">{{ doc.signataire_dga or 'DGA' }}</div>
+                <div class="line">{{ doc.signataire_dga or 'Auditeur' }}</div>
                 {% if doc.date_signature_dga %}<div style="font-size:8px;color:#888;">{{ frappe.utils.format_date(doc.date_signature_dga) }}</div>{% endif %}
+            </div>
+            <div class="sig-block">
+                {% if doc.signature_daaf %}
+                    <img src="{{ doc.signature_daaf }}" class="sig-img">
+                {% endif %}
+                <div class="line">{{ doc.signataire_daaf or 'DAAF' }}</div>
+                {% if doc.date_signature_daaf %}<div style="font-size:8px;color:#888;">{{ frappe.utils.format_date(doc.date_signature_daaf) }}</div>{% endif %}
             </div>
             {% endif %}
             {% if doc.montant_total >= 2000000 %}
