@@ -9,7 +9,7 @@
  "icon": "calendar",
  "idx": 0,
  "is_hidden": 0,
- "label": "Cong\u00e9s & Permissions",
+ "label": "Congés & Permissions",
  "links": [
   {
    "hidden": 0,
@@ -25,7 +25,7 @@
    "hidden": 0,
    "icon": "file",
    "is_query_report": 0,
-   "label": "Permission Sortie Employ\u00e9",
+   "label": "Permission Sortie Employé",
    "link_count": 0,
    "link_to": "Permission Sortie Employe",
    "link_type": "DocType",
@@ -36,7 +36,7 @@
    "hidden": 0,
    "icon": "calendar",
    "is_query_report": 0,
-   "label": "Planning Cong\u00e9",
+   "label": "Planning Congé",
    "link_count": 0,
    "link_to": "Planning Conge",
    "link_type": "DocType",
@@ -69,7 +69,7 @@
    "hidden": 0,
    "icon": "bar-chart",
    "is_query_report": 0,
-   "label": "Fiche Gestion Cong\u00e9s",
+   "label": "Fiche Gestion Congés",
    "link_count": 0,
    "link_to": "Fiche Gestion Conges",
    "link_type": "Report",
@@ -80,7 +80,7 @@
  "modified": "2026-03-15 12:15:43.703424",
  "modified_by": "Administrator",
  "module": "KYA HR",
- "name": "Cong\u00e9s & Permissions",
+ "name": "Congés & Permissions",
  "number_cards": [],
  "owner": "Administrator",
  "parent_page": "",
@@ -110,7 +110,7 @@
    "color": "#7C5CFC",
    "doc_view": "",
    "icon": "calendar",
-   "label": "Mon Planning de Cong\u00e9",
+   "label": "Mon Planning de Congé",
    "link_to": "Planning Conge",
    "type": "DocType"
   },
@@ -118,7 +118,7 @@
    "color": "#009688",
    "doc_view": "",
    "icon": "external-link",
-   "label": "Formulaire Planning Cong\u00e9",
+   "label": "Formulaire Planning Congé",
    "link_to": "/planning-conge",
    "type": "URL",
    "url": "/planning-conge"
@@ -127,11 +127,12 @@
    "color": "#FF6B6B",
    "doc_view": "",
    "icon": "file",
-   "label": "Demande de Cong\u00e9",
+   "label": "Demande de Congé",
    "link_to": "Leave Application",
    "type": "DocType"
   }
  ],
- "title": "Cong\u00e9s & Permissions",
- "type": "Workspace"
+ "title": "Congés & Permissions",
+ "type": "Workspace",
+ "app": "kya_hr"
 }
