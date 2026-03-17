@@ -75,6 +75,12 @@
             "reqd": 1
         },
         {
+            "fieldname": "montant_total",
+            "fieldtype": "Currency",
+            "label": "Montant Total (XOF)",
+            "read_only": 1
+        },
+        {
             "fieldname": "signature_demandeur",
             "fieldtype": "Signature",
             "label": "Signature Demandeur"
@@ -88,7 +94,13 @@
         {
             "fieldname": "signature_dga",
             "fieldtype": "Signature",
-            "label": "Signature DGA",
+            "label": "Signature DGA/Auditeur",
+            "read_only": 1
+        },
+        {
+            "fieldname": "signature_daaf",
+            "fieldtype": "Signature",
+            "label": "Signature DAAF",
             "read_only": 1
         },
         {

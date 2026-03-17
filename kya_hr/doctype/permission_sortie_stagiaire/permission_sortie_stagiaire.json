@@ -59,12 +59,26 @@
         },
         {
             "fieldname": "date_sortie",
-            "label": "Date de Sortie",
+            "label": "Date de D\u00e9but",
             "fieldtype": "Date",
             "reqd": 1,
             "default": "Today",
             "in_list_view": 1,
             "in_standard_filter": 1
+        },
+        {
+            "fieldname": "date_fin",
+            "label": "Date de Fin",
+            "fieldtype": "Date",
+            "description": "Laisser vide si sortie dans la journ\u00e9e"
+        },
+        {
+            "fieldname": "nombre_jours",
+            "label": "Nombre de Jours",
+            "fieldtype": "Int",
+            "read_only": 1,
+            "description": "Calcul\u00e9 automatiquement",
+            "default": "1"
         },
         {
             "fieldname": "heure_depart",
@@ -122,20 +136,38 @@
             "fieldtype": "Signature"
         },
         {
+            "fieldname": "signataire_stagiaire",
+            "label": "Nom Stagiaire",
+            "fieldtype": "Data",
+            "read_only": 1
+        },
+        {
+            "fieldname": "date_signature_stagiaire",
+            "label": "Date Signature",
+            "fieldtype": "Date",
+            "read_only": 1
+        },
+        {
             "fieldname": "col_sig_chef",
             "fieldtype": "Column Break",
             "label": "Chef de Service"
         },
         {
-            "fieldname": "chef_nom",
-            "label": "Nom Chef de Service",
+            "fieldname": "signature_chef",
+            "label": "Signature Chef",
+            "fieldtype": "Signature",
+            "read_only": 1
+        },
+        {
+            "fieldname": "signataire_chef",
+            "label": "Nom Chef",
             "fieldtype": "Data",
             "read_only": 1
         },
         {
-            "fieldname": "signature_chef",
-            "label": "Signature Chef",
-            "fieldtype": "Signature",
+            "fieldname": "date_signature_chef",
+            "label": "Date Signature Chef",
+            "fieldtype": "Date",
             "read_only": 1
         },
         {
@@ -148,15 +180,21 @@
             "label": "Resp. Stagiaires"
         },
         {
-            "fieldname": "resp_stagiaires_nom",
+            "fieldname": "signature_resp_stagiaires",
+            "label": "Signature Resp. Stagiaires",
+            "fieldtype": "Signature",
+            "read_only": 1
+        },
+        {
+            "fieldname": "signataire_resp",
             "label": "Nom Resp. Stagiaires",
             "fieldtype": "Data",
             "read_only": 1
         },
         {
-            "fieldname": "signature_resp_stagiaires",
-            "label": "Signature Resp. Stagiaires",
-            "fieldtype": "Signature",
+            "fieldname": "date_signature_resp",
+            "label": "Date Signature Resp.",
+            "fieldtype": "Date",
             "read_only": 1
         },
         {
@@ -165,15 +203,21 @@
             "label": "Directeur G\u00e9n\u00e9ral"
         },
         {
-            "fieldname": "dg_nom",
+            "fieldname": "signature_dg",
+            "label": "Signature DG",
+            "fieldtype": "Signature",
+            "read_only": 1
+        },
+        {
+            "fieldname": "signataire_dg",
             "label": "Nom DG",
             "fieldtype": "Data",
             "read_only": 1
         },
         {
-            "fieldname": "signature_dg",
-            "label": "Signature DG",
-            "fieldtype": "Signature",
+            "fieldname": "date_signature_dg",
+            "label": "Date Signature DG",
+            "fieldtype": "Date",
             "read_only": 1
         },
         {

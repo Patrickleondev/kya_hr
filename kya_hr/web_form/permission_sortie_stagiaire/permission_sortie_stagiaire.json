@@ -49,9 +49,21 @@
         {
             "fieldname": "date_sortie",
             "fieldtype": "Date",
-            "label": "Date de Sortie",
+            "label": "Date de D\u00e9but",
             "reqd": 1,
             "default": "Today"
+        },
+        {
+            "fieldname": "date_fin",
+            "fieldtype": "Date",
+            "label": "Date de Fin",
+            "description": "Laisser vide si sortie dans la journ\u00e9e"
+        },
+        {
+            "fieldname": "nombre_jours",
+            "fieldtype": "Int",
+            "label": "Nombre de Jours",
+            "read_only": 1
         },
         {
             "fieldname": "heure_depart",

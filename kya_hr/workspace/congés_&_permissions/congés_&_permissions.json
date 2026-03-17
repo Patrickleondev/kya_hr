@@ -1,0 +1,137 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"hero\",\"type\":\"header\",\"data\":{\"text\":\"<div class='ellipsis' title='Cong\\u00e9s & Permissions'>\\ud83d\\udcc5 Cong\\u00e9s & Permissions</div>\",\"level\":3,\"col\":12}},{\"id\":\"s1\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Nouvelle Permission de Sortie\",\"col\":3}},{\"id\":\"s2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Formulaire Permission\",\"col\":3}},{\"id\":\"s3\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Mon Planning de Cong\\u00e9\",\"col\":3}},{\"id\":\"s3b\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Formulaire Planning Cong\\u00e9\",\"col\":3}},{\"id\":\"s4\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Demande de Cong\\u00e9\",\"col\":3}},{\"id\":\"spacer1\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"cards_header\",\"type\":\"header\",\"data\":{\"text\":\"Acc\\u00e8s Rapide\",\"level\":4,\"col\":12}}]",
+ "creation": "2026-03-14 21:41:10.999343",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "hide_custom": 0,
+ "icon": "calendar",
+ "idx": 0,
+ "is_hidden": 0,
+ "label": "Cong\u00e9s & Permissions",
+ "links": [
+  {
+   "hidden": 0,
+   "icon": "home",
+   "is_query_report": 0,
+   "label": "Accueil",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "icon": "file",
+   "is_query_report": 0,
+   "label": "Permission Sortie Employ\u00e9",
+   "link_count": 0,
+   "link_to": "Permission Sortie Employe",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "icon": "calendar",
+   "is_query_report": 0,
+   "label": "Planning Cong\u00e9",
+   "link_count": 0,
+   "link_to": "Planning Conge",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "icon": "file",
+   "is_query_report": 0,
+   "label": "Leave Application",
+   "link_count": 0,
+   "link_to": "Leave Application",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "icon": "bar-chart-2",
+   "is_query_report": 0,
+   "label": "Rapports",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "Leave Application",
+   "hidden": 0,
+   "icon": "bar-chart",
+   "is_query_report": 0,
+   "label": "Fiche Gestion Cong\u00e9s",
+   "link_count": 0,
+   "link_to": "Fiche Gestion Conges",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-03-15 12:15:43.703424",
+ "modified_by": "Administrator",
+ "module": "KYA HR",
+ "name": "Cong\u00e9s & Permissions",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 10.0,
+ "shortcuts": [
+  {
+   "color": "#2490EF",
+   "doc_view": "",
+   "icon": "file",
+   "label": "Nouvelle Permission de Sortie",
+   "link_to": "Permission Sortie Employe",
+   "type": "DocType"
+  },
+  {
+   "color": "#29CD42",
+   "doc_view": "",
+   "icon": "external-link",
+   "label": "Formulaire Permission",
+   "link_to": "/permission-sortie-employe",
+   "type": "URL",
+   "url": "/permission-sortie-employe"
+  },
+  {
+   "color": "#7C5CFC",
+   "doc_view": "",
+   "icon": "calendar",
+   "label": "Mon Planning de Cong\u00e9",
+   "link_to": "Planning Conge",
+   "type": "DocType"
+  },
+  {
+   "color": "#009688",
+   "doc_view": "",
+   "icon": "external-link",
+   "label": "Formulaire Planning Cong\u00e9",
+   "link_to": "/planning-conge",
+   "type": "URL",
+   "url": "/planning-conge"
+  },
+  {
+   "color": "#FF6B6B",
+   "doc_view": "",
+   "icon": "file",
+   "label": "Demande de Cong\u00e9",
+   "link_to": "Leave Application",
+   "type": "DocType"
+  }
+ ],
+ "title": "Cong\u00e9s & Permissions",
+ "type": "Workspace"
+}

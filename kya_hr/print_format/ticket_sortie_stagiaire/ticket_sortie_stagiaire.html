@@ -41,7 +41,12 @@
             </tr>
             <tr>
                 <td class="label">Date de sortie</td>
-                <td class="value">{{ frappe.utils.format_date(doc.date_sortie) }}</td>
+                <td class="value">
+                    {{ frappe.utils.format_date(doc.date_sortie) }}
+                    {% if doc.date_fin and doc.date_fin != doc.date_sortie %}
+                        → {{ frappe.utils.format_date(doc.date_fin) }} ({{ doc.nombre_jours or 1 }} jour{{ 's' if (doc.nombre_jours or 1) > 1 else '' }})
+                    {% endif %}
+                </td>
             </tr>
             <tr>
                 <td class="label">Heure de départ</td>

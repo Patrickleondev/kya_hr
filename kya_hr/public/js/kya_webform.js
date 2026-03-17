@@ -20,9 +20,11 @@
       {
         title: "Détails de la Sortie",
         icon: "🚪",
-        fields: ["date_sortie", "heure_depart", "heure_retour", "motif", "justificatif"],
+        fields: ["date_sortie", "date_fin", "nombre_jours", "heure_depart", "heure_retour", "motif", "justificatif"],
         grid: {
           date_sortie: "col",
+          date_fin: "col",
+          nombre_jours: "col",
           heure_depart: "col",
           heure_retour: "col",
           motif: "span 2",
@@ -84,12 +86,12 @@
       {
         title: "Articles Demandés",
         icon: "🛒",
-        fields: ["items"],
+        fields: ["items", "montant_total"],
       },
       {
         title: "Validations & Signatures",
         icon: "✍️",
-        fields: ["signature_demandeur", "signature_chef", "signature_dga", "signature_dg"],
+        fields: ["signature_demandeur", "signature_chef", "signature_dga", "signature_daaf", "signature_dg"],
         sigGrid: true,
       },
     ],

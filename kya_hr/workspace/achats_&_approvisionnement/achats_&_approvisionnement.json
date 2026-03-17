@@ -1,0 +1,88 @@
+{
+ "app": "kya_hr",
+ "charts": [],
+ "content": "[{\"id\":\"hero\",\"type\":\"header\",\"data\":{\"text\":\"<div class='ellipsis' title='Achats & Approvisionnement'>\\ud83d\\udecd\\ufe0f Achats & Approvisionnement</div>\",\"level\":3,\"col\":12}},{\"id\":\"s1\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Nouvelle Demande d'Achat\",\"col\":4}},{\"id\":\"s2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Demandes en attente\",\"col\":4}},{\"id\":\"s3\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Formulaire Demande d'Achat\",\"col\":4}},{\"id\":\"spacer1\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"cards_header\",\"type\":\"header\",\"data\":{\"text\":\"Processus d'Achat\",\"level\":4,\"col\":12}}]",
+ "creation": "2026-03-14 21:41:10.870758",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "hide_custom": 0,
+ "icon": "buying",
+ "idx": 0,
+ "is_hidden": 0,
+ "label": "Achats & Approvisionnement",
+ "links": [
+  {
+   "hidden": 0,
+   "icon": "home",
+   "is_query_report": 0,
+   "label": "Accueil",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "icon": "shopping-cart",
+   "is_query_report": 0,
+   "label": "Demande Achat KYA",
+   "link_count": 0,
+   "link_to": "Demande Achat KYA",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "icon": "file",
+   "is_query_report": 0,
+   "label": "Purchase Order",
+   "link_count": 0,
+   "link_to": "Purchase Order",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-03-16 10:25:40.305200",
+ "modified_by": "Administrator",
+ "module": "KYA HR",
+ "name": "Achats & Approvisionnement",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 15.0,
+ "shortcuts": [
+  {
+   "color": "#2490EF",
+   "doc_view": "",
+   "icon": "file",
+   "label": "Nouvelle Demande d'Achat",
+   "link_to": "Demande Achat KYA",
+   "type": "DocType"
+  },
+  {
+   "color": "#FF6B6B",
+   "doc_view": "",
+   "icon": "alert-circle",
+   "label": "Demandes en attente",
+   "link_to": "Demande Achat KYA",
+   "type": "DocType"
+  },
+  {
+   "color": "#29CD42",
+   "doc_view": "",
+   "icon": "external-link",
+   "label": "Formulaire Demande d'Achat",
+   "link_to": "/demande-achat",
+   "type": "URL",
+   "url": "/demande-achat"
+  }
+ ],
+ "title": "Achats & Approvisionnement",
+ "type": "Workspace"
+}

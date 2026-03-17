@@ -1,0 +1,205 @@
+{
+ "app": "kya_hr",
+ "charts": [
+  {
+   "chart_name": "Stagiaires par D\u00e9partement"
+  },
+  {
+   "chart_name": "R\u00e9partition par Genre"
+  },
+  {
+   "chart_name": "Pr\u00e9sences Mensuelles"
+  }
+ ],
+ "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Stagiaires'>\\ud83c\\udf93 Espace Stagiaires KYA</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Demander une Permission\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Permissions\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Bilan\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Tableau de Bord\", \"col\": 3}}, {\"id\": \"spacer1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"nc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Stagiaires Actifs\", \"col\": 3}}, {\"id\": \"nc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Permissions en cours\", \"col\": 3}}, {\"id\": \"nc3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Bilans valid\\u00e9s\", \"col\": 3}}, {\"id\": \"nc4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Retards ce mois\", \"col\": 3}}, {\"id\": \"spacer2\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"ch1\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Stagiaires par D\\u00e9partement\", \"col\": 6}}, {\"id\": \"ch2\", \"type\": \"chart\", \"data\": {\"chart_name\": \"R\\u00e9partition par Genre\", \"col\": 6}}, {\"id\": \"ch3\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Pr\\u00e9sences Mensuelles\", \"col\": 12}}]",
+ "creation": "2026-03-14 21:41:11.218132",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "hide_custom": 0,
+ "icon": "education",
+ "idx": 0,
+ "is_hidden": 0,
+ "label": "Espace Stagiaires",
+ "links": [
+  {
+   "hidden": 0,
+   "icon": "home",
+   "is_query_report": 0,
+   "label": "Accueil",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "icon": "file",
+   "is_query_report": 0,
+   "label": "Permission Sortie Stagiaire",
+   "link_count": 0,
+   "link_to": "Permission Sortie Stagiaire",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "icon": "bar-chart",
+   "is_query_report": 0,
+   "label": "Bilan Fin de Stage",
+   "link_count": 0,
+   "link_to": "Bilan Fin de Stage",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "icon": "list",
+   "is_query_report": 0,
+   "label": "Listes",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "icon": "users",
+   "is_query_report": 0,
+   "label": "Stagiaires",
+   "link_count": 0,
+   "link_to": "Employee",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "icon": "clock",
+   "is_query_report": 0,
+   "label": "Pr\u00e9sences",
+   "link_count": 0,
+   "link_to": "Attendance",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "icon": "bar-chart-2",
+   "is_query_report": 0,
+   "label": "Rapports",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "Employee",
+   "hidden": 0,
+   "icon": "dashboard",
+   "is_query_report": 0,
+   "label": "Tableau de Bord Stagiaires",
+   "link_count": 0,
+   "link_to": "Tableau de Bord Stagiaires",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "Employee",
+   "type": "Link"
+  },
+  {
+   "dependencies": "Attendance",
+   "hidden": 0,
+   "icon": "bar-chart",
+   "is_query_report": 0,
+   "label": "Rapport Pr\u00e9sence Stagiaires",
+   "link_count": 0,
+   "link_to": "Rapport Pr\u00e9sence Stagiaires",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "Attendance",
+   "type": "Link"
+  },
+  {
+   "dependencies": "Leave Application",
+   "hidden": 0,
+   "icon": "calendar",
+   "is_query_report": 0,
+   "label": "Fiche Gestion Cong\u00e9s",
+   "link_count": 0,
+   "link_to": "Fiche Gestion Conges",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "Leave Application",
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-03-16 10:25:40.670370",
+ "modified_by": "Administrator",
+ "module": "KYA HR",
+ "name": "Espace Stagiaires",
+ "number_cards": [
+  {
+   "label": "Stagiaires actifs",
+   "number_card_name": "Total Stagiaires Actifs"
+  },
+  {
+   "label": "En cours de validation",
+   "number_card_name": "Permissions en cours"
+  },
+  {
+   "label": "Bilans valid\u00e9s",
+   "number_card_name": "Bilans valid\u00e9s"
+  },
+  {
+   "label": "Absences / Retards",
+   "number_card_name": "Retards ce mois"
+  }
+ ],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 5.0,
+ "shortcuts": [
+  {
+   "color": "#2490EF",
+   "doc_view": "",
+   "icon": "file",
+   "label": "Demander une Permission",
+   "link_to": "/permission-sortie-stagiaire",
+   "type": "URL",
+   "url": "/permission-sortie-stagiaire"
+  },
+  {
+   "color": "#29CD42",
+   "doc_view": "",
+   "icon": "list",
+   "label": "Permissions",
+   "link_to": "Permission Sortie Stagiaire",
+   "type": "DocType"
+  },
+  {
+   "color": "#7C5CFC",
+   "doc_view": "",
+   "icon": "bar-chart",
+   "label": "Bilan",
+   "link_to": "Bilan Fin de Stage",
+   "type": "DocType"
+  },
+  {
+   "color": "#009688",
+   "doc_view": "",
+   "icon": "dashboard",
+   "label": "Tableau de Bord",
+   "link_to": "Tableau de Bord Stagiaires",
+   "report_ref_doctype": "Employee",
+   "type": "Report"
+  }
+ ],
+ "title": "Espace Stagiaires",
+ "type": "Workspace"
+}
