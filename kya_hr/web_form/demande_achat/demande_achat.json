@@ -94,13 +94,7 @@
         {
             "fieldname": "signature_dga",
             "fieldtype": "Signature",
-            "label": "Signature DGA/Auditeur",
-            "read_only": 1
-        },
-        {
-            "fieldname": "signature_daaf",
-            "fieldtype": "Signature",
-            "label": "Signature DAAF",
+            "label": "Signature DGA",
             "read_only": 1
         },
         {

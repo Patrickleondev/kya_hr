@@ -58,6 +58,12 @@
             "label": "Signature Demandeur"
         },
         {
+            "fieldname": "signature_chef",
+            "fieldtype": "Signature",
+            "label": "Signature Chef",
+            "read_only": 1
+        },
+        {
             "fieldname": "signature_audit",
             "fieldtype": "Signature",
             "label": "Signature Audit",

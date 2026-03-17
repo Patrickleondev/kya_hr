@@ -91,7 +91,7 @@
       {
         title: "Validations & Signatures",
         icon: "✍️",
-        fields: ["signature_demandeur", "signature_chef", "signature_dga", "signature_daaf", "signature_dg"],
+        fields: ["signature_demandeur", "signature_chef", "signature_dga", "signature_dg"],
         sigGrid: true,
       },
     ],
@@ -110,7 +110,7 @@
       {
         title: "Validations & Signatures",
         icon: "✍️",
-        fields: ["signature_demandeur", "signature_audit", "signature_dga", "signature_magasin"],
+        fields: ["signature_demandeur", "signature_chef", "signature_audit", "signature_dga", "signature_magasin"],
         sigGrid: true,
       },
     ],
