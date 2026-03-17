@@ -1,0 +1,52 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    name: Deploy kya_hr + kya_services to digital.pro.kya.tg
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_SSH_HOST }}
+          username: ${{ secrets.PROD_SSH_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          port: ${{ secrets.PROD_SSH_PORT || 22 }}
+          script: |
+            set -e
+            BENCH_PATH="${{ secrets.PROD_BENCH_PATH || '/home/frappe/frappe-bench' }}"
+            SITE="${{ secrets.PROD_SITE_NAME || 'frontend' }}"
+            COMPOSE_FILE="${{ secrets.PROD_COMPOSE_FILE || 'v16-hrms-8086.yml' }}"
+            COMPOSE_DIR="${{ secrets.PROD_COMPOSE_DIR || '/srv/kya' }}"
+
+            echo "=== [1/5] Pull kya_hr latest ==="
+            cd "$BENCH_PATH/apps/kya_hr"
+            git fetch origin main
+            git reset --hard origin/main
+
+            echo "=== [2/5] Pull kya_services latest ==="
+            cd "$BENCH_PATH/apps/kya_services"
+            git fetch origin main
+            git reset --hard origin/main
+
+            echo "=== [3/5] Migrate ==="
+            cd "$BENCH_PATH"
+            bench --site "$SITE" migrate
+
+            echo "=== [4/5] Build assets ==="
+            bench build --app kya_hr
+            bench build --app kya_services
+
+            echo "=== [5/5] Clear cache ==="
+            bench --site "$SITE" clear-cache
+            bench --site "$SITE" clear-website-cache
+
+            echo "=== Deploy complete ==="
