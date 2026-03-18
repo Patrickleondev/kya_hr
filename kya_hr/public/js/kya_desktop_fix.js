@@ -1,16 +1,30 @@
 /**
- * KYA Desktop Icon Fix v3
- * Multi-layer approach to prevent "Icon is not correctly configured" error:
- * 1. Intercept frappe.msgprint early to suppress the error message
- * 2. Patch desktop page render to fix icons with missing routes
- * 3. MutationObserver fallback to catch dynamically rendered icons
+ * KYA Desktop Icon Fix v4
+ * Supprime l'erreur "Icon is not correctly configured" sur les icônes HRMS.
+ * Couches: msgprint + throw + dialog + workspace click interception
  */
 (function () {
 	"use strict";
 
+	var ICON_ERROR_PATTERNS = [
+		"Icon is not correctly configured",
+		"not correctly configured",
+		"pas correctement configur",
+		"icône n'est pas",
+		"icon_link",
+	];
+
+	function isIconError(text) {
+		if (!text) return false;
+		text = String(text).toLowerCase();
+		return ICON_ERROR_PATTERNS.some(function (p) {
+			return text.indexOf(p.toLowerCase()) >= 0;
+		});
+	}
+
 	// === Layer 1: Intercept frappe.msgprint ===
 	function patchMsgprint() {
-		if (!frappe || !frappe.msgprint) return false;
+		if (!window.frappe || !frappe.msgprint) return false;
 		if (frappe._kya_msgprint_patched) return true;
 
 		var _orig = frappe.msgprint;
@@ -21,12 +35,8 @@
 			} else if (msg && typeof msg === "object") {
 				text = msg.message || msg.title || msg.indicator || "";
 			}
-			if (
-				text.indexOf("Icon is not correctly configured") >= 0 ||
-				text.indexOf("not correctly configured") >= 0 ||
-				text.indexOf("pas correctement configur") >= 0
-			) {
-				console.log("[KYA] Suppressed icon config error");
+			if (isIconError(text)) {
+				console.log("[KYA] Suppressed icon config error (msgprint)");
 				return;
 			}
 			return _orig.apply(this, arguments);
@@ -35,12 +45,51 @@
 		return true;
 	}
 
-	// Try patching immediately
-	patchMsgprint();
+	// === Layer 2: Intercept frappe.throw ===
+	function patchThrow() {
+		if (!window.frappe || !frappe.throw) return false;
+		if (frappe._kya_throw_patched) return true;
 
-	// Also patch on DOMContentLoaded (in case frappe wasn't ready)
-	document.addEventListener("DOMContentLoaded", function () {
+		var _origThrow = frappe.throw;
+		frappe.throw = function (msg) {
+			if (isIconError(typeof msg === "string" ? msg : (msg && msg.message) || "")) {
+				console.log("[KYA] Suppressed icon config error (throw)");
+				return;
+			}
+			return _origThrow.apply(this, arguments);
+		};
+		frappe._kya_throw_patched = true;
+		return true;
+	}
+
+	// === Layer 3: Intercept frappe.show_alert ===
+	function patchShowAlert() {
+		if (!window.frappe || !frappe.show_alert) return false;
+		if (frappe._kya_alert_patched) return true;
+
+		var _origAlert = frappe.show_alert;
+		frappe.show_alert = function (msg) {
+			var text = typeof msg === "string" ? msg : (msg && (msg.message || msg.indicator)) || "";
+			if (isIconError(text)) {
+				console.log("[KYA] Suppressed icon config error (alert)");
+				return;
+			}
+			return _origAlert.apply(this, arguments);
+		};
+		frappe._kya_alert_patched = true;
+		return true;
+	}
+
+	function applyAllPatches() {
 		patchMsgprint();
+		patchThrow();
+		patchShowAlert();
+	}
+
+	// Try immediately, then on DOMContentLoaded, frappe.ready
+	applyAllPatches();
+	document.addEventListener("DOMContentLoaded", function () {
+		applyAllPatches();
 	});
 
 	// === Layer 2: Fix desktop icons after page renders ===

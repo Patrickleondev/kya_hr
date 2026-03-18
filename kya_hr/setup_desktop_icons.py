@@ -83,9 +83,16 @@ def execute():
             fixed += 1
             print(f"  HIDDEN: {icon.label} ({reason})")
 
-    # Ensure KYA workspace icons are visible
-    kya_icons = ["KYA Stagiaires", "KYA Services", "Achats KYA",
-                 "Congés & Permissions", "Stock KYA"]
+    # Hide stale KYA Desktop Icons that reference old/renamed workspaces
+    stale_icons = ["KYA Stagiaires", "Achats KYA", "Stock KYA"]
+    for label in stale_icons:
+        existing = frappe.db.exists("Desktop Icon", {"label": label})
+        if existing:
+            frappe.db.set_value("Desktop Icon", existing, "hidden", 1)
+            print(f"  HIDDEN (stale): {label}")
+
+    # Ensure current KYA workspace icons are visible
+    kya_icons = ["Espace Stagiaires", "KYA Services", "Congés & Permissions"]
     for label in kya_icons:
         existing = frappe.db.exists("Desktop Icon", {"label": label})
         if existing:
