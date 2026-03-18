@@ -1,4 +1,4 @@
-{
+﻿{
  "app": "kya_hr",
  "charts": [
   {
@@ -45,7 +45,7 @@
   },
   {
    "hidden": 0,
-   "icon": "bar-chart",
+   "icon": "bar-chart-2",
    "is_query_report": 0,
    "label": "Bilan Fin de Stage",
    "link_count": 0,
@@ -99,7 +99,7 @@
   {
    "dependencies": "Employee",
    "hidden": 0,
-   "icon": "dashboard",
+   "icon": "home",
    "is_query_report": 0,
    "label": "Tableau de Bord Stagiaires",
    "link_count": 0,
@@ -112,7 +112,7 @@
   {
    "dependencies": "Attendance",
    "hidden": 0,
-   "icon": "bar-chart",
+   "icon": "bar-chart-2",
    "is_query_report": 0,
    "label": "Rapport Pr\u00e9sence Stagiaires",
    "link_count": 0,
@@ -185,7 +185,7 @@
   {
    "color": "#7C5CFC",
    "doc_view": "",
-   "icon": "bar-chart",
+   "icon": "bar-chart-2",
    "label": "Bilan",
    "link_to": "Bilan Fin de Stage",
    "type": "DocType"
@@ -193,7 +193,7 @@
   {
    "color": "#009688",
    "doc_view": "",
-   "icon": "dashboard",
+   "icon": "home",
    "label": "Tableau de Bord",
    "link_to": "Tableau de Bord Stagiaires",
    "report_ref_doctype": "Employee",
