@@ -68,7 +68,7 @@
   {
    "color": "#FF6B6B",
    "doc_view": "",
-   "icon": "alert-circle",
+   "icon": "circle-alert",
    "label": "Demandes en attente",
    "link_to": "Demande Achat KYA",
    "type": "DocType"

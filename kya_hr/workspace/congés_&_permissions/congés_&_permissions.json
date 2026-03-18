@@ -56,7 +56,7 @@
   },
   {
    "hidden": 0,
-   "icon": "bar-chart-2",
+   "icon": "chart-bar",
    "is_query_report": 0,
    "label": "Rapports",
    "link_count": 0,
@@ -67,7 +67,7 @@
   {
    "dependencies": "Leave Application",
    "hidden": 0,
-   "icon": "bar-chart",
+   "icon": "chart-bar",
    "is_query_report": 0,
    "label": "Fiche Gestion Congés",
    "link_count": 0,

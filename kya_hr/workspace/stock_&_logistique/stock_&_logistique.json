@@ -57,7 +57,7 @@
   {
    "color": "#FF6B6B",
    "doc_view": "",
-   "icon": "alert-circle",
+   "icon": "circle-alert",
    "label": "PV en attente",
    "link_to": "PV Sortie Materiel",
    "type": "DocType"
