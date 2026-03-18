@@ -75,6 +75,19 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "dependencies": "Attendance",
+   "hidden": 0,
+   "icon": "chart-bar",
+   "is_query_report": 0,
+   "label": "Rapport Présence Employés",
+   "link_count": 0,
+   "link_to": "Rapport Présence Employés",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "Attendance",
+   "type": "Link"
   }
  ],
  "modified": "2026-03-15 12:15:43.703424",
