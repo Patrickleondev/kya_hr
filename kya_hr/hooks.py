@@ -59,10 +59,12 @@ scheduler_events = {
     ],
 }
 
-# Post-migration: configure Desktop Icons
+# Post-migration: configure Desktop Icons + forcer la sync des workspaces
+# Note: bench migrate ne met pas a jour les workspaces existants en DB
 after_migrate = [
-    "kya_hr.setup_desktop_icons.execute",
+    "kya_hr.force_sync_workspaces.execute",
     "kya_hr.fix_workspace_shortcuts.execute",
+    "kya_hr.setup_desktop_icons.execute",
 ]
 
 # Translations
