@@ -1,8 +1,41 @@
 /**
- * KYA Desktop Icon Fix v4
- * Supprime l'erreur "Icon is not correctly configured" sur les icônes HRMS.
- * Couches: msgprint + throw + dialog + workspace click interception
+ * KYA Desktop Fix v5
+ * 1. Purge workspace localStorage cache (cause racine "rien ne change")
+ * 2. Supprime l'erreur "Icon is not correctly configured"
  */
+
+// =========================================================
+// WORKSPACE LOCALSTORAGE CACHE BUST
+// Frappe v16 cache le contenu de chaque workspace en localStorage.
+// Sans cette purge, les modifications serveur ne sont jamais visibles.
+// =========================================================
+(function kyaClearWorkspaceCache() {
+	try {
+		var toDelete = [];
+		for (var i = 0; i < localStorage.length; i++) {
+			var k = localStorage.key(i);
+			if (!k) continue;
+			var kl = k.toLowerCase();
+			if (
+				kl.indexOf("workspace") !== -1 ||
+				kl === "last_open_page" ||
+				kl === "desk_sidebar" ||
+				kl.indexOf("frappe_desk") !== -1
+			) {
+				toDelete.push(k);
+			}
+		}
+		toDelete.forEach(function (k) {
+			localStorage.removeItem(k);
+		});
+		if (toDelete.length > 0) {
+			console.log("[KYA] Workspace cache cleared: " + toDelete.length + " localStorage keys purged");
+		}
+	} catch (e) {
+		/* silently fail if localStorage not accessible */
+	}
+})();
+
 (function () {
 	"use strict";
 
