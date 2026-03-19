@@ -45,6 +45,10 @@
 		"pas correctement configur",
 		"icône n'est pas",
 		"icon_link",
+		"workspace sidebar to it",
+		"kya-evaluation-critere",
+		"kya-form-question",
+		"kya-form-answer",
 	];
 
 	function isIconError(text) {
@@ -66,10 +70,10 @@
 			if (typeof msg === "string") {
 				text = msg;
 			} else if (msg && typeof msg === "object") {
-				text = msg.message || msg.title || msg.indicator || "";
+				text = msg.message || msg.title || msg.indicator || JSON.stringify(msg);
 			}
 			if (isIconError(text)) {
-				console.log("[KYA] Suppressed icon config error (msgprint)");
+				console.log("[KYA] Suppressed icon config error (msgprint):", text.substring(0, 80));
 				return;
 			}
 			return _orig.apply(this, arguments);
@@ -119,11 +123,19 @@
 		patchShowAlert();
 	}
 
-	// Try immediately, then on DOMContentLoaded, frappe.ready
+	// Try immediately, then on DOMContentLoaded, then keep retrying
+	// until frappe.msgprint exists (it loads asynchronously in Frappe v16)
 	applyAllPatches();
 	document.addEventListener("DOMContentLoaded", function () {
 		applyAllPatches();
 	});
+	// Retry every 200ms for the first 5 seconds (catches late-loading frappe)
+	var _patchRetries = 0;
+	var _patchInterval = setInterval(function () {
+		applyAllPatches();
+		_patchRetries++;
+		if (_patchRetries >= 25) clearInterval(_patchInterval); // stop after 5s
+	}, 200);
 
 	// === Layer 2: Fix desktop icons after page renders ===
 	function fixDesktopIcons() {
