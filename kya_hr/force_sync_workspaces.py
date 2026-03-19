@@ -182,7 +182,52 @@ def execute():
     print("  [OK] Stock (natif) - section KYA ajoutee")
 
     # ----------------------------------------------------------
-    # 5. MASQUER les anciennes sous-pages custom (plus necessaires)
+    # 5. WORKSPACE SIDEBAR "KYA Stagiaires" → 1er lien = Workspace Espace Stagiaires
+    # Desktop Icon "KYA Stagiaires" utilise le 1er lien de la sidebar pour calculer
+    # icon_route. Si ce 1er lien est un DocType, il navigue vers une liste, pas le workspace.
+    # On force le 1er lien a etre: link_type=Workspace, link_to=Espace Stagiaires.
+    # ----------------------------------------------------------
+    if frappe.db.exists("Workspace Sidebar", "KYA Stagiaires"):
+        try:
+            ws_sidebar = frappe.get_doc("Workspace Sidebar", "KYA Stagiaires")
+            # Supprimer les items existants et reconstruire avec Workspace en premier
+            ws_sidebar.items = []
+            ws_sidebar.append("items", {
+                "type": "Link",
+                "label": "Espace Stagiaires",
+                "link_type": "Workspace",
+                "link_to": "Espace Stagiaires",
+                "icon": "education",
+                "indent": 0,
+                "collapsible": 0,
+                "child": 0,
+            })
+            # Remettre les autres liens utiles
+            for item_def in [
+                ("Permission Sortie Stagiaire", "DocType", "file", "Permissions"),
+                ("Bilan Fin de Stage", "DocType", "graduation-cap", "Bilan"),
+                ("Employee", "DocType", "users", "Stagiaires"),
+                ("Attendance", "DocType", "clock", "Presences"),
+            ]:
+                ws_sidebar.append("items", {
+                    "type": "Link",
+                    "label": item_def[3],
+                    "link_type": item_def[1],
+                    "link_to": item_def[0],
+                    "icon": item_def[2],
+                    "indent": 0,
+                    "collapsible": 0,
+                    "child": 0,
+                })
+            ws_sidebar.save(ignore_permissions=True)
+            print("  [OK] Workspace Sidebar 'KYA Stagiaires' - 1er lien = Workspace Espace Stagiaires")
+        except Exception as e:
+            print(f"  [WARN] Workspace Sidebar KYA Stagiaires: {e}")
+    else:
+        print("  [SKIP] Workspace Sidebar 'KYA Stagiaires' non trouvee")
+
+    # ----------------------------------------------------------
+    # 6. MASQUER les anciennes sous-pages custom (plus necessaires)
     # ----------------------------------------------------------
     for ws_to_hide in ["Achats & Approvisionnement", "Stock & Logistique"]:
         if frappe.db.exists("Workspace", ws_to_hide):
@@ -190,7 +235,7 @@ def execute():
             print(f"  [HIDE] {ws_to_hide}")
 
     # ----------------------------------------------------------
-    # 6. COMMIT + cache bust
+    # 7. COMMIT + cache bust
     # ----------------------------------------------------------
     frappe.db.commit()
     try:

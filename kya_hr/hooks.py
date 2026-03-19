@@ -65,6 +65,7 @@ after_migrate = [
     "kya_hr.force_sync_workspaces.execute",
     "kya_hr.fix_workspace_shortcuts.execute",
     "kya_hr.setup_desktop_icons.execute",
+    "kya_hr.kya_hr.fix_desktop_icons.execute",
 ]
 
 # Translations
