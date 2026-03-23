@@ -1,0 +1,116 @@
+{
+    "allow_comments": 1,
+    "allow_delete": 0,
+    "allow_edit": 1,
+    "allow_incomplete": 0,
+    "allow_multiple": 1,
+    "allow_print": 1,
+    "anonymous": 0,
+    "apply_document_permissions": 1,
+    "creation": "2026-03-12 00:00:00.000000",
+    "doc_type": "Permission Sortie Stagiaire",
+    "docstatus": 0,
+    "doctype": "Web Form",
+    "idx": 0,
+    "introduction_text": "",
+    "is_standard": 1,
+    "login_required": 1,
+    "modified": "2026-03-12 00:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "KYA HR",
+    "name": "permission-sortie-stagiaire",
+    "owner": "Administrator",
+    "published": 1,
+    "route": "permission-sortie-stagiaire",
+    "show_sidebar": 1,
+    "success_message": "\u2705 Votre demande de permission de sortie a \u00e9t\u00e9 soumise avec succ\u00e8s. Elle sera examin\u00e9e par votre Ma\u00eetre de Stage.",
+    "title": "Demande de Permission de Sortie (Stagiaire)",
+    "web_form_fields": [
+        {
+            "fieldname": "employee",
+            "fieldtype": "Link",
+            "label": "Stagiaire (Employ\u00e9)",
+            "options": "Employee",
+            "reqd": 1
+        },
+        {
+            "fieldname": "employee_name",
+            "fieldtype": "Data",
+            "label": "Nom",
+            "read_only": 1
+        },
+        {
+            "fieldname": "department",
+            "fieldtype": "Link",
+            "label": "D\u00e9partement",
+            "options": "Department",
+            "read_only": 1
+        },
+        {
+            "fieldname": "date_sortie",
+            "fieldtype": "Date",
+            "label": "Date de D\u00e9but",
+            "reqd": 1,
+            "default": "Today"
+        },
+        {
+            "fieldname": "date_fin",
+            "fieldtype": "Date",
+            "label": "Date de Fin",
+            "description": "Laisser vide si sortie dans la journ\u00e9e"
+        },
+        {
+            "fieldname": "nombre_jours",
+            "fieldtype": "Int",
+            "label": "Nombre de Jours",
+            "read_only": 1
+        },
+        {
+            "fieldname": "heure_depart",
+            "fieldtype": "Time",
+            "label": "Heure de D\u00e9part",
+            "reqd": 1
+        },
+        {
+            "fieldname": "heure_retour",
+            "fieldtype": "Time",
+            "label": "Heure de Retour Pr\u00e9vue"
+        },
+        {
+            "fieldname": "motif",
+            "fieldtype": "Small Text",
+            "label": "Motif de la Sortie",
+            "reqd": 1,
+            "description": "Indiquez le motif d\u00e9taill\u00e9 de votre demande de sortie"
+        },
+        {
+            "fieldname": "justificatif",
+            "fieldtype": "Attach",
+            "label": "Pi\u00e8ce Justificative",
+            "description": "Joindre un justificatif si n\u00e9cessaire (certificat m\u00e9dical, convocation, etc.)"
+        },
+        {
+            "fieldname": "signature_stagiaire",
+            "fieldtype": "Signature",
+            "label": "Signature Stagiaire"
+        },
+        {
+            "fieldname": "signature_chef",
+            "fieldtype": "Signature",
+            "label": "Signature Chef",
+            "read_only": 1
+        },
+        {
+            "fieldname": "signature_resp_stagiaires",
+            "fieldtype": "Signature",
+            "label": "Signature Resp. Stagiaires",
+            "read_only": 1
+        },
+        {
+            "fieldname": "signature_dg",
+            "fieldtype": "Signature",
+            "label": "Signature DG",
+            "read_only": 1
+        }
+    ]
+}

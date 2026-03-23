@@ -46,6 +46,6 @@ class PVSortieMateriel(Document):
         elif ws == "En attente Audit" and not self.get("audit_nom"):
             self.db_set("audit_nom", emp or frappe.utils.get_fullname(user), update_modified=False)
             self.db_set("audit_date", today, update_modified=False)
-        elif ws == "En attente DGA" and not self.get("dga_nom"):
+        elif ws == "En attente Direction" and not self.get("dga_nom"):
             self.db_set("dga_nom", emp or frappe.utils.get_fullname(user), update_modified=False)
             self.db_set("dga_date", today, update_modified=False)

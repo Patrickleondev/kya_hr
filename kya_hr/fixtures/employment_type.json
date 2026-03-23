@@ -1,0 +1,26 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Employment Type",
+  "name": "CDI",
+  "employee_type_name": "CDI"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Employment Type",
+  "name": "CDD",
+  "employee_type_name": "CDD"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Employment Type",
+  "name": "Stage",
+  "employee_type_name": "Stage"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Employment Type",
+  "name": "Prestataire",
+  "employee_type_name": "Prestataire"
+ }
+]

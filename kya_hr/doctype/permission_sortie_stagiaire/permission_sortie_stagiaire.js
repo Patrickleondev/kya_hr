@@ -15,6 +15,9 @@ frappe.ui.form.on("Permission Sortie Stagiaire", {
         // Contrôle des champs signature
         _control_pss_signatures(frm);
 
+        // Visibilité heures selon multi-jour
+        _toggle_heures(frm);
+
         // Bouton impression pour permission approuvée
         if (frm.doc.docstatus === 1 && frm.doc.statut === "Approuvé") {
             frm.add_custom_button("Imprimer le Ticket de Sortie", function() {
@@ -40,7 +43,6 @@ frappe.ui.form.on("Permission Sortie Stagiaire", {
                         frm.set_value("employee", r.name);
                         frm.set_value("employee_name", r.employee_name);
                         frm.set_value("department", r.department);
-                        frm.set_value("designation", r.designation);
                     }
                 }
             );
@@ -70,7 +72,9 @@ frappe.ui.form.on("Permission Sortie Stagiaire", {
     },
 
     heure_depart: function(frm) { _calc_duree(frm); },
-    heure_retour: function(frm) { _calc_duree(frm); }
+    heure_retour: function(frm) { _calc_duree(frm); },
+    date_sortie: function(frm) { _calc_nombre_jours(frm); _toggle_heures(frm); },
+    date_fin: function(frm) { _calc_nombre_jours(frm); _toggle_heures(frm); }
 });
 
 function _calc_duree(frm) {
@@ -84,6 +88,34 @@ function _calc_duree(frm) {
             frm.set_value("duree", h + "h " + (m < 10 ? "0" : "") + m + "min");
         }
     }
+}
+
+function _calc_nombre_jours(frm) {
+    if (frm.doc.date_fin && frm.doc.date_sortie) {
+        var d1 = moment(frm.doc.date_sortie);
+        var d2 = moment(frm.doc.date_fin);
+        if (d2.isBefore(d1)) {
+            frappe.msgprint({
+                title: "Erreur",
+                indicator: "red",
+                message: "La date de fin ne peut pas \u00eatre ant\u00e9rieure \u00e0 la date de d\u00e9but."
+            });
+            frm.set_value("date_fin", "");
+            return;
+        }
+        var jours = d2.diff(d1, "days") + 1;
+        frm.set_value("nombre_jours", jours);
+        frm.set_value("duree", jours + " jour" + (jours > 1 ? "s" : ""));
+    } else {
+        frm.set_value("nombre_jours", 1);
+    }
+}
+
+function _toggle_heures(frm) {
+    // If multi-day, hours are optional (not required)
+    var multi = frm.doc.date_fin && frm.doc.date_sortie
+        && frm.doc.date_fin !== frm.doc.date_sortie;
+    frm.toggle_reqd("heure_depart", !multi);
 }
 
 function _control_pss_signatures(frm) {
@@ -102,6 +134,12 @@ function _control_pss_signatures(frm) {
     frm.set_df_property("signature_chef", "read_only", peut_signer_chef ? 0 : 1);
     frm.set_df_property("signataire_chef", "read_only", 1);
     frm.set_df_property("date_signature_chef", "read_only", 1);
+
+    // Signature Resp. Stagiaires : modifiable à "En attente Resp. Stagiaires" pour HR User
+    var peut_signer_resp = ws === "En attente Resp. Stagiaires" && roles.includes("HR User");
+    frm.set_df_property("signature_resp_stagiaires", "read_only", peut_signer_resp ? 0 : 1);
+    frm.set_df_property("signataire_resp", "read_only", 1);
+    frm.set_df_property("date_signature_resp", "read_only", 1);
 
     // Signature DG : modifiable à "En attente DG" pour HR Manager
     var peut_signer_dg = ws === "En attente DG" && roles.includes("HR Manager");

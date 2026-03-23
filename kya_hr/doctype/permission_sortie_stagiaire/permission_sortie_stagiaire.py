@@ -3,12 +3,14 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe.utils import date_diff, today, get_fullname
 
 
 class PermissionSortieStagiaire(Document):
     def validate(self):
         self.validate_employee_is_intern()
         self.set_employee_details()
+        self.calc_nombre_jours()
 
     def validate_employee_is_intern(self):
         if self.employee:
@@ -23,6 +25,16 @@ class PermissionSortieStagiaire(Document):
         if self.employee and not self.employee_name:
             self.employee_name = frappe.db.get_value("Employee", self.employee, "employee_name")
 
+    def calc_nombre_jours(self):
+        """Calculate number of days when date_fin is set."""
+        if self.date_fin and self.date_sortie:
+            diff = date_diff(self.date_fin, self.date_sortie)
+            if diff < 0:
+                frappe.throw("La date de fin ne peut pas être antérieure à la date de début.")
+            self.nombre_jours = diff + 1
+        else:
+            self.nombre_jours = 1
+
     def before_submit(self):
         if self.workflow_state == "Approuvé":
             self.statut = "Approuvé"
@@ -33,15 +45,19 @@ class PermissionSortieStagiaire(Document):
         self._stamp_approver_signature()
 
     def _stamp_approver_signature(self):
-        """Auto-fill approver name when they approve at their workflow level."""
+        """Auto-fill approver name and date when they approve at their workflow level."""
         user = frappe.session.user
         emp = frappe.db.get_value("Employee", {"user_id": user}, "employee_name")
-        today = frappe.utils.today()
+        name = emp or get_fullname(user)
+        now = today()
         ws = self.workflow_state
 
-        if ws == "En attente Resp. Stagiaires" and not self.get("chef_nom"):
-            self.db_set("chef_nom", emp or frappe.utils.get_fullname(user), update_modified=False)
-        elif ws == "En attente DG" and not self.get("resp_stagiaires_nom"):
-            self.db_set("resp_stagiaires_nom", emp or frappe.utils.get_fullname(user), update_modified=False)
-        elif ws == "Approuvé" and not self.get("dg_nom"):
-            self.db_set("dg_nom", emp or frappe.utils.get_fullname(user), update_modified=False)
+        if ws == "En attente Resp. Stagiaires" and not self.get("signataire_chef"):
+            self.db_set("signataire_chef", name, update_modified=False)
+            self.db_set("date_signature_chef", now, update_modified=False)
+        elif ws == "En attente DG" and not self.get("signataire_resp"):
+            self.db_set("signataire_resp", name, update_modified=False)
+            self.db_set("date_signature_resp", now, update_modified=False)
+        elif ws == "Approuvé" and not self.get("signataire_dg"):
+            self.db_set("signataire_dg", name, update_modified=False)
+            self.db_set("date_signature_dg", now, update_modified=False)

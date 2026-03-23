@@ -1,0 +1,71 @@
+{
+    "allow_comments": 1,
+    "allow_delete": 0,
+    "allow_edit": 1,
+    "allow_incomplete": 0,
+    "allow_multiple": 1,
+    "allow_print": 1,
+    "anonymous": 0,
+    "apply_document_permissions": 1,
+    "creation": "2026-06-01 00:00:00.000000",
+    "doc_type": "Planning Conge",
+    "docstatus": 0,
+    "doctype": "Web Form",
+    "idx": 0,
+    "introduction_text": "",
+    "is_standard": 1,
+    "login_required": 1,
+    "modified": "2026-06-01 00:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "KYA HR",
+    "name": "planning-conge",
+    "owner": "Administrator",
+    "published": 1,
+    "route": "planning-conge",
+    "show_sidebar": 1,
+    "success_message": "\u2705 Votre planning de cong\u00e9 a \u00e9t\u00e9 soumis avec succ\u00e8s. Il sera examin\u00e9 par les RH puis la Direction G\u00e9n\u00e9rale.",
+    "title": "Planning de Cong\u00e9 Annuel",
+    "web_form_fields": [
+        {
+            "fieldname": "employee",
+            "fieldtype": "Link",
+            "label": "Employ\u00e9",
+            "options": "Employee",
+            "reqd": 1
+        },
+        {
+            "fieldname": "employee_name",
+            "fieldtype": "Data",
+            "label": "Nom",
+            "read_only": 1
+        },
+        {
+            "fieldname": "department",
+            "fieldtype": "Link",
+            "label": "D\u00e9partement",
+            "options": "Department",
+            "read_only": 1
+        },
+        {
+            "fieldname": "annee",
+            "fieldtype": "Int",
+            "label": "Ann\u00e9e",
+            "reqd": 1,
+            "description": "Ann\u00e9e du planning (ex: 2026)"
+        },
+        {
+            "fieldname": "periodes",
+            "fieldtype": "Table",
+            "label": "P\u00e9riodes de Cong\u00e9 Souhait\u00e9es",
+            "options": "Planning Conge Periode",
+            "reqd": 1,
+            "description": "Ajoutez les p\u00e9riodes de cong\u00e9 pr\u00e9vues pour l\u2019ann\u00e9e"
+        },
+        {
+            "fieldname": "commentaire_employe",
+            "fieldtype": "Small Text",
+            "label": "Commentaire",
+            "description": "Pr\u00e9cisions ou contraintes particuli\u00e8res"
+        }
+    ]
+}

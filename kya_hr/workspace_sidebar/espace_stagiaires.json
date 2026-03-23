@@ -1,0 +1,77 @@
+{
+ "app": "kya_hr",
+ "creation": "2026-03-19 17:07:04.799496",
+ "docstatus": 0,
+ "doctype": "Workspace Sidebar",
+ "header_icon": "graduation-cap",
+ "idx": 0,
+ "items": [
+  {
+   "child": 0,
+   "collapsible": 0,
+   "icon": "graduation-cap",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Espace Stagiaires",
+   "link_to": "Espace Stagiaires",
+   "link_type": "Workspace",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 0,
+   "icon": "file",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Permissions",
+   "link_to": "Permission Sortie Stagiaire",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 0,
+   "icon": "graduation-cap",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Bilan",
+   "link_to": "Bilan Fin de Stage",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 0,
+   "icon": "users",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Stagiaires",
+   "link_to": "Employee",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 0,
+   "icon": "clock",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Presences",
+   "link_to": "Attendance",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-03-23 11:59:55.527089",
+ "modified_by": "Administrator",
+ "module": "KYA HR",
+ "name": "Espace Stagiaires",
+ "owner": "Administrator",
+ "standard": 0,
+ "title": "Espace Stagiaires"
+}

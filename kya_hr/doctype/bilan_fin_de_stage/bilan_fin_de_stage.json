@@ -160,6 +160,9 @@
         {
             "role": "Employee",
             "read": 1,
+            "write": 1,
+            "create": 1,
+            "submit": 1,
             "if_owner": 1
         }
     ]

@@ -135,6 +135,3 @@ function _control_pse_signatures(frm) {
     frm.set_df_property("signataire_dga", "read_only", 1);
     frm.set_df_property("date_signature_dga", "read_only", 1);
 }
-    frm.set_df_property("signataire_rh", "read_only", 1);
-    frm.set_df_property("date_signature_rh", "read_only", 1);
-}
