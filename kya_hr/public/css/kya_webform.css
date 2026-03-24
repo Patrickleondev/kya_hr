@@ -1,10 +1,8 @@
-/* ═══════════════════════════════════════════════════════════
-   KYA-Energy Group — Web Form Design v3
-   Style : Fiche d'Intervention / Document officiel
+/* ===================================================================
+   KYA-Energy Group — Web Form Design v4
+   Design : Ordre de Mission / Fiche officielle
    Palette : Blue #1a5276 · Orange #F58220 · Green #8DC63F
-   Font    : Plus Jakarta Sans (body) / Sora (accent)
-   "Move beyond the sky!"
-   ═══════════════════════════════════════════════════════════ */
+   =================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap');
 
@@ -22,7 +20,7 @@
   --kya-bg: #f4f6f9;
   --kya-surface: #FFFFFF;
   --kya-heading: #1a1a2e;
-  --kya-body: #475569;
+  --kya-body: #333333;
   --kya-label: #555e6d;
   --kya-border: #dee2e6;
   --kya-border-input: #ccc;
@@ -36,10 +34,49 @@
   --kya-ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-/* ── Page ──────────────────────────────────────────────── */
+/* == FORCE TEXT COLORS (fix white text on Frappe v16) ===== */
+body,
+.web-form-container,
+.web-form-container *,
+.frappe-form,
+.frappe-form *,
+.kya-form-section,
+.kya-form-section * {
+  color: var(--kya-body) !important;
+}
+/* Restore specific colors for branded elements */
+.kya-wf-header .kya-title,
+.kya-section-title,
+.kya-doc-number,
+.kya-doc-name { color: var(--kya-blue) !important; }
+.kya-slogan { color: var(--kya-orange) !important; }
+.kya-section-title,
+.kya-section-title * { color: #fff !important; }
+.kya-footer-slogan { color: var(--kya-blue-accent) !important; }
+.kya-state-badge { color: inherit !important; }
+.kya-btn-approve, .kya-btn-reject { color: #fff !important; }
+.kya-wf-info b { color: var(--kya-blue) !important; }
+
+/* Labels must be dark */
+.control-label,
+.frappe-control .control-label,
+.form-group label,
+label { color: var(--kya-label) !important; }
+
+/* Inputs text must be dark */
+input, textarea, select,
+.form-control,
+.ql-editor,
+.like-disabled-input {
+  color: var(--kya-heading) !important;
+  -webkit-text-fill-color: var(--kya-heading) !important;
+}
+
+/* == Page ================================================= */
 body {
   background: var(--kya-bg) !important;
   min-height: 100vh;
+  font-family: var(--kya-font);
 }
 
 .web-form-container {
@@ -53,84 +90,114 @@ body {
   border-radius: 0; box-shadow: none; border: none; overflow: visible;
 }
 
-/* V16: Hide default Frappe header when KYA header is present */
 .kya-restructured ~ .web-form-header,
-.web-form-container:has(.kya-restructured) .web-form-header,
-.web-form-container:has(.kya-wf-header) .web-form-head {
+.web-form-container:has(.kya-restructured) .web-form-head {
   display: none !important;
 }
-/* Also hide via JS class */
 .web-form-head.kya-hidden { display: none !important; }
 
-/* ═══ HEADER — Clean document style (like Fiche Intervention) ═══ */
+/* == HEADER — Ordre de Mission 2-column style ============= */
 .kya-wf-header {
-  display: flex; flex-direction: column; align-items: center;
-  text-align: center;
-  padding: 30px 24px 22px;
   background: var(--kya-surface);
-  border-bottom: 3px solid var(--kya-blue);
+  padding: 28px 24px 0;
   border-radius: var(--kya-r-lg) var(--kya-r-lg) 0 0;
   box-shadow: var(--kya-shadow);
 }
-.kya-wf-header img.kya-logo {
-  max-height: 70px; margin-bottom: 14px;
+
+.kya-header-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.kya-header-left {
+  flex-shrink: 0;
+}
+
+.kya-header-left .kya-logo {
+  max-height: 90px;
+  width: auto;
   transition: transform .3s var(--kya-ease);
 }
-.kya-wf-header img.kya-logo:hover { transform: scale(1.05); }
-.kya-wf-header h3 {
-  color: var(--kya-blue); margin: 0 0 6px;
+.kya-header-left .kya-logo:hover { transform: scale(1.05); }
+
+.kya-header-right {
+  flex: 1;
+  text-align: right;
+}
+
+.kya-header-right .kya-title {
+  color: var(--kya-blue) !important;
   font-family: var(--kya-font-accent);
-  font-size: 22px; font-weight: 800;
-  letter-spacing: 0.02em; text-transform: uppercase;
+  font-size: 22px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin: 0 0 4px;
+  line-height: 1.2;
 }
-.kya-wf-header .kya-slogan {
-  font-size: 13px; font-weight: 500;
-  color: var(--kya-blue-accent);
-  font-style: italic; margin: 2px 0 0;
-  letter-spacing: .04em;
+
+.kya-header-right .kya-slogan {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--kya-orange) !important;
+  font-style: italic;
+  letter-spacing: .03em;
+  margin-bottom: 8px;
 }
-.kya-wf-header .kya-subtitle {
-  color: var(--kya-label); font-size: 12px;
-  margin-top: 6px; font-weight: 600;
-  text-transform: uppercase; letter-spacing: .06em;
+
+.kya-company-details {
+  font-size: 11px;
+  line-height: 1.7;
+  color: var(--kya-label) !important;
+  font-weight: 500;
 }
-.kya-wf-header .kya-ref-badge {
-  display: inline-block; margin-top: 10px;
-  background: var(--kya-blue-light); color: var(--kya-blue);
-  padding: 4px 16px; border-radius: 20px;
-  font-size: .75rem; font-weight: 700; letter-spacing: .04em;
+
+.kya-header-divider {
+  height: 3px;
+  background: var(--kya-blue);
+  margin: 18px 0 14px;
+  border-radius: 2px;
+}
+
+.kya-doc-number {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--kya-heading) !important;
+  padding-bottom: 18px;
+  font-family: var(--kya-font-accent);
+}
+
+.kya-doc-name {
+  color: var(--kya-blue) !important;
+  font-weight: 800;
+}
+
+.kya-doc-ref-inline {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--kya-label) !important;
+  background: var(--kya-blue-light);
+  padding: 2px 10px;
+  border-radius: 12px;
   border: 1px solid var(--kya-border);
 }
 
-/* ═══ HEADER TOP — RCCM / NIF line ═══ */
-.kya-header-top {
-  width: 100%; text-align: right; margin-bottom: 8px;
-}
-.kya-header-info {
-  display: flex; justify-content: flex-end; gap: 20px;
-  font-size: 10px; font-weight: 600; color: var(--kya-label);
-  letter-spacing: .02em;
-}
-.kya-doc-ref {
-  display: inline-block; margin-top: 6px;
-  background: var(--kya-blue-light); color: var(--kya-blue);
-  padding: 3px 14px; border-radius: 16px;
-  font-size: .7rem; font-weight: 700; letter-spacing: .04em;
-  border: 1px solid var(--kya-border);
-}
-
-/* ═══ INFO BOX ═════════════════════════════════════════════ */
+/* == INFO BOX ============================================= */
 .kya-wf-info {
   background: var(--kya-blue-light);
   border-left: 4px solid var(--kya-blue);
   padding: 14px 20px;
-  font-size: 13px; line-height: 1.7;
-  color: var(--kya-heading); font-weight: 500;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--kya-heading) !important;
+  font-weight: 500;
   margin: 0;
 }
-.kya-wf-info b { color: var(--kya-blue); font-weight: 700; }
 
-/* ═══ SECTIONS ═════════════════════════════════════════════ */
+/* == SECTIONS ============================================= */
 .kya-sections-wrapper { margin-top: 0; }
 
 .kya-form-section {
@@ -143,14 +210,17 @@ body {
   border-radius: 0 0 var(--kya-r-lg) var(--kya-r-lg);
 }
 
-/* Section title — solid dark blue (like Fiche Intervention) */
 .kya-section-title {
   background: var(--kya-blue);
-  color: #fff; padding: 10px 18px;
+  color: #fff !important;
+  padding: 10px 18px;
   font-family: var(--kya-font-accent);
-  font-weight: 700; font-size: 13px;
+  font-weight: 700;
+  font-size: 13px;
   letter-spacing: .03em;
-  display: flex; align-items: center; gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   border-radius: var(--kya-r-sm);
   margin: 15px 18px 0;
 }
@@ -158,14 +228,12 @@ body {
 
 .kya-section-body { padding: 18px 22px; }
 
-/* Grid */
 .kya-section-body.kya-grid {
   display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px;
 }
 .kya-section-body.kya-grid .kya-grid-span-2 { grid-column: span 2; }
 .kya-section-body.kya-grid .kya-grid-col { grid-column: span 1; }
 
-/* Signature Grid — 4 columns like reference Fiche */
 .kya-section-body.kya-sig-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -197,16 +265,13 @@ body {
   max-height: 80px;
   object-fit: contain;
 }
-/* Read-only signature box — show "En attente" for empty approver sigs */
 .kya-section-body.kya-sig-grid .frappe-control.read-only .signature-pad,
 .kya-section-body.kya-sig-grid .frappe-control[data-read-only] canvas {
   background: var(--kya-blue-light);
   border-style: dashed;
 }
 
-/* ═══ FORM CONTROLS ════════════════════════════════════════ */
-
-/* Labels */
+/* == FORM CONTROLS ======================================== */
 .web-form-container .web-form .form-group label,
 .web-form-container .web-form .frappe-control .control-label,
 .kya-form-section .frappe-control .control-label,
@@ -215,16 +280,14 @@ body {
   font-family: var(--kya-font);
   font-weight: 700;
   font-size: 12px;
-  color: var(--kya-label);
+  color: var(--kya-label) !important;
   margin-bottom: 6px;
 }
-/* Focus-within label highlight */
 .kya-form-section .form-group:focus-within label,
 .kya-form-section .frappe-control:focus-within .control-label {
-  color: var(--kya-blue);
+  color: var(--kya-blue) !important;
 }
 
-/* Inputs — clean, simple borders */
 .web-form-container .web-form .form-control,
 .web-form-container .web-form input[type="text"],
 .web-form-container .web-form input[type="date"],
@@ -239,16 +302,20 @@ body {
 .kya-form-section input[type="number"],
 .kya-form-section textarea,
 .kya-form-section select {
-  width: 100%; background: #fff;
+  width: 100%;
+  background: #fff;
   border: 1px solid var(--kya-border-input);
   border-radius: var(--kya-r-sm);
-  padding: 10px 14px; font-size: 14px; font-weight: 500;
-  color: var(--kya-heading);
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--kya-heading) !important;
+  -webkit-text-fill-color: var(--kya-heading) !important;
   transition: border-color .2s, box-shadow .2s;
-  box-sizing: border-box; font-family: var(--kya-font);
+  box-sizing: border-box;
+  font-family: var(--kya-font);
 }
 
-/* Focus */
 .web-form-container .web-form .form-control:focus,
 .web-form-container .web-form input:focus,
 .web-form-container .web-form textarea:focus,
@@ -259,10 +326,11 @@ body {
 .kya-form-section select:focus {
   border-color: var(--kya-blue);
   box-shadow: 0 0 0 3px var(--kya-blue-glow);
-  outline: none; background: #fff;
+  outline: none;
+  background: #fff;
 }
 
-/* ═══ READ-ONLY FIELDS — look like filled data, NOT disabled ═══ */
+/* Read-only fields */
 .web-form-container .web-form .form-control[disabled],
 .web-form-container .web-form .form-control:disabled,
 .web-form-container .web-form .form-control[readonly],
@@ -278,37 +346,38 @@ body {
 .kya-form-section select:disabled {
   background: var(--kya-blue-light) !important;
   color: var(--kya-heading) !important;
+  -webkit-text-fill-color: var(--kya-heading) !important;
   opacity: 1 !important;
   cursor: default;
   border-color: var(--kya-border) !important;
   font-weight: 600 !important;
-  -webkit-text-fill-color: var(--kya-heading) !important;
 }
-/* Read-only label indicator */
 .kya-form-section .frappe-control.read-only .control-label::after,
 .kya-form-section .frappe-control[data-read-only="1"] .control-label::after {
   content: ' (auto)';
-  font-size: 9px; color: var(--kya-blue-accent);
-  font-weight: 500; font-style: italic;
-  text-transform: none; letter-spacing: 0;
+  font-size: 9px;
+  color: var(--kya-blue-accent) !important;
+  font-weight: 500;
+  font-style: italic;
 }
 
-/* Required */
 .web-form-container .web-form .reqd .control-label::after,
 .kya-form-section .reqd .control-label::after {
-  content: ' *'; color: #e74c3c; font-weight: bold;
+  content: ' *'; color: #e74c3c !important; font-weight: bold;
 }
 
 .web-form-container .web-form .form-group,
 .kya-form-section .form-group { margin-bottom: 16px; }
 
-/* ── Signature ─────────────────────────────────────────── */
+/* Signature */
 .web-form-container .signature-field .signature-pad,
 .kya-form-section .signature-field .signature-pad,
 .kya-form-section .frappe-control[data-fieldtype="Signature"] canvas {
   border: 1px solid var(--kya-border-input);
   border-radius: var(--kya-r-sm);
-  background: #fff; width: 100%; min-height: 120px;
+  background: #fff;
+  width: 100%;
+  min-height: 120px;
   touch-action: none;
 }
 .kya-form-section .frappe-control[data-fieldtype="Signature"] { text-align: center; }
@@ -316,33 +385,31 @@ body {
 .web-form-container .signature-field .btn-xs {
   margin-top: 6px; font-size: 10px; cursor: pointer;
   background: none; border: 1px solid var(--kya-border-input);
-  color: var(--kya-label);
+  color: var(--kya-label) !important;
   padding: 3px 12px; border-radius: 4px; font-weight: 500;
-  transition: all .2s;
-}
-.kya-form-section .frappe-control[data-fieldtype="Signature"] .btn-xs:hover,
-.web-form-container .signature-field .btn-xs:hover {
-  background: #f8f8f8; color: var(--kya-heading);
 }
 
-/* ── Child Table ───────────────────────────────────────── */
+/* Child Table */
 .web-form-container .frappe-control[data-fieldtype="Table"] .form-group,
 .kya-form-section .frappe-control[data-fieldtype="Table"] .form-group {
   border: 1px solid var(--kya-border);
-  border-radius: var(--kya-r-md); overflow: hidden;
+  border-radius: var(--kya-r-md);
+  overflow: hidden;
 }
 .web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row,
 .kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row {
-  background: var(--kya-blue); color: #fff;
+  background: var(--kya-blue);
 }
 .web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row .static-area,
 .kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row .static-area {
-  color: #fff !important; font-weight: 700; font-size: 11px;
-  text-transform: uppercase; letter-spacing: .04em;
+  color: #fff !important;
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
 }
 .web-form-container .frappe-control[data-fieldtype="Table"] .rows .grid-row,
 .kya-form-section .frappe-control[data-fieldtype="Table"] .rows .grid-row {
-  border-bottom: 1px solid var(--kya-border); transition: background .15s;
+  border-bottom: 1px solid var(--kya-border);
 }
 .web-form-container .frappe-control[data-fieldtype="Table"] .rows .grid-row:nth-child(even),
 .kya-form-section .frappe-control[data-fieldtype="Table"] .rows .grid-row:nth-child(even) {
@@ -354,33 +421,26 @@ body {
 }
 .web-form-container .frappe-control[data-fieldtype="Table"] .btn-xs,
 .kya-form-section .frappe-control[data-fieldtype="Table"] .btn-xs {
-  background: var(--kya-blue); color: #fff; border: none;
-  border-radius: 4px; padding: 6px 14px;
-  font-size: 11px; font-weight: 700;
-  transition: all .2s;
-}
-.web-form-container .frappe-control[data-fieldtype="Table"] .btn-xs:hover,
-.kya-form-section .frappe-control[data-fieldtype="Table"] .btn-xs:hover {
-  background: var(--kya-blue-dark); transform: translateY(-1px);
+  background: var(--kya-blue);
+  color: #fff !important;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 700;
 }
 
-/* ── Select / Attach / Link ────────────────────────────── */
 .web-form-container .web-form select,
 .kya-form-section select { appearance: auto; }
-.web-form-container .frappe-control[data-fieldtype="Attach"] .attached-file,
-.kya-form-section .frappe-control[data-fieldtype="Attach"] .attached-file {
-  background: var(--kya-bg); border: 1px solid var(--kya-border);
-  border-radius: var(--kya-r-sm); padding: 10px 14px;
-}
 .web-form-container .frappe-control[data-fieldtype="Link"] .link-btn,
 .kya-form-section .frappe-control[data-fieldtype="Link"] .link-btn { display: none; }
 
-/* ═══ SUBMIT BUTTON — Green like Fiche Intervention ════════ */
+/* Submit Button */
 .web-form-container .btn-primary,
 .web-form-container .btn-primary-dark {
   display: block; width: 100%; padding: 15px 24px;
   background: var(--kya-blue);
-  color: #fff; border: none;
+  color: #fff !important; border: none;
   border-radius: var(--kya-r-sm); cursor: pointer;
   font-family: var(--kya-font-accent);
   font-weight: 700; font-size: 15px;
@@ -388,18 +448,9 @@ body {
   box-shadow: 0 4px 12px rgba(26,82,118,0.25);
   transition: all .25s var(--kya-ease); margin-top: 16px;
 }
-.web-form-container .btn-primary:hover,
-.web-form-container .btn-primary-dark:hover {
-  background: var(--kya-blue-dark);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(26,82,118,0.3);
-}
-.web-form-container .btn-primary:active,
-.web-form-container .btn-primary-dark:active {
-  transform: scale(.98); box-shadow: 0 2px 8px rgba(26,82,118,.15);
-}
+.web-form-container .btn-primary:hover { background: var(--kya-blue-dark); transform: translateY(-1px); }
 
-/* ═══ TOOLBAR — Print / Download buttons ═══════════════════ */
+/* == TOOLBAR ============================================== */
 .kya-wf-toolbar {
   display: flex; justify-content: flex-end; gap: 8px;
   padding: 10px 18px;
@@ -408,88 +459,83 @@ body {
 .kya-wf-toolbar button {
   background: var(--kya-surface); border: 1px solid var(--kya-border);
   border-radius: var(--kya-r-sm); padding: 6px 14px;
-  font-size: 12px; font-weight: 600; color: var(--kya-label);
-  cursor: pointer; transition: all .2s;
-  font-family: var(--kya-font);
+  font-size: 12px; font-weight: 600; color: var(--kya-label) !important;
+  cursor: pointer; font-family: var(--kya-font);
   display: flex; align-items: center; gap: 5px;
 }
-.kya-wf-toolbar button:hover {
-  background: var(--kya-blue-light); color: var(--kya-blue);
-  border-color: var(--kya-blue);
-}
+.kya-wf-toolbar button:hover { background: var(--kya-blue-light); color: var(--kya-blue) !important; }
 
-/* ═══ FOOTER ═══════════════════════════════════════════════ */
+/* == FOOTER =============================================== */
 .kya-wf-footer {
   text-align: center; padding: 18px 24px; margin-top: 0;
   border-top: 2px solid var(--kya-blue);
-  color: var(--kya-label); font-size: 11px; font-weight: 500;
+  color: var(--kya-label) !important; font-size: 11px; font-weight: 500;
   background: var(--kya-surface);
   border-radius: 0 0 var(--kya-r-lg) var(--kya-r-lg);
-  font-family: var(--kya-font);
 }
-.kya-wf-footer .kya-footer-brand {
-  font-weight: 800; color: var(--kya-heading);
-}
-.kya-wf-footer .kya-footer-slogan {
-  display: block; font-style: italic; color: var(--kya-blue-accent);
-  font-weight: 500; margin-top: 3px; font-size: 11px;
-}
+.kya-wf-footer .kya-footer-brand { font-weight: 800; color: var(--kya-heading) !important; }
+.kya-wf-footer .kya-footer-slogan { display: block; font-style: italic; margin-top: 3px; font-size: 11px; }
 
-/* ── Hide Frappe header & "Powered by" ─────────────────── */
 .kya-restructured .page-header-wrapper,
 .kya-restructured .page-header { display: none; }
+footer .web-footer, .powered-by, .footer-powered, [class*="powered"], .web-footer .text-muted { display: none !important; }
 
-footer .web-footer,
-.powered-by,
-.footer-powered,
-[class*="powered"],
-.web-footer .text-muted { display: none !important; }
+/* == WORKFLOW STATE ======================================== */
+.kya-wf-state {
+  background: #fff; border: 1px solid #e0e0e0; border-radius: 10px;
+  padding: 14px 18px; margin: 12px 0 16px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+}
+.kya-state-label { font-weight: 600; color: #555 !important; font-size: 14px; }
+.kya-state-badge {
+  display: inline-block; padding: 5px 14px; border-radius: 20px;
+  font-weight: 700; font-size: 13px; letter-spacing: 0.3px;
+}
+.kya-state-draft { background: #f5f5f5; color: #666 !important; }
+.kya-state-pending { background: #fff3e0; color: #e65100 !important; }
+.kya-state-approved { background: #e8f5e9; color: #2e7d32 !important; }
+.kya-state-rejected { background: #ffebee; color: #c62828 !important; }
+.kya-wf-actions { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; }
+.kya-btn-approve {
+  background: linear-gradient(135deg, #2e7d32, #43a047); color: #fff !important;
+  border: none; padding: 10px 22px; border-radius: 8px; font-weight: 700; font-size: 14px;
+  cursor: pointer; box-shadow: 0 2px 8px rgba(46,125,50,0.3);
+}
+.kya-btn-reject {
+  background: linear-gradient(135deg, #c62828, #e53935); color: #fff !important;
+  border: none; padding: 10px 22px; border-radius: 8px; font-weight: 700; font-size: 14px;
+  cursor: pointer; box-shadow: 0 2px 8px rgba(198,40,40,0.3);
+}
 
-/* ═══ RESPONSIVE ═══════════════════════════════════════════ */
+/* == RESPONSIVE =========================================== */
 @media (max-width: 768px) {
   .web-form-container { padding: 10px 8px 40px; }
-  .kya-wf-header { padding: 20px 14px 16px; }
-  .kya-wf-header h3 { font-size: 17px; }
-  .kya-wf-header img.kya-logo { max-height: 56px; }
+  .kya-wf-header { padding: 18px 14px 0; }
+  .kya-header-row { flex-direction: column; align-items: center; text-align: center; }
+  .kya-header-right { text-align: center; }
+  .kya-header-right .kya-title { font-size: 17px; }
+  .kya-header-left .kya-logo { max-height: 60px; }
   .kya-section-body.kya-grid { grid-template-columns: 1fr; }
   .kya-section-body.kya-grid .kya-grid-span-2,
   .kya-section-body.kya-grid .kya-grid-col { grid-column: span 1; }
   .kya-section-body.kya-sig-grid { grid-template-columns: repeat(2, 1fr); }
   .kya-section-title { font-size: 12px; padding: 8px 14px; margin: 10px 12px 0; }
-  .kya-section-body { padding: 14px 14px; }
+  .kya-section-body { padding: 14px; }
   .web-form-container .btn-primary { font-size: 14px; padding: 14px 16px; }
-  .kya-wf-toolbar { flex-wrap: wrap; justify-content: center; }
+  .kya-wf-state { flex-direction: column; align-items: stretch; text-align: center; }
+  .kya-wf-actions { margin-left: 0; justify-content: center; }
 }
 
-/* ═══ LOGIN & GLOBAL BRANDING ══════════════════════════════ */
-.page-card .app-logo,
-.for-login .app-logo {
-  max-height: 100px !important; width: auto !important;
-}
-.page-card {
-  border-top: 4px solid var(--kya-blue) !important;
-  border-radius: var(--kya-r-lg) !important;
-  box-shadow: var(--kya-shadow-card) !important;
-}
-img[src*="erpnext-logo"],
-a[href*="erpnext"] img,
-.footer-logo-extension,
-footer .container a[href*="erpnext"] {
-  display: none !important;
-}
+/* == LOGIN & GLOBAL BRANDING ============================== */
+.page-card .app-logo, .for-login .app-logo { max-height: 100px !important; width: auto !important; }
+.page-card { border-top: 4px solid var(--kya-blue) !important; border-radius: var(--kya-r-lg) !important; }
+img[src*="erpnext-logo"], a[href*="erpnext"] img, .footer-logo-extension, footer .container a[href*="erpnext"] { display: none !important; }
 footer .web-footer-menu { display: none !important; }
-.navbar-brand img,
-.sidebar-header img { max-height: 36px !important; }
+.navbar-brand img, .sidebar-header img { max-height: 36px !important; }
 .navbar .erpnext-setup-banner { display: none !important; }
-.desk-sidebar .sidebar-item.selected {
-  border-left: 3px solid var(--kya-orange) !important;
-  background: var(--kya-blue-light) !important;
-}
-.navbar .navbar-nav .nav-link:hover {
-  color: var(--kya-blue) !important;
-}
+.desk-sidebar .sidebar-item.selected { border-left: 3px solid var(--kya-orange) !important; background: var(--kya-blue-light) !important; }
 
-/* ═══ PRINT ════════════════════════════════════════════════ */
+/* == PRINT ================================================ */
 @media print {
   body { background: #fff !important; }
   .web-form-container { max-width: 100% !important; padding: 0; margin: 0; }
@@ -499,107 +545,8 @@ footer .web-footer-menu { display: none !important; }
     -webkit-print-color-adjust: exact; print-color-adjust: exact;
     margin: 8px 0 0; border-radius: 2px;
   }
-  .web-form-container .btn-primary,
-  .web-form-container .btn-primary-dark,
-  .kya-wf-toolbar,
-  .kya-wf-state { display: none !important; }
-  .kya-wf-footer {
-    border-radius: 0; border-top: 1px solid #333;
-    -webkit-print-color-adjust: exact; print-color-adjust: exact;
-  }
-  /* Show read-only values clearly in print */
-  input[readonly], input:disabled, .form-control[disabled] {
-    border: none !important; background: transparent !important;
-    padding-left: 0 !important;
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════
-   WORKFLOW ACTION TOOLBAR (Mobile Approval)
-   ═══════════════════════════════════════════════════════════ */
-.kya-wf-state {
-  background: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 10px;
-  padding: 14px 18px;
-  margin: 12px 0 16px;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-}
-.kya-state-label {
-  font-weight: 600;
-  color: #555;
-  font-size: 14px;
-}
-.kya-state-badge {
-  display: inline-block;
-  padding: 5px 14px;
-  border-radius: 20px;
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 0.3px;
-}
-.kya-state-draft { background: #f5f5f5; color: #666; }
-.kya-state-pending { background: #fff3e0; color: #e65100; }
-.kya-state-approved { background: #e8f5e9; color: #2e7d32; }
-.kya-state-rejected { background: #ffebee; color: #c62828; }
-
-.kya-wf-actions {
-  display: flex;
-  gap: 8px;
-  margin-left: auto;
-  flex-wrap: wrap;
-}
-.kya-btn-approve {
-  background: linear-gradient(135deg, #2e7d32, #43a047);
-  color: #fff;
-  border: none;
-  padding: 10px 22px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 14px;
-  cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s;
-  box-shadow: 0 2px 8px rgba(46,125,50,0.3);
-}
-.kya-btn-approve:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(46,125,50,0.4);
-}
-.kya-btn-reject {
-  background: linear-gradient(135deg, #c62828, #e53935);
-  color: #fff;
-  border: none;
-  padding: 10px 22px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 14px;
-  cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s;
-  box-shadow: 0 2px 8px rgba(198,40,40,0.3);
-}
-.kya-btn-reject:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(198,40,40,0.4);
-}
-
-/* Mobile responsive */
-@media (max-width: 480px) {
-  .kya-wf-state {
-    flex-direction: column;
-    align-items: stretch;
-    text-align: center;
-  }
-  .kya-wf-actions {
-    margin-left: 0;
-    justify-content: center;
-  }
-  .kya-btn-approve, .kya-btn-reject {
-    flex: 1;
-    min-width: 120px;
-    padding: 12px 16px;
-    font-size: 15px;
-  }
+  .web-form-container .btn-primary, .kya-wf-toolbar, .kya-wf-state { display: none !important; }
+  .kya-wf-footer { border-radius: 0; border-top: 1px solid #333; }
+  input[readonly], input:disabled, .form-control[disabled] { border: none !important; background: transparent !important; padding-left: 0 !important; }
+  .kya-header-divider { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }

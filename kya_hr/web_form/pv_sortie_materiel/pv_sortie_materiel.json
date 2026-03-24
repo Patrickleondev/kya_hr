@@ -60,26 +60,22 @@
         {
             "fieldname": "signature_chef",
             "fieldtype": "Signature",
-            "label": "Signature Chef",
-            "read_only": 1
+            "label": "Signature Chef"
         },
         {
             "fieldname": "signature_audit",
             "fieldtype": "Signature",
-            "label": "Signature Audit",
-            "read_only": 1
+            "label": "Signature Audit"
         },
         {
             "fieldname": "signature_dga",
             "fieldtype": "Signature",
-            "label": "Signature DG / DGA",
-            "read_only": 1
+            "label": "Signature DG / DGA"
         },
         {
             "fieldname": "signature_magasin",
             "fieldtype": "Signature",
-            "label": "Signature Magasin",
-            "read_only": 1
+            "label": "Signature Magasin"
         }
     ]
 }

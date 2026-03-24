@@ -1,4 +1,4 @@
-"""Customer Provided Item"" cannot be Purchase Item also","Un ""article fourni par un client"" ne peut pas être également un article d'achat"
+﻿"""Customer Provided Item"" cannot be Purchase Item also","Un ""article fourni par un client"" ne peut pas être également un article d'achat"
 """Customer Provided Item"" cannot have Valuation Rate","Un ""article fourni par un client"" ne peut pas avoir de taux de valorisation"
 """From Date"" can not be greater than or equal to ""To Date""","Le ""De Date"" ne peut pas être supérieur ou égal à ""Date de Date"""
 """From date"" can not be greater than or equal to ""To date""","""De la date"" ne peut pas être supérieur ou égal à ""À ce jour"""
@@ -696,21 +696,21 @@ Accumulated Values in Group Company,Valeurs accumulées dans la société mère
 Achieved ({}),Atteint ({})
 Achievement,Réalisation
 Acquisition Date,Date d'Aquisition
-Action,étion
-Action If Quality Inspection Is Not Submitted,étion si l'inspection qualité n'est pas soumise
-Action If Quality Inspection Is Rejected,étion si l'inspection qualité est rejetée
-Action If Same Rate is Not Maintained,étion si le même taux n'est pas maintenu
-Action Initialised,étion initialisée
+Action,Action
+Action If Quality Inspection Is Not Submitted,Action si l'inspection qualité n'est pas soumise
+Action If Quality Inspection Is Rejected,Action si l'inspection qualité est rejetée
+Action If Same Rate is Not Maintained,Action si le même taux n'est pas maintenu
+Action Initialised,Action initialisée
 Action if Accumulated Monthly Budget Exceeded on Actual,Mesure à prendre si le budget mensuel accumulé est dépassé
 Action if Accumulated Monthly Budget Exceeded on MR,Mesure à prendre si le budget mensuel accumulé est dépassé avec les requêtes de matériel
 Action if Accumulated Monthly Budget Exceeded on PO,Mesure à prendre si le budget mensuel accumulé a été dépassé avec les bons de commande d'achat
-Action if Annual Budget Exceeded on Actual,étion si le budget annuel est dépassé par rapport aux dépenses réelles
-Action if Annual Budget Exceeded on MR,étion si le budget annuel est dépassé avec les requêtes de matériel
-Action if Annual Budget Exceeded on PO,étion si le budget annuel a été dépassé avec les bons de commande d'achat
-Action if Same Rate is Not Maintained Throughout  Internal Transaction,étion si le même taux n'est pas maintenu tout au long de la transaction interne
-Action if Same Rate is Not Maintained Throughout Sales Cycle,étion si le même taux n'est pas maintenu tout au long du cycle de vente
-Actions,étions
-Actions performed,étions réalisées
+Action if Annual Budget Exceeded on Actual,Action si le budget annuel est dépassé par rapport aux dépenses réelles
+Action if Annual Budget Exceeded on MR,Action si le budget annuel est dépassé avec les requêtes de matériel
+Action if Annual Budget Exceeded on PO,Action si le budget annuel a été dépassé avec les bons de commande d'achat
+Action if Same Rate is Not Maintained Throughout  Internal Transaction,Action si le même taux n'est pas maintenu tout au long de la transaction interne
+Action if Same Rate is Not Maintained Throughout Sales Cycle,Action si le même taux n'est pas maintenu tout au long du cycle de vente
+Actions,Actions
+Actions performed,Actions réalisées
 Active,Actif
 Active Assist,Assistance active
 Active Customers,Clients actifs
@@ -1547,7 +1547,7 @@ At Row #{0}: The picked quantity {1} for the item {2} is greater than available 
 At least one account with exchange gain or loss is required,Au moins un compte avec gain ou perte de change est requis
 At least one mode of payment is required for POS invoice.,Au moins un mode de paiement est nécessaire pour une facture de PDV
 At least one of the Applicable Modules should be selected,Au moins un des modules applicables doit être sélectionné
-"At row #{0}: the Difference Account must not be a Stock type account, please change the Account Type for the account {1} or select a different account","À la ligne #{0}: le compte de différence ne doit pas être un compte de type étions, veuillez modifier le type de compte pour le compte {1} ou sélectionner un autre compte"
+"At row #{0}: the Difference Account must not be a Stock type account, please change the Account Type for the account {1} or select a different account","À la ligne #{0}: le compte de différence ne doit pas être un compte de type Actions, veuillez modifier le type de compte pour le compte {1} ou sélectionner un autre compte"
 At row #{0}: the sequence id {1} cannot be less than previous row sequence id {2},À la ligne n ° {0}: l'ID de séquence {1} ne peut pas être inférieur à l'ID de séquence de ligne précédent {2}
 "At row #{0}: you have selected the Difference Account {1}, which is a Cost of Goods Sold type account. Please select a different account","à la ligne #{0} : vous avez sélectionné le compte de différence {1}, qui est un compte de type Coût des marchandises vendues. Veuillez sélectionner un autre compte"
 At row {0}: Batch No is mandatory for Item {1},À la ligne {0} : Le numéro de lot est obligatoire pour l'article {1}
@@ -2829,7 +2829,7 @@ Contribution (%),Contribution (%)
 Contribution Amount,Montant de la contribution
 Contribution Qty,Quantité de contribution
 Contribution to Net Total,Contribution au Total Net
-Control Action,étion de contrôle
+Control Action,Action de contrôle
 Control Historical Stock Transactions,Controle de l'historique des stransaction de stock
 Conversion Factor,Facteur de Conversion
 Conversion Factor is mandatory,Le facteur de conversion est obligatoire
@@ -2855,7 +2855,7 @@ Copy Webhook URL,Copier l'URL du Webhook
 Copy of Invitation/Announcement,Copie de l'invitation / annonce
 Correct,Correct
 Corrective,Correctif
-Corrective Action,étion corrective
+Corrective Action,Action corrective
 Corrective Job Card,Carte de travail corrective
 Corrective Operation,Opération corrective
 Corrective Operation Cost,Coût des opérations correctives
@@ -4867,7 +4867,7 @@ From Prospect,Depuis Prospect
 From Range,Plage Initiale
 From Range has to be less than To Range,La Plage Initiale doit être inférieure à la Plage Finale
 From Reference Date,Depuis la date de référence
-From Shareholder,étionnaire Initial
+From Shareholder,Actionnaire Initial
 From State,Etat (Origine)
 From Template,À partir du modèle
 From Time,Horaire de Début
@@ -8788,7 +8788,7 @@ Prevent POs,Interdire les Bons de Commande d'Achat
 Prevent Purchase Orders,Interdire les Bons de Commande d'Achat
 Prevent RFQs,Interdire les Appels d'Offres
 Preventive,Préventif
-Preventive Action,étion préventive
+Preventive Action,Action préventive
 Preventive Maintenance,Maintenance préventive
 Preview,Aperçu
 Preview Email,Aperçu de l'e-mail
@@ -9203,8 +9203,8 @@ Qualified,Qualifié
 Qualified By,Qualifié par
 Qualified on,Qualifié le
 Quality,Qualité
-Quality Action,étion Qualité
-Quality Action Resolution,Quality étion Resolution
+Quality Action,Action Qualité
+Quality Action Resolution,Quality Action Resolution
 Quality Feedback,Commentaires sur la qualité
 Quality Feedback Parameter,Paramètre de retour qualité
 Quality Feedback Template,Modèle de commentaires sur la qualité
@@ -9355,7 +9355,7 @@ Raw Material Name,Nom de la matière première
 Raw Material Value,Valeur de matière première
 Raw Material Warehouse,Entrepôt de matières premières
 Raw Materials,Matières premières
-Raw Materials Actions,étions sur les matières premières
+Raw Materials Actions,Actions sur les matières premières
 Raw Materials Consumed,Matières premières consommées
 Raw Materials Consumption,Consommation de matières premières
 Raw Materials Supplied,Matières Premières Fournies
@@ -10446,7 +10446,7 @@ Score Obtained,Score obtenu
 Score cannot be greater than Maximum Score,Score ne peut pas être supérieure à Score maximum
 Score must be less than or equal to 5,Score doit être inférieur ou égal à 5
 Score out of 100,Score sur 100
-Scorecard Actions,étions de la Fiche d'Évaluation
+Scorecard Actions,Actions de la Fiche d'Évaluation
 "Scorecard variables can be used, as well as:
 {total_score} (the total score from that period),
 "{period_number} (the number of periods to present day)""","Les variables de tableau de bord peuvent être utilisées, ainsi que :"
@@ -10944,7 +10944,7 @@ Share On,Partager sur
 Share Transfer,Transfert d'actions
 Share Type,Type de partage
 Shared secret,Secret partagé
-Shareholder,étionnaire
+Shareholder,Actionnaire
 Shelf Life In Days,Durée de conservation en jours
 Shelf Life in Days,Durée de Vie en Jours
 Shift,Créneau
@@ -13228,7 +13228,7 @@ Workday,Journée de travail
 Workday {0} has been repeated.,La journée de travail {0} a été répétée.
 Worked On Holiday,Travail en vacances
 Workflow,Flux de Travail
-Workflow Action,étion du Flux de Travail
+Workflow Action,Action du Flux de Travail
 Workflow State,État du Flux de Travail
 Working,Travail en cours
 Working Days,Jours Ouvrables

@@ -1,91 +1,98 @@
 <style>
     @page { size: A4; margin: 15mm; }
-    body { font-family: Arial, sans-serif; font-size: 12px; color: #333; }
-    .bilan-container { max-width: 700px; margin: 0 auto; }
-    .bilan-header { text-align: center; border-bottom: 3px solid #29CD42; padding-bottom: 14px; margin-bottom: 20px; }
-    .bilan-header img { height: 55px; margin-bottom: 8px; }
-    .bilan-header h1 { font-size: 20px; color: #29CD42; margin: 6px 0 2px; text-transform: uppercase; }
-    .bilan-header .subtitle { font-size: 11px; color: #888; }
-    .section { margin-bottom: 18px; }
-    .section h3 { color: #29CD42; font-size: 14px; border-bottom: 1px solid #29CD42; padding-bottom: 4px; margin-bottom: 10px; }
-    table.data { width: 100%; border-collapse: collapse; }
-    table.data td { padding: 7px 10px; border: 1px solid #e0e0e0; }
-    table.data .lbl { background: #f0faf0; font-weight: 700; width: 35%; color: #555; }
-    .note-display { text-align: center; margin: 16px 0; padding: 16px; background: #f0faf0; border-radius: 10px; }
-    .note-display .note { font-size: 36px; font-weight: 700; color: #29CD42; }
-    .note-display .mention { font-size: 16px; color: #555; margin-top: 4px; }
-    .evaluation-text { background: #fafafa; padding: 14px; border-radius: 8px; border: 1px solid #e0e0e0; line-height: 1.6; min-height: 80px; }
-    .signatures-row { display: flex; justify-content: space-between; margin-top: 30px; }
-    .sig { text-align: center; width: 30%; }
-    .sig .sig-line { border-top: 1px solid #333; margin-top: 36px; padding-top: 4px; font-size: 10px; color: #666; }
-    .footer { margin-top: 30px; text-align: center; font-size: 9px; color: #aaa; border-top: 2px solid #29CD42; padding-top: 8px; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; color: #333; }
+    .kya-doc { max-width: 100%; margin: 0 auto; }
+    .kya-doc-header { display: flex; align-items: flex-start; gap: 24px; padding: 10px 0 0; }
+    .kya-doc-logo { flex-shrink: 0; }
+    .kya-doc-logo img { max-height: 80px; }
+    .kya-doc-info { flex: 1; text-align: right; }
+    .kya-doc-title { font-size: 22px; font-weight: 800; color: #1a5276; text-transform: uppercase; margin: 0 0 4px; letter-spacing: 0.02em; }
+    .kya-doc-slogan { font-style: italic; color: #F58220; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    .kya-doc-company { font-size: 10px; color: #666; line-height: 1.6; }
+    .kya-doc-line { height: 3px; background: #1a5276; margin: 14px 0 10px; }
+    .kya-doc-ref { text-align: center; font-size: 15px; font-weight: 800; color: #1a5276; margin: 10px 0 18px; }
+    .kya-sec-header { background: #1a5276; color: #fff; padding: 8px 16px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; margin: 14px 0 0; }
+    .kya-sec-body { padding: 12px 16px; border: 1px solid #dee2e6; border-top: none; }
+    .kya-row { display: flex; gap: 16px; margin-bottom: 8px; }
+    .kya-col { flex: 1; }
+    .kya-lbl { font-weight: 700; color: #1a5276; font-size: 10px; text-transform: uppercase; margin-bottom: 2px; }
+    .kya-val { font-size: 12px; padding: 4px 0; min-height: 18px; color: #333; }
+    .kya-items { width: 100%; border-collapse: collapse; margin: 8px 0; }
+    .kya-items th { background: #1a5276; color: #fff; padding: 7px 10px; text-align: left; font-size: 10px; text-transform: uppercase; }
+    .kya-items td { padding: 5px 10px; border-bottom: 1px solid #eee; font-size: 11px; color: #333; }
+    .kya-items .num { text-align: right; }
+    .kya-total { text-align: right; font-size: 14px; font-weight: 700; color: #1a5276; margin: 8px 0; }
+    .kya-status { text-align: center; margin: 12px 0; }
+    .kya-badge { display: inline-block; padding: 5px 20px; border-radius: 16px; font-weight: 700; font-size: 12px; text-transform: uppercase; }
+    .kya-badge-ok { background: #e8f5e9; color: #2e7d32; border: 2px solid #4caf50; }
+    .kya-badge-wait { background: #fff3e0; color: #e65100; border: 2px solid #ff9800; }
+    .kya-badge-no { background: #ffebee; color: #c62828; border: 2px solid #ef5350; }
+    .kya-palier { display: inline-block; padding: 3px 12px; border-radius: 10px; font-size: 10px; font-weight: 700; }
+    .palier-1 { background: #e3f2fd; color: #1565c0; }
+    .palier-2 { background: #fff3e0; color: #e65100; }
+    .palier-3 { background: #ffebee; color: #c62828; }
+    .kya-sigs { display: flex; flex-wrap: wrap; justify-content: space-around; gap: 10px; margin-top: 10px; }
+    .kya-sig { text-align: center; min-width: 100px; flex: 1; }
+    .kya-sig img { max-height: 50px; display: block; margin: 0 auto 4px; }
+    .kya-sig .sig-line { border-top: 1px solid #333; margin-top: 28px; padding-top: 4px; font-size: 9px; font-weight: 600; color: #333; }
+    .kya-sig .sig-date { font-size: 8px; color: #888; }
+    .kya-doc-footer { text-align: center; padding: 12px 0 0; margin-top: 16px; border-top: 2px solid #1a5276; font-size: 9px; color: #999; }
 </style>
-
-<div class="bilan-container">
-    <div class="bilan-header">
-        <img src="/assets/kya_hr/images/image010.png" alt="KYA-Energy Group" onerror="this.src='https://www.kya-energy.com/wp-content/uploads/2024/02/Logo-10-ans-KYA.png'">
-        <h1>Bilan de Fin de Stage</h1>
-        <div class="subtitle">{{ doc.name }} | KYA-Energy Group</div>
+<div class="kya-doc">
+  <div class="kya-doc-header">
+    <div class="kya-doc-logo">
+      <img src="/assets/kya_hr/images/logo_kya.png" alt="KYA" style="max-height:80px;"
+           onerror="this.src='/files/vrai.png'">
     </div>
-
-    <div class="section">
-        <h3>1. Informations du Stagiaire</h3>
-        <table class="data">
-            <tr>
-                <td class="lbl">Nom du stagiaire</td>
-                <td><strong>{{ doc.employee_name or '' }}</strong></td>
-            </tr>
-            <tr>
-                <td class="lbl">Département</td>
-                <td>{{ doc.department or '—' }}</td>
-            </tr>
-            <tr>
-                <td class="lbl">Encadrant</td>
-                <td>{{ frappe.db.get_value('Employee', doc.encadrant, 'employee_name') if doc.encadrant else '—' }}</td>
-            </tr>
-            <tr>
-                <td class="lbl">Période de stage</td>
-                <td>
-                    Du {{ frappe.utils.format_date(doc.date_debut) }}
-                    au {{ frappe.utils.format_date(doc.date_fin) }}
-                </td>
-            </tr>
-        </table>
+    <div class="kya-doc-info">
+      <div class="kya-doc-title">BILAN DE FIN DE STAGE</div>
+      <div class="kya-doc-slogan">Move beyond the sky!</div>
+      <div class="kya-doc-company">
+        info@kya-energy.com<br>
+        N° RCCM : TG-LOM 2015 B 975<br>
+        NIF : 1000430317 | CNSS : 48863
+      </div>
     </div>
+  </div>
+  <div class="kya-doc-line"></div>
+  <div class="kya-doc-ref">N° {{ doc.name }} — <span style="font-size:12px;color:#888;">AEA-ENG-34-V01</span></div>
 
-    <div class="section">
-        <h3>2. Évaluation</h3>
-        <div class="note-display">
-            <div class="note">{{ doc.note_globale or '—' }} / 20</div>
-            <div class="mention">{{ doc.mention or '' }}</div>
-        </div>
+  <div class="kya-sec-header">1. IDENTIFICATION DU STAGIAIRE</div>
+  <div class="kya-sec-body">
+    <div class="kya-row">
+      <div class="kya-col"><div class="kya-lbl">Stagiaire</div><div class="kya-val"><strong>{{ doc.employee_name or '' }}</strong></div></div>
+      <div class="kya-col"><div class="kya-lbl">Département</div><div class="kya-val">{{ doc.department or '—' }}</div></div>
     </div>
+    <div class="kya-row">
+      <div class="kya-col"><div class="kya-lbl">Encadrant</div><div class="kya-val">
+        {% set enc_name = frappe.db.get_value('Employee', doc.encadrant, 'employee_name') if doc.encadrant else None %}
+        {{ enc_name or doc.encadrant or '—' }}
+      </div></div>
+    </div>
+  </div>
 
-    {% if doc.evaluation %}
-    <div class="section">
-        <h3>3. Évaluation Détaillée</h3>
-        <div class="evaluation-text">{{ doc.evaluation }}</div>
+  <div class="kya-sec-header">2. PÉRIODE DE STAGE</div>
+  <div class="kya-sec-body">
+    <div class="kya-row">
+      <div class="kya-col"><div class="kya-lbl">Date début</div><div class="kya-val">{{ frappe.utils.format_date(doc.date_debut) }}</div></div>
+      <div class="kya-col"><div class="kya-lbl">Date fin</div><div class="kya-val">{{ frappe.utils.format_date(doc.date_fin) }}</div></div>
     </div>
-    {% endif %}
+  </div>
 
-    <div class="section">
-        <h3>{{ '4' if doc.evaluation else '3' }}. Signatures</h3>
-        <div class="signatures-row">
-            <div class="sig">
-                <div class="sig-line">Encadrant</div>
-            </div>
-            <div class="sig">
-                <div class="sig-line">Responsable RH</div>
-            </div>
-            <div class="sig">
-                <div class="sig-line">Direction Générale</div>
-            </div>
-        </div>
-    </div>
+  <div class="kya-sec-header">3. ÉVALUATION / BILAN</div>
+  <div class="kya-sec-body">
+    <div class="kya-val" style="white-space:pre-wrap;">{{ doc.evaluation or 'Aucune évaluation fournie.' }}</div>
+  </div>
 
-    <div class="footer">
-        KYA-Energy Group — 08BP 81101 Agoe Nyive, Logopé — Lomé, Togo<br>
-        📞 +228 70 45 34 81 | ✉️ info@kya-energy.com | 🌐 www.kya-energy.com<br>
-        Document généré le {{ frappe.utils.now_datetime().strftime('%d/%m/%Y à %H:%M') }}
+  <div class="kya-sec-header">4. RÉSULTATS</div>
+  <div class="kya-sec-body">
+    <div class="kya-row">
+      <div class="kya-col"><div class="kya-lbl">Note Globale (/20)</div><div class="kya-val" style="font-size:18px;font-weight:800;color:#1a5276;">{{ doc.note_globale or '—' }}</div></div>
+      <div class="kya-col"><div class="kya-lbl">Mention</div><div class="kya-val" style="font-size:14px;font-weight:700;">{{ doc.mention or '—' }}</div></div>
     </div>
+  </div>
+
+  <div class="kya-doc-footer">
+    Généré le {{ frappe.utils.now_datetime().strftime('%d/%m/%Y à %H:%M') }} — KYA-Energy Group, Lomé, Togo
+  </div>
 </div>

@@ -131,6 +131,7 @@ ALLOWED_DOCTYPES = {
     "PV Sortie Materiel",
     "Planning Conge",
     "Demande Achat KYA",
+    "Bilan Fin de Stage",
 }
 
 

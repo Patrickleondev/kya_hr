@@ -1,244 +1,329 @@
-/* ═══════════════════════════════════════════════════════════
-   KYA-Energy Group — Web Form Layout v3
-   Style : Fiche d'Intervention (document officiel)
-   Restructure Frappe web form fields into numbered sections,
-   clean logo header, proper read-only styling, print support.
-   ═══════════════════════════════════════════════════════════ */
+/* ===================================================================
+   KYA-Energy Group — Web Form Layout v4
+   Design : Ordre de Mission / Fiche officielle KYA
+   En-tête 2-colonnes : Logo gauche | Titre + infos droite
+   N° de document affiché, sections numérotées,
+   permissions par rôle, signatures verrouillées.
+   =================================================================== */
 
 (function () {
   "use strict";
 
-  /* ── Section definitions per web-form route ───────────── */
   var FORM_SECTIONS = {
     "permission-sortie-stagiaire": [
       {
-        title: "Informations du Stagiaire",
-        icon: "👤",
+        title: "IDENTIFICATION DU STAGIAIRE",
+        icon: "\u{1F464}",
         fields: ["employee", "employee_name", "department"],
-        grid: { employee: "span 2", employee_name: "col", department: "col" },
+        grid: { employee: "span 2", employee_name: "col", department: "col" }
       },
       {
-        title: "Détails de la Sortie",
-        icon: "🚪",
+        title: "D\u00c9TAILS DE LA SORTIE",
+        icon: "\u{1F6AA}",
         fields: ["date_sortie", "date_fin", "nombre_jours", "heure_depart", "heure_retour", "motif", "justificatif"],
         grid: {
-          date_sortie: "col",
-          date_fin: "col",
-          nombre_jours: "col",
-          heure_depart: "col",
-          heure_retour: "col",
-          motif: "span 2",
-          justificatif: "span 2",
-        },
+          date_sortie: "col", date_fin: "col", nombre_jours: "col",
+          heure_depart: "col", heure_retour: "col",
+          motif: "span 2", justificatif: "span 2"
+        }
       },
       {
-        title: "Validations & Signatures",
-        icon: "✍️",
+        title: "VALIDATIONS & SIGNATURES",
+        icon: "\u270D\uFE0F",
         fields: ["signature_stagiaire", "signature_chef", "signature_resp_stagiaires", "signature_dg"],
-        sigGrid: true,
-      },
+        sigGrid: true
+      }
     ],
     "permission-sortie-employe": [
       {
-        title: "Informations de l'Employé",
-        icon: "👤",
+        title: "IDENTIFICATION DE L\u2019EMPLOY\u00c9",
+        icon: "\u{1F464}",
         fields: ["employee", "employee_name", "department"],
-        grid: { employee: "span 2", employee_name: "col", department: "col" },
+        grid: { employee: "span 2", employee_name: "col", department: "col" }
       },
       {
-        title: "Détails de la Sortie",
-        icon: "🚪",
-        fields: [
-          "date_sortie",
-          "heure_depart",
-          "heure_retour",
-          "motif",
-          "justificatif",
-        ],
+        title: "D\u00c9TAILS DE LA SORTIE",
+        icon: "\u{1F6AA}",
+        fields: ["date_sortie", "heure_depart", "heure_retour", "motif", "justificatif"],
         grid: {
-          date_sortie: "col",
-          heure_depart: "col",
-          heure_retour: "col",
-          motif: "span 2",
-          justificatif: "span 2",
-        },
+          date_sortie: "col", heure_depart: "col", heure_retour: "col",
+          motif: "span 2", justificatif: "span 2"
+        }
       },
       {
-        title: "Validations & Signatures",
-        icon: "✍️",
+        title: "VALIDATIONS & SIGNATURES",
+        icon: "\u270D\uFE0F",
         fields: ["signature_employe", "signature_chef", "signature_rh", "signature_dga"],
-        sigGrid: true,
-      },
+        sigGrid: true
+      }
     ],
     "demande-achat": [
       {
-        title: "Informations du Demandeur",
-        icon: "👤",
+        title: "IDENTIFICATION DU DEMANDEUR",
+        icon: "\u{1F464}",
         fields: ["employee", "employee_name", "department"],
-        grid: { employee: "span 2", employee_name: "col", department: "col" },
+        grid: { employee: "span 2", employee_name: "col", department: "col" }
       },
       {
-        title: "Détails de la Demande",
-        icon: "📋",
+        title: "D\u00c9TAILS DE LA DEMANDE",
+        icon: "\u{1F4CB}",
         fields: ["date_demande", "objet", "urgence"],
-        grid: { date_demande: "col", urgence: "col", objet: "span 2" },
+        grid: { date_demande: "col", urgence: "col", objet: "span 2" }
       },
       {
-        title: "Articles Demandés",
-        icon: "🛒",
-        fields: ["items", "montant_total"],
+        title: "ARTICLES DEMAND\u00c9S",
+        icon: "\u{1F6D2}",
+        fields: ["items", "montant_total"]
       },
       {
-        title: "Validations & Signatures",
-        icon: "✍️",
+        title: "VALIDATIONS & SIGNATURES",
+        icon: "\u270D\uFE0F",
         fields: ["signature_demandeur", "signature_chef", "signature_dga", "signature_dg"],
-        sigGrid: true,
-      },
+        sigGrid: true
+      }
     ],
     "pv-sortie-materiel": [
       {
-        title: "Informations de la Sortie",
-        icon: "📦",
+        title: "INFORMATIONS DE LA SORTIE",
+        icon: "\u{1F4E6}",
         fields: ["objet", "date_sortie"],
-        grid: { objet: "span 2", date_sortie: "span 2" },
+        grid: { objet: "span 2", date_sortie: "span 2" }
       },
       {
-        title: "Liste du Matériel",
-        icon: "📝",
-        fields: ["items", "demandeur_nom"],
+        title: "LISTE DU MAT\u00c9RIEL",
+        icon: "\u{1F4DD}",
+        fields: ["items", "demandeur_nom"]
       },
       {
-        title: "Validations & Signatures",
-        icon: "✍️",
+        title: "VALIDATIONS & SIGNATURES",
+        icon: "\u270D\uFE0F",
         fields: ["signature_demandeur", "signature_chef", "signature_audit", "signature_dga", "signature_magasin"],
-        sigGrid: true,
-      },
+        sigGrid: true
+      }
     ],
     "planning-conge": [
       {
-        title: "Informations de l'Employé",
-        icon: "👤",
+        title: "IDENTIFICATION DE L\u2019EMPLOY\u00c9",
+        icon: "\u{1F464}",
         fields: ["employee", "employee_name", "department"],
-        grid: { employee: "span 2", employee_name: "col", department: "col" },
+        grid: { employee: "span 2", employee_name: "col", department: "col" }
       },
       {
-        title: "Planning Annuel",
-        icon: "📅",
-        fields: ["annee", "periodes"],
+        title: "PLANNING ANNUEL",
+        icon: "\u{1F4C5}",
+        fields: ["annee", "periodes"]
       },
       {
-        title: "Commentaire",
-        icon: "💬",
-        fields: ["commentaire_employe"],
-      },
+        title: "COMMENTAIRE",
+        icon: "\u{1F4AC}",
+        fields: ["commentaire_employe"]
+      }
     ],
+    "bilan-fin-de-stage": [
+      {
+        title: "IDENTIFICATION DU STAGIAIRE",
+        icon: "\u{1F464}",
+        fields: ["employee", "employee_name", "department", "encadrant"],
+        grid: { employee: "col", employee_name: "col", department: "col", encadrant: "col" }
+      },
+      {
+        title: "P\u00c9RIODE DE STAGE",
+        icon: "\u{1F4C5}",
+        fields: ["date_debut", "date_fin"],
+        grid: { date_debut: "col", date_fin: "col" }
+      },
+      {
+        title: "\u00c9VALUATION / BILAN",
+        icon: "\u{1F4DD}",
+        fields: ["evaluation"]
+      },
+      {
+        title: "R\u00c9SULTATS",
+        icon: "\u{1F3C6}",
+        fields: ["note_globale", "mention"],
+        grid: { note_globale: "col", mention: "col" }
+      }
+    ]
   };
 
-  /* ── Form metadata ────────────────────────────────────── */
   var FORM_META = {
     "permission-sortie-stagiaire": {
       title: "DEMANDE DE PERMISSION DE SORTIE",
       subtitle: "Stagiaire",
       ref: "AEA-ENG-31-V01",
-      workflow: "Maître de Stage → Resp. Stagiaires → Direction",
-      desc: "Remplissez ce formulaire pour demander une permission de sortie.",
+      workflow: "Ma\u00eetre de Stage \u2192 Resp. Stagiaires \u2192 Direction"
     },
     "permission-sortie-employe": {
       title: "DEMANDE DE PERMISSION DE SORTIE",
-      subtitle: "Employé",
+      subtitle: "Employ\u00e9",
       ref: "AEA-ENG-30-V01",
-      workflow: "Chef de Service → RH → Direction",
-      desc: "Remplissez ce formulaire pour demander une permission de sortie.",
+      workflow: "Chef de Service \u2192 RH \u2192 Direction"
     },
     "demande-achat": {
       title: "FICHE D\u2019ENGAGEMENT DE D\u00c9PENSES",
       subtitle: "Approvisionnement",
-      ref: "AEA-ENG-29-V01",
-      workflow: "Chef → Auditeur → DAAF → DG",
-      desc: "Soumettez votre demande d\u2019achat avec les articles n\u00e9cessaires.",
+      ref: "AEA-PRO-01-V01",
+      workflow: "Chef \u2192 Auditeur \u2192 DAAF \u2192 DG"
     },
     "pv-sortie-materiel": {
       title: "PV DE SORTIE DE MAT\u00c9RIEL",
       subtitle: "Stock & Logistique",
       ref: "AEA-ENG-32-V01",
-      workflow: "Chef → Audit → Direction → Magasin",
-      desc: "Enregistrez la sortie de mat\u00e9riel avec les articles concern\u00e9s.",
+      workflow: "Chef \u2192 Audit \u2192 Direction \u2192 Magasin"
     },
     "planning-conge": {
       title: "PLANNING DE CONG\u00c9 ANNUEL",
       subtitle: "Ressources Humaines",
       ref: "AEA-ENG-33-V01",
-      workflow: "Employ\u00e9 → RH → DG",
-      desc: "Planifiez vos p\u00e9riodes de cong\u00e9 pour l\u2019ann\u00e9e.",
+      workflow: "Employ\u00e9 \u2192 RH \u2192 DG"
     },
+    "bilan-fin-de-stage": {
+      title: "BILAN DE FIN DE STAGE",
+      subtitle: "Formation & Stages",
+      ref: "AEA-ENG-34-V01",
+      workflow: "Stagiaire \u2192 Encadrant \u2192 RH"
+    }
   };
 
-  /* ── Detect current route ─────────────────────────────── */
+  /* Signature -> role mapping */
+  var SIGNATURE_ROLES = {
+    "permission-sortie-stagiaire": {
+      signature_stagiaire: null,
+      signature_chef: ["Chef Service", "HR Manager", "System Manager"],
+      signature_resp_stagiaires: ["HR Manager", "HR User", "System Manager"],
+      signature_dg: ["DG", "System Manager"]
+    },
+    "permission-sortie-employe": {
+      signature_employe: null,
+      signature_chef: ["Chef Service", "HR Manager", "System Manager"],
+      signature_rh: ["HR Manager", "HR User", "System Manager"],
+      signature_dga: ["DGA", "DG", "System Manager"]
+    },
+    "demande-achat": {
+      signature_demandeur: null,
+      signature_chef: ["Chef Service", "System Manager"],
+      signature_dga: ["DGA", "DG", "System Manager"],
+      signature_dg: ["DG", "System Manager"]
+    },
+    "pv-sortie-materiel": {
+      signature_demandeur: null,
+      signature_chef: ["Chef Service", "System Manager"],
+      signature_audit: ["DGA", "System Manager"],
+      signature_dga: ["DGA", "DG", "System Manager"],
+      signature_magasin: ["Stock Manager", "Stock User", "System Manager"]
+    }
+  };
+
+  var EDITOR_ROLES = [
+    "HR Manager", "HR User", "System Manager",
+    "DG", "DGA", "Chef Service", "Stock Manager"
+  ];
+
   function getRoute() {
-    /* Prefer Frappe's web_form_doc.route (accurate even with /new suffix in URL) */
     if (window.frappe && frappe.web_form_doc && frappe.web_form_doc.route) {
       return frappe.web_form_doc.route;
     }
-    /* Fallback: strip /new or /<docname> from pathname */
     var path = window.location.pathname.replace(/^\//, "").replace(/\/$/, "");
     return path.replace(/\/new$/, "").replace(/\/[^/]+$/, "");
   }
 
-  /* ── Find field control by fieldname ──────────────────── */
   function findFieldEl(fieldname) {
     return (
-      document.querySelector(
-        '.frappe-control[data-fieldname="' + fieldname + '"]'
-      ) || document.querySelector('[data-fieldname="' + fieldname + '"]')
+      document.querySelector('.frappe-control[data-fieldname="' + fieldname + '"]') ||
+      document.querySelector('[data-fieldname="' + fieldname + '"]')
     );
   }
 
-  /* ── Create a numbered section ────────────────────────── */
   function createSection(cfg, idx) {
     var section = document.createElement("div");
     section.className = "kya-form-section";
-
     var header = document.createElement("div");
     header.className = "kya-section-title";
-    header.innerHTML =
-      '<span class="kya-section-icon">' +
-      (cfg.icon || "") +
-      "</span> " +
-      idx +
-      ". " +
-      cfg.title;
+    header.innerHTML = '<span class="kya-section-icon">' + (cfg.icon || "") + '</span> ' + idx + '. ' + cfg.title;
     section.appendChild(header);
-
     var body = document.createElement("div");
     body.className = "kya-section-body";
-    if (cfg.sigGrid) {
-      body.classList.add("kya-sig-grid");
-    } else if (cfg.grid) {
-      body.classList.add("kya-grid");
-    }
+    if (cfg.sigGrid) body.classList.add("kya-sig-grid");
+    else if (cfg.grid) body.classList.add("kya-grid");
     section.appendChild(body);
-
     return { section: section, body: body };
   }
 
-  /* ── Print function ───────────────────────────────────── */
-  function printForm() {
-    window.print();
+  function printForm() { window.print(); }
+
+  function userHasRole(r) {
+    return window.frappe && frappe.user_roles && frappe.user_roles.indexOf(r) !== -1;
+  }
+  function userHasAnyRole(roles) {
+    if (!roles || !roles.length) return false;
+    for (var i = 0; i < roles.length; i++) { if (userHasRole(roles[i])) return true; }
+    return false;
+  }
+  function isDocOwner() {
+    if (!window.frappe || !frappe.web_form_doc) return true;
+    var owner = frappe.web_form_doc.doc_owner || frappe.web_form_doc.owner || "";
+    return !owner || owner === frappe.session.user;
   }
 
-  /* ── Download as PDF (browser print-to-PDF) ───────────── */
-  function downloadPDF() {
-    window.print();
+  function setupSignaturePermissions(route) {
+    var sigMap = SIGNATURE_ROLES[route];
+    if (!sigMap) return;
+    Object.keys(sigMap).forEach(function(fieldname) {
+      var el = findFieldEl(fieldname);
+      if (!el) return;
+      var allowedRoles = sigMap[fieldname];
+      var canSign = false;
+      if (allowedRoles === null) {
+        canSign = isDocOwner();
+      } else {
+        canSign = userHasAnyRole(allowedRoles);
+      }
+      if (canSign) {
+        el.classList.remove("read-only");
+        el.removeAttribute("data-read-only");
+        var canvas = el.querySelector("canvas");
+        if (canvas) canvas.style.pointerEvents = "auto";
+        var clearBtn = el.querySelector(".btn-xs");
+        if (clearBtn) clearBtn.style.display = "";
+        var input = el.querySelector("input");
+        if (input) { input.removeAttribute("readonly"); input.removeAttribute("disabled"); }
+      } else {
+        el.classList.add("read-only");
+        el.setAttribute("data-read-only", "1");
+        var canvas2 = el.querySelector("canvas");
+        if (canvas2) canvas2.style.pointerEvents = "none";
+        var clearBtn2 = el.querySelector(".btn-xs");
+        if (clearBtn2) clearBtn2.style.display = "none";
+      }
+    });
   }
 
-  /* ── Workflow Action Toolbar (Mobile Approval) ────────── */
+  function setupFieldEditPermissions(route) {
+    var isEditor = userHasAnyRole(EDITOR_ROLES);
+    var owner = isDocOwner();
+    if (isEditor || owner) return;
+    var sections = FORM_SECTIONS[route];
+    if (!sections) return;
+    sections.forEach(function(sec) {
+      if (sec.sigGrid) return;
+      sec.fields.forEach(function(fn) {
+        var el = findFieldEl(fn);
+        if (!el) return;
+        var inputs = el.querySelectorAll("input, textarea, select");
+        inputs.forEach(function(inp) {
+          inp.setAttribute("readonly", "readonly");
+          inp.setAttribute("disabled", "disabled");
+        });
+      });
+    });
+  }
+
   function setupWorkflowActions(wrapper) {
     if (!window.frappe || !frappe.web_form_doc) return;
     var docName = frappe.web_form_doc.doc_name || frappe.web_form_doc.name;
-    if (!docName) return; /* New form — no actions */
+    if (!docName) return;
     var doctype = frappe.web_form_doc.doc_type;
     if (!doctype) return;
-
     frappe.call({
       method: "kya_hr.api.get_kya_workflow_actions",
       args: { doctype: doctype, docname: docName },
@@ -248,65 +333,53 @@
         var data = r.message;
         var actions = data.actions || [];
         if (!actions.length && !data.workflow_state) return;
-
-        /* State badge */
         var stateEl = document.createElement("div");
         stateEl.className = "kya-wf-state";
         var stateClass = "kya-state-pending";
         var ws = data.workflow_state || "";
-        if (ws === "Approuvé" || ws === "Approuvée") stateClass = "kya-state-approved";
-        else if (ws === "Rejeté" || ws === "Rejetée") stateClass = "kya-state-rejected";
+        if (/approuv/i.test(ws)) stateClass = "kya-state-approved";
+        else if (/rejet/i.test(ws)) stateClass = "kya-state-rejected";
         else if (ws === "Brouillon") stateClass = "kya-state-draft";
         stateEl.innerHTML =
-          '<span class="kya-state-label">État :</span> ' +
+          '<span class="kya-state-label">\u00c9tat :</span> ' +
           '<span class="kya-state-badge ' + stateClass + '">' + ws + '</span>';
-
-        /* Action buttons */
         if (actions.length) {
-          var btnContainer = document.createElement("div");
-          btnContainer.className = "kya-wf-actions";
+          var btnC = document.createElement("div");
+          btnC.className = "kya-wf-actions";
           actions.forEach(function (a) {
             var btn = document.createElement("button");
             btn.type = "button";
-            var isReject = /rejeter|refuser/i.test(a.action);
-            btn.className = isReject ? "kya-btn-reject" : "kya-btn-approve";
+            btn.className = /rejeter|refuser/i.test(a.action) ? "kya-btn-reject" : "kya-btn-approve";
             btn.textContent = a.action;
-            btn.title = "→ " + a.next_state;
+            btn.title = "\u2192 " + a.next_state;
             btn.addEventListener("click", function () {
               applyWorkflowAction(doctype, docName, a.action, a.next_state);
             });
-            btnContainer.appendChild(btn);
+            btnC.appendChild(btn);
           });
-          stateEl.appendChild(btnContainer);
+          stateEl.appendChild(btnC);
         }
-
-        /* Insert after toolbar or header */
-        var toolbar = wrapper.querySelector(".kya-wf-toolbar");
-        if (toolbar) {
-          toolbar.parentNode.insertBefore(stateEl, toolbar.nextSibling);
-        } else {
-          var header = wrapper.querySelector(".kya-wf-header");
-          if (header) {
-            header.parentNode.insertBefore(stateEl, header.nextSibling);
-          }
+        var tb = wrapper.querySelector(".kya-wf-toolbar");
+        if (tb) tb.parentNode.insertBefore(stateEl, tb.nextSibling);
+        else {
+          var hd = wrapper.querySelector(".kya-wf-header");
+          if (hd) hd.parentNode.insertBefore(stateEl, hd.nextSibling);
         }
-      },
+      }
     });
   }
 
   function applyWorkflowAction(doctype, docname, action, nextState) {
-    if (!confirm("Confirmer l\u2019action : " + action + " ?\n(→ " + nextState + ")")) {
-      return;
-    }
+    if (!confirm("Confirmer l\u2019action : " + action + " ?\n(\u2192 " + nextState + ")")) return;
     frappe.call({
       method: "kya_hr.api.apply_kya_workflow_action",
       args: { doctype: doctype, docname: docname, action: action },
       callback: function (r) {
         if (r && r.message && r.message.status === "success") {
           frappe.msgprint({
-            title: "Action effectuée",
+            title: "Action effectu\u00e9e",
             message: "Le document est maintenant : <b>" + r.message.workflow_state + "</b>",
-            indicator: "green",
+            indicator: "green"
           });
           setTimeout(function () { window.location.reload(); }, 1500);
         }
@@ -314,14 +387,14 @@
       error: function () {
         frappe.msgprint({
           title: "Erreur",
-          message: "Impossible d\u2019effectuer cette action. V\u00e9rifiez vos permissions.",
-          indicator: "red",
+          message: "Impossible d\u2019effectuer cette action.",
+          indicator: "red"
         });
-      },
+      }
     });
   }
 
-  /* ── Main restructure function ────────────────────────── */
+  /* ===== MAIN RESTRUCTURE ============================= */
   function restructureForm() {
     var route = getRoute();
     var sections = FORM_SECTIONS[route];
@@ -335,28 +408,13 @@
       document.querySelector("form.web-form") ||
       document.querySelector(".frappe-form");
     if (!formBody) return;
-
-    /* Already restructured? */
     if (formBody.querySelector(".kya-form-section")) return;
 
-    /* Remove any existing kya-wf-header from introduction_text to avoid duplicates */
-    var existingHeaders = document.querySelectorAll(
-      ".introduction .kya-wf-header, .web-form-header .kya-wf-header"
-    );
-    existingHeaders.forEach(function (h) {
-      h.parentNode.removeChild(h);
-    });
-    /* Also remove existing kya-wf-info from introduction_text */
-    var existingInfos = document.querySelectorAll(
-      ".introduction .kya-wf-info, .web-form-header .kya-wf-info"
-    );
-    existingInfos.forEach(function (h) {
-      h.parentNode.removeChild(h);
-    });
+    /* cleanup old headers */
+    document.querySelectorAll(".introduction .kya-wf-header, .web-form-header .kya-wf-header").forEach(function(h){h.remove();});
+    document.querySelectorAll(".introduction .kya-wf-info, .web-form-header .kya-wf-info").forEach(function(h){h.remove();});
 
-    /* Collect fields */
     var allFields = {};
-    var assigned = {};
     sections.forEach(function (sec) {
       sec.fields.forEach(function (fn) {
         var el = findFieldEl(fn);
@@ -364,63 +422,64 @@
       });
     });
 
-    /* Build wrapper */
     var wrapper = document.createElement("div");
     wrapper.className = "kya-sections-wrapper";
 
-    /* ── Clean header (like Fiche d'Intervention) ──────── */
+    /* === HEADER: 2-column Ordre de Mission style === */
+    var docName = "";
+    if (window.frappe && frappe.web_form_doc) {
+      docName = frappe.web_form_doc.doc_name || frappe.web_form_doc.name || "";
+    }
+    var docDisplay = docName || "PROVISOIRE";
+
     var header = document.createElement("div");
     header.className = "kya-wf-header";
     header.innerHTML =
-      '<div class="kya-header-top">' +
-        '<div class="kya-header-info">' +
-          '<span>N\u00b0 RCCM : TG-LOM 2015 B 975</span>' +
-          '<span>NIF : 1000430317</span>' +
+      '<div class="kya-header-row">' +
+        '<div class="kya-header-left">' +
+          '<img class="kya-logo" src="/assets/kya_hr/images/logo_kya.png" ' +
+          "alt=\"KYA-Energy Group\" onerror=\"this.src='/files/vrai.png'\">" +
+        '</div>' +
+        '<div class="kya-header-right">' +
+          '<h3 class="kya-title">' + meta.title + '</h3>' +
+          '<span class="kya-slogan">Move beyond the sky!</span>' +
+          '<div class="kya-company-details">' +
+            'info@kya-energy.com<br>' +
+            'N\u00b0 RCCM : TG-LOM 2015 B 975<br>' +
+            'NIF : 1000430317 | CNSS : 48863' +
+          '</div>' +
         '</div>' +
       '</div>' +
-      '<img class="kya-logo" src="/assets/kya_hr/images/logo_kya.png" ' +
-      'alt="KYA-Energy Group" onerror="this.src=\'/files/vrai.png\'">' +
-      "<h3>" +
-      meta.title +
-      "</h3>" +
-      (meta.ref
-        ? '<span class="kya-doc-ref">' + meta.ref + "</span>"
-        : "") +
-      '<span class="kya-slogan">Move beyond the sky!</span>' +
-      (meta.subtitle
-        ? '<span class="kya-subtitle">' + meta.subtitle + "</span>"
-        : "");
+      '<div class="kya-header-divider"></div>' +
+      '<div class="kya-doc-number">' +
+        'N\u00b0 <span class="kya-doc-name">' + docDisplay + '</span>' +
+        (meta.ref ? ' &mdash; <span class="kya-doc-ref-inline">' + meta.ref + '</span>' : '') +
+      '</div>';
     wrapper.appendChild(header);
 
-    /* ── Toolbar: print / download ─────────────────────── */
+    /* Toolbar */
     var toolbar = document.createElement("div");
     toolbar.className = "kya-wf-toolbar";
     toolbar.innerHTML =
-      '<button type="button" class="kya-btn-print" title="Imprimer">🖨️ Imprimer</button>' +
-      '<button type="button" class="kya-btn-pdf" title="Télécharger PDF">📥 PDF</button>';
+      '<button type="button" class="kya-btn-print" title="Imprimer">\u{1F5A8}\uFE0F Imprimer</button>' +
+      '<button type="button" class="kya-btn-pdf" title="PDF">\u{1F4E5} PDF</button>';
     wrapper.appendChild(toolbar);
-
-    /* Bind toolbar events */
     setTimeout(function () {
-      var btnPrint = toolbar.querySelector(".kya-btn-print");
-      var btnPdf = toolbar.querySelector(".kya-btn-pdf");
-      if (btnPrint) btnPrint.addEventListener("click", printForm);
-      if (btnPdf) btnPdf.addEventListener("click", downloadPDF);
+      var bp = toolbar.querySelector(".kya-btn-print");
+      var bd = toolbar.querySelector(".kya-btn-pdf");
+      if (bp) bp.addEventListener("click", printForm);
+      if (bd) bd.addEventListener("click", printForm);
     }, 0);
 
-    /* ── Info box ──────────────────────────────────────── */
+    /* Info box */
     var info = document.createElement("div");
     info.className = "kya-wf-info";
     info.innerHTML =
-      "<b>" +
-      meta.desc +
-      "</b><br>" +
-      "Circuit d\u2019approbation : <b>" +
-      meta.workflow +
-      "</b>";
+      (meta.subtitle ? '<b>' + meta.subtitle + '</b> &mdash; ' : '') +
+      'Circuit d\u2019approbation : <b>' + meta.workflow + '</b>';
     wrapper.appendChild(info);
 
-    /* ── Build numbered sections and move fields ────────── */
+    /* Build sections */
     var sectionIdx = 0;
     sections.forEach(function (sec) {
       sectionIdx++;
@@ -428,184 +487,90 @@
       sec.fields.forEach(function (fn) {
         var el = allFields[fn];
         if (!el) return;
-        assigned[fn] = true;
-        if (sec.grid && sec.grid[fn] === "span 2") {
-          el.classList.add("kya-grid-span-2");
-        } else if (sec.grid && sec.grid[fn] === "col") {
-          el.classList.add("kya-grid-col");
-        }
+        if (sec.grid && sec.grid[fn] === "span 2") el.classList.add("kya-grid-span-2");
+        else if (sec.grid && sec.grid[fn] === "col") el.classList.add("kya-grid-col");
         s.body.appendChild(el);
       });
       wrapper.appendChild(s.section);
     });
 
-    /* ── Footer ────────────────────────────────────────── */
+    /* Footer */
     var footer = document.createElement("div");
     footer.className = "kya-wf-footer";
     footer.innerHTML =
       '<strong class="kya-footer-brand">KYA-Energy Group</strong>' +
-      " | LOM\u00c9 - TOGO | T\u00e9l. : +228 70 45 34 81" +
+      ' | LOM\u00c9 - TOGO | T\u00e9l. : +228 70 45 34 81' +
       '<span class="kya-footer-slogan">Move beyond the sky!</span>';
     wrapper.appendChild(footer);
 
-    /* Insert wrapper at top of form body */
-    var firstChild = formBody.firstChild;
-    if (firstChild) {
-      formBody.insertBefore(wrapper, firstChild);
-    } else {
-      formBody.appendChild(wrapper);
-    }
-
+    formBody.insertBefore(wrapper, formBody.firstChild);
     formBody.classList.add("kya-restructured");
 
-    /* ── Workflow action toolbar (mobile approval) ─────── */
     setupWorkflowActions(wrapper);
+    setTimeout(function() {
+      setupSignaturePermissions(route);
+      setupFieldEditPermissions(route);
+    }, 500);
 
-    /* ── Hide default Frappe web-form header ───────────── */
     var defaultHead = document.querySelector(".web-form-head");
     if (defaultHead) defaultHead.classList.add("kya-hidden");
     var defaultIntro = document.querySelector(".web-form-introduction");
     if (defaultIntro) defaultIntro.style.display = "none";
 
-    /* ── Mark read-only fields with data attribute ──────── */
-    var readOnlyFields = ["employee_name", "department", "designation"];
-    readOnlyFields.forEach(function (fn) {
+    ["employee_name","department","designation","nombre_jours","montant_total","note_globale","mention"].forEach(function(fn){
       var el = findFieldEl(fn);
       if (el) el.setAttribute("data-read-only", "1");
     });
   }
 
-  /* ── Auto-fill employee_name and department ───────────── */
   function setupEmployeeAutoFill() {
     var route = getRoute();
     if (!FORM_SECTIONS[route]) return;
-
-    /* Watch for employee Link field value changes */
     var empField = findFieldEl("employee");
     if (!empField) return;
-
     var empInput = empField.querySelector("input");
     if (!empInput) return;
-
     function fetchEmployeeData(empId) {
       if (!empId || !window.frappe) return;
       frappe.call({
         method: "frappe.client.get_value",
-        args: {
-          doctype: "Employee",
-          filters: { name: empId },
-          fieldname: ["employee_name", "department"],
-        },
+        args: { doctype: "Employee", filters: { name: empId }, fieldname: ["employee_name", "department"] },
         callback: function (r) {
-          if (r && r.message) {
-            var nameField = findFieldEl("employee_name");
-            var deptField = findFieldEl("department");
-            if (nameField) {
-              var nameInput = nameField.querySelector("input");
-              if (nameInput) {
-                nameInput.value = r.message.employee_name || "";
-                nameInput.dispatchEvent(new Event("change"));
-              }
-            }
-            if (deptField) {
-              var deptInput = deptField.querySelector("input");
-              if (deptInput) {
-                deptInput.value = r.message.department || "";
-                deptInput.dispatchEvent(new Event("change"));
-              }
-            }
-          }
-        },
+          if (!r || !r.message) return;
+          var nf = findFieldEl("employee_name");
+          var df = findFieldEl("department");
+          if (nf) { var ni = nf.querySelector("input"); if (ni) { ni.value = r.message.employee_name || ""; ni.dispatchEvent(new Event("change")); } }
+          if (df) { var di = df.querySelector("input"); if (di) { di.value = r.message.department || ""; di.dispatchEvent(new Event("change")); } }
+        }
       });
     }
-
-    /* Listen for changes on the employee input */
-    var observer = new MutationObserver(function () {
+    var obs = new MutationObserver(function () {
       var val = empInput.value;
-      if (val && val.length > 3) {
-        fetchEmployeeData(val);
-      }
+      if (val && val.length > 3) fetchEmployeeData(val);
     });
-    observer.observe(empInput, { attributes: true });
-
-    empInput.addEventListener("change", function () {
-      fetchEmployeeData(empInput.value);
-    });
+    obs.observe(empInput, { attributes: true });
+    empInput.addEventListener("change", function () { fetchEmployeeData(empInput.value); });
   }
 
-  /* ── Observer: wait for form fields to be rendered ────── */
   function waitForForm() {
     var route = getRoute();
     if (!FORM_SECTIONS[route] && !FORM_META[route]) return;
-
-    /* V16: Check multiple possible selectors */
-    var formReady =
-      document.querySelector(".frappe-control") ||
-      document.querySelector(".web-form-body .frappe-control") ||
-      document.querySelector('[data-fieldname]');
-
-    if (formReady) {
-      restructureForm();
-      setupEmployeeAutoFill();
-      return;
-    }
-
-    var obs = new MutationObserver(function (mutations, observer) {
-      var ready =
-        document.querySelector(".frappe-control") ||
-        document.querySelector('[data-fieldname]');
-      if (ready) {
+    var formReady = document.querySelector(".frappe-control") || document.querySelector("[data-fieldname]");
+    if (formReady) { restructureForm(); setupEmployeeAutoFill(); return; }
+    var obs = new MutationObserver(function (m, observer) {
+      if (document.querySelector(".frappe-control") || document.querySelector("[data-fieldname]")) {
         observer.disconnect();
-        setTimeout(function () {
-          restructureForm();
-          setupEmployeeAutoFill();
-        }, 300);
+        setTimeout(function () { restructureForm(); setupEmployeeAutoFill(); }, 300);
       }
     });
     obs.observe(document.body, { childList: true, subtree: true });
-
-    /* Fallback: try after 2s and 5s even if observer doesn't trigger */
-    setTimeout(function () {
-      if (!document.querySelector(".kya-form-section")) {
-        restructureForm();
-        setupEmployeeAutoFill();
-      }
-    }, 2000);
-
-    setTimeout(function () {
-      obs.disconnect();
-      if (!document.querySelector(".kya-form-section")) {
-        restructureForm();
-        setupEmployeeAutoFill();
-      }
-    }, 5000);
+    setTimeout(function () { if (!document.querySelector(".kya-form-section")) { restructureForm(); setupEmployeeAutoFill(); } }, 2000);
+    setTimeout(function () { obs.disconnect(); if (!document.querySelector(".kya-form-section")) { restructureForm(); setupEmployeeAutoFill(); } }, 5000);
   }
 
-  /* ── Init ──────────────────────────────────────────────── */
-  /* Expose for V16 client_script triggers */
-  window.kyaRestructureForm = function () {
-    restructureForm();
-    setupEmployeeAutoFill();
-  };
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", function() {
-      waitForForm();
-    });
-  } else {
-    waitForForm();
-  }
-
-  /* V16: frappe.ready triggers after Vue rendering */
-  if (window.frappe && window.frappe.ready) {
-    frappe.ready(function () {
-      setTimeout(waitForForm, 300);
-    });
-  }
-
-  if (window.frappe && window.frappe.router) {
-    document.addEventListener("page-change", function () {
-      setTimeout(waitForForm, 500);
-    });
-  }
+  window.kyaRestructureForm = function () { restructureForm(); setupEmployeeAutoFill(); };
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", waitForForm); }
+  else { waitForForm(); }
+  if (window.frappe && window.frappe.ready) { frappe.ready(function () { setTimeout(waitForForm, 300); }); }
+  if (window.frappe && window.frappe.router) { document.addEventListener("page-change", function () { setTimeout(waitForForm, 500); }); }
 })();

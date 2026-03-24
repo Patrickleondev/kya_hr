@@ -97,20 +97,17 @@
         {
             "fieldname": "signature_chef",
             "fieldtype": "Signature",
-            "label": "Signature Chef",
-            "read_only": 1
+            "label": "Signature Chef"
         },
         {
             "fieldname": "signature_resp_stagiaires",
             "fieldtype": "Signature",
-            "label": "Signature Resp. Stagiaires",
-            "read_only": 1
+            "label": "Signature Resp. Stagiaires"
         },
         {
             "fieldname": "signature_dg",
             "fieldtype": "Signature",
-            "label": "Signature DG",
-            "read_only": 1
+            "label": "Signature DG"
         }
     ]
 }

@@ -10,11 +10,11 @@
     "modified": "2026-03-14 10:00:00.000000",
     "modified_by": "Administrator",
     "module": "KYA HR",
-    "name": "Rapport Pr\u00e9sence Employ\u00e9s",
+    "name": "Rapport Presence Employes",
     "owner": "Administrator",
     "prepared_report": 0,
     "ref_doctype": "Attendance",
-    "report_name": "Rapport Pr\u00e9sence Employ\u00e9s",
+    "report_name": "Rapport Presence Employes",
     "report_type": "Script Report",
     "roles": [
         {"role": "System Manager"},

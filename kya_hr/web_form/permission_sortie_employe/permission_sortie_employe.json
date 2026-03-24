@@ -85,20 +85,17 @@
         {
             "fieldname": "signature_chef",
             "fieldtype": "Signature",
-            "label": "Signature Chef de Service",
-            "read_only": 1
+            "label": "Signature Chef de Service"
         },
         {
             "fieldname": "signature_rh",
             "fieldtype": "Signature",
-            "label": "Signature RH",
-            "read_only": 1
+            "label": "Signature RH"
         },
         {
             "fieldname": "signature_dga",
             "fieldtype": "Signature",
-            "label": "Signature DGA",
-            "read_only": 1
+            "label": "Signature DGA"
         }
     ]
 }
