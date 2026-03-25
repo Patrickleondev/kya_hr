@@ -819,7 +819,7 @@
     "update_value": "Brouillon"
    },
    {
-    "allow_edit": "Employee",
+    "allow_edit": "Chef Service",
     "doc_status": "0",
     "is_optional_state": 0,
     "state": "En attente Chef",
@@ -830,12 +830,12 @@
     "allow_edit": "Purchase Manager",
     "doc_status": "0",
     "is_optional_state": 0,
-    "state": "En attente Approbation",
+    "state": "En attente DAAF",
     "update_field": "statut",
-    "update_value": "En attente Approbation"
+    "update_value": "En attente DAAF"
    },
    {
-    "allow_edit": "HR Manager",
+    "allow_edit": "System Manager",
     "doc_status": "0",
     "is_optional_state": 0,
     "state": "En attente DG",
@@ -843,7 +843,7 @@
     "update_value": "En attente DG"
    },
    {
-    "allow_edit": "HR Manager",
+    "allow_edit": "System Manager",
     "doc_status": "1",
     "is_optional_state": 0,
     "state": "Approuv\u00e9",
@@ -851,7 +851,7 @@
     "update_value": "Approuv\u00e9"
    },
    {
-    "allow_edit": "HR Manager",
+    "allow_edit": "System Manager",
     "doc_status": "1",
     "is_optional_state": 0,
     "state": "Rejet\u00e9",
@@ -871,42 +871,34 @@
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "Purchase User",
+    "allowed": "Chef Service",
+    "condition": null,
+    "next_state": "En attente DAAF",
+    "state": "En attente Chef"
+   },
+   {
+    "action": "Rejeter",
+    "allow_self_approval": 0,
+    "allowed": "Chef Service",
+    "condition": null,
+    "next_state": "Rejet\u00e9",
+    "state": "En attente Chef"
+   },
+   {
+    "action": "Approuver",
+    "allow_self_approval": 0,
+    "allowed": "Purchase Manager",
     "condition": "doc.montant_total < 100000",
     "next_state": "Approuv\u00e9",
-    "state": "En attente Chef"
+    "state": "En attente DAAF"
    },
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "Purchase User",
+    "allowed": "Purchase Manager",
     "condition": "doc.montant_total >= 100000",
-    "next_state": "En attente Approbation",
-    "state": "En attente Chef"
-   },
-   {
-    "action": "Rejeter",
-    "allow_self_approval": 0,
-    "allowed": "Purchase User",
-    "condition": null,
-    "next_state": "Rejet\u00e9",
-    "state": "En attente Chef"
-   },
-   {
-    "action": "Approuver",
-    "allow_self_approval": 0,
-    "allowed": "Purchase Manager",
-    "condition": "doc.montant_total < 2000000",
-    "next_state": "Approuv\u00e9",
-    "state": "En attente Approbation"
-   },
-   {
-    "action": "Approuver",
-    "allow_self_approval": 0,
-    "allowed": "Purchase Manager",
-    "condition": "doc.montant_total >= 2000000",
     "next_state": "En attente DG",
-    "state": "En attente Approbation"
+    "state": "En attente DAAF"
    },
    {
     "action": "Rejeter",
@@ -914,12 +906,12 @@
     "allowed": "Purchase Manager",
     "condition": null,
     "next_state": "Rejet\u00e9",
-    "state": "En attente Approbation"
+    "state": "En attente DAAF"
    },
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "HR Manager",
+    "allowed": "System Manager",
     "condition": null,
     "next_state": "Approuv\u00e9",
     "state": "En attente DG"
@@ -927,7 +919,7 @@
    {
     "action": "Rejeter",
     "allow_self_approval": 0,
-    "allowed": "HR Manager",
+    "allowed": "System Manager",
     "condition": null,
     "next_state": "Rejet\u00e9",
     "state": "En attente DG"
