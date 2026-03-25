@@ -1,5 +1,5 @@
 ﻿"""
-force_sync_workspaces.py v9 -- Post-migrate hook (KYA).
+force_sync_workspaces.py v10 -- Post-migrate hook (KYA).
 
 Regles :
   1. Ne JAMAIS creer de workspaces programmatiquement (les JSON files gerent ca)
@@ -7,6 +7,8 @@ Regles :
   3. S'assurer que les workspaces KYA JSON sont visibles
   4. Corriger le module de KYA Services si necessaire
   5. Creer le Workspace Sidebar pour KYA Services s'il manque
+  6. Creer le Workspace Sidebar pour Espace Stagiaires s'il manque
+  7. Corriger le champ app de Gestion Equipe
 """
 import frappe
 
@@ -18,12 +20,12 @@ ORPHAN_WORKSPACES = ["KYA Stagiaires", "Conges & Permissions"]
 ORPHAN_SIDEBARS = ["KYA Stagiaires", "Personnes"]
 
 # Workspaces geres par les fichiers JSON (on s'assure juste qu'ils sont visibles)
-KYA_WORKSPACES = ["Espace Stagiaires", "KYA Services"]
+KYA_WORKSPACES = ["Espace Employes", "Espace Stagiaires", "KYA Services", "Gestion Équipe"]
 
 
 def execute():
     """Post-migrate hook -- nettoyage et visibilite uniquement."""
-    print("=== KYA WORKSPACE SYNC v9 ===")
+    print("=== KYA WORKSPACE SYNC v10 ===")
 
     # 1. Supprimer les Workspace Sidebar orphelins
     for sb_name in ORPHAN_SIDEBARS:
@@ -65,45 +67,95 @@ def execute():
             print(f"  [VISIBLE] {ws_name}")
 
     # 5. Creer le Workspace Sidebar pour KYA Services s'il n'existe pas
+    #    Guard: only if kya_services app is fully installed (DocTypes + Workspace exist)
     if not frappe.db.exists("Workspace Sidebar", "KYA Services"):
-        sidebar = frappe.new_doc("Workspace Sidebar")
-        sidebar.title = "KYA Services"
-        sidebar.module = "KYA Services"
-        sidebar.header_icon = "clipboard-list"
-        sidebar.app = "kya_services"
-        sidebar.standard = 0
-        sidebar.append("items", {
-            "label": "KYA Services",
-            "type": "Link",
-            "link_to": "KYA Services",
-            "link_type": "Workspace",
-            "icon": "clipboard-list"
-        })
-        sidebar.append("items", {
-            "label": "KYA Form",
-            "type": "Link",
-            "link_to": "KYA Form",
-            "link_type": "DocType",
-            "icon": "file-text"
-        })
-        sidebar.append("items", {
-            "label": "Reponses",
-            "type": "Link",
-            "link_to": "KYA Form Response",
-            "link_type": "DocType",
-            "icon": "list"
-        })
-        sidebar.append("items", {
-            "label": "KYA Evaluation",
-            "type": "Link",
-            "link_to": "KYA Evaluation",
-            "link_type": "DocType",
-            "icon": "clipboard-check"
-        })
-        sidebar.insert(ignore_permissions=True)
-        print("  [CREATED] KYA Services sidebar")
+        kya_svc_ready = (
+            frappe.db.exists("DocType", "KYA Form")
+            and frappe.db.exists("Workspace", "KYA Services")
+        )
+        if not kya_svc_ready:
+            print("  [SKIP] KYA Services sidebar (kya_services not fully installed)")
+        else:
+            sidebar = frappe.new_doc("Workspace Sidebar")
+            sidebar.title = "KYA Services"
+            sidebar.module = "KYA Services"
+            sidebar.header_icon = "clipboard-list"
+            sidebar.app = "kya_services"
+            sidebar.standard = 0
+            sidebar.append("items", {
+                "label": "KYA Services",
+                "type": "Link",
+                "link_to": "KYA Services",
+                "link_type": "Workspace",
+                "icon": "clipboard-list"
+            })
+            sidebar.append("items", {
+                "label": "KYA Form",
+                "type": "Link",
+                "link_to": "KYA Form",
+                "link_type": "DocType",
+                "icon": "file-text"
+            })
+            sidebar.append("items", {
+                "label": "Reponses",
+                "type": "Link",
+                "link_to": "KYA Form Response",
+                "link_type": "DocType",
+                "icon": "list"
+            })
+            sidebar.append("items", {
+                "label": "KYA Evaluation",
+                "type": "Link",
+                "link_to": "KYA Evaluation",
+                "link_type": "DocType",
+                "icon": "clipboard-check"
+            })
+            sidebar.insert(ignore_permissions=True)
+            print("  [CREATED] KYA Services sidebar")
 
-    # 6. Fix setup_complete default value if needed
+    # 6. Creer le Workspace Sidebar pour Espace Stagiaires s'il n'existe pas
+    if not frappe.db.exists("Workspace Sidebar", "Espace Stagiaires"):
+        if frappe.db.exists("Workspace", "Espace Stagiaires"):
+            sidebar = frappe.new_doc("Workspace Sidebar")
+            sidebar.title = "Espace Stagiaires"
+            sidebar.module = "KYA HR"
+            sidebar.header_icon = "graduation-cap"
+            sidebar.app = "kya_hr"
+            sidebar.standard = 0
+            sidebar.append("items", {
+                "label": "Espace Stagiaires",
+                "type": "Link",
+                "link_to": "Espace Stagiaires",
+                "link_type": "Workspace",
+                "icon": "graduation-cap"
+            })
+            sidebar.append("items", {
+                "label": "Permission Sortie",
+                "type": "Link",
+                "link_to": "Permission Sortie Stagiaire",
+                "link_type": "DocType",
+                "icon": "file-text"
+            })
+            sidebar.append("items", {
+                "label": "Bilan Fin de Stage",
+                "type": "Link",
+                "link_to": "Bilan Fin de Stage",
+                "link_type": "DocType",
+                "icon": "clipboard"
+            })
+            sidebar.insert(ignore_permissions=True)
+            print("  [CREATED] Espace Stagiaires sidebar")
+        else:
+            print("  [SKIP] Espace Stagiaires sidebar (workspace not found)")
+
+    # 7. Corriger le champ app de Gestion Equipe
+    if frappe.db.exists("Workspace", "Gestion Équipe"):
+        current_app = frappe.db.get_value("Workspace", "Gestion Équipe", "app")
+        if not current_app:
+            frappe.db.set_value("Workspace", "Gestion Équipe", "app", "kya_services", update_modified=False)
+            print("  [FIXED] Gestion Équipe app -> kya_services")
+
+    # 8. Fix setup_complete default value if needed
     try:
         val = frappe.db.get_value("DefaultValue", {"defkey": "setup_complete"}, "defvalue")
         if val != "1":

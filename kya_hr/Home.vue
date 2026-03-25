@@ -3,11 +3,32 @@
 		<template #body>
 			<div class="flex flex-col items-center my-7 p-4 gap-7">
 				<CheckInPanel />
-				<!-- KYA Custom Links -->
+				<!-- KYA Custom Links (Flux RH) -->
 				<KYALinks
 					v-if="kyaLinks.length"
 					:links="kyaLinks"
 					:title="__('Flux RH KYA')"
+				/>
+				<!-- Mes Demandes (Document Tracking) -->
+				<KYADocuments
+					:documents="myDocuments"
+					:total="myDocumentsTotal"
+					:loading="loadingDocs"
+					:title="__('Mes Demandes')"
+				/>
+				<!-- Enquêtes & Évaluations -->
+				<KYASurveys
+					:available="surveysAvailable"
+					:completed="surveysCompleted"
+					:loading="loadingSurveys"
+					:title="__('Enquêtes & Évaluations')"
+				/>
+				<!-- Mes Tâches (KYA Taches) -->
+				<KYATasks
+					:tasks="myTasks"
+					:plans="myPlans"
+					:loading="loadingTasks"
+					:title="__('Mes Tâches')"
 				/>
 				<QuickLinks
 					v-if="shouldShowLegacyQuickLinks && filteredQuickLinks.length"
@@ -29,6 +50,9 @@ import QuickLinks from "@/components/QuickLinks.vue"
 import BaseLayout from "@/components/BaseLayout.vue"
 import RequestPanel from "@/components/RequestPanel.vue"
 import KYALinks from "@/components/KYALinks.vue"
+import KYADocuments from "@/components/KYADocuments.vue"
+import KYASurveys from "@/components/KYASurveys.vue"
+import KYATasks from "@/components/KYATasks.vue"
 import AttendanceIcon from "@/components/icons/AttendanceIcon.vue"
 import ShiftIcon from "@/components/icons/ShiftIcon.vue"
 import LeaveIcon from "@/components/icons/LeaveIcon.vue"
@@ -168,7 +192,23 @@ function fallbackKyaLinks(category) {
 // KYA custom links loaded from API
 const kyaLinks = ref([])
 
+// Document tracking
+const myDocuments = ref([])
+const myDocumentsTotal = ref(0)
+const loadingDocs = ref(false)
+
+// Enquêtes & Évaluations
+const surveysAvailable = ref([])
+const surveysCompleted = ref([])
+const loadingSurveys = ref(false)
+
+// Tâches
+const myTasks = ref([])
+const myPlans = ref([])
+const loadingTasks = ref(false)
+
 onMounted(async () => {
+	// 1. User category
 	try {
 		const catRes = await frappeRequest({
 			url: "/api/method/kya_hr.api.get_user_category",
@@ -180,6 +220,7 @@ onMounted(async () => {
 		console.log("KYA user category not available, using employee fallback")
 	}
 
+	// 2. Quick links
 	try {
 		const res = await frappeRequest({
 			url: "/api/method/kya_hr.api.get_kya_quick_links",
@@ -189,5 +230,51 @@ onMounted(async () => {
 		kyaLinks.value = fallbackKyaLinks(userCategory.value)
 		console.log("KYA links not available from API, fallback enabled")
 	}
+
+	// 3. Mes Demandes (documents)
+	loadingDocs.value = true
+	try {
+		const res = await frappeRequest({
+			url: "/api/method/kya_hr.api.get_my_documents",
+			params: { limit: 10 },
+		})
+		if (res.message) {
+			myDocuments.value = res.message.data || []
+			myDocumentsTotal.value = res.message.total || 0
+		}
+	} catch (e) {
+		console.log("KYA documents not available")
+	}
+	loadingDocs.value = false
+
+	// 4. Enquêtes & Évaluations
+	loadingSurveys.value = true
+	try {
+		const res = await frappeRequest({
+			url: "/api/method/kya_hr.api.get_my_kya_forms",
+		})
+		if (res.message) {
+			surveysAvailable.value = res.message.available || []
+			surveysCompleted.value = res.message.completed || []
+		}
+	} catch (e) {
+		console.log("KYA surveys not available")
+	}
+	loadingSurveys.value = false
+
+	// 5. Mes Tâches
+	loadingTasks.value = true
+	try {
+		const res = await frappeRequest({
+			url: "/api/method/kya_hr.api.get_my_tasks",
+		})
+		if (res.message) {
+			myTasks.value = res.message.tasks || []
+			myPlans.value = res.message.plans || []
+		}
+	} catch (e) {
+		console.log("KYA tasks not available")
+	}
+	loadingTasks.value = false
 })
 </script>

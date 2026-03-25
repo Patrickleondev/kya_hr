@@ -1,7 +1,7 @@
 {
  "app": "kya_hr",
  "charts": [],
- "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Employés'>👤 Espace Employés KYA</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Demander une Permission\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Permissions Employé\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Planning Congé\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Tableau de Bord Employés\", \"col\": 3}}, {\"id\": \"spacer1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}]",
+ "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Employés'>👤 Espace Employés KYA</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Demander une Permission\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Permissions Employé\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Planning Congé\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Tableau de Bord Employés\", \"col\": 3}}, {\"id\": \"s5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Demande d'Achat\", \"col\": 3}}, {\"id\": \"s6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"PV Sortie Matériel\", \"col\": 3}}, {\"id\": \"s7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Planifier mon Congé\", \"col\": 3}}, {\"id\": \"s8\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Mon Espace\", \"col\": 3}}, {\"id\": \"spacer1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}]",
  "creation": "2026-03-25 00:00:00.000000",
  "custom_blocks": [],
  "docstatus": 0,
@@ -44,6 +44,34 @@
    "url": "/tableau-bord-employes",
    "color": "#F58220",
    "icon": "bar-chart"
+  },
+  {
+   "label": "Demande d'Achat",
+   "type": "URL",
+   "url": "/demande-achat/new",
+   "color": "#8e44ad",
+   "icon": "shopping-cart"
+  },
+  {
+   "label": "PV Sortie Matériel",
+   "type": "URL",
+   "url": "/pv-sortie-materiel/new",
+   "color": "#c0392b",
+   "icon": "upload"
+  },
+  {
+   "label": "Planifier mon Congé",
+   "type": "URL",
+   "url": "/planning-conge/new",
+   "color": "#16a085",
+   "icon": "calendar"
+  },
+  {
+   "label": "Mon Espace",
+   "type": "URL",
+   "url": "/mon-espace",
+   "color": "#2c3e50",
+   "icon": "home"
   }
  ],
  "links": [
@@ -174,5 +202,12 @@
    "link_count": 0,
    "onboard": 0
   }
- ]
+ ],
+ "modified": "2026-03-25 00:00:00.000000",
+ "modified_by": "Administrator",
+ "name": "Espace Employes",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "quick_lists": []
 }
