@@ -1,16 +1,22 @@
 {
  "app": "kya_hr",
  "charts": [],
- "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Stagiaires'>Espace Stagiaires KYA</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Demander une Permission\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Permissions\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Bilan\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Bilan de Stage ↗\", \"col\": 3}}, {\"id\": \"s5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Tableau de Bord\", \"col\": 3}}, {\"id\": \"s6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Mon Espace\", \"col\": 3}}, {\"id\": \"spacer1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}]",
+ "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Stagiaires'>\ud83c\udf93 Espace Stagiaires KYA</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Demander une Permission\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Permissions\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Bilan\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Bilan de Stage \u2197\", \"col\": 3}}, {\"id\": \"s5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Tableau de Bord\", \"col\": 3}}, {\"id\": \"s6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Mon Espace\", \"col\": 3}}, {\"id\": \"spacer1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}]",
  "creation": "2026-03-14 21:41:11.218132",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
+ "type": "Workspace",
  "hide_custom": 0,
  "icon": "graduation-cap",
  "idx": 0,
  "is_hidden": 0,
+ "is_standard": 1,
  "label": "Espace Stagiaires",
+ "module": "KYA HR",
+ "name": "Espace Stagiaires",
+ "public": 1,
+ "sequence_id": 5.0,
  "links": [
   {
    "type": "Card Break",
@@ -119,7 +125,7 @@
    "onboard": 1
   }
  ],
- "modified": "2026-03-23 16:00:00.000000",
+ "modified": "2026-03-25 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "Espace Stagiaires",
@@ -128,11 +134,7 @@
  "parent_page": "",
  "public": 1,
  "quick_lists": [],
- "roles": [
-  {
-   "role": "Employee"
-  }
- ],
+ "roles": [],
  "sequence_id": 5.0,
  "shortcuts": [
   {
@@ -190,6 +192,5 @@
    "url": "/tableau-bord-stagiaires"
   }
  ],
- "title": "Espace Stagiaires",
- "type": "Workspace"
+ "title": "Espace Stagiaires"
 }

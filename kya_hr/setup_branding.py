@@ -6,7 +6,7 @@ Ou via after_migrate (appelé automatiquement).
 """
 import frappe
 
-KYA_LOGO_URL = "https://www.kya-energy.com/wp-content/uploads/2024/02/Logo-10-ans-KYA.png"
+KYA_LOGO_URL = "/assets/kya_hr/images/kya_logo.png"
 KYA_APP_NAME = "KYA-Energy Group"
 
 
@@ -31,10 +31,11 @@ def execute():
     try:
         ws = frappe.get_single("Website Settings")
         changed = False
-        if not ws.app_logo:
+        # Force update si l'URL est externe (cassée) ou vide
+        if not ws.app_logo or ws.app_logo.startswith("http"):
             ws.app_logo = KYA_LOGO_URL
             changed = True
-        if not ws.favicon:
+        if not ws.favicon or ws.favicon.startswith("http"):
             ws.favicon = KYA_LOGO_URL
             changed = True
         if not ws.copyright:
