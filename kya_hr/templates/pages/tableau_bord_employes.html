@@ -1,0 +1,471 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Tableau de Bord – Employés{% endblock %}
+
+{% block page_content %}
+<style>
+  :root {
+    --kya-primary: #1976d2;
+    --kya-primary-dark: #0d47a1;
+    --kya-accent: #ff6f00;
+    --kya-warn: #f9a825;
+    --kya-danger: #e53935;
+    --kya-success: #388e3c;
+    --kya-teal: #009688;
+  }
+  .kya-db-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .kya-db-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--kya-primary-dark);
+    margin: 0;
+  }
+  .kya-db-header .kya-year-filter {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .kya-db-header select {
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: .4rem .7rem;
+    font-size: 0.9rem;
+  }
+  .kya-db-header button {
+    background: var(--kya-primary);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: .4rem 1rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  .kya-db-header button:hover { background: var(--kya-primary-dark); }
+
+  /* ── Sections ── */
+  .kya-section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #333;
+    margin: 1.75rem 0 .75rem;
+    padding-left: .5rem;
+    border-left: 4px solid var(--kya-primary);
+  }
+
+  /* ── Stat cards ── */
+  .kya-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .kya-stat-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 1.1rem 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,.07);
+    text-align: center;
+    border-top: 4px solid transparent;
+    transition: transform .15s;
+  }
+  .kya-stat-card:hover { transform: translateY(-2px); }
+  .kya-stat-card .stat-icon { font-size: 1.5rem; margin-bottom: .25rem; }
+  .kya-stat-card .stat-value {
+    font-size: 1.9rem;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+  .kya-stat-card .stat-label {
+    font-size: 0.72rem;
+    color: #6c757d;
+    margin-top: 3px;
+  }
+  .card-blue    { border-color: var(--kya-primary); }
+  .card-blue    .stat-value { color: var(--kya-primary); }
+  .card-success { border-color: var(--kya-success); }
+  .card-success .stat-value { color: var(--kya-success); }
+  .card-warn    { border-color: var(--kya-warn); }
+  .card-warn    .stat-value { color: var(--kya-warn); }
+  .card-danger  { border-color: var(--kya-danger); }
+  .card-danger  .stat-value { color: var(--kya-danger); }
+  .card-teal    { border-color: var(--kya-teal); }
+  .card-teal    .stat-value { color: var(--kya-teal); }
+  .card-accent  { border-color: var(--kya-accent); }
+  .card-accent  .stat-value { color: var(--kya-accent); }
+
+  /* ── Charts ── */
+  .kya-charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+  }
+  @media(max-width: 640px) { .kya-charts-row { grid-template-columns: 1fr; } }
+  .kya-chart-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 1.2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,.07);
+  }
+  .kya-chart-card h3 {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: .9rem;
+    padding-bottom: .5rem;
+    border-bottom: 2px solid #f0f0f0;
+  }
+  .chart-container { position: relative; height: 210px; }
+
+  /* ── Table ── */
+  .kya-table-wrap { overflow-x: auto; margin-bottom: 1.5rem; }
+  .kya-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+  .kya-table th {
+    background: #f5f7fa;
+    text-align: left;
+    padding: .55rem .75rem;
+    white-space: nowrap;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+  }
+  .kya-table td {
+    padding: .55rem .75rem;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+  }
+  .kya-table tr:hover td { background: #f9fbfc; }
+
+  /* ── Progress bar (taux présence) ── */
+  .kya-progress-wrap { margin: .5rem 0 1.5rem; }
+  .kya-progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    margin-bottom: .3rem;
+  }
+  .kya-progress-bar {
+    height: 14px;
+    border-radius: 8px;
+    background: #e0e0e0;
+    overflow: hidden;
+  }
+  .kya-progress-fill {
+    height: 100%;
+    border-radius: 8px;
+    background: linear-gradient(90deg, var(--kya-success), var(--kya-teal));
+    transition: width .5s;
+  }
+
+  /* ── Links ── */
+  .kya-links-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: .75rem;
+    margin-bottom: 2rem;
+  }
+  .kya-link-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: .9rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    text-decoration: none;
+    color: #333;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: box-shadow .15s, border-color .15s;
+  }
+  .kya-link-card:hover { box-shadow: 0 2px 10px rgba(25,118,210,.2); border-color: var(--kya-primary); color: var(--kya-primary); }
+  .kya-link-card .licon { font-size: 1.3rem; }
+
+  #kya-loading { text-align: center; padding: 3rem; color: #888; font-size: 0.9rem; }
+  .kya-error { color: var(--kya-danger); text-align: center; padding: 2rem; }
+</style>
+
+<div id="kya-loading">⏳ Chargement du tableau de bord…</div>
+
+<div id="kya-dashboard" style="display:none">
+
+  <!-- Header -->
+  <div class="kya-db-header">
+    <h1>👥 Tableau de Bord — Employés</h1>
+    <div class="kya-year-filter">
+      <label for="anneeSelect" style="font-size:.875rem;font-weight:600">Année :</label>
+      <select id="anneeSelect"></select>
+      <button onclick="loadDashboard()">Actualiser</button>
+    </div>
+  </div>
+
+  <!-- ─ RH & Effectifs ─ -->
+  <p class="kya-section-title">Effectifs & Permissions</p>
+  <div class="kya-stats-grid" id="statsRH"></div>
+
+  <!-- ─ Charts Permissions ─ -->
+  <div class="kya-charts-row">
+    <div class="kya-chart-card">
+      <h3>Permissions de sortie par mois</h3>
+      <div class="chart-container"><canvas id="chartPermMois"></canvas></div>
+    </div>
+    <div class="kya-chart-card">
+      <h3>Statuts des permissions</h3>
+      <div class="chart-container"><canvas id="chartPermStatuts"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ─ Présences ─ -->
+  <p class="kya-section-title">Présences & Absences</p>
+  <div class="kya-stats-grid" id="statsPresence"></div>
+  <div class="kya-progress-wrap">
+    <div class="kya-progress-label">
+      <span>Taux de présence</span>
+      <span id="tauxLabel">—</span>
+    </div>
+    <div class="kya-progress-bar">
+      <div class="kya-progress-fill" id="tauxFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- ─ Demandes d'Achat & PV Matériel ─ -->
+  <p class="kya-section-title">Achats & Logistique</p>
+  <div class="kya-stats-grid" id="statsAchats"></div>
+  <div class="kya-charts-row">
+    <div class="kya-chart-card">
+      <h3>Statuts Demandes d'Achat</h3>
+      <div class="chart-container"><canvas id="chartDA"></canvas></div>
+    </div>
+    <div class="kya-chart-card">
+      <h3>Top demandeurs (nbre DA)</h3>
+      <div class="chart-container"><canvas id="chartTopDA"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Table top demandeurs -->
+  <div class="kya-table-wrap">
+    <table class="kya-table" id="tableDA">
+      <thead><tr><th>#</th><th>Employé</th><th>Nbre demandes</th><th>Montant total (XOF)</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- ─ Quick links ─ -->
+  <p class="kya-section-title">Accès rapides</p>
+  <div class="kya-links-grid">
+    <a class="kya-link-card" href="/permission-sortie-employe/new"><span class="licon">➕</span>Nouvelle permission</a>
+    <a class="kya-link-card" href="/permission-sortie-employe"><span class="licon">🚪</span>Permissions de sortie</a>
+    <a class="kya-link-card" href="/planning-conge/new"><span class="licon">📅</span>Nouveau congé</a>
+    <a class="kya-link-card" href="/demande-achat/new"><span class="licon">🛒</span>Nouvelle demande achat</a>
+    <a class="kya-link-card" href="/pv-sortie-materiel/new"><span class="licon">📦</span>Nouveau PV matériel</a>
+    <a class="kya-link-card" href="/app/attendance"><span class="licon">📊</span>Présences (bureau)</a>
+    <a class="kya-link-card" href="/tableau-bord-stagiaires"><span class="licon">🎓</span>Tableau Stagiaires</a>
+  </div>
+
+</div>
+<div class="kya-error" id="kya-error" style="display:none"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+  const MOIS_LABELS = {
+    "01":"Jan","02":"Fév","03":"Mar","04":"Avr","05":"Mai","06":"Jun",
+    "07":"Jul","08":"Aoû","09":"Sep","10":"Oct","11":"Nov","12":"Déc"
+  };
+  let charts = {};
+
+  function destroyChart(id) {
+    if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+  }
+
+  // Init year select
+  const yr = new Date().getFullYear();
+  const sel = document.getElementById("anneeSelect");
+  for (let y = yr; y >= yr - 4; y--) {
+    const opt = document.createElement("option");
+    opt.value = y; opt.textContent = y;
+    sel.appendChild(opt);
+  }
+
+  function fmt(n) { return Number(n).toLocaleString("fr-FR"); }
+
+  window.loadDashboard = function() {
+    const annee = sel.value;
+    document.getElementById("kya-loading").style.display = "";
+    document.getElementById("kya-dashboard").style.display = "none";
+    document.getElementById("kya-error").style.display = "none";
+
+    frappe.call({
+      method: "kya_hr.api.get_dashboard_employes",
+      args: { annee: annee },
+      callback: function(r) {
+        document.getElementById("kya-loading").style.display = "none";
+        if (r.message) {
+          render(r.message);
+          document.getElementById("kya-dashboard").style.display = "";
+        } else {
+          showError("Impossible de charger les données.");
+        }
+      },
+      error: function(err) {
+        showError("Erreur : " + (err.message || JSON.stringify(err)));
+      }
+    });
+  };
+
+  function showError(msg) {
+    document.getElementById("kya-loading").style.display = "none";
+    const el = document.getElementById("kya-error");
+    el.textContent = msg; el.style.display = "";
+  }
+
+  function makeStatCards(containerId, kpis) {
+    const grid = document.getElementById(containerId);
+    grid.innerHTML = "";
+    kpis.forEach(function(k) {
+      const card = document.createElement("div");
+      card.className = "kya-stat-card " + k.cls;
+      card.innerHTML = '<div class="stat-icon">' + k.icon + '</div>'
+        + '<div class="stat-value">' + k.value + '</div>'
+        + '<div class="stat-label">' + k.label + '</div>';
+      grid.appendChild(card);
+    });
+  }
+
+  function render(d) {
+    // ── RH KPIs
+    makeStatCards("statsRH", [
+      { label: "Employés actifs",       value: d.employes_actifs,          icon: "👥", cls: "card-blue" },
+      { label: "Permissions totales",   value: d.permissions_total,        icon: "📋", cls: "card-teal" },
+      { label: "Approuvées",            value: d.permissions_approuvees,   icon: "✅", cls: "card-success" },
+      { label: "En cours",              value: d.permissions_en_cours,     icon: "⏳", cls: "card-warn" },
+      { label: "Rejetées",              value: d.permissions_rejetees,     icon: "❌", cls: "card-danger" },
+      { label: "Congés (total)",        value: d.conges_total,             icon: "📅", cls: "card-blue" },
+      { label: "Congés approuvés",      value: d.conges_approuves,         icon: "✔️", cls: "card-success" },
+    ]);
+
+    // ── Chart: permissions par mois (bar)
+    destroyChart("chartPermMois");
+    const moisKeys = Object.keys(d.permissions_par_mois || {}).sort();
+    const moisLabels = moisKeys.map(function(k) {
+      const parts = k.split("-");
+      return (MOIS_LABELS[parts[1]] || parts[1]) + " " + parts[0];
+    });
+    charts["chartPermMois"] = new Chart(document.getElementById("chartPermMois"), {
+      type: "bar",
+      data: {
+        labels: moisLabels,
+        datasets: [{ label: "Permissions", data: moisKeys.map(function(k) { return d.permissions_par_mois[k]; }),
+          backgroundColor: "rgba(25,118,210,.7)", borderRadius: 5 }]
+      },
+      options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+
+    // ── Chart: statuts permissions (doughnut)
+    destroyChart("chartPermStatuts");
+    charts["chartPermStatuts"] = new Chart(document.getElementById("chartPermStatuts"), {
+      type: "doughnut",
+      data: {
+        labels: ["Approuvées","En cours","Rejetées","Autre"],
+        datasets: [{
+          data: [
+            d.permissions_approuvees, d.permissions_en_cours, d.permissions_rejetees,
+            Math.max(0, d.permissions_total - d.permissions_approuvees - d.permissions_en_cours - d.permissions_rejetees)
+          ],
+          backgroundColor: ["#388e3c","#1976d2","#e53935","#9e9e9e"],
+          borderWidth: 2
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: "bottom" } } }
+    });
+
+    // ── Présence KPIs
+    makeStatCards("statsPresence", [
+      { label: "Jours présents",  value: d.presences_total,   icon: "✅", cls: "card-success" },
+      { label: "Jours absents",   value: d.absences_total,    icon: "❌", cls: "card-danger" },
+      { label: "Taux de présence",value: d.taux_presence + "%", icon: "📈", cls: "card-teal" },
+    ]);
+    document.getElementById("tauxLabel").textContent = d.taux_presence + " %";
+    document.getElementById("tauxFill").style.width = Math.min(100, d.taux_presence) + "%";
+
+    // ── Achats KPIs
+    makeStatCards("statsAchats", [
+      { label: "PV Matériel",         value: d.pv_total,               icon: "📦", cls: "card-blue" },
+      { label: "PV approuvés",        value: d.pv_approuves,           icon: "✅", cls: "card-success" },
+      { label: "Demandes achat",      value: d.da_total,               icon: "🛒", cls: "card-accent" },
+      { label: "DA approuvées",       value: d.da_approuves,           icon: "✔️", cls: "card-success" },
+      { label: "Montant approuvé (XOF)",
+        value: fmt(d.da_montant_total_approuve), icon: "💰", cls: "card-warn" },
+    ]);
+
+    // ── Chart: DA statuts
+    destroyChart("chartDA");
+    const daAutre = Math.max(0, d.da_total - d.da_approuves - (d.da_total - d.da_approuves));
+    charts["chartDA"] = new Chart(document.getElementById("chartDA"), {
+      type: "doughnut",
+      data: {
+        labels: ["Approuvées","En cours / Rejetées"],
+        datasets: [{
+          data: [d.da_approuves, Math.max(0, d.da_total - d.da_approuves)],
+          backgroundColor: ["#388e3c","#1976d2"],
+          borderWidth: 2
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: "bottom" } } }
+    });
+
+    // ── Chart: top demandeurs DA
+    destroyChart("chartTopDA");
+    const top = d.top_demandeurs_da || [];
+    charts["chartTopDA"] = new Chart(document.getElementById("chartTopDA"), {
+      type: "bar",
+      data: {
+        labels: top.map(function(t) { return t.emp; }),
+        datasets: [{
+          label: "Demandes",
+          data: top.map(function(t) { return t.count; }),
+          backgroundColor: "rgba(255,111,0,.72)",
+          borderRadius: 5
+        }]
+      },
+      options: { indexAxis: "y", responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+
+    // ── Table top demandeurs
+    const tbody = document.querySelector("#tableDA tbody");
+    tbody.innerHTML = "";
+    if (!top.length) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#aaa">Aucune donnée</td></tr>';
+    } else {
+      top.forEach(function(t, i) {
+        tbody.innerHTML += "<tr><td>" + (i+1) + "</td><td>" + t.emp
+          + "</td><td>" + t.count + "</td><td>" + fmt(t.montant) + "</td></tr>";
+      });
+    }
+  }
+
+  // Load on ready
+  if (typeof frappe !== "undefined" && frappe.ready) {
+    frappe.ready(function() { loadDashboard(); });
+  } else {
+    document.addEventListener("DOMContentLoaded", function() { loadDashboard(); });
+  }
+})();
+</script>
+{% endblock %}
