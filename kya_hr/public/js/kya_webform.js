@@ -6,6 +6,21 @@
    permissions par rôle, signatures verrouillées.
    =================================================================== */
 
+/* === Auto-redirect bare web form URLs to /new ==================== */
+(function () {
+  var KYA_WF_ROUTES = [
+    "permission-sortie-stagiaire", "permission-sortie-employe",
+    "demande-achat", "pv-sortie-materiel",
+    "planning-conge", "bilan-fin-de-stage"
+  ];
+  var path = window.location.pathname.replace(/^\//, "").replace(/\/$/, "");
+  if (KYA_WF_ROUTES.indexOf(path) !== -1) {
+    // Bare route without /new — redirect silently
+    window.location.replace("/" + path + "/new");
+    return; // stop further execution until redirect completes
+  }
+})();
+
 (function () {
   "use strict";
 
