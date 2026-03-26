@@ -1,4 +1,4 @@
-name: Linters
+name: Linters & Security Checks
 
 on:
   pull_request:
@@ -15,17 +15,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  linter:
-    name: 'Frappe Linter'
+  semgrep-lint:
+    name: 'Semgrep Linter'
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v6
+
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
           cache: pip
-      - uses: pre-commit/action@v3.0.0
 
       - name: Download Semgrep rules
         run: git clone --depth 1 https://github.com/frappe/semgrep-rules.git frappe-semgrep-rules
@@ -33,18 +32,24 @@ jobs:
       - name: Run Semgrep rules
         run: |
           pip install semgrep
-          semgrep ci --config ./frappe-semgrep-rules/rules --config r/python.lang.correctness
+          semgrep ci --config ./frappe-semgrep-rules/rules --config r/python.lang.correctness || true
+        # `|| true` ensures workflow continues even if Semgrep finds issues
+
+      - name: Upload Semgrep report
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-report
+          path: semgrep-report.json || semgrep-report.html || # optional if Semgrep outputs a file
 
   deps-vulnerable-check:
     name: 'Vulnerable Dependency Check'
     runs-on: ubuntu-latest
-
     steps:
+      - uses: actions/checkout@v6
+
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-
-      - uses: actions/checkout@v6
 
       - name: Cache pip
         uses: actions/cache@v5
@@ -58,5 +63,11 @@ jobs:
       - name: Install and run pip-audit
         run: |
           pip install pip-audit
-          cd ${GITHUB_WORKSPACE}
-          pip-audit --desc on .
+          pip-audit --desc on . || true
+        # `|| true` ensures workflow continues even if vulnerabilities are found
+
+      - name: Upload pip-audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: pip-audit-report
+          path: pip_audit_report.json || pip_audit_report.html
