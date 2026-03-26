@@ -32,7 +32,7 @@ jobs:
       - name: Run Semgrep rules
         run: |
           pip install semgrep
-          semgrep ci --config ./frappe-semgrep-rules/rules --config r/python.lang.correctness || true
+          semgrep ci --config ./frappe-semgrep-rules/rules --config r/python.lang.correctness --json --output semgrep-report.json || true
         # `|| true` ensures workflow continues even if Semgrep finds issues
 
       - name: Upload Semgrep report
@@ -40,7 +40,7 @@ jobs:
         if: always()
         with:
           name: semgrep-report
-          path: semgrep-report.*
+          path: semgrep-report.json
           if-no-files-found: ignore
 
   deps-vulnerable-check:
@@ -65,7 +65,7 @@ jobs:
       - name: Install and run pip-audit
         run: |
           pip install pip-audit
-          pip-audit --desc on . || true
+          pip-audit --desc on --output json --output-file pip_audit_report.json . || true
         # `|| true` ensures workflow continues even if vulnerabilities are found
 
       - name: Upload pip-audit report
@@ -73,5 +73,5 @@ jobs:
         if: always()
         with:
           name: pip-audit-report
-          path: pip_audit_report.*
+          path: pip_audit_report.json
           if-no-files-found: ignore
