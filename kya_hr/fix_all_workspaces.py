@@ -12,6 +12,8 @@ def execute():
     fix_espace_employes()
     fix_gestion_equipe()
     fix_espace_stagiaires()
+    fix_website_settings_appname()
+    fix_corrupted_statut_values()
     frappe.db.commit()
     print("=== ALL FIXES APPLIED ===")
 
@@ -115,3 +117,39 @@ def fix_espace_stagiaires():
         WHERE name = 'Espace Stagiaires'
     """)
     print("  [Espace Stagiaires] Visible + public + icon=education ✓")
+
+
+def fix_website_settings_appname():
+    """Force Website Settings.app_name = KYA-Energy Group (was 'Frappe')."""
+    frappe.db.sql("""
+        UPDATE tabSingles
+        SET value = 'KYA-Energy Group'
+        WHERE doctype = 'Website Settings' AND field = 'app_name'
+    """)
+    count = frappe.db.sql("SELECT ROW_COUNT()")[0][0]
+    if not count:
+        # Row might not exist — insert it
+        frappe.db.sql("""
+            INSERT INTO tabSingles (doctype, field, value)
+            VALUES ('Website Settings', 'app_name', 'KYA-Energy Group')
+            ON DUPLICATE KEY UPDATE value = 'KYA-Energy Group'
+        """)
+    print("  [Website Settings] app_name → KYA-Energy Group ✓")
+
+
+def fix_corrupted_statut_values():
+    """Correct statut values that may be corrupted/outdated in DB."""
+    # KYA Form: valid options are Brouillon, Actif, Fermé
+    frappe.db.sql("""
+        UPDATE `tabKYA Form`
+        SET statut = 'Actif'
+        WHERE statut NOT IN ('Brouillon', 'Actif', 'Ferm\u00e9')
+          AND (statut LIKE '%tiv%' OR statut LIKE '%ctif%' OR statut LIKE '%Activ%')
+    """)
+    # KYA Evaluation: valid options are Brouillon, Soumis, Validé
+    frappe.db.sql("""
+        UPDATE `tabKYA Evaluation`
+        SET statut = 'Brouillon'
+        WHERE statut NOT IN ('Brouillon', 'Soumis', 'Valid\u00e9')
+    """)
+    print("  [Statut] Valeurs corrompues corrigées ✓")

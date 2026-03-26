@@ -41,6 +41,9 @@ def execute():
         if not ws.copyright:
             ws.copyright = "KYA-Energy Group"
             changed = True
+        if not ws.app_name or ws.app_name in ("Frappe", "ERPNext", "frappe"):
+            ws.app_name = KYA_APP_NAME
+            changed = True
         if changed:
             ws.flags.ignore_permissions = True
             ws.save()
