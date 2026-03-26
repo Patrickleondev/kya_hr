@@ -61,6 +61,27 @@
             "in_list_view": 1
         },
         {
+            "fieldname": "section_delegation",
+            "label": "D\u00e9l\u00e9gation (optionnel)",
+            "fieldtype": "Section Break",
+            "collapsible": 1,
+            "description": "Remplir uniquement si vous soumettez pour le compte d\u2019un autre employ\u00e9"
+        },
+        {
+            "fieldname": "au_nom_de",
+            "label": "Sur d\u00e9l\u00e9gation de",
+            "fieldtype": "Link",
+            "options": "Employee",
+            "description": "Employ\u00e9 pour le compte duquel vous soumettez"
+        },
+        {
+            "fieldname": "au_nom_de_nom",
+            "label": "Nom (d\u00e9l\u00e9gation)",
+            "fieldtype": "Data",
+            "fetch_from": "au_nom_de.employee_name",
+            "read_only": 1
+        },
+        {
             "fieldname": "section_objet",
             "label": "Objet de la Demande",
             "fieldtype": "Section Break"
@@ -231,7 +252,7 @@
             "fieldname": "statut",
             "label": "Statut",
             "fieldtype": "Select",
-            "options": "Brouillon\nEn attente Chef\nEn attente Approbation\nEn attente DG\nApprouv\u00e9\nRejet\u00e9",
+            "options": "Brouillon\nEn attente Chef\nEn attente DAAF\nEn attente DG\nApprouv\u00e9\nRejet\u00e9",
             "default": "Brouillon",
             "in_list_view": 1,
             "in_standard_filter": 1,

@@ -1,0 +1,77 @@
+name: Linters & Security Checks
+
+on:
+  pull_request:
+    branches:
+      - dev
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  semgrep-lint:
+    name: 'Semgrep Linter'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Download Semgrep rules
+        run: git clone --depth 1 https://github.com/frappe/semgrep-rules.git frappe-semgrep-rules
+
+      - name: Run Semgrep rules
+        run: |
+          pip install semgrep
+          semgrep ci --config ./frappe-semgrep-rules/rules --config r/python.lang.correctness --json --output semgrep-report.json || true
+        # `|| true` ensures workflow continues even if Semgrep finds issues
+
+      - name: Upload Semgrep report
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: semgrep-report
+          path: semgrep-report.json
+          if-no-files-found: ignore
+
+  deps-vulnerable-check:
+    name: 'Vulnerable Dependency Check'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Cache pip
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/*requirements.txt', '**/pyproject.toml', '**/setup.py') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+            ${{ runner.os }}-
+
+      - name: Install and run pip-audit
+        run: |
+          pip install pip-audit
+          pip-audit --desc on --output json --output-file pip_audit_report.json . || true
+        # `|| true` ensures workflow continues even if vulnerabilities are found
+
+      - name: Upload pip-audit report
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: pip-audit-report
+          path: pip_audit_report.json
+          if-no-files-found: ignore

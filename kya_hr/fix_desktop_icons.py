@@ -1,99 +1,69 @@
 ﻿"""
-fix_desktop_icons.py - v2
+fix_desktop_icons.py - v3
 --------------------------
-Corrige les Desktop Icons pour qu'ils correspondent aux Workspace Sidebar.
-
-Architecture Frappe v16:
-  Desktop Icon.label -> frappe.boot.workspace_sidebar_item[label.lower()]
-  La cle vient du NOM des Workspace Sidebar records (pas des Workspace DocType).
+Crée les Desktop Icons manquantes pour les workspaces kya_hr en français.
+Ces workspaces ont des noms avec accents et ne sont pas auto-détectés par
+create_desktop_icons_from_workspace() (bug avec la validation des liens).
 """
-
-# Labels qui ont ete modifies et doivent etre REVERTS vers l original
-LABEL_REVERT = {
-    "Conges & Permissions": None,  # placeholder
-}
+import frappe
 
 
 def execute():
-    import frappe
-    from frappe.boot import get_sidebar_items
+    from frappe.desk.doctype.desktop_icon.desktop_icon import clear_desktop_icons_cache
 
-    ws_names = [w["name"] for w in frappe.get_all("Workspace", filters={"is_hidden": 0})]
-    sidebar_items = get_sidebar_items(ws_names)
-    print(f"[fix_desktop_icons v2] {len(sidebar_items)} Workspace Sidebar keys")
-    print("Keys:", sorted(sidebar_items.keys()))
+    # Workspaces kya_hr/hrms qui manquent de Desktop Icons avec link_type="Workspace Sidebar"
+    targets = [
+        {"label": "Congés & Permissions", "icon": "calendar", "app": "kya_hr"},
+        {"label": "Personnes",            "icon": "users",    "app": "hrms"},
+        {"label": "Espace Stagiaires",    "icon": "education","app": "kya_hr"},
+    ]
 
-    icons = frappe.get_all("Desktop Icon",
-        fields=["name", "label", "link_type", "hidden"],
-    )
-    print(f"[fix_desktop_icons v2] {len(icons)} Desktop Icons")
-
-    # Revert incorrectly changed labels
-    revert_map = {}
-
-    import frappe as _f
-    # Read the current labels to find ones that were changed
-    for ic in icons:
-        name = ic["name"]
-        label = ic.get("label") or ""
-        link_type = ic.get("link_type") or ""
-        hidden = ic.get("hidden", 0)
-
-        # Icons whose names differ from labels (were relabeled)
-        if name != label and link_type == "Workspace Sidebar":
-            # name is the original English value, label is the modified value
-            print(f"  MISMATCH: name={name!r} != label={label!r}")
-
-    # Now fix based on name vs label mismatch
-    reverted = 0
-    hidden_count = 0
-
-    for ic in icons:
-        name = ic["name"]
-        label = ic.get("label") or ""
-        link_type = ic.get("link_type") or ""
-        current_hidden = ic.get("hidden", 0)
-
-        if link_type == "External":
+    for item in targets:
+        label = item["label"]
+        exists = frappe.db.get_value("Desktop Icon", {"label": label}, "name")
+        if exists:
+            current_lt = frappe.db.get_value("Desktop Icon", exists, "link_type")
+            if current_lt != "Workspace Sidebar":
+                frappe.db.set_value("Desktop Icon", exists, {
+                    "link_type": "Workspace Sidebar",
+                    "link_to": label,
+                })
+                print(f"  [FIX] '{label}' link_type: {current_lt} -> Workspace Sidebar")
+            else:
+                print(f"  [OK]  '{label}' deja configure (link_type=Workspace Sidebar)")
             continue
 
-        # The Desktop Icon name IS the original label in Frappe
-        # If name != label, label was changed - revert it
-        if name != label:
-            # Revert to name (original)
-            frappe.db.set_value("Desktop Icon", name, "label", name)
-            print(f"  [REVERT] {label!r} -> {name!r}")
-            reverted += 1
-            label = name
-
-        # Check if sidebar exists for this label
-        key = label.lower()
-        sidebar = sidebar_items.get(key)
-        items = sidebar.get("items") or [] if sidebar else []
-        link_items = [i for i in items if i.get("type") == "Link"]
-
-        if not sidebar or not link_items:
-            if not current_hidden:
-                frappe.db.set_value("Desktop Icon", name, "hidden", 1)
-                reason = "no sidebar" if not sidebar else "0 link items"
-                print(f"  [HIDE] {label!r}: {reason}")
-                hidden_count += 1
+        # Créer la Desktop Icon manquante
+        di = frappe.new_doc("Desktop Icon")
+        di.label = label
+        di.link_type = "Workspace Sidebar"
+        di.link_to = label
+        di.icon_type = "Link"
+        di.icon = item["icon"]
+        di.app = item["app"]
+        di.standard = 1
+        di.hidden = 0
+        di.flags.ignore_permissions = True
+        di.flags.ignore_links = True
+        di.insert(ignore_if_duplicate=True)
+        print(f"  [OK] Desktop Icon '{label}' creee (link_type=Workspace Sidebar)")
 
     frappe.db.commit()
-    frappe.clear_cache()
+    clear_desktop_icons_cache()
 
-    print(f"\nReverted: {reverted}, Hidden: {hidden_count}")
+    # Résumé
+    print("\n=== Resume Desktop Icons ===")
+    for item in targets:
+        label = item["label"]
+        di = frappe.db.get_value(
+            "Desktop Icon", {"label": label},
+            ["name", "link_type", "link_to", "hidden"],
+            as_dict=True
+        )
+        if di:
+            print(f"  {label}: link_type={di.link_type}, hidden={di.hidden}")
+        else:
+            print(f"  {label}: NOT FOUND")
 
-    # Final state
-    print("\n=== Final VISIBLE icons ===")
-    final = frappe.get_all("Desktop Icon",
-        fields=["name", "label", "link_type", "hidden"],
-        filters={"hidden": 0}
-    )
-    for ic in sorted(final, key=lambda x: x["label"] or ""):
-        if (ic.get("link_type") or "") != "External":
-            key = (ic["label"] or "").lower()
-            sidebar = sidebar_items.get(key)
-            lc = len([i for i in (sidebar.get("items") or []) if i.get("type") == "Link"]) if sidebar else 0
-            status = f"OK ({lc} links)" if sidebar and lc > 0 else "BROKEN"
-            print(f"  {ic['label']!r}: {status}")
+    print("\nDone. Effacez le cache et reconnectez-vous.")
+

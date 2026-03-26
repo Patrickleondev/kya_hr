@@ -1,259 +1,168 @@
 ﻿"""
-force_sync_workspaces.py v3
-- Workspaces propres KYA : Espace Stagiaires, KYA Services
-- Workspaces natifs augmentes : Buying (Achats), Stock
-- Cache bust localStorage via JS flag
+force_sync_workspaces.py v10 -- Post-migrate hook (KYA).
+
+Regles :
+  1. Ne JAMAIS creer de workspaces programmatiquement (les JSON files gerent ca)
+  2. Supprimer les workspaces et sidebars orphelins crees par les anciennes versions
+  3. S'assurer que les workspaces KYA JSON sont visibles
+  4. Corriger le module de KYA Services si necessaire
+  5. Creer le Workspace Sidebar pour KYA Services s'il manque
+  6. Creer le Workspace Sidebar pour Espace Stagiaires s'il manque
+  7. Corriger le champ app de Gestion Equipe
 """
 import frappe
-import json
 
 
-# =============================================================
-# HELPERS COMMUNS
-# =============================================================
+# Workspaces orphelins a supprimer (crees par d'anciennes versions du script)
+ORPHAN_WORKSPACES = ["KYA Stagiaires", "Conges & Permissions"]
 
-def _reset_links(ws_name, links_data):
-    """Replace TOUS les links d un workspace KYA custom."""
-    frappe.db.delete("Workspace Link", {"parent": ws_name})
-    for i, lk in enumerate(links_data):
-        row = frappe.new_doc("Workspace Link")
-        row.parent = ws_name; row.parenttype = "Workspace"; row.parentfield = "links"
-        row.idx = i + 1; row.type = lk.get("type", "Link")
-        row.label = lk.get("label", ""); row.link_to = lk.get("link_to") or None
-        row.link_type = lk.get("link_type") or None; row.hidden = 0
-        row.icon = lk.get("icon") or None; row.onboard = lk.get("onboard", 0)
-        row.dependencies = lk.get("dependencies") or None
-        row.report_ref_doctype = lk.get("report_ref_doctype") or None
-        row.db_insert()
+# Workspace Sidebars orphelins a supprimer
+ORPHAN_SIDEBARS = ["KYA Stagiaires", "Personnes"]
 
+# Workspaces geres par les fichiers JSON (on s'assure juste qu'ils sont visibles)
+KYA_WORKSPACES = ["Espace Employes", "Espace Stagiaires", "KYA Services", "Gestion Équipe"]
 
-def _reset_shortcuts(ws_name, shortcuts):
-    frappe.db.delete("Workspace Shortcut", {"parent": ws_name})
-    for i, sc in enumerate(shortcuts):
-        row = frappe.new_doc("Workspace Shortcut")
-        row.parent = ws_name; row.parenttype = "Workspace"; row.parentfield = "shortcuts"
-        row.idx = i + 1; row.label = sc["label"]; row.type = sc.get("type", "DocType")
-        row.link_to = sc.get("link_to", "") if sc.get("type") != "URL" else ""
-        row.url = sc.get("url", "") if sc.get("type") == "URL" else ""
-        row.color = sc.get("color", ""); row.db_insert()
-
-
-def _append_kya_section_to_native(ws_name, section_label, kya_links):
-    """Ajoute une section KYA a la fin d un workspace NATIF ERPNext.
-    Si la section existait (d un precedent execute), la remplace proprement.
-    Ne touche JAMAIS aux liens natifs ERPNext existants."""
-    rows = frappe.db.sql(
-        "SELECT name, type, label, idx FROM `tabWorkspace Link` WHERE parent=%s ORDER BY idx",
-        ws_name, as_dict=True
-    )
-    # Supprimer l ancienne section KYA si presente
-    kya_start = None
-    for r in rows:
-        if r.type == "Card Break" and r.label == section_label:
-            kya_start = r.idx
-            break
-    if kya_start is not None:
-        frappe.db.sql(
-            "DELETE FROM `tabWorkspace Link` WHERE parent=%s AND idx >= %s",
-            (ws_name, kya_start)
-        )
-        next_idx = kya_start
-    else:
-        next_idx = len(rows) + 1
-
-    for i, lk in enumerate(kya_links):
-        row = frappe.new_doc("Workspace Link")
-        row.parent = ws_name; row.parenttype = "Workspace"; row.parentfield = "links"
-        row.idx = next_idx + i; row.type = lk.get("type", "Link")
-        row.label = lk.get("label", ""); row.link_to = lk.get("link_to") or None
-        row.link_type = lk.get("link_type") or None; row.hidden = 0
-        row.icon = lk.get("icon") or None; row.onboard = lk.get("onboard", 0)
-        row.db_insert()
-
-
-def _ensure_number_card(name, label, document_type, color="#4CAF50", filters=None):
-    if frappe.db.exists("Number Card", name):
-        return False
-    doc = frappe.new_doc("Number Card")
-    doc.name = name; doc.label = label; doc.document_type = document_type
-    doc.function = "Count"; doc.aggregate_function_based_on = "name"
-    doc.color = color; doc.filters_json = json.dumps(filters or []); doc.is_public = 1
-    doc.insert(ignore_permissions=True)
-    return True
-
-
-# =============================================================
-# EXECUTE
-# =============================================================
 
 def execute():
-    print("=== FORCE SYNC WORKSPACES KYA v3 ===\n")
+    """Post-migrate hook -- nettoyage et visibilite uniquement."""
+    print("=== KYA WORKSPACE SYNC v10 ===")
 
-    # ----------------------------------------------------------
-    # 1. ESPACE STAGIAIRES (workspace KYA custom)
-    # ----------------------------------------------------------
-    es_links = [
-        {"type": "Card Break", "label": "\U0001f4cb Permissions & Bilans"},
-        {"type": "Link", "label": "Permissions de Sortie", "link_to": "Permission Sortie Stagiaire", "link_type": "DocType", "onboard": 1},
-        {"type": "Link", "label": "Bilan Fin de Stage", "link_to": "Bilan Fin de Stage", "link_type": "DocType", "onboard": 1},
-        {"type": "Card Break", "label": "\U0001f465 Gestion Stagiaires"},
-        {"type": "Link", "label": "Employes / Stagiaires", "link_to": "Employee", "link_type": "DocType"},
-        {"type": "Link", "label": "Presences", "link_to": "Attendance", "link_type": "DocType"},
-        {"type": "Card Break", "label": "\U0001f4dd Formulaires Web"},
-        {"type": "Link", "label": "Demande de Permission (Web)", "link_to": "/permission-sortie-stagiaire", "link_type": "URL"},
-        {"type": "Link", "label": "Bilan de Stage (Web)", "link_to": "/bilan-fin-de-stage", "link_type": "URL"},
-        {"type": "Card Break", "label": "\U0001f4ca Rapports"},
-        {"type": "Link", "label": "Tableau de Bord Stagiaires", "link_to": "Tableau de Bord Stagiaires", "link_type": "Report", "dependencies": "Employee", "report_ref_doctype": "Employee"},
-        {"type": "Link", "label": "Rapport Presence Stagiaires", "link_to": "Rapport Pr\u00e9sence Stagiaires", "link_type": "Report", "dependencies": "Attendance", "report_ref_doctype": "Attendance"},
-    ]
-    _reset_links("Espace Stagiaires", es_links)
-    _reset_shortcuts("Espace Stagiaires", [
-        {"label": "Nouvelle Permission", "type": "DocType", "link_to": "Permission Sortie Stagiaire", "color": "#4CAF50"},
-        {"label": "Nouveau Bilan", "type": "DocType", "link_to": "Bilan Fin de Stage", "color": "#2196F3"},
-        {"label": "Form. Permission", "type": "URL", "url": "/permission-sortie-stagiaire", "color": "#FF9800"},
-    ])
-    frappe.db.set_value("Workspace", "Espace Stagiaires", "content", json.dumps([
-        {"id":"h1","type":"header","data":{"text":"<div class='ellipsis'>\U0001f393 Espace Stagiaires KYA</div>","level":3,"col":12}},
-        {"id":"s1","type":"shortcut","data":{"shortcut_name":"Nouvelle Permission","col":4}},
-        {"id":"s2","type":"shortcut","data":{"shortcut_name":"Nouveau Bilan","col":4}},
-        {"id":"s3","type":"shortcut","data":{"shortcut_name":"Form. Permission","col":4}},
-    ], ensure_ascii=False), update_modified=True)
-    print("  [OK] Espace Stagiaires (custom)")
+    # 1. Supprimer les Workspace Sidebar orphelins
+    for sb_name in ORPHAN_SIDEBARS:
+        if frappe.db.exists("Workspace Sidebar", sb_name):
+            frappe.delete_doc("Workspace Sidebar", sb_name, force=True, ignore_missing=True)
+            print(f"  [SIDEBAR DELETED] {sb_name}")
 
-    # ----------------------------------------------------------
-    # 2. KYA SERVICES (workspace KYA custom)
-    # ----------------------------------------------------------
-    svc_links = [
-        {"type": "Card Break", "label": "\U0001f4dd Formulaires & Enqu\u00eates"},
-        {"type": "Link", "label": "KYA Form", "link_to": "KYA Form", "link_type": "DocType", "onboard": 1},
-        {"type": "Link", "label": "R\u00e9ponses", "link_to": "KYA Form Response", "link_type": "DocType"},
-        {"type": "Card Break", "label": "\U0001f4cb \u00c9valuations"},
-        {"type": "Link", "label": "KYA Evaluation", "link_to": "KYA Evaluation", "link_type": "DocType", "onboard": 1},
-        {"type": "Card Break", "label": "\U0001f310 Portail"},
-        {"type": "Link", "label": "Enqu\u00eate en ligne", "link_to": "/kya-survey", "link_type": "URL"},
-        {"type": "Link", "label": "\u00c9valuation en ligne", "link_to": "/kya-eval", "link_type": "URL"},
-    ]
-    _reset_links("KYA Services", svc_links)
-    _reset_shortcuts("KYA Services", [
-        {"label": "Formulaires", "type": "DocType", "link_to": "KYA Form", "color": "#3F51B5"},
-        {"label": "\u00c9valuations", "type": "DocType", "link_to": "KYA Evaluation", "color": "#9C27B0"},
-        {"label": "R\u00e9ponses", "type": "DocType", "link_to": "KYA Form Response", "color": "#009688"},
-        {"label": "Portail Enqu\u00eate", "type": "URL", "url": "/kya-survey", "color": "#FF5722"},
-    ])
-    nc1 = _ensure_number_card("Total Formulaires KYA", "Total Formulaires", "KYA Form", "#3F51B5")
-    nc2 = _ensure_number_card("Total Evaluations KYA", "Total \u00c9valuations", "KYA Evaluation", "#9C27B0")
-    nc3 = _ensure_number_card("Reponses Recues KYA", "R\u00e9ponses Re\u00e7ues", "KYA Form Response", "#009688")
-    fa = "Formulaires Actifs" if frappe.db.exists("Number Card", "Formulaires Actifs") else "Total Formulaires KYA"
-    frappe.db.set_value("Workspace", "KYA Services", "content", json.dumps([
-        {"id":"h1","type":"header","data":{"text":"<div class='ellipsis'>\U0001f4cb KYA Services</div>","level":3,"col":12}},
-        {"id":"s1","type":"shortcut","data":{"shortcut_name":"Formulaires","col":3}},
-        {"id":"s2","type":"shortcut","data":{"shortcut_name":"\u00c9valuations","col":3}},
-        {"id":"s3","type":"shortcut","data":{"shortcut_name":"R\u00e9ponses","col":3}},
-        {"id":"s4","type":"shortcut","data":{"shortcut_name":"Portail Enqu\u00eate","col":3}},
-        {"id":"sp","type":"spacer","data":{"col":12}},
-        {"id":"h2","type":"header","data":{"text":"\U0001f4ca Indicateurs","level":4,"col":12}},
-        {"id":"nc1","type":"number_card","data":{"number_card_name":fa,"col":3}},
-        {"id":"nc2","type":"number_card","data":{"number_card_name":"Total Formulaires KYA","col":3}},
-        {"id":"nc3","type":"number_card","data":{"number_card_name":"Total Evaluations KYA","col":3}},
-        {"id":"nc4","type":"number_card","data":{"number_card_name":"Reponses Recues KYA","col":3}},
-    ], ensure_ascii=False), update_modified=True)
-    print(f"  [OK] KYA Services (custom) | Number Cards: {nc1},{nc2},{nc3}")
+    # Also delete "Conges & Permissions" sidebar (accent variants)
+    for variant in ["Conges & Permissions", "Cong\u00e9s & Permissions"]:
+        if frappe.db.exists("Workspace Sidebar", variant):
+            frappe.delete_doc("Workspace Sidebar", variant, force=True, ignore_missing=True)
+            print(f"  [SIDEBAR DELETED] {variant}")
 
-    # ----------------------------------------------------------
-    # 3. BUYING (workspace NATIF) - ajouter section KYA
-    # ----------------------------------------------------------
-    buying_kya = [
-        {"type": "Card Break", "label": "\U0001f3f7\ufe0f KYA \u2014 Achats"},
-        {"type": "Link", "label": "Demandes d\u2019Achat (KYA)", "link_to": "Purchase Requisition", "link_type": "DocType", "onboard": 1},
-        {"type": "Link", "label": "Formulaire Demande Achat", "link_to": "/demande-achat", "link_type": "URL"},
-    ]
-    _append_kya_section_to_native("Buying", "\U0001f3f7\ufe0f KYA \u2014 Achats", buying_kya)
-    print("  [OK] Buying (natif) - section KYA ajoutee")
+    # 2. Supprimer les workspaces orphelins des anciennes versions
+    for ws_name in ORPHAN_WORKSPACES:
+        if frappe.db.exists("Workspace", ws_name):
+            frappe.delete_doc("Workspace", ws_name, force=True, ignore_missing=True)
+            print(f"  [WORKSPACE DELETED] {ws_name} (orphelin)")
 
-    # ----------------------------------------------------------
-    # 4. STOCK (workspace NATIF) - ajouter section KYA
-    # ----------------------------------------------------------
-    stock_kya = [
-        {"type": "Card Break", "label": "\U0001f4e6 KYA \u2014 Stock"},
-        {"type": "Link", "label": "PV Sortie Mat\u00e9riel", "link_to": "PV Sortie Materiel", "link_type": "DocType", "onboard": 1},
-        {"type": "Link", "label": "Formulaire PV Sortie", "link_to": "/pv-sortie-materiel", "link_type": "URL"},
-    ]
-    _append_kya_section_to_native("Stock", "\U0001f4e6 KYA \u2014 Stock", stock_kya)
-    print("  [OK] Stock (natif) - section KYA ajoutee")
+    # Also delete accent variant
+    if frappe.db.exists("Workspace", "Cong\u00e9s & Permissions"):
+        frappe.delete_doc("Workspace", "Cong\u00e9s & Permissions", force=True, ignore_missing=True)
+        print("  [WORKSPACE DELETED] Cong\u00e9s & Permissions (orphelin)")
 
-    # ----------------------------------------------------------
-    # 5. WORKSPACE SIDEBAR "KYA Stagiaires" → 1er lien = Workspace Espace Stagiaires
-    # Desktop Icon "KYA Stagiaires" utilise le 1er lien de la sidebar pour calculer
-    # icon_route. Si ce 1er lien est un DocType, il navigue vers une liste, pas le workspace.
-    # On force le 1er lien a etre: link_type=Workspace, link_to=Espace Stagiaires.
-    # ----------------------------------------------------------
-    if frappe.db.exists("Workspace Sidebar", "KYA Stagiaires"):
-        try:
-            ws_sidebar = frappe.get_doc("Workspace Sidebar", "KYA Stagiaires")
-            # Supprimer les items existants et reconstruire avec Workspace en premier
-            ws_sidebar.items = []
-            ws_sidebar.append("items", {
+    # 3. Corriger le module de KYA Services (doit etre KYA Services, pas KYA HR)
+    if frappe.db.exists("Workspace", "KYA Services"):
+        current_module = frappe.db.get_value("Workspace", "KYA Services", "module")
+        if current_module != "KYA Services":
+            frappe.db.set_value("Workspace", "KYA Services", {
+                "module": "KYA Services",
+                "app": "kya_services"
+            }, update_modified=False)
+            print(f"  [FIXED] KYA Services module: {current_module} -> KYA Services")
+
+    # 4. S'assurer que les workspaces KYA sont visibles
+    for ws_name in KYA_WORKSPACES:
+        if frappe.db.exists("Workspace", ws_name):
+            frappe.db.set_value("Workspace", ws_name, "is_hidden", 0, update_modified=False)
+            print(f"  [VISIBLE] {ws_name}")
+
+    # 5. Creer le Workspace Sidebar pour KYA Services s'il n'existe pas
+    #    Guard: only if kya_services app is fully installed (DocTypes + Workspace exist)
+    if not frappe.db.exists("Workspace Sidebar", "KYA Services"):
+        kya_svc_ready = (
+            frappe.db.exists("DocType", "KYA Form")
+            and frappe.db.exists("Workspace", "KYA Services")
+        )
+        if not kya_svc_ready:
+            print("  [SKIP] KYA Services sidebar (kya_services not fully installed)")
+        else:
+            sidebar = frappe.new_doc("Workspace Sidebar")
+            sidebar.title = "KYA Services"
+            sidebar.module = "KYA Services"
+            sidebar.header_icon = "clipboard-list"
+            sidebar.app = "kya_services"
+            sidebar.standard = 0
+            sidebar.append("items", {
+                "label": "KYA Services",
                 "type": "Link",
-                "label": "Espace Stagiaires",
+                "link_to": "KYA Services",
                 "link_type": "Workspace",
-                "link_to": "Espace Stagiaires",
-                "icon": "education",
-                "indent": 0,
-                "collapsible": 0,
-                "child": 0,
+                "icon": "clipboard-list"
             })
-            # Remettre les autres liens utiles
-            for item_def in [
-                ("Permission Sortie Stagiaire", "DocType", "file", "Permissions"),
-                ("Bilan Fin de Stage", "DocType", "graduation-cap", "Bilan"),
-                ("Employee", "DocType", "users", "Stagiaires"),
-                ("Attendance", "DocType", "clock", "Presences"),
-            ]:
-                ws_sidebar.append("items", {
-                    "type": "Link",
-                    "label": item_def[3],
-                    "link_type": item_def[1],
-                    "link_to": item_def[0],
-                    "icon": item_def[2],
-                    "indent": 0,
-                    "collapsible": 0,
-                    "child": 0,
-                })
-            ws_sidebar.save(ignore_permissions=True)
-            print("  [OK] Workspace Sidebar 'KYA Stagiaires' - 1er lien = Workspace Espace Stagiaires")
-        except Exception as e:
-            print(f"  [WARN] Workspace Sidebar KYA Stagiaires: {e}")
-    else:
-        print("  [SKIP] Workspace Sidebar 'KYA Stagiaires' non trouvee")
+            sidebar.append("items", {
+                "label": "KYA Form",
+                "type": "Link",
+                "link_to": "KYA Form",
+                "link_type": "DocType",
+                "icon": "file-text"
+            })
+            sidebar.append("items", {
+                "label": "Reponses",
+                "type": "Link",
+                "link_to": "KYA Form Response",
+                "link_type": "DocType",
+                "icon": "list"
+            })
+            sidebar.append("items", {
+                "label": "KYA Evaluation",
+                "type": "Link",
+                "link_to": "KYA Evaluation",
+                "link_type": "DocType",
+                "icon": "clipboard-check"
+            })
+            sidebar.insert(ignore_permissions=True)
+            print("  [CREATED] KYA Services sidebar")
 
-    # ----------------------------------------------------------
-    # 6. MASQUER les anciennes sous-pages custom (plus necessaires)
-    # ----------------------------------------------------------
-    for ws_to_hide in ["Achats & Approvisionnement", "Stock & Logistique"]:
-        if frappe.db.exists("Workspace", ws_to_hide):
-            frappe.db.set_value("Workspace", ws_to_hide, "is_hidden", 1, update_modified=False)
-            print(f"  [HIDE] {ws_to_hide}")
+    # 6. Creer le Workspace Sidebar pour Espace Stagiaires s'il n'existe pas
+    if not frappe.db.exists("Workspace Sidebar", "Espace Stagiaires"):
+        if frappe.db.exists("Workspace", "Espace Stagiaires"):
+            sidebar = frappe.new_doc("Workspace Sidebar")
+            sidebar.title = "Espace Stagiaires"
+            sidebar.module = "KYA HR"
+            sidebar.header_icon = "graduation-cap"
+            sidebar.app = "kya_hr"
+            sidebar.standard = 0
+            sidebar.append("items", {
+                "label": "Espace Stagiaires",
+                "type": "Link",
+                "link_to": "Espace Stagiaires",
+                "link_type": "Workspace",
+                "icon": "graduation-cap"
+            })
+            sidebar.append("items", {
+                "label": "Permission Sortie",
+                "type": "Link",
+                "link_to": "Permission Sortie Stagiaire",
+                "link_type": "DocType",
+                "icon": "file-text"
+            })
+            sidebar.append("items", {
+                "label": "Bilan Fin de Stage",
+                "type": "Link",
+                "link_to": "Bilan Fin de Stage",
+                "link_type": "DocType",
+                "icon": "clipboard"
+            })
+            sidebar.insert(ignore_permissions=True)
+            print("  [CREATED] Espace Stagiaires sidebar")
+        else:
+            print("  [SKIP] Espace Stagiaires sidebar (workspace not found)")
 
-    # ----------------------------------------------------------
-    # 7. COMMIT + cache bust
-    # ----------------------------------------------------------
-    frappe.db.commit()
+    # 7. Corriger le champ app de Gestion Equipe
+    if frappe.db.exists("Workspace", "Gestion Équipe"):
+        current_app = frappe.db.get_value("Workspace", "Gestion Équipe", "app")
+        if not current_app:
+            frappe.db.set_value("Workspace", "Gestion Équipe", "app", "kya_services", update_modified=False)
+            print("  [FIXED] Gestion Équipe app -> kya_services")
+
+    # 8. Fix setup_complete default value if needed
     try:
-        for ws in ["Espace Stagiaires", "KYA Services", "Buying", "Stock"]:
-            frappe.cache().delete_value(f"workspace:{ws}")
+        val = frappe.db.get_value("DefaultValue", {"defkey": "setup_complete"}, "defvalue")
+        if val != "1":
+            frappe.db.sql("UPDATE tabDefaultValue SET defvalue='1' WHERE defkey='setup_complete'")
+            print("  [FIXED] setup_complete = 1")
     except Exception:
         pass
 
-    print("\n=== VERIFICATION ===")
-    for ws in ["Espace Stagiaires", "KYA Services", "Buying", "Stock"]:
-        n = frappe.db.count("Workspace Link", {"parent": ws})
-        ns = frappe.db.count("Workspace Shortcut", {"parent": ws})
-        print(f"  {ws}: {n} links, {ns} shortcuts")
-
-    print("""
-=== IMPORTANT NAVIGATEUR ===
-Les changements sont en DB. Pour les voir dans le navigateur:
-  Chrome/Edge: Ctrl+Shift+Delete -> cocher Cookies ET Cache -> Effacer
-  Firefox: Ctrl+Shift+Delete -> Tout effacer
-  OU: ouvrir en onglet PRIVE (Ctrl+Shift+N) sur http://localhost:8086
-""")
+    frappe.db.commit()
+    print("=== DONE ===")
