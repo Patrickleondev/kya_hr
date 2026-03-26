@@ -8,6 +8,7 @@ import json
 
 def execute():
     print("=== KYA FIX ALL WORKSPACES ===")
+    fix_card_break_links()
     fix_kya_services_portail()
     fix_kya_services_content()
     fix_espace_employes()
@@ -19,9 +20,26 @@ def execute():
     fix_kya_forms_dashboard()
     fix_kya_services_number_cards()
     fix_stagiaires_number_cards()
+    fix_kya_services_total_reponses()
     frappe.db.commit()
     frappe.clear_cache()
     print("=== ALL FIXES APPLIED + CACHE CLEARED ===")
+
+
+def fix_card_break_links():
+    """Clean Card Break entries with link_to='None' (string) that cause 'DocType s introuvable'."""
+    frappe.db.sql("""
+        UPDATE `tabWorkspace Link`
+        SET link_to = '', link_type = ''
+        WHERE type = 'Card Break' AND (link_to = 'None' OR link_to IS NULL)
+    """)
+    # Also clean shortcuts with url='None' (string)
+    frappe.db.sql("""
+        UPDATE `tabWorkspace Shortcut`
+        SET url = ''
+        WHERE url = 'None'
+    """)
+    print("  [Card Break] Cleaned link_to='None' entries ✓")
 
 
 def fix_kya_services_portail():
@@ -37,20 +55,16 @@ def fix_kya_services_portail():
 def fix_kya_services_content():
     """Rebuild KYA Services workspace content JSON to avoid broken blocks."""
     content = [
+        {"id": "hdr_forms", "type": "header", "data": {"text": "📝 Formulaires & Enquêtes", "col": 12}},
         {"id": "sc_forms", "type": "shortcut", "data": {"shortcut_name": "Formulaires", "col": 4}},
-        {"id": "sc_evals", "type": "shortcut", "data": {"shortcut_name": "Évaluations", "col": 4}},
         {"id": "sc_resp", "type": "shortcut", "data": {"shortcut_name": "Réponses", "col": 4}},
         {"id": "sc_portail", "type": "shortcut", "data": {"shortcut_name": "Portail Enquête", "col": 4}},
+        {"id": "hdr_evals", "type": "header", "data": {"text": "📋 Évaluations", "col": 12}},
+        {"id": "sc_evals", "type": "shortcut", "data": {"shortcut_name": "Évaluations", "col": 4}},
         {"id": "sp1", "type": "spacer", "data": {"col": 12}},
-        {"id": "hdr_ind", "type": "header", "data": {"text": "<b>Indicateurs</b>", "level": 4, "col": 12}},
-        {"id": "nc1", "type": "number_card", "data": {"number_card_name": "Total Formulaires", "col": 3}},
-        {"id": "nc2", "type": "number_card", "data": {"number_card_name": "Formulaires Actifs", "col": 3}},
-        {"id": "nc3", "type": "number_card", "data": {"number_card_name": "Total Évaluations", "col": 3}},
-        {"id": "nc4", "type": "number_card", "data": {"number_card_name": "Réponses Reçues", "col": 3}},
-        {"id": "sp2", "type": "spacer", "data": {"col": 12}},
-        {"id": "hdr_charts", "type": "header", "data": {"text": "<b>Tableaux de Bord</b>", "level": 4, "col": 12}},
-        {"id": "ch1", "type": "chart", "data": {"chart_name": "Formulaires par Statut", "col": 6}},
-        {"id": "ch2", "type": "chart", "data": {"chart_name": "Évaluations par Type", "col": 6}},
+        {"id": "hdr_ind", "type": "header", "data": {"text": "📊 Indicateurs", "col": 12}},
+        {"id": "nc1", "type": "number_card", "data": {"number_card_name": "Formulaires Actifs", "col": 6}},
+        {"id": "nc2", "type": "number_card", "data": {"number_card_name": "Total Réponses", "col": 6}},
     ]
     frappe.db.sql(
         "UPDATE tabWorkspace SET content = %s WHERE name = 'KYA Services'",
@@ -141,13 +155,29 @@ def fix_gestion_equipe():
 
 
 def fix_espace_stagiaires():
-    """Ensure Espace Stagiaires is visible, public, with correct icon (graduation-cap)."""
+    """Ensure Espace Stagiaires is visible, public, with correct icon and content."""
     frappe.db.sql("""
         UPDATE tabWorkspace
         SET public = 1, is_hidden = 0, icon = 'graduation-cap'
         WHERE name = 'Espace Stagiaires'
     """)
-    print("  [Espace Stagiaires] Visible + public + icon=graduation-cap ✓")
+    # Rebuild content with 3 Number Cards + shortcuts
+    content = [
+        {"type": "header", "data": {"text": "📊 Tableau de Bord", "col": 12}},
+        {"type": "number_card", "data": {"number_card_name": "Stagiaires Actifs", "col": 4}},
+        {"type": "number_card", "data": {"number_card_name": "Permissions Stagiaires en Attente", "col": 4}},
+        {"type": "number_card", "data": {"number_card_name": "Bilans de Stage Soumis", "col": 4}},
+        {"type": "header", "data": {"text": "🔗 Accès Rapide", "col": 12}},
+        {"type": "shortcut", "data": {"shortcut_name": "Stagiaires", "col": 4}},
+        {"type": "shortcut", "data": {"shortcut_name": "Permissions", "col": 4}},
+        {"type": "shortcut", "data": {"shortcut_name": "Bilan", "col": 4}},
+        {"type": "shortcut", "data": {"shortcut_name": "Demander une Permission", "col": 4}},
+        {"type": "shortcut", "data": {"shortcut_name": "Bilan de Stage ↗", "col": 4}},
+        {"type": "shortcut", "data": {"shortcut_name": "Tableau de Bord", "col": 4}},
+        {"type": "shortcut", "data": {"shortcut_name": "Mon Espace", "col": 4}},
+    ]
+    frappe.db.set_value("Workspace", "Espace Stagiaires", "content", json.dumps(content))
+    print("  [Espace Stagiaires] Visible + public + icon + content rebuilt ✓")
 
 
 def fix_website_settings_appname():
@@ -321,3 +351,40 @@ def fix_stagiaires_number_cards():
             (json.dumps(ws_content),)
         )
         print("  [Stagiaires] Workspace content mis à jour avec Number Cards ✓")
+
+
+def fix_kya_services_total_reponses():
+    """Ensure 'Total Réponses' and 'Formulaires Actifs' Number Cards exist."""
+    nc_definitions = [
+        {
+            "name": "Formulaires Actifs",
+            "label": "Formulaires Actifs",
+            "document_type": "KYA Form",
+            "function": "Count",
+            "filters_json": '[["KYA Form","statut","=","Actif"]]',
+            "color": "#4caf50",
+        },
+        {
+            "name": "Total Réponses",
+            "label": "Total Réponses",
+            "document_type": "KYA Form Response",
+            "function": "Count",
+            "filters_json": "[]",
+            "color": "#2196f3",
+        },
+    ]
+    created = 0
+    for nc_def in nc_definitions:
+        name = nc_def["name"]
+        if not frappe.db.exists("Number Card", name):
+            try:
+                card = frappe.new_doc("Number Card")
+                for k, v in nc_def.items():
+                    setattr(card, k, v)
+                card.is_standard = 1
+                card.module = "KYA HR"
+                card.insert(ignore_permissions=True)
+                created += 1
+            except Exception as e:
+                print(f"  [NC] Skipped '{name}': {e}")
+    print(f"  [KYA Services NC] {created} Number Cards créés ✓")
