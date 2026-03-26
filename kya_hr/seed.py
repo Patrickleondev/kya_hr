@@ -939,6 +939,107 @@ def run():
     frappe.db.commit()
 
     # ========================================
+    # 13. MOCK KYA FORM RESPONSES (demo data)
+    # ========================================
+    print("\n=== 13. MOCK KYA FORM RESPONSES ===")
+    try:
+        if "KYA Form Response" in [d.name for d in frappe.get_all("DocType", filters={"module": "KYA Services"})]:
+            import uuid as _uuid
+            from frappe.utils import get_datetime, add_to_date
+
+            def _make_response(form_name, employe_id, offset_days, note_bias=4):
+                """Create one mock response for a form."""
+                if frappe.db.exists("KYA Form Response", {"formulaire": form_name, "employe": employe_id or ""}):
+                    return None
+                form = frappe.get_doc("KYA Form", form_name)
+                answers = []
+                for q in form.questions:
+                    if q.type_reponse == "Note 1-5":
+                        # Weighted towards note_bias with some variance
+                        note = random.choices(
+                            [note_bias - 1, note_bias, note_bias, note_bias + 0,
+                             min(note_bias + 1, 5)],
+                            weights=[1, 3, 3, 2, 1]
+                        )[0]
+                        note = max(1, min(5, note))
+                        valeur = str(note)
+                    else:
+                        valeur = random.choice([
+                            "Bon travail général.",
+                            "À améliorer sur la communication.",
+                            "Satisfait des services.",
+                            "Plus de formation serait appréciée.",
+                            "",
+                        ])
+                    answers.append({
+                        "doctype": "KYA Form Answer",
+                        "question": q.libelle[:140],
+                        "type_reponse": q.type_reponse,
+                        "valeur": valeur,
+                    })
+                resp = frappe.get_doc({
+                    "doctype": "KYA Form Response",
+                    "formulaire": form_name,
+                    "employe": employe_id,
+                    "token": str(_uuid.uuid4()),
+                    "soumis_le": add_to_date(nowdate(), days=-offset_days),
+                    "reponses": answers,
+                })
+                resp.flags.ignore_permissions = True
+                resp.insert(ignore_permissions=True)
+                return resp.name
+
+            # --- Satisfaction survey (anonymous → no employe) ---
+            sat_form = frappe.db.get_value("KYA Form", {"titre": "Enquête de Satisfaction du Personnel"}, "name")
+            if sat_form:
+                anon_users = [None] * 12  # 12 anonymous responses
+                created_sat = 0
+                for i, emp in enumerate(anon_users):
+                    try:
+                        r = _make_response(sat_form, None, offset_days=random.randint(1, 90),
+                                           note_bias=random.choice([3, 4, 4, 5]))
+                        if r:
+                            created_sat += 1
+                    except Exception as _e:
+                        pass
+                print(f"  Satisfaction survey: {created_sat} réponses créées")
+            else:
+                print("  Satisfaction survey non trouvé — skip")
+
+            # --- Eval N+1→N (non-anonymous, linked to employees) ---
+            eval_n1n_form = frappe.db.get_value("KYA Form", {"titre": "Évaluation Trimestrielle du N par son N+1"}, "name")
+            emp_ids = frappe.get_all("Employee", filters={"employment_type": ["!=", "Stage"], "status": "Active"}, pluck="name", limit=5)
+            if eval_n1n_form and emp_ids:
+                created_eval = 0
+                for i, emp_id in enumerate(emp_ids[:4]):
+                    try:
+                        r = _make_response(eval_n1n_form, emp_id, offset_days=random.randint(15, 60), note_bias=4)
+                        if r:
+                            created_eval += 1
+                    except Exception as _e:
+                        pass
+                print(f"  Eval N+1→N: {created_eval} réponses créées")
+
+            # --- Eval N→N+1 (non-anonymous) ---
+            eval_nn1_form = frappe.db.get_value("KYA Form", {"titre": "Évaluation Trimestrielle du N+1 par le N"}, "name")
+            if eval_nn1_form and emp_ids:
+                created_eval2 = 0
+                for i, emp_id in enumerate(emp_ids[:5]):
+                    try:
+                        r = _make_response(eval_nn1_form, emp_id, offset_days=random.randint(5, 45), note_bias=4)
+                        if r:
+                            created_eval2 += 1
+                    except Exception as _e:
+                        pass
+                print(f"  Eval N→N+1: {created_eval2} réponses créées")
+
+            frappe.db.commit()
+        else:
+            print("  KYA Services non installé — skip réponses")
+    except Exception as e:
+        print(f"  Mock responses error: {e}")
+
+    # ========================================
     # SUMMARY
     # ========================================
     print("\n" + "="*60)

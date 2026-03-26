@@ -9,6 +9,7 @@ import json
 def execute():
     print("=== KYA FIX ALL WORKSPACES ===")
     fix_kya_services_portail()
+    fix_kya_services_content()
     fix_espace_employes()
     fix_gestion_equipe()
     fix_espace_stagiaires()
@@ -31,6 +32,31 @@ def fix_kya_services_portail():
         WHERE parent = 'KYA Services' AND label = 'Portail Enquête'
     """)
     print("  [KYA Services] Fixed 'Portail Enquête' → url=/kya-survey ✓")
+
+
+def fix_kya_services_content():
+    """Rebuild KYA Services workspace content JSON to avoid broken blocks."""
+    content = [
+        {"id": "sc_forms", "type": "shortcut", "data": {"shortcut_name": "Formulaires", "col": 4}},
+        {"id": "sc_evals", "type": "shortcut", "data": {"shortcut_name": "Évaluations", "col": 4}},
+        {"id": "sc_resp", "type": "shortcut", "data": {"shortcut_name": "Réponses", "col": 4}},
+        {"id": "sc_portail", "type": "shortcut", "data": {"shortcut_name": "Portail Enquête", "col": 4}},
+        {"id": "sp1", "type": "spacer", "data": {"col": 12}},
+        {"id": "hdr_ind", "type": "header", "data": {"text": "<b>Indicateurs</b>", "level": 4, "col": 12}},
+        {"id": "nc1", "type": "number_card", "data": {"number_card_name": "Total Formulaires", "col": 3}},
+        {"id": "nc2", "type": "number_card", "data": {"number_card_name": "Formulaires Actifs", "col": 3}},
+        {"id": "nc3", "type": "number_card", "data": {"number_card_name": "Total Évaluations", "col": 3}},
+        {"id": "nc4", "type": "number_card", "data": {"number_card_name": "Réponses Reçues", "col": 3}},
+        {"id": "sp2", "type": "spacer", "data": {"col": 12}},
+        {"id": "hdr_charts", "type": "header", "data": {"text": "<b>Tableaux de Bord</b>", "level": 4, "col": 12}},
+        {"id": "ch1", "type": "chart", "data": {"chart_name": "Formulaires par Statut", "col": 6}},
+        {"id": "ch2", "type": "chart", "data": {"chart_name": "Évaluations par Type", "col": 6}},
+    ]
+    frappe.db.sql(
+        "UPDATE tabWorkspace SET content = %s WHERE name = 'KYA Services'",
+        (json.dumps(content),)
+    )
+    print("  [KYA Services] Content JSON rebuilt ✓")
 
 
 def fix_espace_employes():
@@ -262,11 +288,12 @@ def fix_stagiaires_number_cards():
         if not frappe.db.exists("Number Card", name):
             try:
                 card = frappe.new_doc("Number Card")
-                card.number_card_name = name
+                card.name = name
+                card.label = card_data.pop("label", name)
                 card.is_standard = 0
                 for k, v in card_data.items():
                     setattr(card, k, v)
-                card.save(ignore_permissions=True)
+                card.insert(ignore_permissions=True, ignore_if_duplicate=True)
                 created += 1
             except Exception as e:
                 print(f"  [Stagiaires NC] Skipped '{name}': {e}")
