@@ -14,6 +14,8 @@ def execute():
     fix_espace_stagiaires()
     fix_website_settings_appname()
     fix_corrupted_statut_values()
+    fix_webform_client_scripts()
+    fix_kya_forms_dashboard()
     frappe.db.commit()
     print("=== ALL FIXES APPLIED ===")
 
@@ -153,3 +155,55 @@ def fix_corrupted_statut_values():
         WHERE statut NOT IN ('Brouillon', 'Soumis', 'Valid\u00e9')
     """)
     print("  [Statut] Valeurs corrompues corrigées ✓")
+
+def fix_webform_client_scripts():
+    """Push client_script from JSON files to DB (bench migrate ignores existing records)."""
+    import os
+    base = frappe.get_app_path("kya_hr", "web_form")
+    updated = 0
+    for wf_dir in ["permission_sortie_employe", "permission_sortie_stagiaire"]:
+        json_path = os.path.join(base, wf_dir, f"{wf_dir}.json")
+        if not os.path.exists(json_path):
+            continue
+        import json as _json
+        with open(json_path) as f:
+            data = _json.load(f)
+        cs = data.get("client_script", "")
+        if not cs:
+            continue
+        name_in_db = wf_dir.replace("_", "-")
+        if frappe.db.exists("Web Form", name_in_db):
+            frappe.db.set_value("Web Form", name_in_db, "client_script", cs)
+            updated += 1
+    print(f"  [WebForms] {updated} client_scripts mis à jour ✓")
+
+
+def fix_kya_forms_dashboard():
+    """Create 'KYA Forms' dashboard with Number Cards if it doesn't exist."""
+    chart_name = "KYA Forms - Formulaires par mois"
+    if not frappe.db.exists("Dashboard Chart", chart_name):
+        chart = frappe.new_doc("Dashboard Chart")
+        chart.chart_name = chart_name
+        chart.document_type = "KYA Form"
+        chart.based_on = "creation"
+        chart.type = "Bar"
+        chart.time_interval = "Monthly"
+        chart.timespan = "Last Year"
+        chart.filters_json = "[]"
+        chart.is_standard = 0
+        chart.save(ignore_permissions=True)
+
+    dash_name = "KYA Forms"
+    if frappe.db.exists("Dashboard", dash_name):
+        print("  [Dashboard] KYA Forms déjà présent ✓")
+        return
+
+    dash = frappe.new_doc("Dashboard")
+    dash.dashboard_name = dash_name
+    dash.is_standard = 0
+    dash.append("charts", {"chart": chart_name, "width": "Full"})
+    for card in ["Total Formulaires", "Formulaires Actifs", "Réponses Reçues", "Total Évaluations"]:
+        if frappe.db.exists("Number Card", card):
+            dash.append("cards", {"card": card})
+    dash.save(ignore_permissions=True)
+    print("  [Dashboard] KYA Forms créé ✓")
