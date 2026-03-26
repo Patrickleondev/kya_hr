@@ -16,8 +16,11 @@ def execute():
     fix_corrupted_statut_values()
     fix_webform_client_scripts()
     fix_kya_forms_dashboard()
+    fix_kya_services_number_cards()
+    fix_stagiaires_number_cards()
     frappe.db.commit()
-    print("=== ALL FIXES APPLIED ===")
+    frappe.clear_cache()
+    print("=== ALL FIXES APPLIED + CACHE CLEARED ===")
 
 
 def fix_kya_services_portail():
@@ -112,13 +115,13 @@ def fix_gestion_equipe():
 
 
 def fix_espace_stagiaires():
-    """Ensure Espace Stagiaires is visible, public, with correct icon."""
+    """Ensure Espace Stagiaires is visible, public, with correct icon (graduation-cap)."""
     frappe.db.sql("""
         UPDATE tabWorkspace
-        SET public = 1, is_hidden = 0, icon = 'education'
+        SET public = 1, is_hidden = 0, icon = 'graduation-cap'
         WHERE name = 'Espace Stagiaires'
     """)
-    print("  [Espace Stagiaires] Visible + public + icon=education ✓")
+    print("  [Espace Stagiaires] Visible + public + icon=graduation-cap ✓")
 
 
 def fix_website_settings_appname():
@@ -207,3 +210,87 @@ def fix_kya_forms_dashboard():
             dash.append("cards", {"card": card})
     dash.save(ignore_permissions=True)
     print("  [Dashboard] KYA Forms créé ✓")
+
+
+def fix_kya_services_number_cards():
+    """Ensure KYA Services Portail Enquête shortcut has correct type=URL (not DocType)."""
+    frappe.db.sql("""
+        UPDATE `tabWorkspace Shortcut`
+        SET type = 'URL', url = '/kya-survey', link_to = ''
+        WHERE parent = 'KYA Services' AND label = 'Portail Enquête'
+    """)
+    # Also ensure the 'Réponses Reçues' Number Card filter key is valid
+    frappe.db.sql("""
+        UPDATE `tabNumber Card`
+        SET filters_json = '[["KYA Form Response","soumis_le","is","set",false]]'
+        WHERE name = 'Réponses Reçues' AND document_type = 'KYA Form Response'
+    """)
+    print("  [KYA Services] Portail Enquête type=URL ✓ · Réponses Reçues filter ✓")
+
+
+def fix_stagiaires_number_cards():
+    """Create Number Cards for Stagiaires module and inject into workspace content."""
+    cards_to_create = [
+        {
+            "name": "Stagiaires Actifs",
+            "label": "Stagiaires Actifs",
+            "document_type": "Employee",
+            "function": "Count",
+            "filters_json": '[["Employee","employment_type","=","Stage",false],["Employee","status","=","Active",false]]',
+            "color": "#009688",
+        },
+        {
+            "name": "Permissions Stagiaires en Attente",
+            "label": "Permissions en Attente",
+            "document_type": "Permission Sortie Stagiaire",
+            "function": "Count",
+            "filters_json": '[["Permission Sortie Stagiaire","workflow_state","not in",["Approuvé","Rejeté"],false]]',
+            "color": "#e67e22",
+        },
+        {
+            "name": "Bilans de Stage Soumis",
+            "label": "Bilans Soumis",
+            "document_type": "Bilan Fin de Stage",
+            "function": "Count",
+            "filters_json": '[["Bilan Fin de Stage","docstatus","!=",0,false]]',
+            "color": "#1a5276",
+        },
+    ]
+    created = 0
+    for card_data in cards_to_create:
+        name = card_data.pop("name")
+        if not frappe.db.exists("Number Card", name):
+            try:
+                card = frappe.new_doc("Number Card")
+                card.number_card_name = name
+                card.is_standard = 0
+                for k, v in card_data.items():
+                    setattr(card, k, v)
+                card.save(ignore_permissions=True)
+                created += 1
+            except Exception as e:
+                print(f"  [Stagiaires NC] Skipped '{name}': {e}")
+    print(f"  [Stagiaires] {created} Number Cards créés ✓")
+
+    # Inject Number Cards into Espace Stagiaires workspace content (DB)
+    ws_content_raw = frappe.db.get_value("Workspace", "Espace Stagiaires", "content") or "[]"
+    ws_content = json.loads(ws_content_raw)
+    has_nc = any(b.get("type") == "number_card" for b in ws_content)
+    if not has_nc:
+        ws_content.append({"id": "spacer_nc", "type": "spacer", "data": {"col": 12}})
+        ws_content.append({"id": "nc_hdr", "type": "header",
+                           "data": {"text": "<b>Indicateurs</b>", "level": 4, "col": 12}})
+        nc_names = [
+            "Stagiaires Actifs",
+            "Permissions Stagiaires en Attente",
+            "Bilans de Stage Soumis",
+        ]
+        for i, nm in enumerate(nc_names):
+            if frappe.db.exists("Number Card", nm):
+                ws_content.append({"id": f"snc{i}", "type": "number_card",
+                                   "data": {"number_card_name": nm, "col": 4}})
+        frappe.db.sql(
+            "UPDATE tabWorkspace SET content = %s WHERE name = 'Espace Stagiaires'",
+            (json.dumps(ws_content),)
+        )
+        print("  [Stagiaires] Workspace content mis à jour avec Number Cards ✓")
