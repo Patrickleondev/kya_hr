@@ -31,7 +31,10 @@ jobs:
           context: .
           push: false
           tags: kya-hr:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          no-cache: ${{ github.ref == 'refs/heads/main' }}
           secrets: |
             gh_token=${{ secrets.GITHUB_TOKEN }}
-          no-cache: true
-        # Build fails if Dockerfile has errors - this will reject the merge request
+        # no-cache: true only on main branch for strict validation
+        # dev/PRs use cache for faster builds
