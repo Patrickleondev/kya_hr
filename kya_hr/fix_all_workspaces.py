@@ -21,6 +21,8 @@ def execute():
     fix_kya_services_number_cards()
     fix_stagiaires_number_cards()
     fix_kya_services_total_reponses()
+    fix_navbar_logo()
+    fix_splash_logo()
     frappe.db.commit()
     frappe.clear_cache()
     print("=== ALL FIXES APPLIED + CACHE CLEARED ===")
@@ -388,3 +390,37 @@ def fix_kya_services_total_reponses():
             except Exception as e:
                 print(f"  [NC] Skipped '{name}': {e}")
     print(f"  [KYA Services NC] {created} Number Cards créés ✓")
+
+
+def fix_navbar_logo():
+    """Set Navbar Settings app_logo to KYA logo."""
+    frappe.db.sql("""
+        UPDATE tabSingles
+        SET value = '/assets/kya_hr/images/kya_logo.png'
+        WHERE doctype = 'Navbar Settings' AND field = 'app_logo'
+    """)
+    count = frappe.db.sql("SELECT ROW_COUNT()")[0][0]
+    if not count:
+        frappe.db.sql("""
+            INSERT INTO tabSingles (doctype, field, value)
+            VALUES ('Navbar Settings', 'app_logo', '/assets/kya_hr/images/kya_logo.png')
+            ON DUPLICATE KEY UPDATE value = '/assets/kya_hr/images/kya_logo.png'
+        """)
+    print("  [Navbar] app_logo → /assets/kya_hr/images/kya_logo.png ✓")
+
+
+def fix_splash_logo():
+    """Set Website Settings splash_image and app_logo to KYA logo."""
+    for field in ("app_logo", "splash_image"):
+        frappe.db.sql("""
+            UPDATE tabSingles SET value = %s
+            WHERE doctype = 'Website Settings' AND field = %s
+        """, ("/assets/kya_hr/images/kya_logo.png", field))
+        count = frappe.db.sql("SELECT ROW_COUNT()")[0][0]
+        if not count:
+            frappe.db.sql("""
+                INSERT INTO tabSingles (doctype, field, value)
+                VALUES ('Website Settings', %s, %s)
+                ON DUPLICATE KEY UPDATE value = %s
+            """, (field, "/assets/kya_hr/images/kya_logo.png", "/assets/kya_hr/images/kya_logo.png"))
+    print("  [Website Settings] app_logo + splash_image → KYA logo ✓")
