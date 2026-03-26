@@ -36,10 +36,12 @@ jobs:
         # `|| true` ensures workflow continues even if Semgrep finds issues
 
       - name: Upload Semgrep report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
+        if: always()
         with:
           name: semgrep-report
-          path: semgrep-report.json || semgrep-report.html || # optional if Semgrep outputs a file
+          path: semgrep-report.*
+          if-no-files-found: ignore
 
   deps-vulnerable-check:
     name: 'Vulnerable Dependency Check'
@@ -67,7 +69,9 @@ jobs:
         # `|| true` ensures workflow continues even if vulnerabilities are found
 
       - name: Upload pip-audit report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
+        if: always()
         with:
           name: pip-audit-report
-          path: pip_audit_report.json || pip_audit_report.html
+          path: pip_audit_report.*
+          if-no-files-found: ignore
