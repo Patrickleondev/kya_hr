@@ -31,8 +31,7 @@ jobs:
           context: .
           push: false
           tags: kya-hr:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
           secrets: |
             gh_token=${{ secrets.GITHUB_TOKEN }}
+          no-cache: true
         # Build fails if Dockerfile has errors - this will reject the merge request
