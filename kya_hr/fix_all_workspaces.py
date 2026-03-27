@@ -26,6 +26,7 @@ def execute():
     fix_navbar_logo()
     fix_splash_logo()
     fix_dashboard_shortcuts_to_stats_page()
+    fix_workspace_number_card_links()
     frappe.db.commit()
     frappe.clear_cache()
     print("=== ALL FIXES APPLIED + CACHE CLEARED ===")
@@ -646,37 +647,80 @@ def fix_bad_doctype_shortcuts():
 
 
 def fix_dashboard_shortcuts_to_stats_page():
-    """Pointer les shortcuts 'Dashboard KYA' vers /kya-stats (page de stats réelles).
-    La page /kya-stats liste tous les formulaires avec leurs statistiques.
+    """Pointer les shortcuts vers /kya-stats (page de stats réelles).
+    Ne crée qu'UN seul shortcut stats (📈 Statistiques), pas de doublon.
     """
-    # Shortcut « Dashboard KYA » dans KYA Services → /kya-stats
-    _upsert_workspace_shortcut(
-        "KYA Services", "📊 Dashboard KYA",
-        "URL", "/kya-stats", "#1565c0", "bar-chart-2"
-    )
+    # Supprimer le doublon « 📊 Dashboard KYA » s'il existe
+    frappe.db.sql("""
+        DELETE FROM `tabWorkspace Shortcut`
+        WHERE parent = 'KYA Services' AND label = '📊 Dashboard KYA'
+    """)
 
-    # Shortcut « Statistiques Formulaires » dans KYA Services
+    # Shortcut unique « 📈 Statistiques » dans KYA Services → /kya-stats
     _upsert_workspace_shortcut(
         "KYA Services", "📈 Statistiques",
         "URL", "/kya-stats", "#0077b6", "trending-up"
     )
 
-    # Shortcut dans Gestion Équipe → page native Frappe dashboard (ça marche correctement)
-    # Le nom exact doit correspondre au nom du Dashboard enregistré
+    # Shortcut dans Gestion Équipe → page native Frappe dashboard
     _upsert_workspace_shortcut(
         "Gestion Équipe", "📊 Dashboard Équipe",
         "URL", "/app/dashboard/Gestion-%C3%89quipe", "#673ab7", "bar-chart-2"
     )
 
-    # Aussi mettre à jour le contenu du workspace KYA Services pour inclure le bon shortcut
-    frappe.db.sql("""
-        UPDATE tabWorkspace
-        SET content = JSON_SET(
-            content,
-            '$[5].data.shortcut_name', '📈 Statistiques'
-        )
-        WHERE name = 'KYA Services'
-          AND JSON_CONTAINS(content, '{"shortcut_name": "📊 Dashboard KYA"}')
-    """)
-
     print("  [Dashboard Shortcuts] /kya-stats et /app/dashboard mis à jour ✓")
+
+
+def fix_workspace_number_card_links():
+    """Lier les Workspace Number Card rows aux documents Number Card existants.
+    Sans ce lien, les indicateurs apparaissent vides dans le workspace."""
+    # KYA Services
+    kya_nc_map = {
+        "Total Formulaires": "Total Formulaires",
+        "Formulaires Actifs": "Formulaires Actifs",
+        "Réponses Reçues": "Réponses Reçues",
+        "Total Évaluations": "Total Évaluations",
+    }
+    for label, card_name in kya_nc_map.items():
+        if frappe.db.exists("Number Card", card_name):
+            frappe.db.sql(
+                "UPDATE `tabWorkspace Number Card` SET number_card_name=%s "
+                "WHERE parent='KYA Services' AND label=%s AND (number_card_name IS NULL OR number_card_name='')",
+                (card_name, label)
+            )
+
+    # Espace Stagiaires
+    stag_nc_map = {
+        "Stagiaires Actifs": "Stagiaires Actifs",
+        "Permissions Stagiaires en Attente": "Permissions Stagiaires en Attente",
+        "Bilans de Stage Soumis": "Bilans de Stage Soumis",
+    }
+    # Ensure rows exist (content JSON references them but child table may be empty)
+    existing_labels = set(
+        r[0] for r in frappe.db.sql(
+            "SELECT label FROM `tabWorkspace Number Card` WHERE parent='Espace Stagiaires'"
+        )
+    )
+    idx = len(existing_labels)
+    for label, card_name in stag_nc_map.items():
+        if not frappe.db.exists("Number Card", card_name):
+            continue
+        if label in existing_labels:
+            frappe.db.sql(
+                "UPDATE `tabWorkspace Number Card` SET number_card_name=%s "
+                "WHERE parent='Espace Stagiaires' AND label=%s AND (number_card_name IS NULL OR number_card_name='')",
+                (card_name, label)
+            )
+        else:
+            idx += 1
+            name = frappe.generate_hash(length=10)
+            frappe.db.sql(
+                "INSERT INTO `tabWorkspace Number Card` "
+                "(name, parent, parenttype, parentfield, label, number_card_name, idx, "
+                "creation, modified, modified_by, owner) "
+                "VALUES (%s, 'Espace Stagiaires', 'Workspace', 'number_cards', %s, %s, %s, "
+                "NOW(), NOW(), 'Administrator', 'Administrator')",
+                (name, label, card_name, idx)
+            )
+
+    print("  [NC Links] Workspace Number Cards liés aux documents ✓")
