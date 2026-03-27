@@ -18,6 +18,7 @@ def execute():
     fix_corrupted_statut_values()
     fix_webform_client_scripts()
     fix_kya_forms_dashboard()
+    fix_gestion_equipe_dashboard()
     fix_kya_services_number_cards()
     fix_stagiaires_number_cards()
     fix_kya_services_total_reponses()
@@ -63,6 +64,7 @@ def fix_kya_services_content():
         {"id": "sc_portail", "type": "shortcut", "data": {"shortcut_name": "Portail Enquête", "col": 4}},
         {"id": "hdr_evals", "type": "header", "data": {"text": "📋 Évaluations", "col": 12}},
         {"id": "sc_evals", "type": "shortcut", "data": {"shortcut_name": "Évaluations", "col": 4}},
+        {"id": "sc_dash_kya", "type": "shortcut", "data": {"shortcut_name": "📊 Dashboard KYA", "col": 4}},
         {"id": "sp1", "type": "spacer", "data": {"col": 12}},
         {"id": "hdr_ind", "type": "header", "data": {"text": "📊 Indicateurs", "col": 12}},
         {"id": "nc1", "type": "number_card", "data": {"number_card_name": "Formulaires Actifs", "col": 6}},
@@ -71,6 +73,10 @@ def fix_kya_services_content():
     frappe.db.sql(
         "UPDATE tabWorkspace SET content = %s WHERE name = 'KYA Services'",
         (json.dumps(content),)
+    )
+    _upsert_workspace_shortcut(
+        "KYA Services", "📊 Dashboard KYA",
+        "URL", "/app/dashboard/KYA%20Forms", "#1565c0", "bar-chart-2"
     )
     print("  [KYA Services] Content JSON rebuilt ✓")
 
@@ -147,12 +153,18 @@ def fix_gestion_equipe():
          "data": {"shortcut_name": "Tâches d'Équipe", "col": 4}},
         {"id": "shortcut-3", "type": "shortcut",
          "data": {"shortcut_name": "Tableau de Bord", "col": 4}},
+        {"id": "shortcut-4", "type": "shortcut",
+         "data": {"shortcut_name": "📊 Dashboard Équipe", "col": 4}},
         {"id": "spacer-1", "type": "spacer", "data": {"col": 12}},
         {"id": "header-1", "type": "header",
          "data": {"text": "📋 Gestion des Tâches", "col": 12, "level": 4}},
         {"id": "spacer-2", "type": "spacer", "data": {"col": 12}},
     ]
     frappe.db.set_value("Workspace", "Gestion Équipe", "content", json.dumps(new_content))
+    _upsert_workspace_shortcut(
+        "Gestion Équipe", "📊 Dashboard Équipe",
+        "URL", "/app/dashboard/Gestion%20%C3%89quipe", "#673ab7", "bar-chart-2"
+    )
     print("  [Gestion Équipe] Removed card/link blocks, rebuilt content ✓")
 
 
@@ -240,34 +252,72 @@ def fix_webform_client_scripts():
 
 
 def fix_kya_forms_dashboard():
-    """Create 'KYA Forms' dashboard with Number Cards if it doesn't exist."""
-    chart_name = "KYA Forms - Formulaires par mois"
-    if not frappe.db.exists("Dashboard Chart", chart_name):
-        chart = frappe.new_doc("Dashboard Chart")
-        chart.chart_name = chart_name
-        chart.document_type = "KYA Form"
-        chart.based_on = "creation"
-        chart.type = "Bar"
-        chart.time_interval = "Monthly"
-        chart.timespan = "Last Year"
-        chart.filters_json = "[]"
-        chart.is_standard = 0
-        chart.save(ignore_permissions=True)
+    """Rebuild 'KYA Forms' dashboard — toujours lie les charts + cards."""
+    # ── Charts ────────────────────────────────────────────────────────────────
+    charts_def = [
+        ("KYA - Réponses par mois",  "KYA Form Response", "Line"),
+        ("KYA - Formulaires créés",  "KYA Form",          "Bar"),
+    ]
+    chart_names = []
+    for cname, doctype, ctype in charts_def:
+        if not frappe.db.exists("Dashboard Chart", cname):
+            chart = frappe.new_doc("Dashboard Chart")
+            chart.chart_name    = cname
+            chart.document_type = doctype
+            chart.based_on      = "creation"
+            chart.type          = ctype
+            chart.time_interval = "Monthly"
+            chart.timespan      = "Last Year"
+            chart.filters_json  = "[]"
+            chart.is_standard   = 0
+            chart.save(ignore_permissions=True)
+        chart_names.append(cname)
 
+    # ── Number Cards ──────────────────────────────────────────────────────────
+    nc_def = [
+        ("Total Formulaires",  "KYA Form",          "[]",                                   "#607d8b"),
+        ("Formulaires Actifs", "KYA Form",          '[["KYA Form","statut","=","Actif"]]',  "#4caf50"),
+        ("Total Réponses KYA", "KYA Form Response", "[]",                                   "#2196f3"),
+    ]
+    card_names = []
+    for nm, dt, filters, color in nc_def:
+        if not frappe.db.exists("Number Card", nm):
+            try:
+                card = frappe.new_doc("Number Card")
+                card.name          = nm
+                card.label         = nm
+                card.document_type = dt
+                card.function      = "Count"
+                card.filters_json  = filters
+                card.color         = color
+                card.is_standard   = 0
+                card.insert(ignore_permissions=True)
+            except Exception:
+                pass
+        card_names.append(nm)
+
+    # ── Dashboard (get or create, toujours rebuild charts + cards) ────────────
     dash_name = "KYA Forms"
     if frappe.db.exists("Dashboard", dash_name):
-        print("  [Dashboard] KYA Forms déjà présent ✓")
-        return
+        dash = frappe.get_doc("Dashboard", dash_name)
+    else:
+        dash = frappe.new_doc("Dashboard")
+        dash.dashboard_name = dash_name
+        dash.is_standard    = 0
 
-    dash = frappe.new_doc("Dashboard")
-    dash.dashboard_name = dash_name
-    dash.is_standard = 0
-    dash.append("charts", {"chart": chart_name, "width": "Full"})
-    for card in ["Total Formulaires", "Formulaires Actifs", "Réponses Reçues", "Total Évaluations"]:
-        if frappe.db.exists("Number Card", card):
-            dash.append("cards", {"card": card})
+    dash.charts = []
+    for cname in chart_names:
+        if frappe.db.exists("Dashboard Chart", cname):
+            dash.append("charts", {"chart": cname, "width": "Full"})
+
+    dash.cards = []
+    for nm in card_names:
+        if frappe.db.exists("Number Card", nm):
+            dash.append("cards", {"card": nm})
+
     dash.save(ignore_permissions=True)
-    print("  [Dashboard] KYA Forms créé ✓")
+    print("  [Dashboard] KYA Forms → {} charts, {} cards ✓".format(
+        len(dash.charts), len(dash.cards)))
 
 
 def fix_kya_services_number_cards():
@@ -424,3 +474,113 @@ def fix_splash_logo():
                 ON DUPLICATE KEY UPDATE value = %s
             """, (field, "/assets/kya_hr/images/kya_logo.png", "/assets/kya_hr/images/kya_logo.png"))
     print("  [Website Settings] app_logo + splash_image → KYA logo ✓")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# DASHBOARDS STRATÉGIQUES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def _upsert_workspace_shortcut(workspace, label, type_, url, color, icon="bar-chart"):
+    """Insert ou met à jour un Workspace Shortcut (type=URL)."""
+    existing = frappe.db.get_value(
+        "Workspace Shortcut", {"parent": workspace, "label": label}, "name"
+    )
+    if existing:
+        frappe.db.sql("""
+            UPDATE `tabWorkspace Shortcut`
+            SET type = %s, url = %s, link_to = '', color = %s, icon = %s
+            WHERE name = %s
+        """, (type_, url or "", color, icon, existing))
+    else:
+        name = frappe.generate_hash(length=10)
+        frappe.db.sql("""
+            INSERT INTO `tabWorkspace Shortcut`
+              (name, parent, parenttype, parentfield, label, type, url, link_to, color, icon, idx)
+            VALUES (
+              %s, %s, 'Workspace', 'shortcuts', %s, %s, %s, '', %s, %s,
+              COALESCE((SELECT MAX(t2.idx) FROM `tabWorkspace Shortcut` t2 WHERE t2.parent = %s), 0) + 1
+            )
+        """, (name, workspace, label, type_, url or "", color, icon, workspace))
+
+
+def fix_gestion_equipe_dashboard():
+    """Créer ou mettre à jour le dashboard stratégique Gestion Équipe."""
+    # ── Charts ────────────────────────────────────────────────────────────────
+    charts_def = [
+        ("Gestion Équipe - Plans par mois",       "Plan Trimestriel", "Bar"),
+        ("Gestion Équipe - Évaluations par mois", "KYA Evaluation",   "Line"),
+    ]
+    chart_names = []
+    for cname, doctype, ctype in charts_def:
+        if not frappe.db.exists("Dashboard Chart", cname):
+            try:
+                chart = frappe.new_doc("Dashboard Chart")
+                chart.chart_name    = cname
+                chart.document_type = doctype
+                chart.based_on      = "creation"
+                chart.type          = ctype
+                chart.time_interval = "Monthly"
+                chart.timespan      = "Last Year"
+                chart.filters_json  = "[]"
+                chart.is_standard   = 0
+                chart.save(ignore_permissions=True)
+            except Exception as e:
+                print("  [Dashboard] Chart skip '{}': {}".format(cname, e))
+                continue
+        chart_names.append(cname)
+
+    # ── Number Cards ──────────────────────────────────────────────────────────
+    nc_def = [
+        ("Plans En Cours",
+         "Plan Trimestriel", '[["Plan Trimestriel","statut","=","En cours"]]', "#2196f3"),
+        ("Tâches En Cours",
+         "Tache Equipe",     '[["Tache Equipe","statut","=","En cours"]]',      "#ff9800"),
+        ("Évaluations à Valider",
+         "KYA Evaluation",   '[["KYA Evaluation","statut","=","Soumis"]]',      "#9c27b0"),
+    ]
+    card_names = []
+    for nm, dt, filters, color in nc_def:
+        if not frappe.db.exists("Number Card", nm):
+            try:
+                card = frappe.new_doc("Number Card")
+                card.name          = nm
+                card.label         = nm
+                card.document_type = dt
+                card.function      = "Count"
+                card.filters_json  = filters
+                card.color         = color
+                card.is_standard   = 0
+                card.insert(ignore_permissions=True)
+            except Exception:
+                pass
+        card_names.append(nm)
+
+    # ── Dashboard (get or create, toujours rebuild) ───────────────────────────
+    dash_name = "Gestion Équipe"
+    if frappe.db.exists("Dashboard", dash_name):
+        dash = frappe.get_doc("Dashboard", dash_name)
+    else:
+        dash = frappe.new_doc("Dashboard")
+        dash.dashboard_name = dash_name
+        dash.is_standard    = 0
+
+    dash.charts = []
+    for cname in chart_names:
+        if frappe.db.exists("Dashboard Chart", cname):
+            dash.append("charts", {"chart": cname, "width": "Full"})
+
+    dash.cards = []
+    for nm in card_names:
+        if frappe.db.exists("Number Card", nm):
+            dash.append("cards", {"card": nm})
+
+    dash.save(ignore_permissions=True)
+    print("  [Dashboard] Gestion Équipe → {} charts, {} cards ✓".format(
+        len(dash.charts), len(dash.cards)))
+
+    # ── Shortcut dans workspace Gestion Équipe ────────────────────────────────
+    _upsert_workspace_shortcut(
+        "Gestion Équipe", "📊 Dashboard Équipe",
+        "URL", "/app/dashboard/Gestion%20%C3%89quipe", "#673ab7", "bar-chart-2"
+    )
+    print("  [Dashboard] Shortcuts Gestion Équipe + KYA Services mis à jour ✓")
