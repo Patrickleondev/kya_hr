@@ -8,6 +8,7 @@ import json
 
 def execute():
     print("=== KYA FIX ALL WORKSPACES ===")
+    fix_bad_doctype_shortcuts()
     fix_card_break_links()
     fix_kya_services_portail()
     fix_kya_services_content()
@@ -24,6 +25,7 @@ def execute():
     fix_kya_services_total_reponses()
     fix_navbar_logo()
     fix_splash_logo()
+    fix_dashboard_shortcuts_to_stats_page()
     frappe.db.commit()
     frappe.clear_cache()
     print("=== ALL FIXES APPLIED + CACHE CLEARED ===")
@@ -64,7 +66,7 @@ def fix_kya_services_content():
         {"id": "sc_portail", "type": "shortcut", "data": {"shortcut_name": "Portail Enquête", "col": 4}},
         {"id": "hdr_evals", "type": "header", "data": {"text": "📋 Évaluations", "col": 12}},
         {"id": "sc_evals", "type": "shortcut", "data": {"shortcut_name": "Évaluations", "col": 4}},
-        {"id": "sc_dash_kya", "type": "shortcut", "data": {"shortcut_name": "📊 Dashboard KYA", "col": 4}},
+        {"id": "sc_stats", "type": "shortcut", "data": {"shortcut_name": "📈 Statistiques", "col": 4}},
         {"id": "sp1", "type": "spacer", "data": {"col": 12}},
         {"id": "hdr_ind", "type": "header", "data": {"text": "📊 Indicateurs", "col": 12}},
         {"id": "nc1", "type": "number_card", "data": {"number_card_name": "Formulaires Actifs", "col": 6}},
@@ -75,8 +77,8 @@ def fix_kya_services_content():
         (json.dumps(content),)
     )
     _upsert_workspace_shortcut(
-        "KYA Services", "📊 Dashboard KYA",
-        "URL", "/app/dashboard/KYA%20Forms", "#1565c0", "bar-chart-2"
+        "KYA Services", "📈 Statistiques",
+        "URL", "/kya-stats", "#1565c0", "bar-chart-2"
     )
     print("  [KYA Services] Content JSON rebuilt ✓")
 
@@ -163,7 +165,7 @@ def fix_gestion_equipe():
     frappe.db.set_value("Workspace", "Gestion Équipe", "content", json.dumps(new_content))
     _upsert_workspace_shortcut(
         "Gestion Équipe", "📊 Dashboard Équipe",
-        "URL", "/app/dashboard/Gestion%20%C3%89quipe", "#673ab7", "bar-chart-2"
+        "URL", "/app/dashboard/Gestion-%C3%89quipe", "#673ab7", "bar-chart-2"
     )
     print("  [Gestion Équipe] Removed card/link blocks, rebuilt content ✓")
 
@@ -584,3 +586,97 @@ def fix_gestion_equipe_dashboard():
         "URL", "/app/dashboard/Gestion%20%C3%89quipe", "#673ab7", "bar-chart-2"
     )
     print("  [Dashboard] Shortcuts Gestion Équipe + KYA Services mis à jour ✓")
+
+
+def fix_bad_doctype_shortcuts():
+    """Désactiver / corriger les shortcuts qui pointent vers des DocTypes inexistants.
+    Ces shortcuts causent l'erreur 'DocType s introuvable' quand on clique dessus."""
+    # Lister tous les shortcuts de type 'DocType' dont le link_to n'existe pas
+    bad = frappe.db.sql("""
+        SELECT ws.name, ws.parent, ws.label, ws.link_to
+        FROM `tabWorkspace Shortcut` ws
+        WHERE ws.type = 'DocType'
+          AND ws.link_to != ''
+          AND ws.link_to IS NOT NULL
+          AND ws.link_to NOT IN (SELECT name FROM tabDocType)
+    """, as_dict=True)
+
+    fixed = 0
+    for row in bad:
+        # Essayer de trouver le bon DocType par mapping connu
+        mapping = {
+            "KYA Form Response": "KYA Form Response",
+            "Plan Trimestriel": "Plan Trimestriel",
+            "Tache Equipe": "Tache Equipe",
+            "KYA Evaluation": "KYA Evaluation",
+        }
+        new_link = mapping.get(row["link_to"])
+        if new_link and frappe.db.exists("DocType", new_link):
+            frappe.db.sql("UPDATE `tabWorkspace Shortcut` SET link_to = %s WHERE name = %s",
+                          (new_link, row["name"]))
+        else:
+            # Convertir en URL vide pour éviter l'erreur (shortcut visible mais inactif)
+            frappe.db.sql("""
+                UPDATE `tabWorkspace Shortcut`
+                SET type = 'URL', url = '', link_to = ''
+                WHERE name = %s
+            """, (row["name"],))
+        fixed += 1
+        print(f"  [Bad Shortcut] Fixed: {row['parent']} / {row['label']} → {row['link_to']}")
+
+    # Aussi vérifier les Workspace Links (cards)
+    bad_links = frappe.db.sql("""
+        SELECT wl.name, wl.parent, wl.label, wl.link_to, wl.type
+        FROM `tabWorkspace Link` wl
+        WHERE wl.type = 'DocType'
+          AND wl.link_to != ''
+          AND wl.link_to IS NOT NULL
+          AND wl.link_to NOT IN (SELECT name FROM tabDocType)
+    """, as_dict=True)
+
+    for row in bad_links:
+        frappe.db.sql("""
+            UPDATE `tabWorkspace Link`
+            SET link_to = '', type = 'Card Break'
+            WHERE name = %s
+        """, (row["name"],))
+        fixed += 1
+
+    print(f"  [Bad DocType] {fixed} shortcuts/links corrigés ✓")
+
+
+def fix_dashboard_shortcuts_to_stats_page():
+    """Pointer les shortcuts 'Dashboard KYA' vers /kya-stats (page de stats réelles).
+    La page /kya-stats liste tous les formulaires avec leurs statistiques.
+    """
+    # Shortcut « Dashboard KYA » dans KYA Services → /kya-stats
+    _upsert_workspace_shortcut(
+        "KYA Services", "📊 Dashboard KYA",
+        "URL", "/kya-stats", "#1565c0", "bar-chart-2"
+    )
+
+    # Shortcut « Statistiques Formulaires » dans KYA Services
+    _upsert_workspace_shortcut(
+        "KYA Services", "📈 Statistiques",
+        "URL", "/kya-stats", "#0077b6", "trending-up"
+    )
+
+    # Shortcut dans Gestion Équipe → page native Frappe dashboard (ça marche correctement)
+    # Le nom exact doit correspondre au nom du Dashboard enregistré
+    _upsert_workspace_shortcut(
+        "Gestion Équipe", "📊 Dashboard Équipe",
+        "URL", "/app/dashboard/Gestion-%C3%89quipe", "#673ab7", "bar-chart-2"
+    )
+
+    # Aussi mettre à jour le contenu du workspace KYA Services pour inclure le bon shortcut
+    frappe.db.sql("""
+        UPDATE tabWorkspace
+        SET content = JSON_SET(
+            content,
+            '$[5].data.shortcut_name', '📈 Statistiques'
+        )
+        WHERE name = 'KYA Services'
+          AND JSON_CONTAINS(content, '{"shortcut_name": "📊 Dashboard KYA"}')
+    """)
+
+    print("  [Dashboard Shortcuts] /kya-stats et /app/dashboard mis à jour ✓")
