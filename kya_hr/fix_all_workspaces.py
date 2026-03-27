@@ -27,25 +27,56 @@ def execute():
     fix_splash_logo()
     fix_dashboard_shortcuts_to_stats_page()
     fix_workspace_number_card_links()
+    fix_stagiaires_permissions()
     frappe.db.commit()
     frappe.clear_cache()
     print("=== ALL FIXES APPLIED + CACHE CLEARED ===")
 
 
 def fix_card_break_links():
-    """Clean Card Break entries with link_to='None' (string) that cause 'DocType s introuvable'."""
+    """Clean Card Break entries with link_to='None' and shortcuts with invalid DocType link_to."""
+    # 1. Card Break rows with NULL/None link_to
     frappe.db.sql("""
         UPDATE `tabWorkspace Link`
         SET link_to = '', link_type = ''
         WHERE type = 'Card Break' AND (link_to = 'None' OR link_to IS NULL)
     """)
-    # Also clean shortcuts with url='None' (string)
+    # 2. Shortcuts with url='None' (string literal)
     frappe.db.sql("""
         UPDATE `tabWorkspace Shortcut`
         SET url = ''
         WHERE url = 'None'
     """)
-    print("  [Card Break] Cleaned link_to='None' entries ✓")
+    # 3. Shortcuts with type='DocType' but link_to is short (<3 chars), 'None', or non-existent
+    #    This catches "DocType s introuvable" where link_to was corrupted to a single letter
+    bad_shortcuts = frappe.db.sql("""
+        SELECT name, parent, label, link_to
+        FROM `tabWorkspace Shortcut`
+        WHERE type = 'DocType'
+          AND (
+            link_to IS NULL
+            OR link_to = ''
+            OR link_to = 'None'
+            OR LENGTH(link_to) < 3
+            OR link_to NOT IN (SELECT name FROM tabDocType)
+          )
+    """, as_dict=True)
+    for row in bad_shortcuts:
+        frappe.db.sql("""
+            UPDATE `tabWorkspace Shortcut`
+            SET type = 'URL', url = '', link_to = ''
+            WHERE name = %s
+        """, (row["name"],))
+        print(f"  [Card Break] Fixed bad shortcut '{row['parent']}/{row['label']}' (link_to={repr(row['link_to'])})")
+    # 4. Workspace Links with type='DocType' and non-existent link_to
+    frappe.db.sql("""
+        UPDATE `tabWorkspace Link`
+        SET link_to = '', type = 'Card Break'
+        WHERE type = 'DocType'
+          AND link_to IS NOT NULL AND link_to != '' AND link_to != 'None'
+          AND link_to NOT IN (SELECT name FROM tabDocType)
+    """)
+    print("  [Card Break] Cleaned link_to='None' entries + bad DocType refs ✓")
 
 
 def fix_kya_services_portail():
@@ -724,3 +755,58 @@ def fix_workspace_number_card_links():
             )
 
     print("  [NC Links] Workspace Number Cards liés aux documents ✓")
+
+
+def fix_stagiaires_permissions():
+    """Ajouter les rôles Stagiaire + Responsable des Stagiaires aux DocTypes custom
+    du module stagiaires (tabDocPerm — bench migrate ne les synchronise pas car custom=1)."""
+    PERMS_TO_ADD = [
+        ("Permission Sortie Stagiaire", [
+            # (role, permlevel, read, write, create, submit, cancel, amend, if_owner)
+            ("Stagiaire",                  0, 1, 1, 1, 0, 0, 0, 1),
+            ("Responsable des Stagiaires", 0, 1, 1, 1, 1, 1, 0, 0),
+        ]),
+        ("Bilan Fin de Stage", [
+            ("Stagiaire",                  0, 1, 1, 1, 1, 0, 0, 1),
+            ("Responsable des Stagiaires", 0, 1, 1, 1, 1, 1, 0, 0),
+        ]),
+    ]
+    inserted = 0
+    for doctype, roles in PERMS_TO_ADD:
+        if not frappe.db.exists("DocType", doctype):
+            print(f"  [Permissions] DocType '{doctype}' introuvable, ignore")
+            continue
+        for (role, permlevel, read, write, create, submit, cancel, amend, if_owner) in roles:
+            exists = frappe.db.sql(
+                "SELECT name FROM `tabDocPerm` WHERE parent=%s AND role=%s AND permlevel=%s",
+                (doctype, role, permlevel)
+            )
+            if exists:
+                frappe.db.sql("""
+                    UPDATE `tabDocPerm`
+                    SET `read`=%s, `write`=%s, `create`=%s, `submit`=%s,
+                        `cancel`=%s, `amend`=%s, `if_owner`=%s,
+                        modified=NOW(), modified_by='Administrator'
+                    WHERE parent=%s AND role=%s AND permlevel=%s
+                """, (read, write, create, submit, cancel, amend, if_owner,
+                      doctype, role, permlevel))
+                print(f"  [Permissions] Mis a jour: {doctype} / {role}")
+            else:
+                name = frappe.generate_hash(length=10)
+                frappe.db.sql("""
+                    INSERT INTO `tabDocPerm`
+                      (name, parent, parenttype, parentfield, permlevel, role,
+                       `read`, `write`, `create`, `submit`, `cancel`, `amend`, `if_owner`,
+                       idx, creation, modified, modified_by, owner)
+                    VALUES (%s, %s, 'DocType', 'permissions', %s, %s,
+                            %s, %s, %s, %s, %s, %s, %s,
+                            COALESCE((SELECT MAX(t2.idx)+1 FROM `tabDocPerm` t2 WHERE t2.parent=%s), 1),
+                            NOW(), NOW(), 'Administrator', 'Administrator')
+                """, (name, doctype, permlevel, role,
+                      read, write, create, submit, cancel, amend, if_owner,
+                      doctype))
+                inserted += 1
+                print(f"  [Permissions] Insere: {doctype} / {role}")
+    frappe.clear_cache(doctype="Permission Sortie Stagiaire")
+    frappe.clear_cache(doctype="Bilan Fin de Stage")
+    print(f"  [Permissions Stagiaires] {inserted} entrees ajoutees")
