@@ -6,25 +6,8 @@ import frappe
 import json
 
 
-def _table_exists(table_name):
-    """Check if a DB table exists (safe for cross-app references)."""
-    try:
-        frappe.db.sql(f"SELECT 1 FROM `{table_name}` LIMIT 1")
-        return True
-    except Exception:
-        frappe.db.rollback()
-        return False
-
-
-def _kya_services_ready():
-    """Check if kya_services tables exist (may not during fresh install)."""
-    return _table_exists("tabKYA Form")
-
-
 def execute():
     print("=== KYA FIX ALL WORKSPACES ===")
-    fix_workspace_schema_nulls()
-    fix_missing_workflow_states()
     fix_bad_doctype_shortcuts()
     fix_card_break_links()
     fix_kya_services_portail()
@@ -45,46 +28,9 @@ def execute():
     fix_dashboard_shortcuts_to_stats_page()
     fix_workspace_number_card_links()
     fix_stagiaires_permissions()
-    fix_workflow_role_access()
-    fix_kya_indicator_perms()
     frappe.db.commit()
     frappe.clear_cache()
     print("=== ALL FIXES APPLIED + CACHE CLEARED ===")
-
-
-def fix_workspace_schema_nulls():
-    """Fix NULL type/title in tabWorkspace — survives every migrate.
-
-    Root causes:
-    - Frappe core 'Welcome Workspace' JSON has no 'type' field → type=NULL in DB
-    - Any kya_hr workspace JSON missing 'title' field → title=NULL in DB
-    Both cause a silent JS crash that makes the workspace sidebar blank.
-    """
-    n_type = frappe.db.sql(
-        "UPDATE `tabWorkspace` SET `type`='Workspace' WHERE `type` IS NULL OR `type`=''"
-    )
-    n_title = frappe.db.sql(
-        "UPDATE `tabWorkspace` SET `title`=`label` WHERE `title` IS NULL OR `title`=''"
-    )
-    print(f"  [Workspace] Fixed type nulls and title nulls")
-
-
-def fix_missing_workflow_states():
-    """Create required workflow states if missing in DB."""
-    required = [
-        {"name": "En attente DAAF", "style": "Warning"},
-    ]
-
-    for state in required:
-        if not frappe.db.exists("Workflow State", state["name"]):
-            doc = frappe.get_doc({
-                "doctype": "Workflow State",
-                "name": state["name"],
-                "workflow_state_name": state["name"],
-                "style": state["style"],
-            })
-            doc.insert(ignore_permissions=True)
-            print(f"  [Workflow State] Created '{state['name']}' ✓")
 
 
 def fix_card_break_links():
@@ -200,8 +146,6 @@ def fix_espace_employes():
     ))
 
     to_add = []
-    if "Mon Espace" not in existing:
-        to_add.append(("Mon Espace", "URL", "/mon-espace", "#2c3e50", "home"))
     if "Demande d'Achat" not in existing:
         to_add.append(("Demande d'Achat", "URL", "/demande-achat/new", "#1a5276", "file"))
     if "PV Sortie Matériel" not in existing:
@@ -265,10 +209,6 @@ def fix_espace_stagiaires():
         SET public = 1, is_hidden = 0, icon = 'graduation-cap'
         WHERE name = 'Espace Stagiaires'
     """)
-    frappe.db.sql("""
-        DELETE FROM `tabWorkspace Shortcut`
-        WHERE parent = 'Espace Stagiaires' AND label = 'Mon Espace'
-    """)
     # Rebuild content with 3 Number Cards + shortcuts
     content = [
         {"type": "header", "data": {"text": "📊 Tableau de Bord", "col": 12}},
@@ -282,6 +222,7 @@ def fix_espace_stagiaires():
         {"type": "shortcut", "data": {"shortcut_name": "Demander une Permission", "col": 4}},
         {"type": "shortcut", "data": {"shortcut_name": "Bilan de Stage ↗", "col": 4}},
         {"type": "shortcut", "data": {"shortcut_name": "Tableau de Bord", "col": 4}},
+        {"type": "shortcut", "data": {"shortcut_name": "Mon Espace", "col": 4}},
     ]
     frappe.db.set_value("Workspace", "Espace Stagiaires", "content", json.dumps(content))
     print("  [Espace Stagiaires] Visible + public + icon + content rebuilt ✓")
@@ -307,9 +248,6 @@ def fix_website_settings_appname():
 
 def fix_corrupted_statut_values():
     """Correct statut values that may be corrupted/outdated in DB."""
-    if not _kya_services_ready():
-        print("  [Statut] SKIP — kya_services tables not yet created")
-        return
     # KYA Form: valid options are Brouillon, Actif, Fermé
     frappe.db.sql("""
         UPDATE `tabKYA Form`
@@ -318,12 +256,11 @@ def fix_corrupted_statut_values():
           AND (statut LIKE '%tiv%' OR statut LIKE '%ctif%' OR statut LIKE '%Activ%')
     """)
     # KYA Evaluation: valid options are Brouillon, Soumis, Validé
-    if _table_exists("tabKYA Evaluation"):
-        frappe.db.sql("""
-            UPDATE `tabKYA Evaluation`
-            SET statut = 'Brouillon'
-            WHERE statut NOT IN ('Brouillon', 'Soumis', 'Valid\u00e9')
-        """)
+    frappe.db.sql("""
+        UPDATE `tabKYA Evaluation`
+        SET statut = 'Brouillon'
+        WHERE statut NOT IN ('Brouillon', 'Soumis', 'Valid\u00e9')
+    """)
     print("  [Statut] Valeurs corrompues corrigées ✓")
 
 def fix_webform_client_scripts():
@@ -350,9 +287,6 @@ def fix_webform_client_scripts():
 
 def fix_kya_forms_dashboard():
     """Rebuild 'KYA Forms' dashboard — toujours lie les charts + cards."""
-    if not _kya_services_ready():
-        print("  [Dashboard] SKIP KYA Forms — kya_services tables not yet created")
-        return
     # ── Charts ────────────────────────────────────────────────────────────────
     charts_def = [
         ("KYA - Réponses par mois",  "KYA Form Response", "Line"),
@@ -422,9 +356,6 @@ def fix_kya_forms_dashboard():
 
 def fix_kya_services_number_cards():
     """Ensure KYA Services Portail Enquête shortcut has correct type=URL (not DocType)."""
-    if not _kya_services_ready():
-        print("  [KYA Services NC] SKIP — kya_services tables not yet created")
-        return
     frappe.db.sql("""
         UPDATE `tabWorkspace Shortcut`
         SET type = 'URL', url = '/kya-survey', link_to = ''
@@ -510,9 +441,6 @@ def fix_stagiaires_number_cards():
 
 def fix_kya_services_total_reponses():
     """Ensure 'Total Réponses' and 'Formulaires Actifs' Number Cards exist."""
-    if not _kya_services_ready():
-        print("  [KYA Services NC] SKIP Total Réponses — kya_services tables not yet created")
-        return
     nc_definitions = [
         {
             "name": "Formulaires Actifs",
@@ -611,11 +539,6 @@ def _upsert_workspace_shortcut(workspace, label, type_, url, color, icon="bar-ch
 
 def fix_gestion_equipe_dashboard():
     """Créer ou mettre à jour le dashboard stratégique Gestion Équipe."""
-    # Plan Trimestriel and KYA Evaluation are kya_hr DocTypes (may not exist on fresh install
-    # if their JSON files have not been created yet — guard both tables)
-    if not _table_exists("tabPlan Trimestriel") or not _table_exists("tabKYA Evaluation"):
-        print("  [Dashboard] SKIP Gestion Équipe — Plan Trimestriel / KYA Evaluation tables not yet created")
-        return
     # ── Charts ────────────────────────────────────────────────────────────────
     charts_def = [
         ("Gestion Équipe - Plans par mois",       "Plan Trimestriel", "Bar"),
@@ -889,171 +812,70 @@ def fix_stagiaires_permissions():
     print(f"  [Permissions Stagiaires] {inserted} entrees ajoutees")
 
 
-def fix_workflow_role_access():
-    """Ensure workflow approver roles can access Desk and required documents."""
-    approval_roles = [
-        "Directeur Général",
-        "Responsable RH",
-        "Supérieur Immédiat",
-        "Responsable des Stagiaires",
-    ]
-    placeholders = ", ".join(["%s"] * len(approval_roles))
-    frappe.db.sql(
-        f"""
-        UPDATE `tabRole`
-        SET desk_access = 1
-        WHERE name IN ({placeholders})
-        """,
-        tuple(approval_roles),
+def fix_tableau_de_bord_shortcut():
+    """Fix 'Tableau de Bord' shortcut in Gestion Equipe to point to /kya-dashboard-equipe."""
+    _upsert_workspace_shortcut(
+        "Gestion \u00c9quipe", "Tableau de Bord",
+        "URL", "/kya-dashboard-equipe", "#1a237e", "bar-chart-2"
     )
+    # Remove the '📊 Dashboard Equipe' duplicate if it still exists
+    frappe.db.sql("""
+        DELETE FROM `tabWorkspace Shortcut`
+        WHERE parent = 'Gestion \u00c9quipe'
+          AND label = '\U0001f4ca Dashboard \u00c9quipe'
+    """)
+    frappe.db.commit()
+    print("  [Gestion Equipe] 'Tableau de Bord' -> /kya-dashboard-equipe OK")
+    print("  [Gestion Equipe] Duplicate Dashboard shortcut removed")
 
-    perms = [
-        ("Employee", "Responsable RH", 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1),
-        ("Leave Application", "Supérieur Immédiat", 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-        ("Leave Application", "Responsable RH", 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-        ("Leave Application", "Directeur Général", 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+
+def fix_ws_shortcuts_and_nc_filters():
+    """Fix: (1) Remove duplicate Tableau de Bord shortcut from Gestion Equipe.
+            (2) Fix Number Card filters to use valid 4-element Frappe v16 format."""
+    import json
+
+    # ── 1. Remove duplicate "Tableau de Bord" shortcut from Gestion Equipe ────
+    # Keep "📊 Dashboard Équipe", remove the plain "Tableau de Bord" duplicate
+    deleted = frappe.db.sql("""
+        DELETE FROM `tabWorkspace Shortcut`
+        WHERE parent = 'Gestion \u00c9quipe'
+          AND label = 'Tableau de Bord'
+    """)
+    rows_deleted = frappe.db.sql("SELECT ROW_COUNT()")[0][0]
+    print(f"  [Gestion Equipe] Removed {rows_deleted} duplicate 'Tableau de Bord' shortcut(s) ✓")
+
+    # ── 2. Fix Number Card filters (remove invalid 5th element) ───────────────
+    nc_fixes = [
+        (
+            "Stagiaires Actifs",
+            json.dumps([
+                ["Employee", "employment_type", "=", "Stage"],
+                ["Employee", "status", "=", "Active"]
+            ])
+        ),
+        (
+            "Permissions Stagiaires en Attente",
+            json.dumps([
+                ["Permission Sortie Stagiaire", "workflow_state", "not in",
+                 ["Approuv\u00e9", "Rejet\u00e9"]]
+            ])
+        ),
+        (
+            "Bilans de Stage Soumis",
+            json.dumps([
+                ["Bilan Fin de Stage", "docstatus", "!=", 0]
+            ])
+        ),
     ]
-
-    inserted = 0
-    for (
-        doctype,
-        role,
-        permlevel,
-        read,
-        write,
-        create,
-        delete,
-        submit,
-        cancel,
-        amend,
-        if_owner,
-        select,
-        report,
-        export,
-        print_perm,
-        email,
-    ) in perms:
-        if not frappe.db.exists("DocType", doctype):
-            continue
-
-        exists = frappe.db.sql(
-            "SELECT name FROM `tabDocPerm` WHERE parent=%s AND role=%s AND permlevel=%s",
-            (doctype, role, permlevel),
-        )
-        if exists:
-            frappe.db.sql(
-                """
-                UPDATE `tabDocPerm`
-                SET `read`=%s, `write`=%s, `create`=%s, `delete`=%s,
-                    `submit`=%s, `cancel`=%s, `amend`=%s, `if_owner`=%s,
-                    `select`=%s, `report`=%s, `export`=%s, `print`=%s, `email`=%s,
-                    modified=NOW(), modified_by='Administrator'
-                WHERE parent=%s AND role=%s AND permlevel=%s
-                """,
-                (
-                    read,
-                    write,
-                    create,
-                    delete,
-                    submit,
-                    cancel,
-                    amend,
-                    if_owner,
-                    select,
-                    report,
-                    export,
-                    print_perm,
-                    email,
-                    doctype,
-                    role,
-                    permlevel,
-                ),
-            )
+    updated_nc = 0
+    for nc_name, filters in nc_fixes:
+        if frappe.db.exists("Number Card", nc_name):
+            frappe.db.set_value("Number Card", nc_name, "filters_json", filters)
+            updated_nc += 1
+            print(f"  [Number Card] '{nc_name}' filters updated ✓")
         else:
-            name = frappe.generate_hash(length=10)
-            frappe.db.sql(
-                """
-                INSERT INTO `tabDocPerm`
-                  (name, parent, parenttype, parentfield, permlevel, role,
-                   `read`, `write`, `create`, `delete`, `submit`, `cancel`, `amend`, `if_owner`,
-                   `select`, `report`, `export`, `print`, `email`,
-                   idx, creation, modified, modified_by, owner)
-                VALUES (%s, %s, 'DocType', 'permissions', %s, %s,
-                        %s, %s, %s, %s, %s, %s, %s, %s,
-                        %s, %s, %s, %s, %s,
-                        COALESCE((SELECT MAX(t2.idx)+1 FROM `tabDocPerm` t2 WHERE t2.parent=%s), 1),
-                        NOW(), NOW(), 'Administrator', 'Administrator')
-                """,
-                (
-                    name,
-                    doctype,
-                    permlevel,
-                    role,
-                    read,
-                    write,
-                    create,
-                    delete,
-                    submit,
-                    cancel,
-                    amend,
-                    if_owner,
-                    select,
-                    report,
-                    export,
-                    print_perm,
-                    email,
-                    doctype,
-                ),
-            )
-            inserted += 1
+            print(f"  [Number Card] '{nc_name}' NOT FOUND — skipping")
 
-    frappe.clear_cache(doctype="Employee")
-    frappe.clear_cache(doctype="Leave Application")
-    print(f"  [Workflow Access] Desk access normalized + {inserted} DocPerm entrées ajoutées ✓")
-
-
-def fix_kya_indicator_perms():
-    """Set role permissions on KYA Indicator, Plan Trimestriel, Tache Equipe, KYA Evaluation."""
-    PERMS = [
-        # (DocType, role, permlevel, read, write, create, delete, submit, cancel, amend, if_owner)
-        ("KYA Indicator", "HR Manager",           0, 1, 1, 1, 1, 0, 0, 0, 0),
-        ("KYA Indicator", "HR User",              0, 1, 0, 0, 0, 0, 0, 0, 0),
-        ("KYA Indicator", "Chef d'Équipe",        0, 1, 0, 0, 0, 0, 0, 0, 0),
-        ("KYA Indicator", "Accounts Manager",     0, 1, 0, 0, 0, 0, 0, 0, 0),
-        ("KYA Indicator", "Purchase Manager",     0, 1, 0, 0, 0, 0, 0, 0, 0),
-        ("Plan Trimestriel", "HR Manager",        0, 1, 1, 1, 1, 0, 0, 0, 0),
-        ("Plan Trimestriel", "HR User",           0, 1, 1, 1, 0, 0, 0, 0, 0),
-        ("Plan Trimestriel", "Chef d'Équipe",     0, 1, 1, 1, 0, 0, 0, 0, 0),
-        ("Tache Equipe",     "HR Manager",        0, 1, 1, 1, 1, 0, 0, 0, 0),
-        ("Tache Equipe",     "HR User",           0, 1, 1, 1, 0, 0, 0, 0, 0),
-        ("Tache Equipe",     "Chef d'Équipe",     0, 1, 1, 1, 0, 0, 0, 0, 0),
-        ("Tache Equipe",     "Employee",          0, 1, 1, 0, 0, 0, 0, 0, 1),
-        ("KYA Evaluation",   "HR Manager",        0, 1, 1, 1, 1, 0, 0, 0, 0),
-        ("KYA Evaluation",   "HR User",           0, 1, 0, 0, 0, 0, 0, 0, 0),
-        ("KYA Evaluation",   "Chef d'Équipe",     0, 1, 1, 1, 0, 0, 0, 0, 0),
-        ("KYA Evaluation",   "Employee",          0, 1, 1, 1, 0, 0, 0, 0, 1),
-    ]
-    inserted = 0
-    for (doctype, role, permlevel, read, write, create, delete, submit, cancel, amend, if_owner) in PERMS:
-        if not frappe.db.exists("DocType", doctype):
-            continue
-        exists = frappe.db.sql(
-            "SELECT name FROM `tabDocPerm` WHERE parent=%s AND role=%s AND permlevel=%s",
-            (doctype, role, permlevel)
-        )
-        if not exists:
-            name = frappe.generate_hash(length=10)
-            frappe.db.sql("""
-                INSERT INTO `tabDocPerm`
-                  (name, parent, parenttype, parentfield, permlevel, role,
-                   `read`, `write`, `create`, `delete`, `submit`, `cancel`, `amend`, `if_owner`,
-                   idx, creation, modified, modified_by, owner)
-                VALUES (%s, %s, 'DocType', 'permissions', %s, %s,
-                        %s, %s, %s, %s, %s, %s, %s, %s,
-                        COALESCE((SELECT MAX(t2.idx)+1 FROM `tabDocPerm` t2 WHERE t2.parent=%s), 1),
-                        NOW(), NOW(), 'Administrator', 'Administrator')
-            """, (name, doctype, permlevel, role,
-                  read, write, create, delete, submit, cancel, amend, if_owner,
-                  doctype))
-            inserted += 1
-    print(f"  [Indicator Perms] {inserted} permission entries added ✓")
+    frappe.db.commit()
+    frappe.clear_cache()
+    print(f"  [fix_ws_shortcuts_and_nc_filters] DONE — {rows_deleted} shortcuts removed, {updated_nc} NC filters fixed")
