@@ -14,6 +14,7 @@ def execute():
     fix_kya_services_content()
     fix_espace_employes()
     fix_gestion_equipe()
+    fix_tableau_de_bord_shortcut()
     fix_espace_stagiaires()
     fix_website_settings_appname()
     fix_corrupted_statut_values()
@@ -187,18 +188,18 @@ def fix_gestion_equipe():
          "data": {"shortcut_name": "Tâches d'Équipe", "col": 4}},
         {"id": "shortcut-3", "type": "shortcut",
          "data": {"shortcut_name": "Tableau de Bord", "col": 4}},
-        {"id": "shortcut-4", "type": "shortcut",
-         "data": {"shortcut_name": "📊 Dashboard Équipe", "col": 4}},
         {"id": "spacer-1", "type": "spacer", "data": {"col": 12}},
         {"id": "header-1", "type": "header",
          "data": {"text": "📋 Gestion des Tâches", "col": 12, "level": 4}},
         {"id": "spacer-2", "type": "spacer", "data": {"col": 12}},
     ]
     frappe.db.set_value("Workspace", "Gestion Équipe", "content", json.dumps(new_content))
-    _upsert_workspace_shortcut(
-        "Gestion Équipe", "📊 Dashboard Équipe",
-        "URL", "/app/dashboard/Gestion-%C3%89quipe", "#673ab7", "bar-chart-2"
-    )
+    # Nettoyer l'ancien shortcut "📊 Dashboard Équipe" s'il existe encore
+    frappe.db.sql("""
+        DELETE FROM `tabWorkspace Shortcut`
+        WHERE parent = 'Gestion \u00c9quipe'
+          AND label = '\U0001f4ca Dashboard \u00c9quipe'
+    """)
     print("  [Gestion Équipe] Removed card/link blocks, rebuilt content ✓")
 
 
@@ -621,16 +622,14 @@ def fix_gestion_equipe_dashboard():
 
 
 def fix_bad_doctype_shortcuts():
-    """Désactiver / corriger les shortcuts qui pointent vers des DocTypes inexistants.
-    Ces shortcuts causent l'erreur 'DocType s introuvable' quand on clique dessus."""
+    """Corriger les shortcuts qui pointent vers des DocTypes inexistants.
+    Ces shortcuts causent l'erreur 'DocType xxx introuvable' quand on clique dessus."""
     # Lister tous les shortcuts de type 'DocType' dont le link_to n'existe pas
     bad = frappe.db.sql("""
         SELECT ws.name, ws.parent, ws.label, ws.link_to
         FROM `tabWorkspace Shortcut` ws
         WHERE ws.type = 'DocType'
-          AND ws.link_to != ''
-          AND ws.link_to IS NOT NULL
-          AND ws.link_to NOT IN (SELECT name FROM tabDocType)
+          AND (ws.link_to IS NULL OR ws.link_to = '' OR ws.link_to NOT IN (SELECT name FROM tabDocType))
     """, as_dict=True)
 
     fixed = 0
@@ -693,10 +692,10 @@ def fix_dashboard_shortcuts_to_stats_page():
         "URL", "/kya-stats", "#0077b6", "trending-up"
     )
 
-    # Shortcut dans Gestion Équipe → page native Frappe dashboard
+    # Shortcut dans Gestion Équipe → dashboard custom KYA
     _upsert_workspace_shortcut(
         "Gestion Équipe", "📊 Dashboard Équipe",
-        "URL", "/app/dashboard/Gestion-%C3%89quipe", "#673ab7", "bar-chart-2"
+        "URL", "/kya-dashboard-equipe", "#673ab7", "bar-chart-2"
     )
 
     print("  [Dashboard Shortcuts] /kya-stats et /app/dashboard mis à jour ✓")
