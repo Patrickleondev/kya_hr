@@ -1,21 +1,21 @@
-import frappe
+﻿import frappe
 from frappe.utils import today, now_datetime, add_days, getdate, get_datetime, cint
 
 
-# ═══════════════════════════════════════════════════════════════
+# ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
 #  QUICK LINKS (HRMS Mobile)
-# ═══════════════════════════════════════════════════════════════
+# ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
 
-# Types d'emploi considérés comme "personnel interne"
+# Types d'emploi consid├⌐r├⌐s comme "personnel interne"
 EMPLOYEE_TYPES = {"CDI", "CDD", "Full-time", "Part-time", "Probation", "Contract"}
-# Types considérés comme "stagiaires"
+# Types consid├⌐r├⌐s comme "stagiaires"
 STAGE_TYPES = {"Stage", "Intern", "Apprentice"}
-# Types considérés comme "prestataires"
+# Types consid├⌐r├⌐s comme "prestataires"
 PRESTATAIRE_TYPES = {"Prestataire de service"}
 
 
 def _get_user_category(employment_type):
-    """Détermine la catégorie utilisateur à partir du type d'emploi."""
+    """D├⌐termine la cat├⌐gorie utilisateur ├á partir du type d'emploi."""
     if employment_type in STAGE_TYPES:
         return "stage"
     elif employment_type in PRESTATAIRE_TYPES:
@@ -49,50 +49,50 @@ def get_kya_quick_links():
         links.append({
             "title": "Permission de Sortie",
             "description": "Demander une permission de sortie",
-            "url": "/permission-sortie-stagiaire",
-            "emoji": "🚪",
+            "url": "/permission-sortie-stagiaire/new",
+            "emoji": "≡ƒÜ¬",
         })
         links.append({
             "title": "Bilan de Stage",
             "description": "Remplir le bilan de fin de stage",
-            "url": "/bilan-fin-de-stage",
-            "emoji": "📝",
+            "url": "/bilan-fin-de-stage/new",
+            "emoji": "≡ƒô¥",
         })
     elif category == "prestataire":
         # --- Prestataire de service links ---
         links.append({
             "title": "Permission de Sortie",
             "description": "Demander une permission de sortie",
-            "url": "/permission-sortie-employe",
-            "emoji": "🚪",
+            "url": "/permission-sortie-employe/new",
+            "emoji": "≡ƒÜ¬",
         })
     else:
         # --- Employee (CDI/CDD) links ---
         links.append({
             "title": "Permission de Sortie",
             "description": "Demander une permission de sortie",
-            "url": "/permission-sortie-employe",
-            "emoji": "🚪",
+            "url": "/permission-sortie-employe/new",
+            "emoji": "≡ƒÜ¬",
         })
         links.append({
-            "title": "Planning de Congé",
-            "description": "Planifier vos périodes de congé annuelles",
-            "url": "/planning-conge",
-            "emoji": "📅",
+            "title": "Planning de Cong├⌐",
+            "description": "Planifier vos p├⌐riodes de cong├⌐ annuelles",
+            "url": "/planning-conge/new",
+            "emoji": "≡ƒôà",
         })
 
     # --- Common links (all types) ---
     links.append({
-        "title": "PV Sortie Matériel",
-        "description": "Déclarer une sortie de matériel",
-        "url": "/pv-sortie-materiel",
-        "emoji": "📦",
+        "title": "PV Sortie Mat├⌐riel",
+        "description": "D├⌐clarer une sortie de mat├⌐riel",
+        "url": "/pv-sortie-materiel/new",
+        "emoji": "≡ƒôª",
     })
     links.append({
         "title": "Demande d\'Achat",
         "description": "Soumettre une demande d\'achat",
-        "url": "/demande-achat",
-        "emoji": "🛒",
+        "url": "/demande-achat/new",
+        "emoji": "≡ƒ¢Æ",
     })
 
     return links
@@ -121,9 +121,9 @@ def get_user_category():
     }
 
 
-# ═══════════════════════════════════════════════════════════════
+# ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
 #  WORKFLOW ACTIONS (Web Form Mobile Approval)
-# ═══════════════════════════════════════════════════════════════
+# ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
 
 ALLOWED_DOCTYPES = {
     "Permission Sortie Stagiaire",
@@ -140,7 +140,7 @@ def get_kya_workflow_actions(doctype, docname):
     """Get available workflow actions for the current user on a document.
     Returns current workflow_state and list of possible actions."""
     if doctype not in ALLOWED_DOCTYPES:
-        frappe.throw("Type de document non autorisé", frappe.PermissionError)
+        frappe.throw("Type de document non autoris├⌐", frappe.PermissionError)
 
     doc = frappe.get_doc(doctype, docname)
     doc.check_permission("read")
@@ -166,7 +166,7 @@ def get_kya_workflow_actions(doctype, docname):
 def apply_kya_workflow_action(doctype, docname, action):
     """Apply a workflow action from the web form (mobile approval)."""
     if doctype not in ALLOWED_DOCTYPES:
-        frappe.throw("Type de document non autorisé", frappe.PermissionError)
+        frappe.throw("Type de document non autoris├⌐", frappe.PermissionError)
 
     from frappe.model.workflow import apply_workflow
 
@@ -181,9 +181,9 @@ def apply_kya_workflow_action(doctype, docname, action):
     }
 
 
-# ═══════════════════════════════════════════════════════════════
+# ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
 #  BIOMETRIC ATTENDANCE API (for frontend dashboard)
-# ═══════════════════════════════════════════════════════════════
+# ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
 
 @frappe.whitelist()
 def get_attendance_summary(from_date=None, to_date=None, department=None):
@@ -444,7 +444,7 @@ def get_employee_attendance_detail(employee, from_date=None, to_date=None):
         as_dict=True,
     )
     if not emp:
-        frappe.throw("Employé non trouvé", frappe.DoesNotExistError)
+        frappe.throw("Employ├⌐ non trouv├⌐", frappe.DoesNotExistError)
 
     attendance = frappe.get_all(
         "Attendance",
@@ -486,9 +486,9 @@ def get_employee_attendance_detail(employee, from_date=None, to_date=None):
     }
 
 
-# ═══════════════════════════════════════════════════════════════
+# ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
 #  MES DEMANDES (Document Tracking for Mobile)
-# ═══════════════════════════════════════════════════════════════
+# ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
 
 _TRACKABLE_DOCTYPES = [
     {
@@ -505,13 +505,13 @@ _TRACKABLE_DOCTYPES = [
     },
     {
         "doctype": "Planning Conge",
-        "label": "Planning de Congé",
+        "label": "Planning de Cong├⌐",
         "category": "rh",
         "for": ["employee"],
     },
     {
         "doctype": "PV Sortie Materiel",
-        "label": "PV Sortie Matériel",
+        "label": "PV Sortie Mat├⌐riel",
         "category": "stock",
         "for": ["employee", "stage", "prestataire"],
         "filter_by": "owner",  # No Employee Link field, filter by doc creator
@@ -539,21 +539,21 @@ _STATE_COLORS = {
     "En attente DGA": "blue",
     "En attente Magasin": "blue",
     "En attente Audit": "blue",
-    "En attente Comptabilité": "blue",
+    "En attente Comptabilit├⌐": "blue",
     "En attente Resp. Stagiaires": "blue",
     "En cours": "yellow",
-    "Approuvé": "green",
-    "Approuvée": "green",
-    "Validé": "green",
-    "Rejeté": "red",
-    "Rejetée": "red",
-    "Annulé": "gray",
+    "Approuv├⌐": "green",
+    "Approuv├⌐e": "green",
+    "Valid├⌐": "green",
+    "Rejet├⌐": "red",
+    "Rejet├⌐e": "red",
+    "Annul├⌐": "gray",
 }
 
 
 @frappe.whitelist()
 def get_my_documents(limit=20, offset=0, status_filter=None):
-    """Retourne les documents de l'utilisateur courant avec états workflow."""
+    """Retourne les documents de l'utilisateur courant avec ├⌐tats workflow."""
     user = frappe.session.user
     if user == "Guest":
         return {"data": [], "total": 0}
@@ -619,18 +619,18 @@ def get_my_documents(limit=20, offset=0, status_filter=None):
     return {"data": page, "total": total}
 
 
-# ═══════════════════════════════════════════════════════════════
-#  ENQUÊTES & ÉVALUATIONS (KYA Forms for Mobile)
-# ═══════════════════════════════════════════════════════════════
+# ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+#  ENQU├èTES & ├ëVALUATIONS (KYA Forms for Mobile)
+# ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
 
 @frappe.whitelist()
 def get_my_kya_forms():
-    """Retourne les enquêtes/évaluations disponibles et remplies pour l'utilisateur."""
+    """Retourne les enqu├¬tes/├⌐valuations disponibles et remplies pour l'utilisateur."""
     user = frappe.session.user
     if user == "Guest":
         return {"available": [], "completed": []}
 
-    # Vérifier si le DocType KYA Form existe (kya_services installé)
+    # V├⌐rifier si le DocType KYA Form existe (kya_services install├⌐)
     if not frappe.db.exists("DocType", "KYA Form"):
         return {"available": [], "completed": []}
 
@@ -641,18 +641,18 @@ def get_my_kya_forms():
         as_dict=True,
     )
 
-    # Formulaires publiés (actifs)
+    # Formulaires publi├⌐s (actifs)
     available = []
     try:
         forms = frappe.get_all(
             "KYA Form",
-            filters={"statut": "Publié"},
+            filters={"statut": "Publi├⌐"},
             fields=["name", "titre", "description", "type_formulaire",
                      "date_debut", "date_fin", "token"],
             order_by="creation desc",
         )
         for f in forms:
-            # Vérifier si déjà rempli
+            # V├⌐rifier si d├⌐j├á rempli
             already_done = False
             if employee and frappe.db.exists("DocType", "KYA Form Response"):
                 already_done = frappe.db.exists("KYA Form Response", {
@@ -663,7 +663,7 @@ def get_my_kya_forms():
                 "name": f.name,
                 "titre": f.titre,
                 "description": f.description or "",
-                "type": f.type_formulaire or "Enquête",
+                "type": f.type_formulaire or "Enqu├¬te",
                 "date_debut": str(f.date_debut) if f.date_debut else None,
                 "date_fin": str(f.date_fin) if f.date_fin else None,
                 "completed": bool(already_done),
@@ -672,7 +672,7 @@ def get_my_kya_forms():
     except Exception:
         pass
 
-    # Réponses déjà soumises
+    # R├⌐ponses d├⌐j├á soumises
     completed = []
     try:
         if frappe.db.exists("DocType", "KYA Form Response"):
@@ -697,18 +697,18 @@ def get_my_kya_forms():
     return {"available": available, "completed": completed}
 
 
-# ═══════════════════════════════════════════════════════════════
-#  MES TÂCHES (KYA Taches for Mobile)
-# ═══════════════════════════════════════════════════════════════
+# ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+#  MES T├éCHES (KYA Taches for Mobile)
+# ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
 
 @frappe.whitelist()
 def get_my_tasks():
-    """Retourne les tâches attribuées à l'utilisateur courant."""
+    """Retourne les t├óches attribu├⌐es ├á l'utilisateur courant."""
     user = frappe.session.user
     if user == "Guest":
         return {"tasks": [], "plans": []}
 
-    # Vérifier si le module KYA Taches existe
+    # V├⌐rifier si le module KYA Taches existe
     if not frappe.db.exists("DocType", "Tache Equipe"):
         return {"tasks": [], "plans": []}
 
@@ -721,7 +721,7 @@ def get_my_tasks():
     if not employee:
         return {"tasks": [], "plans": []}
 
-    # Tâches assignées directement
+    # T├óches assign├⌐es directement
     tasks = []
     try:
         taches = frappe.get_all(
@@ -736,7 +736,7 @@ def get_my_tasks():
             tasks.append({
                 "name": t.name,
                 "titre": t.titre,
-                "statut": t.statut or "Non démarré",
+                "statut": t.statut or "Non d├⌐marr├⌐",
                 "priorite": t.priorite or "Moyenne",
                 "date_debut": str(t.date_debut) if t.date_debut else None,
                 "date_echeance": str(t.date_echeance) if t.date_echeance else None,
@@ -747,7 +747,7 @@ def get_my_tasks():
     except Exception:
         pass
 
-    # Plans trimestriels où l'utilisateur est chef d'équipe
+    # Plans trimestriels o├╣ l'utilisateur est chef d'├⌐quipe
     plans = []
     try:
         if frappe.db.exists("DocType", "Plan Trimestriel"):
@@ -774,14 +774,14 @@ def get_my_tasks():
     return {"tasks": tasks, "plans": plans}
 
 
-# ═══════════════════════════════════════════════════════════
-# MES DEMANDES — LISTE COMBINÉE + STATISTIQUES
-# ═══════════════════════════════════════════════════════════
+# ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+# MES DEMANDES ΓÇö LISTE COMBIN├ëE + STATISTIQUES
+# ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
 
 @frappe.whitelist()
 def get_demandes_combined(limit=50, offset=0, type_filter=None, statut_filter=None):
     """
-    Retourne une liste combinée de PV Sortie Matériel et Demande Achat KYA.
+    Retourne une liste combin├⌐e de PV Sortie Mat├⌐riel et Demande Achat KYA.
     Filtrable par type (pv / da) et par statut (workflow_state).
     """
     user = frappe.session.user
@@ -797,7 +797,7 @@ def get_demandes_combined(limit=50, offset=0, type_filter=None, statut_filter=No
 
     results = []
 
-    # ── PV Sortie Matériel ─────────────────────────────────
+    # ΓöÇΓöÇ PV Sortie Mat├⌐riel ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
     if not type_filter or type_filter == "pv":
         pv_filters = {"owner": user}
         if statut_filter:
@@ -814,19 +814,19 @@ def get_demandes_combined(limit=50, offset=0, type_filter=None, statut_filter=No
             for doc in pvs:
                 results.append({
                     "name": doc.name,
-                    "type": "PV Sortie Matériel",
+                    "type": "PV Sortie Mat├⌐riel",
                     "type_code": "pv",
                     "objet": doc.objet or doc.reference or "",
                     "date": str(doc.date_sortie) if doc.date_sortie else str(doc.creation)[:10],
                     "statut": doc.workflow_state or "Brouillon",
                     "color": _STATE_COLORS.get(doc.workflow_state or "Brouillon", "gray"),
-                    "url": f"/pv-sortie-materiel?name={doc.name}",
+                    "url": f"/pv-sortie-materiel/{doc.name}",
                     "creation": str(doc.creation),
                 })
         except Exception:
             pass
 
-    # ── Demande d'Achat ────────────────────────────────────
+    # ΓöÇΓöÇ Demande d'Achat ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
     if not type_filter or type_filter == "da":
         da_filters = {}
         if employee:
@@ -855,13 +855,13 @@ def get_demandes_combined(limit=50, offset=0, type_filter=None, statut_filter=No
                     "color": _STATE_COLORS.get(doc.workflow_state or "Brouillon", "gray"),
                     "montant": doc.montant_total or 0,
                     "urgence": doc.urgence or "Normale",
-                    "url": f"/demande-achat?name={doc.name}",
+                    "url": f"/demande-achat/{doc.name}",
                     "creation": str(doc.creation),
                 })
         except Exception:
             pass
 
-    # Tri global par date de création décroissante
+    # Tri global par date de cr├⌐ation d├⌐croissante
     results.sort(key=lambda x: x["creation"], reverse=True)
 
     total = len(results)
@@ -902,14 +902,14 @@ def get_demandes_stats():
     en_cours_states = {
         "En attente Chef", "En attente Chef Service", "En attente RH",
         "En attente DG", "En attente DGA", "En attente Magasin",
-        "En attente Audit", "En attente Comptabilité",
+        "En attente Audit", "En attente Comptabilit├⌐",
         "En attente Resp. Stagiaires", "En cours",
         "En attente Approbation",
     }
-    approuve_states = {"Approuvé", "Approuvée", "Validé"}
-    rejete_states = {"Rejeté", "Rejetée", "Annulé"}
+    approuve_states = {"Approuv├⌐", "Approuv├⌐e", "Valid├⌐"}
+    rejete_states = {"Rejet├⌐", "Rejet├⌐e", "Annul├⌐"}
 
-    # PV Sortie Matériel
+    # PV Sortie Mat├⌐riel
     try:
         pvs = frappe.get_all(
             "PV Sortie Materiel",
@@ -957,7 +957,7 @@ def get_demandes_stats():
     return stats
 
 
-# ─── Dashboard Stagiaires ──────────────────────────────────────────────────────
+# ΓöÇΓöÇΓöÇ Dashboard Stagiaires ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 @frappe.whitelist()
 def get_dashboard_stagiaires(annee=None):
@@ -1002,8 +1002,8 @@ def get_dashboard_stagiaires(annee=None):
         "En attente Chef", "En attente Chef Service",
         "En attente Resp. Stagiaires", "En attente DG", "En cours",
     }
-    approuve_states = {"Approuvé", "Approuvée", "Validé"}
-    rejete_states = {"Rejeté", "Rejetée", "Annulé"}
+    approuve_states = {"Approuv├⌐", "Approuv├⌐e", "Valid├⌐"}
+    rejete_states = {"Rejet├⌐", "Rejet├⌐e", "Annul├⌐"}
 
     # Permissions Stagiaires
     try:
@@ -1028,7 +1028,7 @@ def get_dashboard_stagiaires(annee=None):
             if p.date_sortie:
                 mois = str(p.date_sortie)[:7]
                 mois_count[mois] = mois_count.get(mois, 0) + 1
-            # Par bénéficiaire
+            # Par b├⌐n├⌐ficiaire
             emp = p.employee_name or p.employee or "Inconnu"
             benef_count[emp] = benef_count.get(emp, 0) + 1
         stats["permissions_par_mois"] = mois_count
@@ -1068,7 +1068,7 @@ def get_dashboard_stagiaires(annee=None):
 
 @frappe.whitelist()
 def get_dashboard_employes(annee=None):
-    """Stats globales pour le module Employés (accessible RH + System Manager)."""
+    """Stats globales pour le module Employ├⌐s (accessible RH + System Manager)."""
     import datetime
     if annee:
         annee = int(annee)
@@ -1100,13 +1100,13 @@ def get_dashboard_employes(annee=None):
     en_cours_states = {
         "En attente Chef", "En attente Chef Service", "En attente RH",
         "En attente DG", "En attente DGA", "En attente Magasin",
-        "En attente Audit", "En attente Comptabilité",
+        "En attente Audit", "En attente Comptabilit├⌐",
         "En attente Approbation", "En cours",
     }
-    approuve_states = {"Approuvé", "Approuvée", "Validé"}
-    rejete_states = {"Rejeté", "Rejetée", "Annulé"}
+    approuve_states = {"Approuv├⌐", "Approuv├⌐e", "Valid├⌐"}
+    rejete_states = {"Rejet├⌐", "Rejet├⌐e", "Annul├⌐"}
 
-    # Employés (hors stagiaires)
+    # Employ├⌐s (hors stagiaires)
     try:
         emp_filters = [["employment_type", "!=", "Stage"], ["status", "=", "Active"]]
         stats["employes_actifs"] = frappe.db.count("Employee", emp_filters)
@@ -1116,7 +1116,7 @@ def get_dashboard_employes(annee=None):
     except Exception:
         pass
 
-    # Permissions Employés
+    # Permissions Employ├⌐s
     try:
         perms = frappe.get_all(
             "Permission Sortie Employe",
@@ -1141,7 +1141,7 @@ def get_dashboard_employes(annee=None):
     except Exception:
         pass
 
-    # Plannings Congé
+    # Plannings Cong├⌐
     try:
         conges = frappe.get_all(
             "Planning Conge",
@@ -1155,7 +1155,7 @@ def get_dashboard_employes(annee=None):
     except Exception:
         pass
 
-    # PV Sortie Matériel
+    # PV Sortie Mat├⌐riel
     try:
         pvs = frappe.get_all(
             "PV Sortie Materiel",
@@ -1197,7 +1197,7 @@ def get_dashboard_employes(annee=None):
     except Exception:
         pass
 
-    # Présences / Absences
+    # Pr├⌐sences / Absences
     try:
         att = frappe.get_all(
             "Attendance",
@@ -1231,57 +1231,57 @@ def get_webforms_list():
             "label": "Permission de Sortie Stagiaire",
             "route": "/permission-sortie-stagiaire",
             "new_route": "/permission-sortie-stagiaire/new",
-            "ref": "KEG-RH-31-V01",
+            "ref": "AEA-ENG-30-V01",
             "module": "Stagiaires",
-            "icon": "🎓"
+            "icon": "≡ƒÄô"
         },
         {
             "name": "permission-sortie-employe",
-            "label": "Permission de Sortie Employé",
+            "label": "Permission de Sortie Employ├⌐",
             "route": "/permission-sortie-employe",
             "new_route": "/permission-sortie-employe/new",
-            "ref": "KEG-RH-30-V01",
-            "module": "Employés",
-            "icon": "👤"
+            "ref": "AEA-ENG-30-V01",
+            "module": "Employ├⌐s",
+            "icon": "≡ƒæñ"
         },
         {
             "name": "demande-achat",
             "label": "Demande d'Achat",
             "route": "/demande-achat",
             "new_route": "/demande-achat/new",
-            "ref": "KEG-PRO-01-V01",
+            "ref": "AEA-ENG-30-V01",
             "module": "Achats",
-            "icon": "🛒"
+            "icon": "≡ƒ¢Æ"
         },
         {
             "name": "pv-sortie-materiel",
-            "label": "PV Sortie de Matériel",
+            "label": "PV Sortie de Mat├⌐riel",
             "route": "/pv-sortie-materiel",
             "new_route": "/pv-sortie-materiel/new",
-            "ref": "KEG-LOG-32-V01",
+            "ref": "AEA-ENG-30-V01",
             "module": "Stock",
-            "icon": "📦"
+            "icon": "≡ƒôª"
         },
         {
             "name": "planning-conge",
-            "label": "Planning de Congé",
+            "label": "Planning de Cong├⌐",
             "route": "/planning-conge",
             "new_route": "/planning-conge/new",
-            "ref": "KEG-RH-33-V01",
-            "module": "Employés",
-            "icon": "📅"
+            "ref": "AEA-ENG-30-V01",
+            "module": "Employ├⌐s",
+            "icon": "≡ƒôà"
         },
         {
             "name": "bilan-fin-de-stage",
             "label": "Bilan de Fin de Stage",
             "route": "/bilan-fin-de-stage",
             "new_route": "/bilan-fin-de-stage/new",
-            "ref": "KEG-RH-34-V01",
+            "ref": "AEA-ENG-30-V01",
             "module": "Stagiaires",
-            "icon": "📋"
+            "icon": "≡ƒôï"
         },
     ]
-    # Enrichir avec le count des documents liés
+    # Enrichir avec le count des documents li├⌐s
     doctypes_map = {
         "permission-sortie-stagiaire": "Permission Sortie Stagiaire",
         "permission-sortie-employe": "Permission Sortie Employe",

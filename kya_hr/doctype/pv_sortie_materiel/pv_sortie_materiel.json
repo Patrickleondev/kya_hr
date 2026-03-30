@@ -1,4 +1,4 @@
-{
+﻿{
     "name": "PV Sortie Materiel",
     "module": "KYA HR",
     "doctype": "DocType",
@@ -38,7 +38,7 @@
             "fieldname": "reference",
             "label": "R\u00e9f\u00e9rence",
             "fieldtype": "Data",
-            "default": "KEG-LOG-32-V01",
+            "default": "AEA-ENG-30-V01",
             "read_only": 1
         },
         {

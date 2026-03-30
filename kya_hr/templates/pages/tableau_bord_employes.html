@@ -1,6 +1,6 @@
-{% extends "templates/web.html" %}
+﻿{% extends "templates/web.html" %}
 
-{% block title %}Tableau de Bord – Employés{% endblock %}
+{% block title %}Tableau de Bord ΓÇô Employ├⌐s{% endblock %}
 
 {% block page_content %}
 <style>
@@ -49,7 +49,7 @@
   }
   .kya-db-header button:hover { background: var(--kya-primary-dark); }
 
-  /* ── Sections ── */
+  /* ΓöÇΓöÇ Sections ΓöÇΓöÇ */
   .kya-section-title {
     font-size: 1.05rem;
     font-weight: 700;
@@ -59,7 +59,7 @@
     border-left: 4px solid var(--kya-primary);
   }
 
-  /* ── Stat cards ── */
+  /* ΓöÇΓöÇ Stat cards ΓöÇΓöÇ */
   .kya-stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -100,7 +100,7 @@
   .card-accent  { border-color: var(--kya-accent); }
   .card-accent  .stat-value { color: var(--kya-accent); }
 
-  /* ── Charts ── */
+  /* ΓöÇΓöÇ Charts ΓöÇΓöÇ */
   .kya-charts-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -124,7 +124,7 @@
   }
   .chart-container { position: relative; height: 210px; }
 
-  /* ── Table ── */
+  /* ΓöÇΓöÇ Table ΓöÇΓöÇ */
   .kya-table-wrap { overflow-x: auto; margin-bottom: 1.5rem; }
   .kya-table {
     width: 100%;
@@ -146,7 +146,7 @@
   }
   .kya-table tr:hover td { background: #f9fbfc; }
 
-  /* ── Progress bar (taux présence) ── */
+  /* ΓöÇΓöÇ Progress bar (taux pr├⌐sence) ΓöÇΓöÇ */
   .kya-progress-wrap { margin: .5rem 0 1.5rem; }
   .kya-progress-label {
     display: flex;
@@ -167,7 +167,7 @@
     transition: width .5s;
   }
 
-  /* ── Links ── */
+  /* ΓöÇΓöÇ Links ΓöÇΓöÇ */
   .kya-links-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -195,25 +195,25 @@
   .kya-error { color: var(--kya-danger); text-align: center; padding: 2rem; }
 </style>
 
-<div id="kya-loading">⏳ Chargement du tableau de bord…</div>
+<div id="kya-loading">ΓÅ│ Chargement du tableau de bordΓÇª</div>
 
 <div id="kya-dashboard" style="display:none">
 
   <!-- Header -->
   <div class="kya-db-header">
-    <h1>👥 Tableau de Bord — Employés</h1>
+    <h1>≡ƒæÑ Tableau de Bord ΓÇö Employ├⌐s</h1>
     <div class="kya-year-filter">
-      <label for="anneeSelect" style="font-size:.875rem;font-weight:600">Année :</label>
+      <label for="anneeSelect" style="font-size:.875rem;font-weight:600">Ann├⌐e :</label>
       <select id="anneeSelect"></select>
       <button onclick="loadDashboard()">Actualiser</button>
     </div>
   </div>
 
-  <!-- ─ RH & Effectifs ─ -->
+  <!-- ΓöÇ RH & Effectifs ΓöÇ -->
   <p class="kya-section-title">Effectifs & Permissions</p>
   <div class="kya-stats-grid" id="statsRH"></div>
 
-  <!-- ─ Charts Permissions ─ -->
+  <!-- ΓöÇ Charts Permissions ΓöÇ -->
   <div class="kya-charts-row">
     <div class="kya-chart-card">
       <h3>Permissions de sortie par mois</h3>
@@ -225,20 +225,20 @@
     </div>
   </div>
 
-  <!-- ─ Présences ─ -->
-  <p class="kya-section-title">Présences & Absences</p>
+  <!-- ΓöÇ Pr├⌐sences ΓöÇ -->
+  <p class="kya-section-title">Pr├⌐sences & Absences</p>
   <div class="kya-stats-grid" id="statsPresence"></div>
   <div class="kya-progress-wrap">
     <div class="kya-progress-label">
-      <span>Taux de présence</span>
-      <span id="tauxLabel">—</span>
+      <span>Taux de pr├⌐sence</span>
+      <span id="tauxLabel">ΓÇö</span>
     </div>
     <div class="kya-progress-bar">
       <div class="kya-progress-fill" id="tauxFill" style="width:0%"></div>
     </div>
   </div>
 
-  <!-- ─ Demandes d'Achat & PV Matériel ─ -->
+  <!-- ΓöÇ Demandes d'Achat & PV Mat├⌐riel ΓöÇ -->
   <p class="kya-section-title">Achats & Logistique</p>
   <div class="kya-stats-grid" id="statsAchats"></div>
   <div class="kya-charts-row">
@@ -255,21 +255,21 @@
   <!-- Table top demandeurs -->
   <div class="kya-table-wrap">
     <table class="kya-table" id="tableDA">
-      <thead><tr><th>#</th><th>Employé</th><th>Nbre demandes</th><th>Montant total (XOF)</th></tr></thead>
+      <thead><tr><th>#</th><th>Employ├⌐</th><th>Nbre demandes</th><th>Montant total (XOF)</th></tr></thead>
       <tbody></tbody>
     </table>
   </div>
 
-  <!-- ─ Quick links ─ -->
-  <p class="kya-section-title">Accès rapides</p>
+  <!-- ΓöÇ Quick links ΓöÇ -->
+  <p class="kya-section-title">Acc├¿s rapides</p>
   <div class="kya-links-grid">
-    <a class="kya-link-card" href="/permission-sortie-employe/new"><span class="licon">➕</span>Nouvelle permission</a>
-    <a class="kya-link-card" href="/permission-sortie-employe"><span class="licon">🚪</span>Permissions de sortie</a>
-    <a class="kya-link-card" href="/planning-conge/new"><span class="licon">📅</span>Nouveau congé</a>
-    <a class="kya-link-card" href="/demande-achat/new"><span class="licon">🛒</span>Nouvelle demande achat</a>
-    <a class="kya-link-card" href="/pv-sortie-materiel/new"><span class="licon">📦</span>Nouveau PV matériel</a>
-    <a class="kya-link-card" href="/app/attendance"><span class="licon">📊</span>Présences (bureau)</a>
-    <a class="kya-link-card" href="/tableau-bord-stagiaires"><span class="licon">🎓</span>Tableau Stagiaires</a>
+    <a class="kya-link-card" href="/permission-sortie-employe/new"><span class="licon">Γ₧ò</span>Nouvelle permission</a>
+    <a class="kya-link-card" href="/app/permission-sortie-employe"><span class="licon">≡ƒÜ¬</span>Permissions de sortie</a>
+    <a class="kya-link-card" href="/planning-conge/new"><span class="licon">≡ƒôà</span>Nouveau cong├⌐</a>
+    <a class="kya-link-card" href="/demande-achat/new"><span class="licon">≡ƒ¢Æ</span>Nouvelle demande achat</a>
+    <a class="kya-link-card" href="/pv-sortie-materiel/new"><span class="licon">≡ƒôª</span>Nouveau PV mat├⌐riel</a>
+    <a class="kya-link-card" href="/app/attendance"><span class="licon">≡ƒôè</span>Pr├⌐sences (bureau)</a>
+    <a class="kya-link-card" href="/tableau-bord-stagiaires"><span class="licon">≡ƒÄô</span>Tableau Stagiaires</a>
   </div>
 
 </div>
@@ -279,8 +279,8 @@
 <script>
 (function() {
   const MOIS_LABELS = {
-    "01":"Jan","02":"Fév","03":"Mar","04":"Avr","05":"Mai","06":"Jun",
-    "07":"Jul","08":"Aoû","09":"Sep","10":"Oct","11":"Nov","12":"Déc"
+    "01":"Jan","02":"F├⌐v","03":"Mar","04":"Avr","05":"Mai","06":"Jun",
+    "07":"Jul","08":"Ao├╗","09":"Sep","10":"Oct","11":"Nov","12":"D├⌐c"
   };
   let charts = {};
 
@@ -314,7 +314,7 @@
           render(r.message);
           document.getElementById("kya-dashboard").style.display = "";
         } else {
-          showError("Impossible de charger les données.");
+          showError("Impossible de charger les donn├⌐es.");
         }
       },
       error: function(err) {
@@ -343,18 +343,18 @@
   }
 
   function render(d) {
-    // ── RH KPIs
+    // ΓöÇΓöÇ RH KPIs
     makeStatCards("statsRH", [
-      { label: "Employés actifs",       value: d.employes_actifs,          icon: "👥", cls: "card-blue" },
-      { label: "Permissions totales",   value: d.permissions_total,        icon: "📋", cls: "card-teal" },
-      { label: "Approuvées",            value: d.permissions_approuvees,   icon: "✅", cls: "card-success" },
-      { label: "En cours",              value: d.permissions_en_cours,     icon: "⏳", cls: "card-warn" },
-      { label: "Rejetées",              value: d.permissions_rejetees,     icon: "❌", cls: "card-danger" },
-      { label: "Congés (total)",        value: d.conges_total,             icon: "📅", cls: "card-blue" },
-      { label: "Congés approuvés",      value: d.conges_approuves,         icon: "✔️", cls: "card-success" },
+      { label: "Employ├⌐s actifs",       value: d.employes_actifs,          icon: "≡ƒæÑ", cls: "card-blue" },
+      { label: "Permissions totales",   value: d.permissions_total,        icon: "≡ƒôï", cls: "card-teal" },
+      { label: "Approuv├⌐es",            value: d.permissions_approuvees,   icon: "Γ£à", cls: "card-success" },
+      { label: "En cours",              value: d.permissions_en_cours,     icon: "ΓÅ│", cls: "card-warn" },
+      { label: "Rejet├⌐es",              value: d.permissions_rejetees,     icon: "Γ¥î", cls: "card-danger" },
+      { label: "Cong├⌐s (total)",        value: d.conges_total,             icon: "≡ƒôà", cls: "card-blue" },
+      { label: "Cong├⌐s approuv├⌐s",      value: d.conges_approuves,         icon: "Γ£ö∩╕Å", cls: "card-success" },
     ]);
 
-    // ── Chart: permissions par mois (bar)
+    // ΓöÇΓöÇ Chart: permissions par mois (bar)
     destroyChart("chartPermMois");
     const moisKeys = Object.keys(d.permissions_par_mois || {}).sort();
     const moisLabels = moisKeys.map(function(k) {
@@ -373,12 +373,12 @@
         scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
     });
 
-    // ── Chart: statuts permissions (doughnut)
+    // ΓöÇΓöÇ Chart: statuts permissions (doughnut)
     destroyChart("chartPermStatuts");
     charts["chartPermStatuts"] = new Chart(document.getElementById("chartPermStatuts"), {
       type: "doughnut",
       data: {
-        labels: ["Approuvées","En cours","Rejetées","Autre"],
+        labels: ["Approuv├⌐es","En cours","Rejet├⌐es","Autre"],
         datasets: [{
           data: [
             d.permissions_approuvees, d.permissions_en_cours, d.permissions_rejetees,
@@ -392,32 +392,32 @@
         plugins: { legend: { position: "bottom" } } }
     });
 
-    // ── Présence KPIs
+    // ΓöÇΓöÇ Pr├⌐sence KPIs
     makeStatCards("statsPresence", [
-      { label: "Jours présents",  value: d.presences_total,   icon: "✅", cls: "card-success" },
-      { label: "Jours absents",   value: d.absences_total,    icon: "❌", cls: "card-danger" },
-      { label: "Taux de présence",value: d.taux_presence + "%", icon: "📈", cls: "card-teal" },
+      { label: "Jours pr├⌐sents",  value: d.presences_total,   icon: "Γ£à", cls: "card-success" },
+      { label: "Jours absents",   value: d.absences_total,    icon: "Γ¥î", cls: "card-danger" },
+      { label: "Taux de pr├⌐sence",value: d.taux_presence + "%", icon: "≡ƒôê", cls: "card-teal" },
     ]);
     document.getElementById("tauxLabel").textContent = d.taux_presence + " %";
     document.getElementById("tauxFill").style.width = Math.min(100, d.taux_presence) + "%";
 
-    // ── Achats KPIs
+    // ΓöÇΓöÇ Achats KPIs
     makeStatCards("statsAchats", [
-      { label: "PV Matériel",         value: d.pv_total,               icon: "📦", cls: "card-blue" },
-      { label: "PV approuvés",        value: d.pv_approuves,           icon: "✅", cls: "card-success" },
-      { label: "Demandes achat",      value: d.da_total,               icon: "🛒", cls: "card-accent" },
-      { label: "DA approuvées",       value: d.da_approuves,           icon: "✔️", cls: "card-success" },
-      { label: "Montant approuvé (XOF)",
-        value: fmt(d.da_montant_total_approuve), icon: "💰", cls: "card-warn" },
+      { label: "PV Mat├⌐riel",         value: d.pv_total,               icon: "≡ƒôª", cls: "card-blue" },
+      { label: "PV approuv├⌐s",        value: d.pv_approuves,           icon: "Γ£à", cls: "card-success" },
+      { label: "Demandes achat",      value: d.da_total,               icon: "≡ƒ¢Æ", cls: "card-accent" },
+      { label: "DA approuv├⌐es",       value: d.da_approuves,           icon: "Γ£ö∩╕Å", cls: "card-success" },
+      { label: "Montant approuv├⌐ (XOF)",
+        value: fmt(d.da_montant_total_approuve), icon: "≡ƒÆ░", cls: "card-warn" },
     ]);
 
-    // ── Chart: DA statuts
+    // ΓöÇΓöÇ Chart: DA statuts
     destroyChart("chartDA");
     const daAutre = Math.max(0, d.da_total - d.da_approuves - (d.da_total - d.da_approuves));
     charts["chartDA"] = new Chart(document.getElementById("chartDA"), {
       type: "doughnut",
       data: {
-        labels: ["Approuvées","En cours / Rejetées"],
+        labels: ["Approuv├⌐es","En cours / Rejet├⌐es"],
         datasets: [{
           data: [d.da_approuves, Math.max(0, d.da_total - d.da_approuves)],
           backgroundColor: ["#388e3c","#1976d2"],
@@ -428,7 +428,7 @@
         plugins: { legend: { position: "bottom" } } }
     });
 
-    // ── Chart: top demandeurs DA
+    // ΓöÇΓöÇ Chart: top demandeurs DA
     destroyChart("chartTopDA");
     const top = d.top_demandeurs_da || [];
     charts["chartTopDA"] = new Chart(document.getElementById("chartTopDA"), {
@@ -447,11 +447,11 @@
         scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } } }
     });
 
-    // ── Table top demandeurs
+    // ΓöÇΓöÇ Table top demandeurs
     const tbody = document.querySelector("#tableDA tbody");
     tbody.innerHTML = "";
     if (!top.length) {
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#aaa">Aucune donnée</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#aaa">Aucune donn├⌐e</td></tr>';
     } else {
       top.forEach(function(t, i) {
         tbody.innerHTML += "<tr><td>" + (i+1) + "</td><td>" + t.emp

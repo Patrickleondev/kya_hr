@@ -1,7 +1,7 @@
-{
+﻿{
  "app": "kya_hr",
  "charts": [],
- "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Stagiaires'>\ud83c\udf93 Espace Stagiaires KYA</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Demander une Permission\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Permissions\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Bilan\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Bilan de Stage \u2197\", \"col\": 3}}, {\"id\": \"s5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Tableau de Bord\", \"col\": 3}}, {\"id\": \"s6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Mon Espace\", \"col\": 3}}, {\"id\": \"spacer1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"nc_hdr\", \"type\": \"header\", \"data\": {\"text\": \"<b>Indicateurs</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"nc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Stagiaires Actifs\", \"col\": 4}}, {\"id\": \"nc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Permissions Stagiaires en Attente\", \"col\": 4}}, {\"id\": \"nc3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Bilans de Stage Soumis\", \"col\": 4}}]",
+ "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Stagiaires'>\ud83c\udf93 Espace Stagiaires KYA</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Demander une Permission\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Permissions\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Bilan\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Bilan de Stage \u2197\", \"col\": 3}}, {\"id\": \"s5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"≡ƒôè Dashboard Stagiaires\", \"col\": 3}}, {\"id\": \"s6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Mon Espace\", \"col\": 3}}, {\"id\": \"spacer1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"nc_hdr\", \"type\": \"header\", \"data\": {\"text\": \"<b>Indicateurs</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"nc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Stagiaires Actifs\", \"col\": 4}}, {\"id\": \"nc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Permissions Stagiaires en Attente\", \"col\": 4}}, {\"id\": \"nc3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Bilans de Stage Soumis\", \"col\": 4}}]",
  "creation": "2026-03-14 21:41:11.218132",
  "custom_blocks": [],
  "docstatus": 0,
@@ -69,7 +69,7 @@
   {
    "type": "Link",
    "label": "Demander une Permission (Web Form)",
-   "link_to": "/permission-sortie-stagiaire",
+    "link_to": "/permission-sortie-stagiaire/new",
    "link_type": "URL",
    "hidden": 0,
    "is_query_report": 0,
@@ -79,7 +79,7 @@
   {
    "type": "Link",
    "label": "Bilan de Stage (Web Form)",
-   "link_to": "/bilan-fin-de-stage",
+    "link_to": "/bilan-fin-de-stage/new",
    "link_type": "URL",
    "hidden": 0,
    "is_query_report": 0,
@@ -136,7 +136,7 @@
    "document_type": "Employee",
    "color": "#009688",
    "function": "Count",
-   "filters_json": "[[\"Employee\",\"employment_type\",\"=\",\"Stage\",false],[\"Employee\",\"status\",\"=\",\"Active\",false]]",
+   "filters_json": "[[\"Employee\",\"employment_type\",\"=\",\"Stage\"],[\"Employee\",\"status\",\"=\",\"Active\"]]",
    "show_percentage_stats": 0
   },
   {
@@ -145,7 +145,7 @@
    "document_type": "Permission Sortie Stagiaire",
    "color": "#e67e22",
    "function": "Count",
-   "filters_json": "[[\"Permission Sortie Stagiaire\",\"workflow_state\",\"not in\",[\"Approuvé\",\"Rejeté\"],false]]",
+   "filters_json": "[[\"Permission Sortie Stagiaire\",\"workflow_state\",\"not in\",[\"Approuv\u00e9\",\"Rejet\u00e9\"]]]",
    "show_percentage_stats": 0
   },
   {
@@ -154,7 +154,7 @@
    "document_type": "Bilan Fin de Stage",
    "color": "#1a5276",
    "function": "Count",
-   "filters_json": "[[\"Bilan Fin de Stage\",\"docstatus\",\"!=\",0,false]]",
+   "filters_json": "[[\"Bilan Fin de Stage\",\"docstatus\",\"!=\",0]]",
    "show_percentage_stats": 0
   }
  ],
@@ -169,9 +169,9 @@
    "color": "#2490EF",
    "doc_view": "",
    "label": "Demander une Permission",
-   "link_to": "/permission-sortie-stagiaire",
+    "link_to": "/permission-sortie-stagiaire/new",
    "type": "URL",
-   "url": "/permission-sortie-stagiaire"
+    "url": "/permission-sortie-stagiaire/new"
   },
   {
    "color": "#29CD42",
@@ -190,7 +190,7 @@
   {
    "color": "#e67e22",
    "doc_view": "",
-   "label": "Bilan de Stage ↗",
+   "label": "Bilan de Stage Γåù",
    "link_to": "/bilan-fin-de-stage/new",
    "type": "URL",
    "url": "/bilan-fin-de-stage/new"
@@ -212,12 +212,13 @@
    "url": "/app/employee?employment_type=Stage"
   },
   {
-   "color": "#E65100",
+   "color": "Green",
    "doc_view": "",
-   "label": "Tableau de Bord",
-   "link_to": "/tableau-bord-stagiaires",
+   "label": "≡ƒôè Dashboard Stagiaires",
+   "link_to": "/kya-dashboard-stagiaires",
+   "icon": "bar-chart-line",
    "type": "URL",
-   "url": "/tableau-bord-stagiaires"
+   "url": "/kya-dashboard-stagiaires"
   }
  ],
  "title": "Espace Stagiaires"

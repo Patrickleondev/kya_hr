@@ -1,9 +1,9 @@
-/* ===================================================================
-   KYA-Energy Group — Web Form Layout v4
+﻿/* ===================================================================
+   KYA-Energy Group ΓÇö Web Form Layout v4
    Design : Ordre de Mission / Fiche officielle KYA
-   En-tête 2-colonnes : Logo gauche | Titre + infos droite
-   N° de document affiché, sections numérotées,
-   permissions par rôle, signatures verrouillées.
+   En-t├¬te 2-colonnes : Logo gauche | Titre + infos droite
+   N┬░ de document affich├⌐, sections num├⌐rot├⌐es,
+   permissions par r├┤le, signatures verrouill├⌐es.
    =================================================================== */
 
 /* === Auto-redirect bare web form URLs to /new ==================== */
@@ -15,7 +15,7 @@
   ];
   var path = window.location.pathname.replace(/^\//, "").replace(/\/$/, "");
   if (KYA_WF_ROUTES.indexOf(path) !== -1) {
-    // Bare route without /new — redirect silently
+    // Bare route without /new ΓÇö redirect silently
     window.location.replace("/" + path + "/new");
     return; // stop further execution until redirect completes
   }
@@ -165,37 +165,37 @@
     "permission-sortie-stagiaire": {
       title: "DEMANDE DE PERMISSION DE SORTIE",
       subtitle: "Stagiaire",
-      ref: "KEG-RH-31-V01",
+      ref: "AEA-ENG-30-V01",
       workflow: "Ma\u00eetre de Stage \u2192 Resp. Stagiaires \u2192 Direction"
     },
     "permission-sortie-employe": {
       title: "DEMANDE DE PERMISSION DE SORTIE",
       subtitle: "Employ\u00e9",
-      ref: "KEG-RH-30-V01",
+      ref: "AEA-ENG-30-V01",
       workflow: "Chef de Service \u2192 RH \u2192 Direction"
     },
     "demande-achat": {
       title: "FICHE D\u2019ENGAGEMENT DE D\u00c9PENSES",
       subtitle: "Approvisionnement",
-      ref: "KEG-PRO-01-V01",
+      ref: "AEA-ENG-30-V01",
       workflow: "Chef \u2192 Auditeur \u2192 DAAF \u2192 DG"
     },
     "pv-sortie-materiel": {
       title: "PV DE SORTIE DE MAT\u00c9RIEL",
-      subtitle: "Stock & Logistique",
-      ref: "KEG-LOG-32-V01",
+      subtitle: "Achat et Stock",
+      ref: "AEA-ENG-30-V01",
       workflow: "Chef \u2192 Audit \u2192 Direction \u2192 Magasin"
     },
     "planning-conge": {
       title: "PLANNING DE CONG\u00c9 ANNUEL",
       subtitle: "Ressources Humaines",
-      ref: "KEG-RH-33-V01",
+      ref: "AEA-ENG-30-V01",
       workflow: "Employ\u00e9 \u2192 RH \u2192 DG"
     },
     "bilan-fin-de-stage": {
       title: "BILAN DE FIN DE STAGE",
       subtitle: "Formation & Stages",
-      ref: "KEG-RH-34-V01",
+      ref: "AEA-ENG-30-V01",
       workflow: "Stagiaire \u2192 Encadrant \u2192 RH"
     }
   };
@@ -414,10 +414,10 @@
     if (!userHasRole("System Manager") && !userHasRole("HR Manager") && !userHasRole("Administrator")) return;
     var allForms = [
       { label: "Permission Sortie Stagiaire", route: "permission-sortie-stagiaire" },
-      { label: "Permission Sortie Employé", route: "permission-sortie-employe" },
+      { label: "Permission Sortie Employ├⌐", route: "permission-sortie-employe" },
       { label: "Demande d'Achat", route: "demande-achat" },
-      { label: "PV Sortie Matériel", route: "pv-sortie-materiel" },
-      { label: "Planning Congé", route: "planning-conge" },
+      { label: "PV Sortie Mat├⌐riel", route: "pv-sortie-materiel" },
+      { label: "Planning Cong├⌐", route: "planning-conge" },
       { label: "Bilan de Stage", route: "bilan-fin-de-stage" }
     ];
     var currentRoute = getRoute();
@@ -426,24 +426,24 @@
     var panel = document.createElement("div");
     panel.className = "kya-preview-panel";
     panel.style.display = "none";
-    panel.innerHTML = '<h4>🔗 Liens de prévisualisation</h4>' +
+    panel.innerHTML = '<h4>≡ƒöù Liens de pr├⌐visualisation</h4>' +
       '<div class="kya-preview-forms">' +
       allForms.map(function(f) {
         var url = window.location.origin + "/" + f.route + "/new";
         var isCurrent = f.route === currentRoute;
         return '<div class="kya-preview-form-link">' +
           '<span' + (isCurrent ? ' style="font-weight:800;"' : '') + '>' + f.label + '</span>' +
-          '<a href="' + url + '" target="_blank">Ouvrir →</a>' +
+          '<a href="' + url + '" target="_blank">Ouvrir ΓåÆ</a>' +
           '</div>';
       }).join("") + '</div>' +
-      '<button class="kya-preview-copy" onclick="(function(){var url=window.location.origin+\'/\'+\'' + currentRoute + '\'+\'/new\';navigator.clipboard&&navigator.clipboard.writeText(url).then(function(){this.textContent=\'✓ Copié !\';}.bind(this));}).call(this)">📋 Copier lien du formulaire actuel</button>';
+      '<button class="kya-preview-copy" onclick="(function(){var url=window.location.origin+\'/\'+\'' + currentRoute + '\'+\'/new\';navigator.clipboard&&navigator.clipboard.writeText(url).then(function(){this.textContent=\'Γ£ô Copi├⌐ !\';}.bind(this));}).call(this)">≡ƒôï Copier lien du formulaire actuel</button>';
     var toggle = document.createElement("button");
     toggle.className = "kya-preview-toggle";
-    toggle.innerHTML = "👁️ Aperçu Admin";
+    toggle.innerHTML = "≡ƒæü∩╕Å Aper├ºu Admin";
     toggle.addEventListener("click", function() {
       var vis = panel.style.display === "none";
       panel.style.display = vis ? "block" : "none";
-      toggle.innerHTML = vis ? "✕ Fermer" : "👁️ Aperçu Admin";
+      toggle.innerHTML = vis ? "Γ£ò Fermer" : "≡ƒæü∩╕Å Aper├ºu Admin";
     });
     bar.appendChild(panel);
     bar.appendChild(toggle);

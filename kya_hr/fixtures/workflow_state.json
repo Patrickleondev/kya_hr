@@ -1,4 +1,4 @@
-[
+﻿[
  {
   "docstatus": 0,
   "doctype": "Workflow State",
@@ -52,6 +52,15 @@
   "name": "En attente DG",
   "style": "Warning",
   "workflow_state_name": "En attente DG"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-06-01 10:00:00",
+  "name": "En attente DAAF",
+  "style": "Warning",
+  "workflow_state_name": "En attente DAAF"
  },
  {
   "docstatus": 0,

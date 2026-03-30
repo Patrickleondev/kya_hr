@@ -1,6 +1,6 @@
-{% extends "templates/web.html" %}
+﻿{% extends "templates/web.html" %}
 
-{% block title %}Tableau de Bord – Stagiaires{% endblock %}
+{% block title %}Tableau de Bord ΓÇô Stagiaires{% endblock %}
 
 {% block page_content %}
 <style>
@@ -49,7 +49,7 @@
   }
   .kya-db-header button:hover { background: var(--kya-primary-dark); }
 
-  /* ── Stat cards ── */
+  /* ΓöÇΓöÇ Stat cards ΓöÇΓöÇ */
   .kya-stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
@@ -90,7 +90,7 @@
   .card-accent    { border-color: var(--kya-accent); }
   .card-accent    .stat-value { color: var(--kya-accent); }
 
-  /* ── Charts row ── */
+  /* ΓöÇΓöÇ Charts row ΓöÇΓöÇ */
   .kya-charts-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -114,7 +114,7 @@
   }
   .chart-container { position: relative; height: 220px; }
 
-  /* ── Tables ── */
+  /* ΓöÇΓöÇ Tables ΓöÇΓöÇ */
   .kya-section-title {
     font-size: 1.1rem;
     font-weight: 700;
@@ -154,7 +154,7 @@
   .badge-danger  { background:#ffebee; color:#c62828; }
   .badge-default { background:#f5f5f5; color:#555; }
 
-  /* ── Links grid ── */
+  /* ΓöÇΓöÇ Links grid ΓöÇΓöÇ */
   .kya-links-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -186,15 +186,15 @@
   .kya-error { color: var(--kya-danger); text-align: center; padding: 2rem; }
 </style>
 
-<div id="kya-loading">⏳ Chargement du tableau de bord…</div>
+<div id="kya-loading">ΓÅ│ Chargement du tableau de bordΓÇª</div>
 
 <div id="kya-dashboard" style="display:none">
 
   <!-- Header -->
   <div class="kya-db-header">
-    <h1>🎓 Tableau de Bord — Stagiaires</h1>
+    <h1>≡ƒÄô Tableau de Bord ΓÇö Stagiaires</h1>
     <div class="kya-year-filter">
-      <label for="anneeSelect" style="font-size:.875rem;font-weight:600">Année :</label>
+      <label for="anneeSelect" style="font-size:.875rem;font-weight:600">Ann├⌐e :</label>
       <select id="anneeSelect"></select>
       <button onclick="loadDashboard()">Actualiser</button>
     </div>
@@ -225,8 +225,8 @@
     </div>
   </div>
 
-  <!-- Top bénéficiaires table -->
-  <p class="kya-section-title">Top bénéficiaires – Permissions de sortie</p>
+  <!-- Top b├⌐n├⌐ficiaires table -->
+  <p class="kya-section-title">Top b├⌐n├⌐ficiaires ΓÇô Permissions de sortie</p>
   <div class="kya-table-wrap">
     <table class="kya-table" id="tableTop">
       <thead><tr><th>#</th><th>Stagiaire</th><th>Nbre demandes</th></tr></thead>
@@ -235,14 +235,14 @@
   </div>
 
   <!-- Quick links -->
-  <p class="kya-section-title">Accès rapides</p>
+  <p class="kya-section-title">Acc├¿s rapides</p>
   <div class="kya-links-grid">
-    <a class="kya-link-card" href="/permission-sortie-stagiaire/new"><span class="licon">➕</span>Nouvelle permission</a>
-    <a class="kya-link-card" href="/permission-sortie-stagiaire"><span class="licon">📋</span>Toutes les permissions</a>
-    <a class="kya-link-card" href="/bilan-fin-de-stage/new"><span class="licon">📝</span>Nouveau bilan</a>
-    <a class="kya-link-card" href="/bilan-fin-de-stage"><span class="licon">🗂️</span>Tous les bilans</a>
-    <a class="kya-link-card" href="/app/permission-sortie-stagiaire"><span class="licon">🖥️</span>Gestion bureau</a>
-    <a class="kya-link-card" href="/tableau-bord-employes"><span class="licon">👥</span>Tableau Employés</a>
+    <a class="kya-link-card" href="/permission-sortie-stagiaire/new"><span class="licon">Γ₧ò</span>Nouvelle permission</a>
+    <a class="kya-link-card" href="/app/permission-sortie-stagiaire"><span class="licon">≡ƒôï</span>Toutes les permissions</a>
+    <a class="kya-link-card" href="/bilan-fin-de-stage/new"><span class="licon">≡ƒô¥</span>Nouveau bilan</a>
+    <a class="kya-link-card" href="/app/bilan-fin-de-stage"><span class="licon">≡ƒùé∩╕Å</span>Tous les bilans</a>
+    <a class="kya-link-card" href="/app/permission-sortie-stagiaire"><span class="licon">≡ƒûÑ∩╕Å</span>Gestion bureau</a>
+    <a class="kya-link-card" href="/tableau-bord-employes"><span class="licon">≡ƒæÑ</span>Tableau Employ├⌐s</a>
   </div>
 
 </div>
@@ -252,11 +252,11 @@
 <script>
 (function() {
   const MOIS_LABELS = {
-    "01":"Jan","02":"Fév","03":"Mar","04":"Avr","05":"Mai","06":"Jun",
-    "07":"Jul","08":"Aoû","09":"Sep","10":"Oct","11":"Nov","12":"Déc"
+    "01":"Jan","02":"F├⌐v","03":"Mar","04":"Avr","05":"Mai","06":"Jun",
+    "07":"Jul","08":"Ao├╗","09":"Sep","10":"Oct","11":"Nov","12":"D├⌐c"
   };
   const MENTION_COLORS = {
-    "Très Bien": "#2e7d32","Bien": "#388e3c","Assez Bien": "#43a047",
+    "Tr├¿s Bien": "#2e7d32","Bien": "#388e3c","Assez Bien": "#43a047",
     "Passable": "#f9a825","Insuffisant": "#e53935","": "#9e9e9e"
   };
   let charts = {};
@@ -289,7 +289,7 @@
           render(r.message);
           document.getElementById("kya-dashboard").style.display = "";
         } else {
-          showError("Impossible de charger les données.");
+          showError("Impossible de charger les donn├⌐es.");
         }
       },
       error: function(err) {
@@ -305,17 +305,17 @@
   }
 
   function render(d) {
-    // ── KPI cards
+    // ΓöÇΓöÇ KPI cards
     const grid = document.getElementById("statsGrid");
     grid.innerHTML = "";
     const kpis = [
-      { label: "Stagiaires actifs",   value: d.stagiaires_actifs,   icon: "🎓", cls: "card-primary" },
-      { label: "Permissions totales", value: d.permissions_total,   icon: "📋", cls: "card-info" },
-      { label: "Approuvées",          value: d.permissions_approuvees, icon: "✅", cls: "card-success" },
-      { label: "En cours",            value: d.permissions_en_cours, icon: "⏳", cls: "card-warn" },
-      { label: "Rejetées",            value: d.permissions_rejetees, icon: "❌", cls: "card-danger" },
-      { label: "Bilans soumis",       value: d.bilans_soumis + " / " + d.bilans_total, icon: "📝", cls: "card-accent", raw: true },
-      { label: "Note moyenne",        value: d.note_moyenne + " / 20", icon: "⭐", cls: "card-warn", raw: true },
+      { label: "Stagiaires actifs",   value: d.stagiaires_actifs,   icon: "≡ƒÄô", cls: "card-primary" },
+      { label: "Permissions totales", value: d.permissions_total,   icon: "≡ƒôï", cls: "card-info" },
+      { label: "Approuv├⌐es",          value: d.permissions_approuvees, icon: "Γ£à", cls: "card-success" },
+      { label: "En cours",            value: d.permissions_en_cours, icon: "ΓÅ│", cls: "card-warn" },
+      { label: "Rejet├⌐es",            value: d.permissions_rejetees, icon: "Γ¥î", cls: "card-danger" },
+      { label: "Bilans soumis",       value: d.bilans_soumis + " / " + d.bilans_total, icon: "≡ƒô¥", cls: "card-accent", raw: true },
+      { label: "Note moyenne",        value: d.note_moyenne + " / 20", icon: "Γ¡É", cls: "card-warn", raw: true },
     ];
     kpis.forEach(function(k) {
       const card = document.createElement("div");
@@ -326,7 +326,7 @@
       grid.appendChild(card);
     });
 
-    // ── Chart: permissions par mois (bar)
+    // ΓöÇΓöÇ Chart: permissions par mois (bar)
     destroyChart("chartMois");
     const moisKeys = Object.keys(d.permissions_par_mois || {}).sort();
     const moisLabels = moisKeys.map(function(k) {
@@ -346,12 +346,12 @@
         scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
     });
 
-    // ── Chart: statuts (doughnut)
+    // ΓöÇΓöÇ Chart: statuts (doughnut)
     destroyChart("chartStatuts");
     charts["chartStatuts"] = new Chart(document.getElementById("chartStatuts"), {
       type: "doughnut",
       data: {
-        labels: ["Approuvées", "En cours", "Rejetées", "Autre"],
+        labels: ["Approuv├⌐es", "En cours", "Rejet├⌐es", "Autre"],
         datasets: [{
           data: [
             d.permissions_approuvees,
@@ -367,7 +367,7 @@
         plugins: { legend: { position: "bottom" } } }
     });
 
-    // ── Chart: mentions bilans (pie)
+    // ΓöÇΓöÇ Chart: mentions bilans (pie)
     destroyChart("chartMentions");
     const mentLabels = Object.keys(d.mentions || {});
     const mentData   = mentLabels.map(function(m) { return d.mentions[m]; });
@@ -375,7 +375,7 @@
     charts["chartMentions"] = new Chart(document.getElementById("chartMentions"), {
       type: "pie",
       data: {
-        labels: mentLabels.length ? mentLabels : ["Aucune donnée"],
+        labels: mentLabels.length ? mentLabels : ["Aucune donn├⌐e"],
         datasets: [{ data: mentData.length ? mentData : [1],
           backgroundColor: mentColors.length ? mentColors : ["#e0e0e0"],
           borderWidth: 2 }]
@@ -384,7 +384,7 @@
         plugins: { legend: { position: "bottom" } } }
     });
 
-    // ── Chart: top bénéficiaires (horizontal bar)
+    // ΓöÇΓöÇ Chart: top b├⌐n├⌐ficiaires (horizontal bar)
     destroyChart("chartTop");
     const top = d.top_beneficiaires || [];
     charts["chartTop"] = new Chart(document.getElementById("chartTop"), {
@@ -403,11 +403,11 @@
         scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } } }
     });
 
-    // ── Table top bénéficiaires
+    // ΓöÇΓöÇ Table top b├⌐n├⌐ficiaires
     const tbody = document.querySelector("#tableTop tbody");
     tbody.innerHTML = "";
     if (!top.length) {
-      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#aaa">Aucune donnée</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#aaa">Aucune donn├⌐e</td></tr>';
     } else {
       top.forEach(function(t, i) {
         tbody.innerHTML += "<tr><td>" + (i + 1) + "</td><td>" + t.nom + "</td><td>" + t.count + "</td></tr>";

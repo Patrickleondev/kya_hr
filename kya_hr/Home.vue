@@ -1,4 +1,4 @@
-<template>
+﻿<template>
 	<BaseLayout>
 		<template #body>
 			<div class="flex flex-col items-center my-7 p-4 gap-7">
@@ -16,19 +16,19 @@
 					:loading="loadingDocs"
 					:title="__('Mes Demandes')"
 				/>
-				<!-- Enquêtes & Évaluations -->
+				<!-- Enqu├¬tes & ├ëvaluations -->
 				<KYASurveys
 					:available="surveysAvailable"
 					:completed="surveysCompleted"
 					:loading="loadingSurveys"
-					:title="__('Enquêtes & Évaluations')"
+					:title="__('Enqu├¬tes & ├ëvaluations')"
 				/>
-				<!-- Mes Tâches (KYA Taches) -->
+				<!-- Mes T├óches (KYA Taches) -->
 				<KYATasks
 					:tasks="myTasks"
 					:plans="myPlans"
 					:loading="loadingTasks"
-					:title="__('Mes Tâches')"
+					:title="__('Mes T├óches')"
 				/>
 				<QuickLinks
 					v-if="shouldShowLegacyQuickLinks && filteredQuickLinks.length"
@@ -118,13 +118,13 @@ function fallbackKyaLinks(category) {
 		{
 			title: "PV Sortie Mat\u00e9riel",
 			description: "D\u00e9clarer une sortie de mat\u00e9riel",
-			url: "/pv-sortie-materiel",
+			url: "/pv-sortie-materiel/new",
 			emoji: "\uD83D\uDCE6",
 		},
 		{
 			title: "Demande d'Achat",
 			description: "Soumettre une demande d'achat",
-			url: "/demande-achat",
+			url: "/demande-achat/new",
 			emoji: "\uD83D\uDED2",
 		},
 	]
@@ -134,13 +134,13 @@ function fallbackKyaLinks(category) {
 			{
 				title: "Permission de Sortie",
 				description: "Demander une permission de sortie",
-				url: "/permission-sortie-stagiaire",
+				url: "/permission-sortie-stagiaire/new",
 				emoji: "\uD83D\uDEAA",
 			},
 			{
 				title: "Bilan de Stage",
 				description: "Remplir le bilan de fin de stage",
-				url: "/bilan-fin-de-stage",
+				url: "/bilan-fin-de-stage/new",
 				emoji: "\uD83D\uDCDD",
 			},
 			...common,
@@ -152,19 +152,19 @@ function fallbackKyaLinks(category) {
 			{
 				title: "Permission Employ\u00e9 (RH)",
 				description: "Saisie manuelle via Web Form",
-				url: "/permission-sortie-employe",
+				url: "/permission-sortie-employe/new",
 				emoji: "\uD83E\uDDFE",
 			},
 			{
 				title: "Permission Stagiaire (RH)",
 				description: "Saisie manuelle via Web Form",
-				url: "/permission-sortie-stagiaire",
+				url: "/permission-sortie-stagiaire/new",
 				emoji: "\uD83C\uDF93",
 			},
 			{
 				title: "Demande de Cong\u00e9 (RH)",
 				description: "Saisie manuelle via Web Form",
-				url: "/planning-conge",
+				url: "/planning-conge/new",
 				emoji: "\uD83D\uDCC5",
 			},
 			...common,
@@ -176,13 +176,13 @@ function fallbackKyaLinks(category) {
 		{
 			title: "Permission de Sortie",
 			description: "Demander une permission de sortie",
-			url: "/permission-sortie-employe",
+			url: "/permission-sortie-employe/new",
 			emoji: "\uD83D\uDEAA",
 		},
 		{
 			title: "Planning de Cong\u00e9",
 			description: "G\u00e9rer vos p\u00e9riodes de cong\u00e9 annuelles",
-			url: "/planning-conge",
+			url: "/planning-conge/new",
 			emoji: "\uD83D\uDCC5",
 		},
 		...common,
@@ -197,12 +197,12 @@ const myDocuments = ref([])
 const myDocumentsTotal = ref(0)
 const loadingDocs = ref(false)
 
-// Enquêtes & Évaluations
+// Enqu├¬tes & ├ëvaluations
 const surveysAvailable = ref([])
 const surveysCompleted = ref([])
 const loadingSurveys = ref(false)
 
-// Tâches
+// T├óches
 const myTasks = ref([])
 const myPlans = ref([])
 const loadingTasks = ref(false)
@@ -247,7 +247,7 @@ onMounted(async () => {
 	}
 	loadingDocs.value = false
 
-	// 4. Enquêtes & Évaluations
+	// 4. Enqu├¬tes & ├ëvaluations
 	loadingSurveys.value = true
 	try {
 		const res = await frappeRequest({
@@ -262,7 +262,7 @@ onMounted(async () => {
 	}
 	loadingSurveys.value = false
 
-	// 5. Mes Tâches
+	// 5. Mes T├óches
 	loadingTasks.value = true
 	try {
 		const res = await frappeRequest({
