@@ -365,7 +365,7 @@ def fix_kya_services_number_cards():
     # Also ensure the 'Réponses Reçues' Number Card filter key is valid
     frappe.db.sql("""
         UPDATE `tabNumber Card`
-        SET filters_json = '[["KYA Form Response","soumis_le","is","set",false]]'
+        SET filters_json = '[["KYA Form Response","soumis_le","is","set"]]'
         WHERE name = 'Réponses Reçues' AND document_type = 'KYA Form Response'
     """)
     print("  [KYA Services] Portail Enquête type=URL ✓ · Réponses Reçues filter ✓")
@@ -379,7 +379,7 @@ def fix_stagiaires_number_cards():
             "label": "Stagiaires Actifs",
             "document_type": "Employee",
             "function": "Count",
-            "filters_json": '[["Employee","employment_type","=","Stage",false],["Employee","status","=","Active",false]]',
+            "filters_json": '[["Employee","employment_type","=","Stage"],["Employee","status","=","Active"]]',
             "color": "#009688",
         },
         {
@@ -387,7 +387,7 @@ def fix_stagiaires_number_cards():
             "label": "Permissions en Attente",
             "document_type": "Permission Sortie Stagiaire",
             "function": "Count",
-            "filters_json": '[["Permission Sortie Stagiaire","workflow_state","not in",["Approuvé","Rejeté"],false]]',
+            "filters_json": '[["Permission Sortie Stagiaire","workflow_state","not in",["Approuvé","Rejeté"]]]',
             "color": "#e67e22",
         },
         {
@@ -395,7 +395,7 @@ def fix_stagiaires_number_cards():
             "label": "Bilans Soumis",
             "document_type": "Bilan Fin de Stage",
             "function": "Count",
-            "filters_json": '[["Bilan Fin de Stage","docstatus","!=",0,false]]',
+            "filters_json": '[["Bilan Fin de Stage","docstatus","!=",0]]',
             "color": "#1a5276",
         },
     ]
