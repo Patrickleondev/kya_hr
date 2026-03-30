@@ -736,6 +736,49 @@ footer .web-footer-menu { display: none !important; }
 .frappe-control[data-fieldtype="Table"] input,
 .frappe-control[data-fieldtype="Table"] select,
 .frappe-control[data-fieldtype="Table"] textarea { color: var(--kya-heading) !important; -webkit-text-fill-color: var(--kya-heading) !important; }
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row > div,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row > div {
+  background: #eef3f8 !important;
+}
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row *,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row *,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row .row-index,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row .row-index,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row .grid-static-col,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row .grid-static-col,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row .static-area,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row .static-area,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row .static-area *,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row .static-area * {
+  color: var(--kya-heading) !important;
+  -webkit-text-fill-color: var(--kya-heading) !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+.web-form-container .frappe-control[data-fieldtype="Table"] .rows .grid-row *,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .rows .grid-row *,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-body *,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-body *,
+.web-form-container .frappe-control[data-fieldtype="Table"] .empty-table-message,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .empty-table-message,
+.web-form-container .frappe-control[data-fieldtype="Table"] .no-result,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .no-result {
+  color: var(--kya-heading) !important;
+  -webkit-text-fill-color: var(--kya-heading) !important;
+  opacity: 1 !important;
+}
+.web-form-container .frappe-control[data-fieldtype="Select"] select,
+.kya-form-section .frappe-control[data-fieldtype="Select"] select,
+.web-form-container .frappe-control[data-fieldtype="Select"] option,
+.kya-form-section .frappe-control[data-fieldtype="Select"] option,
+.web-form-container .frappe-control[data-fieldtype="Select"] option:checked,
+.kya-form-section .frappe-control[data-fieldtype="Select"] option:checked {
+  color: var(--kya-heading) !important;
+  -webkit-text-fill-color: var(--kya-heading) !important;
+  opacity: 1 !important;
+}
 /* Prevent inherited light color on white bg */
 [data-theme="dark"] .web-form-container,
 [data-theme="dark"] .kya-form-section { background: #fff !important; color: var(--kya-body) !important; }
