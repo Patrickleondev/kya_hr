@@ -49,13 +49,13 @@ def get_kya_quick_links():
         links.append({
             "title": "Permission de Sortie",
             "description": "Demander une permission de sortie",
-            "url": "/permission-sortie-stagiaire",
+            "url": "/permission-sortie-stagiaire/new",
             "emoji": "🚪",
         })
         links.append({
             "title": "Bilan de Stage",
             "description": "Remplir le bilan de fin de stage",
-            "url": "/bilan-fin-de-stage",
+            "url": "/bilan-fin-de-stage/new",
             "emoji": "📝",
         })
     elif category == "prestataire":
@@ -63,7 +63,7 @@ def get_kya_quick_links():
         links.append({
             "title": "Permission de Sortie",
             "description": "Demander une permission de sortie",
-            "url": "/permission-sortie-employe",
+            "url": "/permission-sortie-employe/new",
             "emoji": "🚪",
         })
     else:
@@ -71,13 +71,13 @@ def get_kya_quick_links():
         links.append({
             "title": "Permission de Sortie",
             "description": "Demander une permission de sortie",
-            "url": "/permission-sortie-employe",
+            "url": "/permission-sortie-employe/new",
             "emoji": "🚪",
         })
         links.append({
             "title": "Planning de Congé",
             "description": "Planifier vos périodes de congé annuelles",
-            "url": "/planning-conge",
+            "url": "/planning-conge/new",
             "emoji": "📅",
         })
 
@@ -85,13 +85,13 @@ def get_kya_quick_links():
     links.append({
         "title": "PV Sortie Matériel",
         "description": "Déclarer une sortie de matériel",
-        "url": "/pv-sortie-materiel",
+        "url": "/pv-sortie-materiel/new",
         "emoji": "📦",
     })
     links.append({
         "title": "Demande d\'Achat",
         "description": "Soumettre une demande d\'achat",
-        "url": "/demande-achat",
+        "url": "/demande-achat/new",
         "emoji": "🛒",
     })
 
@@ -537,6 +537,7 @@ _STATE_COLORS = {
     "En attente RH": "blue",
     "En attente DG": "blue",
     "En attente DGA": "blue",
+    "En attente DAAF": "blue",
     "En attente Magasin": "blue",
     "En attente Audit": "blue",
     "En attente Comptabilité": "blue",
@@ -902,7 +903,7 @@ def get_demandes_stats():
     en_cours_states = {
         "En attente Chef", "En attente Chef Service", "En attente RH",
         "En attente DG", "En attente DGA", "En attente Magasin",
-        "En attente Audit", "En attente Comptabilité",
+        "En attente Audit", "En attente Comptabilité", "En attente DAAF",
         "En attente Resp. Stagiaires", "En cours",
         "En attente Approbation",
     }
@@ -1231,7 +1232,7 @@ def get_webforms_list():
             "label": "Permission de Sortie Stagiaire",
             "route": "/permission-sortie-stagiaire",
             "new_route": "/permission-sortie-stagiaire/new",
-            "ref": "KEG-RH-31-V01",
+            "ref": "AEA-ENG-30-V01",
             "module": "Stagiaires",
             "icon": "🎓"
         },
@@ -1240,7 +1241,7 @@ def get_webforms_list():
             "label": "Permission de Sortie Employé",
             "route": "/permission-sortie-employe",
             "new_route": "/permission-sortie-employe/new",
-            "ref": "KEG-RH-30-V01",
+            "ref": "AEA-ENG-30-V01",
             "module": "Employés",
             "icon": "👤"
         },
@@ -1249,7 +1250,7 @@ def get_webforms_list():
             "label": "Demande d'Achat",
             "route": "/demande-achat",
             "new_route": "/demande-achat/new",
-            "ref": "KEG-PRO-01-V01",
+            "ref": "AEA-ENG-30-V01",
             "module": "Achats",
             "icon": "🛒"
         },
@@ -1258,7 +1259,7 @@ def get_webforms_list():
             "label": "PV Sortie de Matériel",
             "route": "/pv-sortie-materiel",
             "new_route": "/pv-sortie-materiel/new",
-            "ref": "KEG-LOG-32-V01",
+            "ref": "AEA-ENG-30-V01",
             "module": "Stock",
             "icon": "📦"
         },
@@ -1267,7 +1268,7 @@ def get_webforms_list():
             "label": "Planning de Congé",
             "route": "/planning-conge",
             "new_route": "/planning-conge/new",
-            "ref": "KEG-RH-33-V01",
+            "ref": "AEA-ENG-30-V01",
             "module": "Employés",
             "icon": "📅"
         },
@@ -1276,7 +1277,7 @@ def get_webforms_list():
             "label": "Bilan de Fin de Stage",
             "route": "/bilan-fin-de-stage",
             "new_route": "/bilan-fin-de-stage/new",
-            "ref": "KEG-RH-34-V01",
+            "ref": "AEA-ENG-30-V01",
             "module": "Stagiaires",
             "icon": "📋"
         },

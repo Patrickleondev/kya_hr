@@ -256,37 +256,43 @@
     var style = document.createElement("style");
     style.id = "kya-wf-visibility-patch";
     style.textContent = [
-      '.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row,',
-      '.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row {',
-      '  background: #eaf2f8 !important;',
-      '}',
-      '.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row *,',
-      '.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row * {',
-      '  color: #1a1a2e !important;',
-      '}',
-      '.web-form-container .frappe-control[data-fieldtype="Table"] .rows *,',
-      '.kya-form-section .frappe-control[data-fieldtype="Table"] .rows *,',
-      '.web-form-container .frappe-control[data-fieldtype="Table"] .grid-row *,',
-      '.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-row *,',
-      '.web-form-container .frappe-control[data-fieldtype="Table"] .no-value,',
-      '.kya-form-section .frappe-control[data-fieldtype="Table"] .no-value {',
-      '  color: #1a1a2e !important;',
-      '}',
-      '.web-form-container .frappe-control[data-fieldtype="Select"] select,',
-      '.kya-form-section .frappe-control[data-fieldtype="Select"] select,',
-      '.web-form-container .frappe-control[data-fieldtype="Select"] option,',
-      '.kya-form-section .frappe-control[data-fieldtype="Select"] option {',
-      '  color: #1a1a2e !important;',
-      '  -webkit-text-fill-color: #1a1a2e !important;',
-      '}',
-      '.web-form-container .frappe-control[data-fieldtype="Signature"] .signature-field,',
-      '.kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-field {',
-      '  min-height: 130px !important;',
-      '  height: 130px !important;',
-      '}',
+      '/* Nuclear visibility fix — inline <style> injected by kya_webform.js */',
+      'select, select option { color: #1a1a2e !important; -webkit-text-fill-color: #1a1a2e !important; background-color: #fff !important; }',
+      '.grid-heading-row, .grid-heading-row * { color: #1a1a2e !important; -webkit-text-fill-color: #1a1a2e !important; background: #eaf2f8 !important; }',
+      '.grid-heading-row .static-area { color: #1a1a2e !important; font-weight: 700 !important; font-size: 11px !important; }',
+      '.rows *, .grid-row *, .no-value, .grid-body * { color: #1a1a2e !important; -webkit-text-fill-color: #1a1a2e !important; }',
+      '.frappe-control[data-fieldtype="Signature"] .signature-field { min-height: 130px !important; height: 130px !important; }',
     ].join('\n');
 
     document.head.appendChild(style);
+
+    /* Also force inline styles on already-rendered elements */
+    forceInlineTextVisibility();
+  }
+
+  function forceInlineTextVisibility() {
+    /* Select elements */
+    document.querySelectorAll('select').forEach(function(sel) {
+      sel.style.setProperty('color', '#1a1a2e', 'important');
+      sel.style.setProperty('-webkit-text-fill-color', '#1a1a2e', 'important');
+      sel.style.setProperty('background-color', '#fff', 'important');
+    });
+    document.querySelectorAll('select option').forEach(function(opt) {
+      opt.style.setProperty('color', '#1a1a2e', 'important');
+    });
+    /* Table headers */
+    document.querySelectorAll('.grid-heading-row').forEach(function(row) {
+      row.style.setProperty('background', '#eaf2f8', 'important');
+      row.querySelectorAll('*').forEach(function(el) {
+        el.style.setProperty('color', '#1a1a2e', 'important');
+        el.style.setProperty('-webkit-text-fill-color', '#1a1a2e', 'important');
+      });
+    });
+    /* Table body cells */
+    document.querySelectorAll('.rows .row, .rows .static-area, .grid-row .static-area').forEach(function(el) {
+      el.style.setProperty('color', '#1a1a2e', 'important');
+      el.style.setProperty('-webkit-text-fill-color', '#1a1a2e', 'important');
+    });
   }
 
   function findFieldEl(fieldname) {
@@ -726,6 +732,7 @@
       restructureForm();
       setupEmployeeAutoFill();
       stabilizeSignaturePads(route);
+      setTimeout(forceInlineTextVisibility, 200);
       return;
     }
     var obs = new MutationObserver(function (m, observer) {
@@ -735,6 +742,7 @@
           restructureForm();
           setupEmployeeAutoFill();
           stabilizeSignaturePads(route);
+          forceInlineTextVisibility();
         }, 300);
       }
     });
@@ -745,6 +753,7 @@
         setupEmployeeAutoFill();
       }
       stabilizeSignaturePads(route);
+      forceInlineTextVisibility();
     }, 2000);
     setTimeout(function () {
       obs.disconnect();
@@ -753,6 +762,7 @@
         setupEmployeeAutoFill();
       }
       stabilizeSignaturePads(route);
+      forceInlineTextVisibility();
     }, 5000);
   }
 

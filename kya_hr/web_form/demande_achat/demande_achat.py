@@ -17,7 +17,7 @@ def get_context(context):
         context.can_sign_demandeur = state == "Brouillon"
         context.can_sign_chef = (state == "En attente Chef" and
             any(r in roles for r in ["Purchase User", "Purchase Manager", "System Manager"]))
-        context.can_sign_dga = (state == "En attente Approbation" and
+        context.can_sign_dga = (state == "En attente DAAF" and
             any(r in roles for r in ["Purchase Manager", "HR Manager", "System Manager"]))
         context.can_sign_dg = (state == "En attente DG" and
             any(r in roles for r in ["HR Manager", "System Manager"]))
