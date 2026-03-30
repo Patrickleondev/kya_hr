@@ -165,37 +165,37 @@
     "permission-sortie-stagiaire": {
       title: "DEMANDE DE PERMISSION DE SORTIE",
       subtitle: "Stagiaire",
-      ref: "KEG-RH-31-V01",
+      ref: "AEA-ENG-30-V01",
       workflow: "Ma\u00eetre de Stage \u2192 Resp. Stagiaires \u2192 Direction"
     },
     "permission-sortie-employe": {
       title: "DEMANDE DE PERMISSION DE SORTIE",
       subtitle: "Employ\u00e9",
-      ref: "KEG-RH-30-V01",
+      ref: "AEA-ENG-30-V01",
       workflow: "Chef de Service \u2192 RH \u2192 Direction"
     },
     "demande-achat": {
       title: "FICHE D\u2019ENGAGEMENT DE D\u00c9PENSES",
       subtitle: "Approvisionnement",
-      ref: "KEG-PRO-01-V01",
+      ref: "AEA-ENG-30-V01",
       workflow: "Chef \u2192 Auditeur \u2192 DAAF \u2192 DG"
     },
     "pv-sortie-materiel": {
       title: "PV DE SORTIE DE MAT\u00c9RIEL",
       subtitle: "Achat et Stock",
-      ref: "KEG-LOG-32-V01",
+      ref: "AEA-ENG-30-V01",
       workflow: "Chef \u2192 Audit \u2192 Direction \u2192 Magasin"
     },
     "planning-conge": {
       title: "PLANNING DE CONG\u00c9 ANNUEL",
       subtitle: "Ressources Humaines",
-      ref: "KEG-RH-33-V01",
+      ref: "AEA-ENG-30-V01",
       workflow: "Employ\u00e9 \u2192 RH \u2192 DG"
     },
     "bilan-fin-de-stage": {
       title: "BILAN DE FIN DE STAGE",
       subtitle: "Formation & Stages",
-      ref: "KEG-RH-34-V01",
+      ref: "AEA-ENG-30-V01",
       workflow: "Stagiaire \u2192 Encadrant \u2192 RH"
     }
   };
