@@ -384,7 +384,8 @@ def fix_stagiaires_number_cards():
         },
         {
             "name": "Permissions Stagiaires en Attente",
-            "label": "Permissions en Attente",
+            "label": "Permissions Stagiaires en Attente",
+            "legacy_labels": ["Permissions en Attente"],
             "document_type": "Permission Sortie Stagiaire",
             "function": "Count",
             "filters_json": '[["Permission Sortie Stagiaire","workflow_state","not in",["Approuvé","Rejeté"]]]',
@@ -392,7 +393,8 @@ def fix_stagiaires_number_cards():
         },
         {
             "name": "Bilans de Stage Soumis",
-            "label": "Bilans Soumis",
+            "label": "Bilans de Stage Soumis",
+            "legacy_labels": ["Bilans Soumis"],
             "document_type": "Bilan Fin de Stage",
             "function": "Count",
             "filters_json": '[["Bilan Fin de Stage","docstatus","!=",0]]',
@@ -400,21 +402,53 @@ def fix_stagiaires_number_cards():
         },
     ]
     created = 0
+    updated = 0
     for card_data in cards_to_create:
-        name = card_data.pop("name")
-        if not frappe.db.exists("Number Card", name):
-            try:
+        name = card_data["name"]
+        label = card_data["label"]
+        legacy_labels = card_data.get("legacy_labels", [])
+        payload = {
+            "label": label,
+            "document_type": card_data["document_type"],
+            "function": card_data["function"],
+            "filters_json": card_data["filters_json"],
+            "color": card_data["color"],
+            "is_standard": 0,
+        }
+
+        try:
+            existing_name = frappe.db.exists("Number Card", name)
+            if not existing_name:
+                for legacy_label in [label, *legacy_labels]:
+                    existing_name = frappe.db.get_value("Number Card", {"label": legacy_label}, "name")
+                    if existing_name:
+                        break
+
+            if existing_name:
+                frappe.db.set_value("Number Card", existing_name, payload)
+                if existing_name != name and not frappe.db.exists("Number Card", name):
+                    try:
+                        frappe.rename_doc("Number Card", existing_name, name, force=True, ignore_if_exists=True)
+                        existing_name = name
+                    except Exception as rename_exc:
+                        print(f"  [Stagiaires NC] Rename '{existing_name}' -> '{name}' skipped: {rename_exc}")
+                updated += 1
+            else:
                 card = frappe.new_doc("Number Card")
                 card.name = name
-                card.label = card_data.pop("label", name)
-                card.is_standard = 0
-                for k, v in card_data.items():
+                for k, v in payload.items():
                     setattr(card, k, v)
                 card.insert(ignore_permissions=True, ignore_if_duplicate=True)
+                if card.name != name and not frappe.db.exists("Number Card", name):
+                    try:
+                        frappe.rename_doc("Number Card", card.name, name, force=True, ignore_if_exists=True)
+                    except Exception as rename_exc:
+                        print(f"  [Stagiaires NC] Rename '{card.name}' -> '{name}' skipped: {rename_exc}")
                 created += 1
-            except Exception as e:
-                print(f"  [Stagiaires NC] Skipped '{name}': {e}")
-    print(f"  [Stagiaires] {created} Number Cards créés ✓")
+        except Exception as e:
+            print(f"  [Stagiaires NC] Skipped '{name}': {e}")
+
+    print(f"  [Stagiaires] {created} Number Cards créés · {updated} mis à jour ✓")
 
     # Inject Number Cards into Espace Stagiaires workspace content (DB)
     ws_content_raw = frappe.db.get_value("Workspace", "Espace Stagiaires", "content") or "[]"
