@@ -257,12 +257,15 @@ body {
 }
 .kya-section-body.kya-sig-grid .frappe-control canvas,
 .kya-section-body.kya-sig-grid .frappe-control .signature-pad {
-  min-height: 80px !important;
-  max-height: 100px;
+  min-height: 130px !important;
+  height: 130px !important;
+  max-height: 130px !important;
   width: 100% !important;
 }
 .kya-section-body.kya-sig-grid .frappe-control .signature-field .signature-display img {
-  max-height: 80px;
+  min-height: 110px;
+  max-height: 130px;
+  width: auto;
   object-fit: contain;
 }
 .kya-section-body.kya-sig-grid .frappe-control.read-only .signature-pad,
@@ -398,11 +401,12 @@ body {
 }
 .web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row,
 .kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row {
-  background: var(--kya-blue);
+  background: #eaf2f8 !important;
+  border-bottom: 1px solid var(--kya-border) !important;
 }
 .web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row .static-area,
 .kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row .static-area {
-  color: #fff !important;
+  color: var(--kya-heading) !important;
   font-weight: 700;
   font-size: 11px;
   text-transform: uppercase;
@@ -432,6 +436,81 @@ body {
 
 .web-form-container .web-form select,
 .kya-form-section select { appearance: auto; }
+
+/* Select options + selected values must stay readable */
+.web-form-container .web-form select option,
+.kya-form-section select option,
+.web-form-container .frappe-control[data-fieldtype="Select"] .control-value,
+.kya-form-section .frappe-control[data-fieldtype="Select"] .control-value,
+.web-form-container .frappe-control[data-fieldtype="Select"] .like-disabled-input,
+.kya-form-section .frappe-control[data-fieldtype="Select"] .like-disabled-input {
+  color: var(--kya-heading) !important;
+  background: #fff !important;
+  -webkit-text-fill-color: var(--kya-heading) !important;
+}
+
+/* Child table headers and cells: enforce contrast on all themes */
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row .grid-row,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row .grid-row,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row .row-index,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row .row-index {
+  background: #eaf2f8 !important;
+}
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row .static-area,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row .static-area,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row .static-area *,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row .static-area * {
+  color: var(--kya-heading) !important;
+}
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-body,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-body,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-row,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-row,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-row .static-area,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-row .static-area,
+.web-form-container .frappe-control[data-fieldtype="Table"] .rows,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .rows,
+.web-form-container .frappe-control[data-fieldtype="Table"] .no-value,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .no-value,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-empty,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-empty {
+  color: var(--kya-heading) !important;
+}
+
+/* Last-resort contrast for dynamic grid nodes inserted after render */
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-row *,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-row *,
+.web-form-container .frappe-control[data-fieldtype="Table"] .rows *,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .rows *,
+.web-form-container .frappe-control[data-fieldtype="Table"] .no-value *,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .no-value * {
+  color: var(--kya-heading) !important;
+}
+
+/* Keep header text readable even when Frappe swaps heading classes */
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row *,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row * {
+  color: var(--kya-heading) !important;
+}
+
+/* Keep signed image size stable after save/refresh */
+.web-form-container .frappe-control[data-fieldtype="Signature"] .signature-display,
+.kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-display {
+  min-height: 130px !important;
+}
+.web-form-container .frappe-control[data-fieldtype="Signature"] .signature-field,
+.kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-field {
+  min-height: 130px !important;
+  height: 130px !important;
+}
+.web-form-container .frappe-control[data-fieldtype="Signature"] .signature-display img,
+.kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-display img {
+  max-height: 130px !important;
+  width: auto !important;
+  object-fit: contain !important;
+}
 .web-form-container .frappe-control[data-fieldtype="Link"] .link-btn,
 .kya-form-section .frappe-control[data-fieldtype="Link"] .link-btn { display: none; }
 
