@@ -8,6 +8,7 @@ import json
 
 def execute():
     print("=== KYA FIX ALL WORKSPACES ===")
+    fix_missing_workflow_states()
     fix_bad_doctype_shortcuts()
     fix_card_break_links()
     fix_kya_services_portail()
@@ -32,6 +33,35 @@ def execute():
     frappe.db.commit()
     frappe.clear_cache()
     print("=== ALL FIXES APPLIED + CACHE CLEARED ===")
+
+
+def fix_missing_workflow_states():
+    """Ensure every workflow state referenced by custom workflows exists in DB."""
+    required_states = [
+        ("Brouillon", ""),
+        ("En attente Chef", "Warning"),
+        ("En attente RH", "Warning"),
+        ("En attente DAAF", "Warning"),
+        ("En attente DG", "Warning"),
+        ("En attente Audit", "Warning"),
+        ("En attente Magasin", "Warning"),
+        ("En attente Direction", "Warning"),
+        ("En attente Resp. Stagiaires", "Warning"),
+        ("Approuvé", "Success"),
+        ("Rejeté", "Danger"),
+    ]
+    created = 0
+    for state_name, style in required_states:
+        if frappe.db.exists("Workflow State", state_name):
+            continue
+        doc = frappe.get_doc({
+            "doctype": "Workflow State",
+            "workflow_state_name": state_name,
+            "style": style,
+        })
+        doc.insert(ignore_permissions=True)
+        created += 1
+    print(f"  [Workflow States] {created} état(s) créé(s) si manquants ✓")
 
 
 def fix_card_break_links():
@@ -576,20 +606,60 @@ def fix_gestion_equipe_dashboard():
     """Créer ou mettre à jour le dashboard stratégique Gestion Équipe."""
     # ── Charts ────────────────────────────────────────────────────────────────
     charts_def = [
-        ("Gestion Équipe - Plans par mois",       "Plan Trimestriel", "Bar"),
-        ("Gestion Équipe - Évaluations par mois", "KYA Evaluation",   "Line"),
+        {
+            "name": "Gestion Équipe - Plans par mois",
+            "document_type": "Plan Trimestriel",
+            "type": "Bar",
+            "based_on": "creation",
+            "time_interval": "Monthly",
+            "timespan": "Last Year",
+        },
+        {
+            "name": "Gestion Équipe - Évaluations par mois",
+            "document_type": "KYA Evaluation",
+            "type": "Line",
+            "based_on": "creation",
+            "time_interval": "Monthly",
+            "timespan": "Last Year",
+        },
+        {
+            "name": "🏆 Score collectif par équipe",
+            "document_type": "Plan Trimestriel",
+            "chart_type": "Group By",
+            "group_by_based_on": "equipe",
+            "group_by_type": "Average",
+            "value_based_on": "score_collectif",
+            "aggregate_function_based_on": "score_collectif",
+            "type": "Bar",
+        },
+        {
+            "name": "👥 Performance par équipe",
+            "document_type": "Tache Equipe",
+            "chart_type": "Group By",
+            "group_by_based_on": "equipe",
+            "group_by_type": "Average",
+            "value_based_on": "taux_effectif",
+            "aggregate_function_based_on": "taux_effectif",
+            "type": "Bar",
+        },
     ]
     chart_names = []
-    for cname, doctype, ctype in charts_def:
+    for chart_def in charts_def:
+        cname = chart_def["name"]
         if not frappe.db.exists("Dashboard Chart", cname):
             try:
                 chart = frappe.new_doc("Dashboard Chart")
                 chart.chart_name    = cname
-                chart.document_type = doctype
-                chart.based_on      = "creation"
-                chart.type          = ctype
-                chart.time_interval = "Monthly"
-                chart.timespan      = "Last Year"
+                chart.document_type = chart_def["document_type"]
+                chart.type          = chart_def.get("type", "Bar")
+                chart.chart_type    = chart_def.get("chart_type", "Count")
+                chart.based_on      = chart_def.get("based_on", "creation")
+                chart.time_interval = chart_def.get("time_interval", "Monthly")
+                chart.timespan      = chart_def.get("timespan", "Last Year")
+                chart.group_by_based_on = chart_def.get("group_by_based_on", "")
+                chart.group_by_type = chart_def.get("group_by_type", "Count")
+                chart.value_based_on = chart_def.get("value_based_on", "")
+                chart.aggregate_function_based_on = chart_def.get("aggregate_function_based_on", "")
                 chart.filters_json  = "[]"
                 chart.is_standard   = 0
                 chart.save(ignore_permissions=True)

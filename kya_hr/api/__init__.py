@@ -812,7 +812,7 @@ def get_demandes_combined(limit=50, offset=0, type_filter=None, statut_filter=No
                     "date": str(doc.date_sortie) if doc.date_sortie else str(doc.creation)[:10],
                     "statut": doc.workflow_state or "Brouillon",
                     "color": _STATE_COLORS.get(doc.workflow_state or "Brouillon", "gray"),
-                    "url": f"/pv-sortie-materiel?name={doc.name}",
+                    "url": f"/pv-sortie-materiel/{doc.name}",
                     "creation": str(doc.creation),
                 })
         except Exception:
@@ -847,7 +847,7 @@ def get_demandes_combined(limit=50, offset=0, type_filter=None, statut_filter=No
                     "color": _STATE_COLORS.get(doc.workflow_state or "Brouillon", "gray"),
                     "montant": doc.montant_total or 0,
                     "urgence": doc.urgence or "Normale",
-                    "url": f"/demande-achat?name={doc.name}",
+                    "url": f"/demande-achat/{doc.name}",
                     "creation": str(doc.creation),
                 })
         except Exception:
