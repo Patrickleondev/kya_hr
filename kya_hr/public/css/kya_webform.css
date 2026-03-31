@@ -494,6 +494,13 @@ body {
 .kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row * {
   color: var(--kya-heading) !important;
 }
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row .col,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row .col,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row [data-fieldname],
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row [data-fieldname] {
+  color: var(--kya-heading) !important;
+  opacity: 1 !important;
+}
 
 /* Keep signed image size stable after save/refresh */
 .web-form-container .frappe-control[data-fieldtype="Signature"] .signature-display,
@@ -504,6 +511,16 @@ body {
 .kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-field {
   min-height: 130px !important;
   height: 130px !important;
+  max-height: 130px !important;
+  overflow: hidden !important;
+}
+.web-form-container .frappe-control[data-fieldtype="Signature"] .signature-pad,
+.kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-pad,
+.web-form-container .frappe-control[data-fieldtype="Signature"] canvas,
+.kya-form-section .frappe-control[data-fieldtype="Signature"] canvas {
+  min-height: 130px !important;
+  height: 130px !important;
+  max-height: 130px !important;
 }
 .web-form-container .frappe-control[data-fieldtype="Signature"] .signature-display img,
 .kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-display img {

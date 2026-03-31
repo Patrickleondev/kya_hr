@@ -137,12 +137,12 @@
  },
  {
   "doctype": "Notification",
-  "name": "KYA - PV Matériel: En attente Direction",
+    "name": "KYA - PV Matériel: En attente DGA",
   "subject": "PV Sortie Matériel — {{ doc.objet }} / Validation Direction",
   "document_type": "PV Sortie Materiel",
   "event": "Value Change",
   "value_changed": "workflow_state",
-  "condition": "doc.workflow_state == 'En attente Direction'",
+    "condition": "doc.workflow_state == 'En attente DGA'",
   "channel": "Email",
   "recipients": [
    {

@@ -457,9 +457,9 @@
     "allow_edit": "Stock Manager",
     "doc_status": "0",
     "is_optional_state": 0,
-    "state": "En attente Direction",
+    "state": "En attente DGA",
     "update_field": "statut",
-    "update_value": "En attente Direction"
+    "update_value": "En attente DGA"
    },
    {
     "allow_edit": "Stock User",
@@ -516,7 +516,7 @@
     "allow_self_approval": 0,
     "allowed": "Auditor",
     "condition": null,
-    "next_state": "En attente Direction",
+    "next_state": "En attente DGA",
     "state": "En attente Audit"
    },
    {
@@ -533,7 +533,7 @@
     "allowed": "Stock Manager",
     "condition": null,
     "next_state": "En attente Magasin",
-    "state": "En attente Direction"
+    "state": "En attente DGA"
    },
    {
     "action": "Rejeter",
@@ -541,7 +541,7 @@
     "allowed": "Stock Manager",
     "condition": null,
     "next_state": "Rejeté",
-    "state": "En attente Direction"
+    "state": "En attente DGA"
    },
    {
     "action": "Approuver",
@@ -602,9 +602,9 @@
     "allow_edit": "HR Manager",
     "doc_status": "0",
     "is_optional_state": 0,
-    "state": "En attente Direction",
+    "state": "En attente DGA",
     "update_field": "statut",
-    "update_value": "En attente Direction"
+    "update_value": "En attente DGA"
    },
    {
     "allow_edit": "HR Manager",
@@ -661,7 +661,7 @@
     "allow_self_approval": 0,
     "allowed": "HR Manager",
     "condition": null,
-    "next_state": "En attente Direction",
+    "next_state": "En attente DGA",
     "state": "En attente RH"
    },
    {
@@ -678,7 +678,7 @@
     "allowed": "HR Manager",
     "condition": null,
     "next_state": "Approuv\u00e9",
-    "state": "En attente Direction"
+    "state": "En attente DGA"
    },
    {
     "action": "Rejeter",
@@ -686,7 +686,7 @@
     "allowed": "HR Manager",
     "condition": null,
     "next_state": "Rejet\u00e9",
-    "state": "En attente Direction"
+    "state": "En attente DGA"
    },
    {
     "action": "Valider (Absence DGA)",
@@ -694,7 +694,7 @@
     "allowed": "HR Manager",
     "condition": null,
     "next_state": "Approuv\u00e9",
-    "state": "En attente Direction"
+    "state": "En attente DGA"
    }
   ],
   "workflow_data": null,
