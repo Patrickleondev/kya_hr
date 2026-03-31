@@ -14,6 +14,14 @@
     "planning-conge", "bilan-fin-de-stage"
   ];
   var path = window.location.pathname.replace(/^\//, "").replace(/\/$/, "");
+  var pathParts = path.split("/");
+
+  // Normalize legacy links like /permission-sortie-employe/PSE-2026-00001
+  if (pathParts.length === 2 && KYA_WF_ROUTES.indexOf(pathParts[0]) !== -1 && pathParts[1] !== "new") {
+    window.location.replace("/" + pathParts[0] + "?name=" + encodeURIComponent(pathParts[1]));
+    return;
+  }
+
   if (KYA_WF_ROUTES.indexOf(path) !== -1) {
     // Bare route without /new ΓÇö redirect silently
     window.location.replace("/" + path + "/new");
@@ -182,7 +190,7 @@
     },
     "pv-sortie-materiel": {
       title: "PV DE SORTIE DE MAT\u00c9RIEL",
-      subtitle: "Achat et Stock",
+      subtitle: "Stock & Logistique",
       ref: "AEA-ENG-30-V01",
       workflow: "Chef \u2192 Audit \u2192 Direction \u2192 Magasin"
     },
@@ -240,6 +248,53 @@
     }
     var path = window.location.pathname.replace(/^\//, "").replace(/\/$/, "");
     return path.replace(/\/new$/, "").replace(/\/[^/]+$/, "");
+  }
+
+  function injectVisibilityPatchCss() {
+    if (document.getElementById("kya-wf-visibility-patch")) return;
+
+    var style = document.createElement("style");
+    style.id = "kya-wf-visibility-patch";
+    style.textContent = [
+      '/* Nuclear visibility fix ΓÇö inline <style> injected by kya_webform.js */',
+      'select, select option { color: #1a1a2e !important; -webkit-text-fill-color: #1a1a2e !important; background-color: #fff !important; }',
+      '.grid-heading-row, .grid-heading-row * { color: #1a1a2e !important; -webkit-text-fill-color: #1a1a2e !important; background: #eaf2f8 !important; }',
+      '.grid-heading-row .static-area { color: #1a1a2e !important; font-weight: 700 !important; font-size: 11px !important; }',
+      '.grid-heading-row .col, .grid-heading-row [data-fieldname] { color: #1a1a2e !important; opacity: 1 !important; }',
+      '.rows *, .grid-row *, .no-value, .grid-body * { color: #1a1a2e !important; -webkit-text-fill-color: #1a1a2e !important; }',
+      '.frappe-control[data-fieldtype="Signature"] .signature-field { min-height: 130px !important; height: 130px !important; }',
+      '.frappe-control[data-fieldtype="Signature"] .signature-pad, .frappe-control[data-fieldtype="Signature"] canvas { min-height: 130px !important; height: 130px !important; max-height: 130px !important; }',
+    ].join('\n');
+
+    document.head.appendChild(style);
+
+    /* Also force inline styles on already-rendered elements */
+    forceInlineTextVisibility();
+  }
+
+  function forceInlineTextVisibility() {
+    /* Select elements */
+    document.querySelectorAll('select').forEach(function(sel) {
+      sel.style.setProperty('color', '#1a1a2e', 'important');
+      sel.style.setProperty('-webkit-text-fill-color', '#1a1a2e', 'important');
+      sel.style.setProperty('background-color', '#fff', 'important');
+    });
+    document.querySelectorAll('select option').forEach(function(opt) {
+      opt.style.setProperty('color', '#1a1a2e', 'important');
+    });
+    /* Table headers */
+    document.querySelectorAll('.grid-heading-row').forEach(function(row) {
+      row.style.setProperty('background', '#eaf2f8', 'important');
+      row.querySelectorAll('*').forEach(function(el) {
+        el.style.setProperty('color', '#1a1a2e', 'important');
+        el.style.setProperty('-webkit-text-fill-color', '#1a1a2e', 'important');
+      });
+    });
+    /* Table body cells */
+    document.querySelectorAll('.rows .row, .rows .static-area, .grid-row .static-area').forEach(function(el) {
+      el.style.setProperty('color', '#1a1a2e', 'important');
+      el.style.setProperty('-webkit-text-fill-color', '#1a1a2e', 'important');
+    });
   }
 
   function findFieldEl(fieldname) {
@@ -566,6 +621,7 @@
     setTimeout(function() {
       setupSignaturePermissions(route);
       setupFieldEditPermissions(route);
+      stabilizeSignaturePads(route);
     }, 500);
 
     var defaultHead = document.querySelector(".web-form-head");
@@ -608,20 +664,108 @@
     empInput.addEventListener("change", function () { fetchEmployeeData(empInput.value); });
   }
 
+  function forceSignatureFieldSize(el) {
+    if (!el) return;
+    var field = el.querySelector(".signature-field");
+    var pad = el.querySelector(".signature-pad");
+    var canvas = el.querySelector("canvas");
+    var display = el.querySelector(".signature-display");
+    var img = display ? display.querySelector("img") : null;
+
+    if (field) {
+      field.style.minHeight = "130px";
+      field.style.height = "130px";
+    }
+    if (pad) {
+      pad.style.minHeight = "130px";
+      pad.style.height = "130px";
+      pad.style.width = "100%";
+    }
+    if (canvas) {
+      canvas.style.height = "130px";
+      canvas.style.maxHeight = "130px";
+      canvas.style.width = "100%";
+    }
+    if (display) {
+      display.style.minHeight = "130px";
+    }
+    if (img) {
+      img.style.maxHeight = "130px";
+      img.style.width = "auto";
+      img.style.objectFit = "contain";
+    }
+  }
+
+  function stabilizeSignaturePads(route) {
+    var sections = FORM_SECTIONS[route] || [];
+    var sigFields = [];
+
+    sections.forEach(function (sec) {
+      (sec.fields || []).forEach(function (fn) {
+        if (/^signature_/i.test(fn)) sigFields.push(fn);
+      });
+    });
+
+    sigFields.forEach(function (fn) {
+      var el = findFieldEl(fn);
+      if (!el) return;
+
+      forceSignatureFieldSize(el);
+
+      if (el.getAttribute("data-kya-sig-fix-bound") === "1") return;
+      el.setAttribute("data-kya-sig-fix-bound", "1");
+
+      var obs = new MutationObserver(function () {
+        forceSignatureFieldSize(el);
+      });
+      obs.observe(el, { childList: true, subtree: true, attributes: true });
+
+      setTimeout(function () { forceSignatureFieldSize(el); }, 500);
+      setTimeout(function () { forceSignatureFieldSize(el); }, 1500);
+    });
+  }
+
   function waitForForm() {
     var route = getRoute();
+    injectVisibilityPatchCss();
     if (!FORM_SECTIONS[route] && !FORM_META[route]) return;
     var formReady = document.querySelector(".frappe-control") || document.querySelector("[data-fieldname]");
-    if (formReady) { restructureForm(); setupEmployeeAutoFill(); return; }
+    if (formReady) {
+      restructureForm();
+      setupEmployeeAutoFill();
+      stabilizeSignaturePads(route);
+      setTimeout(forceInlineTextVisibility, 200);
+      return;
+    }
     var obs = new MutationObserver(function (m, observer) {
       if (document.querySelector(".frappe-control") || document.querySelector("[data-fieldname]")) {
         observer.disconnect();
-        setTimeout(function () { restructureForm(); setupEmployeeAutoFill(); }, 300);
+        setTimeout(function () {
+          restructureForm();
+          setupEmployeeAutoFill();
+          stabilizeSignaturePads(route);
+          forceInlineTextVisibility();
+        }, 300);
       }
     });
     obs.observe(document.body, { childList: true, subtree: true });
-    setTimeout(function () { if (!document.querySelector(".kya-form-section")) { restructureForm(); setupEmployeeAutoFill(); } }, 2000);
-    setTimeout(function () { obs.disconnect(); if (!document.querySelector(".kya-form-section")) { restructureForm(); setupEmployeeAutoFill(); } }, 5000);
+    setTimeout(function () {
+      if (!document.querySelector(".kya-form-section")) {
+        restructureForm();
+        setupEmployeeAutoFill();
+      }
+      stabilizeSignaturePads(route);
+      forceInlineTextVisibility();
+    }, 2000);
+    setTimeout(function () {
+      obs.disconnect();
+      if (!document.querySelector(".kya-form-section")) {
+        restructureForm();
+        setupEmployeeAutoFill();
+      }
+      stabilizeSignaturePads(route);
+      forceInlineTextVisibility();
+    }, 5000);
   }
 
   window.kyaRestructureForm = function () { restructureForm(); setupEmployeeAutoFill(); };

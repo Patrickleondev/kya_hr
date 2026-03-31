@@ -1,7 +1,7 @@
-/* ===================================================================
-   KYA-Energy Group — Web Form Design v4
+﻿/* ===================================================================
+   KYA-Energy Group ΓÇö Web Form Design v4
    Design : Ordre de Mission / Fiche officielle
-   Palette : Blue #1a5276 · Orange #F58220 · Green #8DC63F
+   Palette : Blue #1a5276 ┬╖ Orange #F58220 ┬╖ Green #8DC63F
    =================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap');
@@ -96,7 +96,7 @@ body {
 }
 .web-form-head.kya-hidden { display: none !important; }
 
-/* == HEADER — Ordre de Mission 2-column style ============= */
+/* == HEADER ΓÇö Ordre de Mission 2-column style ============= */
 .kya-wf-header {
   background: var(--kya-surface);
   padding: 28px 24px 0;
@@ -257,12 +257,15 @@ body {
 }
 .kya-section-body.kya-sig-grid .frappe-control canvas,
 .kya-section-body.kya-sig-grid .frappe-control .signature-pad {
-  min-height: 80px !important;
-  max-height: 100px;
+  min-height: 130px !important;
+  height: 130px !important;
+  max-height: 130px !important;
   width: 100% !important;
 }
 .kya-section-body.kya-sig-grid .frappe-control .signature-field .signature-display img {
-  max-height: 80px;
+  min-height: 110px;
+  max-height: 130px;
+  width: auto;
   object-fit: contain;
 }
 .kya-section-body.kya-sig-grid .frappe-control.read-only .signature-pad,
@@ -398,11 +401,12 @@ body {
 }
 .web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row,
 .kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row {
-  background: var(--kya-blue);
+  background: #eaf2f8 !important;
+  border-bottom: 1px solid var(--kya-border) !important;
 }
 .web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row .static-area,
 .kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row .static-area {
-  color: #fff !important;
+  color: var(--kya-heading) !important;
   font-weight: 700;
   font-size: 11px;
   text-transform: uppercase;
@@ -432,6 +436,98 @@ body {
 
 .web-form-container .web-form select,
 .kya-form-section select { appearance: auto; }
+
+/* Select options + selected values must stay readable */
+.web-form-container .web-form select option,
+.kya-form-section select option,
+.web-form-container .frappe-control[data-fieldtype="Select"] .control-value,
+.kya-form-section .frappe-control[data-fieldtype="Select"] .control-value,
+.web-form-container .frappe-control[data-fieldtype="Select"] .like-disabled-input,
+.kya-form-section .frappe-control[data-fieldtype="Select"] .like-disabled-input {
+  color: var(--kya-heading) !important;
+  background: #fff !important;
+  -webkit-text-fill-color: var(--kya-heading) !important;
+}
+
+/* Child table headers and cells: enforce contrast on all themes */
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row .grid-row,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row .grid-row,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row .row-index,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row .row-index {
+  background: #eaf2f8 !important;
+}
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row .static-area,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row .static-area,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row .static-area *,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row .static-area * {
+  color: var(--kya-heading) !important;
+}
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-body,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-body,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-row,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-row,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-row .static-area,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-row .static-area,
+.web-form-container .frappe-control[data-fieldtype="Table"] .rows,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .rows,
+.web-form-container .frappe-control[data-fieldtype="Table"] .no-value,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .no-value,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-empty,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-empty {
+  color: var(--kya-heading) !important;
+}
+
+/* Last-resort contrast for dynamic grid nodes inserted after render */
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-row *,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-row *,
+.web-form-container .frappe-control[data-fieldtype="Table"] .rows *,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .rows *,
+.web-form-container .frappe-control[data-fieldtype="Table"] .no-value *,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .no-value * {
+  color: var(--kya-heading) !important;
+}
+
+/* Keep header text readable even when Frappe swaps heading classes */
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row *,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row * {
+  color: var(--kya-heading) !important;
+}
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row .col,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row .col,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row [data-fieldname],
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row [data-fieldname] {
+  color: var(--kya-heading) !important;
+  opacity: 1 !important;
+}
+
+/* Keep signed image size stable after save/refresh */
+.web-form-container .frappe-control[data-fieldtype="Signature"] .signature-display,
+.kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-display {
+  min-height: 130px !important;
+}
+.web-form-container .frappe-control[data-fieldtype="Signature"] .signature-field,
+.kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-field {
+  min-height: 130px !important;
+  height: 130px !important;
+  max-height: 130px !important;
+  overflow: hidden !important;
+}
+.web-form-container .frappe-control[data-fieldtype="Signature"] .signature-pad,
+.kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-pad,
+.web-form-container .frappe-control[data-fieldtype="Signature"] canvas,
+.kya-form-section .frappe-control[data-fieldtype="Signature"] canvas {
+  min-height: 130px !important;
+  height: 130px !important;
+  max-height: 130px !important;
+}
+.web-form-container .frappe-control[data-fieldtype="Signature"] .signature-display img,
+.kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-display img {
+  max-height: 130px !important;
+  width: auto !important;
+  object-fit: contain !important;
+}
 .web-form-container .frappe-control[data-fieldtype="Link"] .link-btn,
 .kya-form-section .frappe-control[data-fieldtype="Link"] .link-btn { display: none; }
 
@@ -657,6 +753,49 @@ footer .web-footer-menu { display: none !important; }
 .frappe-control[data-fieldtype="Table"] input,
 .frappe-control[data-fieldtype="Table"] select,
 .frappe-control[data-fieldtype="Table"] textarea { color: var(--kya-heading) !important; -webkit-text-fill-color: var(--kya-heading) !important; }
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row > div,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row > div {
+  background: #eef3f8 !important;
+}
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row *,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row *,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row .row-index,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row .row-index,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row .grid-static-col,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row .grid-static-col,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row .static-area,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row .static-area,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row .static-area *,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row .static-area * {
+  color: var(--kya-heading) !important;
+  -webkit-text-fill-color: var(--kya-heading) !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+.web-form-container .frappe-control[data-fieldtype="Table"] .rows .grid-row *,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .rows .grid-row *,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-body *,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-body *,
+.web-form-container .frappe-control[data-fieldtype="Table"] .empty-table-message,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .empty-table-message,
+.web-form-container .frappe-control[data-fieldtype="Table"] .no-result,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .no-result {
+  color: var(--kya-heading) !important;
+  -webkit-text-fill-color: var(--kya-heading) !important;
+  opacity: 1 !important;
+}
+.web-form-container .frappe-control[data-fieldtype="Select"] select,
+.kya-form-section .frappe-control[data-fieldtype="Select"] select,
+.web-form-container .frappe-control[data-fieldtype="Select"] option,
+.kya-form-section .frappe-control[data-fieldtype="Select"] option,
+.web-form-container .frappe-control[data-fieldtype="Select"] option:checked,
+.kya-form-section .frappe-control[data-fieldtype="Select"] option:checked {
+  color: var(--kya-heading) !important;
+  -webkit-text-fill-color: var(--kya-heading) !important;
+  opacity: 1 !important;
+}
 /* Prevent inherited light color on white bg */
 [data-theme="dark"] .web-form-container,
 [data-theme="dark"] .kya-form-section { background: #fff !important; color: var(--kya-body) !important; }
