@@ -10,19 +10,24 @@
 (function () {
   var KYA_WF_ROUTES = [
     "permission-sortie-stagiaire", "permission-sortie-employe",
-    "demande-achat", "pv-sortie-materiel",
+    "demande-achat", "demande-conge", "pv-sortie-materiel",
     "planning-conge", "bilan-fin-de-stage"
   ];
   var path = window.location.pathname.replace(/^\//, "").replace(/\/$/, "");
   var pathParts = path.split("/");
+  var params = new URLSearchParams(window.location.search || "");
+  var hasDocPointer = params.has("name") || params.has("docname") || params.has("id");
 
   // Normalize legacy links like /permission-sortie-employe/PSE-2026-00001
   if (pathParts.length === 2 && KYA_WF_ROUTES.indexOf(pathParts[0]) !== -1 && pathParts[1] !== "new") {
-    window.location.replace("/" + pathParts[0] + "?name=" + encodeURIComponent(pathParts[1]));
+    if (!params.has("name")) {
+      params.set("name", pathParts[1]);
+    }
+    window.location.replace("/" + pathParts[0] + "?" + params.toString());
     return;
   }
 
-  if (KYA_WF_ROUTES.indexOf(path) !== -1) {
+  if (KYA_WF_ROUTES.indexOf(path) !== -1 && !hasDocPointer) {
     // Bare route without /new — redirect silently
     window.location.replace("/" + path + "/new");
     return; // stop further execution until redirect completes
@@ -103,6 +108,23 @@
         icon: "\u270D\uFE0F",
         fields: ["signature_demandeur", "signature_chef", "signature_dga", "signature_dg"],
         sigGrid: true
+      }
+    ],
+    "demande-conge": [
+      {
+        title: "IDENTIFICATION DE L\u2019EMPLOY\u00c9",
+        icon: "\u{1F464}",
+        fields: ["employee", "employee_name", "department"],
+        grid: { employee: "span 2", employee_name: "col", department: "col" }
+      },
+      {
+        title: "D\u00c9TAILS DU CONG\u00c9",
+        icon: "\u{1F4C5}",
+        fields: ["leave_type", "from_date", "to_date", "posting_date", "description"],
+        grid: {
+          leave_type: "col", from_date: "col", to_date: "col", posting_date: "col",
+          description: "span 2"
+        }
       }
     ],
     "pv-sortie-materiel": [
@@ -188,6 +210,12 @@
       ref: "AEA-ENG-30-V01",
       workflow: "Chef \u2192 Auditeur \u2192 DAAF \u2192 DG"
     },
+    "demande-conge": {
+      title: "DEMANDE DE CONG\u00c9",
+      subtitle: "Ressources Humaines",
+      ref: "AEA-ENG-30-V01",
+      workflow: "Sup. Imm\u00e9diat / Chef de Service \u2192 RH \u2192 DG"
+    },
     "pv-sortie-materiel": {
       title: "PV DE SORTIE DE MAT\u00c9RIEL",
       subtitle: "Stock & Logistique",
@@ -248,6 +276,13 @@
     }
     var path = window.location.pathname.replace(/^\//, "").replace(/\/$/, "");
     return path.replace(/\/new$/, "").replace(/\/[^/]+$/, "");
+  }
+
+  function setLoadingState(isLoading) {
+    var route = getRoute();
+    if (!FORM_SECTIONS[route] && !FORM_META[route]) return;
+    if (isLoading) document.body.classList.add("kya-wf-loading");
+    else document.body.classList.remove("kya-wf-loading");
   }
 
   function injectVisibilityPatchCss() {
@@ -471,6 +506,7 @@
       { label: "Permission Sortie Stagiaire", route: "permission-sortie-stagiaire" },
       { label: "Permission Sortie Employé", route: "permission-sortie-employe" },
       { label: "Demande d'Achat", route: "demande-achat" },
+      { label: "Demande de Congé", route: "demande-conge" },
       { label: "PV Sortie Matériel", route: "pv-sortie-materiel" },
       { label: "Planning Congé", route: "planning-conge" },
       { label: "Bilan de Stage", route: "bilan-fin-de-stage" }
@@ -616,6 +652,7 @@
 
     formBody.insertBefore(wrapper, formBody.firstChild);
     formBody.classList.add("kya-restructured");
+    setLoadingState(false);
 
     setupWorkflowActions(wrapper);
     setTimeout(function() {
@@ -642,6 +679,18 @@
     if (!empField) return;
     var empInput = empField.querySelector("input");
     if (!empInput) return;
+    var canPickAnyEmployee = userHasAnyRole(["HR Manager", "HR User", "System Manager"]);
+
+    function lockEmployeeSelectionIfNeeded() {
+      if (canPickAnyEmployee) return;
+      var controls = empField.querySelectorAll("input, select, .awesomplete input");
+      controls.forEach(function (ctrl) {
+        ctrl.setAttribute("readonly", "readonly");
+        ctrl.setAttribute("disabled", "disabled");
+      });
+      empField.setAttribute("data-read-only", "1");
+    }
+
     function fetchEmployeeData(empId) {
       if (!empId || !window.frappe) return;
       frappe.call({
@@ -653,6 +702,7 @@
           var df = findFieldEl("department");
           if (nf) { var ni = nf.querySelector("input"); if (ni) { ni.value = r.message.employee_name || ""; ni.dispatchEvent(new Event("change")); } }
           if (df) { var di = df.querySelector("input"); if (di) { di.value = r.message.department || ""; di.dispatchEvent(new Event("change")); } }
+          lockEmployeeSelectionIfNeeded();
         }
       });
     }
@@ -662,6 +712,7 @@
     });
     obs.observe(empInput, { attributes: true });
     empInput.addEventListener("change", function () { fetchEmployeeData(empInput.value); });
+    lockEmployeeSelectionIfNeeded();
   }
 
   function forceSignatureFieldSize(el) {
@@ -729,12 +780,14 @@
     var route = getRoute();
     injectVisibilityPatchCss();
     if (!FORM_SECTIONS[route] && !FORM_META[route]) return;
+    setLoadingState(true);
     var formReady = document.querySelector(".frappe-control") || document.querySelector("[data-fieldname]");
     if (formReady) {
       restructureForm();
       setupEmployeeAutoFill();
       stabilizeSignaturePads(route);
       setTimeout(forceInlineTextVisibility, 200);
+      setLoadingState(false);
       return;
     }
     var obs = new MutationObserver(function (m, observer) {
@@ -745,6 +798,7 @@
           setupEmployeeAutoFill();
           stabilizeSignaturePads(route);
           forceInlineTextVisibility();
+          setLoadingState(false);
         }, 300);
       }
     });
@@ -756,6 +810,7 @@
       }
       stabilizeSignaturePads(route);
       forceInlineTextVisibility();
+      setLoadingState(false);
     }, 2000);
     setTimeout(function () {
       obs.disconnect();
@@ -765,10 +820,27 @@
       }
       stabilizeSignaturePads(route);
       forceInlineTextVisibility();
+      setLoadingState(false);
     }, 5000);
   }
 
   window.kyaRestructureForm = function () { restructureForm(); setupEmployeeAutoFill(); };
+
+  // Universal fallback: if a Web Form defines/overrides after_load,
+  // ensure KYA branded layout is still applied once fields are mounted.
+  if (window.frappe && frappe.web_form && !window.__kyaWfAfterLoadPatched) {
+    window.__kyaWfAfterLoadPatched = true;
+    var previousAfterLoad = frappe.web_form.after_load;
+    frappe.web_form.after_load = function () {
+      if (typeof previousAfterLoad === "function") {
+        previousAfterLoad.apply(this, arguments);
+      }
+      setTimeout(function () {
+        if (window.kyaRestructureForm) window.kyaRestructureForm();
+      }, 120);
+    };
+  }
+
   if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", function() { waitForForm(); setupAdminPreviewButton(); }); }
   else { waitForForm(); setupAdminPreviewButton(); }
   if (window.frappe && window.frappe.ready) { frappe.ready(function () { setTimeout(function() { waitForForm(); setupAdminPreviewButton(); }, 300); }); }

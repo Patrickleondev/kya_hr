@@ -3,7 +3,7 @@ from frappe.utils import today, now_datetime, add_days, getdate, get_datetime, c
 
 
 # ═══════════════════════════════════════════════════════════════
-#  QUICK LINKS (HRMS Mobile)
+#  QUICK LINKS (Espace Employe)
 # ═══════════════════════════════════════════════════════════════
 
 # Types d'emploi considérés comme "personnel interne"
@@ -47,6 +47,12 @@ def get_kya_quick_links():
     if category == "stage":
         # --- Stagiaire links ---
         links.append({
+            "title": "Espace Employé",
+            "description": "Ouvrir votre espace personnel",
+            "url": "/mon-espace",
+            "emoji": "🏠",
+        })
+        links.append({
             "title": "Permission de Sortie",
             "description": "Demander une permission de sortie",
             "url": "/permission-sortie-stagiaire/new",
@@ -61,6 +67,12 @@ def get_kya_quick_links():
     elif category == "prestataire":
         # --- Prestataire de service links ---
         links.append({
+            "title": "Espace Employé",
+            "description": "Ouvrir votre espace personnel",
+            "url": "/mon-espace",
+            "emoji": "🏠",
+        })
+        links.append({
             "title": "Permission de Sortie",
             "description": "Demander une permission de sortie",
             "url": "/permission-sortie-employe/new",
@@ -69,10 +81,22 @@ def get_kya_quick_links():
     else:
         # --- Employee (CDI/CDD) links ---
         links.append({
+            "title": "Espace Employé",
+            "description": "Ouvrir votre espace personnel (formulaires, tâches, opérations)",
+            "url": "/mon-espace",
+            "emoji": "🏠",
+        })
+        links.append({
             "title": "Permission de Sortie",
             "description": "Demander une permission de sortie",
             "url": "/permission-sortie-employe/new",
             "emoji": "🚪",
+        })
+        links.append({
+            "title": "Demande de Congé",
+            "description": "Soumettre votre demande de congé",
+            "url": "/demande-conge/new",
+            "emoji": "🏖️",
         })
         links.append({
             "title": "Planning de Congé",
@@ -128,6 +152,7 @@ def get_user_category():
 ALLOWED_DOCTYPES = {
     "Permission Sortie Stagiaire",
     "Permission Sortie Employe",
+    "Leave Application",
     "PV Sortie Materiel",
     "Planning Conge",
     "Demande Achat KYA",
@@ -625,77 +650,45 @@ def get_my_documents(limit=20, offset=0, status_filter=None):
 # ═══════════════════════════════════════════════════════════════
 
 @frappe.whitelist()
-def get_my_kya_forms():
-    """Retourne les enquêtes/évaluations disponibles et remplies pour l'utilisateur."""
-    user = frappe.session.user
-    if user == "Guest":
-        return {"available": [], "completed": []}
+def get_my_kya_forms(trimestre=None, annee=None, equipe_cible=None, type_formulaire=None):
+    """Vue mobile RHMS des formulaires satisfaction KYA avec onglets et filtres.
 
-    # Vérifier si le DocType KYA Form existe (kya_services installé)
-    if not frappe.db.exists("DocType", "KYA Form"):
-        return {"available": [], "completed": []}
-
-    employee = frappe.db.get_value(
-        "Employee",
-        {"user_id": user, "status": "Active"},
-        ["name", "employee_name", "department"],
-        as_dict=True,
-    )
-
-    # Formulaires publiés (actifs)
-    available = []
+    Conserve les clés legacy (available/completed) pour rétrocompatibilité UI.
+    """
     try:
-        forms = frappe.get_all(
-            "KYA Form",
-            filters={"statut": "Publié"},
-            fields=["name", "titre", "description", "type_formulaire",
-                     "date_debut", "date_fin", "token"],
-            order_by="creation desc",
+        dashboard = frappe.call(
+            "kya_services.api.get_employee_forms_dashboard",
+            trimestre=trimestre,
+            annee=annee,
+            equipe_cible=equipe_cible,
+            type_formulaire=type_formulaire,
         )
-        for f in forms:
-            # Vérifier si déjà rempli
-            already_done = False
-            if employee and frappe.db.exists("DocType", "KYA Form Response"):
-                already_done = frappe.db.exists("KYA Form Response", {
-                    "form": f.name,
-                    "respondent_email": user,
-                })
-            available.append({
-                "name": f.name,
-                "titre": f.titre,
-                "description": f.description or "",
-                "type": f.type_formulaire or "Enquête",
-                "date_debut": str(f.date_debut) if f.date_debut else None,
-                "date_fin": str(f.date_fin) if f.date_fin else None,
-                "completed": bool(already_done),
-                "url": f"/kya-survey?token={f.token}" if f.token else f"/app/kya-form/{f.name}",
-            })
     except Exception:
-        pass
+        return {
+            "available": [],
+            "completed": [],
+            "tabs": {"actifs": [], "en_attente": [], "deja_repondu": [], "fermes": [], "historique": []},
+            "counts": {"actifs": 0, "en_attente": 0, "deja_repondu": 0, "fermes": 0, "historique": 0},
+            "filters": {"trimestres": ["T1", "T2", "T3", "T4"], "annees": [], "equipes": [], "types": []},
+        }
 
-    # Réponses déjà soumises
-    completed = []
-    try:
-        if frappe.db.exists("DocType", "KYA Form Response"):
-            responses = frappe.get_all(
-                "KYA Form Response",
-                filters={"respondent_email": user},
-                fields=["name", "form", "creation", "respondent_name"],
-                order_by="creation desc",
-                limit_page_length=20,
-            )
-            for r in responses:
-                form_title = frappe.db.get_value("KYA Form", r.form, "titre") or r.form
-                completed.append({
-                    "name": r.name,
-                    "form": r.form,
-                    "form_title": form_title,
-                    "date": str(r.creation),
-                })
-    except Exception:
-        pass
+    tabs = dashboard.get("tabs", {})
+    available = tabs.get("actifs", []) + tabs.get("en_attente", [])
+    completed = [
+        {
+            "name": item.get("form_name"),
+            "form": item.get("form_name"),
+            "form_title": item.get("titre"),
+            "date": item.get("date_reponse") or item.get("date_creation"),
+        }
+        for item in tabs.get("deja_repondu", [])
+    ]
 
-    return {"available": available, "completed": completed}
+    dashboard["available"] = available
+    dashboard["completed"] = completed
+    if isinstance(dashboard.get("filters"), dict):
+        dashboard["filters"].pop("semestres", None)
+    return dashboard
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -722,28 +715,21 @@ def get_my_tasks():
     if not employee:
         return {"tasks": [], "plans": []}
 
-    # Tâches assignées directement
+    # Tâches assignées via la table d'attribution.
     tasks = []
     try:
-        taches = frappe.get_all(
-            "Tache Equipe",
-            filters={"responsable": employee.name},
-            fields=["name", "titre", "statut", "priorite", "date_debut",
-                     "date_echeance", "progression", "plan_trimestriel"],
-            order_by="date_echeance asc",
-            limit_page_length=50,
-        )
-        for t in taches:
+        payload = frappe.call("kya_services.kya_taches.api.get_employee_tasks", employee_id=employee.name) or {}
+        for t in (payload.get("taches") or []):
             tasks.append({
-                "name": t.name,
-                "titre": t.titre,
-                "statut": t.statut or "Non démarré",
-                "priorite": t.priorite or "Moyenne",
-                "date_debut": str(t.date_debut) if t.date_debut else None,
-                "date_echeance": str(t.date_echeance) if t.date_echeance else None,
-                "progression": t.progression or 0,
-                "plan": t.plan_trimestriel,
-                "url": f"/app/tache-equipe/{t.name}",
+                "name": t.get("name"),
+                "titre": t.get("libelle") or t.get("name"),
+                "statut": t.get("statut") or "En cours",
+                "priorite": "Normale",
+                "date_debut": None,
+                "date_echeance": None,
+                "progression": t.get("taux_effectif") or 0,
+                "plan": t.get("plan"),
+                "url": f"/app/tache-equipe/{t.get('name')}",
             })
     except Exception:
         pass
@@ -773,6 +759,66 @@ def get_my_tasks():
         pass
 
     return {"tasks": tasks, "plans": plans}
+
+
+@frappe.whitelist()
+def get_my_presence_summary():
+    """Synthèse présence personnelle hebdo/mensuelle pour l'espace employé."""
+    if frappe.session.user == "Guest":
+        return {"weekly": {}, "monthly": {}, "employee": None}
+
+    emp = frappe.db.get_value(
+        "Employee",
+        {"user_id": frappe.session.user, "status": "Active"},
+        ["name", "employee_name"],
+        as_dict=True,
+    )
+    if not emp:
+        return {"weekly": {}, "monthly": {}, "employee": None}
+
+    now = get_datetime()
+    week_start = add_days(now.date(), -int(now.strftime("%w")))
+    month_start = now.date().replace(day=1)
+
+    weekly_rows = frappe.get_all(
+        "Attendance",
+        filters={
+            "employee": emp.name,
+            "attendance_date": ["between", [week_start, now.date()]],
+            "docstatus": 1,
+        },
+        fields=["status", "working_hours"],
+        limit_page_length=200,
+    )
+    monthly_rows = frappe.get_all(
+        "Attendance",
+        filters={
+            "employee": emp.name,
+            "attendance_date": ["between", [month_start, now.date()]],
+            "docstatus": 1,
+        },
+        fields=["status", "working_hours"],
+        limit_page_length=500,
+    )
+
+    def _summarize(rows):
+        present = sum(1 for r in rows if r.status in {"Present", "Work From Home", "Half Day"})
+        absent = sum(1 for r in rows if r.status == "Absent")
+        on_leave = sum(1 for r in rows if r.status == "On Leave")
+        hours = round(sum(float(r.working_hours or 0) for r in rows), 2)
+        return {
+            "present_days": present,
+            "absent_days": absent,
+            "leave_days": on_leave,
+            "working_hours": hours,
+            "tracked_days": len(rows),
+        }
+
+    return {
+        "employee": emp,
+        "weekly": _summarize(weekly_rows),
+        "monthly": _summarize(monthly_rows),
+    }
 
 
 # ═══════════════════════════════════════════════════════════
@@ -1273,6 +1319,15 @@ def get_webforms_list():
             "icon": "📅"
         },
         {
+            "name": "demande-conge",
+            "label": "Demande de Congé",
+            "route": "/demande-conge",
+            "new_route": "/demande-conge/new",
+            "ref": "AEA-ENG-30-V01",
+            "module": "Employés",
+            "icon": "🏖️"
+        },
+        {
             "name": "bilan-fin-de-stage",
             "label": "Bilan de Fin de Stage",
             "route": "/bilan-fin-de-stage",
@@ -1289,6 +1344,7 @@ def get_webforms_list():
         "demande-achat": "Demande Achat KYA",
         "pv-sortie-materiel": "PV Sortie Materiel",
         "planning-conge": "Planning Conge",
+        "demande-conge": "Leave Application",
         "bilan-fin-de-stage": "Bilan Fin de Stage",
     }
     for form in forms:
@@ -1299,4 +1355,92 @@ def get_webforms_list():
             except Exception:
                 form["count"] = 0
     return forms
+
+
+@frappe.whitelist()
+def get_my_hr_dossiers(from_date=None, to_date=None, doctype_filter=None, limit=200):
+    """Historique unifie des dossiers RH du demandeur courant.
+
+    Retourne les dossiers des principaux flux RH avec filtrage par date,
+    type de fiche et etat workflow.
+    """
+    user = frappe.session.user
+    if user == "Guest":
+        return []
+
+    limit = cint(limit) or 200
+    limit = min(max(limit, 1), 500)
+
+    employee = frappe.db.get_value("Employee", {"user_id": user, "status": "Active"}, "name")
+    if not employee:
+        return []
+
+    specs = [
+        {
+            "label": "Permission Sortie Employé",
+            "doctype": "Permission Sortie Employe",
+            "employee_field": "employee",
+            "date_field": "date_sortie",
+            "route": "/permission-sortie-employe",
+        },
+        {
+            "label": "Planning de Congé",
+            "doctype": "Planning Conge",
+            "employee_field": "employee",
+            "date_field": "creation",
+            "route": "/planning-conge",
+        },
+        {
+            "label": "Demande de Congé",
+            "doctype": "Leave Application",
+            "employee_field": "employee",
+            "date_field": "from_date",
+            "route": "/demande-conge",
+        },
+        {
+            "label": "Demande d'Achat",
+            "doctype": "Demande Achat KYA",
+            "employee_field": "employee",
+            "date_field": "date_demande",
+            "route": "/demande-achat",
+        },
+    ]
+
+    if doctype_filter:
+        specs = [s for s in specs if s["doctype"] == doctype_filter or s["label"] == doctype_filter]
+
+    out = []
+    for spec in specs:
+        filters = {spec["employee_field"]: employee}
+        date_field = spec["date_field"]
+        if from_date and to_date:
+            filters[date_field] = ["between", [from_date, to_date]]
+        elif from_date:
+            filters[date_field] = [">=", from_date]
+        elif to_date:
+            filters[date_field] = ["<=", to_date]
+
+        rows = frappe.get_all(
+            spec["doctype"],
+            filters=filters,
+            fields=["name", "workflow_state", "docstatus", "creation", date_field],
+            order_by="creation desc",
+            limit_page_length=limit,
+        )
+
+        for row in rows:
+            dossier_date = row.get(date_field) or row.get("creation")
+            out.append({
+                "doctype": spec["doctype"],
+                "type_fiche": spec["label"],
+                "numero_dossier": row.get("name"),
+                "workflow_state": row.get("workflow_state") or "Brouillon",
+                "docstatus": row.get("docstatus"),
+                "date_dossier": dossier_date,
+                "date_creation": row.get("creation"),
+                "route": f"{spec['route']}?name={row.get('name')}",
+            })
+
+    out.sort(key=lambda d: str(d.get("date_dossier") or d.get("date_creation") or ""), reverse=True)
+    return out[:limit]
 

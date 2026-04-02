@@ -47,13 +47,13 @@ class DemandeAchatKYA(Document):
         today = frappe.utils.today()
         ws = self.workflow_state
 
-        # Chef signs: state moves to En attente Approbation or Approuvé (palier 1)
-        if ws in ("En attente Approbation", "Approuvé") and not self.get("signataire_chef"):
+        # Chef signs: state moves to En attente DAAF or Approuvé (palier 1)
+        if ws in ("En attente DAAF", "Approuvé") and not self.get("signataire_chef"):
             if self.workflow_state != "Approuvé" or self.montant_total < 100000:
                 self.db_set("signataire_chef", name, update_modified=False)
                 self.db_set("date_signature_chef", today, update_modified=False)
 
-        # DGA signs: state moves to En attente DG or Approuvé (palier 2)
+        # DGA/DAAF signs: state moves to En attente DG or Approuvé (palier 2)
         if ws in ("En attente DG", "Approuvé") and not self.get("signataire_dga"):
             if self.montant_total >= 100000:
                 self.db_set("signataire_dga", name, update_modified=False)

@@ -1,7 +1,7 @@
 {
  "app": "kya_hr",
  "charts": [],
- "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Employés'>👤 Espace Employés KYA</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Demander une Permission\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Permissions Employé\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Planning Congé\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Tableau de Bord Employés\", \"col\": 3}}, {\"id\": \"s5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Demande d'Achat\", \"col\": 3}}, {\"id\": \"s6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"PV Sortie Matériel\", \"col\": 3}}, {\"id\": \"s7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Planifier mon Congé\", \"col\": 3}}, {\"id\": \"s8\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Mon Espace\", \"col\": 3}}, {\"id\": \"spacer1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}]",
+ "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Employés'>👤 Espace Employés KYA</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"s0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Mon Espace\", \"col\": 3}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Demande de Congé\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Demander une Permission\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Planning Congé\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Demande d'Achat\", \"col\": 3}}, {\"id\": \"s5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"PV Sortie Matériel\", \"col\": 3}}, {\"id\": \"s6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Tableau de Bord Employés\", \"col\": 3}}, {\"id\": \"spacer1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}]",
  "creation": "2026-03-25 00:00:00.000000",
  "custom_blocks": [],
  "docstatus": 0,
@@ -18,6 +18,20 @@
  "sequence_id": 11,
  "shortcuts": [
   {
+     "label": "Mon Espace",
+     "type": "URL",
+     "url": "/mon-espace",
+     "color": "#2c3e50",
+     "icon": "home"
+    },
+    {
+     "label": "Demande de Congé",
+     "type": "URL",
+     "url": "/demande-conge/new",
+     "color": "#1d4ed8",
+     "icon": "sun"
+    },
+    {
    "label": "Demander une Permission",
    "type": "URL",
    "url": "/permission-sortie-employe/new",
@@ -25,16 +39,9 @@
    "icon": "exit"
   },
   {
-   "label": "Permissions Employé",
-   "type": "DocType",
-   "link_to": "Permission Sortie Employe",
-   "color": "#2471a3",
-   "icon": "list"
-  },
-  {
    "label": "Planning Congé",
-   "type": "DocType",
-   "link_to": "Planning Conge",
+   "type": "URL",
+   "url": "/planning-conge/new",
    "color": "#27ae60",
    "icon": "calendar"
   },
@@ -65,13 +72,6 @@
    "url": "/planning-conge/new",
    "color": "#16a085",
    "icon": "calendar"
-  },
-  {
-   "label": "Mon Espace",
-   "type": "URL",
-   "url": "/mon-espace",
-   "color": "#2c3e50",
-   "icon": "home"
   }
  ],
  "links": [

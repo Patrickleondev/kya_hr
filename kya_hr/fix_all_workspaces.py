@@ -8,6 +8,7 @@ import json
 
 def execute():
     print("=== KYA FIX ALL WORKSPACES ===")
+    fix_missing_workflow_states()
     fix_bad_doctype_shortcuts()
     fix_card_break_links()
     fix_kya_services_portail()
@@ -31,6 +32,24 @@ def execute():
     frappe.db.commit()
     frappe.clear_cache()
     print("=== ALL FIXES APPLIED + CACHE CLEARED ===")
+
+
+def fix_missing_workflow_states():
+    """Create required workflow states if missing in DB."""
+    required = [
+        {"name": "En attente DAAF", "style": "Warning"},
+    ]
+
+    for state in required:
+        if not frappe.db.exists("Workflow State", state["name"]):
+            doc = frappe.get_doc({
+                "doctype": "Workflow State",
+                "name": state["name"],
+                "workflow_state_name": state["name"],
+                "style": state["style"],
+            })
+            doc.insert(ignore_permissions=True)
+            print(f"  [Workflow State] Created '{state['name']}' ✓")
 
 
 def fix_card_break_links():
@@ -146,6 +165,8 @@ def fix_espace_employes():
     ))
 
     to_add = []
+    if "Mon Espace" not in existing:
+        to_add.append(("Mon Espace", "URL", "/mon-espace", "#2c3e50", "home"))
     if "Demande d'Achat" not in existing:
         to_add.append(("Demande d'Achat", "URL", "/demande-achat/new", "#1a5276", "file"))
     if "PV Sortie Matériel" not in existing:
@@ -209,6 +230,10 @@ def fix_espace_stagiaires():
         SET public = 1, is_hidden = 0, icon = 'graduation-cap'
         WHERE name = 'Espace Stagiaires'
     """)
+    frappe.db.sql("""
+        DELETE FROM `tabWorkspace Shortcut`
+        WHERE parent = 'Espace Stagiaires' AND label = 'Mon Espace'
+    """)
     # Rebuild content with 3 Number Cards + shortcuts
     content = [
         {"type": "header", "data": {"text": "📊 Tableau de Bord", "col": 12}},
@@ -222,7 +247,6 @@ def fix_espace_stagiaires():
         {"type": "shortcut", "data": {"shortcut_name": "Demander une Permission", "col": 4}},
         {"type": "shortcut", "data": {"shortcut_name": "Bilan de Stage ↗", "col": 4}},
         {"type": "shortcut", "data": {"shortcut_name": "Tableau de Bord", "col": 4}},
-        {"type": "shortcut", "data": {"shortcut_name": "Mon Espace", "col": 4}},
     ]
     frappe.db.set_value("Workspace", "Espace Stagiaires", "content", json.dumps(content))
     print("  [Espace Stagiaires] Visible + public + icon + content rebuilt ✓")

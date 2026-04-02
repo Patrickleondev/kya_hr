@@ -96,6 +96,20 @@ body {
 }
 .web-form-head.kya-hidden { display: none !important; }
 
+/* Prevent old raw form flash before KYA layout enhancement is applied */
+body.kya-wf-loading .web-form-wrapper,
+body.kya-wf-loading .web-form-body,
+body.kya-wf-loading .web-form .form-body {
+  opacity: 0;
+  transition: opacity .15s ease;
+}
+
+body:not(.kya-wf-loading) .web-form-wrapper,
+body:not(.kya-wf-loading) .web-form-body,
+body:not(.kya-wf-loading) .web-form .form-body {
+  opacity: 1;
+}
+
 /* == HEADER — Ordre de Mission 2-column style ============= */
 .kya-wf-header {
   background: var(--kya-surface);

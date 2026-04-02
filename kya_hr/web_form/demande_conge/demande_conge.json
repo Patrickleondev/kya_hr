@@ -1,0 +1,83 @@
+{
+    "allow_comments": 1,
+    "allow_delete": 0,
+    "allow_edit": 1,
+    "allow_incomplete": 0,
+    "allow_multiple": 1,
+    "allow_print": 1,
+    "anonymous": 0,
+    "apply_document_permissions": 1,
+    "creation": "2026-04-01 00:00:00.000000",
+    "doc_type": "Leave Application",
+    "docstatus": 0,
+    "doctype": "Web Form",
+    "idx": 0,
+    "introduction_text": "",
+    "is_standard": 1,
+    "login_required": 1,
+    "modified": "2026-04-01 00:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "KYA HR",
+    "name": "demande-conge",
+    "owner": "Administrator",
+    "published": 1,
+    "route": "demande-conge",
+    "show_sidebar": 1,
+    "success_message": "Votre demande de conge a ete soumise avec succes. Elle suivra le circuit Superieur/Chef, RH puis DG.",
+    "title": "Demande de Conge",
+    "client_script": "frappe.web_form.on('load', function(){\n  function ensureKyaAssets(done) {\n    var cssHref = '/assets/kya_hr/css/kya_webform.css';\n    var jsSrc = '/assets/kya_hr/js/kya_webform.js';\n\n    if (!document.querySelector('link[href=\\\"' + cssHref + '\\\"]')) {\n      var link = document.createElement('link');\n      link.rel = 'stylesheet';\n      link.href = cssHref;\n      document.head.appendChild(link);\n    }\n\n    if (window.kyaRestructureForm) {\n      done();\n      return;\n    }\n\n    if (frappe.require) {\n      frappe.require(jsSrc, function() { done(); });\n    } else {\n      done();\n    }\n  }\n\n  function applyBranding() {\n    if (!window.kyaRestructureForm) return;\n    window.kyaRestructureForm();\n    setTimeout(function(){ if (window.kyaRestructureForm) window.kyaRestructureForm(); }, 250);\n    setTimeout(function(){ if (window.kyaRestructureForm) window.kyaRestructureForm(); }, 900);\n  }\n\n  var user = (frappe.session && frappe.session.user) ? frappe.session.user : null;\n  if (!user || user === 'Guest') return;\n\n  var roles = (frappe.boot && frappe.boot.user && frappe.boot.user.roles) ? frappe.boot.user.roles : [];\n  var can_select_any_employee = roles.indexOf('HR Manager') !== -1 || roles.indexOf('HR User') !== -1 || roles.indexOf('System Manager') !== -1;\n\n  if (!frappe.web_form.doc.posting_date) {\n    frappe.web_form.set_value('posting_date', frappe.datetime.get_today());\n  }\n\n  frappe.call({\n    method: 'frappe.client.get_value',\n    args: {\n      doctype: 'Employee',\n      filters: { user_id: user, status: 'Active' },\n      fieldname: ['name', 'employee_name', 'department']\n    },\n    callback: function(r){\n      if (!r || !r.message) return;\n      if (!frappe.web_form.doc.employee) {\n        frappe.web_form.set_value('employee', r.message.name);\n      }\n      if (!frappe.web_form.doc.employee_name && r.message.employee_name) {\n        frappe.web_form.set_value('employee_name', r.message.employee_name);\n      }\n      if (!frappe.web_form.doc.department && r.message.department) {\n        frappe.web_form.set_value('department', r.message.department);\n      }\n      if (!can_select_any_employee) {\n        frappe.web_form.set_df_property('employee', 'read_only', 1);\n      }\n\n      ensureKyaAssets(function(){\n        applyBranding();\n      });\n    }\n  });\n\n  ensureKyaAssets(function(){\n    applyBranding();\n  });\n});",
+    "web_form_fields": [
+        {
+            "fieldname": "employee",
+            "fieldtype": "Link",
+            "label": "Employe",
+            "options": "Employee",
+            "reqd": 1
+        },
+        {
+            "fieldname": "employee_name",
+            "fieldtype": "Data",
+            "label": "Nom complet",
+            "read_only": 1
+        },
+        {
+            "fieldname": "department",
+            "fieldtype": "Link",
+            "label": "Departement",
+            "options": "Department",
+            "read_only": 1
+        },
+        {
+            "fieldname": "leave_type",
+            "fieldtype": "Link",
+            "label": "Type de conge",
+            "options": "Leave Type",
+            "reqd": 1
+        },
+        {
+            "fieldname": "from_date",
+            "fieldtype": "Date",
+            "label": "Date de debut",
+            "reqd": 1
+        },
+        {
+            "fieldname": "to_date",
+            "fieldtype": "Date",
+            "label": "Date de fin",
+            "reqd": 1
+        },
+        {
+            "fieldname": "posting_date",
+            "fieldtype": "Date",
+            "label": "Date de la demande",
+            "default": "Today",
+            "read_only": 1
+        },
+        {
+            "fieldname": "description",
+            "fieldtype": "Small Text",
+            "label": "Motif",
+            "reqd": 1
+        }
+    ]
+}

@@ -11,6 +11,7 @@ Regles :
   7. Corriger le champ app de Gestion Equipe
 """
 import frappe
+import json
 
 
 # Workspaces orphelins a supprimer (crees par d'anciennes versions du script)
@@ -20,7 +21,210 @@ ORPHAN_WORKSPACES = ["KYA Stagiaires", "Conges & Permissions"]
 ORPHAN_SIDEBARS = ["KYA Stagiaires", "Personnes"]
 
 # Workspaces geres par les fichiers JSON (on s'assure juste qu'ils sont visibles)
-KYA_WORKSPACES = ["Espace Employes", "Espace Stagiaires", "KYA Services", "Gestion Équipe"]
+KYA_WORKSPACES = [
+    "Espace Employes",
+    "Espace Employés",
+    "Espace Stagiaires",
+    "KYA Services",
+    "Gestion Équipe",
+    "Gestion Equipe",
+]
+
+
+def _resolve_existing_workspace(candidates):
+    for ws_name in candidates:
+        if frappe.db.exists("Workspace", ws_name):
+            return ws_name
+    return None
+
+
+def _resolve_existing_sidebar(candidates):
+    for sidebar_title in candidates:
+        sidebar_name = frappe.db.exists("Workspace Sidebar", {"title": sidebar_title})
+        if sidebar_name:
+            return sidebar_name, sidebar_title
+    return None, None
+
+
+def _ensure_sidebar_home_link(sidebar_title, workspace_name):
+    """Make sure sidebar has a first workspace link so desktop icon can resolve a route."""
+    sidebar_name = frappe.db.exists("Workspace Sidebar", {"title": sidebar_title})
+    if not sidebar_name:
+        return
+    has_workspace_link = frappe.db.exists(
+        "Workspace Sidebar Item",
+        {
+            "parent": sidebar_name,
+            "link_type": "Workspace",
+            "link_to": workspace_name,
+        },
+    )
+    if has_workspace_link:
+        return
+
+    item = frappe.new_doc("Workspace Sidebar Item")
+    item.parent = sidebar_name
+    item.parenttype = "Workspace Sidebar"
+    item.parentfield = "items"
+    item.type = "Link"
+    item.label = "Home"
+    item.link_type = "Workspace"
+    item.link_to = workspace_name
+    item.icon = "home"
+    item.insert(ignore_permissions=True)
+    print(f"  [SIDEBAR LINK] {sidebar_title} -> Workspace:{workspace_name}")
+
+
+def _link_desktop_icon_to_sidebar(label, sidebar_candidates):
+    """Desktop icons must point to Workspace Sidebar for route resolution in Frappe desk."""
+    icon_name = frappe.db.exists("Desktop Icon", {"label": label})
+    sidebar_name, sidebar_title = _resolve_existing_sidebar(sidebar_candidates)
+    if not sidebar_name:
+        return
+
+    # Recreate icon if it was deleted by previous broken fixes.
+    if not icon_name:
+        icon_doc = frappe.new_doc("Desktop Icon")
+        icon_doc.label = label
+        icon_doc.icon_type = "Link"
+        icon_doc.icon = "folder-normal"
+        icon_doc.standard = 1
+        icon_doc.hidden = 0
+        icon_doc.link_type = "Workspace Sidebar"
+        icon_doc.link_to = sidebar_name
+        icon_doc.insert(ignore_permissions=True)
+        print(f"  [ICON CREATED] {label} -> Sidebar:{sidebar_title}")
+        return
+
+    frappe.db.set_value("Desktop Icon", icon_name, {
+        "link_type": "Workspace Sidebar",
+        "link": "",
+        "link_to": sidebar_name,
+        "hidden": 0,
+    }, update_modified=False)
+    print(f"  [ICON LINK] {label} -> Sidebar:{sidebar_title}")
+
+
+def _sidebar_exists(title):
+    """Check sidebar existence by both document name and title."""
+    return bool(
+        frappe.db.exists("Workspace Sidebar", title)
+        or frappe.db.exists("Workspace Sidebar", {"title": title})
+    )
+
+
+def _upsert_workspace_shortcut(workspace_name, label, link_type, link_to=None, url=None, icon=None, color=None):
+    existing = frappe.db.exists(
+        "Workspace Shortcut",
+        {
+            "parent": workspace_name,
+            "label": label,
+        },
+    )
+
+    values = {
+        "type": link_type,
+        "label": label,
+    }
+
+    if link_type == "URL":
+        values.update({"url": url or "", "link_to": ""})
+    else:
+        values.update({"link_to": link_to or "", "url": ""})
+
+    if icon is not None:
+        values["icon"] = icon
+    if color is not None:
+        values["color"] = color
+
+    if existing:
+        frappe.db.set_value("Workspace Shortcut", existing, values, update_modified=False)
+        return existing
+
+    shortcut = frappe.get_doc({
+        "doctype": "Workspace Shortcut",
+        "parent": workspace_name,
+        "parenttype": "Workspace",
+        "parentfield": "shortcuts",
+        **values,
+    })
+    shortcut.insert(ignore_permissions=True)
+    return shortcut.name
+
+
+def _ensure_sidebar_item(sidebar_title, label, link_type, link_to=None, url=None, icon=None):
+    sidebar_name = frappe.db.exists("Workspace Sidebar", {"title": sidebar_title})
+    if not sidebar_name:
+        return
+
+    existing = frappe.db.exists(
+        "Workspace Sidebar Item",
+        {
+            "parent": sidebar_name,
+            "label": label,
+        },
+    )
+
+    values = {
+        "label": label,
+        "type": "Link",
+        "link_type": link_type,
+    }
+    if link_type == "URL":
+        values.update({"url": url or "", "link_to": ""})
+    else:
+        values.update({"link_to": link_to or "", "url": ""})
+    if icon is not None:
+        values["icon"] = icon
+
+    if existing:
+        frappe.db.set_value("Workspace Sidebar Item", existing, values, update_modified=False)
+        return
+
+    item = frappe.get_doc({
+        "doctype": "Workspace Sidebar Item",
+        "parent": sidebar_name,
+        "parenttype": "Workspace Sidebar",
+        "parentfield": "items",
+        **values,
+    })
+    item.insert(ignore_permissions=True)
+
+
+def _ensure_gestion_equipe_content():
+    if not frappe.db.exists("Workspace", "Gestion Équipe"):
+        return
+
+    _upsert_workspace_shortcut(
+        "Gestion Équipe",
+        "Gestion Équipe",
+        "URL",
+        url="/app/gestion-equipe",
+        icon="home",
+        color="#1a3a5c",
+    )
+
+    _upsert_workspace_shortcut(
+        "Gestion Équipe",
+        "Dashboard Equipe",
+        "URL",
+        url="/kya-dashboard-equipe",
+        icon="bar-chart-2",
+        color="#4CAF50",
+    )
+
+    content_blocks = [
+        {"id": "shortcut-home", "type": "shortcut", "data": {"shortcut_name": "Gestion Équipe", "col": 6}},
+        {"id": "shortcut-dashboard", "type": "shortcut", "data": {"shortcut_name": "Dashboard Equipe", "col": 6}},
+    ]
+    frappe.db.set_value("Workspace", "Gestion Équipe", "content", json.dumps(content_blocks), update_modified=False)
+
+    sidebar_name = frappe.db.get_value("Workspace Sidebar", {"title": "Gestion Équipe"}, "name")
+    if sidebar_name:
+        frappe.db.delete("Workspace Sidebar Item", {"parent": sidebar_name})
+        _ensure_sidebar_item("Gestion Équipe", "Gestion Équipe", "Workspace", link_to="Gestion Équipe", icon="home")
+    _ensure_sidebar_item("Gestion Équipe", "Dashboard Equipe", "URL", url="/kya-dashboard-equipe", icon="bar-chart-2")
+    print("  [MINIMAL] Gestion Équipe content + sidebar (Home + Dashboard)")
 
 
 def execute():
@@ -64,11 +268,13 @@ def execute():
     for ws_name in KYA_WORKSPACES:
         if frappe.db.exists("Workspace", ws_name):
             frappe.db.set_value("Workspace", ws_name, "is_hidden", 0, update_modified=False)
+            if not frappe.db.get_value("Workspace", ws_name, "title"):
+                frappe.db.set_value("Workspace", ws_name, "title", ws_name, update_modified=False)
             print(f"  [VISIBLE] {ws_name}")
 
     # 5. Creer le Workspace Sidebar pour KYA Services s'il n'existe pas
     #    Guard: only if kya_services app is fully installed (DocTypes + Workspace exist)
-    if not frappe.db.exists("Workspace Sidebar", "KYA Services"):
+    if not _sidebar_exists("KYA Services"):
         kya_svc_ready = (
             frappe.db.exists("DocType", "KYA Form")
             and frappe.db.exists("Workspace", "KYA Services")
@@ -114,7 +320,7 @@ def execute():
             print("  [CREATED] KYA Services sidebar")
 
     # 6. Creer le Workspace Sidebar pour Espace Stagiaires s'il n'existe pas
-    if not frappe.db.exists("Workspace Sidebar", "Espace Stagiaires"):
+    if not _sidebar_exists("Espace Stagiaires"):
         if frappe.db.exists("Workspace", "Espace Stagiaires"):
             sidebar = frappe.new_doc("Workspace Sidebar")
             sidebar.title = "Espace Stagiaires"
@@ -148,14 +354,83 @@ def execute():
         else:
             print("  [SKIP] Espace Stagiaires sidebar (workspace not found)")
 
+    # 6b. Creer le Workspace Sidebar pour Espace Employes s'il n'existe pas
+    espace_employes_name = None
+    if frappe.db.exists("Workspace", "Espace Employes"):
+        espace_employes_name = "Espace Employes"
+    elif frappe.db.exists("Workspace", "Espace Employés"):
+        espace_employes_name = "Espace Employés"
+
+    if not _sidebar_exists("Espace Employes") and espace_employes_name:
+        sidebar = frappe.new_doc("Workspace Sidebar")
+        sidebar.title = "Espace Employes"
+        sidebar.module = "KYA HR"
+        sidebar.header_icon = "employee"
+        sidebar.app = "kya_hr"
+        sidebar.standard = 0
+        sidebar.append("items", {
+            "label": "Espace Employes",
+            "type": "Link",
+            "link_to": espace_employes_name,
+            "link_type": "Workspace",
+            "icon": "employee"
+        })
+        sidebar.append("items", {
+            "label": "Permissions de Sortie",
+            "type": "Link",
+            "link_to": "Permission Sortie Employe",
+            "link_type": "DocType",
+            "icon": "file-text"
+        })
+        sidebar.append("items", {
+            "label": "Planning Conge",
+            "type": "Link",
+            "link_to": "Planning Conge",
+            "link_type": "DocType",
+            "icon": "calendar"
+        })
+        sidebar.insert(ignore_permissions=True)
+        print("  [CREATED] Espace Employes sidebar")
+
     # 7. Corriger le champ app de Gestion Equipe
+
     if frappe.db.exists("Workspace", "Gestion Équipe"):
         current_app = frappe.db.get_value("Workspace", "Gestion Équipe", "app")
         if not current_app:
             frappe.db.set_value("Workspace", "Gestion Équipe", "app", "kya_services", update_modified=False)
             print("  [FIXED] Gestion Équipe app -> kya_services")
 
-    # 8. Fix setup_complete default value if needed
+    # 8. Ensure sidebars expose a workspace home link (required by desktop icon route resolver).
+    gestion_ws = _resolve_existing_workspace(["Gestion Équipe", "Gestion Equipe"])
+    if gestion_ws:
+        _ensure_sidebar_home_link("Gestion Équipe", gestion_ws)
+        _ensure_gestion_equipe_content()
+        _ensure_sidebar_item("Gestion Équipe", "Plans Trimestriels", "DocType", link_to="Plan Trimestriel", icon="list")
+        _ensure_sidebar_item("Gestion Équipe", "Taches d'Equipe", "DocType", link_to="Tache Equipe", icon="task")
+
+    espace_ws = _resolve_existing_workspace(["Espace Employes", "Espace Employés"])
+    if espace_ws:
+        _ensure_sidebar_home_link("Espace Employes", espace_ws)
+
+    # Ensure KYA Services sidebar contains functional entries even if sidebar existed but got emptied.
+    kya_services_ws = _resolve_existing_workspace(["KYA Services"])
+    if kya_services_ws:
+        _ensure_sidebar_home_link("KYA Services", kya_services_ws)
+        _ensure_sidebar_item("KYA Services", "Formulaires", "DocType", link_to="KYA Form", icon="file")
+        _ensure_sidebar_item("KYA Services", "Évaluations", "DocType", link_to="KYA Evaluation", icon="clipboard")
+        _ensure_sidebar_item("KYA Services", "Réponses Formulaires", "DocType", link_to="KYA Form Response", icon="list")
+        _ensure_sidebar_item("KYA Services", "Dashboard Formulaires", "URL", url="/kya-stats", icon="bar-chart-2")
+        _ensure_sidebar_item("KYA Services", "Portail Enquête", "URL", url="/kya-survey", icon="external-link")
+
+    # 9. Desktop icons must target Workspace Sidebar to avoid route=null popup.
+    _link_desktop_icon_to_sidebar("KYA Services", ["KYA Services"])
+    _link_desktop_icon_to_sidebar("Gestion Équipe", ["Gestion Équipe", "Gestion Equipe"])
+    _link_desktop_icon_to_sidebar("Gestion Equipe", ["Gestion Équipe", "Gestion Equipe"])
+    _link_desktop_icon_to_sidebar("Espace Employes", ["Espace Employes", "Espace Employés"])
+    _link_desktop_icon_to_sidebar("Espace Employés", ["Espace Employes", "Espace Employés"])
+    _link_desktop_icon_to_sidebar("Espace Stagiaires", ["Espace Stagiaires"])
+
+    # 10. Fix setup_complete default value if needed
     try:
         val = frappe.db.get_value("DefaultValue", {"defkey": "setup_complete"}, "defvalue")
         if val != "1":

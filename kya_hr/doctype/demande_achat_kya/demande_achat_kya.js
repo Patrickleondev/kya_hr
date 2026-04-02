@@ -116,20 +116,26 @@ function _control_da_signatures(frm) {
     frm.set_df_property("signataire_demandeur", "read_only", 1);
     frm.set_df_property("date_signature_demandeur", "read_only", 1);
 
-    // Signature Chef : modifiable à "En attente Chef" pour Purchase User
-    var peut_signer_chef = ws === "En attente Chef" && roles.includes("Purchase User");
+    // Signature Chef : modifiable à "En attente Chef"
+    var peut_signer_chef = ws === "En attente Chef" && (
+        roles.includes("Chef Service") || roles.includes("Purchase User") || roles.includes("System Manager")
+    );
     frm.set_df_property("signature_chef", "read_only", peut_signer_chef ? 0 : 1);
     frm.set_df_property("signataire_chef", "read_only", 1);
     frm.set_df_property("date_signature_chef", "read_only", 1);
 
-    // Signature DGA : modifiable à "En attente Approbation" pour Purchase Manager
-    var peut_signer_dga = ws === "En attente Approbation" && roles.includes("Purchase Manager");
+    // Signature DAAF/DGA : modifiable à "En attente DAAF"
+    var peut_signer_dga = ws === "En attente DAAF" && (
+        roles.includes("Purchase Manager") || roles.includes("Accounts Manager") || roles.includes("System Manager")
+    );
     frm.set_df_property("signature_dga", "read_only", peut_signer_dga ? 0 : 1);
     frm.set_df_property("signataire_dga", "read_only", 1);
     frm.set_df_property("date_signature_dga", "read_only", 1);
 
-    // Signature DG : modifiable à "En attente DG" pour HR Manager
-    var peut_signer_dg = ws === "En attente DG" && roles.includes("HR Manager");
+    // Signature DG : modifiable à "En attente DG"
+    var peut_signer_dg = ws === "En attente DG" && (
+        roles.includes("System Manager") || roles.includes("DG")
+    );
     frm.set_df_property("signature_dg", "read_only", peut_signer_dg ? 0 : 1);
     frm.set_df_property("signataire_dg", "read_only", 1);
     frm.set_df_property("date_signature_dg", "read_only", 1);
