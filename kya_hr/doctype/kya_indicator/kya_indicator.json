@@ -1,0 +1,159 @@
+{
+    "name": "KYA Indicator",
+    "module": "KYA HR",
+    "doctype": "DocType",
+    "custom": 1,
+    "is_submittable": 0,
+    "autoname": "format:KPI-{employee}-{trimestre}-{annee}",
+    "title_field": "employee_name",
+    "search_fields": "employee,employee_name,trimestre,annee",
+    "track_changes": 1,
+    "fields": [
+        {
+            "fieldname": "section_employe",
+            "label": "Employ\u00e9",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "employee",
+            "label": "Employ\u00e9",
+            "fieldtype": "Link",
+            "options": "Employee",
+            "reqd": 1,
+            "in_list_view": 1,
+            "in_standard_filter": 1
+        },
+        {
+            "fieldname": "employee_name",
+            "label": "Nom",
+            "fieldtype": "Data",
+            "fetch_from": "employee.employee_name",
+            "read_only": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "department",
+            "label": "D\u00e9partement",
+            "fieldtype": "Link",
+            "options": "Department",
+            "fetch_from": "employee.department",
+            "read_only": 1,
+            "in_list_view": 1,
+            "in_standard_filter": 1
+        },
+        {
+            "fieldname": "col_emp",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "trimestre",
+            "label": "Trimestre",
+            "fieldtype": "Select",
+            "options": "T1\nT2\nT3\nT4",
+            "reqd": 1,
+            "in_list_view": 1,
+            "in_standard_filter": 1
+        },
+        {
+            "fieldname": "annee",
+            "label": "Ann\u00e9e",
+            "fieldtype": "Int",
+            "reqd": 1,
+            "in_list_view": 1,
+            "in_standard_filter": 1
+        },
+        {
+            "fieldname": "date_calcul",
+            "label": "Date de Calcul",
+            "fieldtype": "Datetime",
+            "read_only": 1
+        },
+        {
+            "fieldname": "section_perf",
+            "label": "Indicateurs de Performance",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "presenteisme",
+            "label": "Pr\u00e9sent\u00e9isme (%)",
+            "fieldtype": "Float",
+            "description": "Calcul\u00e9 depuis Attendance. Nb jours pr\u00e9sent / nb jours ouvrables * 100",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "perf_pro",
+            "label": "Performance Professionnelle (%)",
+            "fieldtype": "Float",
+            "description": "Moyenne de taux_effectif des t\u00e2ches assign\u00e9es \u00e0 l\u2019employ\u00e9 dans le trimestre"
+        },
+        {
+            "fieldname": "col_perf",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "sat_n_1",
+            "label": "Satisfaction N+1 \u2192 N (%)",
+            "fieldtype": "Float",
+            "description": "Taux moyen des \u00e9valuations o\u00f9 N+1 \u00e9value cet employ\u00e9"
+        },
+        {
+            "fieldname": "sat_n_plus_1",
+            "label": "Satisfaction N \u2192 N+1 (%)",
+            "fieldtype": "Float",
+            "description": "Taux moyen des \u00e9valuations o\u00f9 cet employ\u00e9 \u00e9value son sup\u00e9rieur"
+        },
+        {
+            "fieldname": "section_sat",
+            "label": "Satisfaction",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "sat_personnel",
+            "label": "Satisfaction Personnel (%)",
+            "fieldtype": "Float",
+            "description": "Calcul\u00e9 depuis les r\u00e9ponses aux enqu\u00eates de satisfaction pour le d\u00e9partement"
+        },
+        {
+            "fieldname": "sat_clients",
+            "label": "Satisfaction Clients (%)",
+            "fieldtype": "Float",
+            "description": "Saisie manuelle"
+        },
+        {
+            "fieldname": "section_discipline",
+            "label": "Discipline & S\u00e9curit\u00e9",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "non_accident",
+            "label": "Non-Accident (Taux %)",
+            "fieldtype": "Float",
+            "description": "100 si aucun accident de travail sur la p\u00e9riode, 0 sinon"
+        },
+        {
+            "fieldname": "redressement",
+            "label": "Redressement (0/1)",
+            "fieldtype": "Float",
+            "description": "1 = mesure disciplinaire sur la p\u00e9riode, 0 = aucune"
+        },
+        {
+            "fieldname": "section_notes",
+            "label": "Notes",
+            "fieldtype": "Section Break",
+            "collapsible": 1
+        },
+        {
+            "fieldname": "notes",
+            "label": "Observations",
+            "fieldtype": "Text"
+        }
+    ],
+    "permissions": [
+        {"role": "System Manager", "permlevel": 0, "read": 1, "write": 1, "create": 1, "delete": 1},
+        {"role": "HR Manager",     "permlevel": 0, "read": 1, "write": 1, "create": 1, "delete": 1},
+        {"role": "HR User",        "permlevel": 0, "read": 1, "write": 0, "create": 0, "delete": 0},
+        {"role": "Accounts Manager", "permlevel": 0, "read": 1, "write": 0, "create": 0, "delete": 0},
+        {"role": "Purchase Manager", "permlevel": 0, "read": 1, "write": 0, "create": 0, "delete": 0},
+        {"role": "Chef d'\u00c9quipe",  "permlevel": 0, "read": 1, "write": 0, "create": 0, "delete": 0}
+    ]
+}

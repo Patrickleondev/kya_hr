@@ -1,4 +1,4 @@
-﻿import frappe
+import frappe
 from frappe.utils import today, now_datetime, add_days, getdate, get_datetime, cint
 
 
@@ -1298,4 +1298,366 @@ def get_webforms_list():
             except Exception:
                 form["count"] = 0
     return forms
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  INDICATEURS DE PERFORMANCE (KYA Indicator)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def _quarter_date_range(trimestre, annee):
+    """Return (from_date, to_date) strings for a given quarter."""
+    mapping = {
+        "T1": ("{}-01-01", "{}-03-31"),
+        "T2": ("{}-04-01", "{}-06-30"),
+        "T3": ("{}-07-01", "{}-09-30"),
+        "T4": ("{}-10-01", "{}-12-31"),
+    }
+    tpl = mapping.get(trimestre, ("{}-01-01", "{}-12-31"))
+    return tpl[0].format(annee), tpl[1].format(annee)
+
+
+def _calc_presenteisme(employee, from_date, to_date):
+    """Calculate presenteeism rate from Attendance records."""
+    try:
+        rows = frappe.db.sql(
+            """SELECT status FROM tabAttendance
+               WHERE employee=%s AND attendance_date BETWEEN %s AND %s
+               AND docstatus=1""",
+            (employee, from_date, to_date), as_dict=True,
+        )
+        if not rows:
+            return None
+        present = sum(1 for r in rows if r.status in ("Present", "Work From Home", "Half Day"))
+        total = len(rows)
+        return round(present / total * 100, 2) if total else None
+    except Exception:
+        return None
+
+
+def _calc_perf_pro(employee, from_date, to_date):
+    """Calcule la perf professionnelle depuis Tache Equipe.
+    = moyenne des taux_effectif des tâches où l'employé est attributaire."""
+    try:
+        if not frappe.db.table_exists("tabTache Equipe"):
+            return None
+        taches = frappe.db.sql(
+            """SELECT te.taux_effectif
+               FROM `tabTache Equipe` te
+               JOIN `tabTache Equipe Attribution` tea ON tea.parent = te.name
+               JOIN `tabPlan Trimestriel` pt ON pt.name = te.plan
+               WHERE tea.employe = %s
+                 AND CONCAT(pt.trimestre, ' ', pt.annee) BETWEEN %s AND %s""",
+            (employee,
+             from_date[:7],   # Approx: use year range fallback below
+             to_date[:7]),
+            as_dict=True,
+        )
+        # Fallback: join via plan trimestre/annee (more robust)
+        taches = frappe.db.sql(
+            """SELECT te.taux_effectif
+               FROM `tabTache Equipe` te
+               JOIN `tabTache Equipe Attribution` tea ON tea.parent = te.name
+               JOIN `tabPlan Trimestriel` pt ON pt.name = te.plan
+               WHERE tea.employe = %s
+                 AND te.creation BETWEEN %s AND %s""",
+            (employee, from_date, to_date),
+            as_dict=True,
+        )
+        if not taches:
+            return None
+        vals = [float(t.taux_effectif) for t in taches if t.taux_effectif is not None]
+        return round(sum(vals) / len(vals), 2) if vals else None
+    except Exception:
+        return None
+
+
+def _calc_sat_evaluations(employee, trimestre, annee, eval_type):
+    """Calcule le taux moyen d'évaluation pour un type donné.
+    eval_type: 'N+1 évalue N' ou 'N évalue N+1'."""
+    try:
+        if not frappe.db.table_exists("tabKYA Evaluation"):
+            return None
+        if eval_type == "N+1 \u00e9value N":
+            # N+1 evaluates this employee → employee is "evalue"
+            evals = frappe.db.sql(
+                """SELECT taux_moyen FROM `tabKYA Evaluation`
+                   WHERE evalue=%s AND trimestre=%s AND annee=%s
+                     AND type_evaluation=%s AND statut IN ('Soumis','Valid\u00e9')""",
+                (employee, trimestre, annee, eval_type), as_dict=True,
+            )
+        else:
+            # This employee evaluates their N+1 → employee is "evaluateur"
+            evals = frappe.db.sql(
+                """SELECT taux_moyen FROM `tabKYA Evaluation`
+                   WHERE evaluateur=%s AND trimestre=%s AND annee=%s
+                     AND type_evaluation=%s AND statut IN ('Soumis','Valid\u00e9')""",
+                (employee, trimestre, annee, eval_type), as_dict=True,
+            )
+        if not evals:
+            return None
+        vals = [float(e.taux_moyen) for e in evals if e.taux_moyen is not None]
+        return round(sum(vals) / len(vals), 2) if vals else None
+    except Exception:
+        return None
+
+
+def _calc_sat_personnel(department, from_date, to_date):
+    """Calcule la satisfaction personnel depuis les réponses KYA Form (enquêtes de satisfaction)."""
+    try:
+        if not frappe.db.table_exists("tabKYA Form Response"):
+            return None
+        # Look for KYA Form Responses linked to satisfaction survey forms for this department
+        # The KYA Form should have a tag/category "Satisfaction Personnel"
+        rows = frappe.db.sql(
+            """SELECT kfr.score_global
+               FROM `tabKYA Form Response` kfr
+               JOIN `tabKYA Form` kf ON kf.name = kfr.form
+               WHERE kf.titre LIKE %s
+                 AND kfr.soumis_le BETWEEN %s AND %s
+                 AND kfr.score_global IS NOT NULL""",
+            ("%Satisfaction%Personnel%", from_date, to_date), as_dict=True,
+        )
+        if not rows:
+            return None
+        vals = [float(r.score_global) for r in rows if r.score_global is not None]
+        return round(sum(vals) / len(vals), 2) if vals else None
+    except Exception:
+        return None
+
+
+def _calc_non_accident(employee, from_date, to_date):
+    """Vérifie si l'employé a eu un accident de travail sur la période.
+    Retourne 100 (taux non-accident) si aucun, 0 si accident détecté."""
+    try:
+        # Check Leave Application with leave_type matching "Accident"
+        count = frappe.db.count(
+            "Leave Application",
+            filters=[
+                ["employee", "=", employee],
+                ["from_date", ">=", from_date],
+                ["to_date", "<=", to_date],
+                ["leave_type", "like", "%Accident%"],
+                ["docstatus", "=", 1],
+            ],
+        )
+        return 0.0 if count > 0 else 100.0
+    except Exception:
+        return None
+
+
+def _calc_redressement(employee, from_date, to_date):
+    """Vérifie s'il y a eu une mesure disciplinaire (Warning/Corrective Action) sur la période.
+    Retourne 1 si mesure disciplinaire, 0 sinon."""
+    try:
+        # Check Employee Warning (HRMS) or HR Notice if available
+        for dt in ("Employee Warning", "Employee Grievance"):
+            if frappe.db.table_exists("tab" + dt):
+                count = frappe.db.count(
+                    dt,
+                    filters=[
+                        ["employee", "=", employee],
+                        ["creation", ">=", from_date],
+                        ["creation", "<=", to_date],
+                        ["docstatus", "=", 1],
+                    ],
+                )
+                if count > 0:
+                    return 1.0
+        return 0.0
+    except Exception:
+        return None
+
+
+@frappe.whitelist()
+def get_employee_indicators(employee, trimestre=None, annee=None):
+    """Calcule ou récupère les indicateurs KPI pour un employé et un trimestre donné.
+    Si trimestre/annee non fournis, utilise le trimestre en cours.
+
+    Retourne:
+    {
+        employee, employee_name, department, trimestre, annee,
+        presenteisme, perf_pro, sat_n_1, sat_n_plus_1,
+        sat_clients, sat_personnel, non_accident, redressement,
+        from_db  // True si lu depuis KYA Indicator, False si calculé à la volée
+    }
+    """
+    import datetime
+
+    today = datetime.date.today()
+    if not annee:
+        annee = today.year
+    annee = int(annee)
+    if not trimestre:
+        m = today.month
+        trimestre = "T1" if m <= 3 else "T2" if m <= 6 else "T3" if m <= 9 else "T4"
+
+    # Check permissions: HR roles + Chef d'Équipe can see all, Employee sees own data only
+    user = frappe.session.user
+    user_roles = set(frappe.get_roles(user))
+    hr_roles = {"System Manager", "HR Manager", "HR User",
+                "Accounts Manager", "Purchase Manager"}
+    if not (user_roles & hr_roles):
+        # Non-HR: can only see own indicators
+        own_emp = frappe.db.get_value("Employee", {"user_id": user, "status": "Active"}, "name")
+        if own_emp != employee:
+            # Chef d'Équipe can see their team
+            is_chef = frappe.db.exists("Employee", {"name": employee, "reports_to": own_emp})
+            if not is_chef:
+                frappe.throw("Acc\u00e8s refus\u00e9", frappe.PermissionError)
+
+    emp_doc = frappe.db.get_value(
+        "Employee", employee,
+        ["employee_name", "department", "designation"], as_dict=True,
+    )
+    if not emp_doc:
+        frappe.throw(f"Employ\u00e9 introuvable: {employee}")
+
+    result = {
+        "employee": employee,
+        "employee_name": emp_doc.employee_name,
+        "department": emp_doc.department,
+        "designation": emp_doc.designation,
+        "trimestre": trimestre,
+        "annee": annee,
+        "presenteisme": None,
+        "perf_pro": None,
+        "sat_n_1": None,
+        "sat_n_plus_1": None,
+        "sat_clients": None,
+        "sat_personnel": None,
+        "non_accident": None,
+        "redressement": None,
+        "from_db": False,
+    }
+
+    # 1. Try to load pre-calculated from KYA Indicator
+    if frappe.db.table_exists("tabKYA Indicator"):
+        saved = frappe.db.get_value(
+            "KYA Indicator",
+            {"employee": employee, "trimestre": trimestre, "annee": annee},
+            ["presenteisme", "perf_pro", "sat_n_1", "sat_n_plus_1",
+             "sat_clients", "sat_personnel", "non_accident", "redressement"],
+            as_dict=True,
+        )
+        if saved:
+            result.update({
+                "presenteisme":  saved.presenteisme,
+                "perf_pro":      saved.perf_pro,
+                "sat_n_1":       saved.sat_n_1,
+                "sat_n_plus_1":  saved.sat_n_plus_1,
+                "sat_clients":   saved.sat_clients,
+                "sat_personnel": saved.sat_personnel,
+                "non_accident":  saved.non_accident,
+                "redressement":  saved.redressement,
+                "from_db":       True,
+            })
+            return result
+
+    # 2. Calculate on the fly
+    from_date, to_date = _quarter_date_range(trimestre, annee)
+    result["presenteisme"]  = _calc_presenteisme(employee, from_date, to_date)
+    result["perf_pro"]      = _calc_perf_pro(employee, from_date, to_date)
+    result["sat_n_1"]       = _calc_sat_evaluations(employee, trimestre, annee, "N+1 \u00e9value N")
+    result["sat_n_plus_1"]  = _calc_sat_evaluations(employee, trimestre, annee, "N \u00e9value N+1")
+    result["sat_clients"]   = None   # Manual — not calculated
+    result["sat_personnel"] = _calc_sat_personnel(emp_doc.department, from_date, to_date)
+    result["non_accident"]  = _calc_non_accident(employee, from_date, to_date)
+    result["redressement"]  = _calc_redressement(employee, from_date, to_date)
+    return result
+
+
+@frappe.whitelist()
+def get_team_indicators(department=None, trimestre=None, annee=None):
+    """Retourne les indicateurs agrégés pour toute une équipe / département."""
+    import datetime
+
+    today = datetime.date.today()
+    if not annee:
+        annee = today.year
+    annee = int(annee)
+    if not trimestre:
+        m = today.month
+        trimestre = "T1" if m <= 3 else "T2" if m <= 6 else "T3" if m <= 9 else "T4"
+
+    allowed_roles = {"System Manager", "HR Manager", "HR User",
+                     "Accounts Manager", "Purchase Manager"}
+    user_roles = set(frappe.get_roles(frappe.session.user))
+    if not (user_roles & allowed_roles):
+        # Chef d'Équipe sees only their own department
+        own_emp = frappe.db.get_value(
+            "Employee", {"user_id": frappe.session.user, "status": "Active"}, "name"
+        )
+        if own_emp:
+            department = frappe.db.get_value("Employee", own_emp, "department")
+        if not department:
+            frappe.throw("Acc\u00e8s refus\u00e9", frappe.PermissionError)
+
+    filters = [["status", "=", "Active"], ["employment_type", "!=", "Stage"]]
+    if department:
+        filters.append(["department", "=", department])
+
+    employees = frappe.get_all("Employee", filters=filters,
+                               fields=["name", "employee_name", "department", "designation"])
+
+    results = []
+    for emp in employees:
+        ind = get_employee_indicators(emp.name, trimestre, annee)
+        results.append(ind)
+    return {"employees": results, "trimestre": trimestre, "annee": annee}
+
+
+@frappe.whitelist()
+def save_employee_indicators(employee, trimestre, annee, sat_clients=None, notes=None):
+    """Calcule et sauvegarde les indicateurs dans KYA Indicator DocType.
+    Réservé aux rôles RH. sat_clients saisie manuelle."""
+    allowed_roles = {"System Manager", "HR Manager"}
+    user_roles = set(frappe.get_roles(frappe.session.user))
+    if not (user_roles & allowed_roles):
+        frappe.throw("Acc\u00e8s r\u00e9serv\u00e9 aux managers RH", frappe.PermissionError)
+
+    if not frappe.db.table_exists("tabKYA Indicator"):
+        frappe.throw("DocType KYA Indicator non install\u00e9 — ex\u00e9cutez bench migrate")
+
+    # Calculate live
+    from_date, to_date = _quarter_date_range(trimestre, int(annee))
+    emp_doc = frappe.db.get_value("Employee", employee,
+                                  ["employee_name", "department"], as_dict=True)
+
+    values = {
+        "presenteisme":  _calc_presenteisme(employee, from_date, to_date),
+        "perf_pro":      _calc_perf_pro(employee, from_date, to_date),
+        "sat_n_1":       _calc_sat_evaluations(employee, trimestre, annee, "N+1 \u00e9value N"),
+        "sat_n_plus_1":  _calc_sat_evaluations(employee, trimestre, annee, "N \u00e9value N+1"),
+        "sat_clients":   float(sat_clients) if sat_clients is not None else None,
+        "sat_personnel": _calc_sat_personnel(emp_doc.department, from_date, to_date),
+        "non_accident":  _calc_non_accident(employee, from_date, to_date),
+        "redressement":  _calc_redressement(employee, from_date, to_date),
+    }
+
+    existing = frappe.db.get_value(
+        "KYA Indicator",
+        {"employee": employee, "trimestre": trimestre, "annee": annee},
+        "name",
+    )
+    if existing:
+        doc = frappe.get_doc("KYA Indicator", existing)
+        for k, v in values.items():
+            if v is not None:
+                setattr(doc, k, v)
+        if notes:
+            doc.notes = notes
+        doc.save(ignore_permissions=True)
+    else:
+        doc = frappe.new_doc("KYA Indicator")
+        doc.employee  = employee
+        doc.trimestre = trimestre
+        doc.annee     = int(annee)
+        doc.notes     = notes or ""
+        for k, v in values.items():
+            setattr(doc, k, v)
+        doc.insert(ignore_permissions=True)
+
+    frappe.db.commit()
+    return {"name": doc.name, "values": values}
+
 

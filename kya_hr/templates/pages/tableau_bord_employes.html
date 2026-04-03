@@ -193,6 +193,68 @@
 
   #kya-loading { text-align: center; padding: 3rem; color: #888; font-size: 0.9rem; }
   .kya-error { color: var(--kya-danger); text-align: center; padding: 2rem; }
+
+  /* ── KPI Indicator Section ── */
+  .kya-kpi-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: 1rem;
+    padding: .85rem 1rem;
+    background: #f5f7fa;
+    border-radius: 10px;
+  }
+  .kya-kpi-select-wrap { display: flex; align-items: center; gap: .45rem; }
+  .btn-kpi-load {
+    background: var(--kya-primary); color: #fff;
+    border: none; border-radius: 6px; padding: .4rem 1rem;
+    cursor: pointer; font-size: .875rem;
+  }
+  .btn-kpi-load:hover { background: var(--kya-primary-dark); }
+  .btn-kpi-save {
+    background: var(--kya-success); color: #fff;
+    border: none; border-radius: 6px; padding: .4rem 1rem;
+    cursor: pointer; font-size: .875rem;
+  }
+  .btn-kpi-save:hover { background: #2e7d32; }
+  .kya-kpi-name-row {
+    display: flex; align-items: center; flex-wrap: wrap;
+    gap: .5rem; margin-bottom: .9rem; margin-top: .25rem;
+  }
+  .kya-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+    gap: .9rem;
+    margin-bottom: 1rem;
+  }
+  .kya-kpi-card {
+    background: #fff; border-radius: 10px;
+    padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    border-top: 4px solid #ccc; text-align: center;
+  }
+  .kya-kpi-card .kpi-icon { font-size: 1.6rem; margin-bottom: .2rem; }
+  .kya-kpi-card .kpi-value {
+    font-size: 1.75rem; font-weight: 700; line-height: 1.1;
+  }
+  .kya-kpi-card .kpi-label { font-size: .7rem; color: #6c757d; margin-top: 4px; }
+  .kya-kpi-card .kpi-null { font-size: 1.2rem; color: #ccc; }
+  .kya-kpi-card.kpi-green  { border-color: var(--kya-success); }
+  .kya-kpi-card.kpi-green  .kpi-value { color: var(--kya-success); }
+  .kya-kpi-card.kpi-blue   { border-color: var(--kya-primary); }
+  .kya-kpi-card.kpi-blue   .kpi-value { color: var(--kya-primary); }
+  .kya-kpi-card.kpi-warn   { border-color: var(--kya-warn); }
+  .kya-kpi-card.kpi-warn   .kpi-value { color: var(--kya-warn); }
+  .kya-kpi-card.kpi-danger { border-color: var(--kya-danger); }
+  .kya-kpi-card.kpi-danger .kpi-value { color: var(--kya-danger); }
+  .kya-kpi-card.kpi-teal   { border-color: var(--kya-teal); }
+  .kya-kpi-card.kpi-teal   .kpi-value { color: var(--kya-teal); }
+  .kya-kpi-card.kpi-gray   { border-color: #9e9e9e; }
+  .kya-kpi-card.kpi-gray   .kpi-value { color: #9e9e9e; }
+  .kya-kpi-manual-row {
+    display: flex; align-items: center; flex-wrap: wrap;
+    gap: .5rem; margin-top: .5rem; margin-bottom: 1rem;
+  }
 </style>
 
 <div id="kya-loading">ΓÅ│ Chargement du tableau de bordΓÇª</div>
@@ -260,8 +322,46 @@
     </table>
   </div>
 
-  <!-- ΓöÇ Quick links ΓöÇ -->
-  <p class="kya-section-title">Acc├¿s rapides</p>
+  <!-- ─ Indicateurs de Performance par Employé ─ -->
+  <p class="kya-section-title">📊 Indicateurs de Performance par Employé</p>
+  <div class="kya-kpi-toolbar">
+    <div class="kya-kpi-select-wrap">
+      <label style="font-size:.85rem;font-weight:600">Employé :</label>
+      <select id="kpiEmployeeSelect" style="min-width:180px;border:1px solid #dee2e6;border-radius:6px;padding:.35rem .7rem;font-size:.875rem"></select>
+    </div>
+    <div class="kya-kpi-select-wrap">
+      <label style="font-size:.85rem;font-weight:600">Trimestre :</label>
+      <select id="kpiTrimestreSelect" style="border:1px solid #dee2e6;border-radius:6px;padding:.35rem .6rem;font-size:.875rem">
+        <option value="T1">T1</option><option value="T2">T2</option>
+        <option value="T3">T3</option><option value="T4">T4</option>
+      </select>
+    </div>
+    <div class="kya-kpi-select-wrap">
+      <label style="font-size:.85rem;font-weight:600">Année :</label>
+      <select id="kpiAnneeSelect" style="border:1px solid #dee2e6;border-radius:6px;padding:.35rem .6rem;font-size:.875rem"></select>
+    </div>
+    <button class="btn-kpi-load" onclick="loadEmployeeKPIs()">🔄 Afficher</button>
+    <button class="btn-kpi-save" onclick="saveEmployeeKPIs()" title="Calculer et sauvegarder dans KYA Indicator">💾 Sauvegarder</button>
+  </div>
+  <div id="kpiLoading" style="display:none;text-align:center;padding:1rem;color:#888;font-size:.85rem">⏳ Calcul en cours…</div>
+  <div id="kpiSection" style="display:none">
+    <div class="kya-kpi-name-row">
+      <span id="kpiEmpName" style="font-weight:700;font-size:1rem;color:#1976d2"></span>
+      <span id="kpiPeriodBadge" style="font-size:.78rem;background:#e3f2fd;color:#1565c0;padding:.2rem .65rem;border-radius:20px;margin-left:.75rem"></span>
+      <span id="kpiFromDb" style="font-size:.75rem;color:#888;margin-left:.75rem"></span>
+    </div>
+    <div class="kya-kpi-grid" id="kpiGrid"></div>
+    <!-- Champ sat_clients (saisie manuelle) -->
+    <div class="kya-kpi-manual-row" id="kpiManualRow" style="display:none">
+      <label style="font-size:.85rem;font-weight:600;margin-right:.5rem">📝 Satisfaction Clients (%) — saisie manuelle :</label>
+      <input type="number" id="kpiSatClients" min="0" max="100" step="0.1"
+             placeholder="ex: 85.5"
+             style="width:120px;border:1px solid #dee2e6;border-radius:6px;padding:.3rem .6rem;font-size:.875rem">
+    </div>
+  </div>
+
+  <!-- ─ Quick links ─ -->
+  <p class="kya-section-title">Accès rapides</p>
   <div class="kya-links-grid">
     <a class="kya-link-card" href="/permission-sortie-employe/new"><span class="licon">Γ₧ò</span>Nouvelle permission</a>
     <a class="kya-link-card" href="/app/permission-sortie-employe"><span class="licon">≡ƒÜ¬</span>Permissions de sortie</a>
@@ -462,10 +562,162 @@
 
   // Load on ready
   if (typeof frappe !== "undefined" && frappe.ready) {
-    frappe.ready(function() { loadDashboard(); });
+    frappe.ready(function() { loadDashboard(); initKpiToolbar(); });
   } else {
-    document.addEventListener("DOMContentLoaded", function() { loadDashboard(); });
+    document.addEventListener("DOMContentLoaded", function() { loadDashboard(); initKpiToolbar(); });
   }
+})();
+
+// ─────────────────────── KPI INDICATOR SECTION ───────────────────────────────
+(function() {
+  // Init quarter/year selectors
+  const yr = new Date().getFullYear();
+  const anneSel = document.getElementById("kpiAnneeSelect");
+  for (let y = yr; y >= yr - 3; y--) {
+    const o = document.createElement("option");
+    o.value = y; o.textContent = y; if (y === yr) o.selected = true;
+    anneSel.appendChild(o);
+  }
+  // Default trimestre: current quarter
+  const curQ = "T" + Math.ceil((new Date().getMonth() + 1) / 3);
+  document.getElementById("kpiTrimestreSelect").value = curQ;
+
+  window.initKpiToolbar = function() {
+    // Load employee list for selector
+    frappe.call({
+      method: "frappe.client.get_list",
+      args: {
+        doctype: "Employee",
+        filters: [["status","=","Active"],["employment_type","!=","Stage"]],
+        fields: ["name","employee_name","department"],
+        limit: 200,
+        order_by: "employee_name asc",
+      },
+      callback: function(r) {
+        const sel = document.getElementById("kpiEmployeeSelect");
+        sel.innerHTML = '<option value="">-- Sélectionner un employé --</option>';
+        (r.message || []).forEach(function(e) {
+          const o = document.createElement("option");
+          o.value = e.name;
+          o.textContent = (e.employee_name || e.name) + (e.department ? " — " + e.department : "");
+          sel.appendChild(o);
+        });
+      }
+    });
+  };
+
+  window.loadEmployeeKPIs = function() {
+    const emp = document.getElementById("kpiEmployeeSelect").value;
+    const tri = document.getElementById("kpiTrimestreSelect").value;
+    const ann = document.getElementById("kpiAnneeSelect").value;
+    if (!emp) { frappe.msgprint("Veuillez sélectionner un employé."); return; }
+
+    document.getElementById("kpiLoading").style.display = "";
+    document.getElementById("kpiSection").style.display  = "none";
+
+    frappe.call({
+      method: "kya_hr.api.get_employee_indicators",
+      args: { employee: emp, trimestre: tri, annee: ann },
+      callback: function(r) {
+        document.getElementById("kpiLoading").style.display = "none";
+        if (r.message) {
+          renderKPIs(r.message);
+          document.getElementById("kpiSection").style.display = "";
+        }
+      },
+      error: function() {
+        document.getElementById("kpiLoading").style.display = "none";
+        frappe.msgprint("Erreur lors du chargement des indicateurs.");
+      }
+    });
+  };
+
+  function kpiColor(key, val) {
+    if (val === null || val === undefined) return "kpi-gray";
+    const thresholds = {
+      presenteisme: [80, 90],   // <80 danger, 80-90 warn, >90 green
+      perf_pro:     [60, 80],
+      sat_n_1:      [60, 80],
+      sat_n_plus_1: [60, 80],
+      sat_clients:  [60, 80],
+      sat_personnel:[60, 80],
+      non_accident: [99, 100],  // 100 = green, 0 = danger
+    };
+    const t = thresholds[key];
+    if (!t) return val > 0 ? "kpi-danger" : "kpi-green"; // redressement: 0=good, 1=bad
+    if (val >= t[1]) return "kpi-green";
+    if (val >= t[0]) return "kpi-warn";
+    return "kpi-danger";
+  }
+
+  const KPI_META = [
+    { key: "presenteisme",  label: "Présentéisme",        icon: "📅", unit: "%", tooltip: "Jours présents / jours ouvrables" },
+    { key: "perf_pro",      label: "Perf. Professionnelle",icon: "🎯", unit: "%", tooltip: "Moyenne taux effectif des tâches (Plan Trimestriel)" },
+    { key: "sat_n_1",       label: "Satisfaction N+1→N",   icon: "⭐", unit: "%", tooltip: "Taux moyen évaluation du supérieur" },
+    { key: "sat_n_plus_1",  label: "Satisfaction N→N+1",   icon: "💬", unit: "%", tooltip: "Taux moyen évaluation de l'employé vers son N+1" },
+    { key: "sat_clients",   label: "Satisfaction Clients", icon: "🤝", unit: "%", tooltip: "Saisie manuelle" },
+    { key: "sat_personnel", label: "Satisfaction Personnel",icon: "😊", unit: "%", tooltip: "Calculé depuis enquêtes de satisfaction interne" },
+    { key: "non_accident",  label: "Non-Accident",         icon: "🦺", unit: "%", tooltip: "100 si aucun accident de travail" },
+    { key: "redressement",  label: "Redressement",         icon: "⚠️", unit: "",  tooltip: "0=aucune mesure, 1=mesure disciplinaire" },
+  ];
+
+  function renderKPIs(d) {
+    document.getElementById("kpiEmpName").textContent =
+      (d.employee_name || d.employee) + (d.designation ? " — " + d.designation : "");
+    document.getElementById("kpiPeriodBadge").textContent = d.trimestre + " " + d.annee;
+    document.getElementById("kpiFromDb").textContent = d.from_db ? "💾 Sauvegardé" : "⚡ Calculé en temps réel";
+
+    const grid = document.getElementById("kpiGrid");
+    grid.innerHTML = "";
+    KPI_META.forEach(function(m) {
+      const val = d[m.key];
+      const color = kpiColor(m.key, val);
+      let valHtml;
+      if (val === null || val === undefined) {
+        valHtml = '<span class="kpi-null">—</span>';
+      } else if (m.key === "redressement") {
+        valHtml = '<span class="kpi-value" style="font-size:1.5rem">' + (val > 0 ? "⚠️ Oui" : "✅ Non") + '</span>';
+      } else {
+        valHtml = '<div class="kpi-value">' + parseFloat(val).toFixed(1) + m.unit + '</div>';
+      }
+      const card = document.createElement("div");
+      card.className = "kya-kpi-card " + color;
+      card.title = m.tooltip;
+      card.innerHTML = '<div class="kpi-icon">' + m.icon + '</div>'
+        + valHtml
+        + '<div class="kpi-label">' + m.label + '</div>';
+      grid.appendChild(card);
+    });
+
+    // Show manual row for sat_clients
+    const manualRow = document.getElementById("kpiManualRow");
+    manualRow.style.display = "";
+    if (d.sat_clients !== null && d.sat_clients !== undefined) {
+      document.getElementById("kpiSatClients").value = d.sat_clients;
+    }
+  }
+
+  window.saveEmployeeKPIs = function() {
+    const emp = document.getElementById("kpiEmployeeSelect").value;
+    const tri = document.getElementById("kpiTrimestreSelect").value;
+    const ann = document.getElementById("kpiAnneeSelect").value;
+    const satC = document.getElementById("kpiSatClients").value;
+    if (!emp) { frappe.msgprint("Veuillez d'abord sélectionner un employé."); return; }
+
+    frappe.call({
+      method: "kya_hr.api.save_employee_indicators",
+      args: { employee: emp, trimestre: tri, annee: ann, sat_clients: satC || null },
+      callback: function(r) {
+        if (r.message) {
+          frappe.show_alert({ message: "Indicateurs sauvegardés ✓", indicator: "green" });
+          loadEmployeeKPIs(); // Reload to show saved badge
+        }
+      },
+      error: function(err) {
+        frappe.msgprint("Erreur : " + (err.message || "Voir les logs"));
+      }
+    });
+  };
 })();
 </script>
 {% endblock %}

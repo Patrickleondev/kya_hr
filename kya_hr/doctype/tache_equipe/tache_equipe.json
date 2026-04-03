@@ -1,0 +1,149 @@
+{
+    "name": "Tache Equipe",
+    "module": "KYA HR",
+    "doctype": "DocType",
+    "custom": 1,
+    "is_submittable": 0,
+    "autoname": "format:TACHE-{plan}-{#####}",
+    "title_field": "libelle",
+    "search_fields": "libelle,equipe,plan,statut",
+    "track_changes": 1,
+    "fields": [
+        {
+            "fieldname": "section_plan",
+            "label": "Plan & Rattachement",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "plan",
+            "label": "Plan Trimestriel",
+            "fieldtype": "Link",
+            "options": "Plan Trimestriel",
+            "reqd": 1,
+            "in_list_view": 1,
+            "in_standard_filter": 1
+        },
+        {
+            "fieldname": "equipe",
+            "label": "\u00c9quipe",
+            "fieldtype": "Link",
+            "options": "Department",
+            "fetch_from": "plan.equipe",
+            "read_only": 1,
+            "in_list_view": 1,
+            "in_standard_filter": 1
+        },
+        {
+            "fieldname": "col_plan",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "resultat_numero",
+            "label": "N\u00b0 R\u00e9sultat",
+            "fieldtype": "Int"
+        },
+        {
+            "fieldname": "resultat_libelle",
+            "label": "R\u00e9sultat rattach\u00e9",
+            "fieldtype": "Data",
+            "read_only": 1
+        },
+        {
+            "fieldname": "section_tache",
+            "label": "D\u00e9tail T\u00e2che",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "libelle",
+            "label": "Libell\u00e9 de la T\u00e2che",
+            "fieldtype": "Data",
+            "reqd": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "frequence",
+            "label": "Fr\u00e9quence",
+            "fieldtype": "Select",
+            "options": "Mensuelle\nTrimestrielle\nHebdomadaire"
+        },
+        {
+            "fieldname": "kpi",
+            "label": "KPI / Indicateur",
+            "fieldtype": "Data"
+        },
+        {
+            "fieldname": "col_tache",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "poids",
+            "label": "Poids (%)",
+            "fieldtype": "Float"
+        },
+        {
+            "fieldname": "statut",
+            "label": "Statut",
+            "fieldtype": "Select",
+            "options": "Non d\u00e9marr\u00e9\nEn cours\nTermin\u00e9",
+            "default": "Non d\u00e9marr\u00e9",
+            "in_list_view": 1,
+            "in_standard_filter": 1
+        },
+        {
+            "fieldname": "section_realisation",
+            "label": "R\u00e9alisation",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "taux_estime",
+            "label": "Taux Estim\u00e9 (%)",
+            "fieldtype": "Float",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "taux_effectif",
+            "label": "Taux Effectif (%)",
+            "fieldtype": "Float",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "col_real",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "digitalisable",
+            "label": "Digitalisable",
+            "fieldtype": "Select",
+            "options": "OUI\nNON",
+            "default": "NON"
+        },
+        {
+            "fieldname": "taux_digitalisation",
+            "label": "Taux Digitalisation (%)",
+            "fieldtype": "Float"
+        },
+        {
+            "fieldname": "commentaire",
+            "label": "Commentaire",
+            "fieldtype": "Small Text"
+        },
+        {
+            "fieldname": "section_attributions",
+            "label": "Attributions",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "attributions",
+            "label": "Attributions",
+            "fieldtype": "Table",
+            "options": "Tache Equipe Attribution"
+        }
+    ],
+    "permissions": [
+        {"role": "System Manager", "permlevel": 0, "read": 1, "write": 1, "create": 1, "delete": 1},
+        {"role": "HR Manager",     "permlevel": 0, "read": 1, "write": 1, "create": 1, "delete": 1},
+        {"role": "HR User",        "permlevel": 0, "read": 1, "write": 1, "create": 1, "delete": 0},
+        {"role": "Chef d'\u00c9quipe",  "permlevel": 0, "read": 1, "write": 1, "create": 1, "delete": 0},
+        {"role": "Employee",       "permlevel": 0, "read": 1, "write": 1, "create": 0, "delete": 0, "if_owner": 1}
+    ]
+}

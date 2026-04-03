@@ -1,4 +1,4 @@
-﻿"""
+"""
 fix_desktop_icons.py - v3
 --------------------------
 Crée les Desktop Icons manquantes pour les workspaces kya_hr en français.

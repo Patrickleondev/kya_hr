@@ -1,4 +1,4 @@
-﻿"""
+"""
 force_sync_workspaces.py v10 -- Post-migrate hook (KYA).
 
 Regles :
