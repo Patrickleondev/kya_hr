@@ -615,7 +615,7 @@ def get_my_documents(limit=20, offset=0, status_filter=None):
                 "color": _STATE_COLORS.get(ws, "gray"),
                 "creation": str(doc.creation),
                 "modified": str(doc.modified),
-                "url": f"/{route}?name={doc.name}",
+                "url": f"/{route}/{doc.name}/edit",
             })
 
     # Sort by modified desc

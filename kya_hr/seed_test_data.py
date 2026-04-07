@@ -24,6 +24,7 @@ def _get_or_create_test_employee():
         "date_of_joining": today(),
         "date_of_birth": "1990-01-01",
         "company": company,
+        "user_id": "Administrator",
     })
     emp_doc.flags.ignore_permissions = True
     emp_doc.flags.ignore_links = True
@@ -202,6 +203,6 @@ def execute():
     }
     for route, ids in all_ids.items():
         for doc_id in (ids or []):
-            print("    http://localhost:8084/" + route + "?name=" + doc_id)
+            print("    http://localhost:8084/" + route + "/" + doc_id + "/edit")
     print()
     print("  Termine OK")

@@ -18,16 +18,15 @@
   var path = window.location.pathname.replace(/^\//, "").replace(/\/$/, "");
   var pathParts = path.split("/");
 
-  // Preserve tracked document links like /permission-sortie-employe?name=PSE-2026-00001
+  // Frappe v16: ?name= URLs are NOT supported for authenticated users (server redirects to /new).
+  // Convert ?name=<docname> → /{route}/{docname}/edit (Frappe canonical path format).
   if (pathParts.length === 1 && KYA_WF_ROUTES.indexOf(path) !== -1 && docName) {
+    window.location.replace("/" + path + "/" + encodeURIComponent(docName) + "/edit");
     return;
   }
 
-  // Normalize legacy links like /permission-sortie-employe/PSE-2026-00001
-  if (pathParts.length === 2 && KYA_WF_ROUTES.indexOf(pathParts[0]) !== -1 && pathParts[1] !== "new") {
-    window.location.replace("/" + pathParts[0] + "?name=" + encodeURIComponent(pathParts[1]));
-    return;
-  }
+  // Path-based links like /{route}/{docname} work correctly in Frappe v16 — no conversion needed.
+  // Sub-paths /new, /list, /edit are handled natively. Do NOT convert to ?name=.
 
   if (KYA_WF_ROUTES.indexOf(path) !== -1) {
     // Bare route without /new ΓÇö redirect silently
