@@ -5,6 +5,9 @@ app_description = "Personnalisations RH et traductions pour KYA-Energy Group"
 app_email = "info@kya-energy.com"
 app_license = "mit"
 
+# Branding KYA — logo utilisé sur la navbar, page de connexion et emails
+app_logo_url = "/assets/kya_hr/images/kya_logo.png"
+
 # CSS + JS pour les web forms publics
 web_include_css = ["/assets/kya_hr/css/kya_webform.css"]
 web_include_js = ["/assets/kya_hr/js/kya_webform.js"]
@@ -59,9 +62,11 @@ scheduler_events = {
     ],
 }
 
-# Post-migration: nettoyage workspaces obsolètes uniquement
+# Post-migration: nettoyage workspaces obsolètes + branding KYA
 after_migrate = [
     "kya_hr.force_sync_workspaces.execute",
+    "kya_hr.setup_branding.execute",
+    "kya_hr.fix_all_workspaces.execute",
 ]
 
 # Translations

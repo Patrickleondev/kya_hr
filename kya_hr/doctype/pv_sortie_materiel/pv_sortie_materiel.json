@@ -38,8 +38,33 @@
             "fieldname": "reference",
             "label": "R\u00e9f\u00e9rence",
             "fieldtype": "Data",
-            "default": "AEA-ENG-32-V01",
+            "default": "AEA-ENG-30-V01",
             "read_only": 1
+        },
+        {
+            "fieldname": "section_delegation",
+            "label": "D\u00e9l\u00e9gation (optionnel)",
+            "fieldtype": "Section Break",
+            "collapsible": 1,
+            "description": "Remplir uniquement si vous soumettez pour le compte d\u2019un autre employ\u00e9"
+        },
+        {
+            "fieldname": "au_nom_de",
+            "label": "Sur d\u00e9l\u00e9gation de",
+            "fieldtype": "Link",
+            "options": "Employee",
+            "description": "Employ\u00e9 pour le compte duquel vous soumettez"
+        },
+        {
+            "fieldname": "au_nom_de_nom",
+            "label": "Nom (d\u00e9l\u00e9gation)",
+            "fieldtype": "Data",
+            "fetch_from": "au_nom_de.employee_name",
+            "read_only": 1
+        },
+        {
+            "fieldname": "col_company",
+            "fieldtype": "Column Break"
         },
         {
             "fieldname": "company",

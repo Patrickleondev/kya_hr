@@ -289,6 +289,21 @@
             "write": 1,
             "create": 1,
             "if_owner": 1
+        },
+        {
+            "role": "Stagiaire",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "if_owner": 1
+        },
+        {
+            "role": "Responsable des Stagiaires",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "submit": 1,
+            "cancel": 1
         }
     ]
 }

@@ -1,3 +1,4 @@
+import os
 import frappe
 from frappe.utils import nowdate, add_days, add_months, getdate, today
 import random
@@ -220,7 +221,7 @@ def run():
                     "enabled": 1,
                     "user_type": "System User",
                     "send_welcome_email": 0,
-                    "new_password": "Kya@2025",
+                    "new_password": os.environ.get("SEED_USER_PASSWORD", frappe.generate_hash(length=12)),
                     "roles": [{"role": r} for r in u["roles"]]
                 })
                 user.flags.no_welcome_mail = True
@@ -656,88 +657,387 @@ def run():
 
     # ========================================
     # 12. DEFAULT ENQUETE & EVALUATION DATA (KYA Services)
+    # Formulaires basés sur MGQ-ENG-25-V01 (revu DG 05/07/2025)
     # ========================================
     print("\n=== 12. DEFAULT ENQUETE & EVALUATION ===")
 
-    # Create a default satisfaction survey if kya_services is installed
+    # Create forms matching the official PDF: FORMULAIRE_ENQUETE_EVALUATION_ACTUALISE
     try:
         if "KYA Form" in [d.name for d in frappe.get_all("DocType", filters={"module": "KYA Services"})]:
-            if not frappe.db.exists("KYA Form", {"titre": "Enquête de Satisfaction Trimestrielle"}):
+            if not frappe.db.exists("KYA Form", {"titre": "Enquête de Satisfaction du Personnel"}):
+                # ── FORM 1: Enquête de satisfaction (7 sections, 41 questions) ──
+                # Matches PDF pages 2-8: Service Santé, Informatique, QHSE, RH, Achats, Comptabilité
+                q = []
+                idx = 0
+
+                # --- SERVICE SANTÉ ---
+                section = "Service Santé"
+                for label in [
+                    "Qualité des consultations médicales (Écoute, diagnostic, conseils médicaux)",
+                    "Prise d'initiatives dans le cadre de la prévention des risques professionnels",
+                    "Actions de formations/sensibilisations sur les enjeux de la santé au travail",
+                    "Quelle appréciation donnez-vous à l'organisation de votre visite médicale d'embauche ?",
+                    "Quelle appréciation donnez-vous à l'organisation de votre visite médicale annuelle obligatoire ?",
+                    "Quelle appréciation donnez-vous sur la compatibilité du poste que vous occupez actuellement avec votre état de santé ?",
+                ]:
+                    idx += 1
+                    q.append({"section": section, "libelle": label, "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": idx})
+                idx += 1
+                q.append({"section": section, "libelle": "Vos suggestions pour améliorer les prestations du service de santé", "type_reponse": "Texte libre", "obligatoire": 0, "ordre": idx})
+
+                # --- EQUIPE INFORMATIQUE ET LOGICIEL ---
+                section = "Equipe Informatique et Logiciel"
+                for label in [
+                    "Satisfaction par rapport au débit/qualité de la connexion internet",
+                    "Réactivité du service lors des sollicitations d'interventions",
+                    "Efficacité des maintenances",
+                    "Qualité des interventions et du travail fourni",
+                    "Qualité des équipements informatiques fournis par le département",
+                    "Satisfaction dans l'utilisation des plates-formes développées",
+                ]:
+                    idx += 1
+                    q.append({"section": section, "libelle": label, "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": idx})
+                idx += 1
+                q.append({"section": section, "libelle": "Vos suggestions pour améliorer les prestations du service Informatique & Logiciels", "type_reponse": "Texte libre", "obligatoire": 0, "ordre": idx})
+
+                # --- EQUIPE QHSE ---
+                section = "Equipe QHSE"
+                for label in [
+                    "Propreté générale des bureaux",
+                    "Propreté générale des autres espaces (cour, couloir, le R+2)",
+                    "Propreté générale des toilettes",
+                    "Gestion des déchets et vidange des poubelles",
+                    "Disponibilité des équipements de protection individuelle (EPI)",
+                    "Qualité des équipements de protection individuelle (EPI)",
+                    "Environnement de travail dans ses aspects psychosociologiques (harcèlement sous toutes ses formes)",
+                    "Environnement de travail dans ses aspects psychosociologiques (discrimination, stress, burnout…)",
+                    "Environnement de travail : température",
+                    "Environnement de travail : fuite d'eau dans les bureaux",
+                    "Environnement de travail : luminosité des bureaux",
+                    "Environnement de travail : bruits dans l'entreprise",
+                ]:
+                    idx += 1
+                    q.append({"section": section, "libelle": label, "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": idx})
+                idx += 1
+                q.append({"section": section, "libelle": "Vos suggestions pour améliorer les prestations du service QHSE", "type_reponse": "Texte libre", "obligatoire": 0, "ordre": idx})
+
+                # --- EQUIPE RESSOURCES HUMAINES ---
+                section = "Equipe Ressources Humaines"
+                for label in [
+                    "Gestion des demandes de congés",
+                    "Gestion des demandes de permissions",
+                    "Gestion des demandes d'attestations/certificats de travail",
+                    "Gestion de la protection sociale (CNSS/AMU)",
+                    "Gestion des assurances maladies (NSIA)",
+                    "Gestion des actions de renforcement de capacités du personnel",
+                    "Gestion des avancements de carrières",
+                    "Gestion de la communication interne",
+                    "Efficacité de la conduite du chauffeur lors des missions",
+                    "Efficacité du travail des agents de nettoyage",
+                ]:
+                    idx += 1
+                    q.append({"section": section, "libelle": label, "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": idx})
+                idx += 1
+                q.append({"section": section, "libelle": "Vos suggestions pour améliorer les prestations du département RH", "type_reponse": "Texte libre", "obligatoire": 0, "ordre": idx})
+
+                # --- SERVICE ACHAT & APPROVISIONNEMENT ---
+                section = "Service Achat & Approvisionnement"
+                for label in [
+                    "Comment évaluez-vous l'efficacité de la gestion des commandes passées au niveau de l'équipe Achats & Approvisionnements ?",
+                    "Comment évaluez-vous l'efficacité dans l'octroi des véhicules lors des sorties ?",
+                    "Quelle est votre appréciation de l'état des véhicules pendant vos déplacements ?",
+                ]:
+                    idx += 1
+                    q.append({"section": section, "libelle": label, "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": idx})
+                idx += 1
+                q.append({"section": section, "libelle": "Vos suggestions pour améliorer les prestations de l'équipe Achats & Approvisionnements", "type_reponse": "Texte libre", "obligatoire": 0, "ordre": idx})
+                idx += 1
+                q.append({"section": section, "libelle": "Vos suggestions pour améliorer les prestations de l'équipe Logistique", "type_reponse": "Texte libre", "obligatoire": 0, "ordre": idx})
+
+                # --- EQUIPE COMPTABLE ---
+                section = "Equipe Comptable"
+                for label in [
+                    "Comment évaluez-vous l'efficacité dans le décaissement de fonds pour les missions (perdiems, hébergement, achat de carburant et d'autres accessoires, etc.) ?",
+                    "Comment évaluez-vous l'efficacité dans le décaissement de fonds pour les opérations d'achats d'équipements et matériels pour l'exécution des marchés ?",
+                ]:
+                    idx += 1
+                    q.append({"section": section, "libelle": label, "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": idx})
+                idx += 1
+                q.append({"section": section, "libelle": "Vos suggestions pour améliorer les prestations de l'équipe comptable", "type_reponse": "Texte libre", "obligatoire": 0, "ordre": idx})
+
                 survey = frappe.get_doc({
                     "doctype": "KYA Form",
-                    "titre": "Enquête de Satisfaction Trimestrielle",
-                    "type_formulaire": "Enquête",
-                    "statut": "Brouillon",
+                    "titre": "Enquête de Satisfaction du Personnel",
+                    "type_formulaire": "Enquête de Satisfaction",
+                    "statut": "Actif",
                     "anonyme": 1,
                     "envoyer_tous": 1,
-                    "description": "Enquête anonyme de satisfaction des employés — T1 2026",
-                    "questions": [
-                        {"libelle": "Comment évaluez-vous votre satisfaction générale au travail ?",
-                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 1},
-                        {"libelle": "L'ambiance de travail est-elle positive ?",
-                         "type_reponse": "Oui / Non", "obligatoire": 1, "ordre": 2},
-                        {"libelle": "Êtes-vous satisfait(e) de la communication interne ?",
-                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 3},
-                        {"libelle": "Les conditions de travail (bureaux, équipements) sont-elles satisfaisantes ?",
-                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 4},
-                        {"libelle": "Recommanderiez-vous KYA-Energy Group comme employeur ?",
-                         "type_reponse": "Oui / Non", "obligatoire": 1, "ordre": 5},
-                        {"libelle": "Quels aspects de votre travail souhaiteriez-vous améliorer ?",
-                         "type_reponse": "Texte libre", "obligatoire": 0, "ordre": 6},
-                        {"libelle": "Commentaires ou suggestions libres",
-                         "type_reponse": "Texte libre", "obligatoire": 0, "ordre": 7},
-                    ],
+                    "description": "Formulaire d'enquête de satisfaction du personnel — Réf. MGQ-ENG-25-V01. Évaluez chaque service de 1 (très insatisfait) à 5 (très satisfait).",
+                    "questions": q,
                 })
                 survey.flags.ignore_permissions = True
                 survey.insert(ignore_permissions=True)
-                print(f"  Enquête créée: {survey.name} (Brouillon, anonyme)")
+                print(f"  Enquête Satisfaction créée: {survey.name} ({len(q)} questions, 7 sections)")
             else:
-                print("  Enquête satisfaction déjà existante")
+                print("  Enquête Satisfaction déjà existante")
 
-            # Create a default evaluation campaign template (N+1 → N) for demo
-            if not frappe.db.exists("KYA Form", {"titre": "Évaluation de Performance — Modèle"}):
-                eval_form = frappe.get_doc({
+            # ── FORM 2: Évaluation N+1 → N (9 critères + 1 text) ──
+            if not frappe.db.exists("KYA Form", {"titre": "Évaluation Trimestrielle du N par son N+1"}):
+                eval_n1_n = frappe.get_doc({
                     "doctype": "KYA Form",
-                    "titre": "Évaluation de Performance — Modèle",
-                    "type_formulaire": "Évaluation",
-                    "statut": "Brouillon",
+                    "titre": "Évaluation Trimestrielle du N par son N+1",
+                    "type_formulaire": "Évaluation N+1 \u2192 N",
+                    "statut": "Actif",
                     "anonyme": 0,
                     "envoyer_tous": 0,
-                    "description": "Modèle d'évaluation de performance trimestrielle (N+1 évalue N). À activer par l'admin pour lancer une campagne.",
+                    "description": "Évaluation trimestrielle du collaborateur « N » par son supérieur hiérarchique direct « N+1 ». Notez chaque critère de 1 à 5.",
                     "questions": [
-                        {"libelle": "Niveau d'atteinte des objectifs individuels",
+                        {"section": "", "libelle": "Évaluer le niveau d'atteinte des objectifs individuels",
                          "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 1},
-                        {"libelle": "Compétences spécifiques liées au poste",
+                        {"section": "", "libelle": "Évaluer les compétences spécifiques liées au poste",
                          "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 2},
-                        {"libelle": "Qualité et précision du travail fourni",
+                        {"section": "", "libelle": "Mesurer la qualité et la précision du travail fourni",
                          "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 3},
-                        {"libelle": "Capacité à collaborer avec les autres",
+                        {"section": "", "libelle": "Évaluer la capacité à collaborer avec les autres",
                          "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 4},
-                        {"libelle": "Efficacité des compétences en communication",
+                        {"section": "", "libelle": "Mesurer l'efficacité de ses compétences en communication",
                          "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 5},
-                        {"libelle": "Capacité à identifier et résoudre des problèmes",
+                        {"section": "", "libelle": "Évaluer la capacité à identifier et à résoudre des problèmes",
                          "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 6},
-                        {"libelle": "Niveau d'engagement et de motivation",
+                        {"section": "", "libelle": "Mesurer le niveau d'engagement et de motivation",
                          "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 7},
-                        {"libelle": "Incarnation des valeurs de l'organisation",
+                        {"section": "", "libelle": "Évaluer dans quelle mesure le collaborateur incarne les valeurs de l'organisation",
                          "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 8},
-                        {"libelle": "Points forts observés",
-                         "type_reponse": "Texte libre", "obligatoire": 0, "ordre": 9},
-                        {"libelle": "Axes d'amélioration suggérés",
+                        {"section": "", "libelle": "Évaluer la conformité aux normes éthiques de l'entreprise",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 9},
+                        {"section": "", "libelle": "Quels changements ou améliorations aimeriez-vous voir dans sa prestation ?",
                          "type_reponse": "Texte libre", "obligatoire": 0, "ordre": 10},
                     ],
                 })
-                eval_form.flags.ignore_permissions = True
-                eval_form.insert(ignore_permissions=True)
-                print(f"  Évaluation modèle créée: {eval_form.name} (Brouillon)")
+                eval_n1_n.flags.ignore_permissions = True
+                eval_n1_n.insert(ignore_permissions=True)
+                print(f"  Évaluation N+1→N créée: {eval_n1_n.name}")
             else:
-                print("  Évaluation modèle déjà existante")
+                print("  Évaluation N+1→N déjà existante")
+
+            # ── FORM 3: Évaluation N → N+1 (16 critères + 2 texts) ──
+            if not frappe.db.exists("KYA Form", {"titre": "Évaluation Trimestrielle du N+1 par le N"}):
+                eval_n_n1 = frappe.get_doc({
+                    "doctype": "KYA Form",
+                    "titre": "Évaluation Trimestrielle du N+1 par le N",
+                    "type_formulaire": "Évaluation N \u2192 N+1",
+                    "statut": "Actif",
+                    "anonyme": 0,
+                    "envoyer_tous": 0,
+                    "description": "Évaluation trimestrielle du supérieur « N+1 » par le collaborateur « N ». Notez chaque critère de 1 à 5.",
+                    "questions": [
+                        {"section": "", "libelle": "Le Supérieur hiérarchique communique-t-il clairement la vision de la direction générale ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 1},
+                        {"section": "", "libelle": "Motive-t-il l'équipe à atteindre des objectifs communs ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 2},
+                        {"section": "", "libelle": "Les informations sont-elles transmises de manière claire et accessible ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 3},
+                        {"section": "", "libelle": "Le Supérieur hiérarchique prend-il en compte les retours et suggestions des membres de l'équipe ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 4},
+                        {"section": "", "libelle": "Évaluer sa capacité à gérer les conflits de manière constructive",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 5},
+                        {"section": "", "libelle": "Traite-t-il tous les membres de l'équipe de manière équitable ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 6},
+                        {"section": "", "libelle": "Offre-t-il un soutien adéquat aux membres de l'équipe ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 7},
+                        {"section": "", "libelle": "Encourage-t-il le développement professionnel et personnel ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 8},
+                        {"section": "", "libelle": "Reconnaît-il les contributions de chacun ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 9},
+                        {"section": "", "libelle": "Fournit-il des retours constructifs régulièrement ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 10},
+                        {"section": "", "libelle": "Les objectifs sont-ils bien définis et atteignables ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 11},
+                        {"section": "", "libelle": "Assure-t-il un suivi régulier de la performance de l'équipe ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 12},
+                        {"section": "", "libelle": "Favorise-t-il un bon esprit d'équipe ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 13},
+                        {"section": "", "libelle": "Encourage-t-il un environnement inclusif où chacun se sent valorisé ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 14},
+                        {"section": "", "libelle": "S'adapte-t-il aux changements et aux imprévus ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 15},
+                        {"section": "", "libelle": "Encourage-t-il de nouvelles idées et méthodes de travail ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 16},
+                        {"section": "", "libelle": "Quels sont les points forts de votre supérieur hiérarchique selon vous ?",
+                         "type_reponse": "Texte libre", "obligatoire": 0, "ordre": 17},
+                        {"section": "", "libelle": "Quels changements ou améliorations aimeriez-vous voir dans son approche de gestion ?",
+                         "type_reponse": "Texte libre", "obligatoire": 0, "ordre": 18},
+                    ],
+                })
+                eval_n_n1.flags.ignore_permissions = True
+                eval_n_n1.insert(ignore_permissions=True)
+                print(f"  Évaluation N→N+1 créée: {eval_n_n1.name}")
+            else:
+                print("  Évaluation N→N+1 déjà existante")
+
+            # ── FORM 4: Évaluation Annuelle du DG (17 critères + 2 texts) ──
+            if not frappe.db.exists("KYA Form", {"titre": "Évaluation Annuelle du Directeur Général"}):
+                eval_dg = frappe.get_doc({
+                    "doctype": "KYA Form",
+                    "titre": "Évaluation Annuelle du Directeur Général",
+                    "type_formulaire": "Évaluation DG",
+                    "statut": "Actif",
+                    "anonyme": 1,
+                    "envoyer_tous": 1,
+                    "description": "Évaluation annuelle du Directeur Général par tout le personnel. Vos réponses sont anonymes. Notez chaque critère de 1 à 5.",
+                    "questions": [
+                        {"section": "", "libelle": "Le directeur général communique-t-il une vision claire de l'entreprise ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 1},
+                        {"section": "", "libelle": "Est-il capable d'inspirer et de motiver les employés ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 2},
+                        {"section": "", "libelle": "Prend-il des décisions stratégiques qui favorisent la croissance de l'entreprise ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 3},
+                        {"section": "", "libelle": "Donne-t-il des orientations claires dans la gestion efficace des ressources humaines, matérielles et financières ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 4},
+                        {"section": "", "libelle": "Est-il accessible et ouvert aux suggestions des employés ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 5},
+                        {"section": "", "libelle": "Comment évaluez-vous sa capacité à résoudre les problèmes ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 6},
+                        {"section": "", "libelle": "Le directeur général informe-t-il régulièrement le personnel des objectifs et des résultats de l'entreprise ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 7},
+                        {"section": "", "libelle": "Est-il à l'écoute des préoccupations des employés ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 8},
+                        {"section": "", "libelle": "La communication est-elle claire et transparente ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 9},
+                        {"section": "", "libelle": "Favorise-t-il un environnement de travail positif et inclusif ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 10},
+                        {"section": "", "libelle": "Encourage-t-il la collaboration entre les différentes équipes ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 11},
+                        {"section": "", "libelle": "Comment évaluez-vous les résultats de l'entreprise sous sa direction ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 12},
+                        {"section": "", "libelle": "Le directeur général fixe-t-il des objectifs clairs et mesurables ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 13},
+                        {"section": "", "libelle": "Propose-t-il des formations ou des opportunités d'apprentissage ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 14},
+                        {"section": "", "libelle": "Le directeur général agit-il avec intégrité et transparence ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 15},
+                        {"section": "", "libelle": "Est-il responsable des décisions prises et de leurs impacts sur l'entreprise et ses employés ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 16},
+                        {"section": "", "libelle": "Le directeur général est-il ouvert à l'innovation et aux nouvelles idées pour améliorer l'entreprise ?",
+                         "type_reponse": "Note 1-5", "obligatoire": 1, "ordre": 17},
+                        {"section": "", "libelle": "Comment décririez-vous le style de leadership du directeur général ?",
+                         "type_reponse": "Texte libre", "obligatoire": 0, "ordre": 18},
+                        {"section": "", "libelle": "Quels aspects de la direction du directeur général aimeriez-vous voir améliorés ?",
+                         "type_reponse": "Texte libre", "obligatoire": 0, "ordre": 19},
+                    ],
+                })
+                eval_dg.flags.ignore_permissions = True
+                eval_dg.insert(ignore_permissions=True)
+                print(f"  Évaluation DG créée: {eval_dg.name}")
+            else:
+                print("  Évaluation DG déjà existante")
         else:
             print("  KYA Services non installé — skip enquêtes/évaluations")
     except Exception as e:
         print(f"  Enquête/Évaluation error: {e}")
 
     frappe.db.commit()
+
+    # ========================================
+    # 13. MOCK KYA FORM RESPONSES (demo data)
+    # ========================================
+    print("\n=== 13. MOCK KYA FORM RESPONSES ===")
+    try:
+        if "KYA Form Response" in [d.name for d in frappe.get_all("DocType", filters={"module": "KYA Services"})]:
+            import uuid as _uuid
+            from frappe.utils import get_datetime, add_to_date
+
+            def _make_response(form_name, employe_id, offset_days, note_bias=4):
+                """Create one mock response for a form."""
+                if frappe.db.exists("KYA Form Response", {"formulaire": form_name, "employe": employe_id or ""}):
+                    return None
+                form = frappe.get_doc("KYA Form", form_name)
+                answers = []
+                for q in form.questions:
+                    if q.type_reponse == "Note 1-5":
+                        # Weighted towards note_bias with some variance
+                        note = random.choices(
+                            [note_bias - 1, note_bias, note_bias, note_bias + 0,
+                             min(note_bias + 1, 5)],
+                            weights=[1, 3, 3, 2, 1]
+                        )[0]
+                        note = max(1, min(5, note))
+                        valeur = str(note)
+                    else:
+                        valeur = random.choice([
+                            "Bon travail général.",
+                            "À améliorer sur la communication.",
+                            "Satisfait des services.",
+                            "Plus de formation serait appréciée.",
+                            "",
+                        ])
+                    answers.append({
+                        "doctype": "KYA Form Answer",
+                        "question": q.libelle[:140],
+                        "type_reponse": q.type_reponse,
+                        "valeur": valeur,
+                    })
+                resp = frappe.get_doc({
+                    "doctype": "KYA Form Response",
+                    "formulaire": form_name,
+                    "employe": employe_id,
+                    "token": str(_uuid.uuid4()),
+                    "soumis_le": add_to_date(nowdate(), days=-offset_days),
+                    "reponses": answers,
+                })
+                resp.flags.ignore_permissions = True
+                resp.insert(ignore_permissions=True)
+                return resp.name
+
+            # --- Satisfaction survey (anonymous → no employe) ---
+            sat_form = frappe.db.get_value("KYA Form", {"titre": "Enquête de Satisfaction du Personnel"}, "name")
+            if sat_form:
+                anon_users = [None] * 12  # 12 anonymous responses
+                created_sat = 0
+                for i, emp in enumerate(anon_users):
+                    try:
+                        r = _make_response(sat_form, None, offset_days=random.randint(1, 90),
+                                           note_bias=random.choice([3, 4, 4, 5]))
+                        if r:
+                            created_sat += 1
+                    except Exception as _e:
+                        pass
+                print(f"  Satisfaction survey: {created_sat} réponses créées")
+            else:
+                print("  Satisfaction survey non trouvé — skip")
+
+            # --- Eval N+1→N (non-anonymous, linked to employees) ---
+            eval_n1n_form = frappe.db.get_value("KYA Form", {"titre": "Évaluation Trimestrielle du N par son N+1"}, "name")
+            emp_ids = frappe.get_all("Employee", filters={"employment_type": ["!=", "Stage"], "status": "Active"}, pluck="name", limit=5)
+            if eval_n1n_form and emp_ids:
+                created_eval = 0
+                for i, emp_id in enumerate(emp_ids[:4]):
+                    try:
+                        r = _make_response(eval_n1n_form, emp_id, offset_days=random.randint(15, 60), note_bias=4)
+                        if r:
+                            created_eval += 1
+                    except Exception as _e:
+                        pass
+                print(f"  Eval N+1→N: {created_eval} réponses créées")
+
+            # --- Eval N→N+1 (non-anonymous) ---
+            eval_nn1_form = frappe.db.get_value("KYA Form", {"titre": "Évaluation Trimestrielle du N+1 par le N"}, "name")
+            if eval_nn1_form and emp_ids:
+                created_eval2 = 0
+                for i, emp_id in enumerate(emp_ids[:5]):
+                    try:
+                        r = _make_response(eval_nn1_form, emp_id, offset_days=random.randint(5, 45), note_bias=4)
+                        if r:
+                            created_eval2 += 1
+                    except Exception as _e:
+                        pass
+                print(f"  Eval N→N+1: {created_eval2} réponses créées")
+
+            frappe.db.commit()
+        else:
+            print("  KYA Services non installé — skip réponses")
+    except Exception as e:
+        print(f"  Mock responses error: {e}")
 
     # ========================================
     # SUMMARY
@@ -749,7 +1049,8 @@ def run():
     print(f"Users/Employees: {len(users_data)}")
     print(f"Attendance records: {count}")
     print()
-    print("LOGIN CREDENTIALS (password: Kya@2025):")
+    seed_pwd = os.environ.get("SEED_USER_PASSWORD", "<auto-generated — set SEED_USER_PASSWORD env var>")
+    print(f"LOGIN CREDENTIALS (password: {seed_pwd})")
     print("-" * 50)
     for u in users_data:
         role_desc = u["roles"][1] if len(u["roles"]) > 1 else u["roles"][0]

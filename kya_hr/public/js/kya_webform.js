@@ -1,10 +1,33 @@
-/* ===================================================================
-   KYA-Energy Group — Web Form Layout v4
+﻿/* ===================================================================
+   KYA-Energy Group ΓÇö Web Form Layout v4
    Design : Ordre de Mission / Fiche officielle KYA
-   En-tête 2-colonnes : Logo gauche | Titre + infos droite
-   N° de document affiché, sections numérotées,
-   permissions par rôle, signatures verrouillées.
+   En-t├¬te 2-colonnes : Logo gauche | Titre + infos droite
+   N┬░ de document affich├⌐, sections num├⌐rot├⌐es,
+   permissions par r├┤le, signatures verrouill├⌐es.
    =================================================================== */
+
+/* === Auto-redirect bare web form URLs to /new ==================== */
+(function () {
+  var KYA_WF_ROUTES = [
+    "permission-sortie-stagiaire", "permission-sortie-employe",
+    "demande-achat", "pv-sortie-materiel",
+    "planning-conge", "bilan-fin-de-stage"
+  ];
+  var path = window.location.pathname.replace(/^\//, "").replace(/\/$/, "");
+  var pathParts = path.split("/");
+
+  // Normalize legacy links like /permission-sortie-employe/PSE-2026-00001
+  if (pathParts.length === 2 && KYA_WF_ROUTES.indexOf(pathParts[0]) !== -1 && pathParts[1] !== "new") {
+    window.location.replace("/" + pathParts[0] + "?name=" + encodeURIComponent(pathParts[1]));
+    return;
+  }
+
+  if (KYA_WF_ROUTES.indexOf(path) !== -1) {
+    // Bare route without /new ΓÇö redirect silently
+    window.location.replace("/" + path + "/new");
+    return; // stop further execution until redirect completes
+  }
+})();
 
 (function () {
   "use strict";
@@ -150,7 +173,7 @@
     "permission-sortie-stagiaire": {
       title: "DEMANDE DE PERMISSION DE SORTIE",
       subtitle: "Stagiaire",
-      ref: "AEA-ENG-31-V01",
+      ref: "AEA-ENG-30-V01",
       workflow: "Ma\u00eetre de Stage \u2192 Resp. Stagiaires \u2192 Direction"
     },
     "permission-sortie-employe": {
@@ -162,25 +185,25 @@
     "demande-achat": {
       title: "FICHE D\u2019ENGAGEMENT DE D\u00c9PENSES",
       subtitle: "Approvisionnement",
-      ref: "AEA-PRO-01-V01",
+      ref: "AEA-ENG-30-V01",
       workflow: "Chef \u2192 Auditeur \u2192 DAAF \u2192 DG"
     },
     "pv-sortie-materiel": {
       title: "PV DE SORTIE DE MAT\u00c9RIEL",
       subtitle: "Stock & Logistique",
-      ref: "AEA-ENG-32-V01",
+      ref: "AEA-ENG-30-V01",
       workflow: "Chef \u2192 Audit \u2192 Direction \u2192 Magasin"
     },
     "planning-conge": {
       title: "PLANNING DE CONG\u00c9 ANNUEL",
       subtitle: "Ressources Humaines",
-      ref: "AEA-ENG-33-V01",
+      ref: "AEA-ENG-30-V01",
       workflow: "Employ\u00e9 \u2192 RH \u2192 DG"
     },
     "bilan-fin-de-stage": {
       title: "BILAN DE FIN DE STAGE",
       subtitle: "Formation & Stages",
-      ref: "AEA-ENG-34-V01",
+      ref: "AEA-ENG-30-V01",
       workflow: "Stagiaire \u2192 Encadrant \u2192 RH"
     }
   };
@@ -225,6 +248,53 @@
     }
     var path = window.location.pathname.replace(/^\//, "").replace(/\/$/, "");
     return path.replace(/\/new$/, "").replace(/\/[^/]+$/, "");
+  }
+
+  function injectVisibilityPatchCss() {
+    if (document.getElementById("kya-wf-visibility-patch")) return;
+
+    var style = document.createElement("style");
+    style.id = "kya-wf-visibility-patch";
+    style.textContent = [
+      '/* Nuclear visibility fix ΓÇö inline <style> injected by kya_webform.js */',
+      'select, select option { color: #1a1a2e !important; -webkit-text-fill-color: #1a1a2e !important; background-color: #fff !important; }',
+      '.grid-heading-row, .grid-heading-row * { color: #1a1a2e !important; -webkit-text-fill-color: #1a1a2e !important; background: #eaf2f8 !important; }',
+      '.grid-heading-row .static-area { color: #1a1a2e !important; font-weight: 700 !important; font-size: 11px !important; }',
+      '.grid-heading-row .col, .grid-heading-row [data-fieldname] { color: #1a1a2e !important; opacity: 1 !important; }',
+      '.rows *, .grid-row *, .no-value, .grid-body * { color: #1a1a2e !important; -webkit-text-fill-color: #1a1a2e !important; }',
+      '.frappe-control[data-fieldtype="Signature"] .signature-field { min-height: 130px !important; height: 130px !important; }',
+      '.frappe-control[data-fieldtype="Signature"] .signature-pad, .frappe-control[data-fieldtype="Signature"] canvas { min-height: 130px !important; height: 130px !important; max-height: 130px !important; }',
+    ].join('\n');
+
+    document.head.appendChild(style);
+
+    /* Also force inline styles on already-rendered elements */
+    forceInlineTextVisibility();
+  }
+
+  function forceInlineTextVisibility() {
+    /* Select elements */
+    document.querySelectorAll('select').forEach(function(sel) {
+      sel.style.setProperty('color', '#1a1a2e', 'important');
+      sel.style.setProperty('-webkit-text-fill-color', '#1a1a2e', 'important');
+      sel.style.setProperty('background-color', '#fff', 'important');
+    });
+    document.querySelectorAll('select option').forEach(function(opt) {
+      opt.style.setProperty('color', '#1a1a2e', 'important');
+    });
+    /* Table headers */
+    document.querySelectorAll('.grid-heading-row').forEach(function(row) {
+      row.style.setProperty('background', '#eaf2f8', 'important');
+      row.querySelectorAll('*').forEach(function(el) {
+        el.style.setProperty('color', '#1a1a2e', 'important');
+        el.style.setProperty('-webkit-text-fill-color', '#1a1a2e', 'important');
+      });
+    });
+    /* Table body cells */
+    document.querySelectorAll('.rows .row, .rows .static-area, .grid-row .static-area').forEach(function(el) {
+      el.style.setProperty('color', '#1a1a2e', 'important');
+      el.style.setProperty('-webkit-text-fill-color', '#1a1a2e', 'important');
+    });
   }
 
   function findFieldEl(fieldname) {
@@ -394,6 +464,47 @@
     });
   }
 
+  /* ===== ADMIN PREVIEW BUTTON ======================== */
+  function setupAdminPreviewButton() {
+    if (!userHasRole("System Manager") && !userHasRole("HR Manager") && !userHasRole("Administrator")) return;
+    var allForms = [
+      { label: "Permission Sortie Stagiaire", route: "permission-sortie-stagiaire" },
+      { label: "Permission Sortie Employ├⌐", route: "permission-sortie-employe" },
+      { label: "Demande d'Achat", route: "demande-achat" },
+      { label: "PV Sortie Mat├⌐riel", route: "pv-sortie-materiel" },
+      { label: "Planning Cong├⌐", route: "planning-conge" },
+      { label: "Bilan de Stage", route: "bilan-fin-de-stage" }
+    ];
+    var currentRoute = getRoute();
+    var bar = document.createElement("div");
+    bar.className = "kya-admin-preview-bar";
+    var panel = document.createElement("div");
+    panel.className = "kya-preview-panel";
+    panel.style.display = "none";
+    panel.innerHTML = '<h4>≡ƒöù Liens de pr├⌐visualisation</h4>' +
+      '<div class="kya-preview-forms">' +
+      allForms.map(function(f) {
+        var url = window.location.origin + "/" + f.route + "/new";
+        var isCurrent = f.route === currentRoute;
+        return '<div class="kya-preview-form-link">' +
+          '<span' + (isCurrent ? ' style="font-weight:800;"' : '') + '>' + f.label + '</span>' +
+          '<a href="' + url + '" target="_blank">Ouvrir ΓåÆ</a>' +
+          '</div>';
+      }).join("") + '</div>' +
+      '<button class="kya-preview-copy" onclick="(function(){var url=window.location.origin+\'/\'+\'' + currentRoute + '\'+\'/new\';navigator.clipboard&&navigator.clipboard.writeText(url).then(function(){this.textContent=\'Γ£ô Copi├⌐ !\';}.bind(this));}).call(this)">≡ƒôï Copier lien du formulaire actuel</button>';
+    var toggle = document.createElement("button");
+    toggle.className = "kya-preview-toggle";
+    toggle.innerHTML = "≡ƒæü∩╕Å Aper├ºu Admin";
+    toggle.addEventListener("click", function() {
+      var vis = panel.style.display === "none";
+      panel.style.display = vis ? "block" : "none";
+      toggle.innerHTML = vis ? "Γ£ò Fermer" : "≡ƒæü∩╕Å Aper├ºu Admin";
+    });
+    bar.appendChild(panel);
+    bar.appendChild(toggle);
+    document.body.appendChild(bar);
+  }
+
   /* ===== MAIN RESTRUCTURE ============================= */
   function restructureForm() {
     var route = getRoute();
@@ -510,6 +621,7 @@
     setTimeout(function() {
       setupSignaturePermissions(route);
       setupFieldEditPermissions(route);
+      stabilizeSignaturePads(route);
     }, 500);
 
     var defaultHead = document.querySelector(".web-form-head");
@@ -552,25 +664,113 @@
     empInput.addEventListener("change", function () { fetchEmployeeData(empInput.value); });
   }
 
+  function forceSignatureFieldSize(el) {
+    if (!el) return;
+    var field = el.querySelector(".signature-field");
+    var pad = el.querySelector(".signature-pad");
+    var canvas = el.querySelector("canvas");
+    var display = el.querySelector(".signature-display");
+    var img = display ? display.querySelector("img") : null;
+
+    if (field) {
+      field.style.minHeight = "130px";
+      field.style.height = "130px";
+    }
+    if (pad) {
+      pad.style.minHeight = "130px";
+      pad.style.height = "130px";
+      pad.style.width = "100%";
+    }
+    if (canvas) {
+      canvas.style.height = "130px";
+      canvas.style.maxHeight = "130px";
+      canvas.style.width = "100%";
+    }
+    if (display) {
+      display.style.minHeight = "130px";
+    }
+    if (img) {
+      img.style.maxHeight = "130px";
+      img.style.width = "auto";
+      img.style.objectFit = "contain";
+    }
+  }
+
+  function stabilizeSignaturePads(route) {
+    var sections = FORM_SECTIONS[route] || [];
+    var sigFields = [];
+
+    sections.forEach(function (sec) {
+      (sec.fields || []).forEach(function (fn) {
+        if (/^signature_/i.test(fn)) sigFields.push(fn);
+      });
+    });
+
+    sigFields.forEach(function (fn) {
+      var el = findFieldEl(fn);
+      if (!el) return;
+
+      forceSignatureFieldSize(el);
+
+      if (el.getAttribute("data-kya-sig-fix-bound") === "1") return;
+      el.setAttribute("data-kya-sig-fix-bound", "1");
+
+      var obs = new MutationObserver(function () {
+        forceSignatureFieldSize(el);
+      });
+      obs.observe(el, { childList: true, subtree: true, attributes: true });
+
+      setTimeout(function () { forceSignatureFieldSize(el); }, 500);
+      setTimeout(function () { forceSignatureFieldSize(el); }, 1500);
+    });
+  }
+
   function waitForForm() {
     var route = getRoute();
+    injectVisibilityPatchCss();
     if (!FORM_SECTIONS[route] && !FORM_META[route]) return;
     var formReady = document.querySelector(".frappe-control") || document.querySelector("[data-fieldname]");
-    if (formReady) { restructureForm(); setupEmployeeAutoFill(); return; }
+    if (formReady) {
+      restructureForm();
+      setupEmployeeAutoFill();
+      stabilizeSignaturePads(route);
+      setTimeout(forceInlineTextVisibility, 200);
+      return;
+    }
     var obs = new MutationObserver(function (m, observer) {
       if (document.querySelector(".frappe-control") || document.querySelector("[data-fieldname]")) {
         observer.disconnect();
-        setTimeout(function () { restructureForm(); setupEmployeeAutoFill(); }, 300);
+        setTimeout(function () {
+          restructureForm();
+          setupEmployeeAutoFill();
+          stabilizeSignaturePads(route);
+          forceInlineTextVisibility();
+        }, 300);
       }
     });
     obs.observe(document.body, { childList: true, subtree: true });
-    setTimeout(function () { if (!document.querySelector(".kya-form-section")) { restructureForm(); setupEmployeeAutoFill(); } }, 2000);
-    setTimeout(function () { obs.disconnect(); if (!document.querySelector(".kya-form-section")) { restructureForm(); setupEmployeeAutoFill(); } }, 5000);
+    setTimeout(function () {
+      if (!document.querySelector(".kya-form-section")) {
+        restructureForm();
+        setupEmployeeAutoFill();
+      }
+      stabilizeSignaturePads(route);
+      forceInlineTextVisibility();
+    }, 2000);
+    setTimeout(function () {
+      obs.disconnect();
+      if (!document.querySelector(".kya-form-section")) {
+        restructureForm();
+        setupEmployeeAutoFill();
+      }
+      stabilizeSignaturePads(route);
+      forceInlineTextVisibility();
+    }, 5000);
   }
 
   window.kyaRestructureForm = function () { restructureForm(); setupEmployeeAutoFill(); };
-  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", waitForForm); }
-  else { waitForForm(); }
-  if (window.frappe && window.frappe.ready) { frappe.ready(function () { setTimeout(waitForForm, 300); }); }
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", function() { waitForForm(); setupAdminPreviewButton(); }); }
+  else { waitForForm(); setupAdminPreviewButton(); }
+  if (window.frappe && window.frappe.ready) { frappe.ready(function () { setTimeout(function() { waitForForm(); setupAdminPreviewButton(); }, 300); }); }
   if (window.frappe && window.frappe.router) { document.addEventListener("page-change", function () { setTimeout(waitForForm, 500); }); }
 })();

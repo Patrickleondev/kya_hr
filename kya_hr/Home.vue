@@ -1,13 +1,34 @@
-<template>
+﻿<template>
 	<BaseLayout>
 		<template #body>
 			<div class="flex flex-col items-center my-7 p-4 gap-7">
 				<CheckInPanel />
-				<!-- KYA Custom Links -->
+				<!-- KYA Custom Links (Flux RH) -->
 				<KYALinks
 					v-if="kyaLinks.length"
 					:links="kyaLinks"
 					:title="__('Flux RH KYA')"
+				/>
+				<!-- Mes Demandes (Document Tracking) -->
+				<KYADocuments
+					:documents="myDocuments"
+					:total="myDocumentsTotal"
+					:loading="loadingDocs"
+					:title="__('Mes Demandes')"
+				/>
+				<!-- Enqu├¬tes & ├ëvaluations -->
+				<KYASurveys
+					:available="surveysAvailable"
+					:completed="surveysCompleted"
+					:loading="loadingSurveys"
+					:title="__('Enqu├¬tes & ├ëvaluations')"
+				/>
+				<!-- Mes T├óches (KYA Taches) -->
+				<KYATasks
+					:tasks="myTasks"
+					:plans="myPlans"
+					:loading="loadingTasks"
+					:title="__('Mes T├óches')"
 				/>
 				<QuickLinks
 					v-if="shouldShowLegacyQuickLinks && filteredQuickLinks.length"
@@ -29,6 +50,9 @@ import QuickLinks from "@/components/QuickLinks.vue"
 import BaseLayout from "@/components/BaseLayout.vue"
 import RequestPanel from "@/components/RequestPanel.vue"
 import KYALinks from "@/components/KYALinks.vue"
+import KYADocuments from "@/components/KYADocuments.vue"
+import KYASurveys from "@/components/KYASurveys.vue"
+import KYATasks from "@/components/KYATasks.vue"
 import AttendanceIcon from "@/components/icons/AttendanceIcon.vue"
 import ShiftIcon from "@/components/icons/ShiftIcon.vue"
 import LeaveIcon from "@/components/icons/LeaveIcon.vue"
@@ -94,13 +118,13 @@ function fallbackKyaLinks(category) {
 		{
 			title: "PV Sortie Mat\u00e9riel",
 			description: "D\u00e9clarer une sortie de mat\u00e9riel",
-			url: "/pv-sortie-materiel",
+			url: "/pv-sortie-materiel/new",
 			emoji: "\uD83D\uDCE6",
 		},
 		{
 			title: "Demande d'Achat",
 			description: "Soumettre une demande d'achat",
-			url: "/demande-achat",
+			url: "/demande-achat/new",
 			emoji: "\uD83D\uDED2",
 		},
 	]
@@ -110,13 +134,13 @@ function fallbackKyaLinks(category) {
 			{
 				title: "Permission de Sortie",
 				description: "Demander une permission de sortie",
-				url: "/permission-sortie-stagiaire",
+				url: "/permission-sortie-stagiaire/new",
 				emoji: "\uD83D\uDEAA",
 			},
 			{
 				title: "Bilan de Stage",
 				description: "Remplir le bilan de fin de stage",
-				url: "/bilan-fin-de-stage",
+				url: "/bilan-fin-de-stage/new",
 				emoji: "\uD83D\uDCDD",
 			},
 			...common,
@@ -128,19 +152,19 @@ function fallbackKyaLinks(category) {
 			{
 				title: "Permission Employ\u00e9 (RH)",
 				description: "Saisie manuelle via Web Form",
-				url: "/permission-sortie-employe",
+				url: "/permission-sortie-employe/new",
 				emoji: "\uD83E\uDDFE",
 			},
 			{
 				title: "Permission Stagiaire (RH)",
 				description: "Saisie manuelle via Web Form",
-				url: "/permission-sortie-stagiaire",
+				url: "/permission-sortie-stagiaire/new",
 				emoji: "\uD83C\uDF93",
 			},
 			{
 				title: "Demande de Cong\u00e9 (RH)",
 				description: "Saisie manuelle via Web Form",
-				url: "/planning-conge",
+				url: "/planning-conge/new",
 				emoji: "\uD83D\uDCC5",
 			},
 			...common,
@@ -152,13 +176,13 @@ function fallbackKyaLinks(category) {
 		{
 			title: "Permission de Sortie",
 			description: "Demander une permission de sortie",
-			url: "/permission-sortie-employe",
+			url: "/permission-sortie-employe/new",
 			emoji: "\uD83D\uDEAA",
 		},
 		{
 			title: "Planning de Cong\u00e9",
 			description: "G\u00e9rer vos p\u00e9riodes de cong\u00e9 annuelles",
-			url: "/planning-conge",
+			url: "/planning-conge/new",
 			emoji: "\uD83D\uDCC5",
 		},
 		...common,
@@ -168,7 +192,23 @@ function fallbackKyaLinks(category) {
 // KYA custom links loaded from API
 const kyaLinks = ref([])
 
+// Document tracking
+const myDocuments = ref([])
+const myDocumentsTotal = ref(0)
+const loadingDocs = ref(false)
+
+// Enqu├¬tes & ├ëvaluations
+const surveysAvailable = ref([])
+const surveysCompleted = ref([])
+const loadingSurveys = ref(false)
+
+// T├óches
+const myTasks = ref([])
+const myPlans = ref([])
+const loadingTasks = ref(false)
+
 onMounted(async () => {
+	// 1. User category
 	try {
 		const catRes = await frappeRequest({
 			url: "/api/method/kya_hr.api.get_user_category",
@@ -180,6 +220,7 @@ onMounted(async () => {
 		console.log("KYA user category not available, using employee fallback")
 	}
 
+	// 2. Quick links
 	try {
 		const res = await frappeRequest({
 			url: "/api/method/kya_hr.api.get_kya_quick_links",
@@ -189,5 +230,51 @@ onMounted(async () => {
 		kyaLinks.value = fallbackKyaLinks(userCategory.value)
 		console.log("KYA links not available from API, fallback enabled")
 	}
+
+	// 3. Mes Demandes (documents)
+	loadingDocs.value = true
+	try {
+		const res = await frappeRequest({
+			url: "/api/method/kya_hr.api.get_my_documents",
+			params: { limit: 10 },
+		})
+		if (res.message) {
+			myDocuments.value = res.message.data || []
+			myDocumentsTotal.value = res.message.total || 0
+		}
+	} catch (e) {
+		console.log("KYA documents not available")
+	}
+	loadingDocs.value = false
+
+	// 4. Enqu├¬tes & ├ëvaluations
+	loadingSurveys.value = true
+	try {
+		const res = await frappeRequest({
+			url: "/api/method/kya_hr.api.get_my_kya_forms",
+		})
+		if (res.message) {
+			surveysAvailable.value = res.message.available || []
+			surveysCompleted.value = res.message.completed || []
+		}
+	} catch (e) {
+		console.log("KYA surveys not available")
+	}
+	loadingSurveys.value = false
+
+	// 5. Mes T├óches
+	loadingTasks.value = true
+	try {
+		const res = await frappeRequest({
+			url: "/api/method/kya_hr.api.get_my_tasks",
+		})
+		if (res.message) {
+			myTasks.value = res.message.tasks || []
+			myPlans.value = res.message.plans || []
+		}
+	} catch (e) {
+		console.log("KYA tasks not available")
+	}
+	loadingTasks.value = false
 })
 </script>

@@ -1,0 +1,426 @@
+﻿{% extends "templates/web.html" %}
+
+{% block title %}Tableau de Bord ΓÇô Stagiaires{% endblock %}
+
+{% block page_content %}
+<style>
+  :root {
+    --kya-primary: #009688;
+    --kya-primary-dark: #00796b;
+    --kya-accent: #ff6f00;
+    --kya-warn: #f9a825;
+    --kya-danger: #e53935;
+    --kya-success: #388e3c;
+    --kya-info: #1976d2;
+  }
+  .kya-db-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .kya-db-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--kya-primary-dark);
+    margin: 0;
+  }
+  .kya-db-header .kya-year-filter {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .kya-db-header select {
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: .4rem .7rem;
+    font-size: 0.9rem;
+  }
+  .kya-db-header button {
+    background: var(--kya-primary);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: .4rem 1rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  .kya-db-header button:hover { background: var(--kya-primary-dark); }
+
+  /* ΓöÇΓöÇ Stat cards ΓöÇΓöÇ */
+  .kya-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .kya-stat-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 1.1rem 1.2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    text-align: center;
+    border-top: 4px solid transparent;
+    transition: transform .15s;
+  }
+  .kya-stat-card:hover { transform: translateY(-2px); }
+  .kya-stat-card .stat-icon { font-size: 1.6rem; margin-bottom: .3rem; }
+  .kya-stat-card .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+  .kya-stat-card .stat-label {
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-top: 3px;
+  }
+  .card-primary   { border-color: var(--kya-primary); }
+  .card-primary   .stat-value { color: var(--kya-primary); }
+  .card-success   { border-color: var(--kya-success); }
+  .card-success   .stat-value { color: var(--kya-success); }
+  .card-info      { border-color: var(--kya-info); }
+  .card-info      .stat-value { color: var(--kya-info); }
+  .card-danger    { border-color: var(--kya-danger); }
+  .card-danger    .stat-value { color: var(--kya-danger); }
+  .card-warn      { border-color: var(--kya-warn); }
+  .card-warn      .stat-value { color: var(--kya-warn); }
+  .card-accent    { border-color: var(--kya-accent); }
+  .card-accent    .stat-value { color: var(--kya-accent); }
+
+  /* ΓöÇΓöÇ Charts row ΓöÇΓöÇ */
+  .kya-charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+  @media(max-width: 640px) { .kya-charts-row { grid-template-columns: 1fr; } }
+  .kya-chart-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 1.2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  }
+  .kya-chart-card h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1rem;
+    padding-bottom: .5rem;
+    border-bottom: 2px solid #f0f0f0;
+  }
+  .chart-container { position: relative; height: 220px; }
+
+  /* ΓöÇΓöÇ Tables ΓöÇΓöÇ */
+  .kya-section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--kya-primary-dark);
+    margin: 1.5rem 0 .75rem;
+  }
+  .kya-table-wrap { overflow-x: auto; }
+  .kya-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+  .kya-table th {
+    background: #f5f7fa;
+    text-align: left;
+    padding: .55rem .75rem;
+    white-space: nowrap;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+  }
+  .kya-table td {
+    padding: .55rem .75rem;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+  }
+  .kya-table tr:hover td { background: #f9fbfc; }
+  .badge {
+    display: inline-block;
+    padding: .2rem .55rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .badge-success { background:#e8f5e9; color:#2e7d32; }
+  .badge-info    { background:#e3f2fd; color:#1565c0; }
+  .badge-warn    { background:#fff8e1; color:#f57f17; }
+  .badge-danger  { background:#ffebee; color:#c62828; }
+  .badge-default { background:#f5f5f5; color:#555; }
+
+  /* ΓöÇΓöÇ Links grid ΓöÇΓöÇ */
+  .kya-links-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: .75rem;
+    margin-bottom: 2rem;
+  }
+  .kya-link-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: .9rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    text-decoration: none;
+    color: #333;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: box-shadow .15s, border-color .15s;
+  }
+  .kya-link-card:hover { box-shadow: 0 2px 10px rgba(0,150,136,.2); border-color: var(--kya-primary); color: var(--kya-primary); }
+  .kya-link-card .licon { font-size: 1.3rem; }
+
+  /* Loading */
+  #kya-loading {
+    text-align: center; padding: 3rem;
+    color: #888; font-size: 0.9rem;
+  }
+  .kya-error { color: var(--kya-danger); text-align: center; padding: 2rem; }
+</style>
+
+<div id="kya-loading">ΓÅ│ Chargement du tableau de bordΓÇª</div>
+
+<div id="kya-dashboard" style="display:none">
+
+  <!-- Header -->
+  <div class="kya-db-header">
+    <h1>≡ƒÄô Tableau de Bord ΓÇö Stagiaires</h1>
+    <div class="kya-year-filter">
+      <label for="anneeSelect" style="font-size:.875rem;font-weight:600">Ann├⌐e :</label>
+      <select id="anneeSelect"></select>
+      <button onclick="loadDashboard()">Actualiser</button>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kya-stats-grid" id="statsGrid"></div>
+
+  <!-- Charts -->
+  <div class="kya-charts-row">
+    <div class="kya-chart-card">
+      <h3>Permissions par mois</h3>
+      <div class="chart-container"><canvas id="chartMois"></canvas></div>
+    </div>
+    <div class="kya-chart-card">
+      <h3>Statuts des demandes</h3>
+      <div class="chart-container"><canvas id="chartStatuts"></canvas></div>
+    </div>
+  </div>
+  <div class="kya-charts-row">
+    <div class="kya-chart-card">
+      <h3>Mentions des bilans de stage</h3>
+      <div class="chart-container"><canvas id="chartMentions"></canvas></div>
+    </div>
+    <div class="kya-chart-card">
+      <h3>Top stagiaires (permissions)</h3>
+      <div class="chart-container"><canvas id="chartTop"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Top b├⌐n├⌐ficiaires table -->
+  <p class="kya-section-title">Top b├⌐n├⌐ficiaires ΓÇô Permissions de sortie</p>
+  <div class="kya-table-wrap">
+    <table class="kya-table" id="tableTop">
+      <thead><tr><th>#</th><th>Stagiaire</th><th>Nbre demandes</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Quick links -->
+  <p class="kya-section-title">Acc├¿s rapides</p>
+  <div class="kya-links-grid">
+    <a class="kya-link-card" href="/permission-sortie-stagiaire/new"><span class="licon">Γ₧ò</span>Nouvelle permission</a>
+    <a class="kya-link-card" href="/app/permission-sortie-stagiaire"><span class="licon">≡ƒôï</span>Toutes les permissions</a>
+    <a class="kya-link-card" href="/bilan-fin-de-stage/new"><span class="licon">≡ƒô¥</span>Nouveau bilan</a>
+    <a class="kya-link-card" href="/app/bilan-fin-de-stage"><span class="licon">≡ƒùé∩╕Å</span>Tous les bilans</a>
+    <a class="kya-link-card" href="/app/permission-sortie-stagiaire"><span class="licon">≡ƒûÑ∩╕Å</span>Gestion bureau</a>
+    <a class="kya-link-card" href="/tableau-bord-employes"><span class="licon">≡ƒæÑ</span>Tableau Employ├⌐s</a>
+  </div>
+
+</div>
+<div class="kya-error" id="kya-error" style="display:none"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+  const MOIS_LABELS = {
+    "01":"Jan","02":"F├⌐v","03":"Mar","04":"Avr","05":"Mai","06":"Jun",
+    "07":"Jul","08":"Ao├╗","09":"Sep","10":"Oct","11":"Nov","12":"D├⌐c"
+  };
+  const MENTION_COLORS = {
+    "Tr├¿s Bien": "#2e7d32","Bien": "#388e3c","Assez Bien": "#43a047",
+    "Passable": "#f9a825","Insuffisant": "#e53935","": "#9e9e9e"
+  };
+  let charts = {};
+
+  function destroyChart(id) {
+    if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+  }
+
+  // Init year dropdown
+  const yr = new Date().getFullYear();
+  const sel = document.getElementById("anneeSelect");
+  for (let y = yr; y >= yr - 4; y--) {
+    const opt = document.createElement("option");
+    opt.value = y; opt.textContent = y;
+    sel.appendChild(opt);
+  }
+
+  window.loadDashboard = function() {
+    const annee = sel.value;
+    document.getElementById("kya-loading").style.display = "";
+    document.getElementById("kya-dashboard").style.display = "none";
+    document.getElementById("kya-error").style.display = "none";
+
+    frappe.call({
+      method: "kya_hr.api.get_dashboard_stagiaires",
+      args: { annee: annee },
+      callback: function(r) {
+        document.getElementById("kya-loading").style.display = "none";
+        if (r.message) {
+          render(r.message);
+          document.getElementById("kya-dashboard").style.display = "";
+        } else {
+          showError("Impossible de charger les donn├⌐es.");
+        }
+      },
+      error: function(err) {
+        showError("Erreur lors du chargement : " + (err.message || JSON.stringify(err)));
+      }
+    });
+  };
+
+  function showError(msg) {
+    document.getElementById("kya-loading").style.display = "none";
+    const el = document.getElementById("kya-error");
+    el.textContent = msg; el.style.display = "";
+  }
+
+  function render(d) {
+    // ΓöÇΓöÇ KPI cards
+    const grid = document.getElementById("statsGrid");
+    grid.innerHTML = "";
+    const kpis = [
+      { label: "Stagiaires actifs",   value: d.stagiaires_actifs,   icon: "≡ƒÄô", cls: "card-primary" },
+      { label: "Permissions totales", value: d.permissions_total,   icon: "≡ƒôï", cls: "card-info" },
+      { label: "Approuv├⌐es",          value: d.permissions_approuvees, icon: "Γ£à", cls: "card-success" },
+      { label: "En cours",            value: d.permissions_en_cours, icon: "ΓÅ│", cls: "card-warn" },
+      { label: "Rejet├⌐es",            value: d.permissions_rejetees, icon: "Γ¥î", cls: "card-danger" },
+      { label: "Bilans soumis",       value: d.bilans_soumis + " / " + d.bilans_total, icon: "≡ƒô¥", cls: "card-accent", raw: true },
+      { label: "Note moyenne",        value: d.note_moyenne + " / 20", icon: "Γ¡É", cls: "card-warn", raw: true },
+    ];
+    kpis.forEach(function(k) {
+      const card = document.createElement("div");
+      card.className = "kya-stat-card " + k.cls;
+      card.innerHTML = '<div class="stat-icon">' + k.icon + '</div>'
+        + '<div class="stat-value">' + k.value + '</div>'
+        + '<div class="stat-label">' + k.label + '</div>';
+      grid.appendChild(card);
+    });
+
+    // ΓöÇΓöÇ Chart: permissions par mois (bar)
+    destroyChart("chartMois");
+    const moisKeys = Object.keys(d.permissions_par_mois || {}).sort();
+    const moisLabels = moisKeys.map(function(k) {
+      const parts = k.split("-");
+      return (MOIS_LABELS[parts[1]] || parts[1]) + " " + parts[0];
+    });
+    const moisData = moisKeys.map(function(k) { return d.permissions_par_mois[k]; });
+    charts["chartMois"] = new Chart(document.getElementById("chartMois"), {
+      type: "bar",
+      data: {
+        labels: moisLabels,
+        datasets: [{ label: "Permissions", data: moisData,
+          backgroundColor: "rgba(0,150,136,.7)", borderRadius: 5 }]
+      },
+      options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+
+    // ΓöÇΓöÇ Chart: statuts (doughnut)
+    destroyChart("chartStatuts");
+    charts["chartStatuts"] = new Chart(document.getElementById("chartStatuts"), {
+      type: "doughnut",
+      data: {
+        labels: ["Approuv├⌐es", "En cours", "Rejet├⌐es", "Autre"],
+        datasets: [{
+          data: [
+            d.permissions_approuvees,
+            d.permissions_en_cours,
+            d.permissions_rejetees,
+            Math.max(0, d.permissions_total - d.permissions_approuvees - d.permissions_en_cours - d.permissions_rejetees)
+          ],
+          backgroundColor: ["#388e3c","#1976d2","#e53935","#9e9e9e"],
+          borderWidth: 2
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: "bottom" } } }
+    });
+
+    // ΓöÇΓöÇ Chart: mentions bilans (pie)
+    destroyChart("chartMentions");
+    const mentLabels = Object.keys(d.mentions || {});
+    const mentData   = mentLabels.map(function(m) { return d.mentions[m]; });
+    const mentColors = mentLabels.map(function(m) { return MENTION_COLORS[m] || "#9e9e9e"; });
+    charts["chartMentions"] = new Chart(document.getElementById("chartMentions"), {
+      type: "pie",
+      data: {
+        labels: mentLabels.length ? mentLabels : ["Aucune donn├⌐e"],
+        datasets: [{ data: mentData.length ? mentData : [1],
+          backgroundColor: mentColors.length ? mentColors : ["#e0e0e0"],
+          borderWidth: 2 }]
+      },
+      options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: "bottom" } } }
+    });
+
+    // ΓöÇΓöÇ Chart: top b├⌐n├⌐ficiaires (horizontal bar)
+    destroyChart("chartTop");
+    const top = d.top_beneficiaires || [];
+    charts["chartTop"] = new Chart(document.getElementById("chartTop"), {
+      type: "bar",
+      data: {
+        labels: top.map(function(t) { return t.nom; }),
+        datasets: [{
+          label: "Permissions",
+          data: top.map(function(t) { return t.count; }),
+          backgroundColor: "rgba(255,111,0,.72)",
+          borderRadius: 5
+        }]
+      },
+      options: { indexAxis: "y", responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+
+    // ΓöÇΓöÇ Table top b├⌐n├⌐ficiaires
+    const tbody = document.querySelector("#tableTop tbody");
+    tbody.innerHTML = "";
+    if (!top.length) {
+      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#aaa">Aucune donn├⌐e</td></tr>';
+    } else {
+      top.forEach(function(t, i) {
+        tbody.innerHTML += "<tr><td>" + (i + 1) + "</td><td>" + t.nom + "</td><td>" + t.count + "</td></tr>";
+      });
+    }
+  }
+
+  // Load on ready
+  if (typeof frappe !== "undefined" && frappe.ready) {
+    frappe.ready(function() { loadDashboard(); });
+  } else {
+    document.addEventListener("DOMContentLoaded", function() { loadDashboard(); });
+  }
+})();
+</script>
+{% endblock %}

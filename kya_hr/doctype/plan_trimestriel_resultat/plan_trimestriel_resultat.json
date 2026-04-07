@@ -1,0 +1,39 @@
+{
+    "name": "Plan Trimestriel Resultat",
+    "module": "KYA HR",
+    "doctype": "DocType",
+    "custom": 1,
+    "istable": 1,
+    "fields": [
+        {
+            "fieldname": "numero",
+            "label": "N\u00b0",
+            "fieldtype": "Int",
+            "in_list_view": 1,
+            "columns": 1
+        },
+        {
+            "fieldname": "libelle",
+            "label": "R\u00e9sultat Attendu",
+            "fieldtype": "Data",
+            "reqd": 1,
+            "in_list_view": 1,
+            "columns": 6
+        },
+        {
+            "fieldname": "poids",
+            "label": "Poids (%)",
+            "fieldtype": "Float",
+            "in_list_view": 1,
+            "columns": 2
+        },
+        {
+            "fieldname": "score",
+            "label": "Score (%)",
+            "fieldtype": "Float",
+            "in_list_view": 1,
+            "columns": 2
+        }
+    ],
+    "permissions": []
+}

@@ -1,0 +1,134 @@
+{
+    "name": "Plan Trimestriel",
+    "module": "KYA HR",
+    "doctype": "DocType",
+    "custom": 1,
+    "is_submittable": 0,
+    "autoname": "format:PLAN-{trimestre}-{annee}-{#####}",
+    "title_field": "titre",
+    "search_fields": "titre,equipe,trimestre,annee,statut",
+    "track_changes": 1,
+    "fields": [
+        {
+            "fieldname": "section_info",
+            "label": "Informations Plan",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "titre",
+            "label": "Titre du Plan",
+            "fieldtype": "Data",
+            "reqd": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "equipe",
+            "label": "\u00c9quipe / D\u00e9partement",
+            "fieldtype": "Link",
+            "options": "Department",
+            "reqd": 1,
+            "in_list_view": 1,
+            "in_standard_filter": 1
+        },
+        {
+            "fieldname": "equipe_abbr",
+            "label": "Abr\u00e9viation",
+            "fieldtype": "Data",
+            "fetch_from": "equipe.abbreviation",
+            "read_only": 1
+        },
+        {
+            "fieldname": "col_info",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "trimestre",
+            "label": "Trimestre",
+            "fieldtype": "Select",
+            "options": "T1\nT2\nT3\nT4",
+            "reqd": 1,
+            "in_list_view": 1,
+            "in_standard_filter": 1
+        },
+        {
+            "fieldname": "annee",
+            "label": "Ann\u00e9e",
+            "fieldtype": "Int",
+            "reqd": 1,
+            "in_list_view": 1,
+            "in_standard_filter": 1
+        },
+        {
+            "fieldname": "chef_equipe",
+            "label": "Chef d'\u00c9quipe",
+            "fieldtype": "Link",
+            "options": "Employee",
+            "in_standard_filter": 1
+        },
+        {
+            "fieldname": "statut",
+            "label": "Statut",
+            "fieldtype": "Select",
+            "options": "Brouillon\nEn cours\n\u00c9valuation\nCl\u00f4tur\u00e9",
+            "default": "Brouillon",
+            "in_list_view": 1,
+            "in_standard_filter": 1
+        },
+        {
+            "fieldname": "description",
+            "label": "Description",
+            "fieldtype": "Small Text"
+        },
+        {
+            "fieldname": "section_resultats",
+            "label": "R\u00e9sultats Attendus",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "resultats",
+            "label": "R\u00e9sultats",
+            "fieldtype": "Table",
+            "options": "Plan Trimestriel Resultat"
+        },
+        {
+            "fieldname": "section_stats",
+            "label": "Statistiques",
+            "fieldtype": "Section Break",
+            "collapsible": 1
+        },
+        {
+            "fieldname": "nombre_taches",
+            "label": "Nombre de T\u00e2ches",
+            "fieldtype": "Int",
+            "read_only": 1
+        },
+        {
+            "fieldname": "col_stats",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "taches_attribuees",
+            "label": "T\u00e2ches Attribu\u00e9es",
+            "fieldtype": "Int",
+            "read_only": 1
+        },
+        {
+            "fieldname": "taches_terminees",
+            "label": "T\u00e2ches Termin\u00e9es",
+            "fieldtype": "Int",
+            "read_only": 1
+        },
+        {
+            "fieldname": "score_collectif",
+            "label": "Score Collectif (%)",
+            "fieldtype": "Float",
+            "read_only": 1
+        }
+    ],
+    "permissions": [
+        {"role": "System Manager", "permlevel": 0, "read": 1, "write": 1, "create": 1, "delete": 1},
+        {"role": "HR Manager",     "permlevel": 0, "read": 1, "write": 1, "create": 1, "delete": 1},
+        {"role": "HR User",        "permlevel": 0, "read": 1, "write": 1, "create": 1, "delete": 0},
+        {"role": "Chef d'\u00c9quipe",  "permlevel": 0, "read": 1, "write": 1, "create": 1, "delete": 0}
+    ]
+}
