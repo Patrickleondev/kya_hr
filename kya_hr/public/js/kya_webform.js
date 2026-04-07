@@ -13,8 +13,15 @@
     "demande-achat", "pv-sortie-materiel",
     "planning-conge", "bilan-fin-de-stage"
   ];
+  var searchParams = new URLSearchParams(window.location.search || "");
+  var docName = searchParams.get("name");
   var path = window.location.pathname.replace(/^\//, "").replace(/\/$/, "");
   var pathParts = path.split("/");
+
+  // Preserve tracked document links like /permission-sortie-employe?name=PSE-2026-00001
+  if (pathParts.length === 1 && KYA_WF_ROUTES.indexOf(path) !== -1 && docName) {
+    return;
+  }
 
   // Normalize legacy links like /permission-sortie-employe/PSE-2026-00001
   if (pathParts.length === 2 && KYA_WF_ROUTES.indexOf(pathParts[0]) !== -1 && pathParts[1] !== "new") {

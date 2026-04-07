@@ -117,7 +117,7 @@
   {
    "type": "Link",
    "label": "Tableau de Bord Stagiaires",
-   "link_to": "/tableau-bord-stagiaires",
+  "link_to": "/tableau_bord_stagiaires",
    "link_type": "URL",
    "hidden": 0,
    "is_query_report": 0,

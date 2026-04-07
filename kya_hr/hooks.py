@@ -14,7 +14,10 @@ web_include_js = ["/assets/kya_hr/js/kya_webform.js"]
 
 # CSS sur le desk (branding, sidebar, logo)
 app_include_css = ["/assets/kya_hr/css/kya_webform.css"]
-app_include_js = ["/assets/kya_hr/js/employee_list.js"]
+app_include_js = [
+    "/assets/kya_hr/js/employee_list.js",
+    "/assets/kya_hr/js/kya_desktop_fix.js",
+]
 
 # Fixtures pour les flux, rôles et personnalisations de champs
 fixtures = [

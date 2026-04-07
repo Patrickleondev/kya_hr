@@ -23,6 +23,25 @@ ORPHAN_SIDEBARS = ["KYA Stagiaires", "Personnes"]
 KYA_WORKSPACES = ["Espace Employes", "Espace Stagiaires", "KYA Services", "Gestion Équipe"]
 
 
+def _normalize_workspace_title(workspace_name):
+    """Ensure custom workspaces always have a non-null title for Desk route generation."""
+    if not frappe.db.exists("Workspace", workspace_name):
+        return
+
+    title = frappe.db.get_value("Workspace", workspace_name, "title")
+    if title:
+        return
+
+    fallback_title = (
+        frappe.db.get_value("Workspace", workspace_name, "label")
+        or workspace_name
+    )
+    frappe.db.set_value(
+        "Workspace", workspace_name, "title", fallback_title, update_modified=False
+    )
+    print(f"  [FIXED] {workspace_name} title -> {fallback_title}")
+
+
 def execute():
     """Post-migrate hook -- nettoyage et visibilite uniquement."""
     print("=== KYA WORKSPACE SYNC v10 ===")
@@ -64,6 +83,7 @@ def execute():
     for ws_name in KYA_WORKSPACES:
         if frappe.db.exists("Workspace", ws_name):
             frappe.db.set_value("Workspace", ws_name, "is_hidden", 0, update_modified=False)
+            _normalize_workspace_title(ws_name)
             print(f"  [VISIBLE] {ws_name}")
 
     # 5. Creer le Workspace Sidebar pour KYA Services s'il n'existe pas

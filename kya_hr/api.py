@@ -496,37 +496,43 @@ _TRACKABLE_DOCTYPES = [
         "label": "Permission de Sortie",
         "category": "rh",
         "for": ["employee", "prestataire"],
+        "route": "permission-sortie-employe",
     },
     {
         "doctype": "Permission Sortie Stagiaire",
         "label": "Permission de Sortie",
         "category": "rh",
         "for": ["stage"],
+        "route": "permission-sortie-stagiaire",
     },
     {
         "doctype": "Planning Conge",
-        "label": "Planning de Cong├⌐",
+        "label": "Planning de Cong\u00e9",
         "category": "rh",
         "for": ["employee"],
+        "route": "planning-conge",
     },
     {
         "doctype": "PV Sortie Materiel",
-        "label": "PV Sortie Mat├⌐riel",
+        "label": "PV Sortie Mat\u00e9riel",
         "category": "stock",
         "for": ["employee", "stage", "prestataire"],
         "filter_by": "owner",  # No Employee Link field, filter by doc creator
+        "route": "pv-sortie-materiel",
     },
     {
         "doctype": "Demande Achat KYA",
         "label": "Demande d'Achat",
         "category": "achats",
         "for": ["employee"],
+        "route": "demande-achat",
     },
     {
         "doctype": "Bilan Fin de Stage",
         "label": "Bilan de Stage",
         "category": "rh",
         "for": ["stage"],
+        "route": "bilan-fin-de-stage",
     },
 ]
 
@@ -599,6 +605,7 @@ def get_my_documents(limit=20, offset=0, status_filter=None):
 
         for doc in docs:
             ws = doc.get("workflow_state") or "Brouillon"
+            route = dt_info.get("route") or frappe.scrub(dt).replace("_", "-")
             documents.append({
                 "doctype": dt,
                 "name": doc.name,
@@ -608,7 +615,7 @@ def get_my_documents(limit=20, offset=0, status_filter=None):
                 "color": _STATE_COLORS.get(ws, "gray"),
                 "creation": str(doc.creation),
                 "modified": str(doc.modified),
-                "url": f"/app/{frappe.scrub(dt).replace('_', '-')}/{doc.name}",
+                "url": f"/{route}?name={doc.name}",
             })
 
     # Sort by modified desc
@@ -641,55 +648,64 @@ def get_my_kya_forms():
         as_dict=True,
     )
 
-    # Formulaires publi├⌐s (actifs)
+    # Formulaires actifs (statut = Actif)
     available = []
     try:
         forms = frappe.get_all(
             "KYA Form",
-            filters={"statut": "Publi├⌐"},
+            filters={"statut": "Actif"},
             fields=["name", "titre", "description", "type_formulaire",
-                     "date_debut", "date_fin", "token"],
+                     "date_limite", "equipe_cible"],
             order_by="creation desc",
         )
         for f in forms:
-            # V├⌐rifier si d├⌐j├á rempli
+            # Vérifier si l'employé a déjà une réponse soumise
             already_done = False
             if employee and frappe.db.exists("DocType", "KYA Form Response"):
-                already_done = frappe.db.exists("KYA Form Response", {
-                    "form": f.name,
-                    "respondent_email": user,
-                })
+                already_done = bool(frappe.db.get_value(
+                    "KYA Form Response",
+                    {"formulaire": f.name, "employe": employee.name, "soumis_le": ["is", "set"]},
+                    "name",
+                ))
+            # Token de réponse personnel pour cet employé
+            personal_token = None
+            if employee and frappe.db.exists("DocType", "KYA Form Response"):
+                personal_token = frappe.db.get_value(
+                    "KYA Form Response",
+                    {"formulaire": f.name, "employe": employee.name, "soumis_le": ["", None]},
+                    "token",
+                )
             available.append({
                 "name": f.name,
                 "titre": f.titre,
                 "description": f.description or "",
-                "type": f.type_formulaire or "Enqu├¬te",
-                "date_debut": str(f.date_debut) if f.date_debut else None,
-                "date_fin": str(f.date_fin) if f.date_fin else None,
-                "completed": bool(already_done),
-                "url": f"/kya-survey?token={f.token}" if f.token else f"/app/kya-form/{f.name}",
+                "type": f.type_formulaire or "Enquête",
+                "date_limite": str(f.date_limite) if f.date_limite else None,
+                "equipe_cible": f.equipe_cible or "",
+                "completed": already_done,
+                "url": f"/kya-survey?token={personal_token}" if personal_token else f"/kya-survey?form={f.name}",
             })
     except Exception:
         pass
 
-    # R├⌐ponses d├⌐j├á soumises
+    # Réponses déjà soumises par cet employé
     completed = []
     try:
-        if frappe.db.exists("DocType", "KYA Form Response"):
+        if employee and frappe.db.exists("DocType", "KYA Form Response"):
             responses = frappe.get_all(
                 "KYA Form Response",
-                filters={"respondent_email": user},
-                fields=["name", "form", "creation", "respondent_name"],
-                order_by="creation desc",
+                filters={"employe": employee.name, "soumis_le": ["is", "set"]},
+                fields=["name", "formulaire", "soumis_le"],
+                order_by="soumis_le desc",
                 limit_page_length=20,
             )
             for r in responses:
-                form_title = frappe.db.get_value("KYA Form", r.form, "titre") or r.form
+                form_title = frappe.db.get_value("KYA Form", r.formulaire, "titre") or r.formulaire
                 completed.append({
                     "name": r.name,
-                    "form": r.form,
+                    "form": r.formulaire,
                     "form_title": form_title,
-                    "date": str(r.creation),
+                    "date": str(r.soumis_le),
                 })
     except Exception:
         pass
@@ -820,7 +836,7 @@ def get_demandes_combined(limit=50, offset=0, type_filter=None, statut_filter=No
                     "date": str(doc.date_sortie) if doc.date_sortie else str(doc.creation)[:10],
                     "statut": doc.workflow_state or "Brouillon",
                     "color": _STATE_COLORS.get(doc.workflow_state or "Brouillon", "gray"),
-                    "url": f"/pv-sortie-materiel/{doc.name}",
+                    "url": f"/pv-sortie-materiel?name={doc.name}",
                     "creation": str(doc.creation),
                 })
         except Exception:
@@ -855,7 +871,7 @@ def get_demandes_combined(limit=50, offset=0, type_filter=None, statut_filter=No
                     "color": _STATE_COLORS.get(doc.workflow_state or "Brouillon", "gray"),
                     "montant": doc.montant_total or 0,
                     "urgence": doc.urgence or "Normale",
-                    "url": f"/demande-achat/{doc.name}",
+                    "url": f"/demande-achat?name={doc.name}",
                     "creation": str(doc.creation),
                 })
         except Exception:
@@ -1408,18 +1424,37 @@ def _calc_sat_personnel(department, from_date, to_date):
             return None
         # Look for KYA Form Responses linked to satisfaction survey forms for this department
         # The KYA Form should have a tag/category "Satisfaction Personnel"
-        rows = frappe.db.sql(
-            """SELECT kfr.score_global
+        # Count satisfaction responses (score_global is calculated externally by admin)
+        # Use a simple count proxy: 100 if at least 1 satisfaction form response, else None
+        count = frappe.db.sql(
+            """SELECT COUNT(*) as cnt
                FROM `tabKYA Form Response` kfr
-               JOIN `tabKYA Form` kf ON kf.name = kfr.form
+               JOIN `tabKYA Form` kf ON kf.name = kfr.formulaire
                WHERE kf.titre LIKE %s
                  AND kfr.soumis_le BETWEEN %s AND %s
-                 AND kfr.score_global IS NOT NULL""",
-            ("%Satisfaction%Personnel%", from_date, to_date), as_dict=True,
+                 AND kfr.soumis_le IS NOT NULL""",
+            ("%Satisfaction%", from_date, to_date), as_dict=True,
         )
-        if not rows:
+        n = count[0].cnt if count else 0
+        if n == 0:
             return None
-        vals = [float(r.score_global) for r in rows if r.score_global is not None]
+        # Calculer la moyenne des réponses numériques pour les enquêtes de satisfaction
+        ans_rows = frappe.db.sql(
+            """SELECT kfa.valeur
+               FROM `tabKYA Form Answer` kfa
+               JOIN `tabKYA Form Response` kfr ON kfr.name = kfa.parent
+               JOIN `tabKYA Form` kf ON kf.name = kfr.formulaire
+               WHERE kf.titre LIKE %s
+                 AND kfr.soumis_le BETWEEN %s AND %s
+                 AND kfa.valeur REGEXP '^[0-9]+\\.?[0-9]*$'""",
+            ("%Satisfaction%", from_date, to_date), as_dict=True,
+        )
+        vals = []
+        for r in ans_rows:
+            try:
+                vals.append(float(r.valeur))
+            except (ValueError, TypeError):
+                pass
         return round(sum(vals) / len(vals), 2) if vals else None
     except Exception:
         return None
@@ -1661,3 +1696,377 @@ def save_employee_indicators(employee, trimestre, annee, sat_clients=None, notes
     return {"name": doc.name, "values": values}
 
 
+# ═══════════════════════════════════════════════════════════════════════════════
+#  GESTION ÉQUIPE — CONTEXTE CHEF D'ÉQUIPE (Isolation département)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+@frappe.whitelist()
+def get_chef_equipe_context():
+    """Retourne le contexte département du chef d'équipe connecté.
+
+    Les chefs d'équipe (rôle Chef Service) ne voient QUE leur département.
+    Les rôles HR/Manager voient tout → department=None (pas de filtre).
+
+    Retourne :
+    {
+      employee, employee_name, department, department_name,
+      is_hr_role  (bool),  → True si HR/Manager (accès total)
+      team_members  → liste des noms d'employés du département
+    }
+    """
+    user = frappe.session.user
+    if user == "Guest":
+        frappe.throw("Authentification requise", frappe.PermissionError)
+
+    hr_roles = {"System Manager", "HR Manager", "HR User",
+                "Accounts Manager", "Purchase Manager"}
+    user_roles = set(frappe.get_roles(user))
+    is_hr = bool(user_roles & hr_roles)
+
+    emp = frappe.db.get_value(
+        "Employee",
+        {"user_id": user, "status": "Active"},
+        ["name", "employee_name", "department"],
+        as_dict=True,
+    )
+
+    department = None
+    department_name = None
+    team_members = []
+
+    if not is_hr and emp:
+        department = emp.department
+        if department:
+            department_name = frappe.db.get_value("Department", department, "department_name") or department
+            team_members = frappe.db.sql_list(
+                "SELECT name FROM `tabEmployee` WHERE department=%s AND status='Active'",
+                department,
+            )
+
+    return {
+        "employee": emp.name if emp else None,
+        "employee_name": emp.employee_name if emp else None,
+        "department": department,
+        "department_name": department_name,
+        "is_hr_role": is_hr,
+        "team_members": team_members,
+    }
+
+
+@frappe.whitelist()
+def get_team_attendance_dashboard(date=None, department=None):
+    """Version sécurisée de get_attendance_dashboard avec isolation département.
+
+    - Rôles HR : peuvent passer n'importe quel department (ou None pour tout)
+    - Rôle Chef Service : filtre automatiquement sur son département
+    - Autres employés : voient uniquement leur propre fiche
+    """
+    user = frappe.session.user
+    if user == "Guest":
+        frappe.throw("Authentification requise", frappe.PermissionError)
+
+    hr_roles = {"System Manager", "HR Manager", "HR User", "Accounts Manager"}
+    user_roles = set(frappe.get_roles(user))
+    is_hr = bool(user_roles & hr_roles)
+
+    emp = frappe.db.get_value(
+        "Employee",
+        {"user_id": user, "status": "Active"},
+        ["name", "department"],
+        as_dict=True,
+    )
+
+    if not is_hr and emp:
+        # Chef d'équipe → forcer son département
+        department = emp.department
+
+    return get_attendance_dashboard(date=date, department=department)
+
+
+@frappe.whitelist()
+def get_team_plans(department=None, trimestre=None, annee=None):
+    """Plans Trimestriels filtrés par département avec isolation chef d'équipe.
+
+    - Rôles HR : voient tous les plans (department=None = tous)
+    - Chef Service : voient uniquement leur département
+    """
+    import datetime
+
+    user = frappe.session.user
+    if user == "Guest":
+        frappe.throw("Authentification requise", frappe.PermissionError)
+
+    hr_roles = {"System Manager", "HR Manager", "HR User"}
+    user_roles = set(frappe.get_roles(user))
+    is_hr = bool(user_roles & hr_roles)
+
+    if not is_hr:
+        emp = frappe.db.get_value(
+            "Employee",
+            {"user_id": user, "status": "Active"},
+            ["name", "department"],
+            as_dict=True,
+        )
+        if emp and emp.department:
+            department = emp.department
+        else:
+            return {"plans": [], "department": None, "is_hr_role": False}
+
+    if not frappe.db.table_exists("tabPlan Trimestriel"):
+        return {"plans": [], "department": department, "is_hr_role": is_hr}
+
+    today = datetime.date.today()
+    if not annee:
+        annee = today.year
+    annee = int(annee)
+    if not trimestre:
+        m = today.month
+        trimestre = "T1" if m <= 3 else "T2" if m <= 6 else "T3" if m <= 9 else "T4"
+
+    filters = [["annee", "=", annee], ["trimestre", "=", trimestre]]
+    if department:
+        filters.append(["equipe", "=", department])
+
+    plans = frappe.get_all(
+        "Plan Trimestriel",
+        filters=filters,
+        fields=["name", "titre", "equipe", "trimestre", "annee",
+                "statut", "chef_equipe", "progression_globale"],
+        order_by="creation desc",
+    )
+
+    # Enrichir avec le nombre de tâches
+    for p in plans:
+        if frappe.db.table_exists("tabTache Equipe"):
+            p["nb_taches"] = frappe.db.count("Tache Equipe", {"plan": p.name})
+            p["nb_terminees"] = frappe.db.count(
+                "Tache Equipe", {"plan": p.name, "statut": ["in", ["Terminé", "Validé"]]}
+            )
+        else:
+            p["nb_taches"] = 0
+            p["nb_terminees"] = 0
+        p["url"] = f"/app/plan-trimestriel/{p.name}"
+
+    return {
+        "plans": plans,
+        "department": department,
+        "trimestre": trimestre,
+        "annee": annee,
+        "is_hr_role": is_hr,
+    }
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  IMPORT PRÉSENCES DEPUIS EXCEL (Espace RH)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+@frappe.whitelist()
+def import_attendance_excel(file_url, employee_col="Matricule", date_col="Date",
+                            time_col="Heure", log_type_col=None,
+                            create_missing_employees=0):
+    """Importe des présences/pointages depuis un fichier Excel.
+
+    Paramètres (colonnes Excel, noms ou index lettre ex: "A", "B"):
+      file_url : URL Frappe du fichier (ex: /files/pointage.xlsx)
+      employee_col : colonne contenant le matricule ou ID employé (défaut "Matricule")
+      date_col     : colonne date (défaut "Date", format YYYY-MM-DD ou DD/MM/YYYY)
+      time_col     : colonne heure (défaut "Heure", format HH:MM ou HH:MM:SS)
+      log_type_col : colonne IN/OUT (optionnelle)
+      create_missing_employees : 0/1 (créer un checkin même si l'employé est introuvable par ID)
+
+    Retourne :
+      { imported, skipped, errors, checkins_created }
+    """
+    import re
+
+    allowed_roles = {"System Manager", "HR Manager", "HR User"}
+    user_roles = set(frappe.get_roles(frappe.session.user))
+    if not (user_roles & allowed_roles):
+        frappe.throw("Accès réservé au personnel RH", frappe.PermissionError)
+
+    # Récupérer le fichier
+    try:
+        from frappe.utils.file_manager import get_file_path
+        file_path = get_file_path(file_url)
+    except Exception as e:
+        frappe.throw(f"Fichier introuvable : {file_url} — {e}")
+
+    # Lire le fichier Excel avec openpyxl
+    try:
+        import openpyxl
+        wb = openpyxl.load_workbook(file_path, read_only=True, data_only=True)
+        ws = wb.active
+    except ImportError:
+        frappe.throw("Module openpyxl non disponible. Installez-le : pip install openpyxl")
+    except Exception as e:
+        frappe.throw(f"Impossible de lire le fichier Excel : {e}")
+
+    # Lire l'en-tête (ligne 1)
+    headers = []
+    for cell in next(ws.iter_rows(max_row=1, values_only=True)):
+        headers.append(str(cell).strip() if cell is not None else "")
+
+    def _col_idx(col_name):
+        """Retourne l'index (0-based) de la colonne par nom d'en-tête ou lettre Excel."""
+        if isinstance(col_name, int):
+            return col_name
+        # Essai par nom d'en-tête
+        col_name_lower = col_name.strip().lower()
+        for i, h in enumerate(headers):
+            if h.lower() == col_name_lower:
+                return i
+        # Essai par lettre Excel (A=0, B=1…)
+        if re.match(r'^[A-Za-z]+$', col_name.strip()):
+            idx = 0
+            for c in col_name.strip().upper():
+                idx = idx * 26 + (ord(c) - ord('A') + 1)
+            return idx - 1
+        raise ValueError(f"Colonne '{col_name}' non trouvée (en-têtes : {headers})")
+
+    try:
+        idx_emp  = _col_idx(employee_col)
+        idx_date = _col_idx(date_col)
+        idx_time = _col_idx(time_col)
+        idx_log  = _col_idx(log_type_col) if log_type_col else None
+    except ValueError as e:
+        frappe.throw(str(e))
+
+    # Construire le mapping matricule → Employee.name
+    emp_map = {}
+    for row in frappe.db.sql(
+        "SELECT name, attendance_device_id FROM `tabEmployee` WHERE status='Active'",
+        as_dict=True,
+    ):
+        if row.attendance_device_id:
+            emp_map[str(row.attendance_device_id).strip()] = row.name
+        emp_map[str(row.name).strip()] = row.name
+
+    imported = 0
+    skipped = 0
+    errors = []
+    checkins_created = []
+
+    from frappe.utils import get_datetime
+    import datetime as dt_mod
+
+    def _parse_date(val):
+        if isinstance(val, (dt_mod.date, dt_mod.datetime)):
+            return val.strftime("%Y-%m-%d")
+        s = str(val).strip()
+        for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y", "%m/%d/%Y"):
+            try:
+                return dt_mod.datetime.strptime(s, fmt).strftime("%Y-%m-%d")
+            except ValueError:
+                continue
+        raise ValueError(f"Format date inconnu : {s}")
+
+    def _parse_time(val):
+        if isinstance(val, dt_mod.time):
+            return val.strftime("%H:%M:%S")
+        if isinstance(val, (dt_mod.datetime,)):
+            return val.strftime("%H:%M:%S")
+        s = str(val).strip()
+        # HH:MM or HH:MM:SS
+        m = re.match(r'^(\d{1,2}):(\d{2})(?::(\d{2}))?$', s)
+        if m:
+            h, mi, sec = m.group(1), m.group(2), m.group(3) or "00"
+            return f"{int(h):02d}:{mi}:{sec}"
+        raise ValueError(f"Format heure inconnu : {s}")
+
+    for row_num, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
+        if not row or all(v is None for v in row):
+            continue
+        try:
+            raw_emp  = row[idx_emp]
+            raw_date = row[idx_date]
+            raw_time = row[idx_time]
+            log_type = "IN"
+            if idx_log is not None:
+                lt_val = str(row[idx_log] or "").strip().upper()
+                log_type = "OUT" if lt_val in ("OUT", "S", "SORTIE", "0") else "IN"
+
+            if raw_emp is None or raw_date is None or raw_time is None:
+                skipped += 1
+                continue
+
+            matricule = str(raw_emp).strip()
+            date_str  = _parse_date(raw_date)
+            time_str  = _parse_time(raw_time)
+
+            employee_id = emp_map.get(matricule)
+            if not employee_id:
+                errors.append(f"Ligne {row_num}: matricule '{matricule}' introuvable")
+                skipped += 1
+                continue
+
+            # Vérifier doublon
+            ts_str = f"{date_str} {time_str}"
+            existing = frappe.db.exists("Employee Checkin", {
+                "employee": employee_id,
+                "time": ["between", [f"{date_str} {time_str[:-2]}00", f"{date_str} {time_str[:-2]}59"]],
+                "log_type": log_type,
+            })
+            if existing:
+                skipped += 1
+                continue
+
+            checkin = frappe.get_doc({
+                "doctype": "Employee Checkin",
+                "employee": employee_id,
+                "time": ts_str,
+                "log_type": log_type,
+                "device_id": "import-excel",
+            })
+            checkin.insert(ignore_permissions=True)
+            imported += 1
+            checkins_created.append({
+                "employee": employee_id,
+                "time": ts_str,
+                "log_type": log_type,
+            })
+        except Exception as e:
+            errors.append(f"Ligne {row_num}: {e}")
+            skipped += 1
+
+    frappe.db.commit()
+    return {
+        "imported": imported,
+        "skipped": skipped,
+        "errors": errors[:50],  # Limiter à 50 erreurs
+        "checkins_created": checkins_created[:20],  # Aperçu des 20 premiers
+        "total_rows": row_num - 1 if 'row_num' in dir() else 0,
+    }
+
+
+@frappe.whitelist()
+def get_rh_attendance_import_info():
+    """Retourne les informations de mapping pour l'import Excel de présences.
+    Aide le RH à comprendre quels champs sont attendus."""
+    allowed_roles = {"System Manager", "HR Manager", "HR User"}
+    user_roles = set(frappe.get_roles(frappe.session.user))
+    if not (user_roles & allowed_roles):
+        frappe.throw("Accès réservé au personnel RH", frappe.PermissionError)
+
+    # Employés actifs avec leur device_id pour l'aide au mapping
+    employees = frappe.db.sql(
+        """SELECT name, employee_name, attendance_device_id, department
+           FROM `tabEmployee` WHERE status='Active'
+           ORDER BY department, employee_name LIMIT 100""",
+        as_dict=True,
+    )
+    departments = frappe.db.sql_list(
+        "SELECT DISTINCT department FROM `tabEmployee` WHERE status='Active' AND department IS NOT NULL"
+    )
+    return {
+        "employees": employees,
+        "departments": departments,
+        "expected_columns": {
+            "employee_col": "Colonne contenant le matricule (attendance_device_id) ou le nom Frappe (HR-EMP-XXXX)",
+            "date_col": "Colonne date (format : YYYY-MM-DD ou DD/MM/YYYY)",
+            "time_col": "Colonne heure (format : HH:MM ou HH:MM:SS)",
+            "log_type_col": "Colonne IN/OUT (optionnel : IN, OUT, E, S, Entrée, Sortie)",
+        },
+        "example_url": "/api/method/kya_hr.kya_hr.api.import_attendance_excel"
+                       "?file_url=/files/pointage.xlsx"
+                       "&employee_col=Matricule&date_col=Date&time_col=Heure",
+    }
