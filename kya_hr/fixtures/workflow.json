@@ -6,7 +6,7 @@
   "enable_action_confirmation": 0,
   "is_active": 1,
   "modified": "2026-02-24 12:05:00",
-  "name": "Flux RH Unifi├⌐",
+  "name": "Flux RH Unifié",
   "override_status": 0,
   "send_email_alert": 1,
   "states": [
@@ -17,7 +17,7 @@
     "evaluate_as_expression": 0,
     "is_optional_state": 0,
     "message": null,
-    "next_action_email_template": "KYA - Demande de Cong├⌐ ├Ç Approuver",
+    "next_action_email_template": "KYA - Demande de Congé ├Ç Approuver",
     "send_email": 1,
     "state": "Brouillon",
     "update_field": null,
@@ -25,15 +25,15 @@
     "workflow_builder_id": null
    },
    {
-    "allow_edit": "Sup├⌐rieur Imm├⌐diat",
+    "allow_edit": "Supérieur Immédiat",
     "avoid_status_override": 0,
     "doc_status": "0",
     "evaluate_as_expression": 0,
     "is_optional_state": 0,
     "message": null,
-    "next_action_email_template": "KYA - Demande de Cong├⌐ ├Ç Approuver",
+    "next_action_email_template": "KYA - Demande de Congé ├Ç Approuver",
     "send_email": 1,
-    "state": "En attente du Sup├⌐rieur Imm├⌐diat",
+    "state": "En attente du Supérieur Immédiat",
     "update_field": null,
     "update_value": null,
     "workflow_builder_id": null
@@ -45,7 +45,7 @@
     "evaluate_as_expression": 0,
     "is_optional_state": 0,
     "message": null,
-    "next_action_email_template": "KYA - Demande de Cong├⌐ ├Ç Approuver",
+    "next_action_email_template": "KYA - Demande de Congé ├Ç Approuver",
     "send_email": 1,
     "state": "En attente RH",
     "update_field": null,
@@ -53,13 +53,13 @@
     "workflow_builder_id": null
    },
    {
-    "allow_edit": "Directeur G├⌐n├⌐ral",
+    "allow_edit": "Directeur Général",
     "avoid_status_override": 0,
     "doc_status": "0",
     "evaluate_as_expression": 0,
     "is_optional_state": 0,
     "message": null,
-    "next_action_email_template": "KYA - Demande de Cong├⌐ ├Ç Approuver",
+    "next_action_email_template": "KYA - Demande de Congé ├Ç Approuver",
     "send_email": 1,
     "state": "En attente DG",
     "update_field": null,
@@ -67,29 +67,29 @@
     "workflow_builder_id": null
    },
    {
-    "allow_edit": "Directeur G├⌐n├⌐ral",
+    "allow_edit": "Directeur Général",
     "avoid_status_override": 0,
     "doc_status": "1",
     "evaluate_as_expression": 0,
     "is_optional_state": 0,
     "message": null,
-    "next_action_email_template": "KYA - Cong├⌐ Accord├⌐",
+    "next_action_email_template": "KYA - Congé Accordé",
     "send_email": 1,
-    "state": "Approuv├⌐",
+    "state": "Approuvé",
     "update_field": null,
     "update_value": null,
     "workflow_builder_id": null
    },
    {
-    "allow_edit": "Directeur G├⌐n├⌐ral",
+    "allow_edit": "Directeur Général",
     "avoid_status_override": 0,
     "doc_status": "0",
     "evaluate_as_expression": 0,
     "is_optional_state": 0,
     "message": null,
-    "next_action_email_template": "KYA - Cong├⌐ Rejet├⌐",
+    "next_action_email_template": "KYA - Congé Rejeté",
     "send_email": 1,
-    "state": "Rejet├⌐",
+    "state": "Rejeté",
     "update_field": null,
     "update_value": null,
     "workflow_builder_id": null
@@ -100,8 +100,8 @@
     "action": "Soumettre",
     "allow_self_approval": 0,
     "allowed": "Employee",
-    "condition": "'Sup├⌐rieur Imm├⌐diat' not in frappe.get_roles(frappe.db.get_value('Employee', doc.employee, 'user_id') or '')",
-    "next_state": "En attente du Sup├⌐rieur Imm├⌐diat",
+    "condition": "'Supérieur Immédiat' not in frappe.get_roles(frappe.db.get_value('Employee', doc.employee, 'user_id') or '')",
+    "next_state": "En attente du Supérieur Immédiat",
     "send_email_to_creator": 0,
     "state": "Brouillon",
     "transition_tasks": null,
@@ -111,7 +111,7 @@
     "action": "Soumettre",
     "allow_self_approval": 0,
     "allowed": "Employee",
-    "condition": "'Sup├⌐rieur Imm├⌐diat' in frappe.get_roles(frappe.db.get_value('Employee', doc.employee, 'user_id') or '')",
+    "condition": "'Supérieur Immédiat' in frappe.get_roles(frappe.db.get_value('Employee', doc.employee, 'user_id') or '')",
     "next_state": "En attente RH",
     "send_email_to_creator": 0,
     "state": "Brouillon",
@@ -121,22 +121,22 @@
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "Sup├⌐rieur Imm├⌐diat",
+    "allowed": "Supérieur Immédiat",
     "condition": null,
     "next_state": "En attente RH",
     "send_email_to_creator": 0,
-    "state": "En attente du Sup├⌐rieur Imm├⌐diat",
+    "state": "En attente du Supérieur Immédiat",
     "transition_tasks": null,
     "workflow_builder_id": null
    },
    {
     "action": "Rejeter",
     "allow_self_approval": 0,
-    "allowed": "Sup├⌐rieur Imm├⌐diat",
+    "allowed": "Supérieur Immédiat",
     "condition": null,
-    "next_state": "Rejet├⌐",
+    "next_state": "Rejeté",
     "send_email_to_creator": 0,
-    "state": "En attente du Sup├⌐rieur Imm├⌐diat",
+    "state": "En attente du Supérieur Immédiat",
     "transition_tasks": null,
     "workflow_builder_id": null
    },
@@ -156,7 +156,7 @@
     "allow_self_approval": 0,
     "allowed": "Responsable RH",
     "condition": null,
-    "next_state": "Rejet├⌐",
+    "next_state": "Rejeté",
     "send_email_to_creator": 0,
     "state": "En attente RH",
     "transition_tasks": null,
@@ -165,9 +165,9 @@
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "Directeur G├⌐n├⌐ral",
+    "allowed": "Directeur Général",
     "condition": null,
-    "next_state": "Approuv├⌐",
+    "next_state": "Approuvé",
     "send_email_to_creator": 0,
     "state": "En attente DG",
     "transition_tasks": null,
@@ -176,9 +176,9 @@
    {
     "action": "Rejeter",
     "allow_self_approval": 0,
-    "allowed": "Directeur G├⌐n├⌐ral",
+    "allowed": "Directeur Général",
     "condition": null,
-    "next_state": "Rejet├⌐",
+    "next_state": "Rejeté",
     "send_email_to_creator": 0,
     "state": "En attente DG",
     "transition_tasks": null,
@@ -186,7 +186,7 @@
    }
   ],
   "workflow_data": null,
-  "workflow_name": "Flux RH Unifi├⌐",
+  "workflow_name": "Flux RH Unifié",
   "workflow_state_field": "workflow_state"
  },
  {
@@ -196,7 +196,7 @@
   "enable_action_confirmation": 0,
   "is_active": 1,
   "modified": "2026-02-24 12:05:00",
-  "name": "Demande de mat├⌐riel",
+  "name": "Demande de matériel",
   "override_status": 0,
   "send_email_alert": 1,
   "states": [
@@ -215,7 +215,7 @@
     "workflow_builder_id": null
    },
    {
-    "allow_edit": "Charg├⌐ des Stocks",
+    "allow_edit": "Chargé des Stocks",
     "avoid_status_override": 0,
     "doc_status": "0",
     "evaluate_as_expression": 0,
@@ -237,7 +237,7 @@
     "message": null,
     "next_action_email_template": null,
     "send_email": 0,
-    "state": "Approuv├⌐",
+    "state": "Approuvé",
     "update_field": null,
     "update_value": null,
     "workflow_builder_id": null
@@ -251,7 +251,7 @@
     "message": null,
     "next_action_email_template": null,
     "send_email": 0,
-    "state": "Rejet├⌐",
+    "state": "Rejeté",
     "update_field": null,
     "update_value": null,
     "workflow_builder_id": null
@@ -274,7 +274,7 @@
     "allow_self_approval": 0,
     "allowed": "Stock Manager",
     "condition": null,
-    "next_state": "Approuv├⌐",
+    "next_state": "Approuvé",
     "send_email_to_creator": 0,
     "state": "En attente",
     "transition_tasks": null,
@@ -285,7 +285,7 @@
     "allow_self_approval": 0,
     "allowed": "Stock Manager",
     "condition": null,
-    "next_state": "Rejet├⌐",
+    "next_state": "Rejeté",
     "send_email_to_creator": 0,
     "state": "En attente",
     "transition_tasks": null,
@@ -293,7 +293,7 @@
    }
   ],
   "workflow_data": null,
-  "workflow_name": "Demande de mat├⌐riel",
+  "workflow_name": "Demande de matériel",
   "workflow_state_field": "workflow_state"
  },
  {
@@ -343,17 +343,17 @@
     "allow_edit": "HR Manager",
     "doc_status": "1",
     "is_optional_state": 0,
-    "state": "Approuv├⌐",
+    "state": "Approuvé",
     "update_field": "statut",
-    "update_value": "Approuv├⌐"
+    "update_value": "Approuvé"
    },
    {
     "allow_edit": "HR Manager",
     "doc_status": "1",
     "is_optional_state": 0,
-    "state": "Rejet├⌐",
+    "state": "Rejeté",
     "update_field": "statut",
-    "update_value": "Rejet├⌐"
+    "update_value": "Rejeté"
    }
   ],
   "transitions": [
@@ -378,7 +378,7 @@
     "allow_self_approval": 0,
     "allowed": "HR User",
     "condition": null,
-    "next_state": "Rejet├⌐",
+    "next_state": "Rejeté",
     "state": "En attente Chef"
    },
    {
@@ -394,7 +394,7 @@
     "allow_self_approval": 0,
     "allowed": "HR User",
     "condition": null,
-    "next_state": "Rejet├⌐",
+    "next_state": "Rejeté",
     "state": "En attente Resp. Stagiaires"
    },
    {
@@ -402,7 +402,7 @@
     "allow_self_approval": 0,
     "allowed": "HR Manager",
     "condition": null,
-    "next_state": "Approuv├⌐",
+    "next_state": "Approuvé",
     "state": "En attente DG"
    },
    {
@@ -410,7 +410,7 @@
     "allow_self_approval": 0,
     "allowed": "HR Manager",
     "condition": null,
-    "next_state": "Rejet├⌐",
+    "next_state": "Rejeté",
     "state": "En attente DG"
    }
   ],
@@ -425,7 +425,7 @@
   "enable_action_confirmation": 1,
   "is_active": 1,
   "modified": "2026-06-01 10:00:00",
-  "name": "Flux PV Sortie Mat├⌐riel",
+  "name": "Flux PV Sortie Matériel",
   "override_status": 0,
   "send_email_alert": 1,
   "states": [
@@ -473,17 +473,17 @@
     "allow_edit": "Stock User",
     "doc_status": "1",
     "is_optional_state": 0,
-    "state": "Approuv├⌐",
+    "state": "Approuvé",
     "update_field": "statut",
-    "update_value": "Approuv├⌐"
+    "update_value": "Approuvé"
    },
    {
     "allow_edit": "Stock User",
     "doc_status": "1",
     "is_optional_state": 0,
-    "state": "Rejet├⌐",
+    "state": "Rejeté",
     "update_field": "statut",
-    "update_value": "Rejet├⌐"
+    "update_value": "Rejeté"
    }
   ],
   "transitions": [
@@ -508,7 +508,7 @@
     "allow_self_approval": 0,
     "allowed": "HR User",
     "condition": null,
-    "next_state": "Rejet├⌐",
+    "next_state": "Rejeté",
     "state": "En attente Chef"
    },
    {
@@ -524,7 +524,7 @@
     "allow_self_approval": 0,
     "allowed": "Auditor",
     "condition": null,
-    "next_state": "Rejet├⌐",
+    "next_state": "Rejeté",
     "state": "En attente Audit"
    },
    {
@@ -540,7 +540,7 @@
     "allow_self_approval": 0,
     "allowed": "Stock Manager",
     "condition": null,
-    "next_state": "Rejet├⌐",
+    "next_state": "Rejeté",
     "state": "En attente DGA"
    },
    {
@@ -548,7 +548,7 @@
     "allow_self_approval": 0,
     "allowed": "Stock User",
     "condition": null,
-    "next_state": "Approuv├⌐",
+    "next_state": "Approuvé",
     "state": "En attente Magasin"
    },
    {
@@ -556,12 +556,12 @@
     "allow_self_approval": 0,
     "allowed": "Stock User",
     "condition": null,
-    "next_state": "Rejet├⌐",
+    "next_state": "Rejeté",
     "state": "En attente Magasin"
    }
   ],
   "workflow_data": null,
-  "workflow_name": "Flux PV Sortie Mat├⌐riel",
+  "workflow_name": "Flux PV Sortie Matériel",
   "workflow_state_field": "workflow_state" },
  {
   "docstatus": 0,

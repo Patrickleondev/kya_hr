@@ -1,7 +1,7 @@
 ﻿/* ===================================================================
-   KYA-Energy Group ΓÇö Web Form Design v4
+   KYA-Energy Group — Web Form Design v4
    Design : Ordre de Mission / Fiche officielle
-   Palette : Blue #1a5276 ┬╖ Orange #F58220 ┬╖ Green #8DC63F
+   Palette : Blue #1a5276 · Orange #F58220 · Green #8DC63F
    =================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap');
@@ -96,7 +96,7 @@ body {
 }
 .web-form-head.kya-hidden { display: none !important; }
 
-/* == HEADER ΓÇö Ordre de Mission 2-column style ============= */
+/* == HEADER — Ordre de Mission 2-column style ============= */
 .kya-wf-header {
   background: var(--kya-surface);
   padding: 28px 24px 0;
@@ -814,4 +814,65 @@ footer .web-footer-menu { display: none !important; }
   .kya-wf-footer { border-radius: 0; border-top: 1px solid #333; }
   input[readonly], input:disabled, .form-control[disabled] { border: none !important; background: transparent !important; padding-left: 0 !important; }
   .kya-header-divider { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
+/* == OVERFLOW / TEXT WRAPPING (global fix) ================ */
+/* Prevent long labels and text from overflowing containers  */
+.control-label,
+.frappe-control .control-label,
+.form-group label,
+.web-form-container label {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  max-width: 100%;
+}
+
+/* Desk list view: prevent column text overflow */
+.list-row-col .level-item,
+.list-subject .subject-row,
+.dt-cell__content {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* Frappe Desk — workflow state badges, field values */
+.workflow-state-indicator,
+.indicator-pill,
+.badge {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Form field values (read-only long text) */
+.like-disabled-input,
+.static-area.ellipsis,
+.frappe-control .control-value {
+  overflow-wrap: break-word;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+/* Prevent sidebar items from overflowing */
+.sidebar-menu .standard-sidebar-item span,
+.sidebar-menu .standard-sidebar-item a {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  flex: 1;
+}
+
+/* Kya-section body: prevent horizontal scroll on mobile */
+.kya-section-body,
+.kya-wf-header,
+.kya-form-section {
+  overflow-x: hidden;
+  word-break: break-word;
 }

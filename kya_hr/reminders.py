@@ -19,6 +19,7 @@ def send_kya_birthday_reminders():
         SELECT name, employee_name, date_of_birth, department, designation
         FROM `tabEmployee`
         WHERE status = 'Active'
+          AND (employment_type IS NULL OR employment_type != 'Stage')
           AND DAY(date_of_birth) = %s
           AND MONTH(date_of_birth) = %s
         """,
@@ -70,6 +71,7 @@ def send_kya_anniversary_reminders():
         SELECT name, employee_name, date_of_joining, department, designation
         FROM `tabEmployee`
         WHERE status = 'Active'
+          AND (employment_type IS NULL OR employment_type != 'Stage')
           AND DAY(date_of_joining) = %s
           AND MONTH(date_of_joining) = %s
           AND YEAR(date_of_joining) < %s

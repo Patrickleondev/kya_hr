@@ -717,11 +717,11 @@ Active Customers,Clients actifs
 Active Leads,Leads actifs
 Active Menu,Menu Actif
 Active Status,Statut actif
-Activities,étivités
-Activity,étivité
-Activity Cost,Coût de l'étivité
-Activity Cost exists for Employee {0} against Activity Type - {1},Des Coûts d'étivité existent pour l'Employé {0} pour le Type d'étivité - {1}
-Activity Cost per Employee,Coût de l'étivité par Employé
+Activities,Activités
+Activity,Activité
+Activity Cost,Coût de l'Activité
+Activity Cost exists for Employee {0} against Activity Type - {1},Des Coûts d'Activité existent pour l'Employé {0} pour le Type d'Activité - {1}
+Activity Cost per Employee,Coût de l'Activité par Employé
 Activity Date,Date d'activité
 Activity Name,Nom de l'activité
 Activity Type,Type d'activité
@@ -1006,7 +1006,7 @@ Alcohol Consumption (Present),Consommation d'alcool (présent)
 Algorithm,Algorithme
 All,Tout
 All Accounts,Tous les comptes
-All Activities,Toutes les étivités
+All Activities,Toutes les Activités
 All Activities HTML,Toutes les activités HTML
 All Addresses.,Toutes les adresses.
 All Assessment Groups,Tous les Groupes d'Évaluation
@@ -1441,7 +1441,7 @@ Assessment Terms,Conditions d'évaluation
 Assessments,Évaluations
 Asset,Actif - Immo.
 Asset Account,Compte d'actif
-Asset Activity,étivité d'actif
+Asset Activity,Activité d'actif
 Asset Capitalization,Capitalisation d'actif
 Asset Capitalization Asset Item,Article d'actif de capitalisation d'actif
 Asset Capitalization Service Item,Article de service de capitalisation d'actif
@@ -1649,7 +1649,7 @@ Auto Reconcile Payments,Rapprochement automatique des paiements
 Auto Reconciliation,Rapprochement automatique
 Auto Reconciliation Job Trigger,Déclencheur de tâche de rapprochement automatique
 Auto Reconciliation has started in the background,Le rapprochement automatique a commencé en arrière-plan
-Auto Reconciliation of Payments has been disabled. Enable it through {0},Le rapprochement automatique des paiements a été désactivé. étivez-le via {0}
+Auto Reconciliation of Payments has been disabled. Enable it through {0},Le rapprochement automatique des paiements a été désactivé. Activez-le via {0}
 Auto Repeat,Répétition automatique
 Auto Repeat Detail,Détail de la Répétition Automatique
 Auto Repeat Section,Répétition Automatique
@@ -2806,7 +2806,7 @@ Contact Us Settings,Paramètres du Formulaire de Contact
 Contact:,Contact:
 Container,Récipient
 Content,Contenu
-Content Activity,étivité de contenu
+Content Activity,Activité de contenu
 Content Masters,Masters de contenu
 Content Question,Question de contenu
 Content Type,Type de Contenu
@@ -2933,7 +2933,7 @@ Coupon Description,Description du coupon
 Coupon Name,Nom du coupon
 Coupon Type,Type de coupon
 Course,Cours
-Course Activity,étivité de cours
+Course Activity,Activité de cours
 Course Assessment Criteria,Critères d'Évaluation du Cours
 Course Code,Code de Cours
 Course Code:,Code du Cours:
@@ -3394,7 +3394,7 @@ Deemed Export,Exportation réputée
 Default,Par Défaut
 Default Account,Compte par Défaut
 Default Accounts,Comptes par défaut
-Default Activity Cost exists for Activity Type - {0},Un Coût d’étivité par défault existe pour le Type d’étivité {0}
+Default Activity Cost exists for Activity Type - {0},Un Coût d’Activité par défault existe pour le Type d’Activité {0}
 Default Advance Account,Compte d'avance par défaut
 Default Advance Paid Account,Compte d'avance payée par défaut
 Default Advance Received Account,Compte d'avance reçue par défaut
@@ -3948,7 +3948,7 @@ Earned Leave Frequency,Fréquence d'acquisition des congés
 Earned Leaves,Feuilles gagnées
 Earned Leaves are allocated as per the configured frequency via scheduler.,Les feuilles gagnées sont allouées selon la fréquence configurée via le planificateur.
 Earned Leaves are auto-allocated via scheduler based on the annual allocation set in the Leave Policy: {0},Les congés gagnés sont automatiquement alloués via le planificateur selon l'allocation annuelle définie dans la politique de congés : {0}
-Earned Leaves are leaves earned by an Employee after working with the company for a certain amount of time. Enabling this will allocate leaves on pro-rata basis by automatically updating Leave Allocation for leaves of this type at intervals set by 'Earned Leave Frequency.,Les congés gagnés sont des congés gagnés par un employé après avoir travaillé avec l'entreprise pendant un certain temps. étiver cette option permettra d'allouer les feuilles au prorata en mettant à jour automatiquement l'allocation de congés pour les feuilles de ce type à des intervalles définis par 'Fréquence de congé gagné.
+Earned Leaves are leaves earned by an Employee after working with the company for a certain amount of time. Enabling this will allocate leaves on pro-rata basis by automatically updating Leave Allocation for leaves of this type at intervals set by 'Earned Leave Frequency.,Les congés gagnés sont des congés gagnés par un employé après avoir travaillé avec l'entreprise pendant un certain temps. Activer cette option permettra d'allouer les feuilles au prorata en mettant à jour automatiquement l'allocation de congés pour les feuilles de ce type à des intervalles définis par 'Fréquence de congé gagné.
 Earnest Money,Arrhes
 Earning,Revenus
 Earning & Deduction,Revenus et Déduction
@@ -4048,7 +4048,7 @@ Employee Benefit Claim,Requête d'avantages sociaux
 Employee Benefits,Avantages de l'Employé
 Employee Billing Summary,Récapitulatif de facturation des employés
 Employee Birthday,Anniversaire de l'employé
-Employee Boarding Activity,étivité d'intégration des nouveaux employés
+Employee Boarding Activity,Activité d'intégration des nouveaux employés
 Employee Checkin,Enregistrement des employés
 Employee Cost Center,Centre de coûts des employés
 Employee Detail,Détail Employé
@@ -4083,7 +4083,7 @@ Employee Name,Nom de l'Employé
 Employee Naming By,Nommage de l'employé par
 Employee Number,Numéro d'Employé
 Employee Onboarding,Embauche des employés
-Employee Onboarding Activity,étivité d'accueil des nouveaux employés
+Employee Onboarding Activity,Activité d'accueil des nouveaux employés
 Employee Onboarding Template,Modèle d'accueil des nouveaux employés
 Employee Onboarding: {0} already exists for Job Applicant: {1},Intégration des employés : {0} existe déjà pour le candidat au poste : {1}
 Employee Onboarding: {0} is already for Job Applicant: {1},Intégration des employés: {0} est déjà pour le candidat à l'emploi: {1}
@@ -4131,7 +4131,7 @@ Employee records are created using the selected option,Les enregistrements des e
 Employee relieved on {0} must be set as 'Left',Employé dégagé de {0} doit être défini comme 'Gauche'
 Employee was marked Absent due to missing Employee Checkins.,L'employé a été marqué comme absent en raison de l'absence d'enregistrement.
 Employee was marked Absent for not meeting the working hours threshold.,L'employé a été marqué absent pour ne pas avoir atteint le seuil d'heures de travail.
-Employee {0} already has Active Shift {1}: {2},L'employé {0} a déjà étive Shift {1}: {2}
+Employee {0} already has Active Shift {1}: {2},L'employé {0} a déjà Active Shift {1}: {2}
 Employee {0} already has an Attendance Request {1} that overlaps with this period,L'employé {0} a déjà une demande de présence {1} qui se chevauche avec cette période
 Employee {0} already has an active Shift {1}: {2} that overlaps within this period.,L'employé {0} a déjà un décalage d'activité {1}: {2} qui se chevauche pendant cette période.
 Employee {0} already submited an apllication {1} for the payroll period {2},L'employé {0} a déjà envoyé une demande {1} pour la période de calcul de paie {2}
@@ -4161,63 +4161,63 @@ Employees working on a holiday,Employés qui travaillent un jour férié
 Employment Type,Type d'emploi
 Employment Type (optional),Type d'emploi (facultatif)
 Empty,Vide
-Enable / disable currencies.,étiver / Désactiver les devises
-Enable Admission Application,étiver l'application d'admission
-Enable Allow Partial Reservation in the Stock Settings to reserve partial stock.,étivez Autoriser la réservation partielle dans les paramètres de stock pour réserver un stock partiel.
-Enable Amazon,étiver Amazon
-Enable Appointment Scheduling,étiver la planification des rendez-vous
-Enable Attribute Filters,étiver les filtres d'attributs
-Enable Auto Attendance,étiver la présence automatique
-Enable Auto Email,étiver la messagerie automatique
-Enable Auto Invoicing,étiver la facturation automatique
-Enable Auto Re-Order,étiver la re-commande automatique
-Enable Automatic Party Matching,étiver la correspondance automatique de tiers
-Enable Capital Work in Progress Accounting,étiver la comptabilité des immobilisations en cours
-Enable Checkout,étiver Caisse
-Enable Common Party Accounting,étiver la comptabilité des tiers communs
-Enable Custom Cash Flow Format,étivation du format de flux de trésorerie personnalisé
-Enable Deferred Expense,étiver les frais reportés
-Enable Deferred Revenue,étiver les produits comptabilisés d'avance
-Enable Discount Accounting for Selling,étivation de la comptabilité d'escompte pour la vente
-Enable Distributed Cost Center,étiver le centre de coûts distribués
-Enable Early Exit Marking,étiver le marquage de fin anticipée
-Enable Entry Grace Period,étiver la période de grâce d'entrée
-Enable European Access,étiver l'accès européen
-Enable Exit Grace Period,étiver la période de grâce de sortie
-Enable Field Filters,étiver les filtres de champ
-Enable Free Follow-ups,étiver les suivis gratuits
-Enable Fuzzy Matching,étiver la correspondance floue
-Enable Health Monitor,étiver le moniteur de santé
-Enable Immutable Ledger,étiver le Grand Livre Immuable
-Enable Late Entry Marking,étiver le marquage des entrées en retard
-Enable Learning Management System,étiver le système de gestion de l'apprentissage
+Enable / disable currencies.,Activer / Désactiver les devises
+Enable Admission Application,Activer l'application d'admission
+Enable Allow Partial Reservation in the Stock Settings to reserve partial stock.,Activez Autoriser la réservation partielle dans les paramètres de stock pour réserver un stock partiel.
+Enable Amazon,Activer Amazon
+Enable Appointment Scheduling,Activer la planification des rendez-vous
+Enable Attribute Filters,Activer les filtres d'attributs
+Enable Auto Attendance,Activer la présence automatique
+Enable Auto Email,Activer la messagerie automatique
+Enable Auto Invoicing,Activer la facturation automatique
+Enable Auto Re-Order,Activer la re-commande automatique
+Enable Automatic Party Matching,Activer la correspondance automatique de tiers
+Enable Capital Work in Progress Accounting,Activer la comptabilité des immobilisations en cours
+Enable Checkout,Activer Caisse
+Enable Common Party Accounting,Activer la comptabilité des tiers communs
+Enable Custom Cash Flow Format,Activation du format de flux de trésorerie personnalisé
+Enable Deferred Expense,Activer les frais reportés
+Enable Deferred Revenue,Activer les produits comptabilisés d'avance
+Enable Discount Accounting for Selling,Activation de la comptabilité d'escompte pour la vente
+Enable Distributed Cost Center,Activer le centre de coûts distribués
+Enable Early Exit Marking,Activer le marquage de fin anticipée
+Enable Entry Grace Period,Activer la période de grâce d'entrée
+Enable European Access,Activer l'accès européen
+Enable Exit Grace Period,Activer la période de grâce de sortie
+Enable Field Filters,Activer les filtres de champ
+Enable Free Follow-ups,Activer les suivis gratuits
+Enable Fuzzy Matching,Activer la correspondance floue
+Enable Health Monitor,Activer le moniteur de santé
+Enable Immutable Ledger,Activer le Grand Livre Immuable
+Enable Late Entry Marking,Activer le marquage des entrées en retard
+Enable Learning Management System,Activer le système de gestion de l'apprentissage
 Enable Perpetual Inventory,Autoriser l'Inventaire Perpétuel
-Enable Perpetual Inventory For Non Stock Items,étiver l'inventaire perpétuel pour les articles hors stock
-Enable Provisional Accounting For Non Stock Items,étiver la provision pour les articles non stockés
-Enable RazorPay For Memberships,étiver RazorPay pour les adhésions
-Enable Recommendations,étiver les recommendations
-Enable Reviews and Ratings,étiver les avis et notes
-Enable Scheduled Sync,étiver la synchronisation programmée
-Enable Shopify,étiver Shopify
-Enable Shopping Cart,étiver Panier
-Enable Stock Reservation,étiver la réservation de stock
-Enable Sync,étiver la synchronisation
-Enable Tax Calculation,étiver le calcul de la taxe
-Enable Variants,étiver les variantes
-Enable Wishlist,étiver la liste de souhaits
-Enable YouTube Tracking,étiver le suivi YouTube
-Enable it if users want to consider rejected materials to dispatch.,étivez cette option si les utilisateurs veulent considérer les matériaux rejetés pour l'expédition.
-Enable this checkbox even if you want to set the zero priority,étivez cette case même si vous voulez définir la priorité zéro
-"Enable this option to calculate daily depreciation by considering the total number of days in the entire depreciation period, (including leap years) while using daily pro-rata based depreciation","étivez cette option pour calculer l'amortissement quotidien en considérant le nombre total de jours dans toute la période d'amortissement, (y compris les années bissextiles) lors de l'utilisation de l'amortissement quotidien au prorata"
-Enable to apply SLA on every {0},étiver pour appliquer le SLà sur chaque {0}
-Enabled,étivé
-"Enabling 'Use for Shopping Cart', as Shopping Cart is enabled and there should be at least one Tax Rule for Shopping Cart","étivation de 'Utiliser pour Panier', comme le Panier est activé et qu'il devrait y avoir au moins une Règle de Taxes pour le Panier"
+Enable Perpetual Inventory For Non Stock Items,Activer l'inventaire perpétuel pour les articles hors stock
+Enable Provisional Accounting For Non Stock Items,Activer la provision pour les articles non stockés
+Enable RazorPay For Memberships,Activer RazorPay pour les adhésions
+Enable Recommendations,Activer les recommendations
+Enable Reviews and Ratings,Activer les avis et notes
+Enable Scheduled Sync,Activer la synchronisation programmée
+Enable Shopify,Activer Shopify
+Enable Shopping Cart,Activer Panier
+Enable Stock Reservation,Activer la réservation de stock
+Enable Sync,Activer la synchronisation
+Enable Tax Calculation,Activer le calcul de la taxe
+Enable Variants,Activer les variantes
+Enable Wishlist,Activer la liste de souhaits
+Enable YouTube Tracking,Activer le suivi YouTube
+Enable it if users want to consider rejected materials to dispatch.,Activez cette option si les utilisateurs veulent considérer les matériaux rejetés pour l'expédition.
+Enable this checkbox even if you want to set the zero priority,Activez cette case même si vous voulez définir la priorité zéro
+"Enable this option to calculate daily depreciation by considering the total number of days in the entire depreciation period, (including leap years) while using daily pro-rata based depreciation","Activez cette option pour calculer l'amortissement quotidien en considérant le nombre total de jours dans toute la période d'amortissement, (y compris les années bissextiles) lors de l'utilisation de l'amortissement quotidien au prorata"
+Enable to apply SLA on every {0},Activer pour appliquer le SLà sur chaque {0}
+Enabled,Activé
+"Enabling 'Use for Shopping Cart', as Shopping Cart is enabled and there should be at least one Tax Rule for Shopping Cart","Activation de 'Utiliser pour Panier', comme le Panier est activé et qu'il devrait y avoir au moins une Règle de Taxes pour le Panier"
 Enabling ensure each Purchase Invoice has a unique value in Supplier Invoice No. field,Garanti que chaque facture d'achat est associée à un numéro de facture fournisseur unique
 Enabling this checkbox will force each Job Card Time Log to have From Time and To Time,L'activation de cette case à cocher obligera chaque fiche de travail à avoir une heure de début et une heure de fin.
-Enabling this ensures each Purchase Invoice has a unique value in Supplier Invoice No. field within a particular fiscal year,étiver ceci assure que chaque facture d'achat ait une valeur unique dans le champ N° de facture fournisseur dans une année fiscale particulière
-Enabling this option will allow you to record - <br><br> 1. Advances Received in a <b>Liability Account</b> instead of the <b>Asset Account</b><br><br>2. Advances Paid in an <b>Asset Account</b> instead of the <b> Liability Account</b>,étiver cette option vous permettra d'enregistrer - <br><br> 1. Les avances reçues dans un <b>compte de passif</b> au lieu du <b>compte d'actif</b><br><br>2. Les avances payées dans un <b>compte d'actif</b> au lieu du <b>compte de passif</b>
+Enabling this ensures each Purchase Invoice has a unique value in Supplier Invoice No. field within a particular fiscal year,Activer ceci assure que chaque facture d'achat ait une valeur unique dans le champ N° de facture fournisseur dans une année fiscale particulière
+Enabling this option will allow you to record - <br><br> 1. Advances Received in a <b>Liability Account</b> instead of the <b>Asset Account</b><br><br>2. Advances Paid in an <b>Asset Account</b> instead of the <b> Liability Account</b>,Activer cette option vous permettra d'enregistrer - <br><br> 1. Les avances reçues dans un <b>compte de passif</b> au lieu du <b>compte d'actif</b><br><br>2. Les avances payées dans un <b>compte d'actif</b> au lieu du <b>compte de passif</b>
 Enabling this will allow creation of multi-currency invoices against single party account in company currency,L'activation de cette option va permettre la création de factures multi-devises en contrepartie d'un seul compte de tiers en devise de la société
-Enabling this will change the way how cancelled transactions are handled.,étiver ceci changera la façon dont les transactions annulées sont gérées.
+Enabling this will change the way how cancelled transactions are handled.,Activer ceci changera la façon dont les transactions annulées sont gérées.
 Encash Leave?,Laisser Encaissé ?
 Encashable days,Jours encaissables
 Encashment,Encaissement
@@ -4797,7 +4797,7 @@ Foreign Trade Details,Détails du Commerce Extérieur
 Formula,Formule
 Formula Based Criteria,Critères basés sur formule
 Fortnightly,Bimensuel
-Forum Activity,étivité du forum
+Forum Activity,Activité du forum
 Forum Posts,Messages du forum
 Forum URL,URL du forum
 Fraction of Applicable Earnings,Fraction des gains applicables
@@ -5404,7 +5404,7 @@ Idle,Inactif
 "If ""Link Customer to Patient"" is checked in Healthcare Settings and an existing Customer is not selected then, a Customer will be created for this Patient for recording transactions in Accounts module.","Si «Lier le client au patient» est coché dans les paramètres de soins de santé et qu'un client existant n'est pas sélectionné, un client sera créé pour ce patient pour enregistrer les transactions dans le module Comptes."
 "If ""Months"" is selected, a fixed amount will be booked as deferred revenue or expense for each month irrespective of the number of days in a month. It will be prorated if deferred revenue or expense is not booked for an entire month","Si «Mois» est sélectionné, un montant fixe sera comptabilisé en tant que revenus ou dépenses différés pour chaque mois, quel que soit le nombre de jours dans un mois. Il sera calculé au prorata si les revenus ou les dépenses différés ne sont pas comptabilisés pour un mois entier"
 "If <b>Enabled</b> - Reconciliation happens on the <b>Advance Payment posting date</b><br>
-"If <b>Disabled</b> - Reconciliation happens on oldest of 2 Dates: <b>Invoice Date</b> or the <b>Advance Payment posting date</b><br>""",Si <b>étivé</b> - Le rapprochement se fait à la <b>date de validation du Paiement d'Avance</b><br>
+"If <b>Disabled</b> - Reconciliation happens on oldest of 2 Dates: <b>Invoice Date</b> or the <b>Advance Payment posting date</b><br>""",Si <b>Activé</b> - Le rapprochement se fait à la <b>date de validation du Paiement d'Avance</b><br>
 Si <b>Désactivé</b> - Le rapprochement se fait à la plus ancienne des 2 Dates : <b>Date de Facture</b> ou la <b>date de validation du Paiement d'àvance</b><br>"
 "If Auto Opt In is checked, then the customers will be automatically linked with the concerned Loyalty Program (on save)","Si l'option adhésion automatique est cochée, les clients seront automatiquement liés au programme de fidélité concerné (après l'enregistrement)"
 If Income or Expense,Si Produits ou Charges
@@ -5683,7 +5683,7 @@ Individual,Individuel
 Individual GL Entry cannot be cancelled.,L'Écriture de Grand Livre Individuelle ne peut pas être annulée.
 Individual Stock Ledger Entry cannot be cancelled.,Une écriture individuelle de grand livre de stock ne peut pas être annulée.
 Industry,Industrie
-Industry Type,Secteur d'étivité
+Industry Type,Secteur d'Activité
 Ineligible,Inéligible
 Ineligible ITC,CTI non éligible
 "Information to help easily interpret the test report, will be printed as part of the Lab Test result.",Les informations permettant d'interpréter facilement le rapport de test seront imprimées dans le cadre du résultat du test de laboratoire.
@@ -5926,7 +5926,7 @@ Inward Supplies(liable to reverse charge),Fournitures entrantes (soumises à l'a
 Inward supplies from ISD,Approvisionnement entrant de la DSI
 Inward supplies liable to reverse charge (other than 1 & 2 above),Approvisionnements entrants susceptibles d’être dédouanés (autres que 1 et 2 ci-dessus)
 Is Account Payable,Est Compte Créditeur
-Is Active,Est étive
+Is Active,Est Active
 Is Adjustment Entry,Est une écriture d'ajustement
 Is Advance,Est écompte
 Is Alternative,Est une Alternative
@@ -6284,7 +6284,7 @@ Key Result Area,Zone de résultat clé
 Kindly cancel the Manufacturing Entries first against the work order {0}.,Veuillez d'abord annuler les écritures de fabrication contre l'ordre de travail {0}.
 Kindly select the company first,Veuillez d'abord sélectionner l'entreprise
 LInked Analysis,Analyse reliée
-LMS Activity,étivité LMS
+LMS Activity,Activité LMS
 LMS Only,LMS seulement
 LMS User,Utilisateur LMS
 Lab Prescription,Prescription de laboratoire
@@ -6326,7 +6326,7 @@ Landscape,Paysage
 Language,Langue
 Lapsed,Caduc
 Large,Grand
-Last Activity,Dernière étivité
+Last Activity,Dernière Activité
 Last Carbon Check,Dernière Vérification Carbone
 Last Communication,Dernière communication
 Last Communication Date,Date de la Dernière Communication
@@ -6928,7 +6928,7 @@ Medications,Médicaments
 Medium,Moyen
 Meeting,Réunion
 Meetup Embed HTML,HTML intégré au Meetup
-Member Activity,étivité des membres
+Member Activity,Activité des membres
 Member ID,ID du membre
 Member Name,Nom de membre
 Member Since,Membre depuis
@@ -7570,7 +7570,7 @@ On enabling this cancellation entries will be posted on the actual cancellation 
 On {0} Creation,Sur {0} Creation
 On-machine press checks,Contrôles de presse sur machine
 Onboarding,Embarquement
-Onboarding Activities,étivités d'intégration
+Onboarding Activities,Activités d'intégration
 Onboarding Begins On,L'intégration commence le
 Onboardings (This Month),Intégrations (ce mois-ci)
 "Once set, this invoice will be on hold till the set date","Une fois définie, cette facture sera mise en attente jusqu'à la date fixée"
@@ -8187,7 +8187,7 @@ Pegged Against,Contre
 Pegged Currencies,Monnaies fixes
 Pegged Currency Details,Détails sur les monnaies fixes
 Pending,En attente
-Pending Activities,étivités en attente
+Pending Activities,Activités en attente
 Pending Amount,Montant en attente
 Pending FnF,FnF en attente
 Pending Interviews,Interviews en attente
@@ -8197,7 +8197,7 @@ Pending Quantity,Quantité en attente
 Pending Review,Revue en Attente
 Pending SO Items For Purchase Request,Articles de Commande Client en Attente Pour la Demande d'Achat
 Pending Work Order,Ordre de fabrication en attente
-Pending activities for today,étivités en Attente pour aujourd'hui
+Pending activities for today,Activités en Attente pour aujourd'hui
 Pending processing,Traitement en attente
 Pension Funds,Fonds de Pension
 People,Personnes
@@ -9018,7 +9018,7 @@ Project Update,Mise à jour du projet
 Project Update.,Mise à jour du projet.
 Project User,Utilisateur du Projet
 Project Value,Valeur du projet
-Project activity / task.,étivité du projet / tâche.
+Project activity / task.,Activité du projet / tâche.
 Project master.,Données de Base du Projet.
 Project will be accessible on the website to these users,Le Projet sera accessible sur le site web à ces utilisateurs
 Project wise Stock Tracking,Suivi des Stocks par Projet
@@ -9284,7 +9284,7 @@ Quick Stock Balance,Solde rapide des stocks
 QuickBooks Migrator,QuickBooks Migrator
 Quickbooks Company ID,ID Quickbooks de la société
 Quiz,Quiz
-Quiz Activity,étivité de test
+Quiz Activity,Activité de test
 Quiz Configuration,Configuration du quiz
 Quiz Question,Quiz Question
 Quiz Result,Résultat du quiz
@@ -10099,7 +10099,7 @@ Row {0}# Paid Amount cannot be greater than Total amount,Ligne {0}# Montant pay�
 Row {0}# Paid Amount cannot be greater than requested advance amount,La ligne {0} # Montant payé ne peut pas être supérieure au montant de l'avance demandée
 Row {0}: Accepted Qty and Rejected Qty can't be zero at the same time.,Ligne {0} : La quantité acceptée et la quantité rejetée ne peuvent pas être zéro en même temps.
 Row {0}: Account {1} and Party Type {2} have different account types,Ligne {0} : Le compte {1} et le type de tiers {2} ont des types de compte différents
-Row {0}: Activity Type is mandatory.,Ligne {0} : Le Type d'étivité est obligatoire.
+Row {0}: Activity Type is mandatory.,Ligne {0} : Le Type d'Activité est obligatoire.
 Row {0}: Advance against Customer must be credit,Ligne {0} : L’Avance du Client doit être un crédit
 Row {0}: Advance against Supplier must be debit,Ligne {0} : L’Avance du Fournisseur doit être un débit
 Row {0}: Allocated amount {1} must be less than or equal to invoice outstanding amount {2},Ligne {0} : Le montant alloué {1} doit être inférieur ou égal au montant en souffrance de la facture {2}
@@ -10311,7 +10311,7 @@ Sales Order Status,Statut de commande de vente
 Sales Order Trends,Tendances des Commandes Client
 Sales Order required for Item {0},Commande Client requise pour l'Article {0}
 Sales Order to Payment,De la Commande Client au Paiement
-"Sales Order {0} already exists against Customer's Purchase Order {1}. To allow multiple Sales Orders, Enable {2} in {3}","La Commande Client {0} existe déjà contre la Commande d'Achat Client {1}. Pour autoriser plusieurs Commandes Client, étivez {2} dans {3}"
+"Sales Order {0} already exists against Customer's Purchase Order {1}. To allow multiple Sales Orders, Enable {2} in {3}","La Commande Client {0} existe déjà contre la Commande d'Achat Client {1}. Pour autoriser plusieurs Commandes Client, Activez {2} dans {3}"
 "Sales Order {0} has reservation for the item {1}, you can only deliver reserved {1} against {0}.","La commande client {0} a une réservation pour l'article {1}, vous ne pouvez livrer que réservée {1} contre {0}."
 Sales Order {0} is not submitted,Commande Client {0} n'a pas été transmise
 Sales Order {0} is not valid,Commande Client {0} invalide
@@ -10601,7 +10601,7 @@ Select company name first.,Sélectionner d'abord le nom de la société.
 Select finance book for the item {0} at row {1},Sélectionnez le livre de financement pour l'élément {0} à la ligne {1}.
 Select item group,Sélectionnez un groupe d'articles
 Select only one Priority as Default.,Sélectionnez une seule priorité par défaut.
-Select students manually for the Activity based Group,Sélectionner les élèves manuellement pour un Groupe basé sur l'étivité
+Select students manually for the Activity based Group,Sélectionner les élèves manuellement pour un Groupe basé sur l'Activité
 Select template item,Sélectionnez l'élément de modèle
 Select the Bank Account to reconcile.,Sélectionnez le compte bancaire à rapprocher.
 Select the Default Workstation where the Operation will be performed. This will be fetched in BOMs and Work Orders.,Sélectionnez le poste de travail par défaut où l'opération sera effectuée. Ceci sera récupéré dans les nomenclatures et ordres de travail.
@@ -10696,7 +10696,7 @@ Sent On,Envoyé le
 Sent To,Envoyé À
 Sep,SEP
 Separate course based Group for every Batch,Groupes basés sur les cours différents pour chaque Lot
-Separation Activities,étivités de séparation
+Separation Activities,Activités de séparation
 Separation Begins On,La séparation commence le
 Separations (This Month),Séparations (ce mois-ci)
 September,septembre
@@ -11373,7 +11373,7 @@ Strength,Force
 Strictly based on Log Type in Employee Checkin,Strictement basé sur le type de journal dans l'enregistrement des employés
 Structures have been assigned successfully,Les structures ont été assignées avec succès
 Student,Étudiant
-Student Activity,étivité étudiante
+Student Activity,Activité étudiante
 Student Address,Adresse de l'Élève
 Student Admission,Admission des Étudiants
 Student Admission Program,Programme d'admission des étudiants
@@ -11404,7 +11404,7 @@ Student Group:,Groupe d'étudiants:
 Student Guardian,Tuteur d'Étudiant
 Student ID,Carte d'Étudiant
 Student ID:,Carte d'étudiant:
-Student LMS Activity,étivité LMS des étudiants
+Student LMS Activity,Activité LMS des étudiants
 Student Language,Langue des Étudiants
 Student Leave Application,Demande de Congé d'Étudiant
 Student Log,Journal des Étudiants
