@@ -23,6 +23,7 @@ def _kya_services_ready():
 
 def execute():
     print("=== KYA FIX ALL WORKSPACES ===")
+    fix_workspace_schema_nulls()
     fix_missing_workflow_states()
     fix_bad_doctype_shortcuts()
     fix_card_break_links()
@@ -48,6 +49,23 @@ def execute():
     frappe.db.commit()
     frappe.clear_cache()
     print("=== ALL FIXES APPLIED + CACHE CLEARED ===")
+
+
+def fix_workspace_schema_nulls():
+    """Fix NULL type/title in tabWorkspace — survives every migrate.
+
+    Root causes:
+    - Frappe core 'Welcome Workspace' JSON has no 'type' field → type=NULL in DB
+    - Any kya_hr workspace JSON missing 'title' field → title=NULL in DB
+    Both cause a silent JS crash that makes the workspace sidebar blank.
+    """
+    n_type = frappe.db.sql(
+        "UPDATE `tabWorkspace` SET `type`='Workspace' WHERE `type` IS NULL OR `type`=''"
+    )
+    n_title = frappe.db.sql(
+        "UPDATE `tabWorkspace` SET `title`=`label` WHERE `title` IS NULL OR `title`=''"
+    )
+    print(f"  [Workspace] Fixed type nulls and title nulls")
 
 
 def fix_missing_workflow_states():

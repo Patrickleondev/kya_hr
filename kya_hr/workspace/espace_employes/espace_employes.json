@@ -13,6 +13,7 @@
  "is_hidden": 0,
  "is_standard": 1,
  "label": "Espace Employés",
+ "title": "Espace Employés",
  "module": "KYA HR",
  "public": 1,
  "sequence_id": 11,
