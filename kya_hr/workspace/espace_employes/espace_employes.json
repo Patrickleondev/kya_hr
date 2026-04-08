@@ -8,7 +8,8 @@
  "doctype": "Workspace",
  "type": "Workspace",
  "hide_custom": 0,
- "icon": "employee",
+ "color": "#1a73e8",
+ "icon": "person-vcard",
  "idx": 0,
  "is_hidden": 0,
  "is_standard": 1,
@@ -17,6 +18,7 @@
  "module": "KYA HR",
  "public": 1,
  "sequence_id": 11,
+ "title": "Espace Employes",
  "shortcuts": [
   {
    "label": "Demander une Permission",
@@ -42,7 +44,7 @@
   {
    "label": "Tableau de Bord Employés",
    "type": "URL",
-   "url": "/tableau-bord-employes",
+    "url": "/tableau_bord_employes",
    "color": "#F58220",
    "icon": "bar-chart"
   },
@@ -196,7 +198,7 @@
   {
    "type": "Link",
    "label": "Tableau de Bord",
-   "link_to": "/tableau-bord-employes",
+    "link_to": "/tableau_bord_employes",
    "link_type": "URL",
    "hidden": 0,
    "is_query_report": 0,
