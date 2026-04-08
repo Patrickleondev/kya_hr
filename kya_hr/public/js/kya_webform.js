@@ -10,7 +10,7 @@
 (function () {
   var KYA_WF_ROUTES = [
     "permission-sortie-stagiaire", "permission-sortie-employe",
-    "demande-achat", "pv-sortie-materiel",
+    "demande-achat", "demande-conge", "pv-sortie-materiel",
     "planning-conge", "bilan-fin-de-stage"
   ];
   var searchParams = new URLSearchParams(window.location.search || "");
@@ -111,6 +111,23 @@
         sigGrid: true
       }
     ],
+    "demande-conge": [
+      {
+        title: "IDENTIFICATION DE L\u2019EMPLOY\u00c9",
+        icon: "\u{1F464}",
+        fields: ["employee", "employee_name", "department"],
+        grid: { employee: "span 2", employee_name: "col", department: "col" }
+      },
+      {
+        title: "D\u00c9TAILS DU CONG\u00c9",
+        icon: "\u{1F4C5}",
+        fields: ["leave_type", "from_date", "to_date", "posting_date", "description"],
+        grid: {
+          leave_type: "col", from_date: "col", to_date: "col", posting_date: "col",
+          description: "span 2"
+        }
+      }
+    ],
     "pv-sortie-materiel": [
       {
         title: "INFORMATIONS DE LA SORTIE",
@@ -193,6 +210,12 @@
       subtitle: "Approvisionnement",
       ref: "AEA-ENG-30-V01",
       workflow: "Chef \u2192 Auditeur \u2192 DAAF \u2192 DG"
+    },
+    "demande-conge": {
+      title: "DEMANDE DE CONG\u00c9",
+      subtitle: "Ressources Humaines",
+      ref: "AEA-ENG-30-V01",
+      workflow: "Sup. Imm\u00e9diat / Chef de Service \u2192 RH \u2192 DG"
     },
     "pv-sortie-materiel": {
       title: "PV DE SORTIE DE MAT\u00c9RIEL",
@@ -477,6 +500,7 @@
       { label: "Permission Sortie Stagiaire", route: "permission-sortie-stagiaire" },
       { label: "Permission Sortie Employ├⌐", route: "permission-sortie-employe" },
       { label: "Demande d'Achat", route: "demande-achat" },
+      { label: "Demande de Cong├⌐", route: "demande-conge" },
       { label: "PV Sortie Mat├⌐riel", route: "pv-sortie-materiel" },
       { label: "Planning Cong├⌐", route: "planning-conge" },
       { label: "Bilan de Stage", route: "bilan-fin-de-stage" }
