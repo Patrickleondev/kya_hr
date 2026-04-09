@@ -19,7 +19,16 @@
   var pathParts = path.split("/");
 
   // Frappe v16: normalize legacy ?name=<docname> links to canonical path URLs.
-  if (pathParts.length === 1 && KYA_WF_ROUTES.indexOf(path) !== -1 && docName) {
+  // Guard: skip if docName equals the route itself (self-referential, causes
+  // "/{route}/{route}" duplication error) or if it is a reserved keyword.
+  var RESERVED = ["new", "list", "edit"];
+  if (
+    pathParts.length === 1 &&
+    KYA_WF_ROUTES.indexOf(path) !== -1 &&
+    docName &&
+    docName !== path &&
+    RESERVED.indexOf(docName) === -1
+  ) {
     window.location.replace("/" + path + "/" + encodeURIComponent(docName));
     return;
   }
