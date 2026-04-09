@@ -1,12 +1,12 @@
 ﻿/* ===================================================================
-   KYA-Energy Group ΓÇö Web Form Layout v4
+   KYA-Energy Group — Web Form Layout v4
    Design : Ordre de Mission / Fiche officielle KYA
-   En-t├¬te 2-colonnes : Logo gauche | Titre + infos droite
-   N┬░ de document affich├⌐, sections num├⌐rot├⌐es,
-   permissions par r├┤le, signatures verrouill├⌐es.
+   En-tête 2-colonnes : Logo gauche | Titre + infos droite
+   N° de document affiché, sections numérotées,
+   permissions par rôle, signatures verrouillées.
    =================================================================== */
 
-/* === Auto-redirect bare web form URLs to /new ==================== */
+/* === Normalize legacy ?name=<docname> URLs to canonical path URLs  */
 (function () {
   var KYA_WF_ROUTES = [
     "permission-sortie-stagiaire", "permission-sortie-employe",
@@ -24,14 +24,9 @@
     return;
   }
 
-  // Path-based links like /{route}/{docname} work correctly in Frappe v16.
-  // Keep /new, /list and other native sub-paths untouched.
-
-  if (KYA_WF_ROUTES.indexOf(path) !== -1) {
-    // Bare route without /new ΓÇö redirect silently
-    window.location.replace("/" + path + "/new");
-    return; // stop further execution until redirect completes
-  }
+  // Bare route (/{route}) and path-based links (/{route}/{docname}) work correctly
+  // in Frappe v16 — no redirect needed. DO NOT redirect bare routes to /new:
+  // Frappe would interpret "new" as a document name and return "Not Found".
 })();
 
 (function () {
