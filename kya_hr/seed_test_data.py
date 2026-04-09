@@ -145,8 +145,8 @@ def _seed_planning_conge(employee):
         {"doctype": "Planning Conge", "employee": employee, "annee": annee_prec,
          "periodes": [{"date_debut": str(annee_prec) + "-08-01", "date_fin": str(annee_prec) + "-08-14",
                        "duree_jours": 14, "type_conge": "Conge Annuel", "note": "Conge ete"}]},
-        state_override="Approuve",
-        label="Planning Conge " + str(annee_prec) + " Approuve"
+        state_override="Approuvé",
+        label="Planning Conge " + str(annee_prec) + " Approuvé"
     ))
     return [n for n in created if n]
 
@@ -203,6 +203,6 @@ def execute():
     }
     for route, ids in all_ids.items():
         for doc_id in (ids or []):
-            print("    http://localhost:8084/" + route + "/" + doc_id + "/edit")
+            print("    http://localhost:8084/" + route + "/" + doc_id)
     print()
     print("  Termine OK")

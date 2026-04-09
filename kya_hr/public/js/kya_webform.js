@@ -18,15 +18,14 @@
   var path = window.location.pathname.replace(/^\//, "").replace(/\/$/, "");
   var pathParts = path.split("/");
 
-  // Frappe v16: ?name= URLs are NOT supported for authenticated users (server redirects to /new).
-  // Convert ?name=<docname> → /{route}/{docname}/edit (Frappe canonical path format).
+  // Frappe v16: normalize legacy ?name=<docname> links to canonical path URLs.
   if (pathParts.length === 1 && KYA_WF_ROUTES.indexOf(path) !== -1 && docName) {
-    window.location.replace("/" + path + "/" + encodeURIComponent(docName) + "/edit");
+    window.location.replace("/" + path + "/" + encodeURIComponent(docName));
     return;
   }
 
-  // Path-based links like /{route}/{docname} work correctly in Frappe v16 — no conversion needed.
-  // Sub-paths /new, /list, /edit are handled natively. Do NOT convert to ?name=.
+  // Path-based links like /{route}/{docname} work correctly in Frappe v16.
+  // Keep /new, /list and other native sub-paths untouched.
 
   if (KYA_WF_ROUTES.indexOf(path) !== -1) {
     // Bare route without /new ΓÇö redirect silently

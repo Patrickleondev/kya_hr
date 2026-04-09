@@ -140,7 +140,7 @@ def get_kya_workflow_actions(doctype, docname):
     """Get available workflow actions for the current user on a document.
     Returns current workflow_state and list of possible actions."""
     if doctype not in ALLOWED_DOCTYPES:
-        frappe.throw("Type de document non autoris├⌐", frappe.PermissionError)
+        frappe.throw("Type de document non autorisé", frappe.PermissionError)
 
     doc = frappe.get_doc(doctype, docname)
     doc.check_permission("read")
@@ -166,7 +166,7 @@ def get_kya_workflow_actions(doctype, docname):
 def apply_kya_workflow_action(doctype, docname, action):
     """Apply a workflow action from the web form (mobile approval)."""
     if doctype not in ALLOWED_DOCTYPES:
-        frappe.throw("Type de document non autoris├⌐", frappe.PermissionError)
+        frappe.throw("Type de document non autorisé", frappe.PermissionError)
 
     from frappe.model.workflow import apply_workflow
 
@@ -545,15 +545,15 @@ _STATE_COLORS = {
     "En attente DGA": "blue",
     "En attente Magasin": "blue",
     "En attente Audit": "blue",
-    "En attente Comptabilit├⌐": "blue",
+        "En attente Comptabilité": "blue",
     "En attente Resp. Stagiaires": "blue",
     "En cours": "yellow",
-    "Approuv├⌐": "green",
-    "Approuv├⌐e": "green",
-    "Valid├⌐": "green",
-    "Rejet├⌐": "red",
-    "Rejet├⌐e": "red",
-    "Annul├⌐": "gray",
+        "Approuvé": "green",
+        "Approuvée": "green",
+        "Validé": "green",
+        "Rejeté": "red",
+        "Rejetée": "red",
+        "Annulé": "gray",
 }
 
 
@@ -615,7 +615,7 @@ def get_my_documents(limit=20, offset=0, status_filter=None):
                 "color": _STATE_COLORS.get(ws, "gray"),
                 "creation": str(doc.creation),
                 "modified": str(doc.modified),
-                "url": f"/{route}/{doc.name}/edit",
+                "url": f"/{route}/{doc.name}",
             })
 
     # Sort by modified desc
@@ -836,7 +836,7 @@ def get_demandes_combined(limit=50, offset=0, type_filter=None, statut_filter=No
                     "date": str(doc.date_sortie) if doc.date_sortie else str(doc.creation)[:10],
                     "statut": doc.workflow_state or "Brouillon",
                     "color": _STATE_COLORS.get(doc.workflow_state or "Brouillon", "gray"),
-                    "url": f"/pv-sortie-materiel/{doc.name}/edit",
+                    "url": f"/pv-sortie-materiel/{doc.name}",
                     "creation": str(doc.creation),
                 })
         except Exception:
@@ -871,7 +871,7 @@ def get_demandes_combined(limit=50, offset=0, type_filter=None, statut_filter=No
                     "color": _STATE_COLORS.get(doc.workflow_state or "Brouillon", "gray"),
                     "montant": doc.montant_total or 0,
                     "urgence": doc.urgence or "Normale",
-                    "url": f"/demande-achat/{doc.name}/edit",
+                    "url": f"/demande-achat/{doc.name}",
                     "creation": str(doc.creation),
                 })
         except Exception:
@@ -918,12 +918,12 @@ def get_demandes_stats():
     en_cours_states = {
         "En attente Chef", "En attente Chef Service", "En attente RH",
         "En attente DG", "En attente DGA", "En attente Magasin",
-        "En attente Audit", "En attente Comptabilit├⌐",
+        "En attente Audit", "En attente Comptabilité",
         "En attente Resp. Stagiaires", "En cours",
         "En attente Approbation",
     }
-    approuve_states = {"Approuv├⌐", "Approuv├⌐e", "Valid├⌐"}
-    rejete_states = {"Rejet├⌐", "Rejet├⌐e", "Annul├⌐"}
+    approuve_states = {"Approuvé", "Approuvée", "Validé"}
+    rejete_states = {"Rejeté", "Rejetée", "Annulé"}
 
     # PV Sortie Mat├⌐riel
     try:
@@ -1018,8 +1018,8 @@ def get_dashboard_stagiaires(annee=None):
         "En attente Chef", "En attente Chef Service",
         "En attente Resp. Stagiaires", "En attente DG", "En cours",
     }
-    approuve_states = {"Approuv├⌐", "Approuv├⌐e", "Valid├⌐"}
-    rejete_states = {"Rejet├⌐", "Rejet├⌐e", "Annul├⌐"}
+    approuve_states = {"Approuvé", "Approuvée", "Validé"}
+    rejete_states = {"Rejeté", "Rejetée", "Annulé"}
 
     # Permissions Stagiaires
     try:
@@ -1116,11 +1116,11 @@ def get_dashboard_employes(annee=None):
     en_cours_states = {
         "En attente Chef", "En attente Chef Service", "En attente RH",
         "En attente DG", "En attente DGA", "En attente Magasin",
-        "En attente Audit", "En attente Comptabilit├⌐",
+        "En attente Audit", "En attente Comptabilité",
         "En attente Approbation", "En cours",
     }
-    approuve_states = {"Approuv├⌐", "Approuv├⌐e", "Valid├⌐"}
-    rejete_states = {"Rejet├⌐", "Rejet├⌐e", "Annul├⌐"}
+    approuve_states = {"Approuvé", "Approuvée", "Validé"}
+    rejete_states = {"Rejeté", "Rejetée", "Annulé"}
 
     # Employ├⌐s (hors stagiaires)
     try:
