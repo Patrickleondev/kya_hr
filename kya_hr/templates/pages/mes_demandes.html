@@ -162,6 +162,26 @@
       <div class="stat-value" id="stat-da" style="color:#5c6bc0;">–</div>
       <div class="stat-label">Demandes Achat</div>
     </div>
+    <div class="kya-stat-card" style="--c:#e65100;">
+      <div class="stat-value" id="stat-pse" style="color:#e65100;">–</div>
+      <div class="stat-label">Perm. Sortie Emp.</div>
+    </div>
+    <div class="kya-stat-card" style="--c:#6a1b9a;">
+      <div class="stat-value" id="stat-pss" style="color:#6a1b9a;">–</div>
+      <div class="stat-label">Perm. Stagiaire</div>
+    </div>
+    <div class="kya-stat-card" style="--c:#0277bd;">
+      <div class="stat-value" id="stat-pc" style="color:#0277bd;">–</div>
+      <div class="stat-label">Planning Congé</div>
+    </div>
+    <div class="kya-stat-card" style="--c:#2e7d32;">
+      <div class="stat-value" id="stat-dc" style="color:#2e7d32;">–</div>
+      <div class="stat-label">Dem. Congé</div>
+    </div>
+    <div class="kya-stat-card" style="--c:#558b2f;">
+      <div class="stat-value" id="stat-bs" style="color:#558b2f;">–</div>
+      <div class="stat-label">Bilan de Stage</div>
+    </div>
   </div>
 
   <!-- Filters -->
@@ -171,16 +191,27 @@
       <option value="">Tous les types</option>
       <option value="pv">PV Sortie Matériel</option>
       <option value="da">Demande d'Achat</option>
+      <option value="pse">Permission Sortie Employé</option>
+      <option value="pss">Permission Sortie Stagiaire</option>
+      <option value="pc">Planning Congé</option>
+      <option value="dc">Demande de Congé</option>
+      <option value="bs">Bilan de Stage</option>
     </select>
     <select id="filter-statut">
       <option value="">Tous les statuts</option>
       <option value="Brouillon">Brouillon</option>
       <option value="En attente Chef">En attente Chef</option>
+      <option value="En attente Chef Service">En attente Chef Service</option>
+      <option value="En attente RH">En attente RH</option>
+      <option value="En attente Resp. Stagiaires">En attente Resp. Stagiaires</option>
+      <option value="En attente DAAF">En attente DAAF</option>
+      <option value="En attente Audit">En attente Audit</option>
       <option value="En attente Approbation">En attente Approbation</option>
+      <option value="En attente Direction">En attente Direction</option>
       <option value="En attente DGA">En attente DGA</option>
       <option value="En attente DG">En attente DG</option>
-      <option value="En attente Audit">En attente Audit</option>
       <option value="En attente Magasin">En attente Magasin</option>
+      <option value="En attente du Supérieur Immédiat">En attente Supérieur Immédiat</option>
       <option value="Approuvé">Approuvé</option>
       <option value="Rejeté">Rejeté</option>
     </select>
@@ -239,6 +270,11 @@
           document.getElementById("stat-brouillon").textContent = s.brouillon || 0;
           document.getElementById("stat-pv").textContent = s.pv_total || 0;
           document.getElementById("stat-da").textContent = s.da_total || 0;
+          document.getElementById("stat-pse").textContent = s.pse_total || 0;
+          document.getElementById("stat-pss").textContent = s.pss_total || 0;
+          document.getElementById("stat-pc").textContent = s.pc_total || 0;
+          document.getElementById("stat-dc").textContent = s.dc_total || 0;
+          document.getElementById("stat-bs").textContent = s.bs_total || 0;
         }
       },
     });

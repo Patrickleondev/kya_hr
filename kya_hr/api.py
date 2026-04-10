@@ -797,8 +797,8 @@ def get_my_tasks():
 @frappe.whitelist()
 def get_demandes_combined(limit=50, offset=0, type_filter=None, statut_filter=None):
     """
-    Retourne une liste combin├⌐e de PV Sortie Mat├⌐riel et Demande Achat KYA.
-    Filtrable par type (pv / da) et par statut (workflow_state).
+    Retourne la liste complète des demandes de l'utilisateur : 7 DocTypes.
+    Filtrable par type (pse/pss/da/pv/pc/dc/bs) et par statut (workflow_state).
     """
     user = frappe.session.user
     if user == "Guest":
@@ -810,74 +810,124 @@ def get_demandes_combined(limit=50, offset=0, type_filter=None, statut_filter=No
         ["name", "employee_name"],
         as_dict=True,
     )
+    emp_name = employee.name if employee else None
 
     results = []
 
-    # ΓöÇΓöÇ PV Sortie Mat├⌐riel ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-    if not type_filter or type_filter == "pv":
-        pv_filters = {"owner": user}
-        if statut_filter:
-            pv_filters["workflow_state"] = statut_filter
+    def _emp_or_owner_filter(statut=None):
+        """Base filter pour les DocTypes avec champ employee."""
+        f = {"employee": emp_name} if emp_name else {"owner": user}
+        if statut:
+            f["workflow_state"] = statut
+        return f
+
+    def _owner_filter(statut=None):
+        f = {"owner": user}
+        if statut:
+            f["workflow_state"] = statut
+        return f
+
+    def _append(docs, type_label, type_code, route, date_field="creation", objet_field=None, montant_field=None):
+        for doc in docs:
+            date_val = getattr(doc, date_field, None) or doc.creation
+            results.append({
+                "name": doc.name,
+                "type": type_label,
+                "type_code": type_code,
+                "objet": (getattr(doc, objet_field, "") if objet_field else "") or "",
+                "date": str(date_val)[:10],
+                "statut": doc.workflow_state or "Brouillon",
+                "color": _STATE_COLORS.get(doc.workflow_state or "Brouillon", "gray"),
+                "montant": getattr(doc, montant_field, 0) or 0 if montant_field else 0,
+                "url": f"/{route}/{doc.name}",
+                "creation": str(doc.creation),
+            })
+
+    # --- Permission Sortie Employé ---
+    if not type_filter or type_filter == "pse":
         try:
-            pvs = frappe.get_all(
-                "PV Sortie Materiel",
-                filters=pv_filters,
-                fields=["name", "objet", "date_sortie", "workflow_state",
-                        "reference", "creation", "owner"],
-                order_by="creation desc",
-                limit_page_length=int(limit) * 2,
-            )
-            for doc in pvs:
-                results.append({
-                    "name": doc.name,
-                    "type": "PV Sortie Mat├⌐riel",
-                    "type_code": "pv",
-                    "objet": doc.objet or doc.reference or "",
-                    "date": str(doc.date_sortie) if doc.date_sortie else str(doc.creation)[:10],
-                    "statut": doc.workflow_state or "Brouillon",
-                    "color": _STATE_COLORS.get(doc.workflow_state or "Brouillon", "gray"),
-                    "url": f"/pv-sortie-materiel/{doc.name}",
-                    "creation": str(doc.creation),
-                })
+            _append(frappe.get_all("Permission Sortie Employe",
+                filters=_emp_or_owner_filter(statut_filter),
+                fields=["name", "workflow_state", "date_sortie", "motif", "creation"],
+                order_by="creation desc", limit_page_length=int(limit) * 4),
+                "Permission Sortie", "pse", "permission-sortie-employe",
+                date_field="date_sortie", objet_field="motif")
         except Exception:
             pass
 
-    # ΓöÇΓöÇ Demande d'Achat ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    # --- Permission Sortie Stagiaire ---
+    if not type_filter or type_filter == "pss":
+        try:
+            _append(frappe.get_all("Permission Sortie Stagiaire",
+                filters=_emp_or_owner_filter(statut_filter),
+                fields=["name", "workflow_state", "date_sortie", "motif", "creation"],
+                order_by="creation desc", limit_page_length=int(limit) * 4),
+                "Permission Stagiaire", "pss", "permission-sortie-stagiaire",
+                date_field="date_sortie", objet_field="motif")
+        except Exception:
+            pass
+
+    # --- Demande Achat ---
     if not type_filter or type_filter == "da":
-        da_filters = {}
-        if employee:
-            da_filters["employee"] = employee.name
-        else:
-            da_filters["owner"] = user
-        if statut_filter:
-            da_filters["workflow_state"] = statut_filter
         try:
-            das = frappe.get_all(
-                "Demande Achat KYA",
-                filters=da_filters,
-                fields=["name", "objet", "date_demande", "workflow_state",
-                        "montant_total", "urgence", "creation", "owner"],
-                order_by="creation desc",
-                limit_page_length=int(limit) * 2,
-            )
-            for doc in das:
-                results.append({
-                    "name": doc.name,
-                    "type": "Demande d'Achat",
-                    "type_code": "da",
-                    "objet": doc.objet or "",
-                    "date": str(doc.date_demande) if doc.date_demande else str(doc.creation)[:10],
-                    "statut": doc.workflow_state or "Brouillon",
-                    "color": _STATE_COLORS.get(doc.workflow_state or "Brouillon", "gray"),
-                    "montant": doc.montant_total or 0,
-                    "urgence": doc.urgence or "Normale",
-                    "url": f"/demande-achat/{doc.name}",
-                    "creation": str(doc.creation),
-                })
+            _append(frappe.get_all("Demande Achat KYA",
+                filters=_emp_or_owner_filter(statut_filter),
+                fields=["name", "workflow_state", "date_demande", "objet", "montant_total", "creation"],
+                order_by="creation desc", limit_page_length=int(limit) * 4),
+                "Demande d'Achat", "da", "demande-achat",
+                date_field="date_demande", objet_field="objet", montant_field="montant_total")
         except Exception:
             pass
 
-    # Tri global par date de cr├⌐ation d├⌐croissante
+    # --- PV Sortie Matériel ---
+    if not type_filter or type_filter == "pv":
+        try:
+            _append(frappe.get_all("PV Sortie Materiel",
+                filters=_owner_filter(statut_filter),
+                fields=["name", "workflow_state", "date_sortie", "objet", "creation"],
+                order_by="creation desc", limit_page_length=int(limit) * 4),
+                "PV Sortie Mat\u00e9riel", "pv", "pv-sortie-materiel",
+                date_field="date_sortie", objet_field="objet")
+        except Exception:
+            pass
+
+    # --- Planning Congé ---
+    if not type_filter or type_filter == "pc":
+        try:
+            _append(frappe.get_all("Planning Conge",
+                filters=_emp_or_owner_filter(statut_filter),
+                fields=["name", "workflow_state", "annee", "creation"],
+                order_by="creation desc", limit_page_length=int(limit) * 4),
+                "Planning Cong\u00e9", "pc", "planning-conge",
+                objet_field="annee")
+        except Exception:
+            pass
+
+    # --- Demande Congé (Leave Application) ---
+    if not type_filter or type_filter == "dc":
+        try:
+            _append(frappe.get_all("Leave Application",
+                filters=_emp_or_owner_filter(statut_filter),
+                fields=["name", "workflow_state", "from_date", "leave_type", "total_leave_days", "creation"],
+                order_by="creation desc", limit_page_length=int(limit) * 4),
+                "Cong\u00e9", "dc", "demande-conge",
+                date_field="from_date", objet_field="leave_type")
+        except Exception:
+            pass
+
+    # --- Bilan de Stage ---
+    if not type_filter or type_filter == "bs":
+        try:
+            _append(frappe.get_all("Bilan de Stage",
+                filters=_emp_or_owner_filter(statut_filter),
+                fields=["name", "workflow_state", "date_debut", "creation"],
+                order_by="creation desc", limit_page_length=int(limit) * 4),
+                "Bilan de Stage", "bs", "bilan-fin-de-stage",
+                date_field="date_debut")
+        except Exception:
+            pass
+
+    # Tri global par date de création décroissante
     results.sort(key=lambda x: x["creation"], reverse=True)
 
     total = len(results)
@@ -893,7 +943,7 @@ def get_demandes_stats():
     """
     Retourne les statistiques des demandes de l'utilisateur courant :
     - total, par statut (brouillon / en_cours / approuve / rejete)
-    - par type (pv vs da)
+    - par type (7 DocTypes)
     """
     user = frappe.session.user
     if user == "Guest":
@@ -913,28 +963,28 @@ def get_demandes_stats():
         "rejete": 0,
         "pv_total": 0,
         "da_total": 0,
+        "pse_total": 0,
+        "pss_total": 0,
+        "pc_total": 0,
+        "dc_total": 0,
+        "bs_total": 0,
     }
 
     en_cours_states = {
         "En attente Chef", "En attente Chef Service", "En attente RH",
         "En attente DG", "En attente DGA", "En attente Magasin",
-        "En attente Audit", "En attente Comptabilité",
+        "En attente Audit", "En attente Comptabilit\u00e9",
         "En attente Resp. Stagiaires", "En cours",
-        "En attente Approbation",
+        "En attente Approbation", "En attente DAAF",
+        "En attente Direction", "En attente du Sup\u00e9rieur Imm\u00e9diat",
     }
-    approuve_states = {"Approuvé", "Approuvée", "Validé"}
-    rejete_states = {"Rejeté", "Rejetée", "Annulé"}
+    approuve_states = {"Approuv\u00e9", "Approuv\u00e9e", "Valid\u00e9", "Open"}
+    rejete_states = {"Rejet\u00e9", "Rejet\u00e9e", "Annul\u00e9", "Rejected"}
 
-    # PV Sortie Mat├⌐riel
-    try:
-        pvs = frappe.get_all(
-            "PV Sortie Materiel",
-            filters={"owner": user},
-            fields=["workflow_state"],
-        )
-        stats["pv_total"] = len(pvs)
-        stats["total"] += len(pvs)
-        for doc in pvs:
+    def _count(docs, stat_key):
+        stats[stat_key] = len(docs)
+        stats["total"] += len(docs)
+        for doc in docs:
             ws = doc.workflow_state or "Brouillon"
             if ws == "Brouillon":
                 stats["brouillon"] += 1
@@ -944,36 +994,49 @@ def get_demandes_stats():
                 stats["approuve"] += 1
             elif ws in rejete_states:
                 stats["rejete"] += 1
+
+    emp_f = {"employee": employee} if employee else {"owner": user}
+
+    try:
+        _count(frappe.get_all("PV Sortie Materiel", filters={"owner": user},
+                              fields=["workflow_state"]), "pv_total")
     except Exception:
         pass
-
-    # Demande d'Achat
     try:
-        da_filters = {"employee": employee} if employee else {"owner": user}
-        das = frappe.get_all(
-            "Demande Achat KYA",
-            filters=da_filters,
-            fields=["workflow_state"],
-        )
-        stats["da_total"] = len(das)
-        stats["total"] += len(das)
-        for doc in das:
-            ws = doc.workflow_state or "Brouillon"
-            if ws == "Brouillon":
-                stats["brouillon"] += 1
-            elif ws in en_cours_states:
-                stats["en_cours"] += 1
-            elif ws in approuve_states:
-                stats["approuve"] += 1
-            elif ws in rejete_states:
-                stats["rejete"] += 1
+        _count(frappe.get_all("Demande Achat KYA", filters=emp_f,
+                              fields=["workflow_state"]), "da_total")
+    except Exception:
+        pass
+    try:
+        _count(frappe.get_all("Permission Sortie Employe", filters=emp_f,
+                              fields=["workflow_state"]), "pse_total")
+    except Exception:
+        pass
+    try:
+        _count(frappe.get_all("Permission Sortie Stagiaire", filters=emp_f,
+                              fields=["workflow_state"]), "pss_total")
+    except Exception:
+        pass
+    try:
+        _count(frappe.get_all("Planning Conge", filters=emp_f,
+                              fields=["workflow_state"]), "pc_total")
+    except Exception:
+        pass
+    try:
+        _count(frappe.get_all("Leave Application", filters=emp_f,
+                              fields=["workflow_state"]), "dc_total")
+    except Exception:
+        pass
+    try:
+        _count(frappe.get_all("Bilan de Stage", filters=emp_f,
+                              fields=["workflow_state"]), "bs_total")
     except Exception:
         pass
 
     return stats
 
 
-# ΓöÇΓöÇΓöÇ Dashboard Stagiaires ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+# ─── Dashboard Stagiaires ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 @frappe.whitelist()
 def get_dashboard_stagiaires(annee=None):

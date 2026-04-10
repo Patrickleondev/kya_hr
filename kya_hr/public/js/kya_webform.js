@@ -288,7 +288,7 @@
     var style = document.createElement("style");
     style.id = "kya-wf-visibility-patch";
     style.textContent = [
-      '/* Nuclear visibility fix ΓÇö inline <style> injected by kya_webform.js */',
+      '/* Nuclear visibility fix \u2014 inline <style> injected by kya_webform.js */',
       'select, select option { color: #1a1a2e !important; -webkit-text-fill-color: #1a1a2e !important; background-color: #fff !important; }',
       '.grid-heading-row, .grid-heading-row * { color: #1a1a2e !important; -webkit-text-fill-color: #1a1a2e !important; background: #eaf2f8 !important; }',
       '.grid-heading-row .static-area { color: #1a1a2e !important; font-weight: 700 !important; font-size: 11px !important; }',
@@ -422,8 +422,20 @@
 
   function setupWorkflowActions(wrapper) {
     if (!window.frappe || !frappe.web_form_doc) return;
-    var docName = frappe.web_form_doc.doc_name || frappe.web_form_doc.name;
-    if (!docName) return;
+    // IMPORTANT: frappe.web_form_doc.name is the Web Form definition's own slug name
+    // (ex: "permission-sortie-employe"), NOT the submitted document's name.
+    // Use frappe.web_form.doc.name (the actual submitted document) to avoid
+    // fetching a non-existent doc and triggering "introuvable" on /new pages.
+    var docName = "";
+    if (frappe.web_form && frappe.web_form.doc && frappe.web_form.doc.name) {
+      docName = frappe.web_form.doc.name;
+    } else if (frappe.web_form_doc && frappe.web_form_doc.doc_name) {
+      docName = frappe.web_form_doc.doc_name;
+    }
+    if (!docName || docName === "new") return;
+    // Skip if docName looks like a route slug (all lowercase + hyphens, no numbers/uppercase)
+    // Real document names always contain uppercase letters or numbers (naming series)
+    if (/^[a-z][a-z-]+[a-z]$/.test(docName)) return;
     var doctype = frappe.web_form_doc.doc_type;
     if (!doctype) return;
     frappe.call({
@@ -501,11 +513,11 @@
     if (!userHasRole("System Manager") && !userHasRole("HR Manager") && !userHasRole("Administrator")) return;
     var allForms = [
       { label: "Permission Sortie Stagiaire", route: "permission-sortie-stagiaire" },
-      { label: "Permission Sortie Employ├⌐", route: "permission-sortie-employe" },
+      { label: "Permission Sortie Employ\u00e9", route: "permission-sortie-employe" },
       { label: "Demande d'Achat", route: "demande-achat" },
-      { label: "Demande de Cong├⌐", route: "demande-conge" },
-      { label: "PV Sortie Mat├⌐riel", route: "pv-sortie-materiel" },
-      { label: "Planning Cong├⌐", route: "planning-conge" },
+      { label: "Demande de Cong\u00e9", route: "demande-conge" },
+      { label: "PV Sortie Mat\u00e9riel", route: "pv-sortie-materiel" },
+      { label: "Planning Cong\u00e9", route: "planning-conge" },
       { label: "Bilan de Stage", route: "bilan-fin-de-stage" }
     ];
     var currentRoute = getRoute();
@@ -514,24 +526,24 @@
     var panel = document.createElement("div");
     panel.className = "kya-preview-panel";
     panel.style.display = "none";
-    panel.innerHTML = '<h4>≡ƒöù Liens de pr├⌐visualisation</h4>' +
+    panel.innerHTML = '<h4>\ud83d\udd17 Liens de pr\u00e9visualisation</h4>' +
       '<div class="kya-preview-forms">' +
       allForms.map(function(f) {
         var url = window.location.origin + "/" + f.route + "/new";
         var isCurrent = f.route === currentRoute;
         return '<div class="kya-preview-form-link">' +
           '<span' + (isCurrent ? ' style="font-weight:800;"' : '') + '>' + f.label + '</span>' +
-          '<a href="' + url + '" target="_blank">Ouvrir ΓåÆ</a>' +
+          '<a href="' + url + '" target="_blank">Ouvrir \u2192</a>' +
           '</div>';
       }).join("") + '</div>' +
-      '<button class="kya-preview-copy" onclick="(function(){var url=window.location.origin+\'/\'+\'' + currentRoute + '\'+\'/new\';navigator.clipboard&&navigator.clipboard.writeText(url).then(function(){this.textContent=\'Γ£ô Copi├⌐ !\';}.bind(this));}).call(this)">≡ƒôï Copier lien du formulaire actuel</button>';
+      '<button class="kya-preview-copy" onclick="(function(){var url=window.location.origin+\'/\'+\'' + currentRoute + '\'+\'/new\';navigator.clipboard&&navigator.clipboard.writeText(url).then(function(){this.textContent=\'\u2705 Copi\u00e9 !\';}.bind(this));}).call(this)">\ud83d\udccb Copier lien du formulaire actuel</button>';
     var toggle = document.createElement("button");
     toggle.className = "kya-preview-toggle";
-    toggle.innerHTML = "≡ƒæü∩╕Å Aper├ºu Admin";
+    toggle.innerHTML = "\ud83d\udc64\u200d\u2696\ufe0f Aper\u00e7u Admin";
     toggle.addEventListener("click", function() {
       var vis = panel.style.display === "none";
       panel.style.display = vis ? "block" : "none";
-      toggle.innerHTML = vis ? "Γ£ò Fermer" : "≡ƒæü∩╕Å Aper├ºu Admin";
+      toggle.innerHTML = vis ? "\u274c Fermer" : "\ud83d\udc64\u200d\u2696\ufe0f Aper\u00e7u Admin";
     });
     bar.appendChild(panel);
     bar.appendChild(toggle);
