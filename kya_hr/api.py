@@ -2133,3 +2133,367 @@ def get_rh_attendance_import_info():
                        "?file_url=/files/pointage.xlsx"
                        "&employee_col=Matricule&date_col=Date&time_col=Heure",
     }
+
+
+# ═══════════════════════════════════════════════════════════════════════
+#  IMPORT ÉVALUATION TRIMESTRIELLE (Excel → Plan Trimestriel + Tâches)
+# ═══════════════════════════════════════════════════════════════════════
+
+@frappe.whitelist()
+def import_evaluation_excel(file_url=None, equipe=None, trimestre=None, annee=None):
+    """
+    Importe un fichier Excel d'évaluation trimestrielle collective.
+    Crée un Plan Trimestriel + résultats + Tache Equipe pour chaque ligne.
+
+    Format attendu du fichier Excel :
+        Col C = N° résultat
+        Col D = Résultat attendu
+        Col E = Tâche prévue
+        Col F = Possibilité de digitalisation (OUI/NON)
+        Col G = Taux de digitalisation (0-1 ou %)
+        Col H = Attribution (nom employé)
+        Col I = Indicateur KPI
+        Col J = Taux estimé (0-1 ou %)
+        Col K = Taux effectif (0-1 ou %)
+        Row 4 = en-tête, données à partir de row 5.
+    """
+    import openpyxl
+    import os
+
+    frappe.only_for(["System Manager", "HR Manager", "HR User"])
+
+    if not file_url:
+        frappe.throw("Paramètre file_url requis (URL du fichier Excel téléchargé)")
+    if not equipe:
+        frappe.throw("Paramètre equipe requis (nom du département)")
+    if not trimestre or trimestre not in ("T1", "T2", "T3", "T4"):
+        frappe.throw("Paramètre trimestre requis (T1, T2, T3 ou T4)")
+    annee = cint(annee) or getdate(today()).year
+
+    # Charger le fichier
+    file_path = frappe.get_site_path("public", file_url.lstrip("/"))
+    if not os.path.isfile(file_path):
+        file_path = frappe.get_site_path(file_url.lstrip("/"))
+    if not os.path.isfile(file_path):
+        frappe.throw(f"Fichier introuvable : {file_url}")
+
+    wb = openpyxl.load_workbook(file_path, data_only=True)
+    ws = wb.active
+
+    # Parser le titre depuis la feuille (row 2 souvent = "Équipe X – T1 2026")
+    titre_plan = ws.cell(row=2, column=3).value or f"Plan {equipe} {trimestre} {annee}"
+
+    # Vérifier s'il existe déjà
+    existing = frappe.db.exists("Plan Trimestriel", {
+        "equipe": equipe, "trimestre": trimestre, "annee": annee
+    })
+    if existing:
+        frappe.throw(
+            f"Un Plan Trimestriel existe déjà pour {equipe} {trimestre} {annee} : {existing}. "
+            "Supprimez-le d'abord ou utilisez un autre trimestre."
+        )
+
+    # ── Parsing des résultats et tâches ──
+    resultats = {}  # {numero: {"libelle": ..., "taches": [...]}}
+    current_numero = None
+
+    for row_idx in range(5, ws.max_row + 1):
+        c_val = ws.cell(row=row_idx, column=3).value  # N° résultat
+        d_val = ws.cell(row=row_idx, column=4).value  # Résultat attendu
+        e_val = ws.cell(row=row_idx, column=5).value  # Tâche prévue
+        f_val = ws.cell(row=row_idx, column=6).value  # Digitalisable
+        g_val = ws.cell(row=row_idx, column=7).value  # Taux digitalisation
+        h_val = ws.cell(row=row_idx, column=8).value  # Attribution
+        i_val = ws.cell(row=row_idx, column=9).value  # KPI
+        j_val = ws.cell(row=row_idx, column=10).value  # Taux estimé
+        k_val = ws.cell(row=row_idx, column=11).value  # Taux effectif
+
+        # Nouvelle ligne de résultat
+        if c_val is not None:
+            try:
+                current_numero = int(c_val)
+            except (ValueError, TypeError):
+                continue
+            resultats[current_numero] = {
+                "libelle": str(d_val or "").strip(),
+                "taches": [],
+            }
+
+        # Ligne de tâche (peut être sous un résultat existant)
+        if e_val and current_numero and current_numero in resultats:
+            tache_data = {
+                "libelle": str(e_val).strip(),
+                "digitalisable": "OUI" if str(f_val or "").upper().startswith("OUI") else "NON",
+                "taux_digitalisation": _parse_pct(g_val),
+                "attribution": str(h_val or "").strip() if h_val else None,
+                "kpi": str(i_val or "").strip() if i_val else None,
+                "taux_estime": _parse_pct(j_val),
+                "taux_effectif": _parse_pct(k_val),
+            }
+            resultats[current_numero]["taches"].append(tache_data)
+
+    if not resultats:
+        frappe.throw("Aucun résultat trouvé dans le fichier Excel. "
+                     "Vérifiez que les données commencent à la ligne 5, colonne C.")
+
+    # ── Créer le Plan Trimestriel ──
+    plan = frappe.get_doc({
+        "doctype": "Plan Trimestriel",
+        "titre": str(titre_plan).strip(),
+        "equipe": equipe,
+        "trimestre": trimestre,
+        "annee": annee,
+        "statut": "En cours",
+        "resultats": [],
+    })
+
+    # Ajouter les résultats
+    for num in sorted(resultats.keys()):
+        plan.append("resultats", {
+            "numero": num,
+            "libelle": resultats[num]["libelle"],
+            "poids": round(100.0 / len(resultats), 1),
+            "score": 0,
+        })
+
+    plan.insert(ignore_permissions=True)
+    frappe.db.commit()
+
+    # ── Créer les Tâches par résultat ──
+    taches_created = 0
+    taches_errors = []
+
+    for num in sorted(resultats.keys()):
+        for tache_data in resultats[num]["taches"]:
+            try:
+                tache = frappe.get_doc({
+                    "doctype": "Tache Equipe",
+                    "plan": plan.name,
+                    "resultat_numero": num,
+                    "resultat_libelle": resultats[num]["libelle"][:140],
+                    "libelle": tache_data["libelle"],
+                    "kpi": tache_data["kpi"],
+                    "taux_estime": tache_data["taux_estime"],
+                    "taux_effectif": tache_data["taux_effectif"],
+                    "digitalisable": tache_data["digitalisable"],
+                    "taux_digitalisation": tache_data["taux_digitalisation"],
+                    "statut": "Non démarré",
+                    "attributions": [],
+                })
+
+                # Résoudre l'attribution (nom employé → Employee link)
+                if tache_data["attribution"]:
+                    emp = _resolve_employee(tache_data["attribution"])
+                    if emp:
+                        tache.append("attributions", {
+                            "employe": emp,
+                            "role_attribution": "Responsable",
+                        })
+
+                tache.insert(ignore_permissions=True)
+                taches_created += 1
+            except Exception as e:
+                taches_errors.append(f"Résultat {num}, Tâche '{tache_data['libelle'][:40]}': {str(e)}")
+
+    frappe.db.commit()
+
+    return {
+        "success": True,
+        "plan_name": plan.name,
+        "resultats_count": len(resultats),
+        "taches_created": taches_created,
+        "errors": taches_errors,
+        "message": f"Plan {plan.name} créé avec {len(resultats)} résultats et {taches_created} tâches.",
+    }
+
+
+def _parse_pct(val):
+    """Convertit une valeur en pourcentage (0-100). Gère 0.5, '50%', 50, '#DIV/0!'."""
+    if val is None:
+        return 0.0
+    if isinstance(val, str):
+        val = val.strip().replace("%", "").replace(",", ".")
+        if not val or "DIV" in val or "N/A" in val.upper():
+            return 0.0
+        try:
+            val = float(val)
+        except ValueError:
+            return 0.0
+    if isinstance(val, (int, float)):
+        # Si entre 0 et 1 (exclusif), convertir en %
+        if 0 < val < 1:
+            return round(val * 100, 1)
+        return round(float(val), 1)
+    return 0.0
+
+
+def _resolve_employee(name_str):
+    """Résout un nom d'employé vers un Employee ID Frappe."""
+    if not name_str:
+        return None
+    name_str = name_str.strip()
+    # Chercher par employee_name exact
+    emp = frappe.db.get_value("Employee", {"employee_name": name_str, "status": "Active"}, "name")
+    if emp:
+        return emp
+    # Chercher par nom partiel (contient)
+    emp = frappe.db.get_value(
+        "Employee",
+        {"employee_name": ["like", f"%{name_str}%"], "status": "Active"},
+        "name",
+    )
+    return emp
+
+
+@frappe.whitelist()
+def get_import_evaluation_template():
+    """Retourne la description du format Excel attendu pour l'import."""
+    return {
+        "format": {
+            "row_4": "En-tête (ignoré)",
+            "row_5+": "Données",
+            "col_C": "N° résultat (entier, marque le début d'un nouveau résultat)",
+            "col_D": "Résultat attendu (texte)",
+            "col_E": "Tâche prévue (texte, une par ligne)",
+            "col_F": "Digitalisable (OUI/NON)",
+            "col_G": "Taux de digitalisation (0-1 ou 0-100)",
+            "col_H": "Attribution (nom de l'employé)",
+            "col_I": "Indicateur KPI (texte)",
+            "col_J": "Taux estimé (0-1 ou 0-100)",
+            "col_K": "Taux effectif (0-1 ou 0-100, rempli par l'employé)",
+        },
+        "parameters": {
+            "file_url": "/files/evaluation_T1_2026.xlsx (URL du fichier uploadé)",
+            "equipe": "Nom du département (ex: Équipe Informatique et Logiciels)",
+            "trimestre": "T1, T2, T3 ou T4",
+            "annee": "2026 (optionnel, défaut = année en cours)",
+        },
+        "example": "/api/method/kya_hr.api.import_evaluation_excel"
+                   "?file_url=/files/eval.xlsx&equipe=Département IT&trimestre=T1&annee=2026",
+    }
+
+
+# ═══════════════════════════════════════════════════════════════════════
+#  ESPACE EMPLOYÉ – MES TÂCHES (consultation + mise à jour taux effectif)
+# ═══════════════════════════════════════════════════════════════════════
+
+@frappe.whitelist()
+def get_my_tasks(trimestre=None, annee=None):
+    """
+    Retourne les tâches attribuées à l'employé connecté pour un trimestre.
+    L'employé peut voir ses tâches et mettre à jour le taux_effectif.
+    """
+    user = frappe.session.user
+    if user == "Guest":
+        return {"tasks": [], "error": "Non connecté"}
+
+    employee = frappe.db.get_value("Employee", {"user_id": user, "status": "Active"}, "name")
+    if not employee:
+        return {"tasks": [], "error": "Aucun employé actif lié à ce compte"}
+
+    annee = cint(annee) or getdate(today()).year
+
+    filters = {"employe": employee}
+    attributions = frappe.get_all(
+        "Tache Equipe Attribution",
+        filters=filters,
+        fields=["parent"],
+        limit=500,
+    )
+    task_names = list({a.parent for a in attributions})
+    if not task_names:
+        return {"tasks": [], "employee": employee, "trimestre": trimestre, "annee": annee}
+
+    # Filtrer par Plan Trimestriel du bon trimestre
+    tache_filters = {"name": ["in", task_names]}
+    tasks = frappe.get_all(
+        "Tache Equipe",
+        filters=tache_filters,
+        fields=[
+            "name", "plan", "libelle", "kpi", "statut",
+            "taux_estime", "taux_effectif", "digitalisable",
+            "taux_digitalisation", "resultat_numero", "resultat_libelle",
+            "commentaire",
+        ],
+        order_by="resultat_numero asc",
+    )
+
+    # Filtrer côté Python par plan trimestriel (trimestre + année)
+    plan_cache = {}
+    filtered = []
+    for t in tasks:
+        if t.plan not in plan_cache:
+            plan_cache[t.plan] = frappe.db.get_value(
+                "Plan Trimestriel", t.plan,
+                ["trimestre", "annee", "equipe", "titre"],
+                as_dict=True,
+            )
+        plan_info = plan_cache.get(t.plan)
+        if not plan_info:
+            continue
+        if trimestre and plan_info.trimestre != trimestre:
+            continue
+        if plan_info.annee != annee:
+            continue
+        t["plan_titre"] = plan_info.titre
+        t["plan_equipe"] = plan_info.equipe
+        t["plan_trimestre"] = plan_info.trimestre
+        t["plan_annee"] = plan_info.annee
+        filtered.append(t)
+
+    # Stats
+    total = len(filtered)
+    terminees = sum(1 for t in filtered if t.statut == "Terminé")
+    en_cours = sum(1 for t in filtered if t.statut == "En cours")
+
+    return {
+        "tasks": filtered,
+        "employee": employee,
+        "trimestre": trimestre,
+        "annee": annee,
+        "stats": {
+            "total": total,
+            "terminees": terminees,
+            "en_cours": en_cours,
+            "non_demarrees": total - terminees - en_cours,
+        },
+    }
+
+
+@frappe.whitelist()
+def update_task_progress(task_name, taux_effectif, commentaire=None):
+    """
+    Permet à l'employé attribué de mettre à jour le taux effectif de sa tâche.
+    Le contrôleur Tache Equipe auto-met à jour le statut dans validate().
+    """
+    user = frappe.session.user
+    employee = frappe.db.get_value("Employee", {"user_id": user, "status": "Active"}, "name")
+    if not employee:
+        frappe.throw("Aucun employé actif lié à ce compte")
+
+    # Vérifier que l'employé est bien attribué à cette tâche
+    is_assigned = frappe.db.exists("Tache Equipe Attribution", {
+        "parent": task_name,
+        "employe": employee,
+    })
+    if not is_assigned:
+        frappe.throw("Vous n'êtes pas attribué à cette tâche", frappe.PermissionError)
+
+    taux = _parse_pct(taux_effectif)
+    if taux < 0 or taux > 100:
+        frappe.throw("Le taux effectif doit être entre 0 et 100")
+
+    tache = frappe.get_doc("Tache Equipe", task_name)
+    tache.taux_effectif = taux
+    if commentaire is not None:
+        tache.commentaire = str(commentaire)[:500]
+    tache.save(ignore_permissions=True)
+    frappe.db.commit()
+
+    return {
+        "success": True,
+        "task_name": task_name,
+        "taux_effectif": tache.taux_effectif,
+        "statut": tache.statut,
+        "message": f"Taux effectif mis à jour : {tache.taux_effectif}%",
+    }
