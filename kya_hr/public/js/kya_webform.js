@@ -687,6 +687,36 @@
     if (!empField) return;
     var empInput = empField.querySelector("input");
     if (!empInput) return;
+
+    // Stocker le matricule de l'utilisateur connecté pour détecter la délégation
+    var currentUserEmployee = null;
+    if (window.frappe && frappe.session && frappe.session.user) {
+      frappe.call({
+        method: "frappe.client.get_value",
+        args: { doctype: "Employee", filters: { user_id: frappe.session.user, status: "Active" }, fieldname: ["name", "employee_name"] },
+        async: false,
+        callback: function (r) {
+          if (r && r.message && r.message.name) currentUserEmployee = r.message.name;
+        }
+      });
+    }
+
+    function showDelegationBanner(empName) {
+      var existing = document.getElementById("kya-delegation-banner");
+      if (existing) existing.remove();
+      var banner = document.createElement("div");
+      banner.id = "kya-delegation-banner";
+      banner.style.cssText = "background:#fff3e0; border:1px solid #f59e0b; border-radius:8px; padding:12px 16px; margin:12px 0; display:flex; align-items:center; gap:10px;";
+      banner.innerHTML = '<span style="font-size:20px;">👤➜</span><span style="font-size:14px; color:#e65100;"><b>Demande pour un autre employé</b> : ' + (empName || "Sélectionné") + '<br><span style="font-size:12px; color:#999;">Vous effectuez cette demande au nom d\'un collègue. Le récapitulatif sera envoyé à cet employé.</span></span>';
+      var form = document.querySelector(".web-form") || document.querySelector(".frappe-control[data-fieldname='employee']");
+      if (form) form.parentNode.insertBefore(banner, form);
+    }
+
+    function hideDelegationBanner() {
+      var existing = document.getElementById("kya-delegation-banner");
+      if (existing) existing.remove();
+    }
+
     function fetchEmployeeData(empId) {
       if (!empId || !window.frappe) return;
       frappe.call({
@@ -698,6 +728,12 @@
           var df = findFieldEl("department");
           if (nf) { var ni = nf.querySelector("input"); if (ni) { ni.value = r.message.employee_name || ""; ni.dispatchEvent(new Event("change")); } }
           if (df) { var di = df.querySelector("input"); if (di) { di.value = r.message.department || ""; di.dispatchEvent(new Event("change")); } }
+          // Afficher la bannière de délégation si c'est un autre employé
+          if (currentUserEmployee && empId !== currentUserEmployee) {
+            showDelegationBanner(r.message.employee_name);
+          } else {
+            hideDelegationBanner();
+          }
         }
       });
     }

@@ -51,9 +51,41 @@ jinja = {
 }
 
 # Grille indiciaire : calcul automatique de la valeur indiciaire (Employee)
+# + Email récap à la soumission de web forms + suivi workflow
 doc_events = {
     "Employee": {
         "before_save": "kya_hr.grille_indiciaire.calculer_indice_employee",
+    },
+    "Permission Sortie Employe": {
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_update": "kya_hr.email_notifications.send_workflow_update",
+    },
+    "Permission Sortie Stagiaire": {
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_update": "kya_hr.email_notifications.send_workflow_update",
+    },
+    "PV Sortie Materiel": {
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_update": "kya_hr.email_notifications.send_workflow_update",
+    },
+    "Demande Achat KYA": {
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_update": "kya_hr.email_notifications.send_workflow_update",
+    },
+    "Planning Conge": {
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_update": "kya_hr.email_notifications.send_workflow_update",
+    },
+    "Leave Application": {
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_update": "kya_hr.email_notifications.send_workflow_update",
+    },
+    "Bilan Fin de Stage": {
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_update": "kya_hr.email_notifications.send_workflow_update",
+    },
+    "Tache Equipe": {
+        "after_insert": "kya_hr.email_notifications.send_task_assignment_email",
     },
 }
 
