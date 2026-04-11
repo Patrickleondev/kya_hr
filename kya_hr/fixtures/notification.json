@@ -468,6 +468,7 @@
  },
  {
   "name": "KYA - Demande Congé: En attente Supérieur",
+  "channel": "Email",
   "document_type": "Leave Application",
   "event": "Value Change",
   "value_changed": "workflow_state",
@@ -486,6 +487,7 @@
  },
  {
   "name": "KYA - Demande Congé: En attente RH",
+  "channel": "Email",
   "document_type": "Leave Application",
   "event": "Value Change",
   "value_changed": "workflow_state",
@@ -504,6 +506,7 @@
  },
  {
   "name": "KYA - Demande Congé: En attente DG",
+  "channel": "Email",
   "document_type": "Leave Application",
   "event": "Value Change",
   "value_changed": "workflow_state",
@@ -522,6 +525,7 @@
  },
  {
   "name": "KYA - Demande Congé: Approuvée",
+  "channel": "Email",
   "document_type": "Leave Application",
   "event": "Value Change",
   "value_changed": "workflow_state",
@@ -540,6 +544,7 @@
  },
  {
   "name": "KYA - Demande Congé: Rejetée",
+  "channel": "Email",
   "document_type": "Leave Application",
   "event": "Value Change",
   "value_changed": "workflow_state",
