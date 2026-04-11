@@ -714,80 +714,7 @@ def get_my_kya_forms():
 
 
 # ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
-#  MES T├éCHES (KYA Taches for Mobile)
-# ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
-
-@frappe.whitelist()
-def get_my_tasks():
-    """Retourne les t├óches attribu├⌐es ├á l'utilisateur courant."""
-    user = frappe.session.user
-    if user == "Guest":
-        return {"tasks": [], "plans": []}
-
-    # V├⌐rifier si le module KYA Taches existe
-    if not frappe.db.exists("DocType", "Tache Equipe"):
-        return {"tasks": [], "plans": []}
-
-    employee = frappe.db.get_value(
-        "Employee",
-        {"user_id": user, "status": "Active"},
-        ["name", "employee_name"],
-        as_dict=True,
-    )
-    if not employee:
-        return {"tasks": [], "plans": []}
-
-    # T├óches assign├⌐es directement
-    tasks = []
-    try:
-        taches = frappe.get_all(
-            "Tache Equipe",
-            filters={"responsable": employee.name},
-            fields=["name", "titre", "statut", "priorite", "date_debut",
-                     "date_echeance", "progression", "plan_trimestriel"],
-            order_by="date_echeance asc",
-            limit_page_length=50,
-        )
-        for t in taches:
-            tasks.append({
-                "name": t.name,
-                "titre": t.titre,
-                "statut": t.statut or "Non d├⌐marr├⌐",
-                "priorite": t.priorite or "Moyenne",
-                "date_debut": str(t.date_debut) if t.date_debut else None,
-                "date_echeance": str(t.date_echeance) if t.date_echeance else None,
-                "progression": t.progression or 0,
-                "plan": t.plan_trimestriel,
-                "url": f"/app/tache-equipe/{t.name}",
-            })
-    except Exception:
-        pass
-
-    # Plans trimestriels o├╣ l'utilisateur est chef d'├⌐quipe
-    plans = []
-    try:
-        if frappe.db.exists("DocType", "Plan Trimestriel"):
-            mes_plans = frappe.get_all(
-                "Plan Trimestriel",
-                filters={"chef_equipe": employee.name},
-                fields=["name", "titre", "trimestre", "annee", "statut",
-                         "equipe", "progression_globale"],
-                order_by="creation desc",
-                limit_page_length=10,
-            )
-            for p in mes_plans:
-                plans.append({
-                    "name": p.name,
-                    "titre": p.titre or f"Plan {p.trimestre} {p.annee}",
-                    "statut": p.statut or "Brouillon",
-                    "equipe": p.equipe,
-                    "progression": p.progression_globale or 0,
-                    "url": f"/app/plan-trimestriel/{p.name}",
-                })
-    except Exception:
-        pass
-
-    return {"tasks": tasks, "plans": plans}
+# (Old get_my_tasks removed — replaced by the version at EOF with child-table attribution support)
 
 
 # ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
@@ -2160,15 +2087,21 @@ def import_evaluation_excel(file_url=None, equipe=None, trimestre=None, annee=No
     import openpyxl
     import os
 
-    frappe.only_for(["System Manager", "HR Manager", "HR User"])
+    frappe.only_for(["System Manager", "HR Manager", "HR User", "Chef Service"])
 
     if not file_url:
         frappe.throw("Paramètre file_url requis (URL du fichier Excel téléchargé)")
     if not equipe:
-        frappe.throw("Paramètre equipe requis (nom du département)")
+        frappe.throw("Paramètre equipe requis (nom de l'équipe KYA)")
     if not trimestre or trimestre not in ("T1", "T2", "T3", "T4"):
         frappe.throw("Paramètre trimestre requis (T1, T2, T3 ou T4)")
     annee = cint(annee) or getdate(today()).year
+
+    # Si Chef Service, vérifier qu'il est chef de cette équipe
+    roles = frappe.get_roles(frappe.session.user)
+    is_admin = any(r in roles for r in ["System Manager", "HR Manager", "HR User"])
+    if not is_admin:
+        _verify_chef_equipe(equipe)
 
     # Charger le fichier
     file_path = frappe.get_site_path("public", file_url.lstrip("/"))
@@ -2446,6 +2379,10 @@ def get_my_tasks(trimestre=None, annee=None):
     terminees = sum(1 for t in filtered if t.statut == "Terminé")
     en_cours = sum(1 for t in filtered if t.statut == "En cours")
 
+    taux_moyen = round(
+        sum(t.taux_effectif or 0 for t in filtered) / total, 1
+    ) if total else 0
+
     return {
         "tasks": filtered,
         "employee": employee,
@@ -2456,6 +2393,7 @@ def get_my_tasks(trimestre=None, annee=None):
             "terminees": terminees,
             "en_cours": en_cours,
             "non_demarrees": total - terminees - en_cours,
+            "taux_moyen": taux_moyen,
         },
     }
 
@@ -2496,4 +2434,253 @@ def update_task_progress(task_name, taux_effectif, commentaire=None):
         "taux_effectif": tache.taux_effectif,
         "statut": tache.statut,
         "message": f"Taux effectif mis à jour : {tache.taux_effectif}%",
+    }
+
+
+# ═══════════════════════════════════════════════════════════════════════
+#  GESTION D'ÉQUIPE — APIs scopées par Equipe KYA
+# ═══════════════════════════════════════════════════════════════════════
+
+def _get_employee_for_user(user=None):
+    """Retourne l'Employee ID de l'utilisateur connecté."""
+    user = user or frappe.session.user
+    return frappe.db.get_value("Employee", {"user_id": user, "status": "Active"}, "name")
+
+
+def _get_chef_equipes(employee):
+    """Retourne les Equipe KYA dont cet employé est chef."""
+    if not employee:
+        return []
+    return frappe.get_all("Equipe KYA", filters={"chef_equipe": employee, "est_active": 1}, pluck="name")
+
+
+def _verify_chef_equipe(equipe_name):
+    """Vérifie que l'utilisateur connecté est bien le chef de cette équipe. Sinon throw."""
+    emp = _get_employee_for_user()
+    if not emp:
+        frappe.throw("Aucun employé actif lié à ce compte", frappe.PermissionError)
+    chef = frappe.db.get_value("Equipe KYA", equipe_name, "chef_equipe")
+    if chef != emp:
+        frappe.throw(
+            f"Vous n'êtes pas le chef de l'équipe '{equipe_name}'.",
+            frappe.PermissionError,
+        )
+
+
+@frappe.whitelist()
+def get_team_members(equipe=None):
+    """
+    Retourne les membres d'une équipe.
+    Chef Service: ne voit que ses équipes.
+    HR/Admin: peut voir toute équipe.
+    """
+    roles = frappe.get_roles(frappe.session.user)
+    is_admin = any(r in roles for r in ["System Manager", "HR Manager", "HR User"])
+    emp = _get_employee_for_user()
+
+    if equipe:
+        if not is_admin:
+            _verify_chef_equipe(equipe)
+        equipes = [equipe]
+    else:
+        if is_admin:
+            equipes = frappe.get_all("Equipe KYA", filters={"est_active": 1}, pluck="name")
+        else:
+            equipes = _get_chef_equipes(emp)
+            if not equipes:
+                return {"members": [], "error": "Vous n'êtes chef d'aucune équipe"}
+
+    members = []
+    for eq in equipes:
+        eq_info = frappe.db.get_value("Equipe KYA", eq,
+            ["nom_equipe", "departement", "chef_equipe", "chef_equipe_name"], as_dict=True)
+        emps = frappe.get_all("Employee",
+            filters={"custom_kya_equipe": eq, "status": "Active"},
+            fields=["name", "employee_name", "designation", "department", "image",
+                     "employment_type", "user_id"],
+            order_by="employee_name asc",
+        )
+        members.append({
+            "equipe": eq,
+            "equipe_info": eq_info,
+            "employees": emps,
+            "count": len(emps),
+        })
+
+    return {"teams": members, "total_members": sum(m["count"] for m in members)}
+
+
+@frappe.whitelist()
+def get_team_dashboard(equipe=None, trimestre=None, annee=None):
+    """
+    Dashboard d'équipe pour le Chef d'Équipe.
+    Retourne : membres, plans, tâches avec progression, KPIs.
+    Le Chef ne voit QUE son équipe.
+    """
+    roles = frappe.get_roles(frappe.session.user)
+    is_admin = any(r in roles for r in ["System Manager", "HR Manager", "HR User"])
+    emp = _get_employee_for_user()
+    annee = cint(annee) or getdate(today()).year
+
+    # Déterminer l'équipe
+    if equipe:
+        if not is_admin:
+            _verify_chef_equipe(equipe)
+    else:
+        equipes = _get_chef_equipes(emp) if not is_admin else \
+            frappe.get_all("Equipe KYA", filters={"est_active": 1}, pluck="name")
+        if not equipes:
+            return {"error": "Aucune équipe trouvée"}
+        equipe = equipes[0]
+
+    eq_info = frappe.db.get_value("Equipe KYA", equipe,
+        ["nom_equipe", "departement", "chef_equipe", "chef_equipe_name", "nombre_membres"],
+        as_dict=True)
+
+    # Membres
+    membres = frappe.get_all("Employee",
+        filters={"custom_kya_equipe": equipe, "status": "Active"},
+        fields=["name", "employee_name", "designation", "image"],
+    )
+
+    # Plans trimestriels de cette équipe
+    plan_filters = {"equipe": equipe, "annee": annee}
+    if trimestre:
+        plan_filters["trimestre"] = trimestre
+    plans = frappe.get_all("Plan Trimestriel",
+        filters=plan_filters,
+        fields=["name", "titre", "trimestre", "annee", "statut",
+                "nombre_taches", "taches_terminees"],
+        order_by="trimestre asc",
+    )
+
+    # Tâches de cette équipe pour la période
+    taches = []
+    for plan in plans:
+        plan_taches = frappe.get_all("Tache Equipe",
+            filters={"plan": plan.name},
+            fields=["name", "libelle", "statut", "taux_estime", "taux_effectif",
+                    "resultat_numero", "resultat_libelle"],
+        )
+        for t in plan_taches:
+            # Charger les attributions
+            t["attributions"] = frappe.get_all("Tache Equipe Attribution",
+                filters={"parent": t.name},
+                fields=["employe", "nom_employe", "role_attribution"],
+            )
+            t["plan_name"] = plan.name
+            t["plan_titre"] = plan.titre
+        taches.extend(plan_taches)
+
+    # Stats agrégées
+    total_taches = len(taches)
+    terminees = sum(1 for t in taches if t.statut == "Terminé")
+    en_cours = sum(1 for t in taches if t.statut == "En cours")
+    taux_moyen = round(
+        sum(t.taux_effectif or 0 for t in taches) / total_taches, 1
+    ) if total_taches else 0
+
+    # Progression par membre
+    member_progress = {}
+    for m in membres:
+        m_tasks = [t for t in taches if any(
+            a["employe"] == m.name for a in t.get("attributions", [])
+        )]
+        m_total = len(m_tasks)
+        m_taux = round(
+            sum(t.taux_effectif or 0 for t in m_tasks) / m_total, 1
+        ) if m_total else 0
+        member_progress[m.name] = {
+            "employee_name": m.employee_name,
+            "designation": m.designation,
+            "image": m.image,
+            "total_taches": m_total,
+            "taux_moyen": m_taux,
+            "terminees": sum(1 for t in m_tasks if t.statut == "Terminé"),
+        }
+
+    return {
+        "equipe": equipe,
+        "equipe_info": eq_info,
+        "membres": membres,
+        "plans": plans,
+        "taches": taches,
+        "stats": {
+            "total_membres": len(membres),
+            "total_taches": total_taches,
+            "terminees": terminees,
+            "en_cours": en_cours,
+            "non_demarrees": total_taches - terminees - en_cours,
+            "taux_moyen": taux_moyen,
+        },
+        "member_progress": member_progress,
+    }
+
+
+@frappe.whitelist()
+def get_my_equipes():
+    """Retourne les équipes de l'utilisateur connecté (en tant que chef ou membre)."""
+    emp = _get_employee_for_user()
+    if not emp:
+        return {"chef_de": [], "membre_de": None}
+
+    chef_de = frappe.get_all("Equipe KYA",
+        filters={"chef_equipe": emp, "est_active": 1},
+        fields=["name", "nom_equipe", "departement", "nombre_membres"],
+    )
+
+    membre_de = frappe.db.get_value("Employee", emp, "custom_kya_equipe")
+    equipe_info = None
+    if membre_de:
+        equipe_info = frappe.db.get_value("Equipe KYA", membre_de,
+            ["name", "nom_equipe", "departement", "chef_equipe", "chef_equipe_name"],
+            as_dict=True)
+
+    return {
+        "employee": emp,
+        "chef_de": chef_de,
+        "membre_de": equipe_info,
+        "is_chef": len(chef_de) > 0,
+    }
+
+
+@frappe.whitelist()
+def assign_task_to_member(task_name, employe, role_attribution="Contributeur"):
+    """
+    Ajouter un membre à une tâche. Seul le chef de l'équipe peut le faire.
+    """
+    emp = _get_employee_for_user()
+    tache = frappe.get_doc("Tache Equipe", task_name)
+
+    # Vérifier que le chef est bien chef de l'équipe de cette tâche
+    equipe = tache.equipe
+    roles = frappe.get_roles(frappe.session.user)
+    is_admin = any(r in roles for r in ["System Manager", "HR Manager"])
+    if not is_admin:
+        _verify_chef_equipe(equipe)
+
+    # Vérifier que l'employé ciblé est bien membre de cette équipe
+    emp_equipe = frappe.db.get_value("Employee", employe, "custom_kya_equipe")
+    if emp_equipe != equipe:
+        frappe.throw(
+            f"L'employé {employe} n'appartient pas à l'équipe '{equipe}'.",
+            frappe.ValidationError,
+        )
+
+    # Vérifier pas déjà attribué
+    already = any(a.employe == employe for a in tache.attributions)
+    if already:
+        frappe.throw(f"L'employé {employe} est déjà attribué à cette tâche.")
+
+    tache.append("attributions", {
+        "employe": employe,
+        "role_attribution": role_attribution if role_attribution in ("Responsable", "Contributeur") else "Contributeur",
+    })
+    tache.save(ignore_permissions=True)
+    frappe.db.commit()
+
+    emp_name = frappe.db.get_value("Employee", employe, "employee_name")
+    return {
+        "success": True,
+        "message": f"{emp_name} ajouté(e) à la tâche '{tache.libelle}'",
     }

@@ -97,6 +97,17 @@ scheduler_events = {
     ],
 }
 
+# Filtrage par équipe — Chef Service ne voit que les plans/tâches de son équipe
+permission_query_conditions = {
+    "Plan Trimestriel": "kya_hr.team_permissions.plan_trimestriel_query",
+    "Tache Equipe": "kya_hr.team_permissions.tache_equipe_query",
+}
+
+has_permission = {
+    "Plan Trimestriel": "kya_hr.team_permissions.plan_trimestriel_has_permission",
+    "Tache Equipe": "kya_hr.team_permissions.tache_equipe_has_permission",
+}
+
 # Post-migration: nettoyage workspaces obsolètes + branding KYA
 after_migrate = [
     "kya_hr.force_sync_workspaces.execute",

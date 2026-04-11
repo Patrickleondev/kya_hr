@@ -27,7 +27,7 @@
             "fieldname": "equipe",
             "label": "\u00c9quipe",
             "fieldtype": "Link",
-            "options": "Department",
+            "options": "Equipe KYA",
             "fetch_from": "plan.equipe",
             "read_only": 1,
             "in_list_view": 1,

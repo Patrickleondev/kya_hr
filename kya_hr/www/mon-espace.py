@@ -28,8 +28,10 @@ def get_context(context):
     # Formulaires/Enquêtes KYA (tout le monde)
     context.show_forms = True
 
-    # Tâches (si Plan Trimestriel existe pour son équipe)
-    context.show_tasks = bool(emp) and frappe.db.exists("Tache Equipe", {"attribution": emp.get("name") if emp else ""})
+    # Tâches (si l'employé est attribué dans au moins une Tache Equipe)
+    context.show_tasks = bool(emp) and frappe.db.exists(
+        "Tache Equipe Attribution", {"employe": emp.get("name") if emp else ""}
+    )
 
     # Section RH (HR User, HR Manager, Responsable RH seulement)
     rh_roles = {"HR Manager", "HR User", "Responsable RH", "System Manager"}
@@ -55,6 +57,24 @@ def get_context(context):
     # Section Chef Service/Supérieur
     chef_roles = {"Chef Service", "Supérieur Immédiat", "HR Manager", "System Manager"}
     context.is_chef = bool(chef_roles.intersection(set(roles)))
+
+    # ── Section Équipe (Chef d'Équipe) ──
+    context.mes_equipes = []
+    context.is_chef_equipe = False
+    if emp:
+        mes_equipes = frappe.get_all("Equipe KYA",
+            filters={"chef_equipe": emp.get("name"), "est_active": 1},
+            fields=["name", "nom_equipe", "departement", "nombre_membres"],
+        )
+        context.mes_equipes = mes_equipes
+        context.is_chef_equipe = len(mes_equipes) > 0
+
+        # Équipe dont je suis membre
+        context.mon_equipe = None
+        mon_eq = frappe.db.get_value("Employee", emp.get("name"), "custom_kya_equipe")
+        if mon_eq:
+            context.mon_equipe = frappe.db.get_value("Equipe KYA", mon_eq,
+                ["name", "nom_equipe", "departement", "chef_equipe_name"], as_dict=True)
 
     # Fiches disponibles pour cet employé (type de web forms accessibles)
     context.fiches_disponibles = []
