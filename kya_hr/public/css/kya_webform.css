@@ -1,18 +1,18 @@
 ﻿/* ===================================================================
    KYA-Energy Group — Web Form Design v4
    Design : Ordre de Mission / Fiche officielle
-   Palette : Blue #1a5276 · Orange #F58220 · Green #8DC63F
+   Palette : Teal #0d7377 · Orange #F58220 · Green #8DC63F
    =================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap');
 
 :root {
-  --kya-blue: #1a5276;
-  --kya-blue-dark: #0e3a55;
-  --kya-blue-mid: #2471a3;
-  --kya-blue-light: #eaf2f8;
-  --kya-blue-glow: rgba(26,82,118,0.12);
-  --kya-blue-accent: #3498db;
+  --kya-blue: #0d7377;
+  --kya-blue-dark: #095456;
+  --kya-blue-mid: #0e9196;
+  --kya-blue-light: #e0f2f1;
+  --kya-blue-glow: rgba(13,115,119,0.12);
+  --kya-blue-accent: #11999e;
   --kya-orange: #F58220;
   --kya-orange-light: #fff4e8;
   --kya-green: #27ae60;
@@ -156,7 +156,7 @@ body {
 
 .kya-header-divider {
   height: 3px;
-  background: var(--kya-blue);
+  background: linear-gradient(90deg, #E74C3C, #F58220);
   margin: 18px 0 14px;
   border-radius: 2px;
 }
