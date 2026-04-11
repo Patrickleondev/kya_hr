@@ -446,7 +446,7 @@
     "update_value": "En attente Chef"
    },
    {
-    "allow_edit": "Auditor",
+    "allow_edit": "Auditeur Interne",
     "doc_status": "0",
     "is_optional_state": 0,
     "state": "En attente Audit",
@@ -514,7 +514,7 @@
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "Auditor",
+    "allowed": "Auditeur Interne",
     "condition": null,
     "next_state": "En attente Direction",
     "state": "En attente Audit"
@@ -522,7 +522,7 @@
    {
     "action": "Rejeter",
     "allow_self_approval": 0,
-    "allowed": "Auditor",
+    "allowed": "Auditeur Interne",
     "condition": null,
     "next_state": "Rejeté",
     "state": "En attente Audit"

@@ -129,6 +129,6 @@
         {"role": "System Manager", "permlevel": 0, "read": 1, "write": 1, "create": 1, "delete": 1},
         {"role": "HR Manager",     "permlevel": 0, "read": 1, "write": 1, "create": 1, "delete": 1},
         {"role": "HR User",        "permlevel": 0, "read": 1, "write": 1, "create": 1, "delete": 0},
-        {"role": "Chef d'\u00c9quipe",  "permlevel": 0, "read": 1, "write": 1, "create": 1, "delete": 0}
+        {"role": "Chef Service",  "permlevel": 0, "read": 1, "write": 1, "create": 1, "delete": 0}
     ]
 }

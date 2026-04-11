@@ -71,8 +71,8 @@ function _control_pv_signatures(frm) {
     frm.set_df_property("magasin_nom", "read_only", 1);
     frm.set_df_property("magasin_date", "read_only", 1);
 
-    // Signature Audit : modifiable à "En attente Audit" pour Auditor
-    var peut_signer_audit = ws === "En attente Audit" && roles.includes("Auditor");
+    // Signature Audit : modifiable à "En attente Audit" pour Auditeur Interne
+    var peut_signer_audit = ws === "En attente Audit" && (roles.includes("Auditeur Interne") || roles.includes("System Manager"));
     frm.set_df_property("signature_audit", "read_only", peut_signer_audit ? 0 : 1);
     frm.set_df_property("audit_nom", "read_only", 1);
     frm.set_df_property("audit_date", "read_only", 1);

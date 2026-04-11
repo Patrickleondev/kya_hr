@@ -245,33 +245,35 @@
     "permission-sortie-stagiaire": {
       signature_stagiaire: null,
       signature_chef: ["Chef Service", "HR Manager", "System Manager"],
-      signature_resp_stagiaires: ["HR Manager", "HR User", "System Manager"],
-      signature_dg: ["DG", "System Manager"]
+      signature_resp_stagiaires: ["HR Manager", "HR User", "Responsable des Stagiaires", "System Manager"],
+      signature_dg: ["Directeur Général", "System Manager"]
     },
     "permission-sortie-employe": {
       signature_employe: null,
-      signature_chef: ["Chef Service", "HR Manager", "System Manager"],
-      signature_rh: ["HR Manager", "HR User", "System Manager"],
-      signature_dga: ["DGA", "DG", "System Manager"]
+      signature_chef: ["Chef Service", "HR Manager", "Supérieur Immédiat", "System Manager"],
+      signature_rh: ["Responsable RH", "HR Manager", "HR User", "System Manager"],
+      signature_dga: ["DAAF", "Directeur Général", "System Manager"]
     },
     "demande-achat": {
       signature_demandeur: null,
-      signature_chef: ["Chef Service", "System Manager"],
-      signature_dga: ["DGA", "DG", "System Manager"],
-      signature_dg: ["DG", "System Manager"]
+      signature_chef: ["Chef Service", "Responsable Achats", "System Manager"],
+      signature_dga: ["DAAF", "Directeur Général", "System Manager"],
+      signature_dg: ["Directeur Général", "System Manager"]
     },
     "pv-sortie-materiel": {
       signature_demandeur: null,
       signature_chef: ["Chef Service", "System Manager"],
-      signature_audit: ["DGA", "System Manager"],
-      signature_dga: ["DGA", "DG", "System Manager"],
-      signature_magasin: ["Stock Manager", "Stock User", "System Manager"]
+      signature_audit: ["Auditeur Interne", "DAAF", "System Manager"],
+      signature_dga: ["DAAF", "Directeur Général", "System Manager"],
+      signature_magasin: ["Chargé des Stocks", "Stock Manager", "Stock User", "System Manager"]
     }
   };
 
   var EDITOR_ROLES = [
     "HR Manager", "HR User", "System Manager",
-    "DG", "DGA", "Chef Service", "Stock Manager"
+    "Directeur Général", "DAAF", "Chef Service", "Responsable RH",
+    "Responsable Achats", "Chargé des Stocks", "Stock Manager",
+    "Supérieur Immédiat", "Auditeur Interne"
   ];
 
   function getRoute() {
