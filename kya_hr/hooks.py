@@ -54,7 +54,10 @@ jinja = {
 # + Email récap à la soumission de web forms + suivi workflow
 doc_events = {
     "Employee": {
-        "before_save": "kya_hr.grille_indiciaire.calculer_indice_employee",
+        "before_save": [
+            "kya_hr.grille_indiciaire.calculer_indice_employee",
+            "kya_hr.matricule.auto_generate_matricule",
+        ],
     },
     "Permission Sortie Employe": {
         "after_insert": "kya_hr.email_notifications.send_submission_recap",
@@ -74,7 +77,10 @@ doc_events = {
     },
     "Planning Conge": {
         "after_insert": "kya_hr.email_notifications.send_submission_recap",
-        "on_update": "kya_hr.email_notifications.send_workflow_update",
+        "on_update": [
+            "kya_hr.email_notifications.send_workflow_update",
+            "kya_hr.leave_bridge.create_leave_from_planning",
+        ],
     },
     "Leave Application": {
         "after_insert": "kya_hr.email_notifications.send_submission_recap",
