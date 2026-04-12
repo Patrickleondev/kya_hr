@@ -17,7 +17,7 @@
     "evaluate_as_expression": 0,
     "is_optional_state": 0,
     "message": null,
-    "next_action_email_template": "KYA - Demande de Congé ├Ç Approuver",
+    "next_action_email_template": "KYA - Demande de Congé À Approuver",
     "send_email": 1,
     "state": "Brouillon",
     "update_field": null,
@@ -31,7 +31,7 @@
     "evaluate_as_expression": 0,
     "is_optional_state": 0,
     "message": null,
-    "next_action_email_template": "KYA - Demande de Congé ├Ç Approuver",
+    "next_action_email_template": "KYA - Demande de Congé À Approuver",
     "send_email": 1,
     "state": "En attente du Supérieur Immédiat",
     "update_field": null,
@@ -45,7 +45,7 @@
     "evaluate_as_expression": 0,
     "is_optional_state": 0,
     "message": null,
-    "next_action_email_template": "KYA - Demande de Congé ├Ç Approuver",
+    "next_action_email_template": "KYA - Demande de Congé À Approuver",
     "send_email": 1,
     "state": "En attente RH",
     "update_field": null,
@@ -59,7 +59,7 @@
     "evaluate_as_expression": 0,
     "is_optional_state": 0,
     "message": null,
-    "next_action_email_template": "KYA - Demande de Congé ├Ç Approuver",
+    "next_action_email_template": "KYA - Demande de Congé À Approuver",
     "send_email": 1,
     "state": "En attente DG",
     "update_field": null,
@@ -446,7 +446,7 @@
     "update_value": "En attente Chef"
    },
    {
-    "allow_edit": "Auditor",
+    "allow_edit": "Auditeur Interne",
     "doc_status": "0",
     "is_optional_state": 0,
     "state": "En attente Audit",
@@ -457,9 +457,9 @@
     "allow_edit": "Stock Manager",
     "doc_status": "0",
     "is_optional_state": 0,
-    "state": "En attente DGA",
+    "state": "En attente Direction",
     "update_field": "statut",
-    "update_value": "En attente DGA"
+    "update_value": "En attente Direction"
    },
    {
     "allow_edit": "Stock User",
@@ -514,15 +514,15 @@
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "Auditor",
+    "allowed": "Auditeur Interne",
     "condition": null,
-    "next_state": "En attente DGA",
+    "next_state": "En attente Direction",
     "state": "En attente Audit"
    },
    {
     "action": "Rejeter",
     "allow_self_approval": 0,
-    "allowed": "Auditor",
+    "allowed": "Auditeur Interne",
     "condition": null,
     "next_state": "Rejeté",
     "state": "En attente Audit"
@@ -533,7 +533,7 @@
     "allowed": "Stock Manager",
     "condition": null,
     "next_state": "En attente Magasin",
-    "state": "En attente DGA"
+    "state": "En attente Direction"
    },
    {
     "action": "Rejeter",
@@ -541,7 +541,7 @@
     "allowed": "Stock Manager",
     "condition": null,
     "next_state": "Rejeté",
-    "state": "En attente DGA"
+    "state": "En attente Direction"
    },
    {
     "action": "Approuver",
@@ -602,9 +602,9 @@
     "allow_edit": "HR Manager",
     "doc_status": "0",
     "is_optional_state": 0,
-    "state": "En attente DGA",
+    "state": "En attente Direction",
     "update_field": "statut",
-    "update_value": "En attente DGA"
+    "update_value": "En attente Direction"
    },
    {
     "allow_edit": "HR Manager",
@@ -661,7 +661,7 @@
     "allow_self_approval": 0,
     "allowed": "HR Manager",
     "condition": null,
-    "next_state": "En attente DGA",
+    "next_state": "En attente Direction",
     "state": "En attente RH"
    },
    {
@@ -678,7 +678,7 @@
     "allowed": "HR Manager",
     "condition": null,
     "next_state": "Approuv\u00e9",
-    "state": "En attente DGA"
+    "state": "En attente Direction"
    },
    {
     "action": "Rejeter",
@@ -686,7 +686,7 @@
     "allowed": "HR Manager",
     "condition": null,
     "next_state": "Rejet\u00e9",
-    "state": "En attente DGA"
+    "state": "En attente Direction"
    },
    {
     "action": "Valider (Absence DGA)",
@@ -694,7 +694,7 @@
     "allowed": "HR Manager",
     "condition": null,
     "next_state": "Approuv\u00e9",
-    "state": "En attente DGA"
+    "state": "En attente Direction"
    }
   ],
   "workflow_data": null,

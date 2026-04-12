@@ -45,6 +45,7 @@ def execute():
     fix_dashboard_shortcuts_to_stats_page()
     fix_workspace_number_card_links()
     fix_stagiaires_permissions()
+    fix_workflow_role_access()
     fix_kya_indicator_perms()
     frappe.db.commit()
     frappe.clear_cache()
@@ -886,6 +887,129 @@ def fix_stagiaires_permissions():
     frappe.clear_cache(doctype="Permission Sortie Stagiaire")
     frappe.clear_cache(doctype="Bilan Fin de Stage")
     print(f"  [Permissions Stagiaires] {inserted} entrees ajoutees")
+
+
+def fix_workflow_role_access():
+    """Ensure workflow approver roles can access Desk and required documents."""
+    approval_roles = [
+        "Directeur Général",
+        "Responsable RH",
+        "Supérieur Immédiat",
+        "Responsable des Stagiaires",
+    ]
+    placeholders = ", ".join(["%s"] * len(approval_roles))
+    frappe.db.sql(
+        f"""
+        UPDATE `tabRole`
+        SET desk_access = 1
+        WHERE name IN ({placeholders})
+        """,
+        tuple(approval_roles),
+    )
+
+    perms = [
+        ("Employee", "Responsable RH", 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1),
+        ("Leave Application", "Supérieur Immédiat", 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+        ("Leave Application", "Responsable RH", 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+        ("Leave Application", "Directeur Général", 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+    ]
+
+    inserted = 0
+    for (
+        doctype,
+        role,
+        permlevel,
+        read,
+        write,
+        create,
+        delete,
+        submit,
+        cancel,
+        amend,
+        if_owner,
+        select,
+        report,
+        export,
+        print_perm,
+        email,
+    ) in perms:
+        if not frappe.db.exists("DocType", doctype):
+            continue
+
+        exists = frappe.db.sql(
+            "SELECT name FROM `tabDocPerm` WHERE parent=%s AND role=%s AND permlevel=%s",
+            (doctype, role, permlevel),
+        )
+        if exists:
+            frappe.db.sql(
+                """
+                UPDATE `tabDocPerm`
+                SET `read`=%s, `write`=%s, `create`=%s, `delete`=%s,
+                    `submit`=%s, `cancel`=%s, `amend`=%s, `if_owner`=%s,
+                    `select`=%s, `report`=%s, `export`=%s, `print`=%s, `email`=%s,
+                    modified=NOW(), modified_by='Administrator'
+                WHERE parent=%s AND role=%s AND permlevel=%s
+                """,
+                (
+                    read,
+                    write,
+                    create,
+                    delete,
+                    submit,
+                    cancel,
+                    amend,
+                    if_owner,
+                    select,
+                    report,
+                    export,
+                    print_perm,
+                    email,
+                    doctype,
+                    role,
+                    permlevel,
+                ),
+            )
+        else:
+            name = frappe.generate_hash(length=10)
+            frappe.db.sql(
+                """
+                INSERT INTO `tabDocPerm`
+                  (name, parent, parenttype, parentfield, permlevel, role,
+                   `read`, `write`, `create`, `delete`, `submit`, `cancel`, `amend`, `if_owner`,
+                   `select`, `report`, `export`, `print`, `email`,
+                   idx, creation, modified, modified_by, owner)
+                VALUES (%s, %s, 'DocType', 'permissions', %s, %s,
+                        %s, %s, %s, %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        COALESCE((SELECT MAX(t2.idx)+1 FROM `tabDocPerm` t2 WHERE t2.parent=%s), 1),
+                        NOW(), NOW(), 'Administrator', 'Administrator')
+                """,
+                (
+                    name,
+                    doctype,
+                    permlevel,
+                    role,
+                    read,
+                    write,
+                    create,
+                    delete,
+                    submit,
+                    cancel,
+                    amend,
+                    if_owner,
+                    select,
+                    report,
+                    export,
+                    print_perm,
+                    email,
+                    doctype,
+                ),
+            )
+            inserted += 1
+
+    frappe.clear_cache(doctype="Employee")
+    frappe.clear_cache(doctype="Leave Application")
+    print(f"  [Workflow Access] Desk access normalized + {inserted} DocPerm entrées ajoutées ✓")
 
 
 def fix_kya_indicator_perms():

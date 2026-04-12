@@ -1,12 +1,12 @@
 ﻿/* ===================================================================
-   KYA-Energy Group ΓÇö Web Form Layout v4
+   KYA-Energy Group — Web Form Layout v4
    Design : Ordre de Mission / Fiche officielle KYA
-   En-t├¬te 2-colonnes : Logo gauche | Titre + infos droite
-   N┬░ de document affich├⌐, sections num├⌐rot├⌐es,
-   permissions par r├┤le, signatures verrouill├⌐es.
+   En-tête 2-colonnes : Logo gauche | Titre + infos droite
+   N° de document affiché, sections numérotées,
+   permissions par rôle, signatures verrouillées.
    =================================================================== */
 
-/* === Auto-redirect bare web form URLs to /new ==================== */
+/* === Normalize legacy ?name=<docname> URLs to canonical path URLs  */
 (function () {
   var KYA_WF_ROUTES = [
     "permission-sortie-stagiaire", "permission-sortie-employe",
@@ -18,21 +18,24 @@
   var path = window.location.pathname.replace(/^\//, "").replace(/\/$/, "");
   var pathParts = path.split("/");
 
-  // Frappe v16: ?name= URLs are NOT supported for authenticated users (server redirects to /new).
-  // Convert ?name=<docname> → /{route}/{docname}/edit (Frappe canonical path format).
-  if (pathParts.length === 1 && KYA_WF_ROUTES.indexOf(path) !== -1 && docName) {
-    window.location.replace("/" + path + "/" + encodeURIComponent(docName) + "/edit");
+  // Frappe v16: normalize legacy ?name=<docname> links to canonical path URLs.
+  // Guard: skip if docName equals the route itself (self-referential, causes
+  // "/{route}/{route}" duplication error) or if it is a reserved keyword.
+  var RESERVED = ["new", "list", "edit"];
+  if (
+    pathParts.length === 1 &&
+    KYA_WF_ROUTES.indexOf(path) !== -1 &&
+    docName &&
+    docName !== path &&
+    RESERVED.indexOf(docName) === -1
+  ) {
+    window.location.replace("/" + path + "/" + encodeURIComponent(docName));
     return;
   }
 
-  // Path-based links like /{route}/{docname} work correctly in Frappe v16 — no conversion needed.
-  // Sub-paths /new, /list, /edit are handled natively. Do NOT convert to ?name=.
-
-  if (KYA_WF_ROUTES.indexOf(path) !== -1) {
-    // Bare route without /new ΓÇö redirect silently
-    window.location.replace("/" + path + "/new");
-    return; // stop further execution until redirect completes
-  }
+  // Bare route (/{route}) and path-based links (/{route}/{docname}) work correctly
+  // in Frappe v16 — no redirect needed. DO NOT redirect bare routes to /new:
+  // Frappe would interpret "new" as a document name and return "Not Found".
 })();
 
 (function () {
@@ -242,33 +245,35 @@
     "permission-sortie-stagiaire": {
       signature_stagiaire: null,
       signature_chef: ["Chef Service", "HR Manager", "System Manager"],
-      signature_resp_stagiaires: ["HR Manager", "HR User", "System Manager"],
-      signature_dg: ["DG", "System Manager"]
+      signature_resp_stagiaires: ["HR Manager", "HR User", "Responsable des Stagiaires", "System Manager"],
+      signature_dg: ["Directeur Général", "System Manager"]
     },
     "permission-sortie-employe": {
       signature_employe: null,
-      signature_chef: ["Chef Service", "HR Manager", "System Manager"],
-      signature_rh: ["HR Manager", "HR User", "System Manager"],
-      signature_dga: ["DGA", "DG", "System Manager"]
+      signature_chef: ["Chef Service", "HR Manager", "Supérieur Immédiat", "System Manager"],
+      signature_rh: ["Responsable RH", "HR Manager", "HR User", "System Manager"],
+      signature_dga: ["DAAF", "Directeur Général", "System Manager"]
     },
     "demande-achat": {
       signature_demandeur: null,
-      signature_chef: ["Chef Service", "System Manager"],
-      signature_dga: ["DGA", "DG", "System Manager"],
-      signature_dg: ["DG", "System Manager"]
+      signature_chef: ["Chef Service", "Responsable Achats", "System Manager"],
+      signature_dga: ["DAAF", "Directeur Général", "System Manager"],
+      signature_dg: ["Directeur Général", "System Manager"]
     },
     "pv-sortie-materiel": {
       signature_demandeur: null,
       signature_chef: ["Chef Service", "System Manager"],
-      signature_audit: ["DGA", "System Manager"],
-      signature_dga: ["DGA", "DG", "System Manager"],
-      signature_magasin: ["Stock Manager", "Stock User", "System Manager"]
+      signature_audit: ["Auditeur Interne", "DAAF", "System Manager"],
+      signature_dga: ["DAAF", "Directeur Général", "System Manager"],
+      signature_magasin: ["Chargé des Stocks", "Stock Manager", "Stock User", "System Manager"]
     }
   };
 
   var EDITOR_ROLES = [
     "HR Manager", "HR User", "System Manager",
-    "DG", "DGA", "Chef Service", "Stock Manager"
+    "Directeur Général", "DAAF", "Chef Service", "Responsable RH",
+    "Responsable Achats", "Chargé des Stocks", "Stock Manager",
+    "Supérieur Immédiat", "Auditeur Interne"
   ];
 
   function getRoute() {
@@ -285,7 +290,7 @@
     var style = document.createElement("style");
     style.id = "kya-wf-visibility-patch";
     style.textContent = [
-      '/* Nuclear visibility fix ΓÇö inline <style> injected by kya_webform.js */',
+      '/* Nuclear visibility fix \u2014 inline <style> injected by kya_webform.js */',
       'select, select option { color: #1a1a2e !important; -webkit-text-fill-color: #1a1a2e !important; background-color: #fff !important; }',
       '.grid-heading-row, .grid-heading-row * { color: #1a1a2e !important; -webkit-text-fill-color: #1a1a2e !important; background: #eaf2f8 !important; }',
       '.grid-heading-row .static-area { color: #1a1a2e !important; font-weight: 700 !important; font-size: 11px !important; }',
@@ -419,8 +424,20 @@
 
   function setupWorkflowActions(wrapper) {
     if (!window.frappe || !frappe.web_form_doc) return;
-    var docName = frappe.web_form_doc.doc_name || frappe.web_form_doc.name;
-    if (!docName) return;
+    // IMPORTANT: frappe.web_form_doc.name is the Web Form definition's own slug name
+    // (ex: "permission-sortie-employe"), NOT the submitted document's name.
+    // Use frappe.web_form.doc.name (the actual submitted document) to avoid
+    // fetching a non-existent doc and triggering "introuvable" on /new pages.
+    var docName = "";
+    if (frappe.web_form && frappe.web_form.doc && frappe.web_form.doc.name) {
+      docName = frappe.web_form.doc.name;
+    } else if (frappe.web_form_doc && frappe.web_form_doc.doc_name) {
+      docName = frappe.web_form_doc.doc_name;
+    }
+    if (!docName || docName === "new") return;
+    // Skip if docName looks like a route slug (all lowercase + hyphens, no numbers/uppercase)
+    // Real document names always contain uppercase letters or numbers (naming series)
+    if (/^[a-z][a-z-]+[a-z]$/.test(docName)) return;
     var doctype = frappe.web_form_doc.doc_type;
     if (!doctype) return;
     frappe.call({
@@ -498,11 +515,11 @@
     if (!userHasRole("System Manager") && !userHasRole("HR Manager") && !userHasRole("Administrator")) return;
     var allForms = [
       { label: "Permission Sortie Stagiaire", route: "permission-sortie-stagiaire" },
-      { label: "Permission Sortie Employ├⌐", route: "permission-sortie-employe" },
+      { label: "Permission Sortie Employ\u00e9", route: "permission-sortie-employe" },
       { label: "Demande d'Achat", route: "demande-achat" },
-      { label: "Demande de Cong├⌐", route: "demande-conge" },
-      { label: "PV Sortie Mat├⌐riel", route: "pv-sortie-materiel" },
-      { label: "Planning Cong├⌐", route: "planning-conge" },
+      { label: "Demande de Cong\u00e9", route: "demande-conge" },
+      { label: "PV Sortie Mat\u00e9riel", route: "pv-sortie-materiel" },
+      { label: "Planning Cong\u00e9", route: "planning-conge" },
       { label: "Bilan de Stage", route: "bilan-fin-de-stage" }
     ];
     var currentRoute = getRoute();
@@ -511,24 +528,24 @@
     var panel = document.createElement("div");
     panel.className = "kya-preview-panel";
     panel.style.display = "none";
-    panel.innerHTML = '<h4>≡ƒöù Liens de pr├⌐visualisation</h4>' +
+    panel.innerHTML = '<h4>\ud83d\udd17 Liens de pr\u00e9visualisation</h4>' +
       '<div class="kya-preview-forms">' +
       allForms.map(function(f) {
         var url = window.location.origin + "/" + f.route + "/new";
         var isCurrent = f.route === currentRoute;
         return '<div class="kya-preview-form-link">' +
           '<span' + (isCurrent ? ' style="font-weight:800;"' : '') + '>' + f.label + '</span>' +
-          '<a href="' + url + '" target="_blank">Ouvrir ΓåÆ</a>' +
+          '<a href="' + url + '" target="_blank">Ouvrir \u2192</a>' +
           '</div>';
       }).join("") + '</div>' +
-      '<button class="kya-preview-copy" onclick="(function(){var url=window.location.origin+\'/\'+\'' + currentRoute + '\'+\'/new\';navigator.clipboard&&navigator.clipboard.writeText(url).then(function(){this.textContent=\'Γ£ô Copi├⌐ !\';}.bind(this));}).call(this)">≡ƒôï Copier lien du formulaire actuel</button>';
+      '<button class="kya-preview-copy" onclick="(function(){var url=window.location.origin+\'/\'+\'' + currentRoute + '\'+\'/new\';navigator.clipboard&&navigator.clipboard.writeText(url).then(function(){this.textContent=\'\u2705 Copi\u00e9 !\';}.bind(this));}).call(this)">\ud83d\udccb Copier lien du formulaire actuel</button>';
     var toggle = document.createElement("button");
     toggle.className = "kya-preview-toggle";
-    toggle.innerHTML = "≡ƒæü∩╕Å Aper├ºu Admin";
+    toggle.innerHTML = "\ud83d\udc64\u200d\u2696\ufe0f Aper\u00e7u Admin";
     toggle.addEventListener("click", function() {
       var vis = panel.style.display === "none";
       panel.style.display = vis ? "block" : "none";
-      toggle.innerHTML = vis ? "Γ£ò Fermer" : "≡ƒæü∩╕Å Aper├ºu Admin";
+      toggle.innerHTML = vis ? "\u274c Fermer" : "\ud83d\udc64\u200d\u2696\ufe0f Aper\u00e7u Admin";
     });
     bar.appendChild(panel);
     bar.appendChild(toggle);
@@ -672,6 +689,36 @@
     if (!empField) return;
     var empInput = empField.querySelector("input");
     if (!empInput) return;
+
+    // Stocker le matricule de l'utilisateur connecté pour détecter la délégation
+    var currentUserEmployee = null;
+    if (window.frappe && frappe.session && frappe.session.user) {
+      frappe.call({
+        method: "frappe.client.get_value",
+        args: { doctype: "Employee", filters: { user_id: frappe.session.user, status: "Active" }, fieldname: ["name", "employee_name"] },
+        async: false,
+        callback: function (r) {
+          if (r && r.message && r.message.name) currentUserEmployee = r.message.name;
+        }
+      });
+    }
+
+    function showDelegationBanner(empName) {
+      var existing = document.getElementById("kya-delegation-banner");
+      if (existing) existing.remove();
+      var banner = document.createElement("div");
+      banner.id = "kya-delegation-banner";
+      banner.style.cssText = "background:#fff3e0; border:1px solid #f59e0b; border-radius:8px; padding:12px 16px; margin:12px 0; display:flex; align-items:center; gap:10px;";
+      banner.innerHTML = '<span style="font-size:20px;">👤➜</span><span style="font-size:14px; color:#e65100;"><b>Demande pour un autre employé</b> : ' + (empName || "Sélectionné") + '<br><span style="font-size:12px; color:#999;">Vous effectuez cette demande au nom d\'un collègue. Le récapitulatif sera envoyé à cet employé.</span></span>';
+      var form = document.querySelector(".web-form") || document.querySelector(".frappe-control[data-fieldname='employee']");
+      if (form) form.parentNode.insertBefore(banner, form);
+    }
+
+    function hideDelegationBanner() {
+      var existing = document.getElementById("kya-delegation-banner");
+      if (existing) existing.remove();
+    }
+
     function fetchEmployeeData(empId) {
       if (!empId || !window.frappe) return;
       frappe.call({
@@ -683,6 +730,12 @@
           var df = findFieldEl("department");
           if (nf) { var ni = nf.querySelector("input"); if (ni) { ni.value = r.message.employee_name || ""; ni.dispatchEvent(new Event("change")); } }
           if (df) { var di = df.querySelector("input"); if (di) { di.value = r.message.department || ""; di.dispatchEvent(new Event("change")); } }
+          // Afficher la bannière de délégation si c'est un autre employé
+          if (currentUserEmployee && empId !== currentUserEmployee) {
+            showDelegationBanner(r.message.employee_name);
+          } else {
+            hideDelegationBanner();
+          }
         }
       });
     }

@@ -51,9 +51,47 @@ jinja = {
 }
 
 # Grille indiciaire : calcul automatique de la valeur indiciaire (Employee)
+# + Email récap à la soumission de web forms + suivi workflow
 doc_events = {
     "Employee": {
-        "before_save": "kya_hr.grille_indiciaire.calculer_indice_employee",
+        "before_save": [
+            "kya_hr.grille_indiciaire.calculer_indice_employee",
+            "kya_hr.matricule.auto_generate_matricule",
+        ],
+    },
+    "Permission Sortie Employe": {
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_update": "kya_hr.email_notifications.send_workflow_update",
+    },
+    "Permission Sortie Stagiaire": {
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_update": "kya_hr.email_notifications.send_workflow_update",
+    },
+    "PV Sortie Materiel": {
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_update": "kya_hr.email_notifications.send_workflow_update",
+    },
+    "Demande Achat KYA": {
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_update": "kya_hr.email_notifications.send_workflow_update",
+    },
+    "Planning Conge": {
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_update": [
+            "kya_hr.email_notifications.send_workflow_update",
+            "kya_hr.leave_bridge.create_leave_from_planning",
+        ],
+    },
+    "Leave Application": {
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_update": "kya_hr.email_notifications.send_workflow_update",
+    },
+    "Bilan Fin de Stage": {
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_update": "kya_hr.email_notifications.send_workflow_update",
+    },
+    "Tache Equipe": {
+        "after_insert": "kya_hr.email_notifications.send_task_assignment_email",
     },
 }
 
@@ -63,6 +101,17 @@ scheduler_events = {
         "kya_hr.reminders.send_kya_birthday_reminders",
         "kya_hr.reminders.send_kya_anniversary_reminders",
     ],
+}
+
+# Filtrage par équipe — Chef Service ne voit que les plans/tâches de son équipe
+permission_query_conditions = {
+    "Plan Trimestriel": "kya_hr.team_permissions.plan_trimestriel_query",
+    "Tache Equipe": "kya_hr.team_permissions.tache_equipe_query",
+}
+
+has_permission = {
+    "Plan Trimestriel": "kya_hr.team_permissions.plan_trimestriel_has_permission",
+    "Tache Equipe": "kya_hr.team_permissions.tache_equipe_has_permission",
 }
 
 # Post-migration: nettoyage workspaces obsolètes + branding KYA
