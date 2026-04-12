@@ -9,6 +9,7 @@ class PermissionSortieEmploye(Document):
     def validate(self):
         self.validate_employee_is_not_intern()
         self.set_employee_details()
+        self._fetch_chef_email()
 
     def before_insert(self):
         """When HR creates manually via Desk, start workflow at 'En attente RH'
@@ -35,6 +36,17 @@ class PermissionSortieEmploye(Document):
     def set_employee_details(self):
         if self.employee and not self.employee_name:
             self.employee_name = frappe.db.get_value("Employee", self.employee, "employee_name")
+
+    def _fetch_chef_email(self):
+        """Auto-fetch email of employee's direct chef via Employee.reports_to."""
+        if not self.get("employee") or self.chef_equipe_email:
+            return
+        reports_to = frappe.db.get_value("Employee", self.employee, "reports_to")
+        if reports_to:
+            user_id = frappe.db.get_value("Employee", reports_to, "user_id")
+            if user_id:
+                email = frappe.db.get_value("User", user_id, "email")
+                self.chef_equipe_email = email or user_id
 
     def before_submit(self):
         if self.workflow_state == "Approuvé":

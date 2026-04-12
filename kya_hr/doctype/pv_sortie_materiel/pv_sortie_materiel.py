@@ -19,14 +19,19 @@ class PVSortieMateriel(Document):
 
     def set_demandeur_info(self):
         """Auto-fill demandeur from session user's Employee record."""
-        if not self.demandeur_nom:
-            emp = frappe.db.get_value(
-                "Employee", {"user_id": frappe.session.user},
-                ["employee_name"], as_dict=True
-            )
-            if emp:
+        emp = frappe.db.get_value(
+            "Employee", {"user_id": frappe.session.user},
+            ["employee_name", "reports_to"], as_dict=True
+        )
+        if emp:
+            if not self.demandeur_nom:
                 self.demandeur_nom = emp.employee_name
                 self.demandeur_date = frappe.utils.today()
+            if not self.chef_equipe_email and emp.reports_to:
+                user_id = frappe.db.get_value("Employee", emp.reports_to, "user_id")
+                if user_id:
+                    email = frappe.db.get_value("User", user_id, "email")
+                    self.chef_equipe_email = email or user_id
 
     def on_update_after_submit(self):
         if self.workflow_state:

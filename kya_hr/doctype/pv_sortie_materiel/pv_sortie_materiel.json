@@ -74,6 +74,13 @@
             "hidden": 1
         },
         {
+            "fieldname": "chef_equipe_email",
+            "label": "Email Chef d'\u00c9quipe",
+            "fieldtype": "Data",
+            "hidden": 1,
+            "read_only": 1
+        },
+        {
             "fieldname": "section_items",
             "label": "Mat\u00e9riels \u00e0 Sortir",
             "fieldtype": "Section Break"
