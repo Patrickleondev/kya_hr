@@ -2684,3 +2684,47 @@ def assign_task_to_member(task_name, employe, role_attribution="Contributeur"):
         "success": True,
         "message": f"{emp_name} ajouté(e) à la tâche '{tache.libelle}'",
     }
+
+
+# ════════════════════════════════════════════════════════════════════
+#  WEB FORM HELPERS
+# ════════════════════════════════════════════════════════════════════
+
+@frappe.whitelist()
+def get_current_employee():
+    """Return current user's employee info for web form auto-fill.
+
+    Returns dict with employee_id, employee_name, department, employment_type, is_hr.
+    Admin/HR users get is_hr=True so they can manually pick a different employee.
+    """
+    user = frappe.session.user
+    if user in ("Guest", ""):
+        frappe.throw("Veuillez vous connecter.", frappe.AuthenticationError)
+
+    if user == "Administrator":
+        return {"employee_id": None, "employee_name": None, "is_hr": True}
+
+    emp = frappe.db.get_value(
+        "Employee",
+        {"user_id": user, "status": "Active"},
+        ["name", "employee_name", "department", "employment_type"],
+        as_dict=True,
+    )
+
+    if not emp:
+        return {"employee_id": None, "employee_name": None, "is_hr": False}
+
+    roles = set(frappe.get_roles(user))
+    hr_roles = {
+        "HR Manager", "HR User", "System Manager",
+        "Responsable RH", "Responsable des Stagiaires",
+    }
+    is_hr = bool(roles & hr_roles)
+
+    return {
+        "employee_id": emp.name,
+        "employee_name": emp.employee_name,
+        "department": emp.department,
+        "employment_type": emp.employment_type,
+        "is_hr": is_hr,
+    }
