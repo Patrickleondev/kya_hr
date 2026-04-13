@@ -167,7 +167,14 @@
 
                     ],
     "roles":  [
-
+                  {"role": "Stagiaire"},
+                  {"role": "Responsable des Stagiaires"},
+                  {"role": "Maître de Stage"},
+                  {"role": "Responsable RH"},
+                  {"role": "HR Manager"},
+                  {"role": "Chef Service"},
+                  {"role": "Supérieur Immédiat"},
+                  {"role": "System Manager"}
               ],
     "shortcuts":  [
                       {

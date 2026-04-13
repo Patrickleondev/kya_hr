@@ -259,6 +259,22 @@ def send_workflow_update(doc, method=None):
         now=True,
     )
 
+    # Diffusion temps réel → les fiches ouvertes dans l'interface se rafraîchissent
+    try:
+        frappe.publish_realtime(
+            event="workflow_state_change",
+            message={
+                "doctype": dt,
+                "docname": doc.name,
+                "workflow_state": getattr(doc, "workflow_state", ""),
+            },
+            doctype=dt,
+            docname=doc.name,
+            after_commit=True,
+        )
+    except Exception:
+        pass
+
 
 def send_task_assignment_email(doc, method=None):
     """Envoie un email quand une tâche est assignée à un employé.

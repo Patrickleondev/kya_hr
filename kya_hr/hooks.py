@@ -104,9 +104,11 @@ scheduler_events = {
 }
 
 # Filtrage par équipe — Chef Service ne voit que les plans/tâches de son équipe
+# Filtre Employee — Stagiaire ne voit que sa propre fiche
 permission_query_conditions = {
     "Plan Trimestriel": "kya_hr.team_permissions.plan_trimestriel_query",
     "Tache Equipe": "kya_hr.team_permissions.tache_equipe_query",
+    "Employee": "kya_hr.permissions.employee_query_condition",
 }
 
 has_permission = {

@@ -1,6 +1,7 @@
 /**
- * Employee client script — real-time valeur indiciaire calculation
- * KYA-Energy Group, Article 13 du Règlement Intérieur
+ * Employee client script — KYA-Energy Group
+ * - Calcul valeur indiciaire (Article 13 RI)
+ * - Boutons rapides vers les web forms KYA (temps réel)
  */
 frappe.ui.form.on('Employee', {
     custom_kya_classe: function(frm) {
@@ -8,6 +9,57 @@ frappe.ui.form.on('Employee', {
     },
     custom_kya_echelon: function(frm) {
         calculer_indice(frm);
+    },
+
+    refresh: function(frm) {
+        if (frm.doc.__islocal) return;
+
+        var emp_id = encodeURIComponent(frm.doc.name);
+        var is_stagiaire = (frm.doc.employment_type === 'Stage');
+        var grp = __('📋 Formulaires');
+
+        // Supprime les anciens boutons de groupe pour éviter les doublons
+        frm.remove_custom_button(__('Permission de Sortie Stagiaire'), grp);
+        frm.remove_custom_button(__('Bilan de Fin de Stage'), grp);
+        frm.remove_custom_button(__('Permission de Sortie'), grp);
+        frm.remove_custom_button(__('PV Sortie Matériel'), grp);
+        frm.remove_custom_button(__("Demande d'Achat"), grp);
+        frm.remove_custom_button(__('Planning de Congé'), grp);
+        frm.remove_custom_button(__('Demande de Congé'), grp);
+
+        if (is_stagiaire) {
+            frm.add_custom_button(__('Permission de Sortie Stagiaire'), function() {
+                window.open('/permission-sortie-stagiaire/new?employee=' + emp_id, '_blank');
+            }, grp);
+            frm.add_custom_button(__('Bilan de Fin de Stage'), function() {
+                window.open('/bilan-fin-de-stage/new?employee=' + emp_id, '_blank');
+            }, grp);
+        } else {
+            frm.add_custom_button(__('Permission de Sortie'), function() {
+                window.open('/permission-sortie-employe/new?employee=' + emp_id, '_blank');
+            }, grp);
+            frm.add_custom_button(__('PV Sortie Matériel'), function() {
+                window.open('/pv-sortie-materiel/new?employee=' + emp_id, '_blank');
+            }, grp);
+            frm.add_custom_button(__("Demande d'Achat"), function() {
+                window.open('/demande-achat/new?employee=' + emp_id, '_blank');
+            }, grp);
+            frm.add_custom_button(__('Planning de Congé'), function() {
+                window.open('/planning-conge/new?employee=' + emp_id, '_blank');
+            }, grp);
+            frm.add_custom_button(__('Demande de Congé'), function() {
+                window.open('/demande-conge/new?employee=' + emp_id, '_blank');
+            }, grp);
+        }
+
+        // Temps réel : rafraîchissement automatique si le workflow change
+        // depuis une autre session (ex: validation par le chef via son Espace)
+        frappe.realtime.off('workflow_state_change');
+        frappe.realtime.on('workflow_state_change', function(data) {
+            if (data && data.doctype === frm.doctype && data.docname === frm.docname) {
+                frm.reload_doc();
+            }
+        });
     }
 });
 
