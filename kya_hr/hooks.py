@@ -30,6 +30,7 @@ fixtures = [
     {"dt": "Email Template"},
     {"dt": "Notification"},
     {"dt": "Employment Type", "filters": [["name", "in", ["CDI", "CDD", "Stage", "Prestataire"]]]},
+    {"dt": "Letter Head", "filters": [["name", "=", "KYA-Energy Group"]]},
 ]
 
 # DocType client scripts
