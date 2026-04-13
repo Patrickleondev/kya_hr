@@ -27,7 +27,7 @@
   "channel": "Email",
   "recipients": [
    {
-    "receiver_by_role": "HR User"
+    "receiver_by_role": "Responsable des Stagiaires"
    }
   ],
   "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#009688,#00bcd4);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='https://www.kya-energy.com/wp-content/uploads/2024/02/Logo-10-ans-KYA.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>Validation Niveau 2</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><p>Bonjour,</p><p>La demande de permission du stagiaire <b>{{ doc.employee_name }}</b> a été validée par le Chef de Service et nécessite votre approbation.</p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url() }}/permission-sortie-stagiaire/{{ doc.name }}' style='display:inline-block;padding:12px 32px;background:#009688;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>📱 Examiner la demande</a><br><a href='{{ frappe.utils.get_url_to_form(doc.doctype, doc.name) }}' style='display:inline-block;margin-top:10px;padding:8px 20px;background:#f5f5f5;color:#333;text-decoration:none;border-radius:6px;font-size:13px;border:1px solid #ddd;'>💻 Ouvrir dans le Bureau ERPNext</a></div></div>{{ get_kya_email_footer() }}</div>",
@@ -44,7 +44,7 @@
   "channel": "Email",
   "recipients": [
    {
-    "receiver_by_role": "HR Manager"
+    "receiver_by_role": "Directeur Général"
    }
   ],
   "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#009688,#00bcd4);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='https://www.kya-energy.com/wp-content/uploads/2024/02/Logo-10-ans-KYA.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>Approbation Finale</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><p>Bonjour Monsieur le Directeur Général,</p><p>La permission de sortie du stagiaire <b>{{ doc.employee_name }}</b> est en attente de votre approbation finale.</p><table style='width:100%;border-collapse:collapse;margin:14px 0;'><tr><td style='padding:6px 10px;background:#f5f5f5;font-weight:700;width:40%;'>Motif</td><td style='padding:6px 10px;'>{{ doc.motif }}</td></tr><tr><td style='padding:6px 10px;background:#f5f5f5;font-weight:700;'>Date</td><td style='padding:6px 10px;'>{{ doc.date_sortie }}</td></tr></table><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url() }}/permission-sortie-stagiaire/{{ doc.name }}' style='display:inline-block;padding:12px 32px;background:#009688;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>📱 Approuver / Rejeter</a><br><a href='{{ frappe.utils.get_url_to_form(doc.doctype, doc.name) }}' style='display:inline-block;margin-top:10px;padding:8px 20px;background:#f5f5f5;color:#333;text-decoration:none;border-radius:6px;font-size:13px;border:1px solid #ddd;'>💻 Ouvrir dans le Bureau ERPNext</a></div></div>{{ get_kya_email_footer() }}</div>",
@@ -112,7 +112,7 @@
   "channel": "Email",
   "recipients": [
    {
-    "receiver_by_role": "Stock User"
+    "receiver_by_role": "Chargé des Stocks"
    }
   ],
   "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#FF6F61,#FF9A76);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='https://www.kya-energy.com/wp-content/uploads/2024/02/Logo-10-ans-KYA.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>Contrôle Magasin</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><p>Le PV de sortie matériel <b>{{ doc.name }}</b> a passé toutes les validations (Chef, Audit, Direction) et nécessite votre signature finale pour la remise du matériel.</p><p><b>Objet :</b> {{ doc.objet }}</p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url() }}/pv-sortie-materiel/{{ doc.name }}' style='display:inline-block;padding:12px 32px;background:#FF6F61;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>📱 Contrôler et signer</a><br><a href='{{ frappe.utils.get_url_to_form(doc.doctype, doc.name) }}' style='display:inline-block;margin-top:10px;padding:8px 20px;background:#f5f5f5;color:#333;text-decoration:none;border-radius:6px;font-size:13px;border:1px solid #ddd;'>💻 Ouvrir dans le Bureau ERPNext</a></div></div>{{ get_kya_email_footer() }}</div>",
@@ -146,7 +146,7 @@
   "channel": "Email",
   "recipients": [
    {
-    "receiver_by_role": "Stock Manager"
+    "receiver_by_role": "Directeur Général"
    }
   ],
   "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#FF6F61,#FF9A76);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='https://www.kya-energy.com/wp-content/uploads/2024/02/Logo-10-ans-KYA.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>Validation Direction / DGA</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><p>Le PV de sortie matériel <b>{{ doc.name }}</b> a été validé par le Chef et l’Audit et nécessite votre approbation.</p><p><b>Objet :</b> {{ doc.objet }}</p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url() }}/pv-sortie-materiel/{{ doc.name }}' style='display:inline-block;padding:12px 32px;background:#FF6F61;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>📱 Approuver / Rejeter</a><br><a href='{{ frappe.utils.get_url_to_form(doc.doctype, doc.name) }}' style='display:inline-block;margin-top:10px;padding:8px 20px;background:#f5f5f5;color:#333;text-decoration:none;border-radius:6px;font-size:13px;border:1px solid #ddd;'>💻 Ouvrir dans le Bureau ERPNext</a></div></div>{{ get_kya_email_footer() }}</div>",
@@ -214,7 +214,7 @@
   "channel": "Email",
   "recipients": [
    {
-    "receiver_by_role": "HR Manager"
+    "receiver_by_role": "Responsable RH"
    }
   ],
   "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#009688,#00bcd4);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='https://www.kya-energy.com/wp-content/uploads/2024/02/Logo-10-ans-KYA.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>Validation RH Requise</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><p>Bonjour,</p><p>La demande de permission de l’employé(e) <b>{{ doc.employee_name }}</b> a été validée par le Chef de Service et nécessite votre approbation finale.</p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url() }}/permission-sortie-employe/{{ doc.name }}' style='display:inline-block;padding:12px 32px;background:#009688;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>📱 Examiner la demande</a><br><a href='{{ frappe.utils.get_url_to_form(doc.doctype, doc.name) }}' style='display:inline-block;margin-top:10px;padding:8px 20px;background:#f5f5f5;color:#333;text-decoration:none;border-radius:6px;font-size:13px;border:1px solid #ddd;'>💻 Ouvrir dans le Bureau ERPNext</a></div></div>{{ get_kya_email_footer() }}</div>",
@@ -265,7 +265,7 @@
   "channel": "Email",
   "recipients": [
    {
-    "receiver_by_role": "HR User"
+    "receiver_by_role": "Responsable RH"
    }
   ],
   "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#009688,#00bcd4);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='https://www.kya-energy.com/wp-content/uploads/2024/02/Logo-10-ans-KYA.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>Planning de Congé à Valider</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><p>Bonjour,</p><p>L’employé(e) <b>{{ doc.employee_name }}</b> a soumis son planning de congé pour l’année <b>{{ doc.annee }}</b> ({{ doc.total_jours }} jours planifiés).</p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url() }}/planning-conge/{{ doc.name }}' style='display:inline-block;padding:12px 32px;background:#009688;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>📱 Examiner la demande</a><br><a href='{{ frappe.utils.get_url_to_form(doc.doctype, doc.name) }}' style='display:inline-block;margin-top:10px;padding:8px 20px;background:#f5f5f5;color:#333;text-decoration:none;border-radius:6px;font-size:13px;border:1px solid #ddd;'>💻 Ouvrir dans le Bureau ERPNext</a></div></div>{{ get_kya_email_footer() }}</div>",
@@ -282,7 +282,7 @@
   "channel": "Email",
   "recipients": [
    {
-    "receiver_by_role": "HR Manager"
+    "receiver_by_role": "Directeur Général"
    }
   ],
   "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#009688,#00bcd4);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='https://www.kya-energy.com/wp-content/uploads/2024/02/Logo-10-ans-KYA.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>Validation DG Requise</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><p>Bonjour,</p><p>Le planning de congé de <b>{{ doc.employee_name }}</b> pour {{ doc.annee }} a été validé par les RH et nécessite votre approbation finale.</p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url() }}/planning-conge/{{ doc.name }}' style='display:inline-block;padding:12px 32px;background:#009688;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>📱 Approuver / Rejeter</a><br><a href='{{ frappe.utils.get_url_to_form(doc.doctype, doc.name) }}' style='display:inline-block;margin-top:10px;padding:8px 20px;background:#f5f5f5;color:#333;text-decoration:none;border-radius:6px;font-size:13px;border:1px solid #ddd;'>💻 Ouvrir dans le Bureau ERPNext</a></div></div>{{ get_kya_email_footer() }}</div>",
@@ -350,7 +350,7 @@
   "channel": "Email",
   "recipients": [
    {
-    "receiver_by_role": "Purchase Manager"
+    "receiver_by_role": "DAAF"
    }
   ],
   "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#009688,#00bcd4);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='https://www.kya-energy.com/wp-content/uploads/2024/02/Logo-10-ans-KYA.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>Approbation DGA Requise</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><p>Bonjour,</p><p>La demande d’achat <b>{{ doc.objet }}</b> ({{ frappe.utils.fmt_money(doc.montant_total, currency='XOF') }}) de <b>{{ doc.employee_name }}</b> a été validée par le Chef de Service.</p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url() }}/demande-achat/{{ doc.name }}' style='display:inline-block;padding:12px 32px;background:#009688;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>📱 Vérifier et signer</a><br><a href='{{ frappe.utils.get_url_to_form(doc.doctype, doc.name) }}' style='display:inline-block;margin-top:10px;padding:8px 20px;background:#f5f5f5;color:#333;text-decoration:none;border-radius:6px;font-size:13px;border:1px solid #ddd;'>💻 Ouvrir dans le Bureau ERPNext</a></div></div>{{ get_kya_email_footer() }}</div>",
@@ -367,7 +367,7 @@
   "channel": "Email",
   "recipients": [
    {
-    "receiver_by_role": "System Manager"
+    "receiver_by_role": "Directeur Général"
    }
   ],
   "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#009688,#00bcd4);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='https://www.kya-energy.com/wp-content/uploads/2024/02/Logo-10-ans-KYA.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>Approbation DG Requise</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><p>Bonjour,</p><p>La demande d’achat <b>{{ doc.objet }}</b> d’un montant de <b>{{ frappe.utils.fmt_money(doc.montant_total, currency='XOF') }}</b> nécessite votre approbation finale (Palier 3).</p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url() }}/demande-achat/{{ doc.name }}' style='display:inline-block;padding:12px 32px;background:#009688;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>📱 Approuver / Rejeter</a><br><a href='{{ frappe.utils.get_url_to_form(doc.doctype, doc.name) }}' style='display:inline-block;margin-top:10px;padding:8px 20px;background:#f5f5f5;color:#333;text-decoration:none;border-radius:6px;font-size:13px;border:1px solid #ddd;'>💻 Ouvrir dans le Bureau ERPNext</a></div></div>{{ get_kya_email_footer() }}</div>",
@@ -418,7 +418,7 @@
   "channel": "Email",
   "recipients": [
    {
-    "receiver_by_role": "HR Manager"
+    "receiver_by_role": "DAAF"
    }
   ],
   "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#009688,#00bcd4);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='https://www.kya-energy.com/wp-content/uploads/2024/02/Logo-10-ans-KYA.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>Approbation DGA</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><p>Bonjour,</p><p>La permission de sortie de <b>{{ doc.employee_name }}</b> a été validée par le Chef de Service et les RH. Votre approbation finale est requise.</p><table style='width:100%;border-collapse:collapse;margin:14px 0;'><tr><td style='padding:6px 10px;background:#f5f5f5;font-weight:700;width:40%;'>Motif</td><td style='padding:6px 10px;'>{{ doc.motif }}</td></tr><tr><td style='padding:6px 10px;background:#f5f5f5;font-weight:700;'>Date</td><td style='padding:6px 10px;'>{{ doc.date_sortie }}</td></tr></table><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url_to_form(doc.doctype, doc.name) }}' style='display:inline-block;padding:12px 32px;background:#009688;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>💻 Approuver / Rejeter</a></div></div>{{ get_kya_email_footer() }}</div>",
@@ -438,7 +438,7 @@
     "receiver_by_document_field": "user_id"
    },
    {
-    "receiver_by_role": "HR User"
+    "receiver_by_role": "Responsable RH"
    }
   ],
   "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#FF9800,#FF5722);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='https://www.kya-energy.com/wp-content/uploads/2024/02/Logo-10-ans-KYA.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>🎂 Joyeux Anniversaire !</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><div style='text-align:center;font-size:48px;margin:16px 0;'>🎉</div><h3 style='text-align:center;color:#FF9800;'>Joyeux anniversaire, {{ doc.employee_name }} !</h3><p style='text-align:center;'>Toute l'équipe KYA-Energy Group vous souhaite une excellente journée et vous remercie pour votre précieuse contribution au sein de notre organisation.</p><p style='text-align:center;font-style:italic;color:#777;'>« Le succès de KYA-Energy Group repose sur des collaborateurs passionnés comme vous. »</p><hr style='margin:20px 0;border:none;border-top:1px solid #eee;'><p style='text-align:center;font-size:13px;color:#888;'>Département {{ doc.department }} · {{ doc.designation }}</p></div>{{ get_kya_email_footer() }}</div>",
@@ -459,7 +459,7 @@
     "receiver_by_document_field": "user_id"
    },
    {
-    "receiver_by_role": "HR User"
+    "receiver_by_role": "Responsable RH"
    }
   ],
   "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#1a237e,#283593);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='https://www.kya-energy.com/wp-content/uploads/2024/02/Logo-10-ans-KYA.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>🏆 Anniversaire Professionnel</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><div style='text-align:center;font-size:48px;margin:16px 0;'>🌟</div><h3 style='text-align:center;color:#1a237e;'>Félicitations, {{ doc.employee_name }} !</h3><p style='text-align:center;'>Aujourd'hui marque <b>{{ ((frappe.utils.getdate() - frappe.utils.getdate(doc.date_of_joining)).days // 365) }} an(s)</b> au sein de KYA-Energy Group.</p><p style='text-align:center;'>Nous vous remercions pour votre engagement, votre professionnalisme et votre contribution remarquable à la croissance de l'entreprise.</p><hr style='margin:20px 0;border:none;border-top:1px solid #eee;'><p style='text-align:center;font-size:13px;color:#888;'>Membre depuis le {{ frappe.utils.formatdate(doc.date_of_joining) }} · {{ doc.department }}</p></div>{{ get_kya_email_footer() }}</div>",
@@ -496,7 +496,7 @@
   "send_to_all_assignees": 0,
   "recipients": [
    {
-    "receiver_by_role": "HR User"
+    "receiver_by_role": "Responsable RH"
    }
   ],
   "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#009688,#00bcd4);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='https://www.kya-energy.com/wp-content/uploads/2024/02/Logo-10-ans-KYA.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>Demande de Congé</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><p>La demande de congé de <b>{{ doc.employee_name }}</b> ({{ doc.leave_type }}, du {{ doc.from_date }} au {{ doc.to_date }}) requiert votre validation RH.</p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url() }}/demande-conge/{{ doc.name }}' style='display:inline-block;padding:12px 32px;background:#009688;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>📱 Voir la demande</a><br><a href='{{ frappe.utils.get_url_to_form(doc.doctype, doc.name) }}' style='display:inline-block;margin-top:10px;padding:8px 20px;background:#f5f5f5;color:#333;text-decoration:none;border-radius:6px;font-size:13px;border:1px solid #ddd;'>💻 Ouvrir dans le Bureau</a></div></div>{{ get_kya_email_footer() }}</div>",
@@ -515,7 +515,7 @@
   "send_to_all_assignees": 0,
   "recipients": [
    {
-    "receiver_by_role": "HR Manager"
+    "receiver_by_role": "Directeur Général"
    }
   ],
   "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#009688,#00bcd4);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='https://www.kya-energy.com/wp-content/uploads/2024/02/Logo-10-ans-KYA.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>Demande de Congé</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><p>La demande de congé de <b>{{ doc.employee_name }}</b> ({{ doc.leave_type }}, du {{ doc.from_date }} au {{ doc.to_date }}) est en attente de votre approbation.</p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url() }}/demande-conge/{{ doc.name }}' style='display:inline-block;padding:12px 32px;background:#009688;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>📱 Voir la demande</a><br><a href='{{ frappe.utils.get_url_to_form(doc.doctype, doc.name) }}' style='display:inline-block;margin-top:10px;padding:8px 20px;background:#f5f5f5;color:#333;text-decoration:none;border-radius:6px;font-size:13px;border:1px solid #ddd;'>💻 Ouvrir dans le Bureau</a></div></div>{{ get_kya_email_footer() }}</div>",

@@ -15,9 +15,10 @@ def employee_query_condition(user=None):
     # These roles grant full Employee list access
     elevated_roles = {
         "HR User", "HR Manager", "System Manager",
-        "Administrator", "DG", "DGA", "DAAF",
+        "Administrator", "Directeur Général", "Responsable RH", "DAAF",
         "Responsable des Stagiaires", "Maître de Stage",
-        "Chef Service", "Chef Equipe",
+        "Chef Service", "Supérieur Immédiat",
+        "KYA Survey Admin",
     }
 
     if "Stagiaire" in roles and not elevated_roles.intersection(roles):

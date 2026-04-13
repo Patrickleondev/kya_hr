@@ -22,17 +22,17 @@
  "roles": [
   {"role": "Employee Self Service"},
   {"role": "Chef Service"},
-  {"role": "Chef Equipe"},
-  {"role": "HR User"},
+  {"role": "Supérieur Immédiat"},
   {"role": "HR Manager"},
-  {"role": "DG"},
-  {"role": "DGA"},
-  {"role": "Auditeur Interne"},
+  {"role": "Responsable RH"},
+  {"role": "Directeur Général"},
   {"role": "DAAF"},
+  {"role": "Auditeur Interne"},
   {"role": "Stock User"},
   {"role": "Purchase User"},
   {"role": "Responsable Achats"},
   {"role": "Chargé des Stocks"},
+  {"role": "KYA Destinataire Notif"},
   {"role": "System Manager"}
  ],
  "shortcuts": [
