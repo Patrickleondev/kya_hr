@@ -214,6 +214,16 @@
             "read_only": 1
         },
         {
+            "fieldname": "employee_email",
+            "label": "Email Employ\u00e9",
+            "fieldtype": "Data",
+            "options": "Email",
+            "hidden": 1,
+            "read_only": 1,
+            "no_copy": 1,
+            "print_hide": 1
+        },
+        {
             "fieldname": "amended_from",
             "label": "Modifi\u00e9 depuis",
             "fieldtype": "Link",

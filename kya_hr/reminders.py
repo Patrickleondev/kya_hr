@@ -42,10 +42,10 @@ def send_kya_birthday_reminders():
         subject = f"\U0001f382 Anniversaire \u2014 {emp.employee_name}"
         message = (
             "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'>"
-            "<div style='background:linear-gradient(135deg,#ff8f00,#ffa726);padding:24px;"
+            f"<div style='background:#ff8f00;padding:24px;"
             "border-radius:12px 12px 0 0;text-align:center;'>"
-            "<img src='https://www.kya-energy.com/wp-content/uploads/2024/02/Logo-10-ans-KYA.png'"
-            " width='60' style='margin-bottom:8px;'>"
+            f"<img src='{site_url}/assets/kya_hr/images/kya_logo.png'"
+            " alt='KYA-Energy Group' width='60' height='60' border='0' style='margin-bottom:8px;display:block;margin:0 auto;'>"
             "<h2 style='color:white;margin:0;'>\U0001f382 Joyeux Anniversaire !</h2></div>"
             "<div style='background:white;padding:24px;border:1px solid #e0e0e0;"
             "border-radius:0 0 12px 12px;'>"
@@ -99,10 +99,10 @@ def send_kya_anniversary_reminders():
         )
         message = (
             "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'>"
-            "<div style='background:linear-gradient(135deg,#1565c0,#42a5f5);padding:24px;"
+            f"<div style='background:#1565c0;padding:24px;"
             "border-radius:12px 12px 0 0;text-align:center;'>"
-            "<img src='https://www.kya-energy.com/wp-content/uploads/2024/02/Logo-10-ans-KYA.png'"
-            " width='60' style='margin-bottom:8px;'>"
+            f"<img src='{site_url}/assets/kya_hr/images/kya_logo.png'"
+            " alt='KYA-Energy Group' width='60' height='60' border='0' style='margin-bottom:8px;display:block;margin:0 auto;'>"
             "<h2 style='color:white;margin:0;'>\U0001f3c6 Anniversaire de Service</h2></div>"
             "<div style='background:white;padding:24px;border:1px solid #e0e0e0;"
             "border-radius:0 0 12px 12px;'>"

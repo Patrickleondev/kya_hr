@@ -21,12 +21,14 @@ class PVSortieMateriel(Document):
         """Auto-fill demandeur from session user's Employee record."""
         emp = frappe.db.get_value(
             "Employee", {"user_id": frappe.session.user},
-            ["employee_name", "reports_to"], as_dict=True
+            ["name", "employee_name", "reports_to", "user_id"], as_dict=True
         )
         if emp:
             if not self.demandeur_nom:
                 self.demandeur_nom = emp.employee_name
                 self.demandeur_date = frappe.utils.today()
+            if emp.user_id:
+                self.employee_email = emp.user_id
             if not self.chef_equipe_email and emp.reports_to:
                 user_id = frappe.db.get_value("Employee", emp.reports_to, "user_id")
                 if user_id:
