@@ -117,6 +117,73 @@
             "depends_on": "eval:doc.commentaire_rh"
         },
         {
+            "fieldname": "section_signatures",
+            "label": "Signatures & Approbations",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "signature_employe",
+            "label": "Signature Employ\u00e9",
+            "fieldtype": "Signature",
+            "description": "L\u2019employ\u00e9 signe ici pour soumettre sa demande"
+        },
+        {
+            "fieldname": "signataire_employe",
+            "label": "Nom Signataire Employ\u00e9",
+            "fieldtype": "Data",
+            "read_only": 1
+        },
+        {
+            "fieldname": "date_signature_employe",
+            "label": "Date Signature Employ\u00e9",
+            "fieldtype": "Date",
+            "read_only": 1
+        },
+        {
+            "fieldname": "col_sig_1",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "signature_rh",
+            "label": "Signature RH",
+            "fieldtype": "Signature",
+            "read_only": 1
+        },
+        {
+            "fieldname": "signataire_rh",
+            "label": "Nom Signataire RH",
+            "fieldtype": "Data",
+            "read_only": 1
+        },
+        {
+            "fieldname": "date_signature_rh",
+            "label": "Date Signature RH",
+            "fieldtype": "Date",
+            "read_only": 1
+        },
+        {
+            "fieldname": "col_sig_2",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "signature_dg",
+            "label": "Signature DG",
+            "fieldtype": "Signature",
+            "read_only": 1
+        },
+        {
+            "fieldname": "signataire_dg",
+            "label": "Nom Signataire DG",
+            "fieldtype": "Data",
+            "read_only": 1
+        },
+        {
+            "fieldname": "date_signature_dg",
+            "label": "Date Signature DG",
+            "fieldtype": "Date",
+            "read_only": 1
+        },
+        {
             "fieldname": "section_workflow",
             "label": "Statut & Approbation",
             "fieldtype": "Section Break"
