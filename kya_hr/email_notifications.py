@@ -86,9 +86,9 @@ def _build_recap_body(doc, config, emp_name, is_update=False):
 
     return """
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background: linear-gradient(135deg, #009688, #00bcd4); padding: 24px; border-radius: 12px 12px 0 0; text-align:center;">
-        <img src="https://www.kya-energy.com/wp-content/uploads/2024/02/Logo-10-ans-KYA.png"
-             alt="KYA" width="60" style="margin-bottom:8px;">
+      <div style="background: #009688; padding: 24px; border-radius: 12px 12px 0 0; text-align:center;">
+        <img src="{logo_url}"
+             alt="KYA-Energy Group" width="60" height="60" border="0" style="margin-bottom:8px;display:block;margin:0 auto;">
         <h2 style="color:white; margin:0;">{icon} {label}</h2>
         <p style="color:rgba(255,255,255,0.8); margin:4px 0 0;">{title}</p>
       </div>
@@ -129,6 +129,7 @@ def _build_recap_body(doc, config, emp_name, is_update=False):
       {footer}
     </div>
     """.format(
+        logo_url="{}/assets/kya_hr/images/kya_logo.png".format(get_url()),
         icon=config["icon"],
         label=config["label"],
         title=title,
@@ -302,9 +303,9 @@ def send_task_assignment_email(doc, method=None):
 
     body = """
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background: linear-gradient(135deg, #1565c0, #42a5f5); padding: 24px; border-radius: 12px 12px 0 0; text-align:center;">
-        <img src="https://www.kya-energy.com/wp-content/uploads/2024/02/Logo-10-ans-KYA.png"
-             alt="KYA" width="60" style="margin-bottom:8px;">
+      <div style="background: #1565c0; padding: 24px; border-radius: 12px 12px 0 0; text-align:center;">
+        <img src="{logo_url}"
+             alt="KYA-Energy Group" width="60" height="60" border="0" style="margin-bottom:8px;display:block;margin:0 auto;">
         <h2 style="color:white; margin:0;">📌 Nouvelle tâche assignée</h2>
       </div>
       <div style="background: #ffffff; padding: 24px; border: 1px solid #e0e0e0;">
@@ -341,6 +342,7 @@ def send_task_assignment_email(doc, method=None):
       {footer}
     </div>
     """.format(
+        logo_url="{}/assets/kya_hr/images/kya_logo.png".format(base_url),
         emp_name=emp.get("employee_name"),
         libelle=getattr(doc, "libelle", ""),
         resultat=getattr(doc, "resultat_libelle", ""),

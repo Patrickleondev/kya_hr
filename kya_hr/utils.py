@@ -2,14 +2,15 @@
 KYA HR — Fonctions utilitaires
 """
 
-KYA_EMAIL_FOOTER = """
+KYA_EMAIL_FOOTER_TPL = """
 <hr style="border:none; border-top:2px solid #009688; margin:20px 0 10px;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0"
        style="font-family: Arial, sans-serif; font-size: 11px; color: #999;">
   <tr>
     <td width="65" style="vertical-align:middle; padding-right:10px;">
-      <img src="https://www.kya-energy.com/wp-content/uploads/2024/02/Logo-10-ans-KYA.png"
-           alt="KYA" width="55" style="display:block;">
+      <img src="{site_url}/assets/kya_hr/images/kya_logo.png"
+           alt="KYA-Energy Group" width="55" height="55" border="0"
+           style="display:block;">
     </td>
     <td style="vertical-align:middle; border-left:2px solid #009688; padding-left:10px;">
       <b style="color:#009688; font-size:12px;">KYA-Energy Group</b><br>
@@ -24,5 +25,7 @@ KYA_EMAIL_FOOTER = """
 
 
 def get_kya_email_footer():
-    """Retourne le footer HTML KYA pour les templates Jinja."""
-    return KYA_EMAIL_FOOTER
+    """Retourne le footer HTML KYA avec l'URL du site."""
+    import frappe
+    site_url = frappe.utils.get_url()
+    return KYA_EMAIL_FOOTER_TPL.format(site_url=site_url)
