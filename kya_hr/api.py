@@ -1237,57 +1237,57 @@ def get_webforms_list():
             "label": "Permission de Sortie Stagiaire",
             "route": "/permission-sortie-stagiaire",
             "new_route": "/permission-sortie-stagiaire/new",
-            "ref": "AEA-ENG-30-V01",
+            "ref": "PSS",
             "module": "Stagiaires",
-            "icon": "≡ƒÄô"
+            "icon": "\U0001f393"
         },
         {
             "name": "permission-sortie-employe",
-            "label": "Permission de Sortie Employ├⌐",
+            "label": "Permission de Sortie Employ\u00e9",
             "route": "/permission-sortie-employe",
             "new_route": "/permission-sortie-employe/new",
-            "ref": "AEA-ENG-30-V01",
-            "module": "Employ├⌐s",
-            "icon": "≡ƒæñ"
+            "ref": "PSE",
+            "module": "Employ\u00e9s",
+            "icon": "\U0001f6b6"
         },
         {
             "name": "demande-achat",
             "label": "Demande d'Achat",
             "route": "/demande-achat",
             "new_route": "/demande-achat/new",
-            "ref": "AEA-ENG-30-V01",
+            "ref": "DA",
             "module": "Achats",
-            "icon": "≡ƒ¢Æ"
+            "icon": "\U0001f6d2"
         },
         {
             "name": "pv-sortie-materiel",
-            "label": "PV Sortie de Mat├⌐riel",
+            "label": "PV Sortie de Mat\u00e9riel",
             "route": "/pv-sortie-materiel",
             "new_route": "/pv-sortie-materiel/new",
-            "ref": "AEA-ENG-30-V01",
+            "ref": "PVSM",
             "module": "Stock",
-            "icon": "≡ƒôª"
+            "icon": "\U0001f4e6"
         },
         {
             "name": "planning-conge",
-            "label": "Planning de Cong├⌐",
+            "label": "Planning de Cong\u00e9",
             "route": "/planning-conge",
             "new_route": "/planning-conge/new",
-            "ref": "AEA-ENG-30-V01",
-            "module": "Employ├⌐s",
-            "icon": "≡ƒôà"
+            "ref": "PLAN",
+            "module": "Employ\u00e9s",
+            "icon": "\U0001f4c5"
         },
         {
             "name": "bilan-fin-de-stage",
             "label": "Bilan de Fin de Stage",
             "route": "/bilan-fin-de-stage",
             "new_route": "/bilan-fin-de-stage/new",
-            "ref": "AEA-ENG-30-V01",
+            "ref": "BFS",
             "module": "Stagiaires",
-            "icon": "≡ƒôï"
+            "icon": "\U0001f4cb"
         },
     ]
-    # Enrichir avec le count des documents li├⌐s
+    # Enrichir avec le count des documents li\u00e9s
     doctypes_map = {
         "permission-sortie-stagiaire": "Permission Sortie Stagiaire",
         "permission-sortie-employe": "Permission Sortie Employe",
