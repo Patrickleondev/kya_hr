@@ -57,13 +57,7 @@
    "color": "#27ae60",
    "icon": "calendar"
   },
-  {
-   "label": "Tableau de Bord Employés",
-   "type": "URL",
-    "url": "/tableau_bord_employes",
-   "color": "#F58220",
-   "icon": "bar-chart"
-  },
+
   {
    "label": "Demande d'Achat",
    "type": "URL",
@@ -206,16 +200,6 @@
    "label": "Présences",
    "link_to": "Attendance",
    "link_type": "DocType",
-   "hidden": 0,
-   "is_query_report": 0,
-   "link_count": 0,
-   "onboard": 0
-  },
-  {
-   "type": "Link",
-   "label": "Tableau de Bord",
-    "link_to": "/tableau_bord_employes",
-   "link_type": "URL",
    "hidden": 0,
    "is_query_report": 0,
    "link_count": 0,

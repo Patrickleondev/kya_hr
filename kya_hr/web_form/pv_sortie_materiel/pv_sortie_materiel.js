@@ -6,12 +6,11 @@ frappe.ready(function () {
 			callback: function (r) {
 				if (r && r.message) {
 					var emp = r.message;
-					if (emp.employee_id) {
-						frappe.web_form.set_value('employee', emp.employee_id);
+					if (emp.employee_name) {
+						frappe.web_form.set_value('demandeur_nom', emp.employee_name);
 						if (!emp.is_hr) {
-							var $field = $('[data-fieldname="employee"]');
-							$field.find('input, select').prop('disabled', true);
-							$field.find('.like-disabled-input').css('pointer-events', 'none');
+							var $field = $('[data-fieldname="demandeur_nom"]');
+							$field.find('input').prop('disabled', true);
 						}
 					}
 				}
