@@ -44,11 +44,11 @@ class DemandeAchatKYA(Document):
 
     def set_palier(self):
         if self.montant_total >= 2000000:
-            self.palier = "Palier 3 (> 2 000 000 XOF) — Chef + DGA + DG"
+            self.palier = "Palier 3 (> 2 000 000 XOF) — Chef + DAAF + DG"
         elif self.montant_total >= 100000:
-            self.palier = "Palier 2 (100 000 – 2 000 000 XOF) — Chef + DGA"
+            self.palier = "Palier 2 (100 000 – 2 000 000 XOF) — Chef + DAAF + DG"
         else:
-            self.palier = "Palier 1 (< 100 000 XOF) — Chef seul"
+            self.palier = "Palier 1 (< 100 000 XOF) — Chef + DAAF"
 
     def before_submit(self):
         if self.workflow_state == "Approuvé":
@@ -67,15 +67,14 @@ class DemandeAchatKYA(Document):
         today = frappe.utils.today()
         ws = self.workflow_state
 
-        # Chef signs: state moves to En attente Approbation or Approuvé (palier 1)
-        if ws in ("En attente Approbation", "Approuvé") and not self.get("signataire_chef"):
-            if self.workflow_state != "Approuvé" or self.montant_total < 100000:
+        # Chef signs: state moves to En attente DAAF
+        if ws == "En attente DAAF" and not self.get("signataire_chef"):
                 self.db_set("signataire_chef", name, update_modified=False)
                 self.db_set("date_signature_chef", today, update_modified=False)
 
-        # DGA signs: state moves to En attente DG or Approuvé (palier 2)
+        # DAAF signs: state moves to Approuvé (palier 1) or En attente DG (palier 2+)
         if ws in ("En attente DG", "Approuvé") and not self.get("signataire_dga"):
-            if self.montant_total >= 100000:
+            if self.montant_total >= 0:
                 self.db_set("signataire_dga", name, update_modified=False)
                 self.db_set("date_signature_dga", today, update_modified=False)
 

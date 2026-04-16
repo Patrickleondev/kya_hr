@@ -20,22 +20,12 @@ RENAME_MAP = {
 def execute():
     for old_name, new_name in RENAME_MAP.items():
         if not frappe.db.exists("Workflow", old_name):
+            # Already renamed or never existed with mojibake name — skip safely
             continue
         try:
-            frappe.db.sql(
-                "UPDATE `tabWorkflow` SET `name`=%s, modified=NOW() WHERE `name`=%s",
-                (new_name, old_name),
-            )
-            # Child table in v16 is "Workflow Document State", not "Workflow State"
-            for child_table in ("Workflow Document State", "Workflow Transition"):
-                table_name = "tab{}".format(child_table)
-                try:
-                    frappe.db.sql(
-                        "UPDATE `{t}` SET `parent`=%s WHERE `parent`=%s AND `parenttype`='Workflow'".format(t=table_name),
-                        (new_name, old_name),
-                    )
-                except Exception:
-                    pass  # Table structure may vary between v14/v15/v16
+            # frappe.rename_doc handles all linked references (DocType.workflow field,
+            # child tables, etc.) atomically and safely in Frappe v14/v15/v16.
+            frappe.rename_doc("Workflow", old_name, new_name, force=True, ignore_permissions=True)
             frappe.db.commit()
             frappe.logger().info(f"[kya_hr] Workflow renamed: {old_name!r} → {new_name!r}")
         except Exception as e:

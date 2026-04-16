@@ -16,7 +16,7 @@ class PermissionSortieEmploye(Document):
         to skip the Chef step (RH is the creator)."""
         if not self.flags.via_web_form:
             user_roles = frappe.get_roles(frappe.session.user)
-            if "HR Manager" in user_roles or "HR User" in user_roles:
+            if any(role in user_roles for role in ("Responsable RH", "HR Manager", "HR User")):
                 self.workflow_state = "En attente RH"
                 # Auto-fill chef bypass
                 name = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "employee_name")

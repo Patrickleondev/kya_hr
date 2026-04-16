@@ -65,8 +65,9 @@ function _control_pv_signatures(frm) {
         && roles.includes("Employee");
     frm.set_df_property("signature_demandeur", "read_only", peut_signer_demandeur ? 0 : 1);
 
-    // Signature Magasin : modifiable à "En attente Magasin" pour Stock User
-    var peut_signer_magasin = ws === "En attente Magasin" && roles.includes("Stock User");
+    // Signature Magasin : modifiable à "En attente Magasin" pour Chargé des Stocks
+    var peut_signer_magasin = ws === "En attente Magasin"
+        && (roles.includes("Chargé des Stocks") || roles.includes("Stock User") || roles.includes("System Manager"));
     frm.set_df_property("signature_magasin", "read_only", peut_signer_magasin ? 0 : 1);
     frm.set_df_property("magasin_nom", "read_only", 1);
     frm.set_df_property("magasin_date", "read_only", 1);
@@ -77,8 +78,9 @@ function _control_pv_signatures(frm) {
     frm.set_df_property("audit_nom", "read_only", 1);
     frm.set_df_property("audit_date", "read_only", 1);
 
-    // Signature DGA : modifiable à "En attente DGA" pour Stock Manager
-    var peut_signer_dga = ws === "En attente DGA" && roles.includes("Stock Manager");
+    // Signature Direction : modifiable à "En attente Direction" pour Direction
+    var peut_signer_dga = ws === "En attente Direction"
+        && (roles.includes("Directeur Général") || roles.includes("DAAF") || roles.includes("System Manager"));
     frm.set_df_property("signature_dga", "read_only", peut_signer_dga ? 0 : 1);
     frm.set_df_property("dga_nom", "read_only", 1);
     frm.set_df_property("dga_date", "read_only", 1);

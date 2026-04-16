@@ -435,7 +435,16 @@ body {
 }
 
 .web-form-container .web-form select,
-.kya-form-section select { appearance: auto; }
+.kya-form-section select {
+  appearance: auto;
+  min-height: 44px;
+  height: auto !important;
+  line-height: 1.35;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-right: 36px;
+  vertical-align: middle;
+}
 
 /* Select options + selected values must stay readable */
 .web-form-container .web-form select option,
@@ -447,6 +456,7 @@ body {
   color: var(--kya-heading) !important;
   background: #fff !important;
   -webkit-text-fill-color: var(--kya-heading) !important;
+  line-height: 1.35;
 }
 
 /* Child table headers and cells: enforce contrast on all themes */

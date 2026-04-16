@@ -229,7 +229,7 @@
     "workflow_builder_id": null
    },
    {
-    "allow_edit": "Stock Manager",
+    "allow_edit": "Responsable RH",
     "avoid_status_override": 0,
     "doc_status": "1",
     "evaluate_as_expression": 0,
@@ -237,7 +237,7 @@
     "message": null,
     "next_action_email_template": null,
     "send_email": 0,
-    "state": "Approuvé",
+    "allow_edit": "Directeur Général",
     "update_field": null,
     "update_value": null,
     "workflow_builder_id": null
@@ -245,7 +245,7 @@
    {
     "allow_edit": "Stock Manager",
     "avoid_status_override": 0,
-    "doc_status": "0",
+    "allow_edit": "Directeur Général",
     "evaluate_as_expression": 0,
     "is_optional_state": 0,
     "message": null,
@@ -253,7 +253,7 @@
     "send_email": 0,
     "state": "Rejeté",
     "update_field": null,
-    "update_value": null,
+    "allow_edit": "Directeur Général",
     "workflow_builder_id": null
    }
   ],
@@ -272,7 +272,7 @@
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "Stock Manager",
+    "allowed": "Responsable RH",
     "condition": null,
     "next_state": "Approuvé",
     "send_email_to_creator": 0,
@@ -280,7 +280,7 @@
     "transition_tasks": null,
     "workflow_builder_id": null
    },
-   {
+    "allowed": "Responsable RH",
     "action": "Rejeter",
     "allow_self_approval": 0,
     "allowed": "Stock Manager",
@@ -288,7 +288,7 @@
     "next_state": "Rejeté",
     "send_email_to_creator": 0,
     "state": "En attente",
-    "transition_tasks": null,
+    "allowed": "Directeur Général",
     "workflow_builder_id": null
    }
   ],
@@ -296,7 +296,7 @@
   "workflow_name": "Demande de matériel",
   "workflow_state_field": "workflow_state"
  },
- {
+    "allowed": "Directeur Général",
   "docstatus": 0,
   "doctype": "Workflow",
   "document_type": "Permission Sortie Stagiaire",
@@ -316,7 +316,7 @@
     "update_value": "Brouillon"
    },
    {
-    "allow_edit": "Employee",
+        "allow_edit": "Chef Service",
     "doc_status": "0",
     "is_optional_state": 0,
     "state": "En attente Chef",
@@ -324,7 +324,7 @@
     "update_value": "En attente Chef"
    },
    {
-    "allow_edit": "HR User",
+        "allow_edit": "Responsable des Stagiaires",
     "doc_status": "0",
     "is_optional_state": 0,
     "state": "En attente Resp. Stagiaires",
@@ -332,7 +332,7 @@
     "update_value": "En attente Resp. Stagiaires"
    },
    {
-    "allow_edit": "HR Manager",
+        "allow_edit": "Directeur Général",
     "doc_status": "0",
     "is_optional_state": 0,
     "state": "En attente DG",
@@ -340,7 +340,7 @@
     "update_value": "En attente DG"
    },
    {
-    "allow_edit": "HR Manager",
+        "allow_edit": "Directeur Général",
     "doc_status": "1",
     "is_optional_state": 0,
     "state": "Approuvé",
@@ -348,7 +348,7 @@
     "update_value": "Approuvé"
    },
    {
-    "allow_edit": "HR Manager",
+        "allow_edit": "Directeur Général",
     "doc_status": "1",
     "is_optional_state": 0,
     "state": "Rejeté",
@@ -368,7 +368,7 @@
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "HR User",
+    "allowed": "Chef Service",
     "condition": null,
     "next_state": "En attente Resp. Stagiaires",
     "state": "En attente Chef"
@@ -376,7 +376,7 @@
    {
     "action": "Rejeter",
     "allow_self_approval": 0,
-    "allowed": "HR User",
+    "allowed": "Chef Service",
     "condition": null,
     "next_state": "Rejeté",
     "state": "En attente Chef"
@@ -384,7 +384,7 @@
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "HR User",
+    "allowed": "Responsable des Stagiaires",
     "condition": null,
     "next_state": "En attente DG",
     "state": "En attente Resp. Stagiaires"
@@ -392,7 +392,7 @@
    {
     "action": "Rejeter",
     "allow_self_approval": 0,
-    "allowed": "HR User",
+    "allowed": "Responsable des Stagiaires",
     "condition": null,
     "next_state": "Rejeté",
     "state": "En attente Resp. Stagiaires"
@@ -400,7 +400,7 @@
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "HR Manager",
+    "allowed": "Directeur Général",
     "condition": null,
     "next_state": "Approuvé",
     "state": "En attente DG"
@@ -408,7 +408,7 @@
    {
     "action": "Rejeter",
     "allow_self_approval": 0,
-    "allowed": "HR Manager",
+    "allowed": "Directeur Général",
     "condition": null,
     "next_state": "Rejeté",
     "state": "En attente DG"
@@ -438,7 +438,7 @@
     "update_value": "Brouillon"
    },
    {
-    "allow_edit": "Employee",
+        "allow_edit": "Chef Service",
     "doc_status": "0",
     "is_optional_state": 0,
     "state": "En attente Chef",
@@ -446,7 +446,7 @@
     "update_value": "En attente Chef"
    },
    {
-    "allow_edit": "Auditeur Interne",
+        "allow_edit": "Responsable RH",
     "doc_status": "0",
     "is_optional_state": 0,
     "state": "En attente Audit",
@@ -454,7 +454,7 @@
     "update_value": "En attente Audit"
    },
    {
-    "allow_edit": "Stock Manager",
+        "allow_edit": "Directeur Général",
     "doc_status": "0",
     "is_optional_state": 0,
     "state": "En attente Direction",
@@ -462,7 +462,7 @@
     "update_value": "En attente Direction"
    },
    {
-    "allow_edit": "Stock User",
+        "allow_edit": "Directeur Général",
     "doc_status": "0",
     "is_optional_state": 0,
     "state": "En attente Magasin",
@@ -470,7 +470,7 @@
     "update_value": "En attente Magasin"
    },
    {
-    "allow_edit": "Stock User",
+        "allow_edit": "Directeur Général",
     "doc_status": "1",
     "is_optional_state": 0,
     "state": "Approuvé",
@@ -478,7 +478,7 @@
     "update_value": "Approuvé"
    },
    {
-    "allow_edit": "Stock User",
+    "allow_edit": "Chargé des Stocks",
     "doc_status": "1",
     "is_optional_state": 0,
     "state": "Rejeté",
@@ -498,7 +498,7 @@
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "HR User",
+    "allowed": "Chef Service",
     "condition": null,
     "next_state": "En attente Audit",
     "state": "En attente Chef"
@@ -506,7 +506,7 @@
    {
     "action": "Rejeter",
     "allow_self_approval": 0,
-    "allowed": "HR User",
+    "allowed": "Chef Service",
     "condition": null,
     "next_state": "Rejeté",
     "state": "En attente Chef"
@@ -530,7 +530,7 @@
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "Stock Manager",
+    "allowed": "Directeur Général",
     "condition": null,
     "next_state": "En attente Magasin",
     "state": "En attente Direction"
@@ -538,7 +538,7 @@
    {
     "action": "Rejeter",
     "allow_self_approval": 0,
-    "allowed": "Stock Manager",
+    "allowed": "Directeur Général",
     "condition": null,
     "next_state": "Rejeté",
     "state": "En attente Direction"
@@ -546,7 +546,7 @@
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "Stock User",
+    "allowed": "Chargé des Stocks",
     "condition": null,
     "next_state": "Approuvé",
     "state": "En attente Magasin"
@@ -554,7 +554,7 @@
    {
     "action": "Rejeter",
     "allow_self_approval": 0,
-    "allowed": "Stock User",
+    "allowed": "Chargé des Stocks",
     "condition": null,
     "next_state": "Rejeté",
     "state": "En attente Magasin"
@@ -574,7 +574,7 @@
   "override_status": 0,
   "send_email_alert": 1,
   "states": [
-   {
+    "allowed": "Chef Service",
     "allow_edit": "Employee",
     "doc_status": "0",
     "is_optional_state": 0,
@@ -582,7 +582,7 @@
     "update_field": "statut",
     "update_value": "Brouillon"
    },
-   {
+    "allowed": "Chef Service",
     "allow_edit": "Employee",
     "doc_status": "0",
     "is_optional_state": 0,
@@ -590,7 +590,7 @@
     "update_field": "statut",
     "update_value": "En attente Chef"
    },
-   {
+    "allowed": "Responsable RH",
     "allow_edit": "HR Manager",
     "doc_status": "0",
     "is_optional_state": 0,
@@ -598,7 +598,7 @@
     "update_field": "statut",
     "update_value": "En attente RH"
    },
-   {
+    "allowed": "Responsable RH",
     "allow_edit": "HR Manager",
     "doc_status": "0",
     "is_optional_state": 0,
@@ -606,7 +606,7 @@
     "update_field": "statut",
     "update_value": "En attente Direction"
    },
-   {
+    "allowed": "Responsable RH",
     "allow_edit": "HR Manager",
     "doc_status": "1",
     "is_optional_state": 0,
@@ -614,7 +614,7 @@
     "update_field": "statut",
     "update_value": "Approuv\u00e9"
    },
-   {
+    "allowed": "Directeur Général",
     "allow_edit": "HR Manager",
     "doc_status": "1",
     "is_optional_state": 0,
@@ -622,7 +622,7 @@
     "update_field": "statut",
     "update_value": "Rejet\u00e9"
    }
-  ],
+    "allowed": "Directeur Général",
   "transitions": [
    {
     "action": "Soumettre",
@@ -630,7 +630,7 @@
     "allowed": "Employee",
     "condition": null,
     "next_state": "En attente Chef",
-    "state": "Brouillon"
+    "allowed": "Responsable RH",
    },
    {
     "action": "Approuver",
@@ -827,7 +827,7 @@
     "update_value": "En attente Chef"
    },
    {
-    "allow_edit": "Purchase Manager",
+    "allow_edit": "DAAF",
     "doc_status": "0",
     "is_optional_state": 0,
     "state": "En attente DAAF",
@@ -835,7 +835,7 @@
     "update_value": "En attente DAAF"
    },
    {
-    "allow_edit": "System Manager",
+    "allow_edit": "Directeur Général",
     "doc_status": "0",
     "is_optional_state": 0,
     "state": "En attente DG",
@@ -843,7 +843,7 @@
     "update_value": "En attente DG"
    },
    {
-    "allow_edit": "System Manager",
+    "allow_edit": "Directeur Général",
     "doc_status": "1",
     "is_optional_state": 0,
     "state": "Approuv\u00e9",
@@ -851,7 +851,7 @@
     "update_value": "Approuv\u00e9"
    },
    {
-    "allow_edit": "System Manager",
+    "allow_edit": "Directeur Général",
     "doc_status": "1",
     "is_optional_state": 0,
     "state": "Rejet\u00e9",
@@ -887,7 +887,7 @@
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "Purchase Manager",
+    "allowed": "DAAF",
     "condition": "doc.montant_total < 100000",
     "next_state": "Approuv\u00e9",
     "state": "En attente DAAF"
@@ -895,7 +895,7 @@
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "Purchase Manager",
+    "allowed": "DAAF",
     "condition": "doc.montant_total >= 100000",
     "next_state": "En attente DG",
     "state": "En attente DAAF"
@@ -903,7 +903,7 @@
    {
     "action": "Rejeter",
     "allow_self_approval": 0,
-    "allowed": "Purchase Manager",
+    "allowed": "DAAF",
     "condition": null,
     "next_state": "Rejet\u00e9",
     "state": "En attente DAAF"
@@ -911,7 +911,7 @@
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "System Manager",
+    "allowed": "Directeur Général",
     "condition": null,
     "next_state": "Approuv\u00e9",
     "state": "En attente DG"
@@ -919,7 +919,7 @@
    {
     "action": "Rejeter",
     "allow_self_approval": 0,
-    "allowed": "System Manager",
+    "allowed": "Directeur Général",
     "condition": null,
     "next_state": "Rejet\u00e9",
     "state": "En attente DG"
