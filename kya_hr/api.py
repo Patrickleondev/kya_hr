@@ -543,6 +543,7 @@ _STATE_COLORS = {
     "En attente RH": "blue",
     "En attente DG": "blue",
     "En attente DGA": "blue",
+    "En attente Direction": "blue",
     "En attente Magasin": "blue",
     "En attente Audit": "blue",
         "En attente Comptabilité": "blue",
@@ -1105,7 +1106,7 @@ def get_dashboard_employes(annee=None):
 
     en_cours_states = {
         "En attente Chef", "En attente Chef Service", "En attente RH",
-        "En attente DG", "En attente DGA", "En attente Magasin",
+        "En attente DG", "En attente DGA", "En attente Direction", "En attente Magasin",
         "En attente Audit", "En attente Comptabilité",
         "En attente Approbation", "En cours",
     }

@@ -17,17 +17,17 @@ frappe.ui.form.on("Demande Achat KYA", {
             var m = frm.doc.montant_total;
             if (m >= 2000000) {
                 frm.dashboard.set_headline(
-                    "Palier 3 : Approbation Chef + DGA + Directeur Général requise",
+                    "Palier 3 : Approbation Chef + DAAF + Directeur Général requise",
                     "red"
                 );
             } else if (m >= 100000) {
                 frm.dashboard.set_headline(
-                    "Palier 2 : Approbation Chef + DGA requise",
+                    "Palier 2 : Approbation Chef + DAAF + Directeur Général requise",
                     "orange"
                 );
             } else {
                 frm.dashboard.set_headline(
-                    "Palier 1 : Approbation du Chef de Département uniquement",
+                    "Palier 1 : Approbation Chef de Département + DAAF requise",
                     "blue"
                 );
             }
@@ -116,20 +116,21 @@ function _control_da_signatures(frm) {
     frm.set_df_property("signataire_demandeur", "read_only", 1);
     frm.set_df_property("date_signature_demandeur", "read_only", 1);
 
-    // Signature Chef : modifiable à "En attente Chef" pour Purchase User
-    var peut_signer_chef = ws === "En attente Chef" && roles.includes("Purchase User");
+    // Signature Chef : modifiable à "En attente Chef" pour Chef Service
+    var peut_signer_chef = ws === "En attente Chef" && (roles.includes("Chef Service") || roles.includes("System Manager"));
     frm.set_df_property("signature_chef", "read_only", peut_signer_chef ? 0 : 1);
     frm.set_df_property("signataire_chef", "read_only", 1);
     frm.set_df_property("date_signature_chef", "read_only", 1);
 
-    // Signature DGA : modifiable à "En attente Approbation" pour Purchase Manager
-    var peut_signer_dga = ws === "En attente Approbation" && roles.includes("Purchase Manager");
+    // Signature DAAF : modifiable à "En attente DAAF"
+    var peut_signer_dga = ws === "En attente DAAF"
+        && (roles.includes("DAAF") || roles.includes("Responsable Achats") || roles.includes("System Manager"));
     frm.set_df_property("signature_dga", "read_only", peut_signer_dga ? 0 : 1);
     frm.set_df_property("signataire_dga", "read_only", 1);
     frm.set_df_property("date_signature_dga", "read_only", 1);
 
-    // Signature DG : modifiable à "En attente DG" pour HR Manager
-    var peut_signer_dg = ws === "En attente DG" && roles.includes("HR Manager");
+    // Signature DG : modifiable à "En attente DG" pour Direction
+    var peut_signer_dg = ws === "En attente DG" && (roles.includes("Directeur Général") || roles.includes("System Manager"));
     frm.set_df_property("signature_dg", "read_only", peut_signer_dg ? 0 : 1);
     frm.set_df_property("signataire_dg", "read_only", 1);
     frm.set_df_property("date_signature_dg", "read_only", 1);

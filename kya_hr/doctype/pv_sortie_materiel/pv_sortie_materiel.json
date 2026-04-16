@@ -200,7 +200,7 @@
             "fieldname": "statut",
             "label": "Statut",
             "fieldtype": "Select",
-            "options": "Brouillon\nEn attente Chef\nEn attente Magasin\nEn attente Audit\nEn attente DGA\nApprouv\u00e9\nRejet\u00e9",
+            "options": "Brouillon\nEn attente Chef\nEn attente Magasin\nEn attente Audit\nEn attente Direction\nApprouv\u00e9\nRejet\u00e9",
             "default": "Brouillon",
             "in_list_view": 1,
             "in_standard_filter": 1,
