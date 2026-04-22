@@ -59,9 +59,11 @@ scheduler_events = {
     ],
 }
 
-# Post-migration: nettoyage workspaces obsolètes uniquement
+# Post-migration: nettoyage workspaces obsolètes + branding KYA
 after_migrate = [
     "kya_hr.force_sync_workspaces.execute",
+    "kya_hr.setup_branding.execute",
+    "kya_hr.fix_all_workspaces.execute",
 ]
 
 # Translations

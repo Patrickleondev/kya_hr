@@ -24,7 +24,7 @@
 <script setup>
 import { useRoute } from "vue-router"
 
-import { IonTabBar, IonTabButton, IonLabel } from "@ionic/vue"
+import { IonTabBar, IonTabButton } from "@ionic/vue"
 import { frappeRequest } from "frappe-ui"
 
 import HomeIcon from "@/components/icons/HomeIcon.vue"
@@ -69,8 +69,8 @@ const tabItems = computed(() => {
 		{
 			icon: LeaveIcon,
 			title: __("Leaves"),
-			route: "/planning-conge/new",
-			showFor: ["stage", "employee", "prestataire", "rh_manual"],
+			route: "/dashboard/leaves",
+			showFor: ["employee", "stage", "prestataire"],
 		},
 		{
 			icon: ExpenseIcon,

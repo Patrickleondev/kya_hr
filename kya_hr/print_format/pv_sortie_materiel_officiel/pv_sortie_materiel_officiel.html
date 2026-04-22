@@ -1,213 +1,103 @@
 <style>
     @page { size: A4; margin: 15mm; }
-    body { font-family: 'Inter', Arial, sans-serif; font-size: 12px; color: #1A1A1A; }
-    .pv-container { max-width: 700px; margin: 0 auto; }
-
-    /* ── Header (matches KYA document format) ── */
-    .pv-header {
-        display: flex; align-items: center; justify-content: space-between;
-        border-bottom: 3px solid #0054A6; padding-bottom: 14px; margin-bottom: 20px;
-    }
-    .pv-header-left { text-align: left; }
-    .pv-header-left img { height: 60px; }
-    .pv-header-center { text-align: center; flex: 1; padding: 0 16px; }
-    .pv-header-center h1 {
-        font-size: 17px; color: #0054A6; margin: 0 0 2px;
-        text-transform: uppercase; font-weight: 900; letter-spacing: -0.02em;
-    }
-    .pv-header-center .slogan {
-        font-size: 11px; color: #F58220; font-style: italic; font-weight: 600; margin: 2px 0;
-    }
-    .pv-header-right { text-align: right; font-size: 10px; color: #6B7280; line-height: 1.6; }
-    .pv-header-right .ref { font-weight: 800; color: #0054A6; font-size: 11px; }
-
-    /* ── Sections ── */
-    .pv-section { margin-bottom: 18px; }
-    .pv-section h3 {
-        font-size: 12px; color: #fff; background: #0054A6;
-        padding: 7px 14px; margin: 0 0 10px; font-weight: 800;
-        text-transform: uppercase; letter-spacing: 0.06em;
-    }
-
-    /* ── Info table ── */
-    table.info { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
-    table.info td { padding: 6px 10px; border: 1px solid #E5E7EB; font-size: 12px; }
-    table.info .lbl { background: #F4F7FE; font-weight: 700; width: 35%; color: #0054A6; }
-
-    /* ── Items table ── */
-    table.items-full { width: 100%; border-collapse: collapse; margin: 12px 0; }
-    table.items-full th {
-        background: #0054A6; color: white; padding: 8px 10px;
-        text-align: left; font-size: 10px; font-weight: 800;
-        text-transform: uppercase; letter-spacing: .05em;
-    }
-    table.items-full td { padding: 7px 10px; border: 1px solid #E5E7EB; font-size: 12px; }
-    table.items-full tr:nth-child(even) { background: #F9FAFB; }
-
-    /* ── Signatures grid (2x2) ── */
-    .signatures-grid {
-        display: grid; grid-template-columns: 1fr 1fr;
-        gap: 14px; margin-top: 20px;
-    }
-    .sig-box {
-        border: 1px solid #E5E7EB; border-radius: 10px;
-        padding: 14px; text-align: center; background: #FAFBFC;
-    }
-    .sig-box .sig-num {
-        display: inline-block; background: #0054A6; color: #fff;
-        width: 22px; height: 22px; border-radius: 50%;
-        font-size: 11px; font-weight: 800; line-height: 22px;
-        margin-bottom: 4px;
-    }
-    .sig-box .role {
-        font-weight: 800; color: #0054A6; font-size: 10px;
-        text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px;
-    }
-    .sig-box .name { font-size: 12px; font-weight: 600; margin-bottom: 2px; color: #1A1A1A; }
-    .sig-box .date { font-size: 10px; color: #9CA3AF; }
-    .sig-box .sig-img { max-height: 55px; display: block; margin: 6px auto; }
-    .sig-box .sig-placeholder { height: 55px; border-bottom: 1px solid #D1D5DB; margin-top: 8px; }
-
-    /* ── Signing order label ── */
-    .sig-order-note {
-        text-align: center; font-size: 9px; color: #9CA3AF;
-        margin-top: 8px; font-style: italic;
-    }
-
-    /* ── Footer ── */
-    .pv-footer {
-        margin-top: 28px; text-align: center; font-size: 9px;
-        color: #9CA3AF; border-top: 2px solid #0054A6; padding-top: 10px;
-    }
-    .pv-footer .slogan { color: #F58220; font-weight: 600; font-style: italic; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; color: #333; }
+    .kya-doc { max-width: 100%; margin: 0 auto; }
+    .kya-doc-header { display: flex; align-items: flex-start; gap: 24px; padding: 10px 0 0; }
+    .kya-doc-logo { flex-shrink: 0; }
+    .kya-doc-logo img { max-height: 80px; }
+    .kya-doc-info { flex: 1; text-align: right; }
+    .kya-doc-title { font-size: 22px; font-weight: 800; color: #1a5276; text-transform: uppercase; margin: 0 0 4px; letter-spacing: 0.02em; }
+    .kya-doc-slogan { font-style: italic; color: #F58220; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    .kya-doc-company { font-size: 10px; color: #666; line-height: 1.6; }
+    .kya-doc-line { height: 3px; background: #1a5276; margin: 14px 0 10px; }
+    .kya-doc-ref { text-align: center; font-size: 15px; font-weight: 800; color: #1a5276; margin: 10px 0 18px; }
+    .kya-sec-header { background: #1a5276; color: #fff; padding: 8px 16px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; margin: 14px 0 0; }
+    .kya-sec-body { padding: 12px 16px; border: 1px solid #dee2e6; border-top: none; }
+    .kya-row { display: flex; gap: 16px; margin-bottom: 8px; }
+    .kya-col { flex: 1; }
+    .kya-lbl { font-weight: 700; color: #1a5276; font-size: 10px; text-transform: uppercase; margin-bottom: 2px; }
+    .kya-val { font-size: 12px; padding: 4px 0; min-height: 18px; color: #333; }
+    .kya-items { width: 100%; border-collapse: collapse; margin: 8px 0; }
+    .kya-items th { background: #1a5276; color: #fff; padding: 7px 10px; text-align: left; font-size: 10px; text-transform: uppercase; }
+    .kya-items td { padding: 5px 10px; border-bottom: 1px solid #eee; font-size: 11px; color: #333; }
+    .kya-items .num { text-align: right; }
+    .kya-total { text-align: right; font-size: 14px; font-weight: 700; color: #1a5276; margin: 8px 0; }
+    .kya-status { text-align: center; margin: 12px 0; }
+    .kya-badge { display: inline-block; padding: 5px 20px; border-radius: 16px; font-weight: 700; font-size: 12px; text-transform: uppercase; }
+    .kya-badge-ok { background: #e8f5e9; color: #2e7d32; border: 2px solid #4caf50; }
+    .kya-badge-wait { background: #fff3e0; color: #e65100; border: 2px solid #ff9800; }
+    .kya-badge-no { background: #ffebee; color: #c62828; border: 2px solid #ef5350; }
+    .kya-palier { display: inline-block; padding: 3px 12px; border-radius: 10px; font-size: 10px; font-weight: 700; }
+    .palier-1 { background: #e3f2fd; color: #1565c0; }
+    .palier-2 { background: #fff3e0; color: #e65100; }
+    .palier-3 { background: #ffebee; color: #c62828; }
+    .kya-sigs { display: flex; flex-wrap: wrap; justify-content: space-around; gap: 10px; margin-top: 10px; }
+    .kya-sig { text-align: center; min-width: 100px; flex: 1; }
+    .kya-sig img { max-height: 50px; display: block; margin: 0 auto 4px; }
+    .kya-sig .sig-line { border-top: 1px solid #333; margin-top: 28px; padding-top: 4px; font-size: 9px; font-weight: 600; color: #333; }
+    .kya-sig .sig-date { font-size: 8px; color: #888; }
+    .kya-doc-footer { text-align: center; padding: 12px 0 0; margin-top: 16px; border-top: 2px solid #1a5276; font-size: 9px; color: #999; }
 </style>
-
-<div class="pv-container">
-    <!-- ═══ EN-TÊTE (Logo | Titre | Réf) ═══ -->
-    <div class="pv-header">
-        <div class="pv-header-left">
-            <img src="/assets/kya_hr/images/logo_kya.png" alt="KYA-Energy Group"
-                 onerror="this.src='/assets/kya_hr/images/image010.png'">
-        </div>
-        <div class="pv-header-center">
-            <h1>Procès-Verbal de Sortie de Matériel</h1>
-            <div class="slogan">Move beyond the sky!</div>
-        </div>
-        <div class="pv-header-right">
-            <div class="ref">{{ doc.reference or 'AEA-ENG-32-V01' }}</div>
-            <div>N° : {{ doc.name }}</div>
-            <div>{{ frappe.utils.format_date(doc.date_sortie) }}</div>
-        </div>
+<div class="kya-doc">
+  <div class="kya-doc-header">
+    <div class="kya-doc-logo">
+      <img src="/assets/kya_hr/images/logo_kya.png" alt="KYA" style="max-height:80px;"
+           onerror="this.src='/files/vrai.png'">
     </div>
-
-    <!-- ═══ 1. INFORMATIONS GÉNÉRALES ═══ -->
-    <div class="pv-section">
-        <h3>1. Informations Générales</h3>
-        <table class="info">
-            <tr>
-                <td class="lbl">Objet de la sortie</td>
-                <td>{{ doc.objet }}</td>
-            </tr>
-            <tr>
-                <td class="lbl">Date de sortie</td>
-                <td>{{ frappe.utils.format_date(doc.date_sortie) }}</td>
-            </tr>
-            <tr>
-                <td class="lbl">Statut</td>
-                <td><strong>{{ doc.statut }}</strong></td>
-            </tr>
-        </table>
+    <div class="kya-doc-info">
+      <div class="kya-doc-title">PV DE SORTIE DE MATÉRIEL</div>
+      <div class="kya-doc-slogan">Move beyond the sky!</div>
+      <div class="kya-doc-company">
+        info@kya-energy.com<br>
+        N° RCCM : TG-LOM 2015 B 975<br>
+        NIF : 1000430317 | CNSS : 48863
+      </div>
     </div>
+  </div>
+  <div class="kya-doc-line"></div>
+  <div class="kya-doc-ref">N° {{ doc.name }} — <span style="font-size:12px;color:#888;">KEG-LOG-32-V01</span></div>
 
-    <!-- ═══ 2. LISTE DU MATÉRIEL ═══ -->
-    <div class="pv-section">
-        <h3>2. Liste du Matériel</h3>
-        <table class="items-full">
-            <thead>
-                <tr>
-                    <th style="width:5%">N°</th>
-                    <th style="width:50%">Désignation</th>
-                    <th style="width:20%">Qté Demandée</th>
-                    <th style="width:25%">Qté Réellement Sortie</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in doc.items %}
-                <tr>
-                    <td style="text-align:center">{{ loop.index }}</td>
-                    <td>{{ item.designation }}</td>
-                    <td style="text-align:center">{{ item.qte_demandee }}</td>
-                    <td style="text-align:center">{{ item.qte_reellement_sortie or '—' }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+  <div class="kya-sec-header">1. IDENTIFICATION DE LA SORTIE</div>
+  <div class="kya-sec-body">
+    <div class="kya-row">
+      <div class="kya-col"><div class="kya-lbl">Objet / Motif</div><div class="kya-val">{{ doc.objet or '—' }}</div></div>
+      <div class="kya-col"><div class="kya-lbl">Référence</div><div class="kya-val">{{ doc.reference or '—' }}</div></div>
     </div>
+    <div class="kya-row">
+      <div class="kya-col"><div class="kya-lbl">Date de sortie</div><div class="kya-val">{{ frappe.utils.format_date(doc.date_sortie) }}</div></div>
+      <div class="kya-col"><div class="kya-lbl">Demandeur</div><div class="kya-val"><strong>{{ doc.demandeur_nom or '—' }}</strong></div></div>
+    </div>
+  </div>
 
-    <!-- ═══ 3. APPROBATIONS & SIGNATURES ═══ -->
-    <!-- Ordre : 1.Demandeur  2.Audit  3.DG/DGA  4.Resp. Magasin (signe en dernier) -->
-    <div class="pv-section">
-        <h3>3. Approbations & Signatures</h3>
-        <div class="signatures-grid">
-            <!-- 1. Demandeur / Chef d'Équipe -->
-            <div class="sig-box">
-                <span class="sig-num">1</span>
-                <div class="role">Demandeur / Chef d'Équipe</div>
-                <div class="name">{{ doc.demandeur_nom or '________________' }}</div>
-                <div class="date">{{ frappe.utils.format_date(doc.demandeur_date) if doc.demandeur_date else '' }}</div>
-                {% if doc.signature_demandeur %}
-                    <img src="{{ doc.signature_demandeur }}" class="sig-img">
-                {% else %}
-                    <div class="sig-placeholder"></div>
-                {% endif %}
-            </div>
-            <!-- 2. Audit Interne -->
-            <div class="sig-box">
-                <span class="sig-num">2</span>
-                <div class="role">Audit Interne</div>
-                <div class="name">{{ doc.audit_nom or '________________' }}</div>
-                <div class="date">{{ frappe.utils.format_date(doc.audit_date) if doc.audit_date else '' }}</div>
-                {% if doc.signature_audit %}
-                    <img src="{{ doc.signature_audit }}" class="sig-img">
-                {% else %}
-                    <div class="sig-placeholder"></div>
-                {% endif %}
-            </div>
-            <!-- 3. Représentant DG / DGA -->
-            <div class="sig-box">
-                <span class="sig-num">3</span>
-                <div class="role">Représentant DG / DGA</div>
-                <div class="name">{{ doc.dga_nom or '________________' }}</div>
-                <div class="date">{{ frappe.utils.format_date(doc.dga_date) if doc.dga_date else '' }}</div>
-                {% if doc.signature_dga %}
-                    <img src="{{ doc.signature_dga }}" class="sig-img">
-                {% else %}
-                    <div class="sig-placeholder"></div>
-                {% endif %}
-            </div>
-            <!-- 4. Responsable du Magasin (signe en DERNIER) -->
-            <div class="sig-box" style="border: 2px solid #F58220;">
-                <span class="sig-num" style="background:#F58220;">4</span>
-                <div class="role" style="color:#F58220;">Responsable du Magasin</div>
-                <div class="name">{{ doc.magasin_nom or '________________' }}</div>
-                <div class="date">{{ frappe.utils.format_date(doc.magasin_date) if doc.magasin_date else '' }}</div>
-                {% if doc.signature_magasin %}
-                    <img src="{{ doc.signature_magasin }}" class="sig-img">
-                {% else %}
-                    <div class="sig-placeholder"></div>
-                {% endif %}
-            </div>
-        </div>
-        <div class="sig-order-note">
-            Ordre de signature : 1. Demandeur → 2. Audit Interne → 3. Représentant DG/DGA → 4. Responsable du Magasin (dernier signataire)
-        </div>
-    </div>
+  <div class="kya-sec-header">2. LISTE DU MATÉRIEL</div>
+  <div class="kya-sec-body">
+    <table class="kya-items">
+      <thead><tr><th>#</th><th>Désignation</th><th class="num">Qté demandée</th><th class="num">Qté réellement sortie</th></tr></thead>
+      <tbody>
+        {% for item in doc.items %}
+        <tr><td>{{ item.idx }}</td><td>{{ item.designation or '' }}</td><td class="num">{{ item.qte_demandee or 0 }}</td><td class="num">{{ item.qte_reellement_sortie or 0 }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 
-    <!-- ═══ PIED DE PAGE ═══ -->
-    <div class="pv-footer">
-        KYA-Energy Group — 08BP 81101 Agoe Nyive, Logopé — Lomé, Togo<br>
-        Tél. +228 70 45 34 81 | info@kya-energy.com | www.kya-energy.com<br>
-        <span class="slogan">Move beyond the sky!</span><br>
-        Document généré le {{ frappe.utils.now_datetime().strftime('%d/%m/%Y à %H:%M') }}
+  <div class="kya-status">
+    {% if doc.statut == "Approuvé" %}<span class="kya-badge kya-badge-ok">APPROUVÉ</span>
+    {% elif doc.statut == "Rejeté" %}<span class="kya-badge kya-badge-no">REJETÉ</span>
+    {% else %}<span class="kya-badge kya-badge-wait">{{ doc.statut or 'EN ATTENTE' }}</span>{% endif %}
+  </div>
+
+  <div class="kya-sec-header">3. VALIDATIONS & SIGNATURES</div>
+  <div class="kya-sec-body">
+    <div class="kya-sigs">
+      <div class="kya-sig">{% if doc.signature_demandeur %}<img src="{{ doc.signature_demandeur }}">{% endif %}<div class="sig-line">{{ doc.demandeur_nom or 'Demandeur' }}</div>{% if doc.demandeur_date %}<div class="sig-date">{{ frappe.utils.format_date(doc.demandeur_date) }}</div>{% endif %}</div>
+      <div class="kya-sig">{% if doc.signature_audit %}<img src="{{ doc.signature_audit }}">{% endif %}<div class="sig-line">{{ doc.audit_nom or 'Auditeur' }}</div>{% if doc.audit_date %}<div class="sig-date">{{ frappe.utils.format_date(doc.audit_date) }}</div>{% endif %}</div>
+      <div class="kya-sig">{% if doc.signature_dga %}<img src="{{ doc.signature_dga }}">{% endif %}<div class="sig-line">{{ doc.dga_nom or 'DGA' }}</div>{% if doc.dga_date %}<div class="sig-date">{{ frappe.utils.format_date(doc.dga_date) }}</div>{% endif %}</div>
+      <div class="kya-sig">{% if doc.signature_magasin %}<img src="{{ doc.signature_magasin }}">{% endif %}<div class="sig-line">{{ doc.magasin_nom or 'Magasin' }}</div>{% if doc.magasin_date %}<div class="sig-date">{{ frappe.utils.format_date(doc.magasin_date) }}</div>{% endif %}</div>
     </div>
+  </div>
+
+  <div class="kya-doc-footer">
+    Généré le {{ frappe.utils.now_datetime().strftime('%d/%m/%Y à %H:%M') }} — KYA-Energy Group, Lomé, Togo
+  </div>
 </div>
