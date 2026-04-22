@@ -562,7 +562,8 @@
   ],
   "workflow_data": null,
   "workflow_name": "Flux PV Sortie Matériel",
-  "workflow_state_field": "workflow_state" },
+  "workflow_state_field": "workflow_state"
+ },
  {
   "docstatus": 0,
   "doctype": "Workflow",
@@ -570,7 +571,7 @@
   "enable_action_confirmation": 1,
   "is_active": 1,
   "modified": "2026-06-01 12:00:00",
-  "name": "Flux Permission Sortie Employ\u00e9",
+  "name": "Flux Permission Sortie Employé",
   "override_status": 0,
   "send_email_alert": 1,
   "states": [
@@ -610,17 +611,17 @@
     "allow_edit": "HR Manager",
     "doc_status": "1",
     "is_optional_state": 0,
-    "state": "Approuv\u00e9",
+    "state": "Approuvé",
     "update_field": "statut",
-    "update_value": "Approuv\u00e9"
+    "update_value": "Approuvé"
    },
    {
     "allow_edit": "HR Manager",
     "doc_status": "1",
     "is_optional_state": 0,
-    "state": "Rejet\u00e9",
+    "state": "Rejeté",
     "update_field": "statut",
-    "update_value": "Rejet\u00e9"
+    "update_value": "Rejeté"
    }
   ],
   "transitions": [
@@ -645,7 +646,7 @@
     "allow_self_approval": 0,
     "allowed": "HR User",
     "condition": null,
-    "next_state": "Rejet\u00e9",
+    "next_state": "Rejeté",
     "state": "En attente Chef"
    },
    {
@@ -669,7 +670,7 @@
     "allow_self_approval": 0,
     "allowed": "HR Manager",
     "condition": null,
-    "next_state": "Rejet\u00e9",
+    "next_state": "Rejeté",
     "state": "En attente RH"
    },
    {
@@ -677,7 +678,7 @@
     "allow_self_approval": 0,
     "allowed": "HR Manager",
     "condition": null,
-    "next_state": "Approuv\u00e9",
+    "next_state": "Approuvé",
     "state": "En attente Direction"
    },
    {
@@ -685,7 +686,7 @@
     "allow_self_approval": 0,
     "allowed": "HR Manager",
     "condition": null,
-    "next_state": "Rejet\u00e9",
+    "next_state": "Rejeté",
     "state": "En attente Direction"
    },
    {
@@ -693,12 +694,12 @@
     "allow_self_approval": 0,
     "allowed": "HR Manager",
     "condition": null,
-    "next_state": "Approuv\u00e9",
+    "next_state": "Approuvé",
     "state": "En attente Direction"
    }
   ],
   "workflow_data": null,
-  "workflow_name": "Flux Permission Sortie Employ\u00e9",
+  "workflow_name": "Flux Permission Sortie Employé",
   "workflow_state_field": "workflow_state"
  },
  {
@@ -708,7 +709,7 @@
   "enable_action_confirmation": 1,
   "is_active": 1,
   "modified": "2026-06-01 12:00:00",
-  "name": "Flux Planning Cong\u00e9",
+  "name": "Flux Planning Congé",
   "override_status": 0,
   "send_email_alert": 1,
   "states": [
@@ -740,17 +741,17 @@
     "allow_edit": "HR Manager",
     "doc_status": "1",
     "is_optional_state": 0,
-    "state": "Approuv\u00e9",
+    "state": "Approuvé",
     "update_field": "statut",
-    "update_value": "Approuv\u00e9"
+    "update_value": "Approuvé"
    },
    {
     "allow_edit": "HR Manager",
     "doc_status": "1",
     "is_optional_state": 0,
-    "state": "Rejet\u00e9",
+    "state": "Rejeté",
     "update_field": "statut",
-    "update_value": "Rejet\u00e9"
+    "update_value": "Rejeté"
    }
   ],
   "transitions": [
@@ -775,7 +776,7 @@
     "allow_self_approval": 0,
     "allowed": "HR User",
     "condition": null,
-    "next_state": "Rejet\u00e9",
+    "next_state": "Rejeté",
     "state": "En attente RH"
    },
    {
@@ -783,7 +784,7 @@
     "allow_self_approval": 0,
     "allowed": "HR Manager",
     "condition": null,
-    "next_state": "Approuv\u00e9",
+    "next_state": "Approuvé",
     "state": "En attente DG"
    },
    {
@@ -791,12 +792,12 @@
     "allow_self_approval": 0,
     "allowed": "HR Manager",
     "condition": null,
-    "next_state": "Rejet\u00e9",
+    "next_state": "Rejeté",
     "state": "En attente DG"
    }
   ],
   "workflow_data": null,
-  "workflow_name": "Flux Planning Cong\u00e9",
+  "workflow_name": "Flux Planning Congé",
   "workflow_state_field": "workflow_state"
  },
  {
@@ -846,17 +847,17 @@
     "allow_edit": "System Manager",
     "doc_status": "1",
     "is_optional_state": 0,
-    "state": "Approuv\u00e9",
+    "state": "Approuvé",
     "update_field": "statut",
-    "update_value": "Approuv\u00e9"
+    "update_value": "Approuvé"
    },
    {
     "allow_edit": "System Manager",
     "doc_status": "1",
     "is_optional_state": 0,
-    "state": "Rejet\u00e9",
+    "state": "Rejeté",
     "update_field": "statut",
-    "update_value": "Rejet\u00e9"
+    "update_value": "Rejeté"
    }
   ],
   "transitions": [
@@ -881,7 +882,7 @@
     "allow_self_approval": 0,
     "allowed": "Chef Service",
     "condition": null,
-    "next_state": "Rejet\u00e9",
+    "next_state": "Rejeté",
     "state": "En attente Chef"
    },
    {
@@ -889,7 +890,7 @@
     "allow_self_approval": 0,
     "allowed": "Purchase Manager",
     "condition": "doc.montant_total < 100000",
-    "next_state": "Approuv\u00e9",
+    "next_state": "Approuvé",
     "state": "En attente DAAF"
    },
    {
@@ -905,7 +906,7 @@
     "allow_self_approval": 0,
     "allowed": "Purchase Manager",
     "condition": null,
-    "next_state": "Rejet\u00e9",
+    "next_state": "Rejeté",
     "state": "En attente DAAF"
    },
    {
@@ -913,7 +914,7 @@
     "allow_self_approval": 0,
     "allowed": "System Manager",
     "condition": null,
-    "next_state": "Approuv\u00e9",
+    "next_state": "Approuvé",
     "state": "En attente DG"
    },
    {
@@ -921,12 +922,105 @@
     "allow_self_approval": 0,
     "allowed": "System Manager",
     "condition": null,
-    "next_state": "Rejet\u00e9",
+    "next_state": "Rejeté",
     "state": "En attente DG"
    }
   ],
   "workflow_data": null,
   "workflow_name": "Flux Demande Achat KYA",
   "workflow_state_field": "workflow_state"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow",
+  "document_type": "Demande Conge Stagiaire",
+  "enable_action_confirmation": 0,
+  "is_active": 1,
+  "modified": "2026-04-22 12:00:00",
+  "name": "Flux Demande Conge Stagiaire",
+  "override_status": 0,
+  "send_email_alert": 1,
+  "states": [
+   {
+    "allow_edit": "Stagiaire",
+    "doc_status": "0",
+    "state": "Brouillon",
+    "send_email": 0
+   },
+   {
+    "allow_edit": "Maitre de Stage",
+    "doc_status": "0",
+    "state": "En attente Maitre de Stage",
+    "send_email": 1
+   },
+   {
+    "allow_edit": "Responsable des Stagiaires",
+    "doc_status": "0",
+    "state": "En attente Resp. Stagiaires",
+    "send_email": 1
+   },
+   {
+    "allow_edit": "Directeur General",
+    "doc_status": "0",
+    "state": "En attente DG",
+    "send_email": 1
+   },
+   {
+    "allow_edit": "Responsable des Stagiaires",
+    "doc_status": "1",
+    "state": "Approuve",
+    "send_email": 1
+   },
+   {
+    "allow_edit": "Responsable des Stagiaires",
+    "doc_status": "2",
+    "state": "Rejete",
+    "send_email": 1
+   }
+  ],
+  "transitions": [
+   {
+    "action": "Soumettre",
+    "allowed": "Stagiaire",
+    "next_state": "En attente Maitre de Stage",
+    "state": "Brouillon"
+   },
+   {
+    "action": "Approuver",
+    "allowed": "Maitre de Stage",
+    "next_state": "En attente Resp. Stagiaires",
+    "state": "En attente Maitre de Stage"
+   },
+   {
+    "action": "Rejeter",
+    "allowed": "Maitre de Stage",
+    "next_state": "Rejete",
+    "state": "En attente Maitre de Stage"
+   },
+   {
+    "action": "Approuver",
+    "allowed": "Responsable des Stagiaires",
+    "next_state": "En attente DG",
+    "state": "En attente Resp. Stagiaires"
+   },
+   {
+    "action": "Rejeter",
+    "allowed": "Responsable des Stagiaires",
+    "next_state": "Rejete",
+    "state": "En attente Resp. Stagiaires"
+   },
+   {
+    "action": "Approuver",
+    "allowed": "Directeur General",
+    "next_state": "Approuve",
+    "state": "En attente DG"
+   },
+   {
+    "action": "Rejeter",
+    "allowed": "Directeur General",
+    "next_state": "Rejete",
+    "state": "En attente DG"
+   }
+  ]
  }
 ]
