@@ -1,169 +1,251 @@
 {
-    "name": "Bilan Fin de Stage",
-    "module": "KYA HR",
-    "doctype": "DocType",
-    "is_submittable": 1,
-    "custom": 1,
-    "autoname": "format:BILAN-{YYYY}-{#####}",
-    "title_field": "employee_name",
-    "search_fields": "employee_name, date_fin, mention",
-    "track_changes": 1,
-    "fields": [
-        {
-            "fieldname": "section_stagiaire",
-            "label": "Informations Stagiaire",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "employee",
-            "label": "Stagiaire (Employ\u00e9)",
-            "fieldtype": "Link",
-            "options": "Employee",
-            "reqd": 1,
-            "in_list_view": 1,
-            "in_standard_filter": 1
-        },
-        {
-            "fieldname": "employee_name",
-            "label": "Nom",
-            "fieldtype": "Data",
-            "fetch_from": "employee.employee_name",
-            "read_only": 1,
-            "in_list_view": 1
-        },
-        {
-            "fieldname": "col_dept",
-            "fieldtype": "Column Break"
-        },
-        {
-            "fieldname": "department",
-            "label": "D\u00e9partement",
-            "fieldtype": "Link",
-            "options": "Department",
-            "fetch_from": "employee.department",
-            "read_only": 1
-        },
-        {
-            "fieldname": "encadrant",
-            "label": "Encadrant",
-            "fieldtype": "Link",
-            "options": "Employee"
-        },
-        {
-            "fieldname": "section_dates",
-            "label": "P\u00e9riode de Stage",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "date_debut",
-            "label": "Date D\u00e9but de Stage",
-            "fieldtype": "Date",
-            "reqd": 1,
-            "in_list_view": 1
-        },
-        {
-            "fieldname": "col_date_fin",
-            "fieldtype": "Column Break"
-        },
-        {
-            "fieldname": "date_fin",
-            "label": "Date Fin de Stage",
-            "fieldtype": "Date",
-            "reqd": 1,
-            "in_list_view": 1
-        },
-        {
-            "fieldname": "section_eval",
-            "label": "\u00c9valuation",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "note_globale",
-            "label": "Note Globale (/20)",
-            "fieldtype": "Int",
-            "in_list_view": 1,
-            "description": "Sur 20. La mention est calcul\u00e9e automatiquement."
-        },
-        {
-            "fieldname": "col_mention",
-            "fieldtype": "Column Break"
-        },
-        {
-            "fieldname": "mention",
-            "label": "Mention",
-            "fieldtype": "Select",
-            "options": "Insuffisant\nPassable\nAssez Bien\nBien\nTr\u00e8s Bien",
-            "in_list_view": 1,
-            "read_only": 1,
-            "description": "Calcul\u00e9e automatiquement selon la note"
-        },
-        {
-            "fieldname": "section_detail",
-            "label": "\u00c9valuation D\u00e9taill\u00e9e",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "evaluation",
-            "label": "\u00c9valuation D\u00e9taill\u00e9e",
-            "fieldtype": "Text Editor"
-        },
-        {
-            "fieldname": "section_valid",
-            "label": "Validation",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "statut",
-            "label": "Statut",
-            "fieldtype": "Select",
-            "options": "Brouillon\nSoumis\nValid\u00e9",
-            "default": "Brouillon",
-            "in_list_view": 1,
-            "in_standard_filter": 1,
-            "read_only": 1
-        },
-        {
-            "fieldname": "amended_from",
-            "label": "Modifi\u00e9 depuis",
-            "fieldtype": "Link",
-            "options": "Bilan Fin de Stage",
-            "no_copy": 1,
-            "print_hide": 1,
-            "read_only": 1
-        }
-    ],
-    "permissions": [
-        {
-            "role": "System Manager",
-            "read": 1,
-            "write": 1,
-            "create": 1,
-            "delete": 1,
-            "submit": 1,
-            "cancel": 1
-        },
-        {
-            "role": "HR Manager",
-            "read": 1,
-            "write": 1,
-            "create": 1,
-            "submit": 1,
-            "cancel": 1
-        },
-        {
-            "role": "HR User",
-            "read": 1,
-            "write": 1,
-            "create": 1,
-            "submit": 1
-        },
-        {
-            "role": "Employee",
-            "read": 1,
-            "write": 1,
-            "create": 1,
-            "submit": 1,
-            "if_owner": 1
-        }
-    ]
+ "name": "Bilan Fin de Stage",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "is_submittable": 1,
+ "custom": 1,
+ "autoname": "format:BILAN-{YYYY}-{#####}",
+ "title_field": "employee_name",
+ "search_fields": "employee_name, date_fin, mention",
+ "track_changes": 1,
+ "fields": [
+  {
+   "fieldname": "section_stagiaire",
+   "label": "Informations Stagiaire",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "employee",
+   "label": "Stagiaire (Employé)",
+   "fieldtype": "Link",
+   "options": "Employee",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "employee_name",
+   "label": "Nom",
+   "fieldtype": "Data",
+   "fetch_from": "employee.employee_name",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "report_to",
+   "fieldtype": "Link",
+   "options": "Employee",
+   "label": "Responsable direct",
+   "fetch_from": "employee.reports_to",
+   "hidden": 1,
+   "read_only": 1,
+   "in_list_view": 0,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "col_dept",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "department",
+   "label": "Département",
+   "fieldtype": "Link",
+   "options": "Department",
+   "fetch_from": "employee.department",
+   "read_only": 1
+  },
+  {
+   "fieldname": "encadrant",
+   "label": "Encadrant",
+   "fieldtype": "Link",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "section_dates",
+   "label": "Période de Stage",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "date_debut",
+   "label": "Date Début de Stage",
+   "fieldtype": "Date",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "col_date_fin",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "date_fin",
+   "label": "Date Fin de Stage",
+   "fieldtype": "Date",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "section_eval",
+   "label": "Évaluation",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "note_globale",
+   "label": "Note Globale (/20)",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "description": "Sur 20. La mention est calculée automatiquement."
+  },
+  {
+   "fieldname": "col_mention",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mention",
+   "label": "Mention",
+   "fieldtype": "Select",
+   "options": "Insuffisant\nPassable\nAssez Bien\nBien\nTrès Bien",
+   "in_list_view": 1,
+   "read_only": 1,
+   "description": "Calculée automatiquement selon la note"
+  },
+  {
+   "fieldname": "section_detail",
+   "label": "Évaluation Détaillée",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "evaluation",
+   "label": "Évaluation Détaillée",
+   "fieldtype": "Text Editor"
+  },
+  {
+   "fieldname": "section_signatures",
+   "fieldtype": "Section Break",
+   "label": "Signatures & Validation"
+  },
+  {
+   "fieldname": "col_sig_stagiaire",
+   "fieldtype": "Column Break",
+   "label": "Stagiaire"
+  },
+  {
+   "fieldname": "signature_stagiaire",
+   "fieldtype": "Signature",
+   "label": "Signature Stagiaire"
+  },
+  {
+   "fieldname": "signataire_stagiaire",
+   "fieldtype": "Data",
+   "label": "Signataire Stagiaire",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date_signature_stagiaire",
+   "fieldtype": "Date",
+   "label": "Date Signature Stagiaire",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_sig_encadrant",
+   "fieldtype": "Column Break",
+   "label": "Encadrant / Maître de Stage"
+  },
+  {
+   "fieldname": "signature_encadrant",
+   "fieldtype": "Signature",
+   "label": "Signature Encadrant"
+  },
+  {
+   "fieldname": "signataire_encadrant",
+   "fieldtype": "Data",
+   "label": "Signataire Encadrant",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date_signature_encadrant",
+   "fieldtype": "Date",
+   "label": "Date Signature Encadrant",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_sig_resp_stagiaires",
+   "fieldtype": "Column Break",
+   "label": "Responsable Stagiaires"
+  },
+  {
+   "fieldname": "signature_resp_stagiaires",
+   "fieldtype": "Signature",
+   "label": "Signature Resp. Stagiaires"
+  },
+  {
+   "fieldname": "signataire_resp_stagiaires",
+   "fieldtype": "Data",
+   "label": "Signataire Resp. Stagiaires",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date_signature_resp_stagiaires",
+   "fieldtype": "Date",
+   "label": "Date Signature Resp. Stagiaires",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_valid",
+   "label": "Validation",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "statut",
+   "label": "Statut",
+   "fieldtype": "Select",
+   "options": "Brouillon\nSoumis\nValidé",
+   "default": "Brouillon",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "label": "Modifié depuis",
+   "fieldtype": "Link",
+   "options": "Bilan Fin de Stage",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "submit": 1,
+   "cancel": 1
+  },
+  {
+   "role": "HR Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1
+  },
+  {
+   "role": "HR User",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1
+  },
+  {
+   "role": "Employee",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "if_owner": 1
+  }
+ ]
 }

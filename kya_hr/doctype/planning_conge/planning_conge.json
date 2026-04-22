@@ -1,190 +1,272 @@
 {
-    "name": "Planning Conge",
-    "module": "KYA HR",
-    "doctype": "DocType",
-    "is_submittable": 1,
-    "custom": 1,
-    "autoname": "format:PLAN-{YYYY}-{#####}",
-    "title_field": "employee_name",
-    "search_fields": "employee_name, annee, statut",
-    "track_changes": 1,
-    "fields": [
-        {
-            "fieldname": "section_employe",
-            "label": "Informations Employ\u00e9",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "employee",
-            "label": "Employ\u00e9",
-            "fieldtype": "Link",
-            "options": "Employee",
-            "reqd": 1,
-            "in_list_view": 1,
-            "in_standard_filter": 1
-        },
-        {
-            "fieldname": "employee_name",
-            "label": "Nom",
-            "fieldtype": "Data",
-            "fetch_from": "employee.employee_name",
-            "read_only": 1,
-            "in_list_view": 1
-        },
-        {
-            "fieldname": "col_info",
-            "fieldtype": "Column Break"
-        },
-        {
-            "fieldname": "department",
-            "label": "D\u00e9partement",
-            "fieldtype": "Link",
-            "options": "Department",
-            "fetch_from": "employee.department",
-            "read_only": 1,
-            "in_standard_filter": 1
-        },
-        {
-            "fieldname": "designation",
-            "label": "Poste",
-            "fieldtype": "Data",
-            "fetch_from": "employee.designation",
-            "read_only": 1
-        },
-        {
-            "fieldname": "company",
-            "label": "Soci\u00e9t\u00e9",
-            "fieldtype": "Link",
-            "options": "Company",
-            "fetch_from": "employee.company",
-            "read_only": 1,
-            "hidden": 1
-        },
-        {
-            "fieldname": "section_planning",
-            "label": "Planning Annuel",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "annee",
-            "label": "Ann\u00e9e",
-            "fieldtype": "Int",
-            "reqd": 1,
-            "in_list_view": 1,
-            "in_standard_filter": 1,
-            "description": "Ann\u00e9e du planning (ex: 2025)"
-        },
-        {
-            "fieldname": "total_jours",
-            "label": "Total Jours Planifi\u00e9s",
-            "fieldtype": "Int",
-            "read_only": 1,
-            "in_list_view": 1,
-            "description": "Somme automatique des p\u00e9riodes"
-        },
-        {
-            "fieldname": "section_periodes",
-            "label": "P\u00e9riodes de Cong\u00e9 Souhait\u00e9es",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "periodes",
-            "label": "P\u00e9riodes",
-            "fieldtype": "Table",
-            "options": "Planning Conge Periode",
-            "reqd": 1,
-            "description": "Ajoutez les p\u00e9riodes de cong\u00e9 pr\u00e9vues pour l\u2019ann\u00e9e"
-        },
-        {
-            "fieldname": "section_commentaires",
-            "label": "Commentaires",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "commentaire_employe",
-            "label": "Commentaire de l\u2019Employ\u00e9",
-            "fieldtype": "Small Text"
-        },
-        {
-            "fieldname": "col_commentaire_rh",
-            "fieldtype": "Column Break"
-        },
-        {
-            "fieldname": "commentaire_rh",
-            "label": "Commentaire RH",
-            "fieldtype": "Small Text",
-            "read_only": 1,
-            "depends_on": "eval:doc.commentaire_rh"
-        },
-        {
-            "fieldname": "section_workflow",
-            "label": "Statut & Approbation",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "statut",
-            "label": "Statut",
-            "fieldtype": "Select",
-            "options": "Brouillon\nEn attente RH\nEn attente DG\nApprouv\u00e9\nRejet\u00e9",
-            "default": "Brouillon",
-            "in_list_view": 1,
-            "in_standard_filter": 1,
-            "read_only": 1
-        },
-        {
-            "fieldname": "col_wf",
-            "fieldtype": "Column Break"
-        },
-        {
-            "fieldname": "workflow_state",
-            "label": "\u00c9tat du Flux",
-            "fieldtype": "Data",
-            "hidden": 1,
-            "read_only": 1
-        },
-        {
-            "fieldname": "amended_from",
-            "label": "Modifi\u00e9 depuis",
-            "fieldtype": "Link",
-            "options": "Planning Conge",
-            "no_copy": 1,
-            "print_hide": 1,
-            "read_only": 1
-        }
-    ],
-    "permissions": [
-        {
-            "role": "System Manager",
-            "read": 1,
-            "write": 1,
-            "create": 1,
-            "delete": 1,
-            "submit": 1,
-            "cancel": 1,
-            "amend": 1
-        },
-        {
-            "role": "HR Manager",
-            "read": 1,
-            "write": 1,
-            "create": 1,
-            "submit": 1,
-            "cancel": 1,
-            "amend": 1
-        },
-        {
-            "role": "HR User",
-            "read": 1,
-            "write": 1,
-            "create": 1,
-            "submit": 1
-        },
-        {
-            "role": "Employee",
-            "read": 1,
-            "write": 1,
-            "create": 1,
-            "if_owner": 1
-        }
-    ]
+ "name": "Planning Conge",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "is_submittable": 1,
+ "custom": 1,
+ "autoname": "format:PLAN-{YYYY}-{#####}",
+ "title_field": "employee_name",
+ "search_fields": "employee_name, annee, statut",
+ "track_changes": 1,
+ "fields": [
+  {
+   "fieldname": "section_employe",
+   "label": "Informations Employé",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "employee",
+   "label": "Employé",
+   "fieldtype": "Link",
+   "options": "Employee",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "employee_name",
+   "label": "Nom",
+   "fieldtype": "Data",
+   "fetch_from": "employee.employee_name",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "report_to",
+   "fieldtype": "Link",
+   "options": "Employee",
+   "label": "Responsable direct",
+   "fetch_from": "employee.reports_to",
+   "hidden": 1,
+   "read_only": 1,
+   "in_list_view": 0,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "col_info",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "department",
+   "label": "Département",
+   "fieldtype": "Link",
+   "options": "Department",
+   "fetch_from": "employee.department",
+   "read_only": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "designation",
+   "label": "Poste",
+   "fieldtype": "Data",
+   "fetch_from": "employee.designation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "label": "Société",
+   "fieldtype": "Link",
+   "options": "Company",
+   "fetch_from": "employee.company",
+   "read_only": 1,
+   "hidden": 1
+  },
+  {
+   "fieldname": "section_planning",
+   "label": "Planning Annuel",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "annee",
+   "label": "Année",
+   "fieldtype": "Int",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "description": "Année du planning (ex: 2025)"
+  },
+  {
+   "fieldname": "total_jours",
+   "label": "Total Jours Planifiés",
+   "fieldtype": "Int",
+   "read_only": 1,
+   "in_list_view": 1,
+   "description": "Somme automatique des périodes"
+  },
+  {
+   "fieldname": "section_periodes",
+   "label": "Périodes de Congé Souhaitées",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "periodes",
+   "label": "Périodes",
+   "fieldtype": "Table",
+   "options": "Planning Conge Periode",
+   "reqd": 1,
+   "description": "Ajoutez les périodes de congé prévues pour l’année"
+  },
+  {
+   "fieldname": "section_commentaires",
+   "label": "Commentaires",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "commentaire_employe",
+   "label": "Commentaire de l’Employé",
+   "fieldtype": "Small Text"
+  },
+  {
+   "fieldname": "col_commentaire_rh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "commentaire_rh",
+   "label": "Commentaire RH",
+   "fieldtype": "Small Text",
+   "read_only": 1,
+   "depends_on": "eval:doc.commentaire_rh"
+  },
+  {
+   "fieldname": "section_signatures",
+   "fieldtype": "Section Break",
+   "label": "Signatures"
+  },
+  {
+   "fieldname": "col_sig_employe",
+   "fieldtype": "Column Break",
+   "label": "Employé"
+  },
+  {
+   "fieldname": "signature_employe",
+   "fieldtype": "Signature",
+   "label": "Signature Employé"
+  },
+  {
+   "fieldname": "signataire_employe",
+   "fieldtype": "Data",
+   "label": "Signataire Employé",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date_signature_employe",
+   "fieldtype": "Date",
+   "label": "Date Signature Employé",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_sig_rh",
+   "fieldtype": "Column Break",
+   "label": "Responsable RH"
+  },
+  {
+   "fieldname": "signature_rh",
+   "fieldtype": "Signature",
+   "label": "Signature RH"
+  },
+  {
+   "fieldname": "signataire_rh",
+   "fieldtype": "Data",
+   "label": "Signataire RH",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date_signature_rh",
+   "fieldtype": "Date",
+   "label": "Date Signature RH",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_sig_dg",
+   "fieldtype": "Column Break",
+   "label": "Directeur Général"
+  },
+  {
+   "fieldname": "signature_dg",
+   "fieldtype": "Signature",
+   "label": "Signature DG"
+  },
+  {
+   "fieldname": "signataire_dg",
+   "fieldtype": "Data",
+   "label": "Signataire DG",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date_signature_dg",
+   "fieldtype": "Date",
+   "label": "Date Signature DG",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_workflow",
+   "label": "Statut & Approbation",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "statut",
+   "label": "Statut",
+   "fieldtype": "Select",
+   "options": "Brouillon\nEn attente RH\nEn attente DG\nApprouvé\nRejeté",
+   "default": "Brouillon",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_wf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "workflow_state",
+   "label": "État du Flux",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "label": "Modifié depuis",
+   "fieldtype": "Link",
+   "options": "Planning Conge",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1
+  },
+  {
+   "role": "HR Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1
+  },
+  {
+   "role": "HR User",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1
+  },
+  {
+   "role": "Employee",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "if_owner": 1
+  }
+ ]
 }
