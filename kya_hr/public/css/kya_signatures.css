@@ -1,0 +1,78 @@
+/* KYA Signature Styling - Improved display */
+
+/* Signature input box */
+.frappe-control[data-fieldtype="Signature"] .signature-field {
+    height: 150px !important;
+    max-height: 150px !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 4px !important;
+    background: #fff !important;
+}
+
+.frappe-control[data-fieldtype="Signature"] .signature-field canvas {
+    height: 140px !important;
+    max-height: 140px !important;
+    width: 100% !important;
+}
+
+/* Signature display in read mode */
+.frappe-control[data-fieldtype="Signature"] .signature-display {
+    min-height: 60px !important;
+    padding: 8px !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 4px !important;
+    background: #fafafa !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.frappe-control[data-fieldtype="Signature"] .signature-display img {
+    max-height: 120px !important;
+    max-width: 100% !important;
+    width: auto !important;
+    height: auto !important;
+    display: block !important;
+    object-fit: contain !important;
+}
+
+/* Signature pad wrapper */
+.frappe-control[data-fieldtype="Signature"] .signature-pad {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Signature pad canvas - ensure proper dimensions */
+.frappe-control[data-fieldtype="Signature"] .signature-pad canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Like button - ensure visible */
+.frappe-control[data-fieldtype="Signature"] .btn-xs {
+    visibility: visible !important;
+}
+
+/* Clear button */
+.frappe-control[data-fieldtype="Signature"] .signature-btn-row {
+    margin-top: 4px !important;
+}
+
+/* Compact spacing */
+.frappe-control[data-fieldtype="Signature"] {
+    margin-bottom: 8px !important;
+}
+
+/* Date fields near signatures */
+.frappe-control[data-fieldname*="date_approbation"],
+.frappe-control[data-fieldname*="date_signature"] {
+    margin-bottom: 4px !important;
+}
+
+/* Print format */
+@media print {
+    .frappe-control[data-fieldtype="Signature"] .signature-display img {
+        max-height: 80px !important;
+        max-width: 200px !important;
+    }
+}

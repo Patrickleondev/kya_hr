@@ -1,0 +1,37 @@
+{
+    "name": "Tache Equipe Attribution",
+    "module": "KYA HR",
+    "doctype": "DocType",
+    "custom": 1,
+    "istable": 1,
+    "fields": [
+        {
+            "fieldname": "employe",
+            "label": "Employ\u00e9",
+            "fieldtype": "Link",
+            "options": "Employee",
+            "reqd": 1,
+            "in_list_view": 1,
+            "columns": 4
+        },
+        {
+            "fieldname": "nom_employe",
+            "label": "Nom",
+            "fieldtype": "Data",
+            "fetch_from": "employe.employee_name",
+            "read_only": 1,
+            "in_list_view": 1,
+            "columns": 4
+        },
+        {
+            "fieldname": "role_attribution",
+            "label": "R\u00f4le",
+            "fieldtype": "Select",
+            "options": "Responsable\nContributeur",
+            "default": "Contributeur",
+            "in_list_view": 1,
+            "columns": 3
+        }
+    ],
+    "permissions": []
+}

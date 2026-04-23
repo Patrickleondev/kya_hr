@@ -1,0 +1,723 @@
+﻿{% extends "templates/web.html" %}
+
+{% block title %}Tableau de Bord ΓÇô Employ├⌐s{% endblock %}
+
+{% block page_content %}
+<style>
+  :root {
+    --kya-primary: #1976d2;
+    --kya-primary-dark: #0d47a1;
+    --kya-accent: #ff6f00;
+    --kya-warn: #f9a825;
+    --kya-danger: #e53935;
+    --kya-success: #388e3c;
+    --kya-teal: #009688;
+  }
+  .kya-db-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .kya-db-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--kya-primary-dark);
+    margin: 0;
+  }
+  .kya-db-header .kya-year-filter {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .kya-db-header select {
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: .4rem .7rem;
+    font-size: 0.9rem;
+  }
+  .kya-db-header button {
+    background: var(--kya-primary);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: .4rem 1rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  .kya-db-header button:hover { background: var(--kya-primary-dark); }
+
+  /* ΓöÇΓöÇ Sections ΓöÇΓöÇ */
+  .kya-section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #333;
+    margin: 1.75rem 0 .75rem;
+    padding-left: .5rem;
+    border-left: 4px solid var(--kya-primary);
+  }
+
+  /* ΓöÇΓöÇ Stat cards ΓöÇΓöÇ */
+  .kya-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .kya-stat-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 1.1rem 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,.07);
+    text-align: center;
+    border-top: 4px solid transparent;
+    transition: transform .15s;
+  }
+  .kya-stat-card:hover { transform: translateY(-2px); }
+  .kya-stat-card .stat-icon { font-size: 1.5rem; margin-bottom: .25rem; }
+  .kya-stat-card .stat-value {
+    font-size: 1.9rem;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+  .kya-stat-card .stat-label {
+    font-size: 0.72rem;
+    color: #6c757d;
+    margin-top: 3px;
+  }
+  .card-blue    { border-color: var(--kya-primary); }
+  .card-blue    .stat-value { color: var(--kya-primary); }
+  .card-success { border-color: var(--kya-success); }
+  .card-success .stat-value { color: var(--kya-success); }
+  .card-warn    { border-color: var(--kya-warn); }
+  .card-warn    .stat-value { color: var(--kya-warn); }
+  .card-danger  { border-color: var(--kya-danger); }
+  .card-danger  .stat-value { color: var(--kya-danger); }
+  .card-teal    { border-color: var(--kya-teal); }
+  .card-teal    .stat-value { color: var(--kya-teal); }
+  .card-accent  { border-color: var(--kya-accent); }
+  .card-accent  .stat-value { color: var(--kya-accent); }
+
+  /* ΓöÇΓöÇ Charts ΓöÇΓöÇ */
+  .kya-charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+  }
+  @media(max-width: 640px) { .kya-charts-row { grid-template-columns: 1fr; } }
+  .kya-chart-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 1.2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,.07);
+  }
+  .kya-chart-card h3 {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: .9rem;
+    padding-bottom: .5rem;
+    border-bottom: 2px solid #f0f0f0;
+  }
+  .chart-container { position: relative; height: 210px; }
+
+  /* ΓöÇΓöÇ Table ΓöÇΓöÇ */
+  .kya-table-wrap { overflow-x: auto; margin-bottom: 1.5rem; }
+  .kya-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+  .kya-table th {
+    background: #f5f7fa;
+    text-align: left;
+    padding: .55rem .75rem;
+    white-space: nowrap;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+  }
+  .kya-table td {
+    padding: .55rem .75rem;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+  }
+  .kya-table tr:hover td { background: #f9fbfc; }
+
+  /* ΓöÇΓöÇ Progress bar (taux pr├⌐sence) ΓöÇΓöÇ */
+  .kya-progress-wrap { margin: .5rem 0 1.5rem; }
+  .kya-progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    margin-bottom: .3rem;
+  }
+  .kya-progress-bar {
+    height: 14px;
+    border-radius: 8px;
+    background: #e0e0e0;
+    overflow: hidden;
+  }
+  .kya-progress-fill {
+    height: 100%;
+    border-radius: 8px;
+    background: linear-gradient(90deg, var(--kya-success), var(--kya-teal));
+    transition: width .5s;
+  }
+
+  /* ΓöÇΓöÇ Links ΓöÇΓöÇ */
+  .kya-links-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: .75rem;
+    margin-bottom: 2rem;
+  }
+  .kya-link-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: .9rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    text-decoration: none;
+    color: #333;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: box-shadow .15s, border-color .15s;
+  }
+  .kya-link-card:hover { box-shadow: 0 2px 10px rgba(25,118,210,.2); border-color: var(--kya-primary); color: var(--kya-primary); }
+  .kya-link-card .licon { font-size: 1.3rem; }
+
+  #kya-loading { text-align: center; padding: 3rem; color: #888; font-size: 0.9rem; }
+  .kya-error { color: var(--kya-danger); text-align: center; padding: 2rem; }
+
+  /* ── KPI Indicator Section ── */
+  .kya-kpi-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: 1rem;
+    padding: .85rem 1rem;
+    background: #f5f7fa;
+    border-radius: 10px;
+  }
+  .kya-kpi-select-wrap { display: flex; align-items: center; gap: .45rem; }
+  .btn-kpi-load {
+    background: var(--kya-primary); color: #fff;
+    border: none; border-radius: 6px; padding: .4rem 1rem;
+    cursor: pointer; font-size: .875rem;
+  }
+  .btn-kpi-load:hover { background: var(--kya-primary-dark); }
+  .btn-kpi-save {
+    background: var(--kya-success); color: #fff;
+    border: none; border-radius: 6px; padding: .4rem 1rem;
+    cursor: pointer; font-size: .875rem;
+  }
+  .btn-kpi-save:hover { background: #2e7d32; }
+  .kya-kpi-name-row {
+    display: flex; align-items: center; flex-wrap: wrap;
+    gap: .5rem; margin-bottom: .9rem; margin-top: .25rem;
+  }
+  .kya-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+    gap: .9rem;
+    margin-bottom: 1rem;
+  }
+  .kya-kpi-card {
+    background: #fff; border-radius: 10px;
+    padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    border-top: 4px solid #ccc; text-align: center;
+  }
+  .kya-kpi-card .kpi-icon { font-size: 1.6rem; margin-bottom: .2rem; }
+  .kya-kpi-card .kpi-value {
+    font-size: 1.75rem; font-weight: 700; line-height: 1.1;
+  }
+  .kya-kpi-card .kpi-label { font-size: .7rem; color: #6c757d; margin-top: 4px; }
+  .kya-kpi-card .kpi-null { font-size: 1.2rem; color: #ccc; }
+  .kya-kpi-card.kpi-green  { border-color: var(--kya-success); }
+  .kya-kpi-card.kpi-green  .kpi-value { color: var(--kya-success); }
+  .kya-kpi-card.kpi-blue   { border-color: var(--kya-primary); }
+  .kya-kpi-card.kpi-blue   .kpi-value { color: var(--kya-primary); }
+  .kya-kpi-card.kpi-warn   { border-color: var(--kya-warn); }
+  .kya-kpi-card.kpi-warn   .kpi-value { color: var(--kya-warn); }
+  .kya-kpi-card.kpi-danger { border-color: var(--kya-danger); }
+  .kya-kpi-card.kpi-danger .kpi-value { color: var(--kya-danger); }
+  .kya-kpi-card.kpi-teal   { border-color: var(--kya-teal); }
+  .kya-kpi-card.kpi-teal   .kpi-value { color: var(--kya-teal); }
+  .kya-kpi-card.kpi-gray   { border-color: #9e9e9e; }
+  .kya-kpi-card.kpi-gray   .kpi-value { color: #9e9e9e; }
+  .kya-kpi-manual-row {
+    display: flex; align-items: center; flex-wrap: wrap;
+    gap: .5rem; margin-top: .5rem; margin-bottom: 1rem;
+  }
+</style>
+
+<div id="kya-loading">ΓÅ│ Chargement du tableau de bordΓÇª</div>
+
+<div id="kya-dashboard" style="display:none">
+
+  <!-- Header -->
+  <div class="kya-db-header">
+    <h1>≡ƒæÑ Tableau de Bord ΓÇö Employ├⌐s</h1>
+    <div class="kya-year-filter">
+      <label for="anneeSelect" style="font-size:.875rem;font-weight:600">Ann├⌐e :</label>
+      <select id="anneeSelect"></select>
+      <button onclick="loadDashboard()">Actualiser</button>
+    </div>
+  </div>
+
+  <!-- ΓöÇ RH & Effectifs ΓöÇ -->
+  <p class="kya-section-title">Effectifs & Permissions</p>
+  <div class="kya-stats-grid" id="statsRH"></div>
+
+  <!-- ΓöÇ Charts Permissions ΓöÇ -->
+  <div class="kya-charts-row">
+    <div class="kya-chart-card">
+      <h3>Permissions de sortie par mois</h3>
+      <div class="chart-container"><canvas id="chartPermMois"></canvas></div>
+    </div>
+    <div class="kya-chart-card">
+      <h3>Statuts des permissions</h3>
+      <div class="chart-container"><canvas id="chartPermStatuts"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ΓöÇ Pr├⌐sences ΓöÇ -->
+  <p class="kya-section-title">Pr├⌐sences & Absences</p>
+  <div class="kya-stats-grid" id="statsPresence"></div>
+  <div class="kya-progress-wrap">
+    <div class="kya-progress-label">
+      <span>Taux de pr├⌐sence</span>
+      <span id="tauxLabel">ΓÇö</span>
+    </div>
+    <div class="kya-progress-bar">
+      <div class="kya-progress-fill" id="tauxFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- ΓöÇ Demandes d'Achat & PV Mat├⌐riel ΓöÇ -->
+  <p class="kya-section-title">Achats & Logistique</p>
+  <div class="kya-stats-grid" id="statsAchats"></div>
+  <div class="kya-charts-row">
+    <div class="kya-chart-card">
+      <h3>Statuts Demandes d'Achat</h3>
+      <div class="chart-container"><canvas id="chartDA"></canvas></div>
+    </div>
+    <div class="kya-chart-card">
+      <h3>Top demandeurs (nbre DA)</h3>
+      <div class="chart-container"><canvas id="chartTopDA"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Table top demandeurs -->
+  <div class="kya-table-wrap">
+    <table class="kya-table" id="tableDA">
+      <thead><tr><th>#</th><th>Employ├⌐</th><th>Nbre demandes</th><th>Montant total (XOF)</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- ─ Indicateurs de Performance par Employé ─ -->
+  <p class="kya-section-title">📊 Indicateurs de Performance par Employé</p>
+  <div class="kya-kpi-toolbar">
+    <div class="kya-kpi-select-wrap">
+      <label style="font-size:.85rem;font-weight:600">Employé :</label>
+      <select id="kpiEmployeeSelect" style="min-width:180px;border:1px solid #dee2e6;border-radius:6px;padding:.35rem .7rem;font-size:.875rem"></select>
+    </div>
+    <div class="kya-kpi-select-wrap">
+      <label style="font-size:.85rem;font-weight:600">Trimestre :</label>
+      <select id="kpiTrimestreSelect" style="border:1px solid #dee2e6;border-radius:6px;padding:.35rem .6rem;font-size:.875rem">
+        <option value="T1">T1</option><option value="T2">T2</option>
+        <option value="T3">T3</option><option value="T4">T4</option>
+      </select>
+    </div>
+    <div class="kya-kpi-select-wrap">
+      <label style="font-size:.85rem;font-weight:600">Année :</label>
+      <select id="kpiAnneeSelect" style="border:1px solid #dee2e6;border-radius:6px;padding:.35rem .6rem;font-size:.875rem"></select>
+    </div>
+    <button class="btn-kpi-load" onclick="loadEmployeeKPIs()">🔄 Afficher</button>
+    <button class="btn-kpi-save" onclick="saveEmployeeKPIs()" title="Calculer et sauvegarder dans KYA Indicator">💾 Sauvegarder</button>
+  </div>
+  <div id="kpiLoading" style="display:none;text-align:center;padding:1rem;color:#888;font-size:.85rem">⏳ Calcul en cours…</div>
+  <div id="kpiSection" style="display:none">
+    <div class="kya-kpi-name-row">
+      <span id="kpiEmpName" style="font-weight:700;font-size:1rem;color:#1976d2"></span>
+      <span id="kpiPeriodBadge" style="font-size:.78rem;background:#e3f2fd;color:#1565c0;padding:.2rem .65rem;border-radius:20px;margin-left:.75rem"></span>
+      <span id="kpiFromDb" style="font-size:.75rem;color:#888;margin-left:.75rem"></span>
+    </div>
+    <div class="kya-kpi-grid" id="kpiGrid"></div>
+    <!-- Champ sat_clients (saisie manuelle) -->
+    <div class="kya-kpi-manual-row" id="kpiManualRow" style="display:none">
+      <label style="font-size:.85rem;font-weight:600;margin-right:.5rem">📝 Satisfaction Clients (%) — saisie manuelle :</label>
+      <input type="number" id="kpiSatClients" min="0" max="100" step="0.1"
+             placeholder="ex: 85.5"
+             style="width:120px;border:1px solid #dee2e6;border-radius:6px;padding:.3rem .6rem;font-size:.875rem">
+    </div>
+  </div>
+
+  <!-- ─ Quick links ─ -->
+  <p class="kya-section-title">Accès rapides</p>
+  <div class="kya-links-grid">
+    <a class="kya-link-card" href="/permission-sortie-employe/new"><span class="licon">Γ₧ò</span>Nouvelle permission</a>
+    <a class="kya-link-card" href="/app/permission-sortie-employe/view/list"><span class="licon">≡ƒÜ¬</span>Permissions de sortie</a>
+    <a class="kya-link-card" href="/planning-conge/new"><span class="licon">≡ƒôà</span>Nouveau cong├⌐</a>
+    <a class="kya-link-card" href="/demande-achat/new"><span class="licon">≡ƒ¢Æ</span>Nouvelle demande achat</a>
+    <a class="kya-link-card" href="/pv-sortie-materiel/new"><span class="licon">≡ƒôª</span>Nouveau PV mat├⌐riel</a>
+    <a class="kya-link-card" href="/app/attendance"><span class="licon">≡ƒôè</span>Pr├⌐sences (bureau)</a>
+    <a class="kya-link-card" href="/tableau_bord_stagiaires"><span class="licon">≡ƒÄô</span>Tableau Stagiaires</a>
+  </div>
+
+</div>
+<div class="kya-error" id="kya-error" style="display:none"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+  const MOIS_LABELS = {
+    "01":"Jan","02":"F├⌐v","03":"Mar","04":"Avr","05":"Mai","06":"Jun",
+    "07":"Jul","08":"Ao├╗","09":"Sep","10":"Oct","11":"Nov","12":"D├⌐c"
+  };
+  let charts = {};
+
+  function destroyChart(id) {
+    if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+  }
+
+  // Init year select
+  const yr = new Date().getFullYear();
+  const sel = document.getElementById("anneeSelect");
+  for (let y = yr; y >= yr - 4; y--) {
+    const opt = document.createElement("option");
+    opt.value = y; opt.textContent = y;
+    sel.appendChild(opt);
+  }
+
+  function fmt(n) { return Number(n).toLocaleString("fr-FR"); }
+
+  window.loadDashboard = function() {
+    const annee = sel.value;
+    document.getElementById("kya-loading").style.display = "";
+    document.getElementById("kya-dashboard").style.display = "none";
+    document.getElementById("kya-error").style.display = "none";
+
+    frappe.call({
+      method: "kya_hr.api.get_dashboard_employes",
+      args: { annee: annee },
+      callback: function(r) {
+        document.getElementById("kya-loading").style.display = "none";
+        if (r.message) {
+          render(r.message);
+          document.getElementById("kya-dashboard").style.display = "";
+        } else {
+          showError("Impossible de charger les donn├⌐es.");
+        }
+      },
+      error: function(err) {
+        showError("Erreur : " + (err.message || JSON.stringify(err)));
+      }
+    });
+  };
+
+  function showError(msg) {
+    document.getElementById("kya-loading").style.display = "none";
+    const el = document.getElementById("kya-error");
+    el.textContent = msg; el.style.display = "";
+  }
+
+  function makeStatCards(containerId, kpis) {
+    const grid = document.getElementById(containerId);
+    grid.innerHTML = "";
+    kpis.forEach(function(k) {
+      const card = document.createElement("div");
+      card.className = "kya-stat-card " + k.cls;
+      card.innerHTML = '<div class="stat-icon">' + k.icon + '</div>'
+        + '<div class="stat-value">' + k.value + '</div>'
+        + '<div class="stat-label">' + k.label + '</div>';
+      grid.appendChild(card);
+    });
+  }
+
+  function render(d) {
+    // ΓöÇΓöÇ RH KPIs
+    makeStatCards("statsRH", [
+      { label: "Employ├⌐s actifs",       value: d.employes_actifs,          icon: "≡ƒæÑ", cls: "card-blue" },
+      { label: "Permissions totales",   value: d.permissions_total,        icon: "≡ƒôï", cls: "card-teal" },
+      { label: "Approuv├⌐es",            value: d.permissions_approuvees,   icon: "Γ£à", cls: "card-success" },
+      { label: "En cours",              value: d.permissions_en_cours,     icon: "ΓÅ│", cls: "card-warn" },
+      { label: "Rejet├⌐es",              value: d.permissions_rejetees,     icon: "Γ¥î", cls: "card-danger" },
+      { label: "Cong├⌐s (total)",        value: d.conges_total,             icon: "≡ƒôà", cls: "card-blue" },
+      { label: "Cong├⌐s approuv├⌐s",      value: d.conges_approuves,         icon: "Γ£ö∩╕Å", cls: "card-success" },
+    ]);
+
+    // ΓöÇΓöÇ Chart: permissions par mois (bar)
+    destroyChart("chartPermMois");
+    const moisKeys = Object.keys(d.permissions_par_mois || {}).sort();
+    const moisLabels = moisKeys.map(function(k) {
+      const parts = k.split("-");
+      return (MOIS_LABELS[parts[1]] || parts[1]) + " " + parts[0];
+    });
+    charts["chartPermMois"] = new Chart(document.getElementById("chartPermMois"), {
+      type: "bar",
+      data: {
+        labels: moisLabels,
+        datasets: [{ label: "Permissions", data: moisKeys.map(function(k) { return d.permissions_par_mois[k]; }),
+          backgroundColor: "rgba(25,118,210,.7)", borderRadius: 5 }]
+      },
+      options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+
+    // ΓöÇΓöÇ Chart: statuts permissions (doughnut)
+    destroyChart("chartPermStatuts");
+    charts["chartPermStatuts"] = new Chart(document.getElementById("chartPermStatuts"), {
+      type: "doughnut",
+      data: {
+        labels: ["Approuv├⌐es","En cours","Rejet├⌐es","Autre"],
+        datasets: [{
+          data: [
+            d.permissions_approuvees, d.permissions_en_cours, d.permissions_rejetees,
+            Math.max(0, d.permissions_total - d.permissions_approuvees - d.permissions_en_cours - d.permissions_rejetees)
+          ],
+          backgroundColor: ["#388e3c","#1976d2","#e53935","#9e9e9e"],
+          borderWidth: 2
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: "bottom" } } }
+    });
+
+    // ΓöÇΓöÇ Pr├⌐sence KPIs
+    makeStatCards("statsPresence", [
+      { label: "Jours pr├⌐sents",  value: d.presences_total,   icon: "Γ£à", cls: "card-success" },
+      { label: "Jours absents",   value: d.absences_total,    icon: "Γ¥î", cls: "card-danger" },
+      { label: "Taux de pr├⌐sence",value: d.taux_presence + "%", icon: "≡ƒôê", cls: "card-teal" },
+    ]);
+    document.getElementById("tauxLabel").textContent = d.taux_presence + " %";
+    document.getElementById("tauxFill").style.width = Math.min(100, d.taux_presence) + "%";
+
+    // ΓöÇΓöÇ Achats KPIs
+    makeStatCards("statsAchats", [
+      { label: "PV Mat├⌐riel",         value: d.pv_total,               icon: "≡ƒôª", cls: "card-blue" },
+      { label: "PV approuv├⌐s",        value: d.pv_approuves,           icon: "Γ£à", cls: "card-success" },
+      { label: "Demandes achat",      value: d.da_total,               icon: "≡ƒ¢Æ", cls: "card-accent" },
+      { label: "DA approuv├⌐es",       value: d.da_approuves,           icon: "Γ£ö∩╕Å", cls: "card-success" },
+      { label: "Montant approuv├⌐ (XOF)",
+        value: fmt(d.da_montant_total_approuve), icon: "≡ƒÆ░", cls: "card-warn" },
+    ]);
+
+    // ΓöÇΓöÇ Chart: DA statuts
+    destroyChart("chartDA");
+    const daAutre = Math.max(0, d.da_total - d.da_approuves - (d.da_total - d.da_approuves));
+    charts["chartDA"] = new Chart(document.getElementById("chartDA"), {
+      type: "doughnut",
+      data: {
+        labels: ["Approuv├⌐es","En cours / Rejet├⌐es"],
+        datasets: [{
+          data: [d.da_approuves, Math.max(0, d.da_total - d.da_approuves)],
+          backgroundColor: ["#388e3c","#1976d2"],
+          borderWidth: 2
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: "bottom" } } }
+    });
+
+    // ΓöÇΓöÇ Chart: top demandeurs DA
+    destroyChart("chartTopDA");
+    const top = d.top_demandeurs_da || [];
+    charts["chartTopDA"] = new Chart(document.getElementById("chartTopDA"), {
+      type: "bar",
+      data: {
+        labels: top.map(function(t) { return t.emp; }),
+        datasets: [{
+          label: "Demandes",
+          data: top.map(function(t) { return t.count; }),
+          backgroundColor: "rgba(255,111,0,.72)",
+          borderRadius: 5
+        }]
+      },
+      options: { indexAxis: "y", responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+
+    // ΓöÇΓöÇ Table top demandeurs
+    const tbody = document.querySelector("#tableDA tbody");
+    tbody.innerHTML = "";
+    if (!top.length) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#aaa">Aucune donn├⌐e</td></tr>';
+    } else {
+      top.forEach(function(t, i) {
+        tbody.innerHTML += "<tr><td>" + (i+1) + "</td><td>" + t.emp
+          + "</td><td>" + t.count + "</td><td>" + fmt(t.montant) + "</td></tr>";
+      });
+    }
+  }
+
+  // Load on ready
+  if (typeof frappe !== "undefined" && frappe.ready) {
+    frappe.ready(function() { loadDashboard(); initKpiToolbar(); });
+  } else {
+    document.addEventListener("DOMContentLoaded", function() { loadDashboard(); initKpiToolbar(); });
+  }
+})();
+
+// ─────────────────────── KPI INDICATOR SECTION ───────────────────────────────
+(function() {
+  // Init quarter/year selectors
+  const yr = new Date().getFullYear();
+  const anneSel = document.getElementById("kpiAnneeSelect");
+  for (let y = yr; y >= yr - 3; y--) {
+    const o = document.createElement("option");
+    o.value = y; o.textContent = y; if (y === yr) o.selected = true;
+    anneSel.appendChild(o);
+  }
+  // Default trimestre: current quarter
+  const curQ = "T" + Math.ceil((new Date().getMonth() + 1) / 3);
+  document.getElementById("kpiTrimestreSelect").value = curQ;
+
+  window.initKpiToolbar = function() {
+    // Load employee list for selector
+    frappe.call({
+      method: "frappe.client.get_list",
+      args: {
+        doctype: "Employee",
+        filters: [["status","=","Active"],["employment_type","!=","Stage"]],
+        fields: ["name","employee_name","department"],
+        limit: 200,
+        order_by: "employee_name asc",
+      },
+      callback: function(r) {
+        const sel = document.getElementById("kpiEmployeeSelect");
+        sel.innerHTML = '<option value="">-- Sélectionner un employé --</option>';
+        (r.message || []).forEach(function(e) {
+          const o = document.createElement("option");
+          o.value = e.name;
+          o.textContent = (e.employee_name || e.name) + (e.department ? " — " + e.department : "");
+          sel.appendChild(o);
+        });
+      }
+    });
+  };
+
+  window.loadEmployeeKPIs = function() {
+    const emp = document.getElementById("kpiEmployeeSelect").value;
+    const tri = document.getElementById("kpiTrimestreSelect").value;
+    const ann = document.getElementById("kpiAnneeSelect").value;
+    if (!emp) { frappe.msgprint("Veuillez sélectionner un employé."); return; }
+
+    document.getElementById("kpiLoading").style.display = "";
+    document.getElementById("kpiSection").style.display  = "none";
+
+    frappe.call({
+      method: "kya_hr.api.get_employee_indicators",
+      args: { employee: emp, trimestre: tri, annee: ann },
+      callback: function(r) {
+        document.getElementById("kpiLoading").style.display = "none";
+        if (r.message) {
+          renderKPIs(r.message);
+          document.getElementById("kpiSection").style.display = "";
+        }
+      },
+      error: function() {
+        document.getElementById("kpiLoading").style.display = "none";
+        frappe.msgprint("Erreur lors du chargement des indicateurs.");
+      }
+    });
+  };
+
+  function kpiColor(key, val) {
+    if (val === null || val === undefined) return "kpi-gray";
+    const thresholds = {
+      presenteisme: [80, 90],   // <80 danger, 80-90 warn, >90 green
+      perf_pro:     [60, 80],
+      sat_n_1:      [60, 80],
+      sat_n_plus_1: [60, 80],
+      sat_clients:  [60, 80],
+      sat_personnel:[60, 80],
+      non_accident: [99, 100],  // 100 = green, 0 = danger
+    };
+    const t = thresholds[key];
+    if (!t) return val > 0 ? "kpi-danger" : "kpi-green"; // redressement: 0=good, 1=bad
+    if (val >= t[1]) return "kpi-green";
+    if (val >= t[0]) return "kpi-warn";
+    return "kpi-danger";
+  }
+
+  const KPI_META = [
+    { key: "presenteisme",  label: "Présentéisme",        icon: "📅", unit: "%", tooltip: "Jours présents / jours ouvrables" },
+    { key: "perf_pro",      label: "Perf. Professionnelle",icon: "🎯", unit: "%", tooltip: "Moyenne taux effectif des tâches (Plan Trimestriel)" },
+    { key: "sat_n_1",       label: "Satisfaction N+1→N",   icon: "⭐", unit: "%", tooltip: "Taux moyen évaluation du supérieur" },
+    { key: "sat_n_plus_1",  label: "Satisfaction N→N+1",   icon: "💬", unit: "%", tooltip: "Taux moyen évaluation de l'employé vers son N+1" },
+    { key: "sat_clients",   label: "Satisfaction Clients", icon: "🤝", unit: "%", tooltip: "Saisie manuelle" },
+    { key: "sat_personnel", label: "Satisfaction Personnel",icon: "😊", unit: "%", tooltip: "Calculé depuis enquêtes de satisfaction interne" },
+    { key: "non_accident",  label: "Non-Accident",         icon: "🦺", unit: "%", tooltip: "100 si aucun accident de travail" },
+    { key: "redressement",  label: "Redressement",         icon: "⚠️", unit: "",  tooltip: "0=aucune mesure, 1=mesure disciplinaire" },
+  ];
+
+  function renderKPIs(d) {
+    document.getElementById("kpiEmpName").textContent =
+      (d.employee_name || d.employee) + (d.designation ? " — " + d.designation : "");
+    document.getElementById("kpiPeriodBadge").textContent = d.trimestre + " " + d.annee;
+    document.getElementById("kpiFromDb").textContent = d.from_db ? "💾 Sauvegardé" : "⚡ Calculé en temps réel";
+
+    const grid = document.getElementById("kpiGrid");
+    grid.innerHTML = "";
+    KPI_META.forEach(function(m) {
+      const val = d[m.key];
+      const color = kpiColor(m.key, val);
+      let valHtml;
+      if (val === null || val === undefined) {
+        valHtml = '<span class="kpi-null">—</span>';
+      } else if (m.key === "redressement") {
+        valHtml = '<span class="kpi-value" style="font-size:1.5rem">' + (val > 0 ? "⚠️ Oui" : "✅ Non") + '</span>';
+      } else {
+        valHtml = '<div class="kpi-value">' + parseFloat(val).toFixed(1) + m.unit + '</div>';
+      }
+      const card = document.createElement("div");
+      card.className = "kya-kpi-card " + color;
+      card.title = m.tooltip;
+      card.innerHTML = '<div class="kpi-icon">' + m.icon + '</div>'
+        + valHtml
+        + '<div class="kpi-label">' + m.label + '</div>';
+      grid.appendChild(card);
+    });
+
+    // Show manual row for sat_clients
+    const manualRow = document.getElementById("kpiManualRow");
+    manualRow.style.display = "";
+    if (d.sat_clients !== null && d.sat_clients !== undefined) {
+      document.getElementById("kpiSatClients").value = d.sat_clients;
+    }
+  }
+
+  window.saveEmployeeKPIs = function() {
+    const emp = document.getElementById("kpiEmployeeSelect").value;
+    const tri = document.getElementById("kpiTrimestreSelect").value;
+    const ann = document.getElementById("kpiAnneeSelect").value;
+    const satC = document.getElementById("kpiSatClients").value;
+    if (!emp) { frappe.msgprint("Veuillez d'abord sélectionner un employé."); return; }
+
+    frappe.call({
+      method: "kya_hr.api.save_employee_indicators",
+      args: { employee: emp, trimestre: tri, annee: ann, sat_clients: satC || null },
+      callback: function(r) {
+        if (r.message) {
+          frappe.show_alert({ message: "Indicateurs sauvegardés ✓", indicator: "green" });
+          loadEmployeeKPIs(); // Reload to show saved badge
+        }
+      },
+      error: function(err) {
+        frappe.msgprint("Erreur : " + (err.message || "Voir les logs"));
+      }
+    });
+  };
+})();
+</script>
+{% endblock %}

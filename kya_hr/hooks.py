@@ -23,6 +23,7 @@ fixtures = [
     {"dt": "Property Setter"},
     {"dt": "Email Template"},
     {"dt": "Notification"},
+    {"dt": "Letter Head"},
     {"dt": "Employment Type", "filters": [["name", "in", ["CDI", "CDD", "Stage", "Prestataire"]]]},
 ]
 
