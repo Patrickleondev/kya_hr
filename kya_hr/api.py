@@ -1450,3 +1450,315 @@ def search_employee_by_name(search_term):
 
     return None
 
+
+
+
+# ═══════════════════════════════════════════════════════════════
+#  IMPORT EXCEL — Évaluation Trimestrielle (Plan Trimestriel)
+# ═══════════════════════════════════════════════════════════════
+
+@frappe.whitelist()
+def import_evaluation_excel(file_url, equipe, trimestre, annee):
+    """Importe un fichier Excel d'évaluation trimestrielle (Équipe X) et
+    crée/met à jour le Plan Trimestriel correspondant + ses Tâches Equipe.
+
+    Format attendu (cf. evaluation_trimestrielle_Equipe_IT_T1_2026):
+      - Ligne 4 : en-têtes (N°, RESULTATS ATTENDUS, TÂCHES PREVUES,
+        POSSIBILITE DIGITALISATION, TAUX DIGITALISATION, ATTRIBUTION,
+        INDICATEUR (KPI), TAUX ESTIME, ..., TAUX EFFECTIF)
+      - Ligne 5+ : données (un résultat peut s'étaler sur N lignes,
+        chaque ligne = une tâche)
+
+    Retourne:
+        dict {
+          "plan": <name>,           # nom du Plan Trimestriel
+          "taches_created": int,
+          "taches_updated": int,
+          "errors": [str],
+          "attributions_resolved": int,
+          "attributions_unresolved": [str],
+        }
+    """
+    import os
+    import openpyxl
+    from frappe.utils.file_manager import get_file_path
+
+    if not file_url:
+        frappe.throw(_("Aucun fichier fourni."))
+
+    # Sécurité: l'utilisateur doit avoir le rôle Chef Service / HR Manager / System Manager
+    user_roles = set(frappe.get_roles())
+    allowed = {"Chef Service", "HR Manager", "System Manager", "Responsable RH"}
+    if not (allowed & user_roles):
+        frappe.throw(_("Permission refusée : seul le Chef d'Équipe ou la RH peut importer."))
+
+    file_path = get_file_path(file_url)
+    if not os.path.exists(file_path):
+        frappe.throw(_("Fichier introuvable : {0}").format(file_url))
+
+    try:
+        wb = openpyxl.load_workbook(file_path, data_only=True, read_only=False)
+    except Exception as e:
+        frappe.throw(_("Lecture Excel impossible : {0}").format(str(e)))
+
+    ws = wb.active
+    rows = list(ws.iter_rows(values_only=True))
+    if len(rows) < 5:
+        frappe.throw(_("Le fichier ne contient pas assez de lignes (min 5)."))
+
+    # ── Trouve la ligne d'en-tête (contient "RESULTATS ATTENDUS") ───
+    header_idx = None
+    for i, row in enumerate(rows[:10]):
+        joined = " ".join(str(c) for c in row if c is not None).upper()
+        if "RESULTATS ATTENDUS" in joined and "TÂCHES" in joined.replace("TACHES", "TÂCHES"):
+            header_idx = i
+            break
+    if header_idx is None:
+        frappe.throw(_("En-tête 'RESULTATS ATTENDUS / TÂCHES PREVUES' introuvable."))
+
+    headers = [str(c).strip() if c is not None else "" for c in rows[header_idx]]
+    # Mappe les colonnes par mot-clé
+    def find_col(*keywords):
+        for idx, h in enumerate(headers):
+            up = h.upper()
+            if all(k.upper() in up for k in keywords):
+                return idx
+        return None
+
+    col_num = find_col("N°") or find_col("NUM")
+    col_resultat = find_col("RESULTATS")
+    col_tache = find_col("TÂCHES") or find_col("TACHES")
+    col_digit = find_col("POSSIBILITE")
+    col_taux_digit = find_col("TAUX", "DIGITALISATION")
+    col_attrib = find_col("ATTRIBUTION")
+    col_kpi = find_col("INDICATEUR") or find_col("KPI")
+    col_taux_est = find_col("TAUX", "ESTIME")
+    col_taux_eff = find_col("TAUX", "EFFECTIF")
+
+    if col_resultat is None or col_tache is None:
+        frappe.throw(_("Colonnes 'RESULTATS ATTENDUS' ou 'TÂCHES PREVUES' introuvables."))
+
+    # ── Pre-scan: extraire la liste des resultats uniques (R1, R2...) ─
+    pre_resultats = {}  # numero -> libelle
+    cur_num, cur_lib = None, None
+    for row in rows[header_idx + 1:]:
+        if all(c is None or str(c).strip() == "" for c in row):
+            continue
+        if col_num is not None and row[col_num] is not None:
+            try:
+                cur_num = str(int(float(row[col_num])))
+            except (ValueError, TypeError):
+                cur_num = str(row[col_num]).strip()
+        if col_resultat is not None and row[col_resultat] is not None:
+            cur_lib = str(row[col_resultat]).strip()
+        if cur_num and cur_lib and cur_num not in pre_resultats:
+            pre_resultats[cur_num] = cur_lib
+
+    # ── Crée ou récupère le Plan Trimestriel ────────────────────────
+    annee = cint(annee)
+    existing = frappe.db.get_value(
+        "Plan Trimestriel",
+        {"equipe": equipe, "trimestre": trimestre, "annee": annee},
+        "name",
+    )
+    if existing:
+        plan = frappe.get_doc("Plan Trimestriel", existing)
+    else:
+        plan = frappe.new_doc("Plan Trimestriel")
+        plan.equipe = equipe
+        plan.trimestre = trimestre
+        plan.annee = annee
+        plan.titre = f"Évaluation {trimestre} {annee} — {equipe}"
+        plan.statut = "Brouillon"
+        # equipe_abbr (utilise par autoname): derive du nom du departement
+        plan.equipe_abbr = (equipe.replace(" ", "")[:8].upper()) if equipe else "PLAN"
+        # chef_equipe: tente Equipe KYA, sinon premier Employee actif du dept
+        chef = None
+        try:
+            chef = frappe.db.get_value("Equipe KYA", equipe, "chef_equipe")
+        except Exception:
+            chef = None
+        if not chef:
+            chef = frappe.db.get_value(
+                "Employee",
+                {"department": equipe, "status": "Active"},
+                "name",
+                order_by="creation asc",
+            )
+        if not chef:
+            # Fallback ultime: premier Employee actif
+            chef = frappe.db.get_value("Employee", {"status": "Active"}, "name")
+        if chef:
+            plan.chef_equipe = chef
+        # resultats (Table reqd): pre-remplit depuis le pre-scan
+        for num, lib in pre_resultats.items():
+            try:
+                plan.append("resultats", {
+                    "numero": num,
+                    "libelle": lib[:1000],
+                    "poids": 1,
+                })
+            except Exception:
+                # Si la child table 'Resultat Attendu Item' a d'autres champs requis,
+                # on essaie a minima
+                pass
+        plan.insert(ignore_permissions=True)
+
+    # ── Parse les lignes de données ─────────────────────────────────
+    taches_created = 0
+    taches_updated = 0
+    errors = []
+    attrib_resolved = 0
+    attrib_unresolved = []
+    current_resultat_num = None
+    current_resultat_lib = None
+
+    for r_idx, row in enumerate(rows[header_idx + 1:], start=header_idx + 2):
+        # Ligne vide ?
+        if all(c is None or str(c).strip() == "" for c in row):
+            continue
+
+        # Récupère le N° de résultat (peut être None si fusion)
+        if col_num is not None and row[col_num] is not None:
+            try:
+                current_resultat_num = str(int(float(row[col_num])))
+            except (ValueError, TypeError):
+                current_resultat_num = str(row[col_num]).strip()
+        if col_resultat is not None and row[col_resultat] is not None:
+            current_resultat_lib = str(row[col_resultat]).strip()
+
+        # Tâche
+        tache_lib = row[col_tache] if col_tache is not None else None
+        if not tache_lib or not str(tache_lib).strip():
+            continue
+        tache_lib = str(tache_lib).strip()
+
+        digit = (str(row[col_digit]).strip().upper() if col_digit is not None and row[col_digit] is not None else "OUI")
+        if digit not in ("OUI", "NON"):
+            digit = "OUI"
+
+        taux_digit = _safe_pct(row[col_taux_digit]) if col_taux_digit is not None else 0
+        kpi = str(row[col_kpi]).strip() if col_kpi is not None and row[col_kpi] is not None else ""
+        taux_est = _safe_pct(row[col_taux_est]) if col_taux_est is not None else 100
+        taux_eff = _safe_pct(row[col_taux_eff]) if col_taux_eff is not None else 0
+        attrib_raw = str(row[col_attrib]).strip() if col_attrib is not None and row[col_attrib] is not None else ""
+
+        # Cherche tâche existante (même plan + même libellé) sinon crée
+        existing_tache = frappe.db.get_value(
+            "Tache Equipe",
+            {"plan": plan.name, "libelle": tache_lib[:140]},
+            "name",
+        )
+        try:
+            if existing_tache:
+                t = frappe.get_doc("Tache Equipe", existing_tache)
+                taches_updated += 1
+            else:
+                t = frappe.new_doc("Tache Equipe")
+                t.plan = plan.name
+                t.equipe = equipe
+                taches_created += 1
+
+            t.resultat_numero = current_resultat_num or ""
+            t.resultat_libelle = (current_resultat_lib or "")[:1000]
+            t.libelle = tache_lib[:1000]
+            t.digitalisable = digit
+            t.taux_digitalisation = taux_digit
+            t.kpi = kpi[:1000]
+            t.taux_estime = taux_est
+            t.taux_effectif = taux_eff
+            t.poids = 1
+            t.frequence = "Trimestrielle"
+            if not t.statut:
+                t.statut = "Non démarré"
+
+            # Résolution des attributions (séparateurs "," ";" "\n" "/")
+            t.attributions = []
+            if attrib_raw:
+                names = [n.strip() for n in attrib_raw.replace(";", ",").replace("/", ",").replace("\n", ",").split(",") if n.strip()]
+                for n in names:
+                    emp = _resolve_employee_by_name(n)
+                    if emp:
+                        t.append("attributions", {
+                            "employe": emp["name"],
+                            "nom_employe": emp["employee_name"],
+                            "matricule": emp.get("employee_number") or "",
+                            "role_attribution": "Responsable" if not t.attributions else "Contributeur",
+                        })
+                        attrib_resolved += 1
+                    else:
+                        attrib_unresolved.append(f"L{r_idx}: {n}")
+
+            t.save(ignore_permissions=True)
+        except Exception as e:
+            errors.append(f"Ligne {r_idx}: {str(e)[:200]}")
+            frappe.log_error(frappe.get_traceback(), f"import_evaluation_excel L{r_idx}")
+
+    frappe.db.commit()
+
+    return {
+        "plan": plan.name,
+        "taches_created": taches_created,
+        "taches_updated": taches_updated,
+        "errors": errors,
+        "attributions_resolved": attrib_resolved,
+        "attributions_unresolved": attrib_unresolved,
+    }
+
+
+def _safe_pct(value):
+    """Convertit une valeur (float, int, "0%", "0.5", "1") en pourcentage 0-100."""
+    if value is None or value == "":
+        return 0
+    try:
+        if isinstance(value, str):
+            s = value.strip().replace(",", ".")
+            if s.endswith("%"):
+                return float(s[:-1])
+            v = float(s)
+        else:
+            v = float(value)
+        # Heuristique: si <= 1, c'est une fraction → *100; sinon déjà en %
+        if 0 <= v <= 1.0:
+            return round(v * 100, 2)
+        return round(v, 2)
+    except (ValueError, TypeError):
+        return 0
+
+
+def _resolve_employee_by_name(name):
+    """Cherche un Employee par nom (employee_name ou first/last name).
+
+    Tolérant à la casse et aux espaces. Retourne dict {name, employee_name,
+    employee_number} ou None.
+    """
+    if not name:
+        return None
+    name = name.strip()
+    # 1. Match exact employee_name
+    emp = frappe.db.get_value(
+        "Employee",
+        {"employee_name": name, "status": "Active"},
+        ["name", "employee_name", "employee_number"],
+        as_dict=True,
+    )
+    if emp:
+        return emp
+    # 2. LIKE insensible à la casse
+    matches = frappe.get_all(
+        "Employee",
+        filters={"employee_name": ["like", f"%{name}%"], "status": "Active"},
+        fields=["name", "employee_name", "employee_number"],
+        limit=1,
+    )
+    if matches:
+        return matches[0]
+    return None
+
+
+def _(s):
+    """Alias frappe._ pour i18n."""
+    try:
+        return frappe._(s)
+    except Exception:
+        return s
