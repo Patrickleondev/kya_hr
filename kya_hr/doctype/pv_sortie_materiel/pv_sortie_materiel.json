@@ -74,6 +74,33 @@
    "hidden": 1
   },
   {
+   "fieldname": "project",
+   "label": "Projet / Chantier",
+   "fieldtype": "Link",
+   "options": "Project",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "description": "Projet/chantier pour lequel la sortie est effectuée (sert aux rapports par projet)"
+  },
+  {
+   "fieldname": "customer",
+   "label": "Client",
+   "fieldtype": "Link",
+   "options": "Customer",
+   "fetch_from": "project.customer",
+   "in_standard_filter": 1,
+   "description": "Client associé (rempli automatiquement si projet lié)"
+  },
+  {
+   "fieldname": "stock_entry",
+   "label": "Stock Entry généré",
+   "fieldtype": "Link",
+   "options": "Stock Entry",
+   "read_only": 1,
+   "print_hide": 1,
+   "description": "Rempli automatiquement à l'approbation — trace la déduction de stock"
+  },
+  {
    "fieldname": "employee",
    "fieldtype": "Link",
    "options": "Employee",

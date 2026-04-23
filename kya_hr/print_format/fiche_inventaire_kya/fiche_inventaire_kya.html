@@ -1,0 +1,76 @@
+<div class="print-format" style="font-family: Arial, sans-serif; font-size: 12px; padding: 20px;">
+  <table style="width:100%; border-bottom: 2px solid #00A651; padding-bottom:10px;">
+    <tr>
+      <td style="width:25%;"><img src="/files/logo_kya.png" style="max-height:80px;"/></td>
+      <td style="text-align:center;">
+        <h2 style="color:#00A651; margin:0;">KYA-ENERGY GROUP</h2>
+        <p style="margin:2px 0; font-size:10px;">AGOE-LOGOPE | Tél : 70 45 34 81<br/>
+        RCCM TG-LOM 2015 B 975 | NIF 1000430317 | CNSS 48863</p>
+      </td>
+      <td style="width:25%; text-align:right; font-size:10px;">
+        <strong>N° :</strong> {{ doc.name }}<br/>
+        <strong>Date :</strong> {{ frappe.format(doc.date_inventaire, {'fieldtype':'Date'}) or '' }}
+      </td>
+    </tr>
+  </table>
+
+  <h3 style="text-align:center; color:#00A651; margin:15px 0;">FICHE D'INVENTAIRE PHYSIQUE</h3>
+
+  <table style="width:100%; border-collapse:collapse; margin-bottom:10px;">
+    <tr>
+      <td style="padding:4px; border:1px solid #ccc;"><strong>Magasin :</strong> {{ doc.warehouse or '' }}</td>
+      <td style="padding:4px; border:1px solid #ccc;"><strong>Responsable :</strong> {{ doc.responsable or '' }}</td>
+    </tr>
+    <tr>
+      <td colspan="2" style="padding:4px; border:1px solid #ccc;"><strong>Motif :</strong> {{ doc.motif or '' }}</td>
+    </tr>
+  </table>
+
+  <table style="width:100%; border-collapse:collapse; margin-top:10px;">
+    <thead>
+      <tr style="background:#00A651; color:white;">
+        <th style="padding:6px; border:1px solid #00A651;">#</th>
+        <th style="padding:6px; border:1px solid #00A651;">Article</th>
+        <th style="padding:6px; border:1px solid #00A651;">Désignation</th>
+        <th style="padding:6px; border:1px solid #00A651;">UOM</th>
+        <th style="padding:6px; border:1px solid #00A651;">Qté théorique</th>
+        <th style="padding:6px; border:1px solid #00A651;">Qté comptée</th>
+        <th style="padding:6px; border:1px solid #00A651;">Écart</th>
+        <th style="padding:6px; border:1px solid #00A651;">Remarque</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for it in doc.items %}
+      <tr {% if it.ecart and it.ecart != 0 %}style="background:#fff3cd;"{% endif %}>
+        <td style="padding:4px; border:1px solid #ccc; text-align:center;">{{ loop.index }}</td>
+        <td style="padding:4px; border:1px solid #ccc;">{{ it.item_code or '' }}</td>
+        <td style="padding:4px; border:1px solid #ccc;">{{ it.designation or '' }}</td>
+        <td style="padding:4px; border:1px solid #ccc; text-align:center;">{{ it.uom or '' }}</td>
+        <td style="padding:4px; border:1px solid #ccc; text-align:right;">{{ it.qte_theorique or 0 }}</td>
+        <td style="padding:4px; border:1px solid #ccc; text-align:right;">{{ it.qte_comptee or 0 }}</td>
+        <td style="padding:4px; border:1px solid #ccc; text-align:right; {% if it.ecart and it.ecart < 0 %}color:#c0392b;{% elif it.ecart and it.ecart > 0 %}color:#27ae60;{% endif %}"><strong>{{ it.ecart or 0 }}</strong></td>
+        <td style="padding:4px; border:1px solid #ccc;">{{ it.remarque or '' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <table style="width:100%; margin-top:30px;">
+    <tr>
+      <td style="width:50%; text-align:center; border-top:1px solid #333; padding-top:5px;">
+        <strong>Responsable Inventaire</strong><br/>
+        {{ doc.signature_responsable_nom or '' }}<br/>
+        {% if doc.signature_responsable %}<img src="{{ doc.signature_responsable }}" style="max-height:60px;"/>{% endif %}
+      </td>
+      <td style="width:50%; text-align:center; border-top:1px solid #333; padding-top:5px;">
+        <strong>Magasinier</strong><br/>
+        {{ doc.signature_magasin_nom or '' }}<br/>
+        {% if doc.signature_magasin %}<img src="{{ doc.signature_magasin }}" style="max-height:60px;"/>{% endif %}
+      </td>
+    </tr>
+  </table>
+
+  <p style="text-align:center; font-size:10px; margin-top:20px; color:#888;">
+    Document généré par KYA-ERP — {{ frappe.utils.now_datetime() }}
+  </p>
+</div>

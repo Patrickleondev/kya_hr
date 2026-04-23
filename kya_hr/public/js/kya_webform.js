@@ -1,9 +1,9 @@
-/* ===================================================================
-   KYA-Energy Group — Web Form Layout v4
+﻿/* ===================================================================
+   KYA-Energy Group â€” Web Form Layout v4
    Design : Ordre de Mission / Fiche officielle KYA
-   En-tête 2-colonnes : Logo gauche | Titre + infos droite
-   N° de document affiché, sections numérotées,
-   permissions par rôle, signatures verrouillées.
+   En-tÃªte 2-colonnes : Logo gauche | Titre + infos droite
+   NÂ° de document affichÃ©, sections numÃ©rotÃ©es,
+   permissions par rÃ´le, signatures verrouillÃ©es.
    =================================================================== */
 
 /* === Auto-redirect bare web form URLs to /new ==================== */
@@ -11,7 +11,8 @@
   var KYA_WF_ROUTES = [
     "permission-sortie-stagiaire", "permission-sortie-employe",
     "demande-achat", "demande-conge", "pv-sortie-materiel",
-    "planning-conge", "bilan-fin-de-stage"
+    "planning-conge", "bilan-fin-de-stage",
+    "pv-entree-materiel", "inventaire-kya"
   ];
   var path = window.location.pathname.replace(/^\//, "").replace(/\/$/, "");
   var pathParts = path.split("/");
@@ -28,7 +29,7 @@
   }
 
   if (KYA_WF_ROUTES.indexOf(path) !== -1 && !hasDocPointer) {
-    // Bare route without /new — redirect silently
+    // Bare route without /new â€” redirect silently
     window.location.replace("/" + path + "/new");
     return; // stop further execution until redirect completes
   }
@@ -146,6 +147,47 @@
         sigGrid: true
       }
     ],
+    "pv-entree-materiel": [
+      {
+        title: "INFORMATIONS DE L\u2019ENTR\u00c9E",
+        icon: "\u{1F4E5}",
+        fields: ["objet", "date_entree", "fournisseur", "fournisseur_libre", "purchase_order"],
+        grid: {
+          objet: "span 2", date_entree: "col", fournisseur: "col",
+          fournisseur_libre: "span 2", purchase_order: "span 2"
+        }
+      },
+      {
+        title: "ARTICLES RE\u00c7US",
+        icon: "\u{1F4E6}",
+        fields: ["items", "livreur_nom"]
+      },
+      {
+        title: "VALIDATIONS & SIGNATURES",
+        icon: "\u270D\uFE0F",
+        fields: ["signature_livreur", "signature_magasin"],
+        sigGrid: true
+      }
+    ],
+    "inventaire-kya": [
+      {
+        title: "INFORMATIONS DE L\u2019INVENTAIRE",
+        icon: "\u{1F4CB}",
+        fields: ["objet", "date_inventaire", "type_inventaire", "warehouse_filter"],
+        grid: { objet: "span 2", date_inventaire: "col", type_inventaire: "col", warehouse_filter: "span 2" }
+      },
+      {
+        title: "LIGNES D\u2019INVENTAIRE",
+        icon: "\u{1F4CA}",
+        fields: ["items", "responsable_nom"]
+      },
+      {
+        title: "VALIDATIONS & SIGNATURES",
+        icon: "\u270D\uFE0F",
+        fields: ["signature_responsable", "signature_magasin"],
+        sigGrid: true
+      }
+    ],
     "planning-conge": [
       {
         title: "IDENTIFICATION DE L\u2019EMPLOY\u00c9",
@@ -207,43 +249,55 @@
     "permission-sortie-stagiaire": {
       title: "DEMANDE DE PERMISSION DE SORTIE",
       subtitle: "Stagiaire",
-      ref: "AEA-ENG-30-V01",
+      ref: "KYA-RH-PSS-V01",
       workflow: "Ma\u00eetre de Stage \u2192 Resp. Stagiaires \u2192 Direction"
     },
     "permission-sortie-employe": {
       title: "DEMANDE DE PERMISSION DE SORTIE",
       subtitle: "Employ\u00e9",
-      ref: "AEA-ENG-30-V01",
+      ref: "KYA-RH-PSE-V01",
       workflow: "Chef de Service \u2192 RH \u2192 Direction"
     },
     "demande-achat": {
       title: "FICHE D\u2019ENGAGEMENT DE D\u00c9PENSES",
       subtitle: "Approvisionnement",
-      ref: "AEA-ENG-30-V01",
+      ref: "KYA-ACH-FED-V01",
       workflow: "Chef \u2192 Auditeur \u2192 DAAF \u2192 DG"
     },
     "demande-conge": {
       title: "DEMANDE DE CONG\u00c9",
       subtitle: "Ressources Humaines",
-      ref: "AEA-ENG-30-V01",
+      ref: "KYA-RH-CNG-V01",
       workflow: "Sup. Imm\u00e9diat / Chef de Service \u2192 RH \u2192 DG"
     },
     "pv-sortie-materiel": {
       title: "PV DE SORTIE DE MAT\u00c9RIEL",
-      subtitle: "Stock & Logistique",
-      ref: "AEA-ENG-30-V01",
+      subtitle: "Achats et Stocks",
+      ref: "KYA-STK-PVM-V01",
       workflow: "Chef \u2192 Audit \u2192 Direction \u2192 Magasin"
+    },
+    "pv-entree-materiel": {
+      title: "PV D\u2019ENTR\u00c9E DE MAT\u00c9RIEL",
+      subtitle: "Achats et Stocks",
+      ref: "KYA-STK-PEM-V01",
+      workflow: "Livreur \u2192 Responsable Magasin"
+    },
+    "inventaire-kya": {
+      title: "FICHE D\u2019INVENTAIRE",
+      subtitle: "Achats et Stocks",
+      ref: "KYA-STK-INV-V01",
+      workflow: "Responsable Inventaire \u2192 Responsable Magasin"
     },
     "planning-conge": {
       title: "PLANNING DE CONG\u00c9 ANNUEL",
       subtitle: "Ressources Humaines",
-      ref: "AEA-ENG-30-V01",
+      ref: "KYA-RH-PLN-V01",
       workflow: "Employ\u00e9 \u2192 RH \u2192 DG"
     },
     "bilan-fin-de-stage": {
       title: "BILAN DE FIN DE STAGE",
       subtitle: "Formation & Stages",
-      ref: "AEA-ENG-30-V01",
+      ref: "KYA-RH-BFS-V01",
       workflow: "Stagiaire \u2192 Encadrant \u2192 RH"
     }
   };
@@ -272,17 +326,25 @@
       signature_demandeur: null,
       signature_chef: ["Chef Service", "System Manager"],
       signature_audit: ["Auditeur Interne", "System Manager"],
-      signature_dga: ["Directeur General", "System Manager"],
-      signature_magasin: ["Chargé des Stocks", "Stock Manager", "Stock User", "System Manager"]
+      signature_dga: ["Directeur Général", "System Manager"],
+      signature_magasin: ["ChargÃ© des Stocks", "Stock Manager", "Stock User", "System Manager"]
+    },
+    "pv-entree-materiel": {
+      signature_livreur: null,
+      signature_magasin: ["ChargÃ© des Stocks", "Responsable Stock", "Stock Manager", "Stock User", "System Manager"]
+    },
+    "inventaire-kya": {
+      signature_responsable: null,
+      signature_magasin: ["ChargÃ© des Stocks", "Responsable Stock", "Stock Manager", "Stock User", "System Manager"]
     },
     "planning-conge": {
       signature_employe: null,
       signature_rh: ["Responsable RH", "HR Manager", "HR User", "System Manager"],
-      signature_dg: ["Directeur General", "System Manager"]
+      signature_dg: ["Directeur Général", "System Manager"]
     },
     "bilan-fin-de-stage": {
       signature_stagiaire: null,
-      signature_encadrant: ["Maitre de Stage", "Responsable des Stagiaires", "System Manager"],
+      signature_encadrant: ["Maître de Stage", "Responsable des Stagiaires", "System Manager"],
       signature_resp_stagiaires: ["Responsable des Stagiaires", "HR Manager", "System Manager"]
     }
   };
@@ -313,7 +375,7 @@
     var style = document.createElement("style");
     style.id = "kya-wf-visibility-patch";
     style.textContent = [
-      '/* Nuclear visibility fix — inline <style> injected by kya_webform.js */',
+      '/* Nuclear visibility fix â€” inline <style> injected by kya_webform.js */',
       'select, select option { color: #1a1a2e !important; -webkit-text-fill-color: #1a1a2e !important; background-color: #fff !important; }',
       '.grid-heading-row, .grid-heading-row * { color: #1a1a2e !important; -webkit-text-fill-color: #1a1a2e !important; background: #eaf2f8 !important; }',
       '.grid-heading-row .static-area { color: #1a1a2e !important; font-weight: 700 !important; font-size: 11px !important; }',
@@ -526,11 +588,11 @@
     if (!userHasRole("System Manager") && !userHasRole("HR Manager") && !userHasRole("Administrator")) return;
     var allForms = [
       { label: "Permission Sortie Stagiaire", route: "permission-sortie-stagiaire" },
-      { label: "Permission Sortie Employé", route: "permission-sortie-employe" },
+      { label: "Permission Sortie EmployÃ©", route: "permission-sortie-employe" },
       { label: "Demande d'Achat", route: "demande-achat" },
-      { label: "Demande de Congé", route: "demande-conge" },
-      { label: "PV Sortie Matériel", route: "pv-sortie-materiel" },
-      { label: "Planning Congé", route: "planning-conge" },
+      { label: "Demande de CongÃ©", route: "demande-conge" },
+      { label: "PV Sortie MatÃ©riel", route: "pv-sortie-materiel" },
+      { label: "Planning CongÃ©", route: "planning-conge" },
       { label: "Bilan de Stage", route: "bilan-fin-de-stage" }
     ];
     var currentRoute = getRoute();
@@ -539,24 +601,24 @@
     var panel = document.createElement("div");
     panel.className = "kya-preview-panel";
     panel.style.display = "none";
-    panel.innerHTML = '<h4>🔗 Liens de prévisualisation</h4>' +
+    panel.innerHTML = '<h4>ðŸ”— Liens de prÃ©visualisation</h4>' +
       '<div class="kya-preview-forms">' +
       allForms.map(function(f) {
         var url = window.location.origin + "/" + f.route + "/new";
         var isCurrent = f.route === currentRoute;
         return '<div class="kya-preview-form-link">' +
           '<span' + (isCurrent ? ' style="font-weight:800;"' : '') + '>' + f.label + '</span>' +
-          '<a href="' + url + '" target="_blank">Ouvrir →</a>' +
+          '<a href="' + url + '" target="_blank">Ouvrir â†’</a>' +
           '</div>';
       }).join("") + '</div>' +
-      '<button class="kya-preview-copy" onclick="(function(){var url=window.location.origin+\'/\'+\'' + currentRoute + '\'+\'/new\';navigator.clipboard&&navigator.clipboard.writeText(url).then(function(){this.textContent=\'✓ Copié !\';}.bind(this));}).call(this)">📋 Copier lien du formulaire actuel</button>';
+      '<button class="kya-preview-copy" onclick="(function(){var url=window.location.origin+\'/\'+\'' + currentRoute + '\'+\'/new\';navigator.clipboard&&navigator.clipboard.writeText(url).then(function(){this.textContent=\'âœ“ CopiÃ© !\';}.bind(this));}).call(this)">ðŸ“‹ Copier lien du formulaire actuel</button>';
     var toggle = document.createElement("button");
     toggle.className = "kya-preview-toggle";
-    toggle.innerHTML = "👁️ Aperçu Admin";
+    toggle.innerHTML = "ðŸ‘ï¸ AperÃ§u Admin";
     toggle.addEventListener("click", function() {
       var vis = panel.style.display === "none";
       panel.style.display = vis ? "block" : "none";
-      toggle.innerHTML = vis ? "✕ Fermer" : "👁️ Aperçu Admin";
+      toggle.innerHTML = vis ? "âœ• Fermer" : "ðŸ‘ï¸ AperÃ§u Admin";
     });
     bar.appendChild(panel);
     bar.appendChild(toggle);
@@ -726,17 +788,17 @@
 
     function fetchAndFillFromSession() {
       if (!window.frappe || frappe.session.user === "Guest") return;
-      if (empInput.value && empInput.value.trim()) return; // déjà rempli
+      if (empInput.value && empInput.value.trim()) return; // dÃ©jÃ  rempli
       frappe.call({
         method: "kya_hr.api.get_employee_from_user",
         args: {},
         callback: function (r) {
           if (r && r.message) {
             fillFromEmployeeRecord(r.message);
-            // Injecter widget recherche par nom si l'employé n'est toujours pas reconnu
+            // Injecter widget recherche par nom si l'employÃ© n'est toujours pas reconnu
             if (!r.message.name) injectNameSearchWidget();
           } else {
-            // Aucune fiche employé liée au compte → proposer la recherche par nom
+            // Aucune fiche employÃ© liÃ©e au compte â†’ proposer la recherche par nom
             injectNameSearchWidget();
           }
           lockEmployeeField();
@@ -750,8 +812,8 @@
       widget.className = "kya-name-search-widget";
       widget.style.cssText = "margin-top:8px;padding:10px 12px;background:#fff8e1;border:1px solid #ffe082;border-radius:6px;font-size:13px;";
       widget.innerHTML =
-        '<p style="margin:0 0 6px;color:#5d4037;font-weight:600;">Votre compte n\'est pas encore lié à une fiche RH.</p>' +
-        '<p style="margin:0 0 8px;color:#5d4037;">Tapez votre nom complet pour confirmer votre identité :</p>' +
+        '<p style="margin:0 0 6px;color:#5d4037;font-weight:600;">Votre compte n\'est pas encore liÃ© Ã  une fiche RH.</p>' +
+        '<p style="margin:0 0 8px;color:#5d4037;">Tapez votre nom complet pour confirmer votre identitÃ© :</p>' +
         '<div style="display:flex;gap:8px;align-items:center;">' +
           '<input type="text" class="kya-name-search-input" placeholder="Ex: Jean Kofi MENSAH" ' +
             'style="flex:1;padding:6px 10px;border:1px solid #bbb;border-radius:4px;font-size:13px;" />' +
@@ -769,11 +831,11 @@
       function doSearch() {
         var term = searchInput.value.trim();
         if (term.length < 2) {
-          resultMsg.textContent = "Veuillez saisir au moins 2 caractères.";
+          resultMsg.textContent = "Veuillez saisir au moins 2 caractÃ¨res.";
           resultMsg.style.color = "#c62828";
           return;
         }
-        resultMsg.textContent = "Recherche en cours…";
+        resultMsg.textContent = "Recherche en coursâ€¦";
         resultMsg.style.color = "#555";
         frappe.call({
           method: "kya_hr.api.search_employee_by_name",
@@ -781,10 +843,10 @@
           callback: function (r) {
             if (r && r.message) {
               var emp = r.message;
-              resultMsg.textContent = "Correspondance trouvée : " + emp.employee_name + " (" + emp.name + ")";
+              resultMsg.textContent = "Correspondance trouvÃ©e : " + emp.employee_name + " (" + emp.name + ")";
               resultMsg.style.color = "#2e7d32";
               fillFromEmployeeRecord(emp);
-              // Masquer le widget après succès
+              // Masquer le widget aprÃ¨s succÃ¨s
               setTimeout(function () { widget.style.display = "none"; }, 1500);
             } else {
               resultMsg.textContent = "Aucune correspondance avec votre compte. Contactez les RH.";

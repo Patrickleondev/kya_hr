@@ -35,6 +35,8 @@ doctype_js = {
     "PV Sortie Materiel": "doctype/pv_sortie_materiel/pv_sortie_materiel.js",
     "Planning Conge": "doctype/planning_conge/planning_conge.js",
     "Demande Achat KYA": "doctype/demande_achat_kya/demande_achat_kya.js",
+    "PV Entree Materiel": "doctype/pv_entree_materiel/pv_entree_materiel.js",
+    "Inventaire KYA": "doctype/inventaire_kya/inventaire_kya.js",
 }
 
 # Jinja environment

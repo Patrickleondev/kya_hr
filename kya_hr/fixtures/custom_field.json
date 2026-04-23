@@ -3656,5 +3656,32 @@
   "translatable": 0,
   "unique": 0,
   "width": null
+ },
+ {
+  "docstatus": 0, "doctype": "Custom Field", "dt": "Stock Entry",
+  "fieldname": "pv_sortie_materiel", "fieldtype": "Link", "options": "PV Sortie Materiel",
+  "label": "PV Sortie Matériel (KYA)", "insert_after": "remarks",
+  "read_only": 1, "print_hide": 1, "no_copy": 1, "allow_on_submit": 1,
+  "is_system_generated": 0, "module": "KYA HR",
+  "modified": "2026-04-23 00:00:00.000000",
+  "name": "Stock Entry-pv_sortie_materiel"
+ },
+ {
+  "docstatus": 0, "doctype": "Custom Field", "dt": "Stock Entry",
+  "fieldname": "pv_entree_materiel", "fieldtype": "Link", "options": "PV Entree Materiel",
+  "label": "PV Entrée Matériel (KYA)", "insert_after": "pv_sortie_materiel",
+  "read_only": 1, "print_hide": 1, "no_copy": 1, "allow_on_submit": 1,
+  "is_system_generated": 0, "module": "KYA HR",
+  "modified": "2026-04-23 00:00:00.000000",
+  "name": "Stock Entry-pv_entree_materiel"
+ },
+ {
+  "docstatus": 0, "doctype": "Custom Field", "dt": "Stock Reconciliation",
+  "fieldname": "inventaire_kya", "fieldtype": "Link", "options": "Inventaire KYA",
+  "label": "Inventaire KYA", "insert_after": "remarks",
+  "read_only": 1, "print_hide": 1, "no_copy": 1, "allow_on_submit": 1,
+  "is_system_generated": 0, "module": "KYA HR",
+  "modified": "2026-04-23 00:00:00.000000",
+  "name": "Stock Reconciliation-inventaire_kya"
  }
 ]

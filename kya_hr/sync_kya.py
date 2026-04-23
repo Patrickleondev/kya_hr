@@ -21,7 +21,7 @@ if not frappe.db.exists("DocType", "Permission Sortie Stagiaire"):
         "name": "Permission Sortie Stagiaire",
         "module": "KYA HR",
         "custom": 0,
-        "autoname": "format:PSS-{YYYY}-{####}",
+        "autoname": "format:PSS-{YYYY}-{#####}",
         "fields": [
             {"fieldname": "employee", "label": "Employé / Stagiaire", "fieldtype": "Link", "options": "Employee", "reqd": 1, "in_list_view": 1},
             {"fieldname": "date_sortie", "label": "Date de Sortie", "fieldtype": "Date", "reqd": 1, "in_list_view": 1},
@@ -40,7 +40,7 @@ if not frappe.db.exists("DocType", "Bilan Fin de Stage"):
         "name": "Bilan Fin de Stage",
         "module": "KYA HR",
         "custom": 0,
-        "autoname": "format:BILAN-{YYYY}-{####}",
+        "autoname": "format:BILAN-{YYYY}-{#####}",
         "fields": [
             {"fieldname": "employee", "label": "Employé / Stagiaire", "fieldtype": "Link", "options": "Employee", "reqd": 1, "in_list_view": 1},
             {"fieldname": "date_bilan", "label": "Date du Bilan", "fieldtype": "Date", "reqd": 1, "in_list_view": 1},

@@ -1762,3 +1762,9 @@ def _(s):
         return frappe._(s)
     except Exception:
         return s
+
+
+@frappe.whitelist()
+def get_current_employee():
+    """Alias public utilisé par les Web Forms KYA. Retourne la fiche Employee active liée au user."""
+    return get_employee_from_user()

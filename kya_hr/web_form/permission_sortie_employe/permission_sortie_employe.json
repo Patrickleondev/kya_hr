@@ -1,102 +1,102 @@
 {
-    "allow_comments": 1,
-    "allow_delete": 0,
-    "allow_edit": 1,
-    "allow_incomplete": 0,
-    "allow_multiple": 1,
-    "allow_print": 1,
-    "anonymous": 0,
-    "apply_document_permissions": 1,
-    "creation": "2026-03-12 00:00:00.000000",
-    "doc_type": "Permission Sortie Employe",
-    "docstatus": 0,
-    "doctype": "Web Form",
-    "idx": 0,
-    "introduction_text": "",
-    "is_standard": 1,
-    "login_required": 1,
-    "modified": "2026-03-12 00:00:00.000000",
-    "modified_by": "Administrator",
-    "module": "KYA HR",
-    "name": "permission-sortie-employe",
-    "owner": "Administrator",
-    "published": 1,
-    "route": "permission-sortie-employe",
-    "show_sidebar": 1,
-    "success_message": "✅ Votre demande de permission de sortie a été soumise avec succès. Elle sera examinée par votre Chef de Service, puis les RH et la Direction.",
-    "title": "Demande de Permission de Sortie (Employé)",
-    "client_script": "frappe.web_form.after_load = function() {\n  // INJECTION: Dynamic Reference Number\n  if (doc && doc.name) {\n    var refEl = document.createElement('div');\n    refEl.innerHTML = '<div style=\"margin-bottom:12px;padding:8px 16px;background:#f1f8e9;color:#33691e;border-left:4px solid #8bc34a;border-radius:6px;display:inline-block;font-weight:700;margin-right:10px;font-size:14px;\">Réf. Dossier : ' + doc.name + '</div>';\n    var w = document.querySelector('.web-form-wrapper') || document.querySelector('.container');\n    if (w) w.prepend(refEl);\n  }\n\n  var doc = frappe.web_form.doc;\n  var roles = (frappe.boot && frappe.boot.user && frappe.boot.user.roles) ? frappe.boot.user.roles : [];\n  var state = (doc && (doc.workflow_state || doc.statut)) || 'Brouillon';\n  var rules = {\n    'signature_employe': { states: ['Brouillon'], roles: [] },\n    'signature_chef': { states: ['En attente Chef'], roles: ['HR User','HR Manager','Chef Service','System Manager'] },\n    'signature_rh': { states: ['En attente RH'], roles: ['HR Manager','HR User','System Manager'] },\n    'signature_dga': { states: ['En attente Direction'], roles: ['HR Manager','System Manager'] }\n  };\n  var allSig = ['signature_employe','signature_chef','signature_rh','signature_dga'];\n  allSig.forEach(function(f){ frappe.web_form.set_df_property(f, 'read_only', 1); });\n  Object.keys(rules).forEach(function(field) {\n    var rule = rules[field];\n    var stateOk = rule.states.indexOf(state) !== -1;\n    var roleOk = rule.roles.length === 0 || rule.roles.some(function(r){ return roles.indexOf(r) !== -1; });\n    if (stateOk && roleOk) frappe.web_form.set_df_property(field, 'read_only', 0);\n  });\n  if (doc && doc.statut) {\n    var cm = {'Approuv\\u00e9':'#2e7d32','Rejet\\u00e9':'#c62828','Brouillon':'#757575'};\n    var c = cm[doc.statut] || '#e65100';\n    var el = document.createElement('div');\n    el.innerHTML = '<div style=\"margin-bottom:12px;padding:8px 16px;background:'+c+';color:#fff;border-radius:6px;display:inline-block;font-weight:700;\">\\u00c9tat\\u00a0: '+doc.statut+'</div>';\n    var w = document.querySelector('.web-form-wrapper') || document.querySelector('.container');\n    if (w) w.prepend(el);\n  }\n};\nfrappe.web_form.on('load', function(){\n  var doc = frappe.web_form.doc;\n  if (doc && !doc.employee && frappe.session && frappe.session.user) {\n    frappe.call({ method:'frappe.client.get_value', args:{ doctype:'Employee', filters:{ user_id: frappe.session.user, status:'Active' }, fieldname:['name','employee_name'] }, callback:function(r){ if(r.message){ frappe.web_form.set_value('employee', r.message.name); } } });\n  }\n});\n",
-    "web_form_fields": [
-        {
-            "fieldname": "employee",
-            "fieldtype": "Link",
-            "label": "Employé",
-            "options": "Employee",
-            "reqd": 1
-        },
-        {
-            "fieldname": "employee_name",
-            "fieldtype": "Data",
-            "label": "Nom",
-            "read_only": 1
-        },
-        {
-            "fieldname": "department",
-            "fieldtype": "Link",
-            "label": "Département",
-            "options": "Department",
-            "read_only": 1
-        },
-        {
-            "fieldname": "date_sortie",
-            "fieldtype": "Date",
-            "label": "Date de Sortie",
-            "reqd": 1,
-            "default": "Today"
-        },
-        {
-            "fieldname": "heure_depart",
-            "fieldtype": "Time",
-            "label": "Heure de Départ",
-            "reqd": 1
-        },
-        {
-            "fieldname": "heure_retour",
-            "fieldtype": "Time",
-            "label": "Heure de Retour Prévue"
-        },
-        {
-            "fieldname": "motif",
-            "fieldtype": "Small Text",
-            "label": "Motif de la Sortie",
-            "reqd": 1,
-            "description": "Décrivez le motif de votre demande de sortie"
-        },
-        {
-            "fieldname": "justificatif",
-            "fieldtype": "Attach",
-            "label": "Pièce Justificative",
-            "description": "Joindre un justificatif si nécessaire"
-        },
-        {
-            "fieldname": "signature_employe",
-            "fieldtype": "Signature",
-            "label": "Signature Employé"
-        },
-        {
-            "fieldname": "signature_chef",
-            "fieldtype": "Signature",
-            "label": "Signature Chef de Service"
-        },
-        {
-            "fieldname": "signature_rh",
-            "fieldtype": "Signature",
-            "label": "Signature RH"
-        },
-        {
-            "fieldname": "signature_dga",
-            "fieldtype": "Signature",
-            "label": "Signature DGA"
-        }
-    ]
+ "allow_comments": 1,
+ "allow_delete": 0,
+ "allow_edit": 1,
+ "allow_incomplete": 0,
+ "allow_multiple": 1,
+ "allow_print": 1,
+ "anonymous": 0,
+ "apply_document_permissions": 1,
+ "creation": "2026-03-12 00:00:00.000000",
+ "doc_type": "Permission Sortie Employe",
+ "docstatus": 0,
+ "doctype": "Web Form",
+ "idx": 0,
+ "introduction_text": "",
+ "is_standard": 1,
+ "login_required": 1,
+ "modified": "2026-03-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "KYA HR",
+ "name": "permission-sortie-employe",
+ "owner": "Administrator",
+ "published": 1,
+ "route": "permission-sortie-employe",
+ "show_sidebar": 1,
+ "success_message": "✅ Votre demande de permission de sortie a été soumise avec succès. Elle sera examinée par votre Chef de Service, puis les RH et la Direction.",
+ "title": "Demande de Permission de Sortie (Employé)",
+ "client_script": "frappe.web_form.after_load = function() {\n  // INJECTION: Dynamic Reference Number\n  if (doc && doc.name) {\n    var refEl = document.createElement('div');\n    refEl.innerHTML = '<div style=\"margin-bottom:12px;padding:8px 16px;background:#f1f8e9;color:#33691e;border-left:4px solid #8bc34a;border-radius:6px;display:inline-block;font-weight:700;margin-right:10px;font-size:14px;\">Réf. Dossier : ' + doc.name + '</div>';\n    var w = document.querySelector('.web-form-wrapper') || document.querySelector('.container');\n    if (w) w.prepend(refEl);\n  }\n\n  var doc = frappe.web_form.doc;\n  var roles = (frappe.boot && frappe.boot.user && frappe.boot.user.roles) ? frappe.boot.user.roles : [];\n  var state = (doc && (doc.workflow_state || doc.statut)) || 'Brouillon';\n  var rules = {\n    'signature_employe': { states: ['Brouillon'], roles: [] },\n    'signature_chef': { states: ['En attente Chef'], roles: ['Chef Service','System Manager'] },\n    'signature_rh': { states: ['En attente RH'], roles: ['Responsable RH','System Manager'] },\n    'signature_dga': { states: ['En attente Direction'], roles: ['DGA','Directeur Général','System Manager'] }\n  };\n  var allSig = ['signature_employe','signature_chef','signature_rh','signature_dga'];\n  allSig.forEach(function(f){ frappe.web_form.set_df_property(f, 'read_only', 1); });\n  Object.keys(rules).forEach(function(field) {\n    var rule = rules[field];\n    var stateOk = rule.states.indexOf(state) !== -1;\n    var roleOk = rule.roles.length === 0 || rule.roles.some(function(r){ return roles.indexOf(r) !== -1; });\n    if (stateOk && roleOk) frappe.web_form.set_df_property(field, 'read_only', 0);\n  });\n  if (doc && doc.statut) {\n    var cm = {'Approuv\\u00e9':'#2e7d32','Rejet\\u00e9':'#c62828','Brouillon':'#757575'};\n    var c = cm[doc.statut] || '#e65100';\n    var el = document.createElement('div');\n    el.innerHTML = '<div style=\"margin-bottom:12px;padding:8px 16px;background:'+c+';color:#fff;border-radius:6px;display:inline-block;font-weight:700;\">\\u00c9tat\\u00a0: '+doc.statut+'</div>';\n    var w = document.querySelector('.web-form-wrapper') || document.querySelector('.container');\n    if (w) w.prepend(el);\n  }\n};\nfrappe.web_form.on('load', function(){\n  var doc = frappe.web_form.doc;\n  if (doc && !doc.employee && frappe.session && frappe.session.user) {\n    frappe.call({ method:'frappe.client.get_value', args:{ doctype:'Employee', filters:{ user_id: frappe.session.user, status:'Active' }, fieldname:['name','employee_name'] }, callback:function(r){ if(r.message){ frappe.web_form.set_value('employee', r.message.name); } } });\n  }\n});\n",
+ "web_form_fields": [
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employé",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Nom",
+   "read_only": 1
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Département",
+   "options": "Department",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date_sortie",
+   "fieldtype": "Date",
+   "label": "Date de Sortie",
+   "reqd": 1,
+   "default": "Today"
+  },
+  {
+   "fieldname": "heure_depart",
+   "fieldtype": "Time",
+   "label": "Heure de Départ",
+   "reqd": 1
+  },
+  {
+   "fieldname": "heure_retour",
+   "fieldtype": "Time",
+   "label": "Heure de Retour Prévue"
+  },
+  {
+   "fieldname": "motif",
+   "fieldtype": "Small Text",
+   "label": "Motif de la Sortie",
+   "reqd": 1,
+   "description": "Décrivez le motif de votre demande de sortie"
+  },
+  {
+   "fieldname": "justificatif",
+   "fieldtype": "Attach",
+   "label": "Pièce Justificative",
+   "description": "Joindre un justificatif si nécessaire"
+  },
+  {
+   "fieldname": "signature_employe",
+   "fieldtype": "Signature",
+   "label": "Signature Employé"
+  },
+  {
+   "fieldname": "signature_chef",
+   "fieldtype": "Signature",
+   "label": "Signature Chef de Service"
+  },
+  {
+   "fieldname": "signature_rh",
+   "fieldtype": "Signature",
+   "label": "Signature RH"
+  },
+  {
+   "fieldname": "signature_dga",
+   "fieldtype": "Signature",
+   "label": "Signature DGA"
+  }
+ ]
 }
