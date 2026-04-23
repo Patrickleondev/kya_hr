@@ -51,6 +51,19 @@ doc_events = {
     "Employee": {
         "before_save": "kya_hr.grille_indiciaire.calculer_indice_employee",
     },
+    # Auto-rempli report_to_user pour notifications "En attente Chef"
+    "Demande Achat KYA": {
+        "before_save": "kya_hr.chef_routing.populate_chef",
+    },
+    "Permission Sortie Employe": {
+        "before_save": "kya_hr.chef_routing.populate_chef",
+    },
+    "Permission Sortie Stagiaire": {
+        "before_save": "kya_hr.chef_routing.populate_chef",
+    },
+    "Planning Conge": {
+        "before_save": "kya_hr.chef_routing.populate_chef",
+    },
 }
 
 # Rappels quotidiens (anniversaires naissance & ancienneté)
