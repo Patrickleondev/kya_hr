@@ -550,5 +550,116 @@
   ],
   "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#c62828,#e53935);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='{{ frappe.utils.get_url() }}/assets/kya_hr/images/kya_logo.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>❌ Demande Rejetée</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><p>Bonjour <b>{{ doc.employee_name }}</b>,</p><p>Votre demande de congé du <b>{{ doc.date_debut }}</b> au <b>{{ doc.date_fin }}</b> a été <b style='color:#c62828;'>rejetée</b>.</p><p>Veuillez contacter votre responsable pour plus d'informations.</p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url_to_form(doc.doctype, doc.name) }}' style='display:inline-block;padding:12px 32px;background:#666;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>Voir les détails</a></div></div>{{ get_kya_email_footer() }}</div>",
   "enabled": 1
+ },
+ {
+  "doctype": "Notification",
+  "name": "KYA - Brouillard Caisse: En attente Comptable",
+  "subject": "Brouillard de caisse {{ doc.name }} — Validation Comptable requise",
+  "document_type": "Brouillard Caisse",
+  "event": "Value Change",
+  "value_changed": "workflow_state",
+  "condition": "doc.workflow_state == 'En attente Comptable'",
+  "channel": "Email",
+  "recipients": [
+   {
+    "receiver_by_role": "Comptable"
+   }
+  ],
+  "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#009688,#00bcd4);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='{{ frappe.utils.get_url() }}/assets/kya_hr/images/kya_logo.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>Brouillard de Caisse — Validation Comptable</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><div style='background:#f1f8e9;padding:10px;margin-bottom:15px;border-radius:6px;border-left:4px solid #8bc34a;color:#33691e;font-size:14px;'><b>Réf. Dossier :</b> {{ doc.name }}</div><p>Bonjour,</p><p>La caissière <b>{{ doc.caissiere_name }}</b> a soumis le brouillard de caisse du <b>{{ doc.date_brouillard }}</b> pour votre visa.</p><table style='width:100%;border-collapse:collapse;margin:14px 0;'><tr><td style='padding:6px 10px;background:#f5f5f5;font-weight:700;width:45%;'>Total Entrées</td><td style='padding:6px 10px;'>{{ doc.total_entrees }} XOF</td></tr><tr><td style='padding:6px 10px;background:#f5f5f5;font-weight:700;'>Total Sorties</td><td style='padding:6px 10px;'>{{ doc.total_sorties }} XOF</td></tr><tr><td style='padding:6px 10px;background:#f5f5f5;font-weight:700;'>Solde Final</td><td style='padding:6px 10px;'><b>{{ doc.solde_final }} XOF</b></td></tr><tr><td style='padding:6px 10px;background:#f5f5f5;font-weight:700;'>Total Réel Caisse</td><td style='padding:6px 10px;'>{{ doc.total_reel_caisse }} XOF</td></tr></table><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url_to_form(doc.doctype, doc.name) }}' style='display:inline-block;padding:12px 32px;background:#009688;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>💼 Ouvrir le document</a></div></div>{{ get_kya_email_footer() }}</div>",
+  "enabled": 1
+ },
+ {
+  "doctype": "Notification",
+  "name": "KYA - Brouillard Caisse: En attente DFC",
+  "subject": "Brouillard de caisse {{ doc.name }} — Validation DFC requise",
+  "document_type": "Brouillard Caisse",
+  "event": "Value Change",
+  "value_changed": "workflow_state",
+  "condition": "doc.workflow_state == 'En attente DFC'",
+  "channel": "Email",
+  "recipients": [
+   {
+    "receiver_by_role": "DFC"
+   },
+   {
+    "receiver_by_role": "DAAF"
+   }
+  ],
+  "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#009688,#00bcd4);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='{{ frappe.utils.get_url() }}/assets/kya_hr/images/kya_logo.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>Brouillard de Caisse — Validation DFC</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><div style='background:#f1f8e9;padding:10px;margin-bottom:15px;border-radius:6px;border-left:4px solid #8bc34a;color:#33691e;font-size:14px;'><b>Réf. Dossier :</b> {{ doc.name }}</div><p>Bonjour,</p><p>Le comptable a visé le brouillard de caisse du <b>{{ doc.date_brouillard }}</b> (caissière : <b>{{ doc.caissiere_name }}</b>). Votre approbation finale est requise.</p><p><b>Solde final théorique :</b> {{ doc.solde_final }} XOF<br><b>Total réel comptage :</b> {{ doc.total_reel_caisse }} XOF</p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url_to_form(doc.doctype, doc.name) }}' style='display:inline-block;padding:12px 32px;background:#009688;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>💼 Ouvrir le document</a></div></div>{{ get_kya_email_footer() }}</div>",
+  "enabled": 1
+ },
+ {
+  "doctype": "Notification",
+  "name": "KYA - Brouillard Caisse: Approuvé",
+  "subject": "Brouillard de caisse {{ doc.name }} approuvé",
+  "document_type": "Brouillard Caisse",
+  "event": "Value Change",
+  "value_changed": "workflow_state",
+  "condition": "doc.workflow_state == 'Approuvé'",
+  "channel": "Email",
+  "recipients": [
+   {
+    "receiver_by_document_field": "caissiere.user_id"
+   }
+  ],
+  "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#009688,#00bcd4);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='{{ frappe.utils.get_url() }}/assets/kya_hr/images/kya_logo.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>Brouillard de Caisse — Approuvé</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><div style='background:#f1f8e9;padding:10px;margin-bottom:15px;border-radius:6px;border-left:4px solid #8bc34a;color:#33691e;font-size:14px;'><b>Réf. Dossier :</b> {{ doc.name }}</div><p>Bonjour {{ doc.caissiere_name }},</p><p>Votre brouillard du <b>{{ doc.date_brouillard }}</b> a été approuvé par le DFC. Aucune action requise.</p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url_to_form(doc.doctype, doc.name) }}' style='display:inline-block;padding:12px 32px;background:#009688;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>💼 Ouvrir le document</a></div></div>{{ get_kya_email_footer() }}</div>",
+  "enabled": 1
+ },
+ {
+  "doctype": "Notification",
+  "name": "KYA - Brouillard Caisse: Rejeté",
+  "subject": "Brouillard de caisse {{ doc.name }} rejeté",
+  "document_type": "Brouillard Caisse",
+  "event": "Value Change",
+  "value_changed": "workflow_state",
+  "condition": "doc.workflow_state == 'Rejeté'",
+  "channel": "Email",
+  "recipients": [
+   {
+    "receiver_by_document_field": "caissiere.user_id"
+   }
+  ],
+  "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#009688,#00bcd4);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='{{ frappe.utils.get_url() }}/assets/kya_hr/images/kya_logo.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>Brouillard de Caisse — Rejeté</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><div style='background:#f1f8e9;padding:10px;margin-bottom:15px;border-radius:6px;border-left:4px solid #8bc34a;color:#33691e;font-size:14px;'><b>Réf. Dossier :</b> {{ doc.name }}</div><p>Bonjour {{ doc.caissiere_name }},</p><p>Votre brouillard du <b>{{ doc.date_brouillard }}</b> a été rejeté. Merci de vérifier les commentaires et de le corriger.</p>{% if doc.commentaires %}<div style='background:#fff3e0;padding:10px;border-left:4px solid #ff9800;'>{{ doc.commentaires }}</div>{% endif %}<div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url_to_form(doc.doctype, doc.name) }}' style='display:inline-block;padding:12px 32px;background:#009688;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>💼 Ouvrir le document</a></div></div>{{ get_kya_email_footer() }}</div>",
+  "enabled": 1
+ },
+ {
+  "doctype": "Notification",
+  "name": "KYA - Etat Recap: En attente DFC",
+  "subject": "État récap chèques {{ doc.name }} — Validation DFC",
+  "document_type": "Etat Recap Cheques",
+  "event": "Value Change",
+  "value_changed": "workflow_state",
+  "condition": "doc.workflow_state == 'Rédigé'",
+  "channel": "Email",
+  "recipients": [
+   {
+    "receiver_by_role": "DFC"
+   },
+   {
+    "receiver_by_role": "DAAF"
+   }
+  ],
+  "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#009688,#00bcd4);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='{{ frappe.utils.get_url() }}/assets/kya_hr/images/kya_logo.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>État Récapitulatif des Chèques — Validation DFC</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><div style='background:#f1f8e9;padding:10px;margin-bottom:15px;border-radius:6px;border-left:4px solid #8bc34a;color:#33691e;font-size:14px;'><b>Réf. Dossier :</b> {{ doc.name }}</div><p>Bonjour,</p><p>Le rédacteur <b>{{ doc.redacteur_name }}</b> a soumis l'état récapitulatif <b>{{ doc.libelle_periode }}</b>.</p><p><b>Nombre de chèques :</b> {{ doc.nombre_cheques }}<br><b>Total montant :</b> {{ doc.total_montant }} XOF</p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url_to_form(doc.doctype, doc.name) }}' style='display:inline-block;padding:12px 32px;background:#009688;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>💼 Ouvrir le document</a></div></div>{{ get_kya_email_footer() }}</div>",
+  "enabled": 1
+ },
+ {
+  "doctype": "Notification",
+  "name": "KYA - Etat Recap: Transmis Direction",
+  "subject": "État récap chèques {{ doc.name }} validé — transmis à la Direction",
+  "document_type": "Etat Recap Cheques",
+  "event": "Value Change",
+  "value_changed": "workflow_state",
+  "condition": "doc.workflow_state == 'Validé DFC'",
+  "channel": "Email",
+  "recipients": [
+   {
+    "receiver_by_role": "Directeur Général"
+   },
+   {
+    "receiver_by_role": "DGA"
+   }
+  ],
+  "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#009688,#00bcd4);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='{{ frappe.utils.get_url() }}/assets/kya_hr/images/kya_logo.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>État Récapitulatif des Chèques — Direction</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><div style='background:#f1f8e9;padding:10px;margin-bottom:15px;border-radius:6px;border-left:4px solid #8bc34a;color:#33691e;font-size:14px;'><b>Réf. Dossier :</b> {{ doc.name }}</div><p>Bonjour,</p><p>Veuillez trouver ci-joint l'état récapitulatif validé par le DFC.</p><p><b>Période :</b> {{ doc.libelle_periode }}<br><b>Rédigé par :</b> {{ doc.redacteur_name }}<br><b>Nombre de chèques :</b> {{ doc.nombre_cheques }}<br><b>Total :</b> {{ doc.total_montant }} XOF</p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url_to_form(doc.doctype, doc.name) }}' style='display:inline-block;padding:12px 32px;background:#009688;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>💼 Ouvrir le document</a></div></div>{{ get_kya_email_footer() }}</div>",
+  "enabled": 1
  }
 ]

@@ -1,0 +1,289 @@
+{
+ "actions": [],
+ "autoname": "format:ERC-{YYYY}-{#####}",
+ "creation": "2026-04-22 12:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "is_submittable": 1,
+ "track_changes": 1,
+ "field_order": [
+  "section_entete",
+  "date_etat",
+  "redacteur",
+  "redacteur_name",
+  "col_entete",
+  "report_to",
+  "semaine_du",
+  "semaine_au",
+  "libelle_periode",
+  "section_lignes",
+  "lignes",
+  "section_totaux",
+  "total_montant",
+  "nombre_cheques",
+  "section_signatures",
+  "col_sig_redacteur",
+  "signature_redacteur",
+  "signataire_redacteur",
+  "date_signature_redacteur",
+  "col_sig_dfc",
+  "signature_dfc",
+  "signataire_dfc",
+  "date_signature_dfc",
+  "section_workflow",
+  "statut",
+  "workflow_state",
+  "commentaires",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_entete",
+   "fieldtype": "Section Break",
+   "label": "En-tête"
+  },
+  {
+   "fieldname": "date_etat",
+   "fieldtype": "Date",
+   "label": "Date de l'État",
+   "reqd": 1,
+   "in_list_view": 1,
+   "default": "Today"
+  },
+  {
+   "fieldname": "redacteur",
+   "fieldtype": "Link",
+   "options": "Employee",
+   "label": "Rédacteur (Comptable ou DFC)",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "redacteur_name",
+   "fieldtype": "Data",
+   "label": "Nom Rédacteur",
+   "fetch_from": "redacteur.employee_name",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "col_entete",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "report_to",
+   "fieldtype": "Link",
+   "options": "Employee",
+   "label": "Responsable direct",
+   "fetch_from": "redacteur.reports_to",
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "semaine_du",
+   "fieldtype": "Date",
+   "label": "Semaine du",
+   "reqd": 1
+  },
+  {
+   "fieldname": "semaine_au",
+   "fieldtype": "Date",
+   "label": "Au",
+   "reqd": 1
+  },
+  {
+   "fieldname": "libelle_periode",
+   "fieldtype": "Data",
+   "label": "Libellé Période",
+   "read_only": 1,
+   "description": "Ex: du 13 au 17 AVRIL 2026"
+  },
+  {
+   "fieldname": "section_lignes",
+   "fieldtype": "Section Break",
+   "label": "Chèques émis"
+  },
+  {
+   "fieldname": "lignes",
+   "fieldtype": "Table",
+   "options": "Etat Recap Cheques Ligne",
+   "label": "Chèques",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_totaux",
+   "fieldtype": "Section Break",
+   "label": "Totaux"
+  },
+  {
+   "fieldname": "total_montant",
+   "fieldtype": "Currency",
+   "options": "XOF",
+   "label": "Total Montant",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "nombre_cheques",
+   "fieldtype": "Int",
+   "label": "Nombre de chèques",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_signatures",
+   "fieldtype": "Section Break",
+   "label": "Signatures"
+  },
+  {
+   "fieldname": "col_sig_redacteur",
+   "fieldtype": "Column Break",
+   "label": "Rédacteur"
+  },
+  {
+   "fieldname": "signature_redacteur",
+   "fieldtype": "Signature",
+   "label": "Visa Rédacteur"
+  },
+  {
+   "fieldname": "signataire_redacteur",
+   "fieldtype": "Data",
+   "label": "Signataire Rédacteur",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date_signature_redacteur",
+   "fieldtype": "Date",
+   "label": "Date Signature Rédacteur",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_sig_dfc",
+   "fieldtype": "Column Break",
+   "label": "DFC"
+  },
+  {
+   "fieldname": "signature_dfc",
+   "fieldtype": "Signature",
+   "label": "Visa DFC"
+  },
+  {
+   "fieldname": "signataire_dfc",
+   "fieldtype": "Data",
+   "label": "Signataire DFC",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date_signature_dfc",
+   "fieldtype": "Date",
+   "label": "Date Signature DFC",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_workflow",
+   "fieldtype": "Section Break",
+   "label": "Statut",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "statut",
+   "fieldtype": "Select",
+   "label": "Statut",
+   "options": "Brouillon\nRédigé\nValidé DFC\nEnvoyé Direction\nApprouvé\nRejeté",
+   "default": "Brouillon",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "workflow_state",
+   "fieldtype": "Data",
+   "label": "État Workflow",
+   "read_only": 1
+  },
+  {
+   "fieldname": "commentaires",
+   "fieldtype": "Small Text",
+   "label": "Commentaires"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "options": "Etat Recap Cheques",
+   "label": "Modifié depuis",
+   "read_only": 1,
+   "print_hide": 1
+  }
+ ],
+ "modified": "2026-04-22 12:00:00",
+ "module": "KYA HR",
+ "name": "Etat Recap Cheques",
+ "naming_rule": "Expression",
+ "permissions": [
+  {
+   "role": "Comptable",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "print": 1,
+   "email": 1
+  },
+  {
+   "role": "DFC",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1,
+   "print": 1,
+   "email": 1
+  },
+  {
+   "role": "DAAF",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1,
+   "print": 1,
+   "email": 1
+  },
+  {
+   "role": "Directeur Général",
+   "read": 1,
+   "print": 1,
+   "email": 1
+  },
+  {
+   "role": "DGA",
+   "read": 1,
+   "print": 1,
+   "email": 1
+  },
+  {
+   "role": "Accounts Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1,
+   "delete": 1,
+   "print": 1,
+   "email": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1,
+   "delete": 1,
+   "print": 1,
+   "email": 1
+  }
+ ],
+ "sort_field": "date_etat",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "libelle_periode"
+}

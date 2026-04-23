@@ -57,6 +57,12 @@ scheduler_events = {
         "kya_hr.reminders.send_kya_birthday_reminders",
         "kya_hr.reminders.send_kya_anniversary_reminders",
     ],
+    # Vendredi 17h00 : point hebdomadaire caisse au DG + DGA
+    "cron": {
+        "0 17 * * 5": [
+            "kya_hr.kya_hr.doctype.brouillard_caisse.brouillard_caisse.send_weekly_dg_summary",
+        ],
+    },
 }
 
 # Post-migration: nettoyage workspaces obsolètes + branding KYA
