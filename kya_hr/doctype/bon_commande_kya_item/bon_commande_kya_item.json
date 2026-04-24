@@ -1,0 +1,15 @@
+{
+ "name": "Bon Commande KYA Item",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "istable": 1,
+ "custom": 1,
+ "fields": [
+  { "fieldname": "item_code", "label": "Article", "fieldtype": "Link", "options": "Item", "in_list_view": 1, "columns": 2 },
+  { "fieldname": "description", "label": "DESCRIPTION", "fieldtype": "Small Text", "reqd": 1, "in_list_view": 1, "columns": 4 },
+  { "fieldname": "unite", "label": "Unité", "fieldtype": "Data", "default": "U", "in_list_view": 1, "columns": 1 },
+  { "fieldname": "quantite", "label": "QUANTITÉ", "fieldtype": "Float", "reqd": 1, "default": 1, "in_list_view": 1, "columns": 1 },
+  { "fieldname": "prix_unitaire", "label": "PRIX (FCFA)", "fieldtype": "Currency", "reqd": 1, "in_list_view": 1, "columns": 2 },
+  { "fieldname": "total", "label": "Total", "fieldtype": "Currency", "read_only": 1, "in_list_view": 1, "columns": 2 }
+ ]
+}

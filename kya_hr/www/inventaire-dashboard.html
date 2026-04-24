@@ -1,0 +1,372 @@
+{%- extends "templates/web.html" -%}
+{%- block title %}Inventaires Stock — KYA Energy{%- endblock -%}
+
+{%- block page_content -%}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+<style>
+:root {
+  --kya-blue: #0054A6;
+  --kya-orange: #F58220;
+  --kya-green: #22c55e;
+  --kya-red: #ef4444;
+  --kya-amber: #f59e0b;
+  --kya-bg: #f1f5f9;
+  --kya-card: #ffffff;
+  --kya-border: #e2e8f0;
+  --kya-text: #1e293b;
+  --kya-muted: #64748b;
+  --kya-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+body { background: var(--kya-bg) !important; }
+.page-container { max-width: 1600px !important; }
+
+/* Hero */
+.kya-hero {
+  background: linear-gradient(135deg, var(--kya-blue) 0%, #003d7a 100%);
+  color: white; border-radius: 16px; padding: 1.8rem 2.2rem;
+  margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+}
+.kya-hero-left { display: flex; align-items: center; gap: 1rem; }
+.kya-hero-logo {
+  background: white; padding: .5rem; border-radius: 12px; width: 64px; height: 64px;
+  display: flex; align-items: center; justify-content: center;
+}
+.kya-hero-logo img { max-width: 100%; max-height: 100%; }
+.kya-hero h1 { font-size: 1.6rem; font-weight: 700; margin: 0; }
+.kya-hero p { opacity: .85; margin: .25rem 0 0; font-size: .85rem; }
+.kya-hero-actions { display: flex; gap: .5rem; }
+.kya-hero .btn-primary {
+  background: var(--kya-orange); border: none; font-weight: 600; padding: .55rem 1.1rem;
+}
+.kya-hero .btn-primary:hover { background: #d96d10; }
+.kya-hero .btn-light { font-weight: 600; padding: .55rem 1rem; }
+
+/* Filters */
+.kya-filter {
+  background: var(--kya-card); border-radius: 12px; padding: 1rem 1.5rem;
+  border: 1px solid var(--kya-border); margin-bottom: 1.5rem;
+  box-shadow: var(--kya-shadow);
+  display: flex; gap: 1rem; align-items: end; flex-wrap: wrap;
+}
+.kya-filter label { font-size: .72rem; font-weight: 600; color: var(--kya-muted); text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: .2rem; }
+.kya-filter select, .kya-filter input { font-size: .85rem; border-radius: 8px; border: 1px solid var(--kya-border); padding: .4rem .6rem; }
+
+/* KPIs */
+.kya-kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+.kya-kpi {
+  background: var(--kya-card); border-radius: 12px; padding: 1.3rem;
+  border: 1px solid var(--kya-border); box-shadow: var(--kya-shadow);
+  display: flex; align-items: center; gap: 1rem; transition: transform .15s;
+}
+.kya-kpi:hover { transform: translateY(-2px); }
+.kya-kpi-icon {
+  width: 52px; height: 52px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem; color: white;
+}
+.kya-kpi-value { font-size: 1.8rem; font-weight: 800; line-height: 1; color: var(--kya-text); }
+.kya-kpi-label { font-size: .75rem; color: var(--kya-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-top: .3rem; }
+.icon-blue { background: var(--kya-blue); }
+.icon-amber { background: var(--kya-amber); }
+.icon-green { background: var(--kya-green); }
+.icon-red { background: var(--kya-red); }
+
+/* Panels */
+.kya-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+@media (max-width: 992px) { .kya-grid { grid-template-columns: 1fr; } }
+.kya-panel {
+  background: var(--kya-card); border-radius: 12px; border: 1px solid var(--kya-border);
+  box-shadow: var(--kya-shadow); overflow: hidden;
+}
+.kya-panel-header {
+  padding: 1rem 1.3rem; border-bottom: 1px solid var(--kya-border);
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(135deg, #fafbfc 0%, #f1f5f9 100%);
+}
+.kya-panel-header h3 { margin: 0; font-size: 1rem; font-weight: 700; color: var(--kya-text); display: flex; align-items: center; gap: .5rem; }
+.kya-panel-header .pill { background: var(--kya-blue); color: white; border-radius: 12px; padding: .15rem .65rem; font-size: .7rem; font-weight: 700; }
+.kya-panel-body { padding: 1.2rem; }
+
+/* Tables */
+.kya-table { width: 100%; font-size: .85rem; }
+.kya-table thead th {
+  background: linear-gradient(135deg, var(--kya-blue), #1976D2);
+  color: white; padding: .65rem .8rem; text-transform: uppercase; letter-spacing: .3px; font-size: .72rem;
+  font-weight: 700; text-align: left;
+}
+.kya-table tbody td { padding: .65rem .8rem; border-bottom: 1px solid var(--kya-border); }
+.kya-table tbody tr:nth-child(even) { background: #f8fafd; }
+.kya-table tbody tr:hover { background: #fff7ed; }
+
+/* Status badges */
+.badge-status { padding: .25rem .65rem; border-radius: 12px; font-size: .7rem; font-weight: 700; }
+.badge-brouillon { background: #e2e8f0; color: #475569; }
+.badge-attente { background: #fef3c7; color: #92400e; }
+.badge-approuve { background: #d1fae5; color: #065f46; }
+.badge-rejete { background: #fee2e2; color: #991b1b; }
+
+/* Modal */
+.kya-modal-bg { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.5); z-index: 9999; display: none; align-items: center; justify-content: center; }
+.kya-modal-bg.show { display: flex; }
+.kya-modal { background: white; border-radius: 16px; padding: 2rem; max-width: 500px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,.2); }
+.kya-modal h3 { margin: 0 0 1rem; color: var(--kya-blue); }
+.kya-modal label { font-size: .8rem; font-weight: 600; color: var(--kya-text); display: block; margin-top: .8rem; }
+.kya-modal input, .kya-modal select { width: 100%; border-radius: 8px; border: 1px solid var(--kya-border); padding: .55rem .8rem; font-size: .9rem; margin-top: .25rem; }
+.kya-modal-actions { display: flex; gap: .5rem; justify-content: flex-end; margin-top: 1.5rem; }
+
+.kya-empty { padding: 2rem; text-align: center; color: var(--kya-muted); font-style: italic; }
+.kya-loader { padding: 2rem; text-align: center; color: var(--kya-muted); }
+</style>
+
+<div class="kya-hero">
+  <div class="kya-hero-left">
+    <div class="kya-hero-logo"><img src="/assets/kya_hr/images/logo_kya.png" alt="KYA" onerror="this.src='/files/vrai.png'"></div>
+    <div>
+      <h1><i class="bi bi-clipboard-data"></i> Tableau de Bord Inventaires</h1>
+      <p>Suivi des inventaires physiques · écarts · ajustements stock</p>
+    </div>
+  </div>
+  <div class="kya-hero-actions">
+    <button class="btn btn-primary" onclick="openCreateModal()">
+      <i class="bi bi-plus-lg"></i> Nouvel Inventaire
+    </button>
+    <a class="btn btn-light" href="/app/inventaire-kya"><i class="bi bi-list-ul"></i> Voir tous</a>
+  </div>
+</div>
+
+<div class="kya-filter">
+  <div>
+    <label>Magasin</label>
+    <select id="filter-warehouse">
+      <option value="">Tous les magasins</option>
+    </select>
+  </div>
+  <div>
+    <label>Période</label>
+    <select id="filter-period">
+      <option value="7">7 derniers jours</option>
+      <option value="30" selected>30 derniers jours</option>
+      <option value="90">90 derniers jours</option>
+      <option value="365">12 derniers mois</option>
+    </select>
+  </div>
+  <div>
+    <button class="btn btn-primary btn-sm" onclick="loadAll()" style="background: var(--kya-blue); border: none;">
+      <i class="bi bi-arrow-clockwise"></i> Actualiser
+    </button>
+  </div>
+</div>
+
+<div class="kya-kpis" id="kpis"></div>
+
+<div class="kya-grid">
+  <div class="kya-panel">
+    <div class="kya-panel-header"><h3><i class="bi bi-graph-up"></i> Évolution des Inventaires</h3></div>
+    <div class="kya-panel-body"><canvas id="chart-evolution" height="100"></canvas></div>
+  </div>
+  <div class="kya-panel">
+    <div class="kya-panel-header"><h3><i class="bi bi-pie-chart"></i> Par Statut</h3></div>
+    <div class="kya-panel-body"><canvas id="chart-statut" height="200"></canvas></div>
+  </div>
+</div>
+
+<div class="kya-grid">
+  <div class="kya-panel">
+    <div class="kya-panel-header"><h3><i class="bi bi-exclamation-triangle"></i> Top 10 Articles avec Écart</h3></div>
+    <div class="kya-panel-body" style="max-height: 380px; overflow-y: auto;">
+      <table class="kya-table">
+        <thead><tr><th>Article</th><th>Désignation</th><th class="text-end">Occurrences</th><th class="text-end">Valeur écart (XOF)</th></tr></thead>
+        <tbody id="tbl-ecarts"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="kya-panel">
+    <div class="kya-panel-header"><h3><i class="bi bi-box-seam"></i> Stock Actuel</h3></div>
+    <div class="kya-panel-body"><canvas id="chart-stock" height="200"></canvas></div>
+  </div>
+</div>
+
+<div class="kya-panel" style="margin-bottom: 1.5rem;">
+  <div class="kya-panel-header"><h3><i class="bi bi-clock-history"></i> Inventaires Récents</h3><span class="pill" id="cnt-recents">0</span></div>
+  <div class="kya-panel-body" style="padding: 0;">
+    <table class="kya-table">
+      <thead><tr><th>N°</th><th>Objet</th><th>Date</th><th>Magasin</th><th class="text-center">Lignes</th><th class="text-center">Écarts</th><th class="text-end">Val. écart</th><th>Statut</th><th></th></tr></thead>
+      <tbody id="tbl-recents"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal créer -->
+<div class="kya-modal-bg" id="modal-create">
+  <div class="kya-modal">
+    <h3><i class="bi bi-plus-circle"></i> Nouvel Inventaire</h3>
+    <label>Objet / Libellé *</label>
+    <input id="m-objet" placeholder="ex: Inventaire mensuel magasin Lomé">
+    <label>Date</label>
+    <input id="m-date" type="date">
+    <label>Magasin</label>
+    <select id="m-warehouse"><option value="">Tous</option></select>
+    <label>Type</label>
+    <select id="m-type">
+      <option value="Partiel">Partiel</option>
+      <option value="Complet">Complet</option>
+      <option value="Cyclique">Cyclique</option>
+    </select>
+    <div class="kya-modal-actions">
+      <button class="btn btn-light" onclick="closeCreateModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="submitCreate()" style="background: var(--kya-orange); border: none;">
+        <i class="bi bi-check-lg"></i> Créer & Ouvrir
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const fmtXOF = n => new Intl.NumberFormat('fr-FR').format(Math.round(n||0)) + ' XOF';
+const fmtDate = d => d ? new Date(d).toLocaleDateString('fr-FR') : '—';
+const statusBadge = s => {
+  const map = { 'Brouillon': 'badge-brouillon', 'En attente Magasin': 'badge-attente', 'Approuvé': 'badge-approuve', 'Rejeté': 'badge-rejete' };
+  return `<span class="badge-status ${map[s]||'badge-brouillon'}">${s||'—'}</span>`;
+};
+let chartEvo = null, chartStatut = null, chartStock = null;
+
+function renderKPIs(k) {
+  document.getElementById('kpis').innerHTML = `
+    <div class="kya-kpi"><div class="kya-kpi-icon icon-blue"><i class="bi bi-clipboard-check"></i></div><div><div class="kya-kpi-value">${k.total||0}</div><div class="kya-kpi-label">Inventaires</div></div></div>
+    <div class="kya-kpi"><div class="kya-kpi-icon icon-amber"><i class="bi bi-hourglass-split"></i></div><div><div class="kya-kpi-value">${k.pending||0}</div><div class="kya-kpi-label">En attente</div></div></div>
+    <div class="kya-kpi"><div class="kya-kpi-icon icon-green"><i class="bi bi-check-circle"></i></div><div><div class="kya-kpi-value">${k.approved||0}</div><div class="kya-kpi-label">Approuvés</div></div></div>
+    <div class="kya-kpi"><div class="kya-kpi-icon icon-red"><i class="bi bi-cash-stack"></i></div><div><div class="kya-kpi-value" style="font-size:1.3rem">${fmtXOF(k.valeur_ecart)}</div><div class="kya-kpi-label">Valeur écart total</div></div></div>
+  `;
+}
+
+function renderEvolution(data) {
+  if (chartEvo) chartEvo.destroy();
+  const ctx = document.getElementById('chart-evolution');
+  chartEvo = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: data.map(r => fmtDate(r.d)),
+      datasets: [
+        { label: 'Inventaires', data: data.map(r => r.cnt), borderColor: '#0054A6', backgroundColor: 'rgba(0,84,166,.1)', tension: .3, yAxisID: 'y' },
+        { label: 'Valeur écart (XOF)', data: data.map(r => r.ecart), borderColor: '#F58220', backgroundColor: 'rgba(245,130,32,.1)', tension: .3, yAxisID: 'y1' }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { y: { beginAtZero: true, position: 'left' }, y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false } } }
+    }
+  });
+}
+
+function renderStatut(data) {
+  if (chartStatut) chartStatut.destroy();
+  const ctx = document.getElementById('chart-statut');
+  const colors = { 'Brouillon': '#94a3b8', 'En attente Magasin': '#f59e0b', 'Approuvé': '#22c55e', 'Rejeté': '#ef4444' };
+  chartStatut = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels: data.map(r => r.statut), datasets: [{ data: data.map(r => r.cnt), backgroundColor: data.map(r => colors[r.statut] || '#64748b') }] },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+}
+
+function renderEcarts(data) {
+  const tbody = document.getElementById('tbl-ecarts');
+  if (!data.length) { tbody.innerHTML = '<tr><td colspan="4" class="kya-empty">Aucun écart sur la période.</td></tr>'; return; }
+  tbody.innerHTML = data.map(r => `
+    <tr>
+      <td><a href="/app/item/${r.item_code}">${r.item_code}</a></td>
+      <td>${r.item_name||'—'}</td>
+      <td class="text-end">${r.occurrences||0}</td>
+      <td class="text-end" style="color:${r.valeur_ecart<0?'#ef4444':'#22c55e'};font-weight:600;">${fmtXOF(r.valeur_ecart)}</td>
+    </tr>
+  `).join('');
+}
+
+function renderStock(data) {
+  if (chartStock) chartStock.destroy();
+  const ctx = document.getElementById('chart-stock');
+  chartStock = new Chart(ctx, {
+    type: 'bar',
+    data: { labels: data.slice(0,10).map(r => (r.item_name||r.item_code).slice(0,20)), datasets: [{ label: 'Valeur stock (XOF)', data: data.slice(0,10).map(r => r.valeur), backgroundColor: '#0054A6' }] },
+    options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' }
+  });
+}
+
+function renderRecents(data) {
+  document.getElementById('cnt-recents').textContent = data.length;
+  const tbody = document.getElementById('tbl-recents');
+  if (!data.length) { tbody.innerHTML = '<tr><td colspan="9" class="kya-empty">Aucun inventaire.</td></tr>'; return; }
+  tbody.innerHTML = data.map(r => `
+    <tr>
+      <td><a href="/app/inventaire-kya/${r.name}">${r.name}</a></td>
+      <td>${r.objet||'—'}</td>
+      <td>${fmtDate(r.date_inventaire)}</td>
+      <td>${r.warehouse_filter||'—'}</td>
+      <td class="text-center">${r.total_lignes||0}</td>
+      <td class="text-center">${r.lignes_avec_ecart||0}</td>
+      <td class="text-end">${fmtXOF(r.valeur_ecart_total)}</td>
+      <td>${statusBadge(r.statut)}</td>
+      <td><a class="btn btn-sm btn-light" href="/app/inventaire-kya/${r.name}"><i class="bi bi-eye"></i></a></td>
+    </tr>
+  `).join('');
+}
+
+function populateWarehouses(data) {
+  const opts = data.map(w => `<option value="${w.name}">${w.warehouse_name||w.name}</option>`).join('');
+  ['filter-warehouse', 'm-warehouse'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (sel.children.length <= 1) sel.insertAdjacentHTML('beforeend', opts);
+  });
+}
+
+function loadAll() {
+  const wh = document.getElementById('filter-warehouse').value;
+  const period = document.getElementById('filter-period').value;
+  frappe.call({
+    method: 'kya_hr.api.inventaire_dashboard.get_dashboard_stats',
+    args: { warehouse: wh, period: period },
+    callback: function(r) {
+      if (!r.message) return;
+      const d = r.message;
+      renderKPIs(d.kpis);
+      renderEvolution(d.evolution);
+      renderStatut(d.par_statut);
+      renderEcarts(d.top_ecarts);
+      renderRecents(d.recents);
+      populateWarehouses(d.warehouses);
+    }
+  });
+  frappe.call({
+    method: 'kya_hr.api.inventaire_dashboard.get_stock_summary',
+    args: { warehouse: wh },
+    callback: function(r) { if (r.message) renderStock(r.message); }
+  });
+}
+
+function openCreateModal() {
+  document.getElementById('m-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('modal-create').classList.add('show');
+}
+function closeCreateModal() { document.getElementById('modal-create').classList.remove('show'); }
+
+function submitCreate() {
+  const objet = document.getElementById('m-objet').value.trim();
+  if (!objet) { alert('Veuillez saisir un objet.'); return; }
+  frappe.call({
+    method: 'kya_hr.api.inventaire_dashboard.create_inventaire',
+    args: {
+      objet: objet,
+      date_inventaire: document.getElementById('m-date').value,
+      warehouse: document.getElementById('m-warehouse').value,
+      type_inventaire: document.getElementById('m-type').value
+    },
+    callback: function(r) { if (r.message && r.message.url) window.location.href = r.message.url; }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', loadAll);
+</script>
+{%- endblock -%}

@@ -60,14 +60,14 @@
    "fieldname": "caissiere",
    "fieldtype": "Link",
    "options": "Employee",
-   "label": "Caissière",
+   "label": "Caissier(ère)",
    "reqd": 1,
    "in_list_view": 1
   },
   {
    "fieldname": "caissiere_name",
    "fieldtype": "Data",
-   "label": "Nom Caissière",
+   "label": "Nom Caissier(ère)",
    "fetch_from": "caissiere.employee_name",
    "read_only": 1,
    "in_list_view": 1
@@ -159,17 +159,17 @@
   {
    "fieldname": "col_sig_caissiere",
    "fieldtype": "Column Break",
-   "label": "Caissière"
+   "label": "Caissier(ère)"
   },
   {
    "fieldname": "signature_caissiere",
    "fieldtype": "Signature",
-   "label": "Visa Caissière"
+   "label": "Visa Caissier(ère)"
   },
   {
    "fieldname": "signataire_caissiere",
    "fieldtype": "Data",
-   "label": "Signataire Caissière",
+   "label": "Signataire Caissier(ère)",
    "read_only": 1
   },
   {

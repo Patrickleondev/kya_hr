@@ -38,7 +38,7 @@ frappe.ui.form.on("Demande Achat KYA", {
 
         // Bouton impression pour demande approuvée
         if (frm.doc.docstatus === 1 && frm.doc.statut === "Approuvé") {
-            frm.add_custom_button("Imprimer le Bon de Commande", function() {
+            frm.add_custom_button("Imprimer la Demande d'Achat", function() {
                 window.open(
                     frappe.urllib.get_full_url(
                         "/api/method/frappe.utils.print_format.download_pdf?"
@@ -48,6 +48,21 @@ frappe.ui.form.on("Demande Achat KYA", {
                     )
                 );
             });
+
+            // Générer / Ouvrir Bon de Commande lié
+            frm.add_custom_button(__("Générer Bon de Commande"), function() {
+                frappe.call({
+                    method: "kya_hr.api.bon_commande.create_from_demande_achat",
+                    args: { demande_name: frm.doc.name },
+                    freeze: true,
+                    freeze_message: __("Génération du Bon de Commande..."),
+                    callback: function(r) {
+                        if (r.message && r.message.name) {
+                            frappe.set_route("Form", "Bon Commande KYA", r.message.name);
+                        }
+                    }
+                });
+            }, __("Actions"));
         }
     },
 

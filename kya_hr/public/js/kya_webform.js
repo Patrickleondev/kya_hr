@@ -260,7 +260,7 @@
     },
     "demande-achat": {
       title: "FICHE D\u2019ENGAGEMENT DE D\u00c9PENSES",
-      subtitle: "Approvisionnement",
+      subtitle: "Achats et Stocks",
       ref: "KYA-ACH-FED-V01",
       workflow: "Chef \u2192 Auditeur \u2192 DAAF \u2192 DG"
     },
@@ -282,12 +282,6 @@
       ref: "KYA-STK-PEM-V01",
       workflow: "Livreur \u2192 Responsable Magasin"
     },
-    "inventaire-kya": {
-      title: "FICHE D\u2019INVENTAIRE",
-      subtitle: "Achats et Stocks",
-      ref: "KYA-STK-INV-V01",
-      workflow: "Responsable Inventaire \u2192 Responsable Magasin"
-    },
     "planning-conge": {
       title: "PLANNING DE CONG\u00c9 ANNUEL",
       subtitle: "Ressources Humaines",
@@ -299,6 +293,12 @@
       subtitle: "Formation & Stages",
       ref: "KYA-RH-BFS-V01",
       workflow: "Stagiaire \u2192 Encadrant \u2192 RH"
+    },
+    "bon-commande": {
+      title: "BON DE COMMANDE",
+      subtitle: "Achats et Stocks",
+      ref: "KYA-ACH-BC-V01",
+      workflow: "Demandeur \u2192 DAAF \u2192 Direction G\u00e9n\u00e9rale \u2192 Fournisseur"
     }
   };
 

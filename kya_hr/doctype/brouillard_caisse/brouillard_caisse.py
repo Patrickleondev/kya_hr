@@ -108,7 +108,7 @@ def send_weekly_dg_summary():
         "<thead><tr style='background:#009688;color:white;'>"
         "<th style='padding:8px 10px;text-align:left;'>Date</th>"
         "<th style='padding:8px 10px;text-align:left;'>Réf.</th>"
-        "<th style='padding:8px 10px;text-align:left;'>Caissière</th>"
+        "<th style='padding:8px 10px;text-align:left;'>Caissier(ère)</th>"
         "<th style='padding:8px 10px;text-align:right;'>Entrées</th>"
         "<th style='padding:8px 10px;text-align:right;'>Sorties</th>"
         "<th style='padding:8px 10px;text-align:right;'>Solde Final</th>"
