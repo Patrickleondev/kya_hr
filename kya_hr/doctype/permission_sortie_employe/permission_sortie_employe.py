@@ -9,14 +9,13 @@ class PermissionSortieEmploye(Document):
     def validate(self):
         self.validate_employee_is_not_intern()
         self.set_employee_details()
-        self._fetch_chef_email()
 
     def before_insert(self):
         """When HR creates manually via Desk, start workflow at 'En attente RH'
         to skip the Chef step (RH is the creator)."""
         if not self.flags.via_web_form:
             user_roles = frappe.get_roles(frappe.session.user)
-            if any(role in user_roles for role in ("Responsable RH", "HR Manager", "HR User")):
+            if "HR Manager" in user_roles or "HR User" in user_roles:
                 self.workflow_state = "En attente RH"
                 # Auto-fill chef bypass
                 name = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "employee_name")
@@ -34,27 +33,8 @@ class PermissionSortieEmploye(Document):
                 )
 
     def set_employee_details(self):
-        if self.employee:
-            emp = frappe.db.get_value(
-                "Employee", self.employee,
-                ["employee_name", "user_id"], as_dict=True
-            )
-            if emp:
-                if not self.employee_name:
-                    self.employee_name = emp.employee_name
-                if emp.user_id:
-                    self.employee_email = emp.user_id
-
-    def _fetch_chef_email(self):
-        """Auto-fetch email of employee's direct chef via Employee.reports_to."""
-        if not self.get("employee") or self.chef_equipe_email:
-            return
-        reports_to = frappe.db.get_value("Employee", self.employee, "reports_to")
-        if reports_to:
-            user_id = frappe.db.get_value("Employee", reports_to, "user_id")
-            if user_id:
-                email = frappe.db.get_value("User", user_id, "email")
-                self.chef_equipe_email = email or user_id
+        if self.employee and not self.employee_name:
+            self.employee_name = frappe.db.get_value("Employee", self.employee, "employee_name")
 
     def before_submit(self):
         if self.workflow_state == "Approuvé":

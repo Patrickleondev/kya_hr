@@ -1,0 +1,36 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-04-24 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "description",
+  "quantite",
+  "udm",
+  "date_requise",
+  "specifications"
+ ],
+ "fields": [
+  {"fieldname": "item_code", "fieldtype": "Data", "in_list_view": 1, "label": "Article", "columns": 2},
+  {"fieldname": "description", "fieldtype": "Small Text", "in_list_view": 1, "label": "Description", "reqd": 1, "columns": 4},
+  {"fieldname": "quantite", "fieldtype": "Float", "in_list_view": 1, "label": "Quantit\u00e9", "reqd": 1, "default": "1"},
+  {"fieldname": "udm", "fieldtype": "Data", "in_list_view": 1, "label": "UdM", "default": "Nos"},
+  {"fieldname": "date_requise", "fieldtype": "Date", "in_list_view": 1, "label": "Date requise"},
+  {"fieldname": "specifications", "fieldtype": "Small Text", "label": "Sp\u00e9cifications techniques"}
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-04-24 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "KYA HR",
+ "name": "Appel Offre KYA Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "ASC",
+ "states": [],
+ "track_changes": 1
+}

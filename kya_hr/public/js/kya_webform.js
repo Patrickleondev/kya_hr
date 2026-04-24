@@ -1,41 +1,40 @@
 ﻿/* ===================================================================
-   KYA-Energy Group — Web Form Layout v4
+   KYA-Energy Group â€” Web Form Layout v4
    Design : Ordre de Mission / Fiche officielle KYA
-   En-tête 2-colonnes : Logo gauche | Titre + infos droite
-   N° de document affiché, sections numérotées,
-   permissions par rôle, signatures verrouillées.
+   En-tÃªte 2-colonnes : Logo gauche | Titre + infos droite
+   NÂ° de document affichÃ©, sections numÃ©rotÃ©es,
+   permissions par rÃ´le, signatures verrouillÃ©es.
    =================================================================== */
 
-/* === Normalize legacy ?name=<docname> URLs to canonical path URLs  */
+/* === Auto-redirect bare web form URLs to /new ==================== */
 (function () {
   var KYA_WF_ROUTES = [
     "permission-sortie-stagiaire", "permission-sortie-employe",
     "demande-achat", "demande-conge", "pv-sortie-materiel",
-    "planning-conge", "bilan-fin-de-stage"
+    "planning-conge", "bilan-fin-de-stage",
+    "pv-entree-materiel",
+    "brouillard-caisse", "etat-recap", "bon-commande",
+    "appel-offre"
   ];
-  var searchParams = new URLSearchParams(window.location.search || "");
-  var docName = searchParams.get("name");
   var path = window.location.pathname.replace(/^\//, "").replace(/\/$/, "");
   var pathParts = path.split("/");
+  var params = new URLSearchParams(window.location.search || "");
+  var hasDocPointer = params.has("name") || params.has("docname") || params.has("id");
 
-  // Frappe v16: normalize legacy ?name=<docname> links to canonical path URLs.
-  // Guard: skip if docName equals the route itself (self-referential, causes
-  // "/{route}/{route}" duplication error) or if it is a reserved keyword.
-  var RESERVED = ["new", "list", "edit"];
-  if (
-    pathParts.length === 1 &&
-    KYA_WF_ROUTES.indexOf(path) !== -1 &&
-    docName &&
-    docName !== path &&
-    RESERVED.indexOf(docName) === -1
-  ) {
-    window.location.replace("/" + path + "/" + encodeURIComponent(docName));
+  // Normalize legacy links like /permission-sortie-employe/PSE-2026-00001
+  if (pathParts.length === 2 && KYA_WF_ROUTES.indexOf(pathParts[0]) !== -1 && pathParts[1] !== "new") {
+    if (!params.has("name")) {
+      params.set("name", pathParts[1]);
+    }
+    window.location.replace("/" + pathParts[0] + "?" + params.toString());
     return;
   }
 
-  // Bare route (/{route}) and path-based links (/{route}/{docname}) work correctly
-  // in Frappe v16 — no redirect needed. DO NOT redirect bare routes to /new:
-  // Frappe would interpret "new" as a document name and return "Not Found".
+  if (KYA_WF_ROUTES.indexOf(path) !== -1 && !hasDocPointer) {
+    // Bare route without /new â€” redirect silently
+    window.location.replace("/" + path + "/new");
+    return; // stop further execution until redirect completes
+  }
 })();
 
 (function () {
@@ -150,6 +149,47 @@
         sigGrid: true
       }
     ],
+    "pv-entree-materiel": [
+      {
+        title: "INFORMATIONS DE L\u2019ENTR\u00c9E",
+        icon: "\u{1F4E5}",
+        fields: ["objet", "date_entree", "fournisseur", "fournisseur_libre", "purchase_order"],
+        grid: {
+          objet: "span 2", date_entree: "col", fournisseur: "col",
+          fournisseur_libre: "span 2", purchase_order: "span 2"
+        }
+      },
+      {
+        title: "ARTICLES RE\u00c7US",
+        icon: "\u{1F4E6}",
+        fields: ["items", "livreur_nom"]
+      },
+      {
+        title: "VALIDATIONS & SIGNATURES",
+        icon: "\u270D\uFE0F",
+        fields: ["signature_livreur", "signature_magasin"],
+        sigGrid: true
+      }
+    ],
+    "inventaire-kya": [
+      {
+        title: "INFORMATIONS DE L\u2019INVENTAIRE",
+        icon: "\u{1F4CB}",
+        fields: ["objet", "date_inventaire", "type_inventaire", "warehouse_filter"],
+        grid: { objet: "span 2", date_inventaire: "col", type_inventaire: "col", warehouse_filter: "span 2" }
+      },
+      {
+        title: "LIGNES D\u2019INVENTAIRE",
+        icon: "\u{1F4CA}",
+        fields: ["items", "responsable_nom"]
+      },
+      {
+        title: "VALIDATIONS & SIGNATURES",
+        icon: "\u270D\uFE0F",
+        fields: ["signature_responsable", "signature_magasin"],
+        sigGrid: true
+      }
+    ],
     "planning-conge": [
       {
         title: "IDENTIFICATION DE L\u2019EMPLOY\u00c9",
@@ -166,6 +206,12 @@
         title: "COMMENTAIRE",
         icon: "\u{1F4AC}",
         fields: ["commentaire_employe"]
+      },
+      {
+        title: "VALIDATIONS & SIGNATURES",
+        icon: "\u270D\uFE0F",
+        fields: ["signature_employe", "signature_rh", "signature_dg"],
+        sigGrid: true
       }
     ],
     "bilan-fin-de-stage": [
@@ -191,6 +237,151 @@
         icon: "\u{1F3C6}",
         fields: ["note_globale", "mention"],
         grid: { note_globale: "col", mention: "col" }
+      },
+      {
+        title: "VALIDATIONS & SIGNATURES",
+        icon: "\u270D\uFE0F",
+        fields: ["signature_stagiaire", "signature_encadrant", "signature_resp_stagiaires"],
+        sigGrid: true
+      }
+    ],
+    "brouillard-caisse": [
+      {
+        title: "IDENTIFICATION DE LA CAISSE",
+        icon: "\u{1F4B0}",
+        fields: ["date_brouillard", "caissiere", "caissiere_name", "solde_precedent", "date_solde_precedent"],
+        grid: {
+          date_brouillard: "col", caissiere: "col", caissiere_name: "col",
+          solde_precedent: "col", date_solde_precedent: "col"
+        }
+      },
+      {
+        title: "OP\u00c9RATIONS DU JOUR",
+        icon: "\u{1F4DD}",
+        fields: ["lignes"]
+      },
+      {
+        title: "TOTAUX & COMPTAGE",
+        icon: "\u{1F4CA}",
+        fields: ["total_entrees", "total_sorties", "solde_final", "total_reel_caisse", "commentaires"],
+        grid: {
+          total_entrees: "col", total_sorties: "col", solde_final: "col",
+          total_reel_caisse: "col", commentaires: "span 2"
+        }
+      },
+      {
+        title: "VALIDATIONS & SIGNATURES",
+        icon: "\u270D\uFE0F",
+        fields: ["signature_caissiere", "signature_comptable", "signature_dfc"],
+        sigGrid: true
+      }
+    ],
+    "etat-recap": [
+      {
+        title: "IDENTIFICATION DE L\u2019\u00c9TAT",
+        icon: "\u{1F4C4}",
+        fields: ["date_etat", "redacteur", "redacteur_name", "semaine_du", "semaine_au"],
+        grid: {
+          date_etat: "col", redacteur: "col", redacteur_name: "col",
+          semaine_du: "col", semaine_au: "col"
+        }
+      },
+      {
+        title: "CH\u00c8QUES \u00c9MIS",
+        icon: "\u{1F4DD}",
+        fields: ["lignes", "total_montant", "nombre_cheques", "commentaires"],
+        grid: {
+          lignes: "span 2", total_montant: "col", nombre_cheques: "col",
+          commentaires: "span 2"
+        }
+      },
+      {
+        title: "VALIDATIONS & SIGNATURES",
+        icon: "\u270D\uFE0F",
+        fields: ["signature_redacteur", "signature_dfc"],
+        sigGrid: true
+      }
+    ],
+    "bon-commande": [
+      {
+        title: "IDENTIFICATION DU BON DE COMMANDE",
+        icon: "\u{1F4E6}",
+        fields: ["numero_bc", "date_bc", "demande_achat", "objet"],
+        grid: { numero_bc: "col", date_bc: "col", demande_achat: "span 2", objet: "span 2" }
+      },
+      {
+        title: "FOURNISSEUR",
+        icon: "\u{1F3EA}",
+        fields: ["fournisseur", "fournisseur_nom", "fournisseur_entreprise", "fournisseur_adresse", "fournisseur_ville", "fournisseur_telephone", "fournisseur_email"],
+        grid: {
+          fournisseur: "span 2",
+          fournisseur_nom: "col", fournisseur_entreprise: "col",
+          fournisseur_adresse: "span 2",
+          fournisseur_ville: "col", fournisseur_telephone: "col",
+          fournisseur_email: "span 2"
+        }
+      },
+      {
+        title: "ARTICLES COMMAND\u00c9S",
+        icon: "\u{1F6D2}",
+        fields: ["articles"]
+      },
+      {
+        title: "TOTAUX & R\u00c8GLEMENT",
+        icon: "\u{1F4B0}",
+        fields: ["remise", "tva_taux", "modalites_paiement", "reglement"],
+        grid: { remise: "col", tva_taux: "col", modalites_paiement: "span 2", reglement: "span 2" }
+      },
+      {
+        title: "LIVRAISON & GARANTIE",
+        icon: "\u{1F69A}",
+        fields: ["delai_livraison", "lieu_livraison", "validite", "garantie"],
+        grid: { delai_livraison: "col", lieu_livraison: "col", validite: "col", garantie: "col" }
+      },
+      {
+        title: "AUTORISATION & SIGNATURE",
+        icon: "\u270D\uFE0F",
+        fields: ["autorise_par_nom", "autorise_par_fonction", "date_autorisation", "signature_dg"],
+        sigGrid: true
+      }
+    ],
+    "appel-offre": [
+      {
+        title: "IDENTIFICATION DE L\u2019APPEL D\u2019OFFRE",
+        icon: "\u{1F4C4}",
+        fields: ["date_ao", "date_limite", "demandeur", "demandeur_name", "service"],
+        grid: {
+          date_ao: "col", date_limite: "col",
+          demandeur: "col", demandeur_name: "col",
+          service: "span 2"
+        }
+      },
+      {
+        title: "OBJET",
+        icon: "\u{1F4DD}",
+        fields: ["objet", "demande_achat"],
+        grid: { objet: "span 2", demande_achat: "span 2" }
+      },
+      {
+        title: "ARTICLES / SERVICES DEMAND\u00c9S",
+        icon: "\u{1F6D2}",
+        fields: ["items"]
+      },
+      {
+        title: "FOURNISSEURS CONSULT\u00c9S",
+        icon: "\u{1F3EA}",
+        fields: ["fournisseurs"]
+      },
+      {
+        title: "MODALIT\u00c9S & CRIT\u00c8RES",
+        icon: "\u{1F4CB}",
+        fields: ["modalites", "criteres_selection", "message_fournisseur"]
+      },
+      {
+        title: "VALIDATIONS & SIGNATURES",
+        icon: "\u270D\uFE0F",
+        fields: ["signature_demandeur", "signature_daaf", "signature_dg"],
+        sigGrid: true
       }
     ]
   };
@@ -199,44 +390,74 @@
     "permission-sortie-stagiaire": {
       title: "DEMANDE DE PERMISSION DE SORTIE",
       subtitle: "Stagiaire",
-      ref: "AEA-ENG-30-V01",
+      ref: "KYA-RH-PSS-V01",
       workflow: "Ma\u00eetre de Stage \u2192 Resp. Stagiaires \u2192 Direction"
     },
     "permission-sortie-employe": {
       title: "DEMANDE DE PERMISSION DE SORTIE",
       subtitle: "Employ\u00e9",
-      ref: "AEA-ENG-30-V01",
+      ref: "KYA-RH-PSE-V01",
       workflow: "Chef de Service \u2192 RH \u2192 Direction"
     },
     "demande-achat": {
       title: "FICHE D\u2019ENGAGEMENT DE D\u00c9PENSES",
-      subtitle: "Approvisionnement",
-      ref: "AEA-ENG-30-V01",
+      subtitle: "Achats et Stocks",
+      ref: "KYA-ACH-FED-V01",
       workflow: "Chef \u2192 Auditeur \u2192 DAAF \u2192 DG"
     },
     "demande-conge": {
       title: "DEMANDE DE CONG\u00c9",
       subtitle: "Ressources Humaines",
-      ref: "AEA-ENG-30-V01",
+      ref: "KYA-RH-CNG-V01",
       workflow: "Sup. Imm\u00e9diat / Chef de Service \u2192 RH \u2192 DG"
     },
     "pv-sortie-materiel": {
       title: "PV DE SORTIE DE MAT\u00c9RIEL",
-      subtitle: "Stock & Logistique",
-      ref: "AEA-ENG-30-V01",
+      subtitle: "Achats et Stocks",
+      ref: "KYA-STK-PVM-V01",
       workflow: "Chef \u2192 Audit \u2192 Direction \u2192 Magasin"
+    },
+    "pv-entree-materiel": {
+      title: "PV D\u2019ENTR\u00c9E DE MAT\u00c9RIEL",
+      subtitle: "Achats et Stocks",
+      ref: "KYA-STK-PEM-V01",
+      workflow: "Livreur \u2192 Responsable Magasin"
     },
     "planning-conge": {
       title: "PLANNING DE CONG\u00c9 ANNUEL",
       subtitle: "Ressources Humaines",
-      ref: "AEA-ENG-30-V01",
+      ref: "KYA-RH-PLN-V01",
       workflow: "Employ\u00e9 \u2192 RH \u2192 DG"
     },
     "bilan-fin-de-stage": {
       title: "BILAN DE FIN DE STAGE",
       subtitle: "Formation & Stages",
-      ref: "AEA-ENG-30-V01",
+      ref: "KYA-RH-BFS-V01",
       workflow: "Stagiaire \u2192 Encadrant \u2192 RH"
+    },
+    "bon-commande": {
+      title: "BON DE COMMANDE",
+      subtitle: "Achats et Stocks",
+      ref: "KYA-ACH-BC-V01",
+      workflow: "Demandeur \u2192 DAAF \u2192 Direction G\u00e9n\u00e9rale \u2192 Fournisseur"
+    },
+    "brouillard-caisse": {
+      title: "BROUILLARD DE CAISSE",
+      subtitle: "Comptabilit\u00e9",
+      ref: "KYA-CPT-BC-V01",
+      workflow: "Caissier(\u00e8re) \u2192 Comptable \u2192 DFC"
+    },
+    "etat-recap": {
+      title: "\u00c9TAT R\u00c9CAPITULATIF DES CH\u00c8QUES",
+      subtitle: "Comptabilit\u00e9",
+      ref: "KYA-CPT-ER-V01",
+      workflow: "R\u00e9dacteur \u2192 DFC \u2192 DG / DGA"
+    },
+    "appel-offre": {
+      title: "APPEL D\u2019OFFRE",
+      subtitle: "Achats et Stocks",
+      ref: "KYA-ACH-AO-V01",
+      workflow: "Demandeur \u2192 DAAF \u2192 DG \u2192 Fournisseurs"
     }
   };
 
@@ -245,35 +466,68 @@
     "permission-sortie-stagiaire": {
       signature_stagiaire: null,
       signature_chef: ["Chef Service", "HR Manager", "System Manager"],
-      signature_resp_stagiaires: ["HR Manager", "HR User", "Responsable des Stagiaires", "System Manager"],
-      signature_dg: ["Directeur Général", "System Manager"]
+      signature_resp_stagiaires: ["HR Manager", "HR User", "System Manager"],
+      signature_dg: ["DG", "System Manager"]
     },
     "permission-sortie-employe": {
       signature_employe: null,
-      signature_chef: ["Chef Service", "HR Manager", "Supérieur Immédiat", "System Manager"],
-      signature_rh: ["Responsable RH", "HR Manager", "HR User", "System Manager"],
-      signature_dga: ["DAAF", "Directeur Général", "System Manager"]
+      signature_chef: ["Chef Service", "HR Manager", "System Manager"],
+      signature_rh: ["HR Manager", "HR User", "System Manager"],
+      signature_dga: ["DGA", "DG", "System Manager"]
     },
     "demande-achat": {
       signature_demandeur: null,
-      signature_chef: ["Chef Service", "Responsable Achats", "System Manager"],
-      signature_dga: ["DAAF", "Directeur Général", "System Manager"],
-      signature_dg: ["Directeur Général", "System Manager"]
+      signature_chef: ["Chef Service", "System Manager"],
+      signature_dga: ["DGA", "DG", "System Manager"],
+      signature_dg: ["DG", "System Manager"]
     },
     "pv-sortie-materiel": {
       signature_demandeur: null,
       signature_chef: ["Chef Service", "System Manager"],
-      signature_audit: ["Auditeur Interne", "DAAF", "System Manager"],
-      signature_dga: ["DAAF", "Directeur Général", "System Manager"],
-      signature_magasin: ["Chargé des Stocks", "Stock Manager", "Stock User", "System Manager"]
+      signature_audit: ["Auditeur Interne", "System Manager"],
+      signature_dga: ["Directeur Général", "System Manager"],
+      signature_magasin: ["ChargÃ© des Stocks", "Stock Manager", "Stock User", "System Manager"]
+    },
+    "pv-entree-materiel": {
+      signature_livreur: null,
+      signature_magasin: ["ChargÃ© des Stocks", "Responsable Stock", "Stock Manager", "Stock User", "System Manager"]
+    },
+    "inventaire-kya": {
+      signature_responsable: null,
+      signature_magasin: ["ChargÃ© des Stocks", "Responsable Stock", "Stock Manager", "Stock User", "System Manager"]
+    },
+    "planning-conge": {
+      signature_employe: null,
+      signature_rh: ["Responsable RH", "HR Manager", "HR User", "System Manager"],
+      signature_dg: ["Directeur Général", "System Manager"]
+    },
+    "bilan-fin-de-stage": {
+      signature_stagiaire: null,
+      signature_encadrant: ["Maître de Stage", "Responsable des Stagiaires", "System Manager"],
+      signature_resp_stagiaires: ["Responsable des Stagiaires", "HR Manager", "System Manager"]
+    },
+    "brouillard-caisse": {
+      signature_caissiere: null,
+      signature_comptable: ["Comptable", "Accounts Manager", "Accounts User", "System Manager"],
+      signature_dfc: ["DFC", "DAAF", "Accounts Manager", "System Manager"]
+    },
+    "etat-recap": {
+      signature_redacteur: null,
+      signature_dfc: ["DFC", "DAAF", "Accounts Manager", "System Manager"]
+    },
+    "bon-commande": {
+      signature_dg: ["DG", "Directeur Général", "System Manager"]
+    },
+    "appel-offre": {
+      signature_demandeur: null,
+      signature_daaf: ["DAAF", "Purchase Manager", "System Manager"],
+      signature_dg: ["DG", "Directeur Général", "System Manager"]
     }
   };
 
   var EDITOR_ROLES = [
     "HR Manager", "HR User", "System Manager",
-    "Directeur Général", "DAAF", "Chef Service", "Responsable RH",
-    "Responsable Achats", "Chargé des Stocks", "Stock Manager",
-    "Supérieur Immédiat", "Auditeur Interne"
+    "DG", "DGA", "Chef Service", "Stock Manager"
   ];
 
   function getRoute() {
@@ -284,13 +538,20 @@
     return path.replace(/\/new$/, "").replace(/\/[^/]+$/, "");
   }
 
+  function setLoadingState(isLoading) {
+    var route = getRoute();
+    if (!FORM_SECTIONS[route] && !FORM_META[route]) return;
+    if (isLoading) document.body.classList.add("kya-wf-loading");
+    else document.body.classList.remove("kya-wf-loading");
+  }
+
   function injectVisibilityPatchCss() {
     if (document.getElementById("kya-wf-visibility-patch")) return;
 
     var style = document.createElement("style");
     style.id = "kya-wf-visibility-patch";
     style.textContent = [
-      '/* Nuclear visibility fix \u2014 inline <style> injected by kya_webform.js */',
+      '/* Nuclear visibility fix â€” inline <style> injected by kya_webform.js */',
       'select, select option { color: #1a1a2e !important; -webkit-text-fill-color: #1a1a2e !important; background-color: #fff !important; }',
       '.grid-heading-row, .grid-heading-row * { color: #1a1a2e !important; -webkit-text-fill-color: #1a1a2e !important; background: #eaf2f8 !important; }',
       '.grid-heading-row .static-area { color: #1a1a2e !important; font-weight: 700 !important; font-size: 11px !important; }',
@@ -424,20 +685,8 @@
 
   function setupWorkflowActions(wrapper) {
     if (!window.frappe || !frappe.web_form_doc) return;
-    // IMPORTANT: frappe.web_form_doc.name is the Web Form definition's own slug name
-    // (ex: "permission-sortie-employe"), NOT the submitted document's name.
-    // Use frappe.web_form.doc.name (the actual submitted document) to avoid
-    // fetching a non-existent doc and triggering "introuvable" on /new pages.
-    var docName = "";
-    if (frappe.web_form && frappe.web_form.doc && frappe.web_form.doc.name) {
-      docName = frappe.web_form.doc.name;
-    } else if (frappe.web_form_doc && frappe.web_form_doc.doc_name) {
-      docName = frappe.web_form_doc.doc_name;
-    }
-    if (!docName || docName === "new") return;
-    // Skip if docName looks like a route slug (all lowercase + hyphens, no numbers/uppercase)
-    // Real document names always contain uppercase letters or numbers (naming series)
-    if (/^[a-z][a-z-]+[a-z]$/.test(docName)) return;
+    var docName = frappe.web_form_doc.doc_name || frappe.web_form_doc.name;
+    if (!docName) return;
     var doctype = frappe.web_form_doc.doc_type;
     if (!doctype) return;
     frappe.call({
@@ -515,11 +764,11 @@
     if (!userHasRole("System Manager") && !userHasRole("HR Manager") && !userHasRole("Administrator")) return;
     var allForms = [
       { label: "Permission Sortie Stagiaire", route: "permission-sortie-stagiaire" },
-      { label: "Permission Sortie Employ\u00e9", route: "permission-sortie-employe" },
+      { label: "Permission Sortie EmployÃ©", route: "permission-sortie-employe" },
       { label: "Demande d'Achat", route: "demande-achat" },
-      { label: "Demande de Cong\u00e9", route: "demande-conge" },
-      { label: "PV Sortie Mat\u00e9riel", route: "pv-sortie-materiel" },
-      { label: "Planning Cong\u00e9", route: "planning-conge" },
+      { label: "Demande de CongÃ©", route: "demande-conge" },
+      { label: "PV Sortie MatÃ©riel", route: "pv-sortie-materiel" },
+      { label: "Planning CongÃ©", route: "planning-conge" },
       { label: "Bilan de Stage", route: "bilan-fin-de-stage" }
     ];
     var currentRoute = getRoute();
@@ -528,24 +777,24 @@
     var panel = document.createElement("div");
     panel.className = "kya-preview-panel";
     panel.style.display = "none";
-    panel.innerHTML = '<h4>\ud83d\udd17 Liens de pr\u00e9visualisation</h4>' +
+    panel.innerHTML = '<h4>ðŸ”— Liens de prÃ©visualisation</h4>' +
       '<div class="kya-preview-forms">' +
       allForms.map(function(f) {
         var url = window.location.origin + "/" + f.route + "/new";
         var isCurrent = f.route === currentRoute;
         return '<div class="kya-preview-form-link">' +
           '<span' + (isCurrent ? ' style="font-weight:800;"' : '') + '>' + f.label + '</span>' +
-          '<a href="' + url + '" target="_blank">Ouvrir \u2192</a>' +
+          '<a href="' + url + '" target="_blank">Ouvrir â†’</a>' +
           '</div>';
       }).join("") + '</div>' +
-      '<button class="kya-preview-copy" onclick="(function(){var url=window.location.origin+\'/\'+\'' + currentRoute + '\'+\'/new\';navigator.clipboard&&navigator.clipboard.writeText(url).then(function(){this.textContent=\'\u2705 Copi\u00e9 !\';}.bind(this));}).call(this)">\ud83d\udccb Copier lien du formulaire actuel</button>';
+      '<button class="kya-preview-copy" onclick="(function(){var url=window.location.origin+\'/\'+\'' + currentRoute + '\'+\'/new\';navigator.clipboard&&navigator.clipboard.writeText(url).then(function(){this.textContent=\'âœ“ CopiÃ© !\';}.bind(this));}).call(this)">ðŸ“‹ Copier lien du formulaire actuel</button>';
     var toggle = document.createElement("button");
     toggle.className = "kya-preview-toggle";
-    toggle.innerHTML = "\ud83d\udc64\u200d\u2696\ufe0f Aper\u00e7u Admin";
+    toggle.innerHTML = "ðŸ‘ï¸ AperÃ§u Admin";
     toggle.addEventListener("click", function() {
       var vis = panel.style.display === "none";
       panel.style.display = vis ? "block" : "none";
-      toggle.innerHTML = vis ? "\u274c Fermer" : "\ud83d\udc64\u200d\u2696\ufe0f Aper\u00e7u Admin";
+      toggle.innerHTML = vis ? "âœ• Fermer" : "ðŸ‘ï¸ AperÃ§u Admin";
     });
     bar.appendChild(panel);
     bar.appendChild(toggle);
@@ -663,6 +912,7 @@
 
     formBody.insertBefore(wrapper, formBody.firstChild);
     formBody.classList.add("kya-restructured");
+    setLoadingState(false);
 
     setupWorkflowActions(wrapper);
     setTimeout(function() {
@@ -689,62 +939,150 @@
     if (!empField) return;
     var empInput = empField.querySelector("input");
     if (!empInput) return;
+    var canPickAnyEmployee = userHasAnyRole(["HR Manager", "HR User", "System Manager"]);
 
-    // Stocker le matricule de l'utilisateur connecté pour détecter la délégation
-    var currentUserEmployee = null;
-    if (window.frappe && frappe.session && frappe.session.user) {
-      frappe.call({
-        method: "frappe.client.get_value",
-        args: { doctype: "Employee", filters: { user_id: frappe.session.user, status: "Active" }, fieldname: ["name", "employee_name"] },
-        async: false,
-        callback: function (r) {
-          if (r && r.message && r.message.name) currentUserEmployee = r.message.name;
-        }
+    function lockEmployeeField() {
+      if (canPickAnyEmployee) return;
+      var controls = empField.querySelectorAll("input, select, .awesomplete input");
+      controls.forEach(function (ctrl) {
+        ctrl.setAttribute("readonly", "readonly");
+        ctrl.setAttribute("disabled", "disabled");
       });
+      empField.setAttribute("data-read-only", "1");
     }
 
-    function showDelegationBanner(empName) {
-      var existing = document.getElementById("kya-delegation-banner");
-      if (existing) existing.remove();
-      var banner = document.createElement("div");
-      banner.id = "kya-delegation-banner";
-      banner.style.cssText = "background:#fff3e0; border:1px solid #f59e0b; border-radius:8px; padding:12px 16px; margin:12px 0; display:flex; align-items:center; gap:10px;";
-      banner.innerHTML = '<span style="font-size:20px;">👤➜</span><span style="font-size:14px; color:#e65100;"><b>Demande pour un autre employé</b> : ' + (empName || "Sélectionné") + '<br><span style="font-size:12px; color:#999;">Vous effectuez cette demande au nom d\'un collègue. Le récapitulatif sera envoyé à cet employé.</span></span>';
-      var form = document.querySelector(".web-form") || document.querySelector(".frappe-control[data-fieldname='employee']");
-      if (form) form.parentNode.insertBefore(banner, form);
-    }
-
-    function hideDelegationBanner() {
-      var existing = document.getElementById("kya-delegation-banner");
-      if (existing) existing.remove();
-    }
-
-    function fetchEmployeeData(empId) {
-      if (!empId || !window.frappe) return;
-      frappe.call({
-        method: "frappe.client.get_value",
-        args: { doctype: "Employee", filters: { name: empId }, fieldname: ["employee_name", "department"] },
-        callback: function (r) {
-          if (!r || !r.message) return;
-          var nf = findFieldEl("employee_name");
-          var df = findFieldEl("department");
-          if (nf) { var ni = nf.querySelector("input"); if (ni) { ni.value = r.message.employee_name || ""; ni.dispatchEvent(new Event("change")); } }
-          if (df) { var di = df.querySelector("input"); if (di) { di.value = r.message.department || ""; di.dispatchEvent(new Event("change")); } }
-          // Afficher la bannière de délégation si c'est un autre employé
-          if (currentUserEmployee && empId !== currentUserEmployee) {
-            showDelegationBanner(r.message.employee_name);
-          } else {
-            hideDelegationBanner();
+    function fillFromEmployeeRecord(emp) {
+      if (!emp || !emp.name) return;
+      // Use Frappe Web Form API first (triggers internal reactivity), fallback DOM
+      var wf = window.frappe && frappe.web_form;
+      function setVal(fn, val) {
+        if (val == null || val === "") return;
+        if (wf && typeof wf.set_value === "function") {
+          try { wf.set_value(fn, val); } catch (e) {}
+        }
+        var el = findFieldEl(fn);
+        if (el) {
+          var input = el.querySelector("input, select, textarea");
+          if (input) {
+            input.value = val;
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            input.dispatchEvent(new Event("change", { bubbles: true }));
           }
         }
+      }
+      setVal("employee", emp.name);
+      setVal("employee_name", emp.employee_name);
+      setVal("department", emp.department);
+      // retry once after 400ms because Frappe re-renders linked fields asynchronously
+      setTimeout(function () {
+        setVal("employee_name", emp.employee_name);
+        setVal("department", emp.department);
+      }, 400);
+      lockEmployeeField();
+    }
+
+    function fetchAndFillFromSession() {
+      if (!window.frappe || frappe.session.user === "Guest") return;
+      if (empInput.value && empInput.value.trim()) return; // dÃ©jÃ  rempli
+      frappe.call({
+        method: "kya_hr.api.get_employee_from_user",
+        args: {},
+        callback: function (r) {
+          if (r && r.message) {
+            fillFromEmployeeRecord(r.message);
+            // Injecter widget recherche par nom si l'employÃ© n'est toujours pas reconnu
+            if (!r.message.name) injectNameSearchWidget();
+          } else {
+            // Aucune fiche employÃ© liÃ©e au compte â†’ proposer la recherche par nom
+            injectNameSearchWidget();
+          }
+          lockEmployeeField();
+        }
       });
     }
-    var obs = new MutationObserver(function () {
+
+    function injectNameSearchWidget() {
+      if (empField.querySelector(".kya-name-search-widget")) return;
+      var widget = document.createElement("div");
+      widget.className = "kya-name-search-widget";
+      widget.style.cssText = "margin-top:8px;padding:10px 12px;background:#fff8e1;border:1px solid #ffe082;border-radius:6px;font-size:13px;";
+      widget.innerHTML =
+        '<p style="margin:0 0 6px;color:#5d4037;font-weight:600;">Votre compte n\'est pas encore liÃ© Ã  une fiche RH.</p>' +
+        '<p style="margin:0 0 8px;color:#5d4037;">Tapez votre nom complet pour confirmer votre identitÃ© :</p>' +
+        '<div style="display:flex;gap:8px;align-items:center;">' +
+          '<input type="text" class="kya-name-search-input" placeholder="Ex: Jean Kofi MENSAH" ' +
+            'style="flex:1;padding:6px 10px;border:1px solid #bbb;border-radius:4px;font-size:13px;" />' +
+          '<button type="button" class="kya-name-search-btn" ' +
+            'style="padding:6px 14px;background:#1a73e8;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:600;">Rechercher</button>' +
+        '</div>' +
+        '<p class="kya-name-search-result" style="margin:6px 0 0;color:#c62828;min-height:18px;"></p>';
+
+      empField.appendChild(widget);
+
+      var searchInput = widget.querySelector(".kya-name-search-input");
+      var searchBtn = widget.querySelector(".kya-name-search-btn");
+      var resultMsg = widget.querySelector(".kya-name-search-result");
+
+      function doSearch() {
+        var term = searchInput.value.trim();
+        if (term.length < 2) {
+          resultMsg.textContent = "Veuillez saisir au moins 2 caractÃ¨res.";
+          resultMsg.style.color = "#c62828";
+          return;
+        }
+        resultMsg.textContent = "Recherche en coursâ€¦";
+        resultMsg.style.color = "#555";
+        frappe.call({
+          method: "kya_hr.api.search_employee_by_name",
+          args: { search_term: term },
+          callback: function (r) {
+            if (r && r.message) {
+              var emp = r.message;
+              resultMsg.textContent = "Correspondance trouvÃ©e : " + emp.employee_name + " (" + emp.name + ")";
+              resultMsg.style.color = "#2e7d32";
+              fillFromEmployeeRecord(emp);
+              // Masquer le widget aprÃ¨s succÃ¨s
+              setTimeout(function () { widget.style.display = "none"; }, 1500);
+            } else {
+              resultMsg.textContent = "Aucune correspondance avec votre compte. Contactez les RH.";
+              resultMsg.style.color = "#c62828";
+            }
+          }
+        });
+      }
+
+      searchBtn.addEventListener("click", doSearch);
+      searchInput.addEventListener("keydown", function (e) { if (e.key === "Enter") doSearch(); });
+    }
+
+    // Auto-remplissage au chargement (nouveaux formulaires)
+    var isNew = !window.location.search.includes("name=") &&
+                !window.location.search.includes("docname=") &&
+                (window.location.pathname.includes("/new") || !window.frappe || !frappe.web_form_doc || !frappe.web_form_doc.doc_name);
+    if (isNew) {
+      fetchAndFillFromSession();
+    } else {
+      lockEmployeeField();
+    }
+
+    empInput.addEventListener("change", function () {
       var val = empInput.value;
-      if (val && val.length > 3) fetchEmployeeData(val);
+      if (val && val.length > 3) {
+        frappe.call({
+          method: "frappe.client.get_value",
+          args: { doctype: "Employee", filters: { name: val }, fieldname: ["employee_name", "department"] },
+          callback: function (r) {
+            if (!r || !r.message) return;
+            var nf = findFieldEl("employee_name");
+            var df = findFieldEl("department");
+            if (nf) { var ni = nf.querySelector("input"); if (ni) { ni.value = r.message.employee_name || ""; ni.dispatchEvent(new Event("change")); } }
+            if (df) { var di = df.querySelector("input"); if (di) { di.value = r.message.department || ""; di.dispatchEvent(new Event("change")); } }
+            lockEmployeeField();
+          }
+        });
+      }
     });
-    obs.observe(empInput, { attributes: true });
-    empInput.addEventListener("change", function () { fetchEmployeeData(empInput.value); });
+    lockEmployeeField();
   }
 
   function forceSignatureFieldSize(el) {
@@ -808,16 +1146,134 @@
     });
   }
 
+  /* ───────────────────────────────────────────────────────────────
+   * LIVE AMOUNT COMPUTE
+   * Calcul en temps réel des montants dans les lignes + total
+   * Routes: demande-achat, bon-commande, appel-offre, brouillard-caisse, etat-recap
+   * ───────────────────────────────────────────────────────────── */
+  var LIVE_AMOUNT_CONFIG = {
+    "demande-achat": {
+      tableField: "items",
+      qtyField: "quantite",
+      priceField: "prix_unitaire",
+      amountField: "montant",
+      totalField: "montant_total"
+    },
+    "bon-commande": {
+      tableField: "items",
+      qtyField: "quantite",
+      priceField: "prix_unitaire",
+      amountField: "montant",
+      totalField: "montant_total"
+    },
+    "appel-offre": {
+      tableField: "items",
+      qtyField: "quantite",
+      priceField: "prix_unitaire_estime",
+      amountField: "montant_estime",
+      totalField: "budget_estime"
+    },
+    "brouillard-caisse": {
+      tableField: "lignes",
+      qtyField: null,
+      priceField: null,
+      amountField: "montant",
+      totalField: "total_montant"
+    }
+  };
+
+  function formatXOF(n) {
+    if (n == null || isNaN(n)) return "0 XOF";
+    try {
+      return Number(n).toLocaleString("fr-FR", { maximumFractionDigits: 0 }) + " XOF";
+    } catch (e) {
+      return Math.round(n) + " XOF";
+    }
+  }
+
+  function setupLiveAmountCompute(route) {
+    var cfg = LIVE_AMOUNT_CONFIG[route];
+    if (!cfg) return;
+    var tableWrapper = document.querySelector('[data-fieldname="' + cfg.tableField + '"]');
+    if (!tableWrapper) return;
+
+    function recompute() {
+      var rows = tableWrapper.querySelectorAll(".grid-row, .rows .grid-row");
+      var total = 0;
+      rows.forEach(function (row) {
+        var qtyInput = cfg.qtyField ? row.querySelector('[data-fieldname="' + cfg.qtyField + '"] input') : null;
+        var priceInput = cfg.priceField ? row.querySelector('[data-fieldname="' + cfg.priceField + '"] input') : null;
+        var amountInput = row.querySelector('[data-fieldname="' + cfg.amountField + '"] input');
+        if (!amountInput) return;
+        var amount;
+        if (qtyInput && priceInput) {
+          var q = parseFloat((qtyInput.value || "0").replace(/\s/g, "").replace(",", ".")) || 0;
+          var p = parseFloat((priceInput.value || "0").replace(/\s/g, "").replace(",", ".")) || 0;
+          amount = q * p;
+          // show computed value (amountInput is read_only but we can set its value for display)
+          amountInput.value = amount ? amount.toLocaleString("fr-FR") : "";
+          amountInput.dispatchEvent(new Event("change", { bubbles: true }));
+        } else {
+          amount = parseFloat((amountInput.value || "0").replace(/\s/g, "").replace(",", ".")) || 0;
+        }
+        total += amount || 0;
+      });
+      if (cfg.totalField) {
+        var totalEl = document.querySelector('[data-fieldname="' + cfg.totalField + '"] input');
+        if (totalEl) {
+          totalEl.value = total ? total.toLocaleString("fr-FR") : "";
+          totalEl.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+        // Injecter/mettre à jour badge visible au-dessus des sections
+        var badgeId = "kya-total-badge-" + route;
+        var badge = document.getElementById(badgeId);
+        if (!badge) {
+          badge = document.createElement("div");
+          badge.id = badgeId;
+          badge.className = "kya-total-badge";
+          badge.style.cssText = "margin:12px 0;padding:14px 20px;background:linear-gradient(135deg,#f7941d,#ea580c);" +
+            "color:#fff;font-size:20px;font-weight:700;border-radius:8px;text-align:center;" +
+            "box-shadow:0 4px 12px rgba(247,148,29,0.3);letter-spacing:0.5px;";
+          tableWrapper.parentNode.insertBefore(badge, tableWrapper.nextSibling);
+        }
+        badge.innerHTML = '💰 MONTANT TOTAL : <span style="font-size:24px;">' + formatXOF(total) + '</span>';
+      }
+    }
+
+    // Débounce
+    var t = null;
+    function scheduleRecompute() {
+      clearTimeout(t);
+      t = setTimeout(recompute, 150);
+    }
+
+    // Écouter tous les inputs dans la table (délégation)
+    tableWrapper.addEventListener("input", scheduleRecompute, true);
+    tableWrapper.addEventListener("change", scheduleRecompute, true);
+    tableWrapper.addEventListener("click", scheduleRecompute, true); // pour add/remove row
+
+    // Observer les changements DOM (nouvelles lignes)
+    var mo = new MutationObserver(scheduleRecompute);
+    mo.observe(tableWrapper, { childList: true, subtree: true });
+
+    // Recompute initial après 500ms
+    setTimeout(recompute, 500);
+    setTimeout(recompute, 1500);
+  }
+
   function waitForForm() {
     var route = getRoute();
     injectVisibilityPatchCss();
     if (!FORM_SECTIONS[route] && !FORM_META[route]) return;
+    setLoadingState(true);
     var formReady = document.querySelector(".frappe-control") || document.querySelector("[data-fieldname]");
     if (formReady) {
       restructureForm();
       setupEmployeeAutoFill();
       stabilizeSignaturePads(route);
+      setupLiveAmountCompute(route);
       setTimeout(forceInlineTextVisibility, 200);
+      setLoadingState(false);
       return;
     }
     var obs = new MutationObserver(function (m, observer) {
@@ -827,7 +1283,9 @@
           restructureForm();
           setupEmployeeAutoFill();
           stabilizeSignaturePads(route);
+          setupLiveAmountCompute(route);
           forceInlineTextVisibility();
+          setLoadingState(false);
         }, 300);
       }
     });
@@ -839,6 +1297,7 @@
       }
       stabilizeSignaturePads(route);
       forceInlineTextVisibility();
+      setLoadingState(false);
     }, 2000);
     setTimeout(function () {
       obs.disconnect();
@@ -848,10 +1307,27 @@
       }
       stabilizeSignaturePads(route);
       forceInlineTextVisibility();
+      setLoadingState(false);
     }, 5000);
   }
 
   window.kyaRestructureForm = function () { restructureForm(); setupEmployeeAutoFill(); };
+
+  // Universal fallback: if a Web Form defines/overrides after_load,
+  // ensure KYA branded layout is still applied once fields are mounted.
+  if (window.frappe && frappe.web_form && !window.__kyaWfAfterLoadPatched) {
+    window.__kyaWfAfterLoadPatched = true;
+    var previousAfterLoad = frappe.web_form.after_load;
+    frappe.web_form.after_load = function () {
+      if (typeof previousAfterLoad === "function") {
+        previousAfterLoad.apply(this, arguments);
+      }
+      setTimeout(function () {
+        if (window.kyaRestructureForm) window.kyaRestructureForm();
+      }, 120);
+    };
+  }
+
   if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", function() { waitForForm(); setupAdminPreviewButton(); }); }
   else { waitForForm(); setupAdminPreviewButton(); }
   if (window.frappe && window.frappe.ready) { frappe.ready(function () { setTimeout(function() { waitForForm(); setupAdminPreviewButton(); }, 300); }); }

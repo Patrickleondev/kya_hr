@@ -1,326 +1,304 @@
 {
-    "name": "Permission Sortie Stagiaire",
-    "module": "KYA HR",
-    "doctype": "DocType",
-    "is_submittable": 1,
-    "custom": 1,
-    "autoname": "format:PSS-{YYYY}-{#####}",
-    "title_field": "employee_name",
-    "search_fields": "employee_name, date_sortie, statut",
-    "track_changes": 1,
-    "fields": [
-        {
-            "fieldname": "section_stagiaire",
-            "label": "Informations Stagiaire",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "employee",
-            "label": "Stagiaire (Employ\u00e9)",
-            "fieldtype": "Link",
-            "options": "Employee",
-            "reqd": 1,
-            "in_list_view": 1,
-            "in_standard_filter": 1
-        },
-        {
-            "fieldname": "employee_name",
-            "label": "Nom",
-            "fieldtype": "Data",
-            "fetch_from": "employee.employee_name",
-            "read_only": 1,
-            "in_list_view": 1
-        },
-        {
-            "fieldname": "chef_equipe_email",
-            "label": "Email Chef d'\u00c9quipe",
-            "fieldtype": "Data",
-            "hidden": 1,
-            "read_only": 1
-        },
-        {
-            "fieldname": "col_dept",
-            "fieldtype": "Column Break"
-        },
-        {
-            "fieldname": "department",
-            "label": "D\u00e9partement",
-            "fieldtype": "Link",
-            "options": "Department",
-            "fetch_from": "employee.department",
-            "read_only": 1
-        },
-        {
-            "fieldname": "company",
-            "label": "Soci\u00e9t\u00e9",
-            "fieldtype": "Link",
-            "options": "Company",
-            "fetch_from": "employee.company",
-            "read_only": 1,
-            "hidden": 1
-        },
-        {
-            "fieldname": "section_sortie",
-            "label": "D\u00e9tails de la Sortie",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "date_sortie",
-            "label": "Date de D\u00e9but",
-            "fieldtype": "Date",
-            "reqd": 1,
-            "default": "Today",
-            "in_list_view": 1,
-            "in_standard_filter": 1
-        },
-        {
-            "fieldname": "date_fin",
-            "label": "Date de Fin",
-            "fieldtype": "Date",
-            "description": "Laisser vide si sortie dans la journ\u00e9e"
-        },
-        {
-            "fieldname": "nombre_jours",
-            "label": "Nombre de Jours",
-            "fieldtype": "Int",
-            "read_only": 1,
-            "description": "Calcul\u00e9 automatiquement",
-            "default": "1"
-        },
-        {
-            "fieldname": "heure_depart",
-            "label": "Heure de D\u00e9part",
-            "fieldtype": "Time",
-            "reqd": 1
-        },
-        {
-            "fieldname": "col_retour",
-            "fieldtype": "Column Break"
-        },
-        {
-            "fieldname": "heure_retour",
-            "label": "Heure de Retour Pr\u00e9vue",
-            "fieldtype": "Time"
-        },
-        {
-            "fieldname": "duree",
-            "label": "Dur\u00e9e Estim\u00e9e",
-            "fieldtype": "Data",
-            "read_only": 1,
-            "description": "Calcul\u00e9e automatiquement"
-        },
-        {
-            "fieldname": "section_motif",
-            "label": "Motif",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "motif",
-            "label": "Motif de la Sortie",
-            "fieldtype": "Small Text",
-            "reqd": 1
-        },
-        {
-            "fieldname": "justificatif",
-            "label": "Pi\u00e8ce Justificative",
-            "fieldtype": "Attach",
-            "description": "Joindre un justificatif si n\u00e9cessaire (certificat m\u00e9dical, convocation, etc.)"
-        },
-        {
-            "fieldname": "section_signatures",
-            "label": "Approbations & Signatures",
-            "fieldtype": "Section Break",
-            "description": "Chaque approbateur signe \u00e0 son niveau du flux"
-        },
-        {
-            "fieldname": "col_sig_stagiaire",
-            "fieldtype": "Column Break",
-            "label": "Stagiaire"
-        },
-        {
-            "fieldname": "signature_stagiaire",
-            "label": "Signature Stagiaire",
-            "fieldtype": "Signature"
-        },
-        {
-            "fieldname": "signataire_stagiaire",
-            "label": "Nom Stagiaire",
-            "fieldtype": "Data",
-            "read_only": 1
-        },
-        {
-            "fieldname": "date_signature_stagiaire",
-            "label": "Date Signature",
-            "fieldtype": "Date",
-            "read_only": 1
-        },
-        {
-            "fieldname": "col_sig_chef",
-            "fieldtype": "Column Break",
-            "label": "Chef de Service"
-        },
-        {
-            "fieldname": "signature_chef",
-            "label": "Signature Chef",
-            "fieldtype": "Signature",
-            "read_only": 1
-        },
-        {
-            "fieldname": "signataire_chef",
-            "label": "Nom Chef",
-            "fieldtype": "Data",
-            "read_only": 1
-        },
-        {
-            "fieldname": "date_signature_chef",
-            "label": "Date Signature Chef",
-            "fieldtype": "Date",
-            "read_only": 1
-        },
-        {
-            "fieldname": "section_signatures_2",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "col_sig_resp",
-            "fieldtype": "Column Break",
-            "label": "Resp. Stagiaires"
-        },
-        {
-            "fieldname": "signature_resp_stagiaires",
-            "label": "Signature Resp. Stagiaires",
-            "fieldtype": "Signature",
-            "read_only": 1
-        },
-        {
-            "fieldname": "signataire_resp",
-            "label": "Nom Resp. Stagiaires",
-            "fieldtype": "Data",
-            "read_only": 1
-        },
-        {
-            "fieldname": "date_signature_resp",
-            "label": "Date Signature Resp.",
-            "fieldtype": "Date",
-            "read_only": 1
-        },
-        {
-            "fieldname": "col_sig_dg",
-            "fieldtype": "Column Break",
-            "label": "Directeur G\u00e9n\u00e9ral"
-        },
-        {
-            "fieldname": "signature_dg",
-            "label": "Signature DG",
-            "fieldtype": "Signature",
-            "read_only": 1
-        },
-        {
-            "fieldname": "signataire_dg",
-            "label": "Nom DG",
-            "fieldtype": "Data",
-            "read_only": 1
-        },
-        {
-            "fieldname": "date_signature_dg",
-            "label": "Date Signature DG",
-            "fieldtype": "Date",
-            "read_only": 1
-        },
-        {
-            "fieldname": "section_workflow",
-            "label": "Statut & Approbation",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "statut",
-            "label": "Statut",
-            "fieldtype": "Select",
-            "options": "Brouillon\nEn attente Chef\nEn attente Resp. Stagiaires\nEn attente DG\nApprouv\u00e9\nRejet\u00e9",
-            "default": "Brouillon",
-            "in_list_view": 1,
-            "in_standard_filter": 1,
-            "read_only": 1
-        },
-        {
-            "fieldname": "col_approbation",
-            "fieldtype": "Column Break"
-        },
-        {
-            "fieldname": "workflow_state",
-            "label": "\u00c9tat du Flux",
-            "fieldtype": "Data",
-            "hidden": 1,
-            "read_only": 1
-        },
-        {
-            "fieldname": "employee_email",
-            "label": "Email Employ\u00e9",
-            "fieldtype": "Data",
-            "options": "Email",
-            "hidden": 1,
-            "read_only": 1,
-            "no_copy": 1,
-            "print_hide": 1
-        },
-        {
-            "fieldname": "amended_from",
-            "label": "Modifi\u00e9 depuis",
-            "fieldtype": "Link",
-            "options": "Permission Sortie Stagiaire",
-            "no_copy": 1,
-            "print_hide": 1,
-            "read_only": 1
-        }
-    ],
-    "permissions": [
-        {
-            "role": "System Manager",
-            "read": 1,
-            "write": 1,
-            "create": 1,
-            "delete": 1,
-            "submit": 1,
-            "cancel": 1,
-            "amend": 1
-        },
-        {
-            "role": "HR Manager",
-            "read": 1,
-            "write": 1,
-            "create": 1,
-            "submit": 1,
-            "cancel": 1,
-            "amend": 1
-        },
-        {
-            "role": "HR User",
-            "read": 1,
-            "write": 1,
-            "create": 1,
-            "submit": 1
-        },
-        {
-            "role": "Employee",
-            "read": 1,
-            "write": 1,
-            "create": 1,
-            "if_owner": 1
-        },
-        {
-            "role": "Stagiaire",
-            "read": 1,
-            "write": 1,
-            "create": 1,
-            "if_owner": 1
-        },
-        {
-            "role": "Responsable des Stagiaires",
-            "read": 1,
-            "write": 1,
-            "create": 1,
-            "submit": 1,
-            "cancel": 1
-        }
-    ]
+ "name": "Permission Sortie Stagiaire",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "is_submittable": 1,
+ "custom": 1,
+ "autoname": "format:PSS-{YYYY}-{#####}",
+ "title_field": "employee_name",
+ "search_fields": "employee_name, date_sortie, statut",
+ "track_changes": 1,
+ "fields": [
+  {
+   "fieldname": "section_stagiaire",
+   "label": "Informations Stagiaire",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "employee",
+   "label": "Stagiaire (Employé)",
+   "fieldtype": "Link",
+   "options": "Employee",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "employee_name",
+   "label": "Nom",
+   "fieldtype": "Data",
+   "fetch_from": "employee.employee_name",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "report_to",
+   "fieldtype": "Link",
+   "options": "Employee",
+   "fetch_from": "employee.reports_to",
+   "hidden": 1,
+   "read_only": 1,
+   "label": "Responsable direct",
+   "in_list_view": 0
+  },
+  {
+   "fieldname": "col_dept",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "department",
+   "label": "Département",
+   "fieldtype": "Link",
+   "options": "Department",
+   "fetch_from": "employee.department",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "label": "Société",
+   "fieldtype": "Link",
+   "options": "Company",
+   "fetch_from": "employee.company",
+   "read_only": 1,
+   "hidden": 1
+  },
+  {
+   "fieldname": "section_sortie",
+   "label": "Détails de la Sortie",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "date_sortie",
+   "label": "Date de Début",
+   "fieldtype": "Date",
+   "reqd": 1,
+   "default": "Today",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "date_fin",
+   "label": "Date de Fin",
+   "fieldtype": "Date",
+   "description": "Laisser vide si sortie dans la journée"
+  },
+  {
+   "fieldname": "nombre_jours",
+   "label": "Nombre de Jours",
+   "fieldtype": "Int",
+   "read_only": 1,
+   "description": "Calculé automatiquement",
+   "default": "1"
+  },
+  {
+   "fieldname": "heure_depart",
+   "label": "Heure de Départ",
+   "fieldtype": "Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "col_retour",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "heure_retour",
+   "label": "Heure de Retour Prévue",
+   "fieldtype": "Time"
+  },
+  {
+   "fieldname": "duree",
+   "label": "Durée Estimée",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "description": "Calculée automatiquement"
+  },
+  {
+   "fieldname": "section_motif",
+   "label": "Motif",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "motif",
+   "label": "Motif de la Sortie",
+   "fieldtype": "Small Text",
+   "reqd": 1
+  },
+  {
+   "fieldname": "justificatif",
+   "label": "Pièce Justificative",
+   "fieldtype": "Attach",
+   "description": "Joindre un justificatif si nécessaire (certificat médical, convocation, etc.)"
+  },
+  {
+   "fieldname": "section_signatures",
+   "label": "Approbations & Signatures",
+   "fieldtype": "Section Break",
+   "description": "Chaque approbateur signe à son niveau du flux"
+  },
+  {
+   "fieldname": "col_sig_stagiaire",
+   "fieldtype": "Column Break",
+   "label": "Stagiaire"
+  },
+  {
+   "fieldname": "signature_stagiaire",
+   "label": "Signature Stagiaire",
+   "fieldtype": "Signature"
+  },
+  {
+   "fieldname": "signataire_stagiaire",
+   "label": "Nom Stagiaire",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date_signature_stagiaire",
+   "label": "Date Signature",
+   "fieldtype": "Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_sig_chef",
+   "fieldtype": "Column Break",
+   "label": "Chef de Service"
+  },
+  {
+   "fieldname": "signature_chef",
+   "label": "Signature Chef",
+   "fieldtype": "Signature",
+   "read_only": 1
+  },
+  {
+   "fieldname": "signataire_chef",
+   "label": "Nom Chef",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date_signature_chef",
+   "label": "Date Signature Chef",
+   "fieldtype": "Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_signatures_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "col_sig_resp",
+   "fieldtype": "Column Break",
+   "label": "Resp. Stagiaires"
+  },
+  {
+   "fieldname": "signature_resp_stagiaires",
+   "label": "Signature Resp. Stagiaires",
+   "fieldtype": "Signature",
+   "read_only": 1
+  },
+  {
+   "fieldname": "signataire_resp",
+   "label": "Nom Resp. Stagiaires",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date_signature_resp",
+   "label": "Date Signature Resp.",
+   "fieldtype": "Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_sig_dg",
+   "fieldtype": "Column Break",
+   "label": "Directeur Général"
+  },
+  {
+   "fieldname": "signature_dg",
+   "label": "Signature DG",
+   "fieldtype": "Signature",
+   "read_only": 1
+  },
+  {
+   "fieldname": "signataire_dg",
+   "label": "Nom DG",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date_signature_dg",
+   "label": "Date Signature DG",
+   "fieldtype": "Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_workflow",
+   "label": "Statut & Approbation",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "statut",
+   "label": "Statut",
+   "fieldtype": "Select",
+   "options": "Brouillon\nEn attente Chef\nEn attente Resp. Stagiaires\nEn attente DG\nApprouvé\nRejeté",
+   "default": "Brouillon",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_approbation",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "workflow_state",
+   "label": "État du Flux",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "label": "Modifié depuis",
+   "fieldtype": "Link",
+   "options": "Permission Sortie Stagiaire",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1
+  },
+  {
+   "role": "HR Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1
+  },
+  {
+   "role": "HR User",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1
+  },
+  {
+   "role": "Employee",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "if_owner": 1
+  }
+ ]
 }

@@ -1,326 +1,335 @@
 {
-    "name": "Demande Achat KYA",
-    "module": "KYA HR",
-    "doctype": "DocType",
-    "is_submittable": 1,
-    "custom": 1,
-    "autoname": "format:DA-{YYYY}-{#####}",
-    "title_field": "objet",
-    "search_fields": "employee_name, objet, statut",
-    "track_changes": 1,
-    "fields": [
-        {
-            "fieldname": "section_demandeur",
-            "label": "Informations du Demandeur",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "employee",
-            "label": "Employ\u00e9",
-            "fieldtype": "Link",
-            "options": "Employee",
-            "reqd": 1,
-            "in_list_view": 1,
-            "in_standard_filter": 1
-        },
-        {
-            "fieldname": "employee_name",
-            "label": "Nom complet",
-            "fieldtype": "Data",
-            "fetch_from": "employee.employee_name",
-            "read_only": 1,
-            "in_list_view": 1
-        },
-        {
-            "fieldname": "chef_equipe_email",
-            "label": "Email Chef d'\u00c9quipe",
-            "fieldtype": "Data",
-            "hidden": 1,
-            "read_only": 1
-        },
-        {
-            "fieldname": "col_dept",
-            "fieldtype": "Column Break"
-        },
-        {
-            "fieldname": "department",
-            "label": "D\u00e9partement",
-            "fieldtype": "Link",
-            "options": "Department",
-            "fetch_from": "employee.department",
-            "read_only": 1
-        },
-        {
-            "fieldname": "company",
-            "label": "Soci\u00e9t\u00e9",
-            "fieldtype": "Link",
-            "options": "Company",
-            "fetch_from": "employee.company",
-            "read_only": 1,
-            "hidden": 1
-        },
-        {
-            "fieldname": "date_demande",
-            "label": "Date de la demande",
-            "fieldtype": "Date",
-            "default": "Today",
-            "reqd": 1,
-            "in_list_view": 1
-        },
-        {
-            "fieldname": "section_delegation",
-            "label": "D\u00e9l\u00e9gation (optionnel)",
-            "fieldtype": "Section Break",
-            "collapsible": 1,
-            "description": "Remplir uniquement si vous soumettez pour le compte d\u2019un autre employ\u00e9"
-        },
-        {
-            "fieldname": "au_nom_de",
-            "label": "Sur d\u00e9l\u00e9gation de",
-            "fieldtype": "Link",
-            "options": "Employee",
-            "description": "Employ\u00e9 pour le compte duquel vous soumettez"
-        },
-        {
-            "fieldname": "au_nom_de_nom",
-            "label": "Nom (d\u00e9l\u00e9gation)",
-            "fieldtype": "Data",
-            "fetch_from": "au_nom_de.employee_name",
-            "read_only": 1
-        },
-        {
-            "fieldname": "section_objet",
-            "label": "Objet de la Demande",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "objet",
-            "label": "Objet / Motif de la demande",
-            "fieldtype": "Small Text",
-            "reqd": 1,
-            "description": "D\u00e9crivez bri\u00e8vement le besoin"
-        },
-        {
-            "fieldname": "urgence",
-            "label": "Niveau d'urgence",
-            "fieldtype": "Select",
-            "options": "Normal\nUrgent\nTr\u00e8s Urgent",
-            "default": "Normal",
-            "in_list_view": 1
-        },
-        {
-            "fieldname": "section_articles",
-            "label": "Articles demand\u00e9s",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "items",
-            "label": "Liste des articles",
-            "fieldtype": "Table",
-            "options": "Demande Achat Item",
-            "reqd": 1,
-            "description": "Ajoutez chaque article avec sa quantit\u00e9 et son prix unitaire estim\u00e9"
-        },
-        {
-            "fieldname": "section_totaux",
-            "label": "Montant & Palier",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "montant_total",
-            "label": "Montant total estim\u00e9 (XOF)",
-            "fieldtype": "Currency",
-            "read_only": 1,
-            "in_list_view": 1,
-            "bold": 1,
-            "description": "Calcul\u00e9 automatiquement \u00e0 partir des articles"
-        },
-        {
-            "fieldname": "col_palier",
-            "fieldtype": "Column Break"
-        },
-        {
-            "fieldname": "palier",
-            "label": "Palier d'approbation",
-            "fieldtype": "Data",
-            "read_only": 1,
-            "bold": 1,
-            "description": "D\u00e9termin\u00e9 automatiquement selon le montant"
-        },
-        {
-            "fieldname": "section_sig_demandeur",
-            "label": "Signature du Demandeur",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "signature_demandeur",
-            "label": "Signature du demandeur",
-            "fieldtype": "Signature",
-            "description": "Dessinez votre signature ici"
-        },
-        {
-            "fieldname": "signataire_demandeur",
-            "label": "Nom du demandeur",
-            "fieldtype": "Data",
-            "read_only": 1
-        },
-        {
-            "fieldname": "date_signature_demandeur",
-            "label": "Date de signature",
-            "fieldtype": "Date",
-            "read_only": 1
-        },
-        {
-            "fieldname": "section_sig_chef",
-            "label": "Visa du Chef de D\u00e9partement",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "signature_chef",
-            "label": "Signature du Chef",
-            "fieldtype": "Signature",
-            "read_only": 1,
-            "description": "Le Chef de D\u00e9partement signe ici"
-        },
-        {
-            "fieldname": "signataire_chef",
-            "label": "Nom du Chef",
-            "fieldtype": "Data",
-            "read_only": 1
-        },
-        {
-            "fieldname": "date_signature_chef",
-            "label": "Date du visa Chef",
-            "fieldtype": "Date",
-            "read_only": 1
-        },
-        {
-            "fieldname": "section_sig_dga",
-            "label": "Visa de la DGA / Responsable Achats",
-            "fieldtype": "Section Break",
-            "depends_on": "eval:doc.montant_total >= 100000"
-        },
-        {
-            "fieldname": "signature_dga",
-            "label": "Signature DGA",
-            "fieldtype": "Signature",
-            "read_only": 1,
-            "depends_on": "eval:doc.montant_total >= 100000",
-            "description": "Le DGA signe pour les achats \u2265 100 000 XOF"
-        },
-        {
-            "fieldname": "signataire_dga",
-            "label": "Nom du DGA",
-            "fieldtype": "Data",
-            "read_only": 1,
-            "depends_on": "eval:doc.montant_total >= 100000"
-        },
-        {
-            "fieldname": "date_signature_dga",
-            "label": "Date du visa DGA",
-            "fieldtype": "Date",
-            "read_only": 1,
-            "depends_on": "eval:doc.montant_total >= 100000"
-        },
-        {
-            "fieldname": "section_sig_dg",
-            "label": "Approbation du Directeur G\u00e9n\u00e9ral",
-            "fieldtype": "Section Break",
-            "depends_on": "eval:doc.montant_total >= 2000000"
-        },
-        {
-            "fieldname": "signature_dg",
-            "label": "Signature du DG",
-            "fieldtype": "Signature",
-            "read_only": 1,
-            "depends_on": "eval:doc.montant_total >= 2000000",
-            "description": "Le Directeur G\u00e9n\u00e9ral signe pour les achats \u2265 2 000 000 XOF"
-        },
-        {
-            "fieldname": "signataire_dg",
-            "label": "Nom du DG",
-            "fieldtype": "Data",
-            "read_only": 1,
-            "depends_on": "eval:doc.montant_total >= 2000000"
-        },
-        {
-            "fieldname": "date_signature_dg",
-            "label": "Date du visa DG",
-            "fieldtype": "Date",
-            "read_only": 1,
-            "depends_on": "eval:doc.montant_total >= 2000000"
-        },
-        {
-            "fieldname": "section_workflow",
-            "label": "Statut de la Demande",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "statut",
-            "label": "Statut",
-            "fieldtype": "Select",
-            "options": "Brouillon\nEn attente Chef\nEn attente DAAF\nEn attente DG\nApprouv\u00e9\nRejet\u00e9",
-            "default": "Brouillon",
-            "in_list_view": 1,
-            "in_standard_filter": 1,
-            "read_only": 1
-        },
-        {
-            "fieldname": "col_wf",
-            "fieldtype": "Column Break"
-        },
-        {
-            "fieldname": "workflow_state",
-            "label": "\u00c9tat du flux",
-            "fieldtype": "Data",
-            "hidden": 1,
-            "read_only": 1
-        },
-        {
-            "fieldname": "employee_email",
-            "label": "Email Employ\u00e9",
-            "fieldtype": "Data",
-            "options": "Email",
-            "hidden": 1,
-            "read_only": 1,
-            "no_copy": 1,
-            "print_hide": 1
-        },
-        {
-            "fieldname": "amended_from",
-            "label": "Modifi\u00e9 depuis",
-            "fieldtype": "Link",
-            "options": "Demande Achat KYA",
-            "no_copy": 1,
-            "print_hide": 1,
-            "read_only": 1
-        }
-    ],
-    "permissions": [
-        {
-            "role": "System Manager",
-            "read": 1, "write": 1, "create": 1, "delete": 1,
-            "submit": 1, "cancel": 1, "amend": 1
-        },
-        {
-            "role": "HR Manager",
-            "read": 1, "write": 1, "create": 1,
-            "submit": 1, "cancel": 1, "amend": 1
-        },
-        {
-            "role": "Purchase Manager",
-            "read": 1, "write": 1, "create": 1,
-            "submit": 1
-        },
-        {
-            "role": "Purchase User",
-            "read": 1, "write": 1, "create": 1,
-            "submit": 1
-        },
-        {
-            "role": "Employee",
-            "read": 1, "write": 1, "create": 1,
-            "if_owner": 1
-        }
-    ]
+ "name": "Demande Achat KYA",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "is_submittable": 1,
+ "custom": 1,
+ "autoname": "format:DA-{YYYY}-{#####}",
+ "title_field": "objet",
+ "search_fields": "employee_name, objet, statut",
+ "track_changes": 1,
+ "fields": [
+  {
+   "fieldname": "section_demandeur",
+   "label": "Informations du Demandeur",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "employee",
+   "label": "Employé",
+   "fieldtype": "Link",
+   "options": "Employee",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "employee_name",
+   "label": "Nom complet",
+   "fieldtype": "Data",
+   "fetch_from": "employee.employee_name",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "report_to",
+   "fieldtype": "Link",
+   "options": "Employee",
+   "label": "Responsable direct",
+   "fetch_from": "employee.reports_to",
+   "hidden": 1,
+   "read_only": 1,
+   "in_list_view": 0,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "col_dept",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "department",
+   "label": "Département",
+   "fieldtype": "Link",
+   "options": "Department",
+   "fetch_from": "employee.department",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "label": "Société",
+   "fieldtype": "Link",
+   "options": "Company",
+   "fetch_from": "employee.company",
+   "read_only": 1,
+   "hidden": 1
+  },
+  {
+   "fieldname": "date_demande",
+   "label": "Date de la demande",
+   "fieldtype": "Date",
+   "default": "Today",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "section_delegation",
+   "label": "Délégation (optionnel)",
+   "fieldtype": "Section Break",
+   "collapsible": 1,
+   "description": "Remplir uniquement si vous soumettez pour le compte d’un autre employé"
+  },
+  {
+   "fieldname": "au_nom_de",
+   "label": "Sur délégation de",
+   "fieldtype": "Link",
+   "options": "Employee",
+   "description": "Employé pour le compte duquel vous soumettez"
+  },
+  {
+   "fieldname": "au_nom_de_nom",
+   "label": "Nom (délégation)",
+   "fieldtype": "Data",
+   "fetch_from": "au_nom_de.employee_name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_objet",
+   "label": "Objet de la Demande",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "objet",
+   "label": "Objet / Motif de la demande",
+   "fieldtype": "Small Text",
+   "reqd": 1,
+   "description": "Décrivez brièvement le besoin"
+  },
+  {
+   "fieldname": "urgence",
+   "label": "Niveau d'urgence",
+   "fieldtype": "Select",
+   "options": "Normal\nUrgent\nTrès Urgent",
+   "default": "Normal",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "section_articles",
+   "label": "Articles demandés",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "items",
+   "label": "Liste des articles",
+   "fieldtype": "Table",
+   "options": "Demande Achat Item",
+   "reqd": 1,
+   "description": "Ajoutez chaque article avec sa quantité et son prix unitaire estimé"
+  },
+  {
+   "fieldname": "section_totaux",
+   "label": "Montant & Palier",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "montant_total",
+   "label": "Montant total estimé (XOF)",
+   "fieldtype": "Currency",
+   "read_only": 1,
+   "in_list_view": 1,
+   "bold": 1,
+   "description": "Calculé automatiquement à partir des articles"
+  },
+  {
+   "fieldname": "col_palier",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "palier",
+   "label": "Palier d'approbation",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "bold": 1,
+   "description": "Déterminé automatiquement selon le montant"
+  },
+  {
+   "fieldname": "section_sig_demandeur",
+   "label": "Signature du Demandeur",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "signature_demandeur",
+   "label": "Signature du demandeur",
+   "fieldtype": "Signature",
+   "description": "Dessinez votre signature ici"
+  },
+  {
+   "fieldname": "signataire_demandeur",
+   "label": "Nom du demandeur",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date_signature_demandeur",
+   "label": "Date de signature",
+   "fieldtype": "Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_sig_chef",
+   "label": "Visa du Chef de Département",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "signature_chef",
+   "label": "Signature du Chef",
+   "fieldtype": "Signature",
+   "read_only": 1,
+   "description": "Le Chef de Département signe ici"
+  },
+  {
+   "fieldname": "signataire_chef",
+   "label": "Nom du Chef",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date_signature_chef",
+   "label": "Date du visa Chef",
+   "fieldtype": "Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_sig_dga",
+   "label": "Visa de la DGA / Responsable Achats",
+   "fieldtype": "Section Break",
+   "depends_on": "eval:doc.montant_total >= 100000"
+  },
+  {
+   "fieldname": "signature_dga",
+   "label": "Signature DGA",
+   "fieldtype": "Signature",
+   "read_only": 1,
+   "depends_on": "eval:doc.montant_total >= 100000",
+   "description": "Le DGA signe pour les achats ≥ 100 000 XOF"
+  },
+  {
+   "fieldname": "signataire_dga",
+   "label": "Nom du DGA",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "depends_on": "eval:doc.montant_total >= 100000"
+  },
+  {
+   "fieldname": "date_signature_dga",
+   "label": "Date du visa DGA",
+   "fieldtype": "Date",
+   "read_only": 1,
+   "depends_on": "eval:doc.montant_total >= 100000"
+  },
+  {
+   "fieldname": "section_sig_dg",
+   "label": "Approbation du Directeur Général",
+   "fieldtype": "Section Break",
+   "depends_on": "eval:doc.montant_total >= 2000000"
+  },
+  {
+   "fieldname": "signature_dg",
+   "label": "Signature du DG",
+   "fieldtype": "Signature",
+   "read_only": 1,
+   "depends_on": "eval:doc.montant_total >= 2000000",
+   "description": "Le Directeur Général signe pour les achats ≥ 2 000 000 XOF"
+  },
+  {
+   "fieldname": "signataire_dg",
+   "label": "Nom du DG",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "depends_on": "eval:doc.montant_total >= 2000000"
+  },
+  {
+   "fieldname": "date_signature_dg",
+   "label": "Date du visa DG",
+   "fieldtype": "Date",
+   "read_only": 1,
+   "depends_on": "eval:doc.montant_total >= 2000000"
+  },
+  {
+   "fieldname": "section_workflow",
+   "label": "Statut de la Demande",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "statut",
+   "label": "Statut",
+   "fieldtype": "Select",
+   "options": "Brouillon\nEn attente Chef\nEn attente DAAF\nEn attente DG\nApprouvé\nRejeté",
+   "default": "Brouillon",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_wf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "workflow_state",
+   "label": "État du flux",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "label": "Modifié depuis",
+   "fieldtype": "Link",
+   "options": "Demande Achat KYA",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1
+  },
+  {
+   "role": "HR Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1
+  },
+  {
+   "role": "Purchase Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1
+  },
+  {
+   "role": "Purchase User",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1
+  },
+  {
+   "role": "Employee",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "if_owner": 1
+  }
+ ]
 }

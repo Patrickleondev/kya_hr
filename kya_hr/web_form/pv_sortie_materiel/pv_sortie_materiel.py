@@ -2,25 +2,34 @@ import frappe
 
 
 def get_context(context):
+    """Controller du Web Form PV Sortie Matériel.
+    Circuit KYA: Demandeur -> Chef Service -> Auditeur Interne -> Directeur Général -> Chargé des Stocks
+    Les rôles ci-dessous proviennent strictement de la liste des rôles actifs en prod (Rôle.csv).
+    System Manager = override admin pour les tests uniquement.
+    """
     user = frappe.session.user
-    context.user_roles = frappe.get_roles(user)
+    roles = frappe.get_roles(user)
+    context.user_roles = roles
 
-    # Provide the list of possible delegates (employees other than the current user)
     employee = frappe.db.get_value("Employee", {"user_id": user, "status": "Active"}, "name")
     context.current_employee = employee
 
-    if context.doc:
-        doc = context.doc
-        state = doc.get("workflow_state") or doc.get("statut") or "Brouillon"
-        roles = context.user_roles
+    # Valeurs par défaut (nouvelle fiche)
+    context.can_sign_demandeur = True
+    context.can_sign_chef = False
+    context.can_sign_audit = False
+    context.can_sign_dga = False
+    context.can_sign_magasin = False
 
-        # Determine which signature sections are editable for this user
-        context.can_sign_demandeur = state == "Brouillon"
-        context.can_sign_chef = (state == "En attente Chef" and
-            any(r in roles for r in ["Chef Service", "System Manager"]))
-        context.can_sign_audit = (state == "En attente Audit" and
-            any(r in roles for r in ["Auditeur Interne", "System Manager"]))
-        context.can_sign_dga = (state == "En attente Direction" and
-            any(r in roles for r in ["DAAF", "Directeur Général", "System Manager"]))
-        context.can_sign_magasin = (state == "En attente Magasin" and
-            any(r in roles for r in ["Chargé des Stocks", "Stock Manager", "Stock User", "System Manager"]))
+    if not context.doc:
+        return
+
+    doc = context.doc
+    state = doc.get("workflow_state") or doc.get("statut") or "Brouillon"
+    is_admin = "System Manager" in roles
+
+    context.can_sign_demandeur = state == "Brouillon"
+    context.can_sign_chef    = (state == "En attente Chef")      and ("Chef Service"       in roles or is_admin)
+    context.can_sign_audit   = (state == "En attente Audit")     and ("Auditeur Interne"   in roles or is_admin)
+    context.can_sign_dga     = (state == "En attente Direction") and ("Directeur Général"  in roles or is_admin)
+    context.can_sign_magasin = (state == "En attente Magasin")   and ("Chargé des Stocks"  in roles or is_admin)

@@ -17,17 +17,17 @@ frappe.ui.form.on("Demande Achat KYA", {
             var m = frm.doc.montant_total;
             if (m >= 2000000) {
                 frm.dashboard.set_headline(
-                    "Palier 3 : Approbation Chef + DAAF + Directeur Général requise",
+                    "Palier 3 : Approbation Chef + DGA + Directeur Général requise",
                     "red"
                 );
             } else if (m >= 100000) {
                 frm.dashboard.set_headline(
-                    "Palier 2 : Approbation Chef + DAAF + Directeur Général requise",
+                    "Palier 2 : Approbation Chef + DGA requise",
                     "orange"
                 );
             } else {
                 frm.dashboard.set_headline(
-                    "Palier 1 : Approbation Chef de Département + DAAF requise",
+                    "Palier 1 : Approbation du Chef de Département uniquement",
                     "blue"
                 );
             }
@@ -38,7 +38,7 @@ frappe.ui.form.on("Demande Achat KYA", {
 
         // Bouton impression pour demande approuvée
         if (frm.doc.docstatus === 1 && frm.doc.statut === "Approuvé") {
-            frm.add_custom_button("Imprimer le Bon de Commande", function() {
+            frm.add_custom_button("Imprimer la Demande d'Achat", function() {
                 window.open(
                     frappe.urllib.get_full_url(
                         "/api/method/frappe.utils.print_format.download_pdf?"
@@ -48,6 +48,21 @@ frappe.ui.form.on("Demande Achat KYA", {
                     )
                 );
             });
+
+            // Générer / Ouvrir Bon de Commande lié
+            frm.add_custom_button(__("Générer Bon de Commande"), function() {
+                frappe.call({
+                    method: "kya_hr.api.bon_commande.create_from_demande_achat",
+                    args: { demande_name: frm.doc.name },
+                    freeze: true,
+                    freeze_message: __("Génération du Bon de Commande..."),
+                    callback: function(r) {
+                        if (r.message && r.message.name) {
+                            frappe.set_route("Form", "Bon Commande KYA", r.message.name);
+                        }
+                    }
+                });
+            }, __("Actions"));
         }
     },
 
@@ -116,21 +131,20 @@ function _control_da_signatures(frm) {
     frm.set_df_property("signataire_demandeur", "read_only", 1);
     frm.set_df_property("date_signature_demandeur", "read_only", 1);
 
-    // Signature Chef : modifiable à "En attente Chef" pour Chef Service
-    var peut_signer_chef = ws === "En attente Chef" && (roles.includes("Chef Service") || roles.includes("System Manager"));
+    // Signature Chef : modifiable à "En attente Chef" pour Purchase User
+    var peut_signer_chef = ws === "En attente Chef" && roles.includes("Purchase User");
     frm.set_df_property("signature_chef", "read_only", peut_signer_chef ? 0 : 1);
     frm.set_df_property("signataire_chef", "read_only", 1);
     frm.set_df_property("date_signature_chef", "read_only", 1);
 
-    // Signature DAAF : modifiable à "En attente DAAF"
-    var peut_signer_dga = ws === "En attente DAAF"
-        && (roles.includes("DAAF") || roles.includes("Responsable Achats") || roles.includes("System Manager"));
+    // Signature DGA : modifiable à "En attente Approbation" pour Purchase Manager
+    var peut_signer_dga = ws === "En attente Approbation" && roles.includes("Purchase Manager");
     frm.set_df_property("signature_dga", "read_only", peut_signer_dga ? 0 : 1);
     frm.set_df_property("signataire_dga", "read_only", 1);
     frm.set_df_property("date_signature_dga", "read_only", 1);
 
-    // Signature DG : modifiable à "En attente DG" pour Direction
-    var peut_signer_dg = ws === "En attente DG" && (roles.includes("Directeur Général") || roles.includes("System Manager"));
+    // Signature DG : modifiable à "En attente DG" pour HR Manager
+    var peut_signer_dg = ws === "En attente DG" && roles.includes("HR Manager");
     frm.set_df_property("signature_dg", "read_only", peut_signer_dg ? 0 : 1);
     frm.set_df_property("signataire_dg", "read_only", 1);
     frm.set_df_property("date_signature_dg", "read_only", 1);

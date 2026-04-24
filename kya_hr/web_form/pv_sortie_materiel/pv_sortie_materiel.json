@@ -1,95 +1,95 @@
 {
-    "allow_comments": 1,
-    "allow_delete": 0,
-    "allow_edit": 1,
-    "allow_incomplete": 0,
-    "allow_multiple": 1,
-    "allow_print": 1,
-    "anonymous": 0,
-    "apply_document_permissions": 1,
-    "creation": "2026-03-12 00:00:00.000000",
-    "doc_type": "PV Sortie Materiel",
-    "docstatus": 0,
-    "doctype": "Web Form",
-    "idx": 0,
-    "introduction_text": "",
-    "is_standard": 1,
-    "login_required": 1,
-    "modified": "2026-03-24 00:00:00.000000",
-    "modified_by": "Administrator",
-    "module": "KYA HR",
-    "name": "pv-sortie-materiel",
-    "owner": "Administrator",
-    "published": 1,
-    "route": "pv-sortie-materiel",
-    "show_sidebar": 1,
-    "success_message": "✅ Le PV de sortie matériel a été créé avec succès. Il suivra le circuit d’approbation : Chef → Audit → Direction → Magasin.",
-    "title": "PV de Sortie Matériel",
-    "client_script": "frappe.web_form.after_load = function() {\n  var doc = frappe.web_form.doc;\n  var roles = (frappe.boot && frappe.boot.user && frappe.boot.user.roles) ? frappe.boot.user.roles : [];\n  var state = (doc && (doc.workflow_state || doc.statut)) || 'Brouillon';\n  var rules = {\n    'signature_demandeur': { states: ['Brouillon'], roles: [] },\n    'demandeur_nom': { states: ['Brouillon'], roles: [] },\n    'signature_chef': { states: ['En attente Chef'], roles: ['Purchase User','Purchase Manager','Stock Manager','Stock User','System Manager'] },\n    'signature_audit': { states: ['En attente Audit'], roles: ['Purchase Manager','Accounts Manager','HR Manager','System Manager'] },\n    'signature_dga': { states: ['En attente Direction'], roles: ['HR Manager','System Manager'] },\n    'signature_magasin': { states: ['En attente Magasin'], roles: ['Stock Manager','Stock User','System Manager'] }\n  };\n  var allSig = ['signature_demandeur','signature_chef','signature_audit','signature_dga','signature_magasin','demandeur_nom'];\n  allSig.forEach(function(f){ frappe.web_form.set_df_property(f, 'read_only', 1); });\n  Object.keys(rules).forEach(function(field) {\n    var rule = rules[field];\n    var stateOk = rule.states.indexOf(state) !== -1;\n    var roleOk = rule.roles.length === 0 || rule.roles.some(function(r){ return roles.indexOf(r) !== -1; });\n    if (stateOk && roleOk) frappe.web_form.set_df_property(field, 'read_only', 0);\n  });\n  if (doc && doc.statut) {\n    var cm = {'Approuv\\u00e9':'#2e7d32','Rejet\\u00e9':'#c62828','Brouillon':'#757575'};\n    var c = cm[doc.statut] || '#e65100';\n    var el = document.createElement('div');\n    el.innerHTML = '<div style=\"margin-bottom:12px;padding:8px 16px;background:'+c+';color:#fff;border-radius:6px;display:inline-block;font-weight:700;\">\\u00c9tat\\u00a0: '+doc.statut+'</div>';\n    var w = document.querySelector('.web-form-wrapper') || document.querySelector('.container');\n    if (w) w.prepend(el);\n  }\n};\nfrappe.web_form.on('load', function(){\n  var doc = frappe.web_form.doc;\n  if (!doc.demandeur_nom && frappe.session && frappe.session.user) {\n    frappe.call({ method:'frappe.client.get_value', args:{ doctype:'Employee', filters:{ user_id: frappe.session.user }, fieldname:'employee_name' }, callback:function(r){ if(r.message && r.message.employee_name) frappe.web_form.set_value('demandeur_nom', r.message.employee_name); } });\n  }\n});\n",
-    "web_form_fields": [
-        {
-            "fieldname": "objet",
-            "fieldtype": "Small Text",
-            "label": "Objet / Motif de la Sortie",
-            "reqd": 1,
-            "description": "Décrivez le motif de la sortie de matériel"
-        },
-        {
-            "fieldname": "date_sortie",
-            "fieldtype": "Date",
-            "label": "Date de Sortie",
-            "reqd": 1,
-            "default": "Today"
-        },
-        {
-            "fieldname": "items",
-            "fieldtype": "Table",
-            "label": "Liste du Matériel",
-            "options": "PV Sortie Materiel Item",
-            "reqd": 1
-        },
-        {
-            "fieldname": "au_nom_de",
-            "fieldtype": "Link",
-            "options": "Employee",
-            "label": "Sur délégation de (optionnel)",
-            "description": "Laissez vide si vous soumettez pour vous-même"
-        },
-        {
-            "fieldname": "statut",
-            "fieldtype": "Data",
-            "label": "État du PV",
-            "read_only": 1
-        },
-        {
-            "fieldname": "demandeur_nom",
-            "fieldtype": "Data",
-            "label": "Nom du Demandeur"
-        },
-        {
-            "fieldname": "signature_demandeur",
-            "fieldtype": "Signature",
-            "label": "Signature Demandeur"
-        },
-        {
-            "fieldname": "signature_chef",
-            "fieldtype": "Signature",
-            "label": "Signature Chef de Service"
-        },
-        {
-            "fieldname": "signature_audit",
-            "fieldtype": "Signature",
-            "label": "Signature Audit Interne"
-        },
-        {
-            "fieldname": "signature_dga",
-            "fieldtype": "Signature",
-            "label": "Signature DG / DGA"
-        },
-        {
-            "fieldname": "signature_magasin",
-            "fieldtype": "Signature",
-            "label": "Signature Responsable Magasin"
-        }
-    ]
+ "allow_comments": 1,
+ "allow_delete": 0,
+ "allow_edit": 1,
+ "allow_incomplete": 0,
+ "allow_multiple": 1,
+ "allow_print": 1,
+ "anonymous": 0,
+ "apply_document_permissions": 1,
+ "creation": "2026-03-12 00:00:00.000000",
+ "doc_type": "PV Sortie Materiel",
+ "docstatus": 0,
+ "doctype": "Web Form",
+ "idx": 0,
+ "introduction_text": "",
+ "is_standard": 1,
+ "login_required": 1,
+ "modified": "2026-03-24 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "KYA HR",
+ "name": "pv-sortie-materiel",
+ "owner": "Administrator",
+ "published": 1,
+ "route": "pv-sortie-materiel",
+ "show_sidebar": 1,
+ "success_message": "✅ Le PV de sortie matériel a été créé avec succès. Il suivra le circuit d’approbation : Chef → Audit → Direction → Magasin.",
+ "title": "PV de Sortie Matériel",
+ "client_script": "frappe.web_form.after_load = function() {\n  // INJECTION: Dynamic Reference Number\n  if (doc && doc.name) {\n    var refEl = document.createElement('div');\n    refEl.innerHTML = '<div style=\"margin-bottom:12px;padding:8px 16px;background:#f1f8e9;color:#33691e;border-left:4px solid #8bc34a;border-radius:6px;display:inline-block;font-weight:700;margin-right:10px;font-size:14px;\">Réf. Dossier : ' + doc.name + '</div>';\n    var w = document.querySelector('.web-form-wrapper') || document.querySelector('.container');\n    if (w) w.prepend(refEl);\n  }\n\n  var doc = frappe.web_form.doc;\n  var roles = (frappe.boot && frappe.boot.user && frappe.boot.user.roles) ? frappe.boot.user.roles : [];\n  var state = (doc && (doc.workflow_state || doc.statut)) || 'Brouillon';\n  var rules = {\n    'signature_demandeur': { states: ['Brouillon'], roles: [] },\n    'signature_chef': { states: ['En attente Chef'], roles: ['Chef Service','System Manager'] },\n    'signature_audit': { states: ['En attente Audit'], roles: ['Auditeur Interne','System Manager'] },\n    'signature_dga': { states: ['En attente DGA'], roles: ['DGA','Directeur Général','System Manager'] },\n    'signature_magasin': { states: ['En attente Magasin'], roles: ['Chargé des Stocks','Responsable Stock','System Manager'] }\n  };\n  var allSig = ['signature_demandeur','signature_chef','signature_audit','signature_dga','signature_magasin','demandeur_nom'];\n  allSig.forEach(function(f){ frappe.web_form.set_df_property(f, 'read_only', 1); });\n  Object.keys(rules).forEach(function(field) {\n    var rule = rules[field];\n    var stateOk = rule.states.indexOf(state) !== -1;\n    var roleOk = rule.roles.length === 0 || rule.roles.some(function(r){ return roles.indexOf(r) !== -1; });\n    if (stateOk && roleOk) frappe.web_form.set_df_property(field, 'read_only', 0);\n  });\n  if (doc && doc.statut) {\n    var cm = {'Approuv\\u00e9':'#2e7d32','Rejet\\u00e9':'#c62828','Brouillon':'#757575'};\n    var c = cm[doc.statut] || '#e65100';\n    var el = document.createElement('div');\n    el.innerHTML = '<div style=\"margin-bottom:12px;padding:8px 16px;background:'+c+';color:#fff;border-radius:6px;display:inline-block;font-weight:700;\">\\u00c9tat\\u00a0: '+doc.statut+'</div>';\n    var w = document.querySelector('.web-form-wrapper') || document.querySelector('.container');\n    if (w) w.prepend(el);\n  }\n};\nfrappe.web_form.on('load', function(){\n  var doc = frappe.web_form.doc;\n  if (!doc.demandeur_nom && frappe.session && frappe.session.user) {\n    frappe.call({ method:'frappe.client.get_value', args:{ doctype:'Employee', filters:{ user_id: frappe.session.user }, fieldname:'employee_name' }, callback:function(r){ if(r.message && r.message.employee_name) frappe.web_form.set_value('demandeur_nom', r.message.employee_name); } });\n  }\n});\n",
+ "web_form_fields": [
+  {
+   "fieldname": "objet",
+   "fieldtype": "Small Text",
+   "label": "Objet / Motif de la Sortie",
+   "reqd": 1,
+   "description": "Décrivez le motif de la sortie de matériel"
+  },
+  {
+   "fieldname": "date_sortie",
+   "fieldtype": "Date",
+   "label": "Date de Sortie",
+   "reqd": 1,
+   "default": "Today"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Liste du Matériel",
+   "options": "PV Sortie Materiel Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "au_nom_de",
+   "fieldtype": "Link",
+   "options": "Employee",
+   "label": "Sur délégation de (optionnel)",
+   "description": "Laissez vide si vous soumettez pour vous-même"
+  },
+  {
+   "fieldname": "statut",
+   "fieldtype": "Data",
+   "label": "État du PV",
+   "read_only": 1
+  },
+  {
+   "fieldname": "demandeur_nom",
+   "fieldtype": "Data",
+   "label": "Nom du Demandeur"
+  },
+  {
+   "fieldname": "signature_demandeur",
+   "fieldtype": "Signature",
+   "label": "Signature Demandeur"
+  },
+  {
+   "fieldname": "signature_chef",
+   "fieldtype": "Signature",
+   "label": "Signature Chef de Service"
+  },
+  {
+   "fieldname": "signature_audit",
+   "fieldtype": "Signature",
+   "label": "Signature Audit Interne"
+  },
+  {
+   "fieldname": "signature_dga",
+   "fieldtype": "Signature",
+   "label": "Signature DG / DGA"
+  },
+  {
+   "fieldname": "signature_magasin",
+   "fieldtype": "Signature",
+   "label": "Signature Responsable Magasin"
+  }
+ ]
 }
