@@ -1,0 +1,29 @@
+{
+ "creation": "2026-04-22 12:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "istable": 1,
+ "editable_grid": 1,
+ "field_order": [
+  "num_cheque",
+  "banque",
+  "beneficiaire",
+  "libelle",
+  "montant",
+  "observation"
+ ],
+ "fields": [
+  {"fieldname": "num_cheque", "fieldtype": "Data", "label": "N° Chèque", "in_list_view": 1, "columns": 1, "reqd": 1},
+  {"fieldname": "banque", "fieldtype": "Data", "label": "Banque", "in_list_view": 1, "columns": 1, "reqd": 1},
+  {"fieldname": "beneficiaire", "fieldtype": "Data", "label": "Bénéficiaire", "in_list_view": 1, "columns": 3, "reqd": 1},
+  {"fieldname": "libelle", "fieldtype": "Small Text", "label": "Libellé", "in_list_view": 1, "columns": 3},
+  {"fieldname": "montant", "fieldtype": "Currency", "label": "Montant", "options": "XOF", "in_list_view": 1, "columns": 2, "default": "0"},
+  {"fieldname": "observation", "fieldtype": "Data", "label": "Observation", "columns": 2}
+ ],
+ "modified": "2026-04-22 12:00:00",
+ "module": "KYA HR",
+ "name": "Etat Recap Cheques Ligne",
+ "sort_field": "idx",
+ "sort_order": "ASC",
+ "track_changes": 0
+}

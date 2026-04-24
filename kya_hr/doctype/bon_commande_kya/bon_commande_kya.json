@@ -1,0 +1,72 @@
+{
+ "name": "Bon Commande KYA",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "is_submittable": 1,
+ "custom": 1,
+ "autoname": "format:BC-{YYYY}-{#####}",
+ "title_field": "fournisseur_nom",
+ "search_fields": "numero_bc, fournisseur_nom, objet, date_bc",
+ "track_changes": 1,
+ "fields": [
+  { "fieldname": "section_entete", "label": "Identification", "fieldtype": "Section Break" },
+  { "fieldname": "numero_bc", "label": "N° du Bon de Commande", "fieldtype": "Data", "reqd": 1, "in_list_view": 1, "description": "ex: O4026/KYA/DG/SMA" },
+  { "fieldname": "date_bc", "label": "Date du BC", "fieldtype": "Date", "reqd": 1, "default": "Today", "in_list_view": 1, "in_standard_filter": 1 },
+  { "fieldname": "col_entete", "fieldtype": "Column Break" },
+  { "fieldname": "reference", "label": "Référence", "fieldtype": "Data", "default": "KYA-ACH-BC-V01", "read_only": 1 },
+  { "fieldname": "demande_achat", "label": "Demande d'Achat liée", "fieldtype": "Link", "options": "Demande Achat KYA", "in_standard_filter": 1 },
+
+  { "fieldname": "section_objet", "label": "Objet de la commande", "fieldtype": "Section Break" },
+  { "fieldname": "objet", "label": "Objet de la Commande", "fieldtype": "Small Text", "reqd": 1 },
+
+  { "fieldname": "section_fournisseur", "label": "Fournisseur", "fieldtype": "Section Break" },
+  { "fieldname": "fournisseur", "label": "Fournisseur (référence)", "fieldtype": "Link", "options": "Supplier" },
+  { "fieldname": "fournisseur_nom", "label": "Nom / Raison Sociale", "fieldtype": "Data", "reqd": 1, "in_list_view": 1 },
+  { "fieldname": "fournisseur_entreprise", "label": "Entreprise", "fieldtype": "Data" },
+  { "fieldname": "fournisseur_adresse", "label": "Adresse", "fieldtype": "Data" },
+  { "fieldname": "col_fourn", "fieldtype": "Column Break" },
+  { "fieldname": "fournisseur_ville", "label": "Ville", "fieldtype": "Data", "default": "Lomé" },
+  { "fieldname": "fournisseur_telephone", "label": "Téléphone", "fieldtype": "Data" },
+  { "fieldname": "fournisseur_email", "label": "Email", "fieldtype": "Data" },
+
+  { "fieldname": "section_articles", "label": "Articles commandés", "fieldtype": "Section Break" },
+  { "fieldname": "articles", "label": "Articles", "fieldtype": "Table", "options": "Bon Commande KYA Item", "reqd": 1 },
+
+  { "fieldname": "section_totaux", "label": "Montants", "fieldtype": "Section Break" },
+  { "fieldname": "sous_total", "label": "Sous-total (XOF)", "fieldtype": "Currency", "read_only": 1 },
+  { "fieldname": "remise", "label": "Remise (XOF)", "fieldtype": "Currency", "default": 0 },
+  { "fieldname": "col_totaux", "fieldtype": "Column Break" },
+  { "fieldname": "tva_taux", "label": "TVA (%)", "fieldtype": "Percent", "default": 18 },
+  { "fieldname": "tva_montant", "label": "TVA (XOF)", "fieldtype": "Currency", "read_only": 1 },
+  { "fieldname": "total_ttc", "label": "TOTAL (XOF)", "fieldtype": "Currency", "read_only": 1, "in_list_view": 1, "bold": 1 },
+
+  { "fieldname": "section_modalites", "label": "Modalités", "fieldtype": "Section Break" },
+  { "fieldname": "garantie", "label": "Garantie", "fieldtype": "Data", "default": "12 mois" },
+  { "fieldname": "delai_livraison", "label": "Délai de livraison", "fieldtype": "Data", "default": "72 heures" },
+  { "fieldname": "validite", "label": "Validité", "fieldtype": "Data", "default": "30 jours" },
+  { "fieldname": "col_modalites", "fieldtype": "Column Break" },
+  { "fieldname": "lieu_livraison", "label": "Lieu de livraison", "fieldtype": "Data", "default": "Lomé — Agoè Logopé, KYA-Energy Group" },
+  { "fieldname": "modalites_paiement", "label": "Modalités de paiement", "fieldtype": "Data", "default": "100% à la livraison" },
+  { "fieldname": "reglement", "label": "Règlement", "fieldtype": "Small Text", "description": "Coordonnées bancaires / mode de règlement" },
+
+  { "fieldname": "section_signatures", "label": "Autorisation", "fieldtype": "Section Break" },
+  { "fieldname": "autorise_par_nom", "label": "Autorisé par (nom)", "fieldtype": "Data" },
+  { "fieldname": "autorise_par_fonction", "label": "Fonction", "fieldtype": "Data", "default": "Directrice Générale" },
+  { "fieldname": "signature_dg", "label": "Signature DG", "fieldtype": "Signature" },
+  { "fieldname": "col_sig", "fieldtype": "Column Break" },
+  { "fieldname": "date_autorisation", "label": "Date d'autorisation", "fieldtype": "Date" },
+  { "fieldname": "cachet", "label": "Cachet apposé", "fieldtype": "Check", "default": 0 },
+
+  { "fieldname": "section_statut", "label": "Statut", "fieldtype": "Section Break" },
+  { "fieldname": "statut", "label": "Statut", "fieldtype": "Select", "options": "Brouillon\nÉmis\nEnvoyé Fournisseur\nLivré\nClôturé\nAnnulé", "default": "Brouillon", "in_list_view": 1, "in_standard_filter": 1 },
+  { "fieldname": "amended_from", "label": "Modifié depuis", "fieldtype": "Link", "options": "Bon Commande KYA", "no_copy": 1, "print_hide": 1, "read_only": 1 }
+ ],
+ "permissions": [
+  { "role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "submit": 1, "cancel": 1, "amend": 1, "print": 1, "email": 1 },
+  { "role": "Purchase Manager", "read": 1, "write": 1, "create": 1, "submit": 1, "cancel": 1, "amend": 1, "print": 1, "email": 1 },
+  { "role": "Purchase User", "read": 1, "write": 1, "create": 1, "submit": 1, "print": 1, "email": 1 },
+  { "role": "DAAF", "read": 1, "write": 1, "submit": 1, "print": 1 },
+  { "role": "Direction", "read": 1, "write": 1, "submit": 1, "print": 1 },
+  { "role": "Comptabilité", "read": 1, "print": 1 }
+ ]
+}

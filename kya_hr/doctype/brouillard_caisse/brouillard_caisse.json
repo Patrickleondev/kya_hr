@@ -1,0 +1,324 @@
+{
+ "actions": [],
+ "autoname": "format:BC-{YYYY}-{#####}",
+ "creation": "2026-04-22 12:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "is_submittable": 1,
+ "track_changes": 1,
+ "field_order": [
+  "section_entete",
+  "date_brouillard",
+  "caissiere",
+  "caissiere_name",
+  "col_entete",
+  "report_to",
+  "solde_precedent",
+  "date_solde_precedent",
+  "section_lignes",
+  "lignes",
+  "section_totaux",
+  "total_entrees",
+  "total_sorties",
+  "col_totaux",
+  "solde_final",
+  "total_reel_caisse",
+  "section_signatures",
+  "col_sig_caissiere",
+  "signature_caissiere",
+  "signataire_caissiere",
+  "date_signature_caissiere",
+  "col_sig_comptable",
+  "signature_comptable",
+  "signataire_comptable",
+  "date_signature_comptable",
+  "col_sig_dfc",
+  "signature_dfc",
+  "signataire_dfc",
+  "date_signature_dfc",
+  "section_workflow",
+  "statut",
+  "workflow_state",
+  "commentaires",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_entete",
+   "fieldtype": "Section Break",
+   "label": "En-tête"
+  },
+  {
+   "fieldname": "date_brouillard",
+   "fieldtype": "Date",
+   "label": "Date du Brouillard",
+   "reqd": 1,
+   "in_list_view": 1,
+   "default": "Today"
+  },
+  {
+   "fieldname": "caissiere",
+   "fieldtype": "Link",
+   "options": "Employee",
+   "label": "Caissier(ère)",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "caissiere_name",
+   "fieldtype": "Data",
+   "label": "Nom Caissier(ère)",
+   "fetch_from": "caissiere.employee_name",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "col_entete",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "report_to",
+   "fieldtype": "Link",
+   "options": "Employee",
+   "label": "Responsable direct",
+   "fetch_from": "caissiere.reports_to",
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "solde_precedent",
+   "fieldtype": "Currency",
+   "options": "XOF",
+   "label": "Solde précédent",
+   "default": "0",
+   "description": "Solde de clôture de la veille"
+  },
+  {
+   "fieldname": "date_solde_precedent",
+   "fieldtype": "Date",
+   "label": "Date solde précédent"
+  },
+  {
+   "fieldname": "section_lignes",
+   "fieldtype": "Section Break",
+   "label": "Opérations du Jour"
+  },
+  {
+   "fieldname": "lignes",
+   "fieldtype": "Table",
+   "options": "Brouillard Caisse Ligne",
+   "label": "Lignes",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_totaux",
+   "fieldtype": "Section Break",
+   "label": "Totaux"
+  },
+  {
+   "fieldname": "total_entrees",
+   "fieldtype": "Currency",
+   "options": "XOF",
+   "label": "Total Entrées",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "total_sorties",
+   "fieldtype": "Currency",
+   "options": "XOF",
+   "label": "Total Sorties",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "col_totaux",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "solde_final",
+   "fieldtype": "Currency",
+   "options": "XOF",
+   "label": "Solde Final Théorique",
+   "read_only": 1,
+   "description": "Solde précédent + Entrées - Sorties"
+  },
+  {
+   "fieldname": "total_reel_caisse",
+   "fieldtype": "Currency",
+   "options": "XOF",
+   "label": "Total Réel de la Caisse",
+   "description": "Saisie caissière après comptage physique",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_signatures",
+   "fieldtype": "Section Break",
+   "label": "Signatures"
+  },
+  {
+   "fieldname": "col_sig_caissiere",
+   "fieldtype": "Column Break",
+   "label": "Caissier(ère)"
+  },
+  {
+   "fieldname": "signature_caissiere",
+   "fieldtype": "Signature",
+   "label": "Visa Caissier(ère)"
+  },
+  {
+   "fieldname": "signataire_caissiere",
+   "fieldtype": "Data",
+   "label": "Signataire Caissier(ère)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date_signature_caissiere",
+   "fieldtype": "Date",
+   "label": "Date Signature Caissière",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_sig_comptable",
+   "fieldtype": "Column Break",
+   "label": "Comptable"
+  },
+  {
+   "fieldname": "signature_comptable",
+   "fieldtype": "Signature",
+   "label": "Visa Comptable"
+  },
+  {
+   "fieldname": "signataire_comptable",
+   "fieldtype": "Data",
+   "label": "Signataire Comptable",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date_signature_comptable",
+   "fieldtype": "Date",
+   "label": "Date Signature Comptable",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_sig_dfc",
+   "fieldtype": "Column Break",
+   "label": "DFC"
+  },
+  {
+   "fieldname": "signature_dfc",
+   "fieldtype": "Signature",
+   "label": "Visa DFC"
+  },
+  {
+   "fieldname": "signataire_dfc",
+   "fieldtype": "Data",
+   "label": "Signataire DFC",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date_signature_dfc",
+   "fieldtype": "Date",
+   "label": "Date Signature DFC",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_workflow",
+   "fieldtype": "Section Break",
+   "label": "Statut",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "statut",
+   "fieldtype": "Select",
+   "label": "Statut",
+   "options": "Brouillon\nEn attente Comptable\nEn attente DFC\nApprouvé\nRejeté",
+   "default": "Brouillon",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "workflow_state",
+   "fieldtype": "Data",
+   "label": "État Workflow",
+   "read_only": 1
+  },
+  {
+   "fieldname": "commentaires",
+   "fieldtype": "Small Text",
+   "label": "Commentaires"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "options": "Brouillard Caisse",
+   "label": "Modifié depuis",
+   "read_only": 1,
+   "print_hide": 1
+  }
+ ],
+ "modified": "2026-04-22 12:00:00",
+ "module": "KYA HR",
+ "name": "Brouillard Caisse",
+ "naming_rule": "Expression",
+ "permissions": [
+  {
+   "role": "Caissière",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "print": 1,
+   "email": 1
+  },
+  {
+   "role": "Comptable",
+   "read": 1,
+   "write": 1,
+   "submit": 1,
+   "print": 1,
+   "email": 1
+  },
+  {
+   "role": "DFC",
+   "read": 1,
+   "write": 1,
+   "submit": 1,
+   "cancel": 1,
+   "print": 1,
+   "email": 1
+  },
+  {
+   "role": "Directeur Général",
+   "read": 1,
+   "print": 1,
+   "email": 1
+  },
+  {
+   "role": "Accounts Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1,
+   "delete": 1,
+   "print": 1,
+   "email": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1,
+   "delete": 1,
+   "print": 1,
+   "email": 1
+  }
+ ],
+ "sort_field": "date_brouillard",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "caissiere_name"
+}

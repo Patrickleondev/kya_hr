@@ -1,118 +1,118 @@
 {
-    "allow_comments": 1,
-    "allow_delete": 0,
-    "allow_edit": 1,
-    "allow_incomplete": 0,
-    "allow_multiple": 1,
-    "allow_print": 1,
-    "anonymous": 0,
-    "apply_document_permissions": 1,
-    "creation": "2026-03-12 00:00:00.000000",
-    "doc_type": "Demande Achat KYA",
-    "docstatus": 0,
-    "doctype": "Web Form",
-    "idx": 0,
-    "introduction_text": "",
-    "is_standard": 1,
-    "login_required": 1,
-    "modified": "2026-03-24 00:00:00.000000",
-    "modified_by": "Administrator",
-    "module": "KYA HR",
-    "name": "demande-achat",
-    "owner": "Administrator",
-    "published": 1,
-    "route": "demande-achat",
-    "show_sidebar": 1,
-    "success_message": "✅ Votre demande d’achat a été soumise avec succès. Elle sera transmise à votre Chef de Département pour approbation.",
-    "title": "Demande d'Achat",
-    "client_script": "frappe.web_form.after_load = function() {\n  var doc = frappe.web_form.doc;\n  var roles = (frappe.boot && frappe.boot.user && frappe.boot.user.roles) ? frappe.boot.user.roles : [];\n  var state = (doc && (doc.workflow_state || doc.statut)) || 'Brouillon';\n  var rules = {\n    'signature_demandeur': { states: ['Brouillon'], roles: [] },\n    'signature_chef': { states: ['En attente Chef'], roles: ['Chef Service','Purchase Manager','System Manager'] },\n    'signature_dga': { states: ['En attente DAAF'], roles: ['Purchase Manager','Accounts Manager','System Manager'] },\n    'signature_dg': { states: ['En attente DG'], roles: ['System Manager'] }\n  };\n  var allSig = ['signature_demandeur','signature_chef','signature_dga','signature_dg'];\n  allSig.forEach(function(f){ frappe.web_form.set_df_property(f, 'read_only', 1); });\n  Object.keys(rules).forEach(function(field) {\n    var rule = rules[field];\n    var stateOk = rule.states.indexOf(state) !== -1;\n    var roleOk = rule.roles.length === 0 || rule.roles.some(function(r){ return roles.indexOf(r) !== -1; });\n    if (stateOk && roleOk) frappe.web_form.set_df_property(field, 'read_only', 0);\n  });\n  var montant = (doc && doc.montant_total) ? parseFloat(doc.montant_total) : 0;\n  var palierMsg = montant >= 2000000 ? 'Palier 3+ : Chef + DAAF + DG requis' : montant >= 100000 ? 'Palier 2 : Chef + DAAF + DG requis' : 'Palier 1 : Chef de D\\u00e9partement uniquement';\n  var palierColor = montant >= 2000000 ? '#c62828' : montant >= 100000 ? '#e65100' : '#1565c0';\n  if (doc && doc.statut) {\n    var cm = {'Approuv\\u00e9':'#2e7d32','Rejet\\u00e9':'#c62828','Brouillon':'#757575'};\n    var c = cm[doc.statut] || '#e65100';\n    var el = document.createElement('div');\n    el.innerHTML = '<div style=\"margin-bottom:8px;padding:8px 16px;background:'+c+';color:#fff;border-radius:6px;display:inline-block;font-weight:700;\">\\u00c9tat\\u00a0: '+doc.statut+'</div>  <div style=\"margin-bottom:12px;padding:6px 14px;background:'+palierColor+';color:#fff;border-radius:6px;display:inline-block;font-size:0.85em;\">'+palierMsg+'</div>';\n    var w = document.querySelector('.web-form-wrapper') || document.querySelector('.container');\n    if (w) w.prepend(el);\n  }\n};\nfrappe.web_form.on('load', function(){\n  var doc = frappe.web_form.doc;\n  if (doc && !doc.employee && frappe.session && frappe.session.user) {\n    frappe.call({ method:'frappe.client.get_value', args:{ doctype:'Employee', filters:{ user_id: frappe.session.user, status:'Active' }, fieldname:['name','employee_name'] }, callback:function(r){ if(r.message){ frappe.web_form.set_value('employee', r.message.name); } } });\n  }\n});\n",
-    "web_form_fields": [
-        {
-            "fieldname": "employee",
-            "fieldtype": "Link",
-            "label": "Employé Demandeur",
-            "options": "Employee",
-            "reqd": 1
-        },
-        {
-            "fieldname": "employee_name",
-            "fieldtype": "Data",
-            "label": "Nom complet",
-            "read_only": 1
-        },
-        {
-            "fieldname": "department",
-            "fieldtype": "Link",
-            "label": "Département",
-            "options": "Department",
-            "read_only": 1
-        },
-        {
-            "fieldname": "au_nom_de",
-            "fieldtype": "Link",
-            "options": "Employee",
-            "label": "Sur délégation de (optionnel)",
-            "description": "Laissez vide si vous soumettez pour vous-même"
-        },
-        {
-            "fieldname": "date_demande",
-            "fieldtype": "Date",
-            "label": "Date de la demande",
-            "reqd": 1,
-            "default": "Today"
-        },
-        {
-            "fieldname": "objet",
-            "fieldtype": "Small Text",
-            "label": "Objet / Motif de la demande",
-            "reqd": 1,
-            "description": "Décrivez ce que vous souhaitez acheter et pourquoi"
-        },
-        {
-            "fieldname": "urgence",
-            "fieldtype": "Select",
-            "label": "Niveau d'urgence",
-            "options": "Normal\nUrgent\nTrès Urgent",
-            "default": "Normal"
-        },
-        {
-            "fieldname": "items",
-            "fieldtype": "Table",
-            "label": "Articles demandés",
-            "options": "Demande Achat Item",
-            "reqd": 1
-        },
-        {
-            "fieldname": "montant_total",
-            "fieldtype": "Currency",
-            "label": "Montant Total (XOF)",
-            "read_only": 1
-        },
-        {
-            "fieldname": "statut",
-            "fieldtype": "Data",
-            "label": "État de la Demande",
-            "read_only": 1
-        },
-        {
-            "fieldname": "signature_demandeur",
-            "fieldtype": "Signature",
-            "label": "Signature Demandeur"
-        },
-        {
-            "fieldname": "signature_chef",
-            "fieldtype": "Signature",
-            "label": "Visa Chef de Département"
-        },
-        {
-            "fieldname": "signature_dga",
-            "fieldtype": "Signature",
-            "label": "Visa DGA (≥ 100 000 XOF)"
-        },
-        {
-            "fieldname": "signature_dg",
-            "fieldtype": "Signature",
-            "label": "Approbation DG (≥ 2 000 000 XOF)"
-        }
-    ]
+ "allow_comments": 1,
+ "allow_delete": 0,
+ "allow_edit": 1,
+ "allow_incomplete": 0,
+ "allow_multiple": 1,
+ "allow_print": 1,
+ "anonymous": 0,
+ "apply_document_permissions": 1,
+ "creation": "2026-03-12 00:00:00.000000",
+ "doc_type": "Demande Achat KYA",
+ "docstatus": 0,
+ "doctype": "Web Form",
+ "idx": 0,
+ "introduction_text": "",
+ "is_standard": 1,
+ "login_required": 1,
+ "modified": "2026-03-24 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "KYA HR",
+ "name": "demande-achat",
+ "owner": "Administrator",
+ "published": 1,
+ "route": "demande-achat",
+ "show_sidebar": 1,
+ "success_message": "✅ Votre demande d’achat a été soumise avec succès. Elle sera transmise à votre Chef de Département pour approbation.",
+ "title": "Demande d'Achat",
+ "client_script": "frappe.web_form.after_load = function() {\n  // INJECTION: Dynamic Reference Number\n  if (doc && doc.name) {\n    var refEl = document.createElement('div');\n    refEl.innerHTML = '<div style=\"margin-bottom:12px;padding:8px 16px;background:#f1f8e9;color:#33691e;border-left:4px solid #8bc34a;border-radius:6px;display:inline-block;font-weight:700;margin-right:10px;font-size:14px;\">Réf. Dossier : ' + doc.name + '</div>';\n    var w = document.querySelector('.web-form-wrapper') || document.querySelector('.container');\n    if (w) w.prepend(refEl);\n  }\n\n  var doc = frappe.web_form.doc;\n  var roles = (frappe.boot && frappe.boot.user && frappe.boot.user.roles) ? frappe.boot.user.roles : [];\n  var state = (doc && (doc.workflow_state || doc.statut)) || 'Brouillon';\n  var rules = {\n    'signature_demandeur': { states: ['Brouillon'], roles: [] },\n    'signature_chef': { states: ['En attente Chef'], roles: ['Chef Service','System Manager'] },\n    'signature_daaf': { states: [], roles: ['DAAF','System Manager'] },\n    'signature_dga': { states: ['En attente DAAF'], roles: ['DAAF','System Manager'] },\n    'signature_dg': { states: ['En attente DG'], roles: ['Directeur Général','System Manager'] }\n  };\n  var allSig = ['signature_demandeur','signature_chef','signature_dga','signature_dg'];\n  allSig.forEach(function(f){ frappe.web_form.set_df_property(f, 'read_only', 1); });\n  Object.keys(rules).forEach(function(field) {\n    var rule = rules[field];\n    var stateOk = rule.states.indexOf(state) !== -1;\n    var roleOk = rule.roles.length === 0 || rule.roles.some(function(r){ return roles.indexOf(r) !== -1; });\n    if (stateOk && roleOk) frappe.web_form.set_df_property(field, 'read_only', 0);\n  });\n  var montant = (doc && doc.montant_total) ? parseFloat(doc.montant_total) : 0;\n  var palierMsg = montant >= 2000000 ? 'Palier 3+ : Chef + DAAF + DG requis' : montant >= 100000 ? 'Palier 2 : Chef + DAAF + DG requis' : 'Palier 1 : Chef de D\\u00e9partement uniquement';\n  var palierColor = montant >= 2000000 ? '#c62828' : montant >= 100000 ? '#e65100' : '#1565c0';\n  if (doc && doc.statut) {\n    var cm = {'Approuv\\u00e9':'#2e7d32','Rejet\\u00e9':'#c62828','Brouillon':'#757575'};\n    var c = cm[doc.statut] || '#e65100';\n    var el = document.createElement('div');\n    el.innerHTML = '<div style=\"margin-bottom:8px;padding:8px 16px;background:'+c+';color:#fff;border-radius:6px;display:inline-block;font-weight:700;\">\\u00c9tat\\u00a0: '+doc.statut+'</div>  <div style=\"margin-bottom:12px;padding:6px 14px;background:'+palierColor+';color:#fff;border-radius:6px;display:inline-block;font-size:0.85em;\">'+palierMsg+'</div>';\n    var w = document.querySelector('.web-form-wrapper') || document.querySelector('.container');\n    if (w) w.prepend(el);\n  }\n};\nfrappe.web_form.on('load', function(){\n  var doc = frappe.web_form.doc;\n  if (doc && !doc.employee && frappe.session && frappe.session.user) {\n    frappe.call({ method:'frappe.client.get_value', args:{ doctype:'Employee', filters:{ user_id: frappe.session.user, status:'Active' }, fieldname:['name','employee_name'] }, callback:function(r){ if(r.message){ frappe.web_form.set_value('employee', r.message.name); } } });\n  }\n});\n",
+ "web_form_fields": [
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employé Demandeur",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Nom complet",
+   "read_only": 1
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Département",
+   "options": "Department",
+   "read_only": 1
+  },
+  {
+   "fieldname": "au_nom_de",
+   "fieldtype": "Link",
+   "options": "Employee",
+   "label": "Sur délégation de (optionnel)",
+   "description": "Laissez vide si vous soumettez pour vous-même"
+  },
+  {
+   "fieldname": "date_demande",
+   "fieldtype": "Date",
+   "label": "Date de la demande",
+   "reqd": 1,
+   "default": "Today"
+  },
+  {
+   "fieldname": "objet",
+   "fieldtype": "Small Text",
+   "label": "Objet / Motif de la demande",
+   "reqd": 1,
+   "description": "Décrivez ce que vous souhaitez acheter et pourquoi"
+  },
+  {
+   "fieldname": "urgence",
+   "fieldtype": "Select",
+   "label": "Niveau d'urgence",
+   "options": "Normal\nUrgent\nTrès Urgent",
+   "default": "Normal"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Articles demandés",
+   "options": "Demande Achat Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "montant_total",
+   "fieldtype": "Currency",
+   "label": "Montant Total (XOF)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "statut",
+   "fieldtype": "Data",
+   "label": "État de la Demande",
+   "read_only": 1
+  },
+  {
+   "fieldname": "signature_demandeur",
+   "fieldtype": "Signature",
+   "label": "Signature Demandeur"
+  },
+  {
+   "fieldname": "signature_chef",
+   "fieldtype": "Signature",
+   "label": "Visa Chef de Département"
+  },
+  {
+   "fieldname": "signature_dga",
+   "fieldtype": "Signature",
+   "label": "Visa DGA (≥ 100 000 XOF)"
+  },
+  {
+   "fieldname": "signature_dg",
+   "fieldtype": "Signature",
+   "label": "Approbation DG (≥ 2 000 000 XOF)"
+  }
+ ]
 }

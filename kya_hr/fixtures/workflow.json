@@ -272,7 +272,18 @@
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "Stock Manager",
+    "allowed": "Responsable Stock",
+    "condition": null,
+    "next_state": "Approuvé",
+    "send_email_to_creator": 0,
+    "state": "En attente",
+    "transition_tasks": null,
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Approuver",
+    "allow_self_approval": 0,
+    "allowed": "Chargé des Stocks",
     "condition": null,
     "next_state": "Approuvé",
     "send_email_to_creator": 0,
@@ -283,7 +294,18 @@
    {
     "action": "Rejeter",
     "allow_self_approval": 0,
-    "allowed": "Stock Manager",
+    "allowed": "Responsable Stock",
+    "condition": null,
+    "next_state": "Rejeté",
+    "send_email_to_creator": 0,
+    "state": "En attente",
+    "transition_tasks": null,
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Rejeter",
+    "allow_self_approval": 0,
+    "allowed": "Chargé des Stocks",
     "condition": null,
     "next_state": "Rejeté",
     "send_email_to_creator": 0,
@@ -368,7 +390,7 @@
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "HR User",
+    "allowed": "Maître de Stage",
     "condition": null,
     "next_state": "En attente Resp. Stagiaires",
     "state": "En attente Chef"
@@ -376,7 +398,7 @@
    {
     "action": "Rejeter",
     "allow_self_approval": 0,
-    "allowed": "HR User",
+    "allowed": "Maître de Stage",
     "condition": null,
     "next_state": "Rejeté",
     "state": "En attente Chef"
@@ -384,7 +406,7 @@
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "HR User",
+    "allowed": "Responsable des Stagiaires",
     "condition": null,
     "next_state": "En attente DG",
     "state": "En attente Resp. Stagiaires"
@@ -392,7 +414,7 @@
    {
     "action": "Rejeter",
     "allow_self_approval": 0,
-    "allowed": "HR User",
+    "allowed": "Responsable des Stagiaires",
     "condition": null,
     "next_state": "Rejeté",
     "state": "En attente Resp. Stagiaires"
@@ -400,7 +422,7 @@
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "HR Manager",
+    "allowed": "Directeur Général",
     "condition": null,
     "next_state": "Approuvé",
     "state": "En attente DG"
@@ -408,7 +430,7 @@
    {
     "action": "Rejeter",
     "allow_self_approval": 0,
-    "allowed": "HR Manager",
+    "allowed": "Directeur Général",
     "condition": null,
     "next_state": "Rejeté",
     "state": "En attente DG"
@@ -424,145 +446,185 @@
   "document_type": "PV Sortie Materiel",
   "enable_action_confirmation": 1,
   "is_active": 1,
-  "modified": "2026-06-01 10:00:00",
+  "modified": "2026-04-23 15:00:00",
   "name": "Flux PV Sortie Matériel",
   "override_status": 0,
   "send_email_alert": 1,
+  "workflow_name": "Flux PV Sortie Matériel",
+  "workflow_state_field": "workflow_state",
+  "workflow_data": null,
   "states": [
    {
-    "allow_edit": "Employee",
-    "doc_status": "0",
-    "is_optional_state": 0,
     "state": "Brouillon",
-    "update_field": "statut",
-    "update_value": "Brouillon"
-   },
-   {
+    "doc_status": "0",
     "allow_edit": "Employee",
-    "doc_status": "0",
+    "update_field": "statut",
+    "update_value": "Brouillon",
     "is_optional_state": 0,
+    "send_email": 0
+   },
+   {
     "state": "En attente Chef",
+    "doc_status": "0",
+    "allow_edit": "Chef Service",
     "update_field": "statut",
-    "update_value": "En attente Chef"
+    "update_value": "En attente Chef",
+    "is_optional_state": 0,
+    "send_email": 1
    },
    {
-    "allow_edit": "Auditeur Interne",
-    "doc_status": "0",
-    "is_optional_state": 0,
     "state": "En attente Audit",
+    "doc_status": "0",
+    "allow_edit": "Auditeur Interne",
     "update_field": "statut",
-    "update_value": "En attente Audit"
+    "update_value": "En attente Audit",
+    "is_optional_state": 0,
+    "send_email": 1
    },
    {
-    "allow_edit": "Stock Manager",
-    "doc_status": "0",
-    "is_optional_state": 0,
     "state": "En attente Direction",
-    "update_field": "statut",
-    "update_value": "En attente Direction"
-   },
-   {
-    "allow_edit": "Stock User",
     "doc_status": "0",
+    "allow_edit": "Directeur Général",
+    "update_field": "statut",
+    "update_value": "En attente Direction",
     "is_optional_state": 0,
+    "send_email": 1
+   },
+   {
     "state": "En attente Magasin",
+    "doc_status": "0",
+    "allow_edit": "Chargé des Stocks",
     "update_field": "statut",
-    "update_value": "En attente Magasin"
+    "update_value": "En attente Magasin",
+    "is_optional_state": 0,
+    "send_email": 1
    },
    {
-    "allow_edit": "Stock User",
-    "doc_status": "1",
-    "is_optional_state": 0,
     "state": "Approuvé",
+    "doc_status": "1",
+    "allow_edit": "Chargé des Stocks",
     "update_field": "statut",
-    "update_value": "Approuvé"
+    "update_value": "Approuvé",
+    "is_optional_state": 0,
+    "send_email": 1
    },
    {
-    "allow_edit": "Stock User",
-    "doc_status": "1",
-    "is_optional_state": 0,
     "state": "Rejeté",
+    "doc_status": "1",
+    "allow_edit": "Chef Service",
     "update_field": "statut",
-    "update_value": "Rejeté"
+    "update_value": "Rejeté",
+    "is_optional_state": 0,
+    "send_email": 1
    }
   ],
   "transitions": [
    {
+    "state": "Brouillon",
     "action": "Envoyer pour Approbation",
-    "allow_self_approval": 0,
-    "allowed": "Employee",
-    "condition": null,
     "next_state": "En attente Chef",
-    "state": "Brouillon"
+    "allowed": "Employee",
+    "allow_self_approval": 1,
+    "condition": null
    },
    {
+    "state": "En attente Chef",
     "action": "Approuver",
-    "allow_self_approval": 0,
-    "allowed": "HR User",
-    "condition": null,
     "next_state": "En attente Audit",
-    "state": "En attente Chef"
+    "allowed": "Chef Service",
+    "allow_self_approval": 0,
+    "condition": null
    },
    {
+    "state": "En attente Chef",
     "action": "Rejeter",
-    "allow_self_approval": 0,
-    "allowed": "HR User",
-    "condition": null,
     "next_state": "Rejeté",
-    "state": "En attente Chef"
+    "allowed": "Chef Service",
+    "allow_self_approval": 0,
+    "condition": null
    },
    {
+    "state": "En attente Audit",
     "action": "Approuver",
-    "allow_self_approval": 0,
-    "allowed": "Auditeur Interne",
-    "condition": null,
     "next_state": "En attente Direction",
-    "state": "En attente Audit"
-   },
-   {
-    "action": "Rejeter",
-    "allow_self_approval": 0,
     "allowed": "Auditeur Interne",
-    "condition": null,
-    "next_state": "Rejeté",
-    "state": "En attente Audit"
+    "allow_self_approval": 0,
+    "condition": null
    },
    {
-    "action": "Approuver",
+    "state": "En attente Audit",
+    "action": "Rejeter",
+    "next_state": "Rejeté",
+    "allowed": "Auditeur Interne",
     "allow_self_approval": 0,
-    "allowed": "Stock Manager",
-    "condition": null,
+    "condition": null
+   },
+   {
+    "state": "En attente Direction",
+    "action": "Approuver",
     "next_state": "En attente Magasin",
-    "state": "En attente Direction"
-   },
-   {
-    "action": "Rejeter",
+    "allowed": "DGA",
     "allow_self_approval": 0,
-    "allowed": "Stock Manager",
-    "condition": null,
-    "next_state": "Rejeté",
-    "state": "En attente Direction"
+    "condition": null
    },
    {
+    "state": "En attente Direction",
     "action": "Approuver",
+    "next_state": "En attente Magasin",
+    "allowed": "Directeur Général",
     "allow_self_approval": 0,
-    "allowed": "Stock User",
-    "condition": null,
-    "next_state": "Approuvé",
-    "state": "En attente Magasin"
+    "condition": null
    },
    {
+    "state": "En attente Direction",
     "action": "Rejeter",
-    "allow_self_approval": 0,
-    "allowed": "Stock User",
-    "condition": null,
     "next_state": "Rejeté",
-    "state": "En attente Magasin"
+    "allowed": "DGA",
+    "allow_self_approval": 0,
+    "condition": null
+   },
+   {
+    "state": "En attente Direction",
+    "action": "Rejeter",
+    "next_state": "Rejeté",
+    "allowed": "Directeur Général",
+    "allow_self_approval": 0,
+    "condition": null
+   },
+   {
+    "state": "En attente Magasin",
+    "action": "Livrer",
+    "next_state": "Approuvé",
+    "allowed": "Chargé des Stocks",
+    "allow_self_approval": 0,
+    "condition": null
+   },
+   {
+    "state": "En attente Magasin",
+    "action": "Livrer",
+    "next_state": "Approuvé",
+    "allowed": "Responsable Stock",
+    "allow_self_approval": 0,
+    "condition": null
+   },
+   {
+    "state": "En attente Magasin",
+    "action": "Rejeter",
+    "next_state": "Rejeté",
+    "allowed": "Chargé des Stocks",
+    "allow_self_approval": 0,
+    "condition": null
+   },
+   {
+    "state": "En attente Magasin",
+    "action": "Rejeter",
+    "next_state": "Rejeté",
+    "allowed": "Responsable Stock",
+    "allow_self_approval": 0,
+    "condition": null
    }
-  ],
-  "workflow_data": null,
-  "workflow_name": "Flux PV Sortie Matériel",
-  "workflow_state_field": "workflow_state" },
+  ]
+ },
  {
   "docstatus": 0,
   "doctype": "Workflow",
@@ -570,7 +632,7 @@
   "enable_action_confirmation": 1,
   "is_active": 1,
   "modified": "2026-06-01 12:00:00",
-  "name": "Flux Permission Sortie Employ\u00e9",
+  "name": "Flux Permission Sortie Employé",
   "override_status": 0,
   "send_email_alert": 1,
   "states": [
@@ -610,17 +672,17 @@
     "allow_edit": "HR Manager",
     "doc_status": "1",
     "is_optional_state": 0,
-    "state": "Approuv\u00e9",
+    "state": "Approuvé",
     "update_field": "statut",
-    "update_value": "Approuv\u00e9"
+    "update_value": "Approuvé"
    },
    {
     "allow_edit": "HR Manager",
     "doc_status": "1",
     "is_optional_state": 0,
-    "state": "Rejet\u00e9",
+    "state": "Rejeté",
     "update_field": "statut",
-    "update_value": "Rejet\u00e9"
+    "update_value": "Rejeté"
    }
   ],
   "transitions": [
@@ -635,7 +697,7 @@
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "HR User",
+    "allowed": "Chef Service",
     "condition": null,
     "next_state": "En attente RH",
     "state": "En attente Chef"
@@ -643,15 +705,15 @@
    {
     "action": "Rejeter",
     "allow_self_approval": 0,
-    "allowed": "HR User",
+    "allowed": "Chef Service",
     "condition": null,
-    "next_state": "Rejet\u00e9",
+    "next_state": "Rejeté",
     "state": "En attente Chef"
    },
    {
     "action": "Valider (Absence Chef)",
     "allow_self_approval": 0,
-    "allowed": "HR Manager",
+    "allowed": "Chef Service",
     "condition": null,
     "next_state": "En attente RH",
     "state": "En attente Chef"
@@ -659,7 +721,7 @@
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "HR Manager",
+    "allowed": "Responsable RH",
     "condition": null,
     "next_state": "En attente Direction",
     "state": "En attente RH"
@@ -667,38 +729,62 @@
    {
     "action": "Rejeter",
     "allow_self_approval": 0,
-    "allowed": "HR Manager",
+    "allowed": "Responsable RH",
     "condition": null,
-    "next_state": "Rejet\u00e9",
+    "next_state": "Rejeté",
     "state": "En attente RH"
    },
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "HR Manager",
+    "allowed": "DGA",
     "condition": null,
-    "next_state": "Approuv\u00e9",
+    "next_state": "Approuvé",
+    "state": "En attente Direction"
+   },
+   {
+    "action": "Approuver",
+    "allow_self_approval": 0,
+    "allowed": "Directeur Général",
+    "condition": null,
+    "next_state": "Approuvé",
     "state": "En attente Direction"
    },
    {
     "action": "Rejeter",
     "allow_self_approval": 0,
-    "allowed": "HR Manager",
+    "allowed": "DGA",
     "condition": null,
-    "next_state": "Rejet\u00e9",
+    "next_state": "Rejeté",
+    "state": "En attente Direction"
+   },
+   {
+    "action": "Rejeter",
+    "allow_self_approval": 0,
+    "allowed": "Directeur Général",
+    "condition": null,
+    "next_state": "Rejeté",
     "state": "En attente Direction"
    },
    {
     "action": "Valider (Absence DGA)",
     "allow_self_approval": 0,
-    "allowed": "HR Manager",
+    "allowed": "DGA",
     "condition": null,
-    "next_state": "Approuv\u00e9",
+    "next_state": "Approuvé",
+    "state": "En attente Direction"
+   },
+   {
+    "action": "Valider (Absence DGA)",
+    "allow_self_approval": 0,
+    "allowed": "Directeur Général",
+    "condition": null,
+    "next_state": "Approuvé",
     "state": "En attente Direction"
    }
   ],
   "workflow_data": null,
-  "workflow_name": "Flux Permission Sortie Employ\u00e9",
+  "workflow_name": "Flux Permission Sortie Employé",
   "workflow_state_field": "workflow_state"
  },
  {
@@ -708,7 +794,7 @@
   "enable_action_confirmation": 1,
   "is_active": 1,
   "modified": "2026-06-01 12:00:00",
-  "name": "Flux Planning Cong\u00e9",
+  "name": "Flux Planning Congé",
   "override_status": 0,
   "send_email_alert": 1,
   "states": [
@@ -740,17 +826,17 @@
     "allow_edit": "HR Manager",
     "doc_status": "1",
     "is_optional_state": 0,
-    "state": "Approuv\u00e9",
+    "state": "Approuvé",
     "update_field": "statut",
-    "update_value": "Approuv\u00e9"
+    "update_value": "Approuvé"
    },
    {
     "allow_edit": "HR Manager",
     "doc_status": "1",
     "is_optional_state": 0,
-    "state": "Rejet\u00e9",
+    "state": "Rejeté",
     "update_field": "statut",
-    "update_value": "Rejet\u00e9"
+    "update_value": "Rejeté"
    }
   ],
   "transitions": [
@@ -765,7 +851,7 @@
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "HR User",
+    "allowed": "Responsable RH",
     "condition": null,
     "next_state": "En attente DG",
     "state": "En attente RH"
@@ -773,30 +859,30 @@
    {
     "action": "Rejeter",
     "allow_self_approval": 0,
-    "allowed": "HR User",
+    "allowed": "Responsable RH",
     "condition": null,
-    "next_state": "Rejet\u00e9",
+    "next_state": "Rejeté",
     "state": "En attente RH"
    },
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "HR Manager",
+    "allowed": "Directeur Général",
     "condition": null,
-    "next_state": "Approuv\u00e9",
+    "next_state": "Approuvé",
     "state": "En attente DG"
    },
    {
     "action": "Rejeter",
     "allow_self_approval": 0,
-    "allowed": "HR Manager",
+    "allowed": "Directeur Général",
     "condition": null,
-    "next_state": "Rejet\u00e9",
+    "next_state": "Rejeté",
     "state": "En attente DG"
    }
   ],
   "workflow_data": null,
-  "workflow_name": "Flux Planning Cong\u00e9",
+  "workflow_name": "Flux Planning Congé",
   "workflow_state_field": "workflow_state"
  },
  {
@@ -846,17 +932,17 @@
     "allow_edit": "System Manager",
     "doc_status": "1",
     "is_optional_state": 0,
-    "state": "Approuv\u00e9",
+    "state": "Approuvé",
     "update_field": "statut",
-    "update_value": "Approuv\u00e9"
+    "update_value": "Approuvé"
    },
    {
     "allow_edit": "System Manager",
     "doc_status": "1",
     "is_optional_state": 0,
-    "state": "Rejet\u00e9",
+    "state": "Rejeté",
     "update_field": "statut",
-    "update_value": "Rejet\u00e9"
+    "update_value": "Rejeté"
    }
   ],
   "transitions": [
@@ -881,21 +967,21 @@
     "allow_self_approval": 0,
     "allowed": "Chef Service",
     "condition": null,
-    "next_state": "Rejet\u00e9",
+    "next_state": "Rejeté",
     "state": "En attente Chef"
    },
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "Purchase Manager",
+    "allowed": "DAAF",
     "condition": "doc.montant_total < 100000",
-    "next_state": "Approuv\u00e9",
+    "next_state": "Approuvé",
     "state": "En attente DAAF"
    },
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "Purchase Manager",
+    "allowed": "DAAF",
     "condition": "doc.montant_total >= 100000",
     "next_state": "En attente DG",
     "state": "En attente DAAF"
@@ -903,30 +989,218 @@
    {
     "action": "Rejeter",
     "allow_self_approval": 0,
-    "allowed": "Purchase Manager",
+    "allowed": "DAAF",
     "condition": null,
-    "next_state": "Rejet\u00e9",
+    "next_state": "Rejeté",
     "state": "En attente DAAF"
    },
    {
     "action": "Approuver",
     "allow_self_approval": 0,
-    "allowed": "System Manager",
+    "allowed": "Directeur Général",
     "condition": null,
-    "next_state": "Approuv\u00e9",
+    "next_state": "Approuvé",
     "state": "En attente DG"
    },
    {
     "action": "Rejeter",
     "allow_self_approval": 0,
-    "allowed": "System Manager",
+    "allowed": "Directeur Général",
     "condition": null,
-    "next_state": "Rejet\u00e9",
+    "next_state": "Rejeté",
     "state": "En attente DG"
    }
   ],
   "workflow_data": null,
   "workflow_name": "Flux Demande Achat KYA",
   "workflow_state_field": "workflow_state"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow",
+  "document_type": "PV Entree Materiel",
+  "enable_action_confirmation": 1,
+  "is_active": 1,
+  "modified": "2026-04-23 15:00:00",
+  "name": "Flux PV Entrée Matériel",
+  "override_status": 0,
+  "send_email_alert": 1,
+  "workflow_name": "Flux PV Entrée Matériel",
+  "workflow_state_field": "workflow_state",
+  "workflow_data": null,
+  "states": [
+   {
+    "state": "Brouillon",
+    "doc_status": "0",
+    "allow_edit": "Employee",
+    "update_field": "statut",
+    "update_value": "Brouillon",
+    "is_optional_state": 0,
+    "send_email": 0
+   },
+   {
+    "state": "En attente Magasin",
+    "doc_status": "0",
+    "allow_edit": "Chargé des Stocks",
+    "update_field": "statut",
+    "update_value": "En attente Magasin",
+    "is_optional_state": 0,
+    "send_email": 1
+   },
+   {
+    "state": "Approuvé",
+    "doc_status": "1",
+    "allow_edit": "Chargé des Stocks",
+    "update_field": "statut",
+    "update_value": "Approuvé",
+    "is_optional_state": 0,
+    "send_email": 1
+   },
+   {
+    "state": "Rejeté",
+    "doc_status": "1",
+    "allow_edit": "Chargé des Stocks",
+    "update_field": "statut",
+    "update_value": "Rejeté",
+    "is_optional_state": 0,
+    "send_email": 1
+   }
+  ],
+  "transitions": [
+   {
+    "state": "Brouillon",
+    "action": "Envoyer au Magasin",
+    "next_state": "En attente Magasin",
+    "allowed": "Employee",
+    "allow_self_approval": 1,
+    "condition": null
+   },
+   {
+    "state": "En attente Magasin",
+    "action": "Réceptionner",
+    "next_state": "Approuvé",
+    "allowed": "Chargé des Stocks",
+    "allow_self_approval": 0,
+    "condition": null
+   },
+   {
+    "state": "En attente Magasin",
+    "action": "Réceptionner",
+    "next_state": "Approuvé",
+    "allowed": "Responsable Stock",
+    "allow_self_approval": 0,
+    "condition": null
+   },
+   {
+    "state": "En attente Magasin",
+    "action": "Rejeter",
+    "next_state": "Rejeté",
+    "allowed": "Chargé des Stocks",
+    "allow_self_approval": 0,
+    "condition": null
+   },
+   {
+    "state": "En attente Magasin",
+    "action": "Rejeter",
+    "next_state": "Rejeté",
+    "allowed": "Responsable Stock",
+    "allow_self_approval": 0,
+    "condition": null
+   }
+  ]
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow",
+  "document_type": "Inventaire KYA",
+  "enable_action_confirmation": 1,
+  "is_active": 1,
+  "modified": "2026-04-23 15:00:00",
+  "name": "Flux Inventaire KYA",
+  "override_status": 0,
+  "send_email_alert": 1,
+  "workflow_name": "Flux Inventaire KYA",
+  "workflow_state_field": "workflow_state",
+  "workflow_data": null,
+  "states": [
+   {
+    "state": "Brouillon",
+    "doc_status": "0",
+    "allow_edit": "Employee",
+    "update_field": "statut",
+    "update_value": "Brouillon",
+    "is_optional_state": 0,
+    "send_email": 0
+   },
+   {
+    "state": "En attente Magasin",
+    "doc_status": "0",
+    "allow_edit": "Chargé des Stocks",
+    "update_field": "statut",
+    "update_value": "En attente Magasin",
+    "is_optional_state": 0,
+    "send_email": 1
+   },
+   {
+    "state": "Approuvé",
+    "doc_status": "1",
+    "allow_edit": "Chargé des Stocks",
+    "update_field": "statut",
+    "update_value": "Approuvé",
+    "is_optional_state": 0,
+    "send_email": 1
+   },
+   {
+    "state": "Rejeté",
+    "doc_status": "1",
+    "allow_edit": "Chargé des Stocks",
+    "update_field": "statut",
+    "update_value": "Rejeté",
+    "is_optional_state": 0,
+    "send_email": 1
+   }
+  ],
+  "transitions": [
+   {
+    "state": "Brouillon",
+    "action": "Soumettre au Magasin",
+    "next_state": "En attente Magasin",
+    "allowed": "Employee",
+    "allow_self_approval": 1,
+    "condition": null
+   },
+   {
+    "state": "En attente Magasin",
+    "action": "Valider",
+    "next_state": "Approuvé",
+    "allowed": "Chargé des Stocks",
+    "allow_self_approval": 0,
+    "condition": null
+   },
+   {
+    "state": "En attente Magasin",
+    "action": "Valider",
+    "next_state": "Approuvé",
+    "allowed": "Responsable Stock",
+    "allow_self_approval": 0,
+    "condition": null
+   },
+   {
+    "state": "En attente Magasin",
+    "action": "Rejeter",
+    "next_state": "Rejeté",
+    "allowed": "Chargé des Stocks",
+    "allow_self_approval": 0,
+    "condition": null
+   },
+   {
+    "state": "En attente Magasin",
+    "action": "Rejeter",
+    "next_state": "Rejeté",
+    "allowed": "Responsable Stock",
+    "allow_self_approval": 0,
+    "condition": null
+   }
+  ]
  }
 ]

@@ -1,271 +1,312 @@
 {
-    "name": "PV Sortie Materiel",
-    "module": "KYA HR",
-    "doctype": "DocType",
-    "is_submittable": 1,
-    "custom": 1,
-    "autoname": "format:PV-SORT-{YYYY}-{#####}",
-    "title_field": "objet",
-    "search_fields": "objet, demandeur_nom, date_sortie, statut",
-    "track_changes": 1,
-    "fields": [
-        {
-            "fieldname": "section_general",
-            "label": "Informations G\u00e9n\u00e9rales",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "objet",
-            "label": "Objet / Motif de la Sortie",
-            "fieldtype": "Small Text",
-            "reqd": 1,
-            "in_list_view": 1
-        },
-        {
-            "fieldname": "date_sortie",
-            "label": "Date de Sortie",
-            "fieldtype": "Date",
-            "reqd": 1,
-            "default": "Today",
-            "in_list_view": 1,
-            "in_standard_filter": 1
-        },
-        {
-            "fieldname": "col_ref",
-            "fieldtype": "Column Break"
-        },
-        {
-            "fieldname": "reference",
-            "label": "R\u00e9f\u00e9rence",
-            "fieldtype": "Data",
-            "default": "AEA-ENG-30-V01",
-            "read_only": 1
-        },
-        {
-            "fieldname": "section_delegation",
-            "label": "D\u00e9l\u00e9gation (optionnel)",
-            "fieldtype": "Section Break",
-            "collapsible": 1,
-            "description": "Remplir uniquement si vous soumettez pour le compte d\u2019un autre employ\u00e9"
-        },
-        {
-            "fieldname": "au_nom_de",
-            "label": "Sur d\u00e9l\u00e9gation de",
-            "fieldtype": "Link",
-            "options": "Employee",
-            "description": "Employ\u00e9 pour le compte duquel vous soumettez"
-        },
-        {
-            "fieldname": "au_nom_de_nom",
-            "label": "Nom (d\u00e9l\u00e9gation)",
-            "fieldtype": "Data",
-            "fetch_from": "au_nom_de.employee_name",
-            "read_only": 1
-        },
-        {
-            "fieldname": "col_company",
-            "fieldtype": "Column Break"
-        },
-        {
-            "fieldname": "company",
-            "label": "Soci\u00e9t\u00e9",
-            "fieldtype": "Link",
-            "options": "Company",
-            "hidden": 1
-        },
-        {
-            "fieldname": "chef_equipe_email",
-            "label": "Email Chef d'\u00c9quipe",
-            "fieldtype": "Data",
-            "hidden": 1,
-            "read_only": 1
-        },
-        {
-            "fieldname": "section_items",
-            "label": "Mat\u00e9riels \u00e0 Sortir",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "items",
-            "label": "Liste du Mat\u00e9riel",
-            "fieldtype": "Table",
-            "options": "PV Sortie Materiel Item",
-            "reqd": 1
-        },
-        {
-            "fieldname": "section_signatures",
-            "label": "Approbations & Signatures",
-            "fieldtype": "Section Break",
-            "description": "Chaque approbateur signe \u00e0 son niveau du flux"
-        },
-        {
-            "fieldname": "col_demandeur",
-            "fieldtype": "Column Break",
-            "label": "Demandeur / Chef d\u2019\u00c9quipe"
-        },
-        {
-            "fieldname": "demandeur_nom",
-            "label": "Nom Demandeur",
-            "fieldtype": "Data"
-        },
-        {
-            "fieldname": "demandeur_date",
-            "label": "Date Signature Demandeur",
-            "fieldtype": "Date"
-        },
-        {
-            "fieldname": "signature_demandeur",
-            "label": "Signature Demandeur",
-            "fieldtype": "Signature"
-        },
-        {
-            "fieldname": "col_magasin",
-            "fieldtype": "Column Break",
-            "label": "Responsable Magasin"
-        },
-        {
-            "fieldname": "magasin_nom",
-            "label": "Nom Responsable Magasin",
-            "fieldtype": "Data",
-            "read_only": 1
-        },
-        {
-            "fieldname": "magasin_date",
-            "label": "Date Signature Magasin",
-            "fieldtype": "Date",
-            "read_only": 1
-        },
-        {
-            "fieldname": "signature_magasin",
-            "label": "Signature Magasin",
-            "fieldtype": "Signature",
-            "read_only": 1
-        },
-        {
-            "fieldname": "section_signatures_2",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "col_audit",
-            "fieldtype": "Column Break",
-            "label": "Audit Interne"
-        },
-        {
-            "fieldname": "audit_nom",
-            "label": "Nom Audit Interne",
-            "fieldtype": "Data",
-            "read_only": 1
-        },
-        {
-            "fieldname": "audit_date",
-            "label": "Date Signature Audit",
-            "fieldtype": "Date",
-            "read_only": 1
-        },
-        {
-            "fieldname": "signature_audit",
-            "label": "Signature Audit",
-            "fieldtype": "Signature",
-            "read_only": 1
-        },
-        {
-            "fieldname": "col_dga",
-            "fieldtype": "Column Break",
-            "label": "Repr\u00e9sentant DG / DGA"
-        },
-        {
-            "fieldname": "dga_nom",
-            "label": "Nom DG / DGA",
-            "fieldtype": "Data",
-            "read_only": 1
-        },
-        {
-            "fieldname": "dga_date",
-            "label": "Date Signature DGA",
-            "fieldtype": "Date",
-            "read_only": 1
-        },
-        {
-            "fieldname": "signature_dga",
-            "label": "Signature DG / DGA",
-            "fieldtype": "Signature",
-            "read_only": 1
-        },
-        {
-            "fieldname": "section_statut",
-            "label": "Statut",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "statut",
-            "label": "Statut",
-            "fieldtype": "Select",
-            "options": "Brouillon\nEn attente Chef\nEn attente Magasin\nEn attente Audit\nEn attente DGA\nApprouv\u00e9\nRejet\u00e9",
-            "default": "Brouillon",
-            "in_list_view": 1,
-            "in_standard_filter": 1,
-            "read_only": 1
-        },
-        {
-            "fieldname": "workflow_state",
-            "label": "\u00c9tat du Flux",
-            "fieldtype": "Data",
-            "hidden": 1,
-            "read_only": 1
-        },
-        {
-            "fieldname": "employee_email",
-            "label": "Email Employ\u00e9",
-            "fieldtype": "Data",
-            "options": "Email",
-            "hidden": 1,
-            "read_only": 1,
-            "no_copy": 1,
-            "print_hide": 1
-        },
-        {
-            "fieldname": "amended_from",
-            "label": "Modifi\u00e9 depuis",
-            "fieldtype": "Link",
-            "options": "PV Sortie Materiel",
-            "no_copy": 1,
-            "print_hide": 1,
-            "read_only": 1
-        }
-    ],
-    "permissions": [
-        {
-            "role": "System Manager",
-            "read": 1,
-            "write": 1,
-            "create": 1,
-            "delete": 1,
-            "submit": 1,
-            "cancel": 1,
-            "amend": 1
-        },
-        {
-            "role": "Stock Manager",
-            "read": 1,
-            "write": 1,
-            "create": 1,
-            "submit": 1,
-            "cancel": 1,
-            "amend": 1
-        },
-        {
-            "role": "Stock User",
-            "read": 1,
-            "write": 1,
-            "create": 1,
-            "submit": 1
-        },
-        {
-            "role": "Employee",
-            "read": 1,
-            "write": 1,
-            "create": 1,
-            "if_owner": 1
-        }
-    ]
+ "name": "PV Sortie Materiel",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "is_submittable": 1,
+ "custom": 1,
+ "autoname": "format:PV-SORT-{YYYY}-{#####}",
+ "title_field": "objet",
+ "search_fields": "objet, demandeur_nom, date_sortie, statut",
+ "track_changes": 1,
+ "fields": [
+  {
+   "fieldname": "section_general",
+   "label": "Informations Générales",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "objet",
+   "label": "Objet / Motif de la Sortie",
+   "fieldtype": "Small Text",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "date_sortie",
+   "label": "Date de Sortie",
+   "fieldtype": "Date",
+   "reqd": 1,
+   "default": "Today",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "col_ref",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reference",
+   "label": "Référence",
+   "fieldtype": "Data",
+   "default": "KEG-LOG-32-V01",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_delegation",
+   "label": "Délégation (optionnel)",
+   "fieldtype": "Section Break",
+   "collapsible": 1,
+   "description": "Remplir uniquement si vous soumettez pour le compte d’un autre employé"
+  },
+  {
+   "fieldname": "au_nom_de",
+   "label": "Sur délégation de",
+   "fieldtype": "Link",
+   "options": "Employee",
+   "description": "Employé pour le compte duquel vous soumettez"
+  },
+  {
+   "fieldname": "au_nom_de_nom",
+   "label": "Nom (délégation)",
+   "fieldtype": "Data",
+   "fetch_from": "au_nom_de.employee_name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_company",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "label": "Société",
+   "fieldtype": "Link",
+   "options": "Company",
+   "hidden": 1
+  },
+  {
+   "fieldname": "project",
+   "label": "Projet / Chantier",
+   "fieldtype": "Link",
+   "options": "Project",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "description": "Projet/chantier pour lequel la sortie est effectuée (sert aux rapports par projet)"
+  },
+  {
+   "fieldname": "customer",
+   "label": "Client",
+   "fieldtype": "Link",
+   "options": "Customer",
+   "fetch_from": "project.customer",
+   "in_standard_filter": 1,
+   "description": "Client associé (rempli automatiquement si projet lié)"
+  },
+  {
+   "fieldname": "stock_entry",
+   "label": "Stock Entry généré",
+   "fieldtype": "Link",
+   "options": "Stock Entry",
+   "read_only": 1,
+   "print_hide": 1,
+   "description": "Rempli automatiquement à l'approbation — trace la déduction de stock"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "options": "Employee",
+   "label": "Employé (demandeur)",
+   "hidden": 1,
+   "read_only": 1,
+   "in_list_view": 0,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Nom employé",
+   "fetch_from": "employee.employee_name",
+   "hidden": 1,
+   "read_only": 1,
+   "in_list_view": 0,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "report_to",
+   "fieldtype": "Link",
+   "options": "Employee",
+   "label": "Responsable direct",
+   "fetch_from": "employee.reports_to",
+   "hidden": 1,
+   "read_only": 1,
+   "in_list_view": 0,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "section_items",
+   "label": "Matériels à Sortir",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "items",
+   "label": "Liste du Matériel",
+   "fieldtype": "Table",
+   "options": "PV Sortie Materiel Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_signatures",
+   "label": "Approbations & Signatures",
+   "fieldtype": "Section Break",
+   "description": "Chaque approbateur signe à son niveau du flux"
+  },
+  {
+   "fieldname": "col_demandeur",
+   "fieldtype": "Column Break",
+   "label": "Demandeur / Chef d’Équipe"
+  },
+  {
+   "fieldname": "demandeur_nom",
+   "label": "Nom Demandeur",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "demandeur_date",
+   "label": "Date Signature Demandeur",
+   "fieldtype": "Date"
+  },
+  {
+   "fieldname": "signature_demandeur",
+   "label": "Signature Demandeur",
+   "fieldtype": "Signature"
+  },
+  {
+   "fieldname": "col_magasin",
+   "fieldtype": "Column Break",
+   "label": "Responsable Magasin"
+  },
+  {
+   "fieldname": "magasin_nom",
+   "label": "Nom Responsable Magasin",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "magasin_date",
+   "label": "Date Signature Magasin",
+   "fieldtype": "Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "signature_magasin",
+   "label": "Signature Magasin",
+   "fieldtype": "Signature",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_signatures_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "col_audit",
+   "fieldtype": "Column Break",
+   "label": "Audit Interne"
+  },
+  {
+   "fieldname": "audit_nom",
+   "label": "Nom Audit Interne",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "audit_date",
+   "label": "Date Signature Audit",
+   "fieldtype": "Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "signature_audit",
+   "label": "Signature Audit",
+   "fieldtype": "Signature",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_dga",
+   "fieldtype": "Column Break",
+   "label": "Représentant DG / DGA"
+  },
+  {
+   "fieldname": "dga_nom",
+   "label": "Nom DG / DGA",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "dga_date",
+   "label": "Date Signature DGA",
+   "fieldtype": "Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "signature_dga",
+   "label": "Signature DG / DGA",
+   "fieldtype": "Signature",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_statut",
+   "label": "Statut",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "statut",
+   "label": "Statut",
+   "fieldtype": "Select",
+   "options": "Brouillon\nEn attente Chef\nEn attente Magasin\nEn attente Audit\nEn attente DGA\nApprouvé\nRejeté",
+   "default": "Brouillon",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "workflow_state",
+   "label": "État du Flux",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "label": "Modifié depuis",
+   "fieldtype": "Link",
+   "options": "PV Sortie Materiel",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1
+  },
+  {
+   "role": "Stock Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1
+  },
+  {
+   "role": "Stock User",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1
+  },
+  {
+   "role": "Employee",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "if_owner": 1
+  }
+ ]
 }
