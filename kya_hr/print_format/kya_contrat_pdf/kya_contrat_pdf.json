@@ -1,0 +1,18 @@
+{
+ "doctype": "Print Format",
+ "name": "KYA Contrat PDF",
+ "doc_type": "KYA Contrat",
+ "module": "KYA HR",
+ "standard": "Yes",
+ "print_format_type": "Jinja",
+ "custom_format": 1,
+ "default_print_language": "fr",
+ "disabled": 0,
+ "font": "Default",
+ "html": "{% set tpl_html = (frappe.db.get_value('KYA Contract Template', doc.template, 'html_body') if doc.template else '') %}\n<div style=\"font-family:'Times New Roman', serif; font-size:12pt; line-height:1.55; padding:20px;\">\n  <div style=\"display:flex; justify-content:space-between; border-bottom:2px solid #e07b00; padding-bottom:10px;\">\n    <div><b>KYA-Energy Group</b><br><small>08 BP 81101 — Lomé, Togo</small></div>\n    <div style=\"text-align:right;\"><small>Réf : <b>{{ doc.name }}</b><br>{{ doc.contract_type }}</small></div>\n  </div>\n  <div style=\"margin-top:20px;\">{{ frappe.render_template(tpl_html, {'doc': doc, 'frappe': frappe}) if tpl_html else '<p><i>Template non configuré.</i></p>' }}</div>\n  <div style=\"display:flex; gap:30px; margin-top:50px; page-break-inside:avoid;\">\n    <div style=\"flex:1; text-align:center; border-top:1px solid #999; padding-top:10px;\">\n      <b>Le Signataire</b><br>\n      {% if doc.signature_employe %}<img src=\"{{ doc.signature_employe }}\" style=\"max-height:80px;\"><br>{% endif %}\n      {{ doc.nom_signe_employe or doc.employee_name }}<br>\n      <small>{{ frappe.format_value(doc.date_signature_employe, {'fieldtype':'Datetime'}) if doc.date_signature_employe else 'En attente' }}</small>\n    </div>\n    <div style=\"flex:1; text-align:center; border-top:1px solid #999; padding-top:10px;\">\n      <b>Le Directeur Général</b><br>\n      {% if doc.signature_dg %}<img src=\"{{ doc.signature_dg }}\" style=\"max-height:80px;\"><br>{% endif %}\n      {{ doc.nom_dg }}<br><small>{{ doc.fonction_dg }}</small><br>\n      <small>{{ frappe.format_value(doc.date_signature_dg, {'fieldtype':'Datetime'}) if doc.date_signature_dg else 'En attente' }}</small>\n    </div>\n  </div>\n</div>",
+ "css": "@page { size: A4; margin: 1.5cm; }",
+ "show_section_headings": 0,
+ "line_breaks": 0,
+ "absolute_value": 0,
+ "modified": "2026-04-24 12:00:00"
+}

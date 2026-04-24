@@ -78,7 +78,7 @@
   },
   {
    "fieldname": "date_fin",
-   "label": "Date de Fin",
+   "label": "Date de Retour Prévue",
    "fieldtype": "Date",
    "description": "Laisser vide si sortie dans la journée"
   },

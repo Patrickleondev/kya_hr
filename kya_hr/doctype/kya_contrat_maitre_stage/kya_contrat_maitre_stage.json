@@ -1,0 +1,22 @@
+{
+ "actions": [],
+ "creation": "2026-04-24 12:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "istable": 1,
+ "field_order": ["employee", "employee_name", "role_maitre"],
+ "fields": [
+  {"fieldname": "employee", "fieldtype": "Link", "label": "Employé", "options": "Employee", "in_list_view": 1, "columns": 4, "reqd": 1},
+  {"fieldname": "employee_name", "fieldtype": "Data", "label": "Nom", "fetch_from": "employee.employee_name", "in_list_view": 1, "columns": 4, "read_only": 1},
+  {"fieldname": "role_maitre", "fieldtype": "Data", "label": "Rôle", "default": "Maître de Stage", "in_list_view": 1, "columns": 3}
+ ],
+ "links": [],
+ "modified": "2026-04-24 12:00:00",
+ "modified_by": "Administrator",
+ "module": "KYA HR",
+ "name": "KYA Contrat Maitre Stage",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

@@ -38,6 +38,7 @@ doctype_js = {
     "Demande Achat KYA": "doctype/demande_achat_kya/demande_achat_kya.js",
     "PV Entree Materiel": "doctype/pv_entree_materiel/pv_entree_materiel.js",
     "Inventaire KYA": "doctype/inventaire_kya/inventaire_kya.js",
+    "KYA Contrat": "doctype/kya_contrat/kya_contrat.js",
 }
 
 # Jinja environment

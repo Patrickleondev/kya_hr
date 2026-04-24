@@ -51,6 +51,20 @@
    "link_to": "PV Sortie Materiel",
    "color": "#2e7d32",
    "icon": "upload"
+  },
+  {
+   "label": "Contrats KYA",
+   "type": "DocType",
+   "link_to": "KYA Contrat",
+   "color": "#7d3c98",
+   "icon": "file"
+  },
+  {
+   "label": "Templates Contrats",
+   "type": "DocType",
+   "link_to": "KYA Contract Template",
+   "color": "#5b2c6f",
+   "icon": "small-file"
   }
  ],
  "links": [
