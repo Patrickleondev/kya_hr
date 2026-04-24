@@ -35,6 +35,8 @@
         {"fieldname": "lignes", "fieldtype": "Table", "label": "Ch\u00e8ques \u00e9mis", "options": "Etat Recap Cheques Ligne", "reqd": 1},
         {"fieldname": "total_montant", "fieldtype": "Currency", "label": "Total Montant", "read_only": 1},
         {"fieldname": "nombre_cheques", "fieldtype": "Int", "label": "Nombre de ch\u00e8ques", "read_only": 1},
-        {"fieldname": "commentaires", "fieldtype": "Small Text", "label": "Commentaires"}
+        {"fieldname": "commentaires", "fieldtype": "Small Text", "label": "Commentaires"},
+        {"fieldname": "signature_redacteur", "fieldtype": "Signature", "label": "Signature R\u00e9dacteur"},
+        {"fieldname": "signature_dfc", "fieldtype": "Signature", "label": "Signature DFC"}
     ]
 }

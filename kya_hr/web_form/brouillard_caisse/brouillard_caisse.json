@@ -37,6 +37,9 @@
         {"fieldname": "total_sorties", "fieldtype": "Currency", "label": "Total Sorties", "read_only": 1},
         {"fieldname": "solde_final", "fieldtype": "Currency", "label": "Solde Final Th\u00e9orique", "read_only": 1},
         {"fieldname": "total_reel_caisse", "fieldtype": "Currency", "label": "Total R\u00e9el de la Caisse (comptage physique)", "reqd": 1},
-        {"fieldname": "commentaires", "fieldtype": "Small Text", "label": "Commentaires / Observations"}
+        {"fieldname": "commentaires", "fieldtype": "Small Text", "label": "Commentaires / Observations"},
+        {"fieldname": "signature_caissiere", "fieldtype": "Signature", "label": "Signature Caissier(\u00e8re)"},
+        {"fieldname": "signature_comptable", "fieldtype": "Signature", "label": "Signature Comptable"},
+        {"fieldname": "signature_dfc", "fieldtype": "Signature", "label": "Signature DFC"}
     ]
 }

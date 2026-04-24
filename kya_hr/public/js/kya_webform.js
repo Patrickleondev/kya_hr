@@ -12,7 +12,9 @@
     "permission-sortie-stagiaire", "permission-sortie-employe",
     "demande-achat", "demande-conge", "pv-sortie-materiel",
     "planning-conge", "bilan-fin-de-stage",
-    "pv-entree-materiel", "inventaire-kya"
+    "pv-entree-materiel",
+    "brouillard-caisse", "etat-recap", "bon-commande",
+    "appel-offre"
   ];
   var path = window.location.pathname.replace(/^\//, "").replace(/\/$/, "");
   var pathParts = path.split("/");
@@ -242,6 +244,145 @@
         fields: ["signature_stagiaire", "signature_encadrant", "signature_resp_stagiaires"],
         sigGrid: true
       }
+    ],
+    "brouillard-caisse": [
+      {
+        title: "IDENTIFICATION DE LA CAISSE",
+        icon: "\u{1F4B0}",
+        fields: ["date_brouillard", "caissiere", "caissiere_name", "solde_precedent", "date_solde_precedent"],
+        grid: {
+          date_brouillard: "col", caissiere: "col", caissiere_name: "col",
+          solde_precedent: "col", date_solde_precedent: "col"
+        }
+      },
+      {
+        title: "OP\u00c9RATIONS DU JOUR",
+        icon: "\u{1F4DD}",
+        fields: ["lignes"]
+      },
+      {
+        title: "TOTAUX & COMPTAGE",
+        icon: "\u{1F4CA}",
+        fields: ["total_entrees", "total_sorties", "solde_final", "total_reel_caisse", "commentaires"],
+        grid: {
+          total_entrees: "col", total_sorties: "col", solde_final: "col",
+          total_reel_caisse: "col", commentaires: "span 2"
+        }
+      },
+      {
+        title: "VALIDATIONS & SIGNATURES",
+        icon: "\u270D\uFE0F",
+        fields: ["signature_caissiere", "signature_comptable", "signature_dfc"],
+        sigGrid: true
+      }
+    ],
+    "etat-recap": [
+      {
+        title: "IDENTIFICATION DE L\u2019\u00c9TAT",
+        icon: "\u{1F4C4}",
+        fields: ["date_etat", "redacteur", "redacteur_name", "semaine_du", "semaine_au"],
+        grid: {
+          date_etat: "col", redacteur: "col", redacteur_name: "col",
+          semaine_du: "col", semaine_au: "col"
+        }
+      },
+      {
+        title: "CH\u00c8QUES \u00c9MIS",
+        icon: "\u{1F4DD}",
+        fields: ["lignes", "total_montant", "nombre_cheques", "commentaires"],
+        grid: {
+          lignes: "span 2", total_montant: "col", nombre_cheques: "col",
+          commentaires: "span 2"
+        }
+      },
+      {
+        title: "VALIDATIONS & SIGNATURES",
+        icon: "\u270D\uFE0F",
+        fields: ["signature_redacteur", "signature_dfc"],
+        sigGrid: true
+      }
+    ],
+    "bon-commande": [
+      {
+        title: "IDENTIFICATION DU BON DE COMMANDE",
+        icon: "\u{1F4E6}",
+        fields: ["numero_bc", "date_bc", "demande_achat", "objet"],
+        grid: { numero_bc: "col", date_bc: "col", demande_achat: "span 2", objet: "span 2" }
+      },
+      {
+        title: "FOURNISSEUR",
+        icon: "\u{1F3EA}",
+        fields: ["fournisseur", "fournisseur_nom", "fournisseur_entreprise", "fournisseur_adresse", "fournisseur_ville", "fournisseur_telephone", "fournisseur_email"],
+        grid: {
+          fournisseur: "span 2",
+          fournisseur_nom: "col", fournisseur_entreprise: "col",
+          fournisseur_adresse: "span 2",
+          fournisseur_ville: "col", fournisseur_telephone: "col",
+          fournisseur_email: "span 2"
+        }
+      },
+      {
+        title: "ARTICLES COMMAND\u00c9S",
+        icon: "\u{1F6D2}",
+        fields: ["articles"]
+      },
+      {
+        title: "TOTAUX & R\u00c8GLEMENT",
+        icon: "\u{1F4B0}",
+        fields: ["remise", "tva_taux", "modalites_paiement", "reglement"],
+        grid: { remise: "col", tva_taux: "col", modalites_paiement: "span 2", reglement: "span 2" }
+      },
+      {
+        title: "LIVRAISON & GARANTIE",
+        icon: "\u{1F69A}",
+        fields: ["delai_livraison", "lieu_livraison", "validite", "garantie"],
+        grid: { delai_livraison: "col", lieu_livraison: "col", validite: "col", garantie: "col" }
+      },
+      {
+        title: "AUTORISATION & SIGNATURE",
+        icon: "\u270D\uFE0F",
+        fields: ["autorise_par_nom", "autorise_par_fonction", "date_autorisation", "signature_dg"],
+        sigGrid: true
+      }
+    ],
+    "appel-offre": [
+      {
+        title: "IDENTIFICATION DE L\u2019APPEL D\u2019OFFRE",
+        icon: "\u{1F4C4}",
+        fields: ["date_ao", "date_limite", "demandeur", "demandeur_name", "service"],
+        grid: {
+          date_ao: "col", date_limite: "col",
+          demandeur: "col", demandeur_name: "col",
+          service: "span 2"
+        }
+      },
+      {
+        title: "OBJET",
+        icon: "\u{1F4DD}",
+        fields: ["objet", "demande_achat"],
+        grid: { objet: "span 2", demande_achat: "span 2" }
+      },
+      {
+        title: "ARTICLES / SERVICES DEMAND\u00c9S",
+        icon: "\u{1F6D2}",
+        fields: ["items"]
+      },
+      {
+        title: "FOURNISSEURS CONSULT\u00c9S",
+        icon: "\u{1F3EA}",
+        fields: ["fournisseurs"]
+      },
+      {
+        title: "MODALIT\u00c9S & CRIT\u00c8RES",
+        icon: "\u{1F4CB}",
+        fields: ["modalites", "criteres_selection", "message_fournisseur"]
+      },
+      {
+        title: "VALIDATIONS & SIGNATURES",
+        icon: "\u270D\uFE0F",
+        fields: ["signature_demandeur", "signature_daaf", "signature_dg"],
+        sigGrid: true
+      }
     ]
   };
 
@@ -299,6 +440,24 @@
       subtitle: "Achats et Stocks",
       ref: "KYA-ACH-BC-V01",
       workflow: "Demandeur \u2192 DAAF \u2192 Direction G\u00e9n\u00e9rale \u2192 Fournisseur"
+    },
+    "brouillard-caisse": {
+      title: "BROUILLARD DE CAISSE",
+      subtitle: "Comptabilit\u00e9",
+      ref: "KYA-CPT-BC-V01",
+      workflow: "Caissier(\u00e8re) \u2192 Comptable \u2192 DFC"
+    },
+    "etat-recap": {
+      title: "\u00c9TAT R\u00c9CAPITULATIF DES CH\u00c8QUES",
+      subtitle: "Comptabilit\u00e9",
+      ref: "KYA-CPT-ER-V01",
+      workflow: "R\u00e9dacteur \u2192 DFC \u2192 DG / DGA"
+    },
+    "appel-offre": {
+      title: "APPEL D\u2019OFFRE",
+      subtitle: "Achats et Stocks",
+      ref: "KYA-ACH-AO-V01",
+      workflow: "Demandeur \u2192 DAAF \u2192 DG \u2192 Fournisseurs"
     }
   };
 
@@ -346,6 +505,23 @@
       signature_stagiaire: null,
       signature_encadrant: ["Maître de Stage", "Responsable des Stagiaires", "System Manager"],
       signature_resp_stagiaires: ["Responsable des Stagiaires", "HR Manager", "System Manager"]
+    },
+    "brouillard-caisse": {
+      signature_caissiere: null,
+      signature_comptable: ["Comptable", "Accounts Manager", "Accounts User", "System Manager"],
+      signature_dfc: ["DFC", "DAAF", "Accounts Manager", "System Manager"]
+    },
+    "etat-recap": {
+      signature_redacteur: null,
+      signature_dfc: ["DFC", "DAAF", "Accounts Manager", "System Manager"]
+    },
+    "bon-commande": {
+      signature_dg: ["DG", "Directeur Général", "System Manager"]
+    },
+    "appel-offre": {
+      signature_demandeur: null,
+      signature_daaf: ["DAAF", "Purchase Manager", "System Manager"],
+      signature_dg: ["DG", "Directeur Général", "System Manager"]
     }
   };
 
@@ -777,12 +953,31 @@
 
     function fillFromEmployeeRecord(emp) {
       if (!emp || !emp.name) return;
-      empInput.value = emp.name;
-      empInput.dispatchEvent(new Event("change"));
-      var nf = findFieldEl("employee_name");
-      var df = findFieldEl("department");
-      if (nf) { var ni = nf.querySelector("input"); if (ni) { ni.value = emp.employee_name || ""; ni.dispatchEvent(new Event("change")); } }
-      if (df) { var di = df.querySelector("input"); if (di) { di.value = emp.department || ""; di.dispatchEvent(new Event("change")); } }
+      // Use Frappe Web Form API first (triggers internal reactivity), fallback DOM
+      var wf = window.frappe && frappe.web_form;
+      function setVal(fn, val) {
+        if (val == null || val === "") return;
+        if (wf && typeof wf.set_value === "function") {
+          try { wf.set_value(fn, val); } catch (e) {}
+        }
+        var el = findFieldEl(fn);
+        if (el) {
+          var input = el.querySelector("input, select, textarea");
+          if (input) {
+            input.value = val;
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            input.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+        }
+      }
+      setVal("employee", emp.name);
+      setVal("employee_name", emp.employee_name);
+      setVal("department", emp.department);
+      // retry once after 400ms because Frappe re-renders linked fields asynchronously
+      setTimeout(function () {
+        setVal("employee_name", emp.employee_name);
+        setVal("department", emp.department);
+      }, 400);
       lockEmployeeField();
     }
 
@@ -951,6 +1146,121 @@
     });
   }
 
+  /* ───────────────────────────────────────────────────────────────
+   * LIVE AMOUNT COMPUTE
+   * Calcul en temps réel des montants dans les lignes + total
+   * Routes: demande-achat, bon-commande, appel-offre, brouillard-caisse, etat-recap
+   * ───────────────────────────────────────────────────────────── */
+  var LIVE_AMOUNT_CONFIG = {
+    "demande-achat": {
+      tableField: "items",
+      qtyField: "quantite",
+      priceField: "prix_unitaire",
+      amountField: "montant",
+      totalField: "montant_total"
+    },
+    "bon-commande": {
+      tableField: "items",
+      qtyField: "quantite",
+      priceField: "prix_unitaire",
+      amountField: "montant",
+      totalField: "montant_total"
+    },
+    "appel-offre": {
+      tableField: "items",
+      qtyField: "quantite",
+      priceField: "prix_unitaire_estime",
+      amountField: "montant_estime",
+      totalField: "budget_estime"
+    },
+    "brouillard-caisse": {
+      tableField: "lignes",
+      qtyField: null,
+      priceField: null,
+      amountField: "montant",
+      totalField: "total_montant"
+    }
+  };
+
+  function formatXOF(n) {
+    if (n == null || isNaN(n)) return "0 XOF";
+    try {
+      return Number(n).toLocaleString("fr-FR", { maximumFractionDigits: 0 }) + " XOF";
+    } catch (e) {
+      return Math.round(n) + " XOF";
+    }
+  }
+
+  function setupLiveAmountCompute(route) {
+    var cfg = LIVE_AMOUNT_CONFIG[route];
+    if (!cfg) return;
+    var tableWrapper = document.querySelector('[data-fieldname="' + cfg.tableField + '"]');
+    if (!tableWrapper) return;
+
+    function recompute() {
+      var rows = tableWrapper.querySelectorAll(".grid-row, .rows .grid-row");
+      var total = 0;
+      rows.forEach(function (row) {
+        var qtyInput = cfg.qtyField ? row.querySelector('[data-fieldname="' + cfg.qtyField + '"] input') : null;
+        var priceInput = cfg.priceField ? row.querySelector('[data-fieldname="' + cfg.priceField + '"] input') : null;
+        var amountInput = row.querySelector('[data-fieldname="' + cfg.amountField + '"] input');
+        if (!amountInput) return;
+        var amount;
+        if (qtyInput && priceInput) {
+          var q = parseFloat((qtyInput.value || "0").replace(/\s/g, "").replace(",", ".")) || 0;
+          var p = parseFloat((priceInput.value || "0").replace(/\s/g, "").replace(",", ".")) || 0;
+          amount = q * p;
+          // show computed value (amountInput is read_only but we can set its value for display)
+          amountInput.value = amount ? amount.toLocaleString("fr-FR") : "";
+          amountInput.dispatchEvent(new Event("change", { bubbles: true }));
+        } else {
+          amount = parseFloat((amountInput.value || "0").replace(/\s/g, "").replace(",", ".")) || 0;
+        }
+        total += amount || 0;
+      });
+      if (cfg.totalField) {
+        var totalEl = document.querySelector('[data-fieldname="' + cfg.totalField + '"] input');
+        if (totalEl) {
+          totalEl.value = total ? total.toLocaleString("fr-FR") : "";
+          totalEl.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+        // Injecter/mettre à jour badge visible au-dessus des sections
+        var badgeId = "kya-total-badge-" + route;
+        var badge = document.getElementById(badgeId);
+        if (!badge) {
+          badge = document.createElement("div");
+          badge.id = badgeId;
+          badge.className = "kya-total-badge";
+          badge.style.cssText = "margin:12px 0;padding:14px 20px;background:linear-gradient(135deg,#f7941d,#ea580c);" +
+            "color:#fff;font-size:20px;font-weight:700;border-radius:8px;text-align:center;" +
+            "box-shadow:0 4px 12px rgba(247,148,29,0.3);letter-spacing:0.5px;";
+          tableWrapper.parentNode.insertBefore(badge, tableWrapper.nextSibling);
+        }
+        badge.innerHTML = '💰 MONTANT TOTAL : <span style="font-size:24px;">' + formatXOF(total) + '</span>';
+      }
+    }
+
+    // Débounce
+    var t = null;
+    function scheduleRecompute() {
+      clearTimeout(t);
+      t = setTimeout(recompute, 150);
+    }
+
+    // Écouter tous les inputs dans la table (délégation)
+    tableWrapper.addEventListener("input", scheduleRecompute, true);
+    tableWrapper.addEventListener("change", scheduleRecompute, true);
+    tableWrapper.addEventListener("click", scheduleRecompute, true); // pour add/remove row
+
+    // Observer les changements DOM (nouvelles lignes)
+    var mo = new MutationObserver(scheduleRecompute);
+    mo.observe(tableWrapper, { childList: true, subtree: true });
+
+    // Recompute initial après 500ms
+    setTimeout(recompute, 500);
+    setTimeout(recompute, 1500);
+  }
+
   function waitForForm() {
     var route = getRoute();
     injectVisibilityPatchCss();
@@ -961,6 +1271,7 @@
       restructureForm();
       setupEmployeeAutoFill();
       stabilizeSignaturePads(route);
+      setupLiveAmountCompute(route);
       setTimeout(forceInlineTextVisibility, 200);
       setLoadingState(false);
       return;
@@ -972,6 +1283,7 @@
           restructureForm();
           setupEmployeeAutoFill();
           stabilizeSignaturePads(route);
+          setupLiveAmountCompute(route);
           forceInlineTextVisibility();
           setLoadingState(false);
         }, 300);
