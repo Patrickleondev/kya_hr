@@ -1,9 +1,9 @@
 ﻿/* ===================================================================
    KYA-Energy Group â€” Web Form Layout v4
    Design : Ordre de Mission / Fiche officielle KYA
-   En-tÃªte 2-colonnes : Logo gauche | Titre + infos droite
-   NÂ° de document affichÃ©, sections numÃ©rotÃ©es,
-   permissions par rÃ´le, signatures verrouillÃ©es.
+   En-tête 2-colonnes : Logo gauche | Titre + infos droite
+   NÂ° de document affiché, sections numérotées,
+   permissions par rôle, signatures verrouillées.
    =================================================================== */
 
 /* === Auto-redirect bare web form URLs to /new ==================== */
@@ -128,6 +128,12 @@
           leave_type: "col", from_date: "col", to_date: "col", posting_date: "col",
           description: "span 2"
         }
+      },
+      {
+        title: "VALIDATIONS & SIGNATURES",
+        icon: "\u270D\uFE0F",
+        fields: ["signature_employe_la", "signature_superieur_la", "signature_rh_la", "signature_dg_la"],
+        sigGrid: true
       }
     ],
     "pv-sortie-materiel": [
@@ -298,7 +304,7 @@
       {
         title: "VALIDATIONS & SIGNATURES",
         icon: "\u270D\uFE0F",
-        fields: ["signature_redacteur", "signature_dfc"],
+        fields: ["signature_redacteur", "signature_dfc", "signature_dg", "signature_dga"],
         sigGrid: true
       }
     ],
@@ -486,15 +492,15 @@
       signature_chef: ["Chef Service", "System Manager"],
       signature_audit: ["Auditeur Interne", "System Manager"],
       signature_dga: ["Directeur Général", "System Manager"],
-      signature_magasin: ["ChargÃ© des Stocks", "Stock Manager", "Stock User", "System Manager"]
+      signature_magasin: ["Chargé des Stocks", "Stock Manager", "Stock User", "System Manager"]
     },
     "pv-entree-materiel": {
       signature_livreur: null,
-      signature_magasin: ["ChargÃ© des Stocks", "Responsable Stock", "Stock Manager", "Stock User", "System Manager"]
+      signature_magasin: ["Chargé des Stocks", "Responsable Stock", "Stock Manager", "Stock User", "System Manager"]
     },
     "inventaire-kya": {
       signature_responsable: null,
-      signature_magasin: ["ChargÃ© des Stocks", "Responsable Stock", "Stock Manager", "Stock User", "System Manager"]
+      signature_magasin: ["Chargé des Stocks", "Responsable Stock", "Stock Manager", "Stock User", "System Manager"]
     },
     "planning-conge": {
       signature_employe: null,
@@ -557,8 +563,9 @@
       '.grid-heading-row .static-area { color: #1a1a2e !important; font-weight: 700 !important; font-size: 11px !important; }',
       '.grid-heading-row .col, .grid-heading-row [data-fieldname] { color: #1a1a2e !important; opacity: 1 !important; }',
       '.rows *, .grid-row *, .no-value, .grid-body * { color: #1a1a2e !important; -webkit-text-fill-color: #1a1a2e !important; }',
-      '.frappe-control[data-fieldtype="Signature"] .signature-field { min-height: 130px !important; height: 130px !important; }',
-      '.frappe-control[data-fieldtype="Signature"] .signature-pad, .frappe-control[data-fieldtype="Signature"] canvas { min-height: 130px !important; height: 130px !important; max-height: 130px !important; }',
+      '.frappe-control[data-fieldtype="Signature"] .signature-field { min-height: 160px !important; height: 160px !important; }',
+      '.frappe-control[data-fieldtype="Signature"] .signature-pad, .frappe-control[data-fieldtype="Signature"] canvas { min-height: 160px !important; height: 160px !important; max-height: 160px !important; }',
+      '.frappe-control[data-fieldtype="Signature"] .signature-display img { max-height: 160px !important; max-width: 100% !important; height: auto !important; width: auto !important; object-fit: contain !important; }',
     ].join('\n');
 
     document.head.appendChild(style);
@@ -685,8 +692,10 @@
 
   function setupWorkflowActions(wrapper) {
     if (!window.frappe || !frappe.web_form_doc) return;
-    var docName = frappe.web_form_doc.doc_name || frappe.web_form_doc.name;
-    if (!docName) return;
+    // doc_name = nom du document sauvegardd (null/vide pour nouveau formulaire)
+    // Ne PAS utiliser .name qui contient le nom du web form (ex: "demande-achat")
+    var docName = frappe.web_form_doc.doc_name;
+    if (!docName) return;  // nouveau formulaire — pas d'actions workflow
     var doctype = frappe.web_form_doc.doc_type;
     if (!doctype) return;
     frappe.call({
@@ -764,11 +773,11 @@
     if (!userHasRole("System Manager") && !userHasRole("HR Manager") && !userHasRole("Administrator")) return;
     var allForms = [
       { label: "Permission Sortie Stagiaire", route: "permission-sortie-stagiaire" },
-      { label: "Permission Sortie EmployÃ©", route: "permission-sortie-employe" },
+      { label: "Permission Sortie Employé", route: "permission-sortie-employe" },
       { label: "Demande d'Achat", route: "demande-achat" },
-      { label: "Demande de CongÃ©", route: "demande-conge" },
-      { label: "PV Sortie MatÃ©riel", route: "pv-sortie-materiel" },
-      { label: "Planning CongÃ©", route: "planning-conge" },
+      { label: "Demande de Congé", route: "demande-conge" },
+      { label: "PV Sortie Matériel", route: "pv-sortie-materiel" },
+      { label: "Planning Congé", route: "planning-conge" },
       { label: "Bilan de Stage", route: "bilan-fin-de-stage" }
     ];
     var currentRoute = getRoute();
@@ -777,24 +786,24 @@
     var panel = document.createElement("div");
     panel.className = "kya-preview-panel";
     panel.style.display = "none";
-    panel.innerHTML = '<h4>ðŸ”— Liens de prÃ©visualisation</h4>' +
+    panel.innerHTML = '<h4>🔗 Liens de prévisualisation</h4>' +
       '<div class="kya-preview-forms">' +
       allForms.map(function(f) {
         var url = window.location.origin + "/" + f.route + "/new";
         var isCurrent = f.route === currentRoute;
         return '<div class="kya-preview-form-link">' +
           '<span' + (isCurrent ? ' style="font-weight:800;"' : '') + '>' + f.label + '</span>' +
-          '<a href="' + url + '" target="_blank">Ouvrir â†’</a>' +
+          '<a href="' + url + '" target="_blank">Ouvrir →</a>' +
           '</div>';
       }).join("") + '</div>' +
-      '<button class="kya-preview-copy" onclick="(function(){var url=window.location.origin+\'/\'+\'' + currentRoute + '\'+\'/new\';navigator.clipboard&&navigator.clipboard.writeText(url).then(function(){this.textContent=\'âœ“ CopiÃ© !\';}.bind(this));}).call(this)">ðŸ“‹ Copier lien du formulaire actuel</button>';
+      '<button class="kya-preview-copy" onclick="(function(){var url=window.location.origin+\'/\'+\'' + currentRoute + '\'+\'/new\';navigator.clipboard&&navigator.clipboard.writeText(url).then(function(){this.textContent=\'✓ Copié !\';}.bind(this));}).call(this)">📋 Copier lien du formulaire actuel</button>';
     var toggle = document.createElement("button");
     toggle.className = "kya-preview-toggle";
-    toggle.innerHTML = "ðŸ‘ï¸ AperÃ§u Admin";
+    toggle.innerHTML = "ðŸ‘ï¸ Aperçu Admin";
     toggle.addEventListener("click", function() {
       var vis = panel.style.display === "none";
       panel.style.display = vis ? "block" : "none";
-      toggle.innerHTML = vis ? "âœ• Fermer" : "ðŸ‘ï¸ AperÃ§u Admin";
+      toggle.innerHTML = vis ? "✕ Fermer" : "ðŸ‘ï¸ Aperçu Admin";
     });
     bar.appendChild(panel);
     bar.appendChild(toggle);
@@ -983,17 +992,17 @@
 
     function fetchAndFillFromSession() {
       if (!window.frappe || frappe.session.user === "Guest") return;
-      if (empInput.value && empInput.value.trim()) return; // dÃ©jÃ  rempli
+      if (empInput.value && empInput.value.trim()) return; // déjÃ  rempli
       frappe.call({
         method: "kya_hr.api.get_employee_from_user",
         args: {},
         callback: function (r) {
           if (r && r.message) {
             fillFromEmployeeRecord(r.message);
-            // Injecter widget recherche par nom si l'employÃ© n'est toujours pas reconnu
+            // Injecter widget recherche par nom si l'employé n'est toujours pas reconnu
             if (!r.message.name) injectNameSearchWidget();
           } else {
-            // Aucune fiche employÃ© liÃ©e au compte â†’ proposer la recherche par nom
+            // Aucune fiche employé liée au compte → proposer la recherche par nom
             injectNameSearchWidget();
           }
           lockEmployeeField();
@@ -1007,8 +1016,8 @@
       widget.className = "kya-name-search-widget";
       widget.style.cssText = "margin-top:8px;padding:10px 12px;background:#fff8e1;border:1px solid #ffe082;border-radius:6px;font-size:13px;";
       widget.innerHTML =
-        '<p style="margin:0 0 6px;color:#5d4037;font-weight:600;">Votre compte n\'est pas encore liÃ© Ã  une fiche RH.</p>' +
-        '<p style="margin:0 0 8px;color:#5d4037;">Tapez votre nom complet pour confirmer votre identitÃ© :</p>' +
+        '<p style="margin:0 0 6px;color:#5d4037;font-weight:600;">Votre compte n\'est pas encore lié Ã  une fiche RH.</p>' +
+        '<p style="margin:0 0 8px;color:#5d4037;">Tapez votre nom complet pour confirmer votre identité :</p>' +
         '<div style="display:flex;gap:8px;align-items:center;">' +
           '<input type="text" class="kya-name-search-input" placeholder="Ex: Jean Kofi MENSAH" ' +
             'style="flex:1;padding:6px 10px;border:1px solid #bbb;border-radius:4px;font-size:13px;" />' +
@@ -1026,11 +1035,11 @@
       function doSearch() {
         var term = searchInput.value.trim();
         if (term.length < 2) {
-          resultMsg.textContent = "Veuillez saisir au moins 2 caractÃ¨res.";
+          resultMsg.textContent = "Veuillez saisir au moins 2 caractères.";
           resultMsg.style.color = "#c62828";
           return;
         }
-        resultMsg.textContent = "Recherche en coursâ€¦";
+        resultMsg.textContent = "Recherche en cours…";
         resultMsg.style.color = "#555";
         frappe.call({
           method: "kya_hr.api.search_employee_by_name",
@@ -1038,10 +1047,10 @@
           callback: function (r) {
             if (r && r.message) {
               var emp = r.message;
-              resultMsg.textContent = "Correspondance trouvÃ©e : " + emp.employee_name + " (" + emp.name + ")";
+              resultMsg.textContent = "Correspondance trouvée : " + emp.employee_name + " (" + emp.name + ")";
               resultMsg.style.color = "#2e7d32";
               fillFromEmployeeRecord(emp);
-              // Masquer le widget aprÃ¨s succÃ¨s
+              // Masquer le widget après succès
               setTimeout(function () { widget.style.display = "none"; }, 1500);
             } else {
               resultMsg.textContent = "Aucune correspondance avec votre compte. Contactez les RH.";
@@ -1093,26 +1102,42 @@
     var display = el.querySelector(".signature-display");
     var img = display ? display.querySelector("img") : null;
 
+    var H = 160; // hauteur fixe (px) — était 130, bumped to fix miniaturisation
+
     if (field) {
-      field.style.minHeight = "130px";
-      field.style.height = "130px";
+      field.style.minHeight = H + "px";
+      field.style.height = H + "px";
     }
     if (pad) {
-      pad.style.minHeight = "130px";
-      pad.style.height = "130px";
+      pad.style.minHeight = H + "px";
+      pad.style.height = H + "px";
       pad.style.width = "100%";
     }
     if (canvas) {
-      canvas.style.height = "130px";
-      canvas.style.maxHeight = "130px";
+      canvas.style.height = H + "px";
+      canvas.style.maxHeight = H + "px";
       canvas.style.width = "100%";
+      // Corrige l'échelle interne : le bitmap doit correspondre à la taille affichée * DPR
+      if (!canvas.dataset.kyaScaled) {
+        try {
+          var ratio = window.devicePixelRatio || 1;
+          var w = canvas.offsetWidth || canvas.clientWidth || 400;
+          canvas.width = Math.round(w * ratio);
+          canvas.height = Math.round(H * ratio);
+          var ctx = canvas.getContext("2d");
+          if (ctx) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.scale(ratio, ratio); }
+          canvas.dataset.kyaScaled = "1";
+        } catch (e) { /* ignore */ }
+      }
     }
     if (display) {
-      display.style.minHeight = "130px";
+      display.style.minHeight = H + "px";
     }
     if (img) {
-      img.style.maxHeight = "130px";
+      img.style.maxHeight = H + "px";
+      img.style.maxWidth = "100%";
       img.style.width = "auto";
+      img.style.height = "auto";
       img.style.objectFit = "contain";
     }
   }
@@ -1261,6 +1286,156 @@
     setTimeout(recompute, 1500);
   }
 
+  /* ===================================================================
+   * POPUP INLINE — Nouveau Fournisseur (Supplier) / Nouveau Client (Customer)
+   * Routes : appel-offre (Supplier) / bon-commande (Customer)
+   * Si la responsable Achats ne trouve pas le tiers, elle peut :
+   *   1) Créer le tiers dans la base (Supplier/Customer) en 1 clic
+   *   2) Continuer sans l'enregistrer (fournisseur_nom seul)
+   * ================================================================= */
+  var PARTY_CONFIG = {
+    "bon-commande": {
+      linkField: "fournisseur",      // Link
+      nameField: "fournisseur_nom",
+      phoneField: "fournisseur_telephone",
+      emailField: "fournisseur_email",
+      addressField: "fournisseur_adresse",
+      cityField: "fournisseur_ville",
+      doctype: "Customer",
+      dtLabel: "Client",
+      dtLabelLower: "client"
+    },
+    "appel-offre": {
+      linkField: "fournisseur",
+      nameField: "fournisseur_nom",
+      phoneField: "fournisseur_telephone",
+      emailField: "fournisseur_email",
+      addressField: "fournisseur_adresse",
+      cityField: "fournisseur_ville",
+      doctype: "Supplier",
+      dtLabel: "Fournisseur",
+      dtLabelLower: "fournisseur"
+    }
+  };
+
+  function getFieldInputValue(fieldname) {
+    var el = findFieldEl(fieldname);
+    if (!el) return "";
+    var inp = el.querySelector("input, textarea, select");
+    return inp ? (inp.value || "") : "";
+  }
+  function setFieldInputValue(fieldname, value) {
+    if (window.frappe && frappe.web_form && frappe.web_form.set_value) {
+      try { frappe.web_form.set_value(fieldname, value); } catch (e) { /* fallback */ }
+    }
+    var el = findFieldEl(fieldname);
+    if (!el) return;
+    var inp = el.querySelector("input, textarea, select");
+    if (inp) { inp.value = value || ""; inp.dispatchEvent(new Event("input", { bubbles: true })); inp.dispatchEvent(new Event("change", { bubbles: true })); }
+  }
+
+  function openPartyPopup(cfg) {
+    if (document.getElementById("kya-party-modal")) return;
+    var overlay = document.createElement("div");
+    overlay.id = "kya-party-modal";
+    overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;";
+    overlay.innerHTML = ''
+      + '<div style="background:#fff;border-radius:12px;max-width:560px;width:100%;max-height:90vh;overflow:auto;padding:24px;box-shadow:0 10px 40px rgba(0,0,0,0.3);">'
+      + '  <h3 style="margin:0 0 8px;color:#1a1a2e;">Nouveau ' + cfg.dtLabel + '</h3>'
+      + '  <p style="color:#555;margin:0 0 16px;font-size:14px;">Ce ' + cfg.dtLabelLower + ' n\u2019est pas dans la base. Vous pouvez l\u2019enregistrer ici ou continuer sans l\u2019enregistrer.</p>'
+      + '  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'
+      + '    <label style="grid-column:span 2;font-size:12px;color:#1a1a2e;font-weight:600;">Nom / Raison sociale *<input id="kya-pp-name" type="text" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;margin-top:4px;color:#1a1a2e;" /></label>'
+      + '    <label style="font-size:12px;color:#1a1a2e;font-weight:600;">T\u00e9l\u00e9phone<input id="kya-pp-phone" type="text" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;margin-top:4px;color:#1a1a2e;" /></label>'
+      + '    <label style="font-size:12px;color:#1a1a2e;font-weight:600;">Email<input id="kya-pp-email" type="email" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;margin-top:4px;color:#1a1a2e;" /></label>'
+      + '    <label style="grid-column:span 2;font-size:12px;color:#1a1a2e;font-weight:600;">Adresse<input id="kya-pp-address" type="text" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;margin-top:4px;color:#1a1a2e;" /></label>'
+      + '    <label style="font-size:12px;color:#1a1a2e;font-weight:600;">Ville<input id="kya-pp-city" type="text" value="Lom\u00e9" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;margin-top:4px;color:#1a1a2e;" /></label>'
+      + '  </div>'
+      + '  <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px;flex-wrap:wrap;">'
+      + '    <button type="button" id="kya-pp-cancel" style="padding:8px 16px;background:#e0e0e0;color:#333;border:none;border-radius:6px;cursor:pointer;">Annuler</button>'
+      + '    <button type="button" id="kya-pp-skip" style="padding:8px 16px;background:#f57c00;color:#fff;border:none;border-radius:6px;cursor:pointer;">Continuer sans enregistrer</button>'
+      + '    <button type="button" id="kya-pp-save" style="padding:8px 16px;background:#2e7d32;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;">Enregistrer et utiliser</button>'
+      + '  </div>'
+      + '  <div id="kya-pp-err" style="color:#c62828;margin-top:12px;font-size:13px;display:none;"></div>'
+      + '</div>';
+    document.body.appendChild(overlay);
+
+    var nameEl = overlay.querySelector("#kya-pp-name");
+    if (nameEl) nameEl.value = getFieldInputValue(cfg.nameField) || "";
+
+    function close() { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }
+    overlay.querySelector("#kya-pp-cancel").onclick = close;
+
+    overlay.querySelector("#kya-pp-skip").onclick = function () {
+      var name = (overlay.querySelector("#kya-pp-name").value || "").trim();
+      if (name) setFieldInputValue(cfg.nameField, name);
+      close();
+    };
+
+    overlay.querySelector("#kya-pp-save").onclick = function () {
+      var errEl = overlay.querySelector("#kya-pp-err");
+      var name = (overlay.querySelector("#kya-pp-name").value || "").trim();
+      if (!name) { errEl.style.display = "block"; errEl.textContent = "Le nom est obligatoire."; return; }
+      var phone = (overlay.querySelector("#kya-pp-phone").value || "").trim();
+      var email = (overlay.querySelector("#kya-pp-email").value || "").trim();
+      var address = (overlay.querySelector("#kya-pp-address").value || "").trim();
+      var city = (overlay.querySelector("#kya-pp-city").value || "").trim();
+      errEl.style.display = "none";
+
+      var doc = { doctype: cfg.doctype };
+      if (cfg.doctype === "Customer") {
+        doc.customer_name = name;
+        doc.customer_type = "Company";
+        doc.customer_group = "All Customer Groups";
+        doc.territory = "All Territories";
+      } else {
+        doc.supplier_name = name;
+        doc.supplier_group = "All Supplier Groups";
+      }
+      if (phone) doc.mobile_no = phone;
+      if (email) doc.email_id = email;
+
+      frappe.call({
+        method: "frappe.client.insert",
+        args: { doc: doc },
+        callback: function (r) {
+          if (!r || !r.message) {
+            errEl.style.display = "block"; errEl.textContent = "\u00c9chec de l\u2019enregistrement.";
+            return;
+          }
+          var created = r.message.name || name;
+          setFieldInputValue(cfg.linkField, created);
+          setFieldInputValue(cfg.nameField, name);
+          if (phone) setFieldInputValue(cfg.phoneField, phone);
+          if (email) setFieldInputValue(cfg.emailField, email);
+          if (address) setFieldInputValue(cfg.addressField, address);
+          if (city) setFieldInputValue(cfg.cityField, city);
+          frappe.show_alert && frappe.show_alert({ message: cfg.dtLabel + " enregistr\u00e9 : " + created, indicator: "green" });
+          close();
+        },
+        error: function (err) {
+          errEl.style.display = "block";
+          errEl.textContent = "Erreur : " + ((err && err.message) || "impossible de cr\u00e9er le " + cfg.dtLabelLower + ".");
+        }
+      });
+    };
+  }
+
+  function setupPartyCreateButton(route) {
+    var cfg = PARTY_CONFIG[route];
+    if (!cfg) return;
+    var linkEl = findFieldEl(cfg.linkField);
+    if (!linkEl) return;
+    if (linkEl.querySelector(".kya-party-add-btn")) return;
+
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "kya-party-add-btn";
+    btn.textContent = "+ Nouveau " + cfg.dtLabel;
+    btn.style.cssText = "margin:6px 0 0;padding:6px 12px;background:#1565c0;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;";
+    btn.onclick = function () { openPartyPopup(cfg); };
+    linkEl.appendChild(btn);
+  }
+
   function waitForForm() {
     var route = getRoute();
     injectVisibilityPatchCss();
@@ -1272,6 +1447,7 @@
       setupEmployeeAutoFill();
       stabilizeSignaturePads(route);
       setupLiveAmountCompute(route);
+      setupPartyCreateButton(route);
       setTimeout(forceInlineTextVisibility, 200);
       setLoadingState(false);
       return;
@@ -1284,6 +1460,7 @@
           setupEmployeeAutoFill();
           stabilizeSignaturePads(route);
           setupLiveAmountCompute(route);
+          setupPartyCreateButton(route);
           forceInlineTextVisibility();
           setLoadingState(false);
         }, 300);

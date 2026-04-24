@@ -2,3 +2,4 @@ kya_hr.patches.v1_0.fix_report_roles_employee
 kya_hr.patches.v1_0.fix_workflow_encoding
 kya_hr.patches.v1_0.ensure_webforms_published
 kya_hr.patches.v1_0.rename_caissiere_role
+kya_hr.patches.v1_0.mirror_hr_manager_to_responsable_rh

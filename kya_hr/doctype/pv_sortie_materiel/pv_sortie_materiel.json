@@ -92,6 +92,22 @@
    "description": "Client associé (rempli automatiquement si projet lié)"
   },
   {
+   "fieldname": "customer_manuel",
+   "label": "Client (saisie manuelle)",
+   "fieldtype": "Data",
+   "description": "Nom du client si non encore enregistré dans la base. Sera proposé pour création lors de l'approbation."
+  },
+  {
+   "fieldname": "destination_type",
+   "label": "Destination",
+   "fieldtype": "Select",
+   "options": "Équipe interne\nClient / Projet",
+   "default": "Équipe interne",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "description": "Distingue le matériel consommé en interne vs livré à un client"
+  },
+  {
    "fieldname": "stock_entry",
    "label": "Stock Entry généré",
    "fieldtype": "Link",

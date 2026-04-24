@@ -70,7 +70,8 @@
    "fieldname": "heure_depart",
    "fieldtype": "Time",
    "label": "Heure de Départ",
-   "reqd": 1
+   "reqd": 0,
+   "description": "Obligatoire pour une sortie dans la journée. Optionnel pour une absence de plusieurs jours."
   },
   {
    "fieldname": "heure_retour",
