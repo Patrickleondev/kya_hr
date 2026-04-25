@@ -100,21 +100,61 @@ class KYAContrat(Document):
         subject = f"📄 Contrat finalisé — {self.employee_name} — {self.name}"
         message = frappe.render_template(
             """
-            <p>Bonjour {{ doc.employee_name }},</p>
-            <p>Votre contrat de <b>{{ doc.contract_type }}</b> chez KYA-Energy Group est maintenant signé par les deux parties et archivé dans notre système.</p>
-            <p>Vous trouverez en pièce jointe votre exemplaire signé (PDF). Conservez ce document précieusement.</p>
-            <p><b>Date d'effet :</b> {{ frappe.format_date(doc.date_debut) }}<br>
-            {% if doc.date_fin %}<b>Date d'échéance :</b> {{ frappe.format_date(doc.date_fin) }}{% else %}<b>Durée :</b> Indéterminée (CDI){% endif %}</p>
-            <p>Cordialement,<br>KYA-Energy Group — Direction des Ressources Humaines</p>
+            <div style="font-family:Arial,sans-serif; max-width:640px; margin:0 auto; border:1px solid #eee; border-radius:6px; overflow:hidden;">
+              <div style="background:linear-gradient(135deg,#f7a800 0%,#e07b00 100%); padding:24px; color:#fff; text-align:center;">
+                <h2 style="margin:0;">✅ Contrat Finalisé</h2>
+                <p style="margin:6px 0 0 0; opacity:0.95;">{{ doc.contract_type }} — Réf. {{ doc.name }}</p>
+              </div>
+              <div style="padding:24px 28px;">
+                <p>Bonjour <b>{{ doc.employee_name }}</b>,</p>
+                <p>Votre <b>{{ doc.contract_type }}</b> chez KYA-Energy Group est désormais
+                signé par les deux parties et archivé dans notre système.</p>
+                <p>Vous trouverez en <b>pièce jointe</b> votre exemplaire signé (PDF).
+                Conservez ce document précieusement.</p>
+                <table style="width:100%; margin:18px 0; border-collapse:collapse; font-size:14px;">
+                  <tr><td style="padding:6px 0; color:#555;"><b>Date d'effet :</b></td>
+                      <td style="padding:6px 0;">{{ frappe.format_date(doc.date_debut) }}</td></tr>
+                  {% if doc.date_fin %}
+                  <tr><td style="padding:6px 0; color:#555;"><b>Date d'échéance :</b></td>
+                      <td style="padding:6px 0;">{{ frappe.format_date(doc.date_fin) }}</td></tr>
+                  {% else %}
+                  <tr><td style="padding:6px 0; color:#555;"><b>Durée :</b></td>
+                      <td style="padding:6px 0;">Indéterminée (CDI)</td></tr>
+                  {% endif %}
+                  <tr><td style="padding:6px 0; color:#555;"><b>Référence :</b></td>
+                      <td style="padding:6px 0;"><code>{{ doc.name }}</code></td></tr>
+                </table>
+                <p style="font-size:13px; color:#666; border-top:1px solid #eee; padding-top:14px; margin-top:20px;">
+                  Cet email a été envoyé automatiquement par la plateforme KYA-Energy Group.<br>
+                  Pour toute question : <a href="mailto:rh@kya-energy.com">rh@kya-energy.com</a>
+                </p>
+                <p style="margin-top:20px;">Bien cordialement,<br><b>Direction des Ressources Humaines</b><br>KYA-Energy Group</p>
+              </div>
+            </div>
             """,
             {"doc": self, "frappe": frappe},
         )
         attachments = []
         if self.pdf_final:
-            attachments.append({"fid": frappe.db.get_value("File", {"file_url": self.pdf_final}, "name")})
+            fid = frappe.db.get_value("File", {"file_url": self.pdf_final}, "name")
+            if fid:
+                attachments.append({"fid": fid})
+
         recipients = [self.employee_email]
-        rh_email = frappe.db.get_single_value("KYA Dashboard Settings", "rh_email") or "rh@kya-energy.com"
-        recipients.append(rh_email)
+        # RH
+        rh_email = None
+        try:
+            rh_email = frappe.db.get_single_value("KYA Dashboard Settings", "rh_email")
+        except Exception:
+            pass
+        if rh_email:
+            recipients.append(rh_email)
+        # DG
+        for u in frappe.get_all("Has Role", filters={"role": "Directeur Général", "parenttype": "User"}, fields=["parent"]):
+            em = frappe.db.get_value("User", u.parent, "email")
+            if em and em not in recipients:
+                recipients.append(em)
+
         frappe.sendmail(
             recipients=recipients,
             subject=subject,

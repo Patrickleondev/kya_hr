@@ -3,161 +3,304 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block head_include %}
-<link rel="stylesheet" href="/assets/kya_hr/css/kya_webform.css">
 <style>
-.kya-contrat-portail { max-width: 980px; margin: 30px auto; background: #fff; padding: 40px 50px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-.kya-contrat-portail .header-bar { display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #e07b00; padding-bottom:12px; margin-bottom:20px; }
-.kya-contrat-portail .header-bar h2 { margin:0; color:#1a1a1a; }
-.kya-contrat-portail .badge-state { padding:6px 14px; border-radius:14px; font-size:13px; font-weight:600; }
-.kya-contrat-portail .badge-state.Brouillon { background:#eee; color:#555; }
-.kya-contrat-portail .badge-state.EnvoyeSignataire { background:#fff4d6; color:#a16500; }
-.kya-contrat-portail .badge-state.SigneEmploye { background:#d6e9ff; color:#0046a8; }
-.kya-contrat-portail .badge-state.Finalise { background:#d4edda; color:#155724; }
-.kya-contrat-portail .corps-contrat { line-height:1.6; font-size:14px; }
-.kya-contrat-portail .corps-contrat h3 { color:#e07b00; margin-top:24px; }
-.kya-signature-zone { display:flex; gap:30px; margin-top:50px; padding-top:24px; border-top:1px dashed #ccc; }
-.kya-signature-bloc { flex:1; padding:18px; background:#fafafa; border-radius:6px; }
-.kya-signature-bloc h4 { margin:0 0 12px 0; }
-.kya-signature-bloc img { max-height:90px; border:1px solid #ddd; background:#fff; }
-.signature-canvas { border:2px dashed #999; border-radius:4px; background:#fff; cursor:crosshair; touch-action:none; width:100%; height:140px; }
+.kya-contrat-portail { max-width: 1000px; margin: 30px auto; background: #fff; padding: 0; box-shadow: 0 2px 12px rgba(0,0,0,0.1); border-radius: 6px; overflow: hidden; }
+.kya-portail-header { background: linear-gradient(135deg, #f7a800 0%, #e07b00 100%); padding: 24px 40px; color: #fff; display: flex; justify-content: space-between; align-items: center; }
+.kya-portail-header img { height: 60px; background:#fff; padding:6px 10px; border-radius:4px; }
+.kya-portail-header h2 { margin: 0 0 4px 0; font-size: 22px; }
+.kya-portail-header small { opacity: 0.95; }
+.kya-portail-body { padding: 30px 50px; }
+.badge-state { padding:6px 14px; border-radius:14px; font-size:13px; font-weight:600; background:#fff; color:#e07b00; display:inline-block; }
+.kya-info-perso { background:#fefaf0; border:1px solid #f7a800; border-radius:6px; padding:18px 22px; margin-bottom:24px; }
+.kya-info-perso h3 { color:#e07b00; margin:0 0 14px 0; font-size:17px; }
+.kya-info-perso .row { display:flex; gap:18px; flex-wrap:wrap; margin-bottom:10px; }
+.kya-info-perso .field { flex:1; min-width:240px; }
+.kya-info-perso label { display:block; font-size:12px; font-weight:600; color:#555; margin-bottom:4px; }
+.kya-info-perso input { width:100%; padding:8px 10px; border:1px solid #ccc; border-radius:4px; font-size:14px; }
+.kya-info-perso input:disabled { background:#f5f5f5; color:#666; }
+.btn-save-perso { background:#1a5276; color:#fff; padding:8px 18px; border:none; border-radius:4px; cursor:pointer; margin-top:8px; }
+.corps-contrat { line-height:1.7; font-size:14px; padding:20px 0; }
+.corps-contrat h2 { color:#e07b00; border-bottom:2px solid #f7a800; padding-bottom:6px; }
+.corps-contrat h3 { color:#1a5276; margin-top:22px; }
+.kya-signature-zone { display:flex; gap:30px; margin-top:40px; padding-top:24px; border-top:1px dashed #ccc; }
+.kya-signature-bloc { flex:1; padding:18px; background:#fafafa; border-radius:6px; border:1px solid #eee; }
+.kya-signature-bloc h4 { margin:0 0 12px 0; color:#1a5276; }
+.sig-img { max-height:90px; max-width:100%; border:1px solid #ddd; background:#fff; padding:4px; }
+.signature-canvas { border:2px dashed #999; border-radius:4px; background:#fff; cursor:crosshair; touch-action:none; width:100%; height:140px; display:block; }
 .btn-kya-sign { background:#e07b00; color:#fff; padding:12px 28px; border:none; border-radius:6px; font-weight:600; font-size:15px; cursor:pointer; margin-top:14px; }
 .btn-kya-sign:hover { background:#c66a00; }
 .btn-clear { background:#888; color:#fff; padding:6px 14px; border:none; border-radius:4px; cursor:pointer; font-size:12px; }
-.checkbox-lu { font-size:14px; margin:14px 0; }
+.checkbox-lu { display:block; font-size:14px; margin:14px 0; padding:10px; background:#fff8e1; border-radius:4px; border-left:3px solid #f7a800; }
+.sig-tabs { display:flex; gap:8px; margin-bottom:8px; }
+.sig-tab { padding:6px 14px; background:#eee; border:none; border-radius:4px 4px 0 0; cursor:pointer; font-size:12px; font-weight:600; }
+.sig-tab.active { background:#e07b00; color:#fff; }
+.sig-pane { display:none; }
+.sig-pane.active { display:block; }
+.kya-pdf-btn { display:inline-block; background:#1a5276; color:#fff; padding:14px 32px; border-radius:6px; text-decoration:none; font-weight:600; }
+.kya-pdf-btn:hover { background:#0e3a5c; color:#fff; }
+.alert-info { background:#e3f2fd; border-left:4px solid #1976d2; padding:12px 16px; margin:16px 0; border-radius:4px; }
+.alert-success { background:#e8f5e9; border-left:4px solid #2e7d32; padding:12px 16px; margin:16px 0; border-radius:4px; }
 </style>
 {% endblock %}
 
 {% block page_content %}
 <div class="kya-contrat-portail">
 
-  <div class="header-bar">
+  <div class="kya-portail-header">
     <div>
-      <h2>{{ contrat.contract_type }}</h2>
-      <small>Réf : <b>{{ contrat.name }}</b> — {{ contrat.employee_name }}</small>
+      <h2>{{ contrat['contract_type'] }}</h2>
+      <small>Réf : <b>{{ contrat['name'] }}</b> &middot; {{ contrat['employee_name'] or '' }}</small>
     </div>
-    <span class="badge-state {{ (contrat.workflow_state or 'Brouillon')|replace(' ','')|replace('é','e')|replace('è','e') }}">
-      {{ contrat.workflow_state or "Brouillon" }}
-    </span>
+    <div style="text-align:right;">
+      <img src="/assets/kya_hr/images/kya_logo.png" alt="KYA Energy Group" onerror="this.style.display='none'">
+      <br><br>
+      <span class="badge-state">{{ contrat['workflow_state'] or 'Brouillon' }}</span>
+    </div>
   </div>
 
-  <div class="corps-contrat">
-    {{ html_contrat | safe }}
-  </div>
+  <div class="kya-portail-body">
 
-  <!-- Bloc Signatures -->
-  <div class="kya-signature-zone">
+    {% if peut_signer_employe %}
+    <div class="alert-info">
+      <b>Bienvenue !</b> Avant de signer, merci de :<br>
+      1. <b>Compléter vos informations personnelles</b> ci-dessous<br>
+      2. Lire attentivement le contrat<br>
+      3. Cocher « lu et approuvé » et apposer votre signature
+    </div>
+    {% endif %}
 
-    <!-- Signature Employé -->
-    <div class="kya-signature-bloc">
-      <h4>Le Signataire</h4>
-      {% if contrat.signature_employe %}
-        <img src="{{ contrat.signature_employe }}" alt="Signature">
-        <p style="margin-top:8px;"><b>{{ contrat.nom_signe_employe or contrat.employee_name }}</b><br>
-        <small>Signé le {{ frappe.format_value(contrat.date_signature_employe, {"fieldtype":"Datetime"}) }}</small></p>
-      {% elif peut_signer_employe %}
-        <p><i>Mention manuscrite : « lu et approuvé »</i></p>
-        <canvas id="sig-employe" class="signature-canvas"></canvas>
-        <button type="button" class="btn-clear" onclick="clearCanvas('sig-employe')">Effacer</button>
-        <label class="checkbox-lu"><input type="checkbox" id="lu-approuve"> J'ai lu et approuvé le présent contrat</label>
-        <button class="btn-kya-sign" onclick="signContract('employe')">✍ Signer et Soumettre</button>
-      {% else %}
-        <p><i>En attente de la signature du signataire</i></p>
+    {% if peut_signer_dg %}
+    <div class="alert-info">Le signataire a complété ses informations et signé. Merci de procéder à la <b>co-signature</b>.</div>
+    {% endif %}
+
+    {% if is_finalized %}
+    <div class="alert-success">✅ Ce contrat est <b>finalisé</b>. Téléchargez la version PDF officielle ci-dessous.</div>
+    {% endif %}
+
+    <div class="kya-info-perso">
+      <h3>📋 Informations Personnelles du Signataire</h3>
+      <div class="row">
+        <div class="field"><label>Nom complet</label>
+          <input type="text" id="ip_nom" value="{{ contrat['employee_name'] or '' }}" disabled></div>
+        <div class="field"><label>Email</label>
+          <input type="email" id="ip_email" value="{{ contrat['employee_email'] or '' }}" disabled></div>
+        <div class="field"><label>Téléphone</label>
+          <input type="text" id="ip_tel" value="{{ contrat['telephone'] or '' }}" {% if not peut_editer_perso %}disabled{% endif %}></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Date de naissance *</label>
+          <input type="date" id="ip_naissance" value="{{ contrat['date_naissance'] or '' }}" {% if not peut_editer_perso %}disabled{% endif %}></div>
+        <div class="field"><label>Domicile *</label>
+          <input type="text" id="ip_domicile" value="{{ contrat['domicile'] or '' }}" placeholder="Ex : Lomé, Adidogomé" {% if not peut_editer_perso %}disabled{% endif %}></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Fils/Fille de — Nom du Père *</label>
+          <input type="text" id="ip_pere" value="{{ contrat['filiation_pere'] or '' }}" {% if not peut_editer_perso %}disabled{% endif %}></div>
+        <div class="field"><label>Et de — Nom de la Mère *</label>
+          <input type="text" id="ip_mere" value="{{ contrat['filiation_mere'] or '' }}" {% if not peut_editer_perso %}disabled{% endif %}></div>
+      </div>
+      {% if peut_editer_perso %}
+      <button type="button" class="btn-save-perso" onclick="savePersonalInfo()">💾 Enregistrer mes informations</button>
+      <small style="margin-left:10px; color:#666;"><i>À enregistrer avant de signer</i></small>
       {% endif %}
     </div>
 
-    <!-- Signature DG -->
-    <div class="kya-signature-bloc">
-      <h4>Le Directeur Général</h4>
-      {% if contrat.signature_dg %}
-        <img src="{{ contrat.signature_dg }}" alt="Signature DG">
-        <p style="margin-top:8px;"><b>{{ contrat.nom_dg }}</b><br>
-        <small>{{ contrat.fonction_dg }}<br>
-        Signé le {{ frappe.format_value(contrat.date_signature_dg, {"fieldtype":"Datetime"}) }}</small></p>
-      {% elif peut_signer_dg %}
-        <canvas id="sig-dg" class="signature-canvas"></canvas>
-        <button type="button" class="btn-clear" onclick="clearCanvas('sig-dg')">Effacer</button>
-        <p style="margin-top:8px;"><b>{{ contrat.nom_dg }}</b><br><small>{{ contrat.fonction_dg }}</small></p>
-        <button class="btn-kya-sign" onclick="signContract('dg')">✍ Approuver et Co-signer</button>
-      {% else %}
-        <p><i>En attente — le signataire doit signer en premier</i></p>
-      {% endif %}
+    <div class="corps-contrat">
+      {{ html_contrat | safe }}
     </div>
 
-  </div>
+    <div class="kya-signature-zone">
 
-  {% if is_finalized and contrat.pdf_final %}
-  <div style="margin-top:30px; text-align:center;">
-    <a href="{{ contrat.pdf_final }}" class="btn-kya-sign" target="_blank">📄 Télécharger le Contrat Signé (PDF)</a>
-  </div>
-  {% endif %}
+      <div class="kya-signature-bloc">
+        <h4>✍ Le Signataire</h4>
+        {% if contrat['signature_employe'] %}
+          <img class="sig-img" src="{{ contrat['signature_employe'] }}" alt="Signature">
+          <p style="margin-top:8px;"><b>{{ contrat['nom_signe_employe'] or contrat['employee_name'] }}</b><br>
+          <small>Signé le {{ date_signature_employe_fmt }}</small></p>
+        {% elif peut_signer_employe %}
+          <label class="checkbox-lu">
+            <input type="checkbox" id="lu-approuve">
+            <b>Mention :</b> J'ai lu et approuvé le présent contrat
+          </label>
+          <div class="sig-tabs">
+            <button type="button" class="sig-tab active" data-role="employe" data-mode="draw" onclick="switchTab(this)">✍ Dessiner</button>
+            <button type="button" class="sig-tab" data-role="employe" data-mode="upload" onclick="switchTab(this)">🖼 Importer une image</button>
+          </div>
+          <div id="pane-employe-draw" class="sig-pane active">
+            <canvas id="sig-employe" class="signature-canvas"></canvas>
+            <button type="button" class="btn-clear" onclick="clearCanvas('sig-employe')">Effacer</button>
+          </div>
+          <div id="pane-employe-upload" class="sig-pane">
+            <input type="file" id="upload-employe" accept="image/png,image/jpeg" onchange="loadImage(this,'employe')">
+            <p><small>PNG ou JPG (signature scannée ou photo)</small></p>
+            <img id="preview-employe" style="max-height:100px; display:none; border:1px solid #ddd;">
+          </div>
+          <button class="btn-kya-sign" onclick="signContract('employe')">✍ Signer et Soumettre</button>
+        {% else %}
+          <p><i>En attente de la signature du signataire</i></p>
+        {% endif %}
+      </div>
 
+      <div class="kya-signature-bloc">
+        <h4>✍ Le Directeur Général</h4>
+        {% if contrat['signature_dg'] %}
+          <img class="sig-img" src="{{ contrat['signature_dg'] }}" alt="Signature DG">
+          <p style="margin-top:8px;"><b>{{ contrat['nom_dg'] }}</b><br>
+          <small>{{ contrat['fonction_dg'] }}<br>Signé le {{ date_signature_dg_fmt }}</small></p>
+        {% elif peut_signer_dg %}
+          <p><b>{{ contrat['nom_dg'] }}</b> &middot; <small>{{ contrat['fonction_dg'] }}</small></p>
+          <div class="sig-tabs">
+            <button type="button" class="sig-tab active" data-role="dg" data-mode="draw" onclick="switchTab(this)">✍ Dessiner</button>
+            <button type="button" class="sig-tab" data-role="dg" data-mode="upload" onclick="switchTab(this)">🖼 Importer une image</button>
+          </div>
+          <div id="pane-dg-draw" class="sig-pane active">
+            <canvas id="sig-dg" class="signature-canvas"></canvas>
+            <button type="button" class="btn-clear" onclick="clearCanvas('sig-dg')">Effacer</button>
+          </div>
+          <div id="pane-dg-upload" class="sig-pane">
+            <input type="file" id="upload-dg" accept="image/png,image/jpeg" onchange="loadImage(this,'dg')">
+            <img id="preview-dg" style="max-height:100px; display:none; border:1px solid #ddd;">
+          </div>
+          <button class="btn-kya-sign" onclick="signContract('dg')">✍ Approuver et Co-signer</button>
+        {% else %}
+          <p><i>En attente — le signataire doit signer en premier</i></p>
+        {% endif %}
+      </div>
+
+    </div>
+
+    {% if is_finalized and contrat['pdf_final'] %}
+    <div style="margin-top:30px; text-align:center;">
+      <a href="{{ contrat['pdf_final'] }}" class="kya-pdf-btn" target="_blank">📄 Télécharger le Contrat Signé (PDF)</a>
+    </div>
+    {% endif %}
+
+  </div>
 </div>
 
 <script>
-// ----- Signature canvas (souris + tactile) -----
+const sigData = { employe: null, dg: null };
+const sigMode = { employe: 'draw', dg: 'draw' };
 const canvases = {};
+
+function switchTab(btn) {
+  const role = btn.dataset.role;
+  const mode = btn.dataset.mode;
+  sigMode[role] = mode;
+  document.querySelectorAll(`#pane-${role}-draw, #pane-${role}-upload`).forEach(p => p.classList.remove('active'));
+  document.getElementById(`pane-${role}-${mode}`).classList.add('active');
+  btn.parentElement.querySelectorAll('.sig-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function loadImage(input, role) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) { frappe.msgprint('Image trop volumineuse (max 2 Mo)'); return; }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    sigData[role] = e.target.result;
+    const preview = document.getElementById(`preview-${role}`);
+    preview.src = e.target.result;
+    preview.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
 function setupCanvas(id) {
-    const c = document.getElementById(id);
-    if (!c) return;
-    canvases[id] = c;
-    const ctx = c.getContext('2d');
-    c.width = c.offsetWidth; c.height = c.offsetHeight;
-    ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.strokeStyle = '#000';
-    let drawing = false;
-    function getXY(e) {
-        const rect = c.getBoundingClientRect();
-        const t = e.touches ? e.touches[0] : e;
-        return [t.clientX - rect.left, t.clientY - rect.top];
-    }
-    function start(e) { drawing = true; const [x,y] = getXY(e); ctx.beginPath(); ctx.moveTo(x,y); e.preventDefault(); }
-    function move(e) { if (!drawing) return; const [x,y] = getXY(e); ctx.lineTo(x,y); ctx.stroke(); e.preventDefault(); }
-    function end() { drawing = false; }
-    c.addEventListener('mousedown', start); c.addEventListener('mousemove', move);
-    c.addEventListener('mouseup', end); c.addEventListener('mouseleave', end);
-    c.addEventListener('touchstart', start); c.addEventListener('touchmove', move); c.addEventListener('touchend', end);
+  const c = document.getElementById(id);
+  if (!c) return;
+  canvases[id] = c;
+  const ctx = c.getContext('2d');
+  c.width = c.offsetWidth; c.height = c.offsetHeight;
+  ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.strokeStyle = '#000';
+  let drawing = false;
+  function getXY(e) {
+    const rect = c.getBoundingClientRect();
+    const t = e.touches ? e.touches[0] : e;
+    return [t.clientX - rect.left, t.clientY - rect.top];
+  }
+  function start(e) { drawing = true; const [x,y] = getXY(e); ctx.beginPath(); ctx.moveTo(x,y); e.preventDefault(); }
+  function move(e) { if (!drawing) return; const [x,y] = getXY(e); ctx.lineTo(x,y); ctx.stroke(); e.preventDefault(); }
+  function end() { drawing = false; }
+  c.addEventListener('mousedown', start); c.addEventListener('mousemove', move);
+  c.addEventListener('mouseup', end); c.addEventListener('mouseleave', end);
+  c.addEventListener('touchstart', start); c.addEventListener('touchmove', move); c.addEventListener('touchend', end);
 }
 function clearCanvas(id) {
-    const c = canvases[id]; if (!c) return;
-    c.getContext('2d').clearRect(0,0,c.width,c.height);
+  const c = canvases[id]; if (!c) return;
+  c.getContext('2d').clearRect(0,0,c.width,c.height);
 }
+function isCanvasBlank(id) {
+  const c = canvases[id]; if (!c) return true;
+  const blank = document.createElement('canvas');
+  blank.width = c.width; blank.height = c.height;
+  return c.toDataURL() === blank.toDataURL();
+}
+
+function getPersoData() {
+  return {
+    telephone: document.getElementById('ip_tel').value,
+    date_naissance: document.getElementById('ip_naissance').value,
+    domicile: document.getElementById('ip_domicile').value,
+    filiation_pere: document.getElementById('ip_pere').value,
+    filiation_mere: document.getElementById('ip_mere').value,
+  };
+}
+
+function savePersonalInfo() {
+  frappe.call({
+    method: 'kya_hr.api.kya_contracts.update_personal_info',
+    args: { contract_id: '{{ contrat["name"] }}', data: getPersoData() },
+    freeze: true, freeze_message: 'Enregistrement…',
+    callback: (r) => { if (!r.exc) frappe.show_alert({message: '✅ Informations enregistrées', indicator: 'green'}); }
+  });
+}
+
 function signContract(role) {
-    if (role === 'employe') {
-        if (!document.getElementById('lu-approuve').checked) {
-            frappe.msgprint(__('Veuillez cocher « J\'ai lu et approuvé » avant de signer.'));
-            return;
-        }
+  if (role === 'employe') {
+    if (!document.getElementById('lu-approuve').checked) {
+      frappe.msgprint("Veuillez cocher « J'ai lu et approuvé » avant de signer."); return;
     }
+    const required = {ip_pere: 'Nom du Père', ip_mere: 'Nom de la Mère', ip_domicile: 'Domicile', ip_naissance: 'Date de naissance'};
+    for (const [id, label] of Object.entries(required)) {
+      if (!document.getElementById(id).value) { frappe.msgprint(`Veuillez renseigner : ${label}`); return; }
+    }
+  }
+
+  let data = null;
+  if (sigMode[role] === 'draw') {
     const canvasId = role === 'employe' ? 'sig-employe' : 'sig-dg';
-    const c = canvases[canvasId];
-    if (!c) return;
-    // Détection canvas vide
-    const blank = document.createElement('canvas');
-    blank.width = c.width; blank.height = c.height;
-    if (c.toDataURL() === blank.toDataURL()) {
-        frappe.msgprint(__('Veuillez signer dans le cadre.'));
-        return;
+    if (isCanvasBlank(canvasId)) { frappe.msgprint('Veuillez signer ou importer une image.'); return; }
+    data = canvases[canvasId].toDataURL('image/png');
+  } else {
+    data = sigData[role];
+    if (!data) { frappe.msgprint("Veuillez sélectionner une image de signature."); return; }
+  }
+
+  const signCall = () => frappe.call({
+    method: 'kya_hr.api.kya_contracts.sign_contract',
+    args: { contract_id: '{{ contrat["name"] }}', signature_data: data, role: role },
+    freeze: true, freeze_message: 'Enregistrement de votre signature…',
+    callback: (r) => {
+      if (!r.exc) {
+        frappe.msgprint({title: 'Signature enregistrée', message: 'Merci !', indicator: 'green'});
+        setTimeout(() => location.reload(), 1500);
+      }
     }
-    const data = c.toDataURL('image/png');
+  });
+
+  if (role === 'employe') {
     frappe.call({
-        method: 'kya_hr.api.kya_contracts.sign_contract',
-        args: { contract_id: '{{ contrat.name }}', signature_data: data, role: role },
-        freeze: true,
-        freeze_message: __('Enregistrement de votre signature…'),
-        callback: (r) => {
-            if (!r.exc) {
-                frappe.msgprint({
-                    title: __('Signature enregistrée'),
-                    message: __('Merci ! Votre signature a été enregistrée.'),
-                    indicator: 'green'
-                });
-                setTimeout(() => location.reload(), 1500);
-            }
-        }
+      method: 'kya_hr.api.kya_contracts.update_personal_info',
+      args: { contract_id: '{{ contrat["name"] }}', data: getPersoData() },
+      callback: () => signCall()
     });
+  } else {
+    signCall();
+  }
 }
-window.addEventListener('load', () => {
-    setupCanvas('sig-employe');
-    setupCanvas('sig-dg');
-});
+
+window.addEventListener('load', () => { setupCanvas('sig-employe'); setupCanvas('sig-dg'); });
 </script>
 {% endblock %}

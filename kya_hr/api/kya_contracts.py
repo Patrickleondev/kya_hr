@@ -92,21 +92,52 @@ def send_to_signataire(contract_id):
         """
 
     message = f"""
-    <p>Bonjour <b>{doc.employee_name}</b>,</p>
-    <p>Nous sommes ravis de vous accueillir au sein de <b>KYA-Energy Group</b>.</p>
-    <p>Un contrat de <b>{doc.contract_type}</b> a été préparé à votre attention.
-    Merci de le lire attentivement et de le signer en ligne.</p>
-    {creds_block}
-    <p><b>→ Accéder à votre contrat :</b><br>
-    <a href="{portail_url}">{portail_url}</a></p>
-    <p>Démarche :<br>
-    1. Connectez-vous à la plateforme<br>
-    2. Lisez votre contrat en entier<br>
-    3. Cochez « J'ai lu et approuvé »<br>
-    4. Signez dans le champ de signature<br>
-    5. Cliquez sur « Signer et Soumettre »</p>
-    <p>Pour toute question : <a href="mailto:rh@kya-energy.com">rh@kya-energy.com</a></p>
-    <p>Cordialement,<br>Le Service des Ressources Humaines<br>KYA-Energy Group</p>
+    <div style="font-family:Arial,sans-serif; max-width:640px; margin:0 auto; border:1px solid #eee; border-radius:6px; overflow:hidden;">
+      <div style="background:linear-gradient(135deg,#f7a800 0%,#e07b00 100%); padding:24px; color:#fff; text-align:center;">
+        <h2 style="margin:0;">Bienvenue chez KYA-Energy Group</h2>
+        <p style="margin:6px 0 0 0; opacity:0.95;">Votre contrat est prêt à être signé en ligne</p>
+      </div>
+      <div style="padding:24px 28px;">
+        <p>Bonjour <b>{doc.employee_name}</b>,</p>
+        <p>Nous avons le plaisir de vous proposer un <b>{doc.contract_type}</b> au sein de KYA-Energy Group.</p>
+        <p>Référence du contrat : <b>{doc.name}</b></p>
+
+        {creds_block}
+
+        <h3 style="color:#e07b00; margin-top:24px;">Étapes à suivre</h3>
+        <ol style="line-height:1.8;">
+          <li>Cliquez sur le lien ci-dessous pour accéder à votre contrat</li>
+          <li>Connectez-vous avec les identifiants fournis</li>
+          <li><b>Complétez vos informations personnelles</b> :
+            <ul>
+              <li>Nom du Père et de la Mère (filiation)</li>
+              <li>Date de naissance</li>
+              <li>Domicile</li>
+              <li>Téléphone</li>
+            </ul>
+          </li>
+          <li>Lisez attentivement le contrat dans son intégralité</li>
+          <li>Cochez la case <b>« J'ai lu et approuvé »</b></li>
+          <li>Apposez votre signature (au choix) :
+            <ul>
+              <li>en la <b>dessinant</b> à la souris ou au doigt sur tablette/téléphone</li>
+              <li>ou en <b>important une image</b> de votre signature scannée (PNG/JPG)</li>
+            </ul>
+          </li>
+          <li>Cliquez sur <b>« Signer et Soumettre »</b></li>
+        </ol>
+
+        <p style="text-align:center; margin:30px 0;">
+          <a href="{portail_url}" style="display:inline-block; background:#e07b00; color:#fff; padding:14px 32px; text-decoration:none; border-radius:6px; font-weight:600;">→ Accéder à mon contrat</a>
+        </p>
+
+        <p style="font-size:13px; color:#666;">Une fois votre signature apposée, le contrat sera transmis au Directeur Général pour co-signature.
+        Vous recevrez la version finale signée par email au format PDF.</p>
+
+        <p>Pour toute question, contactez-nous : <a href="mailto:rh@kya-energy.com">rh@kya-energy.com</a></p>
+        <p style="margin-top:30px;">Bien cordialement,<br><b>Le Service des Ressources Humaines</b><br>KYA-Energy Group</p>
+      </div>
+    </div>
     """
     frappe.sendmail(
         recipients=[doc.employee_email],
@@ -206,3 +237,24 @@ def get_contract_for_signing(contract_id):
         "can_sign_dg": is_dg and doc.workflow_state == "Signé Employé",
         "is_finalized": doc.workflow_state == "Finalisé",
     }
+
+
+@frappe.whitelist()
+def update_personal_info(contract_id, data):
+    """Le signataire complète ses infos perso depuis le portail (avant signature)."""
+    import json
+    if isinstance(data, str):
+        data = json.loads(data)
+    doc = frappe.get_doc("KYA Contrat", contract_id)
+    if frappe.session.user != doc.employee_email and "System Manager" not in frappe.get_roles():
+        frappe.throw(_("Vous n'êtes pas le signataire de ce contrat."), frappe.PermissionError)
+    if doc.workflow_state not in ("Envoyé Signataire", "Brouillon"):
+        frappe.throw(_("Le contrat n'est plus modifiable."))
+
+    allowed = {"telephone", "date_naissance", "domicile", "filiation_pere", "filiation_mere"}
+    for k, v in data.items():
+        if k in allowed:
+            doc.set(k, v or None)
+    doc.save(ignore_permissions=True)
+    frappe.db.commit()
+    return {"ok": True}
