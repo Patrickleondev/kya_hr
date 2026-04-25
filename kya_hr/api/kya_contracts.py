@@ -1,95 +1,77 @@
-"""KYA Contracts — API endpoints whitelistés.
+"""KYA Contracts — API endpoints (token-based, sans création de User Frappe).
 
-Endpoints:
-- send_to_signataire: création/maj user + envoi email bienvenue
-- sign_contract: appelé depuis le portail web pour signer
-- get_contract_for_signing: récupère un contrat avec contrôle d'accès
+Architecture :
+- Le signataire accède au contrat via un lien magique : /kya-contrat?name=...&token=<HMAC>
+- Aucun compte Frappe n'est créé pour le stagiaire.
+- Avant signature : confirmation du téléphone (anti-fuite).
+- Signature par sections (case "Lu et approuvé" sur chaque section).
+- DG accède via token DG distinct.
+
+Endpoints (allow_guest=True car signataire = Guest) :
+- send_to_signataire (RH only)
+- verify_phone, update_personal_info, mark_section_signed, sign_contract, get_contract_view (Guest+token)
 """
 import frappe
-import secrets
-import string
+import json
+import hmac
+import time
 from frappe import _
 from frappe.utils import now_datetime
-from frappe.utils.password import update_password
 
 
-SIGNATAIRE_ROLE = "KYA Signataire Contrat"
+# ─── Helpers ──────────────────────────────────────────────────────────────────
+
+def _generate_token():
+    return frappe.generate_hash(length=48)
 
 
-def _ensure_signataire_role():
-    if not frappe.db.exists("Role", SIGNATAIRE_ROLE):
-        r = frappe.new_doc("Role")
-        r.role_name = SIGNATAIRE_ROLE
-        r.desk_access = 0  # Web only
-        r.insert(ignore_permissions=True)
+def _verify_token(doc, token, role):
+    if not token:
+        return False
+    field = "access_token_signataire" if role == "employe" else "access_token_dg"
+    expected = doc.get(field) or ""
+    if not expected:
+        return False
+    return hmac.compare_digest(str(token), str(expected))
 
 
-def _gen_password(length=12):
-    alphabet = string.ascii_letters + string.digits
-    return "".join(secrets.choice(alphabet) for _ in range(length))
+def _load_contract_with_token(contract_id, token, role):
+    if not frappe.db.exists("KYA Contrat", contract_id):
+        frappe.throw(_("Contrat introuvable"), frappe.DoesNotExistError)
+    doc = frappe.get_doc("KYA Contrat", contract_id)
+    if not _verify_token(doc, token, role):
+        frappe.throw(_("Lien invalide ou expiré"), frappe.PermissionError)
+    return doc
 
 
-def _ensure_user(email, full_name):
-    """Crée l'utilisateur si inexistant, ajoute le rôle signataire, retourne (user, temp_pwd|None)."""
-    _ensure_signataire_role()
-    if frappe.db.exists("User", email):
-        user = frappe.get_doc("User", email)
-        if not any(r.role == SIGNATAIRE_ROLE for r in user.roles):
-            user.append("roles", {"role": SIGNATAIRE_ROLE})
-            user.save(ignore_permissions=True)
-        return user, None
-    pwd = _gen_password()
-    user = frappe.get_doc({
-        "doctype": "User",
-        "email": email,
-        "first_name": full_name or email.split("@")[0],
-        "send_welcome_email": 0,
-        "user_type": "Website User",
-        "enabled": 1,
-        "roles": [{"role": SIGNATAIRE_ROLE}],
-    }).insert(ignore_permissions=True)
-    update_password(user.name, pwd)
-    return user, pwd
+def _normalize_phone(p):
+    if not p:
+        return ""
+    return "".join(c for c in str(p) if c.isdigit())[-9:]
 
+
+# ─── 1. RH envoie le contrat au signataire ───────────────────────────────────
 
 @frappe.whitelist()
 def send_to_signataire(contract_id):
-    """Étape 3 — RH envoie le contrat au signataire."""
     if not any(r in frappe.get_roles() for r in ("HR Manager", "System Manager", "Responsable RH")):
         frappe.throw(_("Permission refusée"), frappe.PermissionError)
 
     doc = frappe.get_doc("KYA Contrat", contract_id)
     if not doc.employee_email:
         frappe.throw(_("L'employé n'a pas d'email enregistré."))
+    if not doc.telephone:
+        frappe.throw(_("Le numéro de téléphone du signataire est requis avant l'envoi."))
 
-    user, temp_pwd = _ensure_user(doc.employee_email, doc.employee_name)
-
-    # User Permission : restreindre l'accès au seul contrat concerné
-    if not frappe.db.exists("User Permission", {
-        "user": user.name, "allow": "KYA Contrat", "for_value": doc.name
-    }):
-        frappe.get_doc({
-            "doctype": "User Permission",
-            "user": user.name,
-            "allow": "KYA Contrat",
-            "for_value": doc.name,
-            "apply_to_all_doctypes": 0,
-        }).insert(ignore_permissions=True)
+    if not doc.access_token_signataire:
+        doc.access_token_signataire = _generate_token()
+    sender = frappe.session.user
+    if sender and sender != "Guest" and "@" in sender:
+        doc.rh_sender_email = sender
 
     site = frappe.utils.get_url()
-    portail_url = f"{site}/kya-contrat?name={doc.name}"
-
-    creds_block = ""
-    if temp_pwd:
-        creds_block = f"""
-        <div style="background:#f5f5f5; padding:12px; border-left:4px solid #e07b00;">
-        <p><b>Vos identifiants de connexion :</b></p>
-        <p>Plateforme : <a href="{site}">{site}</a><br>
-        Identifiant : <code>{doc.employee_email}</code><br>
-        Mot de passe temporaire : <code>{temp_pwd}</code></p>
-        <p><i>Vous serez invité(e) à le changer dès la première connexion.</i></p>
-        </div>
-        """
+    portail_url = f"{site}/kya-contrat?name={doc.name}&token={doc.access_token_signataire}"
+    phone_hint = (doc.telephone or "")[-4:] if doc.telephone else "????"
 
     message = f"""
     <div style="font-family:Arial,sans-serif; max-width:640px; margin:0 auto; border:1px solid #eee; border-radius:6px; overflow:hidden;">
@@ -100,30 +82,22 @@ def send_to_signataire(contract_id):
       <div style="padding:24px 28px;">
         <p>Bonjour <b>{doc.employee_name}</b>,</p>
         <p>Nous avons le plaisir de vous proposer un <b>{doc.contract_type}</b> au sein de KYA-Energy Group.</p>
-        <p>Référence du contrat : <b>{doc.name}</b></p>
+        <p>Référence : <b>{doc.name}</b></p>
 
-        {creds_block}
+        <div style="background:#fff8e7; border-left:4px solid #e07b00; padding:14px 18px; margin:18px 0;">
+          <p style="margin:0;"><b>🔒 Aucun mot de passe à mémoriser.</b><br>
+          Le lien ci-dessous vous donne accès direct à votre contrat. Pour des raisons de sécurité,
+          il vous sera demandé de <b>confirmer votre numéro de téléphone</b>
+          (se terminant par <code style="background:#fff;padding:2px 6px;">…{phone_hint}</code>) avant de signer.</p>
+        </div>
 
-        <h3 style="color:#e07b00; margin-top:24px;">Étapes à suivre</h3>
+        <h3 style="color:#e07b00; margin-top:24px;">Étapes</h3>
         <ol style="line-height:1.8;">
-          <li>Cliquez sur le lien ci-dessous pour accéder à votre contrat</li>
-          <li>Connectez-vous avec les identifiants fournis</li>
-          <li><b>Complétez vos informations personnelles</b> :
-            <ul>
-              <li>Nom du Père et de la Mère (filiation)</li>
-              <li>Date de naissance</li>
-              <li>Domicile</li>
-              <li>Téléphone</li>
-            </ul>
-          </li>
-          <li>Lisez attentivement le contrat dans son intégralité</li>
-          <li>Cochez la case <b>« J'ai lu et approuvé »</b></li>
-          <li>Apposez votre signature (au choix) :
-            <ul>
-              <li>en la <b>dessinant</b> à la souris ou au doigt sur tablette/téléphone</li>
-              <li>ou en <b>important une image</b> de votre signature scannée (PNG/JPG)</li>
-            </ul>
-          </li>
+          <li>Cliquez sur le bouton ci-dessous</li>
+          <li><b>Confirmez votre numéro de téléphone</b> (les 9 chiffres)</li>
+          <li>Complétez vos informations personnelles (Père, Mère, Domicile, Date de naissance)</li>
+          <li>Lisez chaque section et cochez <b>« Lu et approuvé »</b> sur chacune</li>
+          <li>Apposez votre signature (en la <b>dessinant</b> ou en <b>important une image</b> PNG/JPG)</li>
           <li>Cliquez sur <b>« Signer et Soumettre »</b></li>
         </ol>
 
@@ -131,37 +105,98 @@ def send_to_signataire(contract_id):
           <a href="{portail_url}" style="display:inline-block; background:#e07b00; color:#fff; padding:14px 32px; text-decoration:none; border-radius:6px; font-weight:600;">→ Accéder à mon contrat</a>
         </p>
 
-        <p style="font-size:13px; color:#666;">Une fois votre signature apposée, le contrat sera transmis au Directeur Général pour co-signature.
-        Vous recevrez la version finale signée par email au format PDF.</p>
+        <p style="font-size:12px; color:#888; word-break:break-all;">Si le bouton ne fonctionne pas :<br>{portail_url}</p>
 
-        <p>Pour toute question, contactez-nous : <a href="mailto:rh@kya-energy.com">rh@kya-energy.com</a></p>
+        <p style="font-size:13px; color:#666;">Une fois signé, le contrat sera transmis au Directeur Général. Vous recevrez la version finale en PDF par email.</p>
+        <p>Pour toute question : <a href="mailto:rh@kya-energy.com">rh@kya-energy.com</a></p>
         <p style="margin-top:30px;">Bien cordialement,<br><b>Le Service des Ressources Humaines</b><br>KYA-Energy Group</p>
       </div>
     </div>
     """
     frappe.sendmail(
         recipients=[doc.employee_email],
-        subject=f"Bienvenue chez KYA-Energy Group — Votre contrat {doc.name}",
+        subject=f"Votre contrat {doc.contract_type} — KYA-Energy Group ({doc.name})",
         message=message,
         now=False,
     )
 
-    # Workflow → Envoyé Signataire
     doc.workflow_state = "Envoyé Signataire"
-    doc.save(ignore_permissions=True)
+    doc.flags.ignore_permissions = True
+    doc.save()
     frappe.db.commit()
-    return {"ok": True, "user": user.name, "url": portail_url}
+    return {"ok": True, "url": portail_url}
 
 
-@frappe.whitelist()
-def sign_contract(contract_id, signature_data, role="employe"):
-    """Signature depuis le portail. role='employe' ou 'dg'."""
-    doc = frappe.get_doc("KYA Contrat", contract_id)
-    user = frappe.session.user
+# ─── 2. Confirmation téléphone ────────────────────────────────────────────────
+
+@frappe.whitelist(allow_guest=True)
+def verify_phone(contract_id, token, phone):
+    doc = _load_contract_with_token(contract_id, token, "employe")
+    expected = _normalize_phone(doc.telephone)
+    given = _normalize_phone(phone)
+    if not expected or not given or expected != given:
+        time.sleep(1.5)  # anti-bruteforce léger
+        frappe.throw(_("Numéro de téléphone incorrect."))
+    doc.db_set("phone_confirmed", 1, update_modified=False)
+    frappe.db.commit()
+    return {"ok": True}
+
+
+# ─── 3. Mise à jour infos perso ───────────────────────────────────────────────
+
+@frappe.whitelist(allow_guest=True)
+def update_personal_info(contract_id, token, data):
+    doc = _load_contract_with_token(contract_id, token, "employe")
+    if not doc.phone_confirmed:
+        frappe.throw(_("Confirmez d'abord votre numéro de téléphone."))
+    if doc.workflow_state not in ("Envoyé Signataire", "Brouillon"):
+        frappe.throw(_("Le contrat n'est plus modifiable."))
+    if isinstance(data, str):
+        data = json.loads(data)
+    allowed = {"telephone", "date_naissance", "domicile", "filiation_pere", "filiation_mere"}
+    for k, v in (data or {}).items():
+        if k in allowed:
+            doc.set(k, v or None)
+    doc.flags.ignore_permissions = True
+    doc.save()
+    frappe.db.commit()
+    return {"ok": True}
+
+
+# ─── 4. Marquer une section comme lue/approuvée ───────────────────────────────
+
+@frappe.whitelist(allow_guest=True)
+def mark_section_signed(contract_id, token, section_id, role="employe"):
+    doc = _load_contract_with_token(contract_id, token, role)
+    if role == "employe" and not doc.phone_confirmed:
+        frappe.throw(_("Confirmez d'abord votre numéro de téléphone."))
+    sections = json.loads(doc.sections_signees or "{}")
+    sections.setdefault(role, [])
+    if section_id not in sections[role]:
+        sections[role].append(section_id)
+    doc.db_set("sections_signees", json.dumps(sections), update_modified=False)
+    frappe.db.commit()
+    return {"ok": True, "sections": sections.get(role, [])}
+
+
+# ─── 5. Signature finale ──────────────────────────────────────────────────────
+
+@frappe.whitelist(allow_guest=True)
+def sign_contract(contract_id, token, signature_data, role="employe", total_sections=None):
+    doc = _load_contract_with_token(contract_id, token, role)
+
+    if total_sections:
+        try:
+            total_sections = int(total_sections)
+        except Exception:
+            total_sections = 0
+        signed = json.loads(doc.sections_signees or "{}").get(role, [])
+        if total_sections > 0 and len(signed) < total_sections:
+            frappe.throw(_("Vous devez cocher 'Lu et approuvé' sur chaque section ({0}/{1}).").format(len(signed), total_sections))
 
     if role == "employe":
-        if user != doc.employee_email and "System Manager" not in frappe.get_roles():
-            frappe.throw(_("Vous n'êtes pas le signataire de ce contrat."), frappe.PermissionError)
+        if not doc.phone_confirmed:
+            frappe.throw(_("Confirmez d'abord votre numéro de téléphone."))
         if doc.workflow_state != "Envoyé Signataire":
             frappe.throw(_("Le contrat n'est pas en attente de votre signature."))
         doc.signature_employe = signature_data
@@ -169,33 +204,35 @@ def sign_contract(contract_id, signature_data, role="employe"):
         doc.nom_signe_employe = doc.employee_name
         doc.date_signature_employe = now_datetime()
         doc.workflow_state = "Signé Employé"
-        doc.save(ignore_permissions=True)
-        # Notif DG
+        if not doc.access_token_dg:
+            doc.access_token_dg = _generate_token()
+        doc.flags.ignore_permissions = True
+        doc.save()
         _notify_dg(doc)
     elif role == "dg":
-        if not any(r in frappe.get_roles() for r in ("Directeur Général", "DG", "System Manager")):
-            frappe.throw(_("Seul le Directeur Général peut co-signer."), frappe.PermissionError)
         if doc.workflow_state != "Signé Employé":
             frappe.throw(_("Le contrat n'est pas en attente de la signature DG."))
         doc.signature_dg = signature_data
         doc.date_signature_dg = now_datetime()
         doc.workflow_state = "Finalisé"
-        doc.save(ignore_permissions=True)
-        # Submit + génération PDF (déclenchée par on_update)
+        doc.flags.ignore_permissions = True
+        doc.save()
         try:
             doc.submit()
         except Exception:
             frappe.log_error(frappe.get_traceback(), "KYA Contrat submit")
     else:
-        frappe.throw(_("Rôle de signature invalide"))
+        frappe.throw(_("Rôle invalide"))
 
     frappe.db.commit()
     return {"ok": True, "state": doc.workflow_state}
 
 
+# ─── 6. Notification DG après signature signataire ───────────────────────────
+
 def _notify_dg(doc):
     site = frappe.utils.get_url()
-    url = f"{site}/kya-contrat?name={doc.name}"
+    url = f"{site}/kya-contrat?name={doc.name}&token={doc.access_token_dg}"
     dg_emails = []
     for u in frappe.get_all("Has Role", filters={"role": "Directeur Général", "parenttype": "User"}, fields=["parent"]):
         em = frappe.db.get_value("User", u.parent, "email")
@@ -205,56 +242,49 @@ def _notify_dg(doc):
         return
     frappe.sendmail(
         recipients=dg_emails,
-        subject=f"✅ {doc.employee_name} a signé son contrat — Action requise (DG)",
+        subject=f"✅ {doc.employee_name} a signé son contrat — Votre co-signature requise",
         message=f"""
-        <p>Bonjour,</p>
-        <p>M/Mme <b>{doc.employee_name}</b> a signé son contrat de <b>{doc.contract_type}</b>
-        le {frappe.format_value(doc.date_signature_employe, {'fieldtype':'Datetime'})}.</p>
-        <p>Le contrat est en attente de votre co-signature.</p>
-        <p><a href="{url}">→ Accéder au contrat</a></p>
-        <p>Référence : <b>{doc.name}</b></p>
+        <div style="font-family:Arial,sans-serif; max-width:640px; margin:0 auto; border:1px solid #eee; border-radius:6px; overflow:hidden;">
+          <div style="background:linear-gradient(135deg,#1a5276 0%,#2980b9 100%); padding:20px; color:#fff;">
+            <h2 style="margin:0;">Co-signature requise</h2>
+          </div>
+          <div style="padding:24px 28px;">
+            <p>Monsieur le Directeur Général,</p>
+            <p><b>{doc.employee_name}</b> a signé son contrat de <b>{doc.contract_type}</b>
+            le {frappe.format_value(doc.date_signature_employe, {'fieldtype':'Datetime'})}.</p>
+            <p>Votre co-signature est requise pour finaliser le contrat.</p>
+            <p style="text-align:center; margin:24px 0;">
+              <a href="{url}" style="display:inline-block; background:#1a5276; color:#fff; padding:12px 26px; text-decoration:none; border-radius:5px; font-weight:600;">→ Accéder au contrat</a>
+            </p>
+            <p style="font-size:13px; color:#666;">Référence : <b>{doc.name}</b></p>
+          </div>
+        </div>
         """,
         now=False,
     )
 
 
-@frappe.whitelist()
-def get_contract_for_signing(contract_id):
-    """Récupère un contrat pour le portail web avec contrôle d'accès."""
-    doc = frappe.get_doc("KYA Contrat", contract_id)
-    user = frappe.session.user
-    roles = set(frappe.get_roles())
-    is_signataire = (user == doc.employee_email)
-    is_dg = bool(roles & {"Directeur Général", "DG", "System Manager"})
-    is_rh = bool(roles & {"HR Manager", "Responsable RH", "System Manager"})
+# ─── 7. Récupération du contrat pour le portail ──────────────────────────────
 
-    if not (is_signataire or is_dg or is_rh):
-        frappe.throw(_("Accès refusé"), frappe.PermissionError)
+@frappe.whitelist(allow_guest=True)
+def get_contract_view(contract_id, token):
+    if not frappe.db.exists("KYA Contrat", contract_id):
+        frappe.throw(_("Contrat introuvable"), frappe.DoesNotExistError)
+    doc = frappe.get_doc("KYA Contrat", contract_id)
+    role = None
+    if _verify_token(doc, token, "employe"):
+        role = "employe"
+    elif _verify_token(doc, token, "dg"):
+        role = "dg"
+    else:
+        frappe.throw(_("Lien invalide ou expiré"), frappe.PermissionError)
 
     return {
         "doc": doc.as_dict(),
-        "can_sign_employe": is_signataire and doc.workflow_state == "Envoyé Signataire",
-        "can_sign_dg": is_dg and doc.workflow_state == "Signé Employé",
+        "role": role,
+        "phone_confirmed": bool(doc.phone_confirmed),
+        "sections_signees": json.loads(doc.sections_signees or "{}").get(role, []),
+        "can_sign": (role == "employe" and doc.workflow_state == "Envoyé Signataire") or
+                    (role == "dg" and doc.workflow_state == "Signé Employé"),
         "is_finalized": doc.workflow_state == "Finalisé",
     }
-
-
-@frappe.whitelist()
-def update_personal_info(contract_id, data):
-    """Le signataire complète ses infos perso depuis le portail (avant signature)."""
-    import json
-    if isinstance(data, str):
-        data = json.loads(data)
-    doc = frappe.get_doc("KYA Contrat", contract_id)
-    if frappe.session.user != doc.employee_email and "System Manager" not in frappe.get_roles():
-        frappe.throw(_("Vous n'êtes pas le signataire de ce contrat."), frappe.PermissionError)
-    if doc.workflow_state not in ("Envoyé Signataire", "Brouillon"):
-        frappe.throw(_("Le contrat n'est plus modifiable."))
-
-    allowed = {"telephone", "date_naissance", "domicile", "filiation_pere", "filiation_mere"}
-    for k, v in data.items():
-        if k in allowed:
-            doc.set(k, v or None)
-    doc.save(ignore_permissions=True)
-    frappe.db.commit()
-    return {"ok": True}

@@ -104,6 +104,13 @@
   {"fieldname": "section_archive", "fieldtype": "Section Break", "label": "Archivage"},
   {"fieldname": "pdf_final", "fieldtype": "Attach", "label": "Contrat Signé (PDF)", "read_only": 1},
 
+  {"fieldname": "section_token", "fieldtype": "Section Break", "label": "Accès Portail (Tokens)", "collapsible": 1, "hidden": 1},
+  {"fieldname": "access_token_signataire", "fieldtype": "Data", "label": "Token Signataire", "read_only": 1, "hidden": 1, "no_copy": 1, "length": 80},
+  {"fieldname": "access_token_dg", "fieldtype": "Data", "label": "Token DG", "read_only": 1, "hidden": 1, "no_copy": 1, "length": 80},
+  {"fieldname": "sections_signees", "fieldtype": "Long Text", "label": "Sections lues/signées (JSON)", "read_only": 1, "hidden": 1},
+  {"fieldname": "phone_confirmed", "fieldtype": "Check", "label": "Téléphone Confirmé", "read_only": 1, "hidden": 1, "default": 0},
+  {"fieldname": "rh_sender_email", "fieldtype": "Data", "label": "Email RH Expéditrice", "read_only": 1, "hidden": 1, "options": "Email"},
+
   {"fieldname": "section_internal", "fieldtype": "Section Break", "label": "Notes Internes", "collapsible": 1},
   {"fieldname": "notes_rh", "fieldtype": "Small Text", "label": "Notes RH"},
 

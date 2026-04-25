@@ -141,15 +141,18 @@ class KYAContrat(Document):
                 attachments.append({"fid": fid})
 
         recipients = [self.employee_email]
-        # RH
+        # RH expéditrice (la personne qui a cliqué "Envoyer au signataire")
+        if self.rh_sender_email and self.rh_sender_email not in recipients:
+            recipients.append(self.rh_sender_email)
+        # RH globale (settings)
         rh_email = None
         try:
             rh_email = frappe.db.get_single_value("KYA Dashboard Settings", "rh_email")
         except Exception:
             pass
-        if rh_email:
+        if rh_email and rh_email not in recipients:
             recipients.append(rh_email)
-        # DG
+        # DG (archive)
         for u in frappe.get_all("Has Role", filters={"role": "Directeur Général", "parenttype": "User"}, fields=["parent"]):
             em = frappe.db.get_value("User", u.parent, "email")
             if em and em not in recipients:
