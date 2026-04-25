@@ -1,0 +1,164 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:DOC-VEH-{YYYY}-{#####}",
+ "creation": "2026-04-25 10:00:00.000000",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "vehicle",
+  "license_plate",
+  "type_document",
+  "column_break_1",
+  "numero",
+  "date_emission",
+  "date_expiration",
+  "section_alert",
+  "alerte_jours_avant",
+  "fournisseur",
+  "column_break_2",
+  "cout_xof",
+  "section_pj",
+  "fichier",
+  "remarques"
+ ],
+ "fields": [
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Véhicule",
+   "options": "Vehicle",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "vehicle.license_plate",
+   "fieldname": "license_plate",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Immatriculation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "type_document",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Type de document",
+   "options": "Carte grise\nAssurance\nVisite technique\nCarte de transport\nVignette\nAutre",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "numero",
+   "fieldtype": "Data",
+   "label": "Numéro / Référence"
+  },
+  {
+   "fieldname": "date_emission",
+   "fieldtype": "Date",
+   "label": "Date d'émission"
+  },
+  {
+   "fieldname": "date_expiration",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Date d'expiration",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_alert",
+   "fieldtype": "Section Break",
+   "label": "Alerte & Fournisseur"
+  },
+  {
+   "default": "30",
+   "description": "Nombre de jours avant expiration pour déclencher la notification.",
+   "fieldname": "alerte_jours_avant",
+   "fieldtype": "Int",
+   "label": "Alerte (jours avant)"
+  },
+  {
+   "fieldname": "fournisseur",
+   "fieldtype": "Data",
+   "label": "Fournisseur / Compagnie"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cout_xof",
+   "fieldtype": "Currency",
+   "label": "Coût (XOF)",
+   "options": "XOF"
+  },
+  {
+   "fieldname": "section_pj",
+   "fieldtype": "Section Break",
+   "label": "Pièce justificative"
+  },
+  {
+   "fieldname": "fichier",
+   "fieldtype": "Attach",
+   "label": "Fichier joint"
+  },
+  {
+   "fieldname": "remarques",
+   "fieldtype": "Small Text",
+   "label": "Remarques"
+  }
+ ],
+ "links": [],
+ "modified": "2026-04-25 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "KYA HR",
+ "name": "Document Vehicule",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Gestionnaire de Flotte",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee"
+  }
+ ],
+ "search_fields": "license_plate,type_document,numero",
+ "sort_field": "date_expiration",
+ "sort_order": "ASC",
+ "states": [],
+ "title_field": "license_plate",
+ "track_changes": 1
+}
