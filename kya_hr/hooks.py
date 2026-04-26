@@ -73,6 +73,7 @@ scheduler_events = {
     "daily": [
         "kya_hr.reminders.send_kya_birthday_reminders",
         "kya_hr.reminders.send_kya_anniversary_reminders",
+        "kya_hr.kya_hr.doctype.document_vehicule.document_vehicule.send_expiry_reminders",
     ],
     # Vendredi 17h00 : point hebdomadaire caisse au DG + DGA
     "cron": {
@@ -87,6 +88,11 @@ after_migrate = [
     "kya_hr.force_sync_workspaces.execute",
     "kya_hr.setup_branding.execute",
     "kya_hr.fix_all_workspaces.execute",
+    "kya_hr.setup_fleet.run",
+    "kya_hr.setup_fleet_workspace.run",
+    "kya_hr.setup_fleet_dashboard.run",
+    "kya_hr.setup_pv_extensions.run",
+    "kya_hr.setup_inventaire_dashboard.run",
 ]
 
 # Translations
