@@ -1,0 +1,125 @@
+{
+ "app": "kya_hr",
+ "charts": [],
+ "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Comptabilité'>💰 Comptabilité & Finance KYA</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Brouillards de Caisse\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"États Récap Chèques\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Nouveau Brouillard (Web)\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Nouvel État Récap (Web)\", \"col\": 3}}, {\"id\": \"spacer1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}]",
+ "creation": "2026-01-01 00:00:00.000000",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "type": "Workspace",
+ "hide_custom": 0,
+ "color": "#6a1b9a",
+ "icon": "currency-exchange",
+ "idx": 0,
+ "is_hidden": 0,
+ "is_standard": 1,
+ "name": "Espace Comptabilite",
+ "label": "Espace Comptabilité",
+ "module": "KYA HR",
+ "public": 1,
+ "sequence_id": 14,
+ "roles": [
+  {"role": "Accounts User"},
+  {"role": "Accounts Manager"},
+  {"role": "DAAF"},
+  {"role": "Auditeur Interne"},
+  {"role": "Directeur Général"},
+  {"role": "System Manager"}
+ ],
+ "shortcuts": [
+  {
+   "label": "Brouillards de Caisse",
+   "type": "DocType",
+   "link_to": "Brouillard Caisse",
+   "color": "#6a1b9a",
+   "icon": "cash-coin"
+  },
+  {
+   "label": "États Récap Chèques",
+   "type": "DocType",
+   "link_to": "Etat Recap Cheques",
+   "color": "#4a148c",
+   "icon": "journal-check"
+  },
+  {
+   "label": "Nouveau Brouillard (Web)",
+   "type": "URL",
+   "url": "/brouillard-caisse/new",
+   "color": "#8e24aa",
+   "icon": "plus-circle"
+  },
+  {
+   "label": "Nouvel État Récap (Web)",
+   "type": "URL",
+   "url": "/etat-recap/new",
+   "color": "#8e24aa",
+   "icon": "plus-circle"
+  }
+ ],
+ "links": [
+  {
+   "type": "Card Break",
+   "label": "Fiches Comptables",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Brouillards de Caisse",
+   "link_to": "Brouillard Caisse",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 1
+  },
+  {
+   "type": "Link",
+   "label": "États Récap. Chèques",
+   "link_to": "Etat Recap Cheques",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 1
+  },
+  {
+   "type": "Card Break",
+   "label": "Formulaires Web",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Saisir un Brouillard de Caisse (Web)",
+   "link_to": "/brouillard-caisse/new",
+   "link_type": "URL",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Saisir un État Récap (Web)",
+   "link_to": "/etat-recap/new",
+   "link_type": "URL",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 0
+  }
+ ],
+ "modified": "2026-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "quick_lists": []
+}

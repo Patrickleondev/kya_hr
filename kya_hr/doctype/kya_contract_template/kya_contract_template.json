@@ -1,0 +1,48 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:title",
+ "creation": "2026-04-24 12:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "contract_type",
+  "version",
+  "is_active",
+  "section_body",
+  "html_body",
+  "section_articles",
+  "article_nature",
+  "article_fonctions",
+  "section_internal",
+  "notes_internes"
+ ],
+ "fields": [
+  {"fieldname": "title", "fieldtype": "Data", "label": "Nom du Template", "reqd": 1, "unique": 1, "in_list_view": 1},
+  {"fieldname": "contract_type", "fieldtype": "Select", "label": "Type de Contrat", "options": "Stage Professionnel\nStage Académique\nCDI\nCDD\nPrestataire", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "version", "fieldtype": "Data", "label": "Version", "default": "RH-ENG-V01", "in_list_view": 1},
+  {"fieldname": "is_active", "fieldtype": "Check", "label": "Actif (utilisé par défaut pour ce type)", "default": 1, "in_list_view": 1},
+  {"fieldname": "section_body", "fieldtype": "Section Break", "label": "Corps du Contrat (HTML + Jinja)"},
+  {"fieldname": "html_body", "fieldtype": "Code", "label": "Template HTML", "options": "HTML", "description": "Variables: {{ doc.employee_name }}, {{ doc.date_debut }}, {{ doc.duree_mois }}, etc."},
+  {"fieldname": "section_articles", "fieldtype": "Section Break", "label": "Articles Personnalisables", "collapsible": 1},
+  {"fieldname": "article_nature", "fieldtype": "Text Editor", "label": "Article 1 — Nature"},
+  {"fieldname": "article_fonctions", "fieldtype": "Text Editor", "label": "Article 4 — Fonctions"},
+  {"fieldname": "section_internal", "fieldtype": "Section Break", "label": "Notes internes (non imprimées)", "collapsible": 1},
+  {"fieldname": "notes_internes", "fieldtype": "Small Text", "label": "Notes RH"}
+ ],
+ "links": [],
+ "modified": "2026-04-24 12:00:00",
+ "modified_by": "Administrator",
+ "module": "KYA HR",
+ "name": "KYA Contract Template",
+ "owner": "Administrator",
+ "permissions": [
+  {"create": 1, "delete": 1, "email": 1, "export": 1, "print": 1, "read": 1, "report": 1, "role": "System Manager", "share": 1, "write": 1},
+  {"create": 1, "email": 1, "export": 1, "print": 1, "read": 1, "report": 1, "role": "HR Manager", "share": 1, "write": 1},
+  {"read": 1, "role": "Responsable RH"}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

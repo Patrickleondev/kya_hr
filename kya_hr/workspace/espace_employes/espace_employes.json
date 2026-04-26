@@ -85,6 +85,13 @@
    "url": "/mon-espace",
    "color": "#2c3e50",
    "icon": "home"
+  },
+  {
+   "label": "Mes Contrats",
+   "type": "DocType",
+   "link_to": "KYA Contrat",
+   "color": "#7d3c98",
+   "icon": "file"
   }
  ],
  "links": [

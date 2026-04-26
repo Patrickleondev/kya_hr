@@ -1,0 +1,107 @@
+{
+ "name": "KYA Dashboard Entry",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "istable": 1,
+ "is_submittable": 0,
+ "custom": 0,
+ "track_changes": 0,
+ "creation": "2026-04-24 00:00:00.000000",
+ "modified": "2026-04-24 00:00:00.000000",
+ "modified_by": "Administrator",
+ "owner": "Administrator",
+ "fields": [
+  {
+   "fieldname": "module_key",
+   "label": "Module",
+   "fieldtype": "Select",
+   "options": "rh\nachats\nstocks\ncompta\nautre",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 1
+  },
+  {
+   "fieldname": "module_label",
+   "label": "Libellé Module",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 2,
+   "description": "Ex: Ressources Humaines, Achats, Stocks, Comptabilité"
+  },
+  {
+   "fieldname": "icon",
+   "label": "Icône (emoji)",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "columns": 1,
+   "description": "Emoji représentant le module (ex: 👥 🛒 📦 💰)"
+  },
+  {
+   "fieldname": "color",
+   "label": "Couleur",
+   "fieldtype": "Color",
+   "in_list_view": 1,
+   "columns": 1
+  },
+  {
+   "fieldname": "doctype_name",
+   "label": "DocType ERPNext",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 2,
+   "description": "Nom exact du DocType tel qu'il existe dans ERPNext (ex: Permission Sortie Employe)"
+  },
+  {
+   "fieldname": "dt_label",
+   "label": "Libellé Affiché",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 2,
+   "description": "Nom affiché dans le tableau de bord (ex: Permissions de Sortie)"
+  },
+  {
+   "fieldname": "status_field",
+   "label": "Champ Statut",
+   "fieldtype": "Data",
+   "default": "workflow_state",
+   "description": "Champ contenant l'état du document (ex: workflow_state, statut)"
+  },
+  {
+   "fieldname": "date_field",
+   "label": "Champ Date",
+   "fieldtype": "Data",
+   "default": "creation",
+   "description": "Champ date pour filtrer par période (ex: creation, date_sortie, date_bc)"
+  },
+  {
+   "fieldname": "amount_field",
+   "label": "Champ Montant",
+   "fieldtype": "Data",
+   "description": "Optionnel — champ numérique à additionner (ex: montant_total). Laisser vide si pas de montant."
+  },
+  {
+   "fieldname": "list_url",
+   "label": "URL Liste (Desk)",
+   "fieldtype": "Data",
+   "description": "URL de la liste dans le Desk Frappe (ex: /app/permission-sortie-employe)"
+  },
+  {
+   "fieldname": "web_form_route",
+   "label": "Route Web Form",
+   "fieldtype": "Data",
+   "description": "Route du formulaire web public (ex: /permission-sortie-employe). Laisser vide si pas de web form."
+  },
+  {
+   "fieldname": "is_active",
+   "label": "Actif",
+   "fieldtype": "Check",
+   "default": "1",
+   "in_list_view": 1,
+   "columns": 1
+  }
+ ],
+ "permissions": []
+}

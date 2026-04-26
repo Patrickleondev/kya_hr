@@ -19,9 +19,9 @@
   { "fieldname": "section_objet", "label": "Objet de la commande", "fieldtype": "Section Break" },
   { "fieldname": "objet", "label": "Objet de la Commande", "fieldtype": "Small Text", "reqd": 1 },
 
-  { "fieldname": "section_fournisseur", "label": "Fournisseur", "fieldtype": "Section Break" },
-  { "fieldname": "fournisseur", "label": "Fournisseur (référence)", "fieldtype": "Link", "options": "Supplier" },
-  { "fieldname": "fournisseur_nom", "label": "Nom / Raison Sociale", "fieldtype": "Data", "reqd": 1, "in_list_view": 1 },
+  { "fieldname": "section_fournisseur", "label": "Client (destinataire du Bon de Commande)", "fieldtype": "Section Break" },
+  { "fieldname": "fournisseur", "label": "Client (référence)", "fieldtype": "Link", "options": "Customer" },
+  { "fieldname": "fournisseur_nom", "label": "Nom / Raison Sociale du Client", "fieldtype": "Data", "reqd": 1, "in_list_view": 1 },
   { "fieldname": "fournisseur_entreprise", "label": "Entreprise", "fieldtype": "Data" },
   { "fieldname": "fournisseur_adresse", "label": "Adresse", "fieldtype": "Data" },
   { "fieldname": "col_fourn", "fieldtype": "Column Break" },

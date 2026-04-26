@@ -173,6 +173,59 @@ def get_report(project=None, customer=None, warehouse=None, period="90"):
             LIMIT 20
         """, {"date_from": date_from}, as_dict=True)
 
+    # === SORTIES / ENTRÉES MATÉRIEL KYA (doctypes custom) ================
+    # Ventilation par client pour le livre d'inventaire KYA
+    pv_sorties_par_client = []
+    try:
+        pv_sorties_par_client = frappe.db.sql("""
+            SELECT
+                COALESCE(pv.customer, pv.customer_manuel, 'Interne') AS client,
+                pv.destination_type,
+                COUNT(DISTINCT pv.name) AS nb_pv,
+                COALESCE(SUM(pvi.qte_reellement_sortie), 0) AS qte_totale
+            FROM `tabPV Sortie Materiel` pv
+            JOIN `tabPV Sortie Materiel Item` pvi ON pvi.parent = pv.name
+            WHERE pv.date_sortie >= %(date_from)s
+              AND (pv.workflow_state IS NULL OR pv.workflow_state NOT IN ('Rejeté', 'Brouillon'))
+            GROUP BY client, pv.destination_type
+            ORDER BY qte_totale DESC
+            LIMIT 30
+        """, {"date_from": date_from}, as_dict=True)
+    except Exception as e:
+        frappe.logger().info(f"[stock_projet_client] PV Sortie aggregation skip: {e}")
+        pv_sorties_par_client = []
+
+    # Livre d'inventaire : entrées vs sorties par article (PV Sortie + PV Entrée)
+    livre_inventaire = []
+    try:
+        livre_inventaire = frappe.db.sql("""
+            SELECT item_code, designation,
+                   SUM(entree) AS total_entree,
+                   SUM(sortie) AS total_sortie,
+                   SUM(entree) - SUM(sortie) AS solde
+            FROM (
+                SELECT pvi.item_code, pvi.designation, 0 AS entree, COALESCE(pvi.qte_reellement_sortie,0) AS sortie
+                FROM `tabPV Sortie Materiel` pv
+                JOIN `tabPV Sortie Materiel Item` pvi ON pvi.parent = pv.name
+                WHERE pv.date_sortie >= %(date_from)s
+                  AND (pv.workflow_state IS NULL OR pv.workflow_state NOT IN ('Rejeté', 'Brouillon'))
+                UNION ALL
+                SELECT pei.item_code, pei.designation,
+                       COALESCE(pei.qte_reellement_entree, pei.qte_attendue, 0) AS entree, 0 AS sortie
+                FROM `tabPV Entree Materiel` pe
+                JOIN `tabPV Entree Materiel Item` pei ON pei.parent = pe.name
+                WHERE pe.date_entree >= %(date_from)s
+                  AND (pe.workflow_state IS NULL OR pe.workflow_state NOT IN ('Rejeté', 'Brouillon'))
+            ) t
+            GROUP BY item_code, designation
+            HAVING (total_entree > 0 OR total_sortie > 0)
+            ORDER BY (total_entree + total_sortie) DESC
+            LIMIT 100
+        """, {"date_from": date_from}, as_dict=True)
+    except Exception as e:
+        frappe.logger().info(f"[stock_projet_client] Livre inventaire skip: {e}")
+        livre_inventaire = []
+
     return {
         "kpis": {
             "nb_mouvements": total_mouvements,
@@ -185,4 +238,6 @@ def get_report(project=None, customer=None, warehouse=None, period="90"):
         "synthese": synthese,
         "par_projet": par_projet,
         "par_client": par_client,
+        "pv_sorties_par_client": pv_sorties_par_client,
+        "livre_inventaire": livre_inventaire,
     }

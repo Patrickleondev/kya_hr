@@ -1,0 +1,248 @@
+{
+ "app": "kya_hr",
+ "charts": [
+  {"chart_name": "Sorties Véhicules par Mois", "label": "Sorties Véhicules par Mois"},
+  {"chart_name": "Statut de la Flotte", "label": "Statut de la Flotte"},
+  {"chart_name": "Sorties par Statut", "label": "Sorties par Statut"},
+  {"chart_name": "Sorties par Véhicule", "label": "Sorties par Véhicule"},
+  {"chart_name": "Top 10 Chauffeurs (missions)", "label": "Top 10 Chauffeurs"},
+  {"chart_name": "Kilométrage par Véhicule", "label": "Kilométrage par Véhicule"},
+  {"chart_name": "Documents par Type", "label": "Documents par Type"},
+  {"chart_name": "Coûts Documents par Véhicule (XOF)", "label": "Coûts Documents (XOF)"}
+ ],
+ "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Logistique - Gestion de Flotte'>🚗 Logistique — Gestion de Flotte KYA</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"s0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"📊 Dashboard Flotte (DG/DGA)\", \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Nouvelle Sortie Véhicule\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Sorties en cours\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Véhicules\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Documents à renouveler\", \"col\": 3}}, {\"id\": \"spacer1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"kpi_hdr\", \"type\": \"header\", \"data\": {\"text\": \"<b>📊 Indicateurs Clés (DG/DGA)</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"nc_a\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Parc Total Véhicules\", \"col\": 4}}, {\"id\": \"nc_b\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Sorties cette année\", \"col\": 4}}, {\"id\": \"nc_c\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Km parcourus (total)\", \"col\": 4}}, {\"id\": \"nc_d\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Missions en cours\", \"col\": 4}}, {\"id\": \"nc_e\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Documents expirés\", \"col\": 4}}, {\"id\": \"nc_f\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Coût docs cette année (XOF)\", \"col\": 4}}, {\"id\": \"spacer2\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"chart_hdr\", \"type\": \"header\", \"data\": {\"text\": \"<b>📈 Évolution & Activité</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"ch1\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Sorties Véhicules par Mois\", \"col\": 12}}, {\"id\": \"ch2\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Statut de la Flotte\", \"col\": 6}}, {\"id\": \"ch3\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Sorties par Statut\", \"col\": 6}}, {\"id\": \"ch4\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Sorties par Véhicule\", \"col\": 6}}, {\"id\": \"ch5\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Top 10 Chauffeurs (missions)\", \"col\": 6}}, {\"id\": \"ch6\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Kilométrage par Véhicule\", \"col\": 12}}, {\"id\": \"ch7\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Documents par Type\", \"col\": 6}}, {\"id\": \"ch8\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Coûts Documents par Véhicule (XOF)\", \"col\": 6}}, {\"id\": \"spacer3\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"ops_hdr\", \"type\": \"header\", \"data\": {\"text\": \"<b>🚦 Opérationnel</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"nc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Véhicules Disponibles\", \"col\": 3}}, {\"id\": \"nc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Véhicules En Mission\", \"col\": 3}}, {\"id\": \"nc3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Sorties du Mois\", \"col\": 3}}, {\"id\": \"nc4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Docs Expirant 30j\", \"col\": 3}}]",
+ "creation": "2026-04-25 10:00:00.000000",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "type": "Workspace",
+ "hide_custom": 0,
+ "icon": "car",
+ "idx": 0,
+ "is_hidden": 0,
+ "is_standard": 1,
+ "label": "Logistique",
+ "module": "KYA HR",
+ "name": "Logistique",
+ "public": 1,
+ "sequence_id": 6.5,
+ "links": [
+  {
+   "type": "Card Break",
+   "label": "Sorties & Missions",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Sorties Véhicule",
+   "link_to": "Sortie Vehicule",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 1
+  },
+  {
+   "type": "Link",
+   "label": "Sorties en cours",
+   "link_to": "/app/sortie-vehicule?statut=En%20mission",
+   "link_type": "URL",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 1
+  },
+  {
+   "type": "Link",
+   "label": "Sorties à confirmer",
+   "link_to": "/app/sortie-vehicule?statut=Approuv%C3%A9e",
+   "link_type": "URL",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Card Break",
+   "label": "Parc Véhicules",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Véhicules",
+   "link_to": "Vehicle",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 1
+  },
+  {
+   "type": "Link",
+   "label": "Chauffeurs",
+   "link_to": "Driver",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Card Break",
+   "label": "Carburant & Entretien",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Journal Carburant (Vehicle Log)",
+   "link_to": "Vehicle Log",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 1
+  },
+  {
+   "type": "Link",
+   "label": "Entretiens (Vehicle Service)",
+   "link_to": "Vehicle Service",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Dépenses Véhicules (Rapport)",
+   "link_to": "Vehicle Expenses",
+   "link_type": "Report",
+   "is_query_report": 1,
+   "hidden": 0,
+   "link_count": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Card Break",
+   "label": "Documents officiels",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Documents Véhicule",
+   "link_to": "Document Vehicule",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 1
+  },
+  {
+   "type": "Link",
+   "label": "Documents expirant <30j",
+   "link_to": "/app/document-vehicule?date_expiration=%5B%22%3C%3D%22%2C%22today%2030d%22%5D",
+   "link_type": "URL",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 0
+  }
+ ],
+ "modified": "2026-04-25 10:00:00.000000",
+ "modified_by": "Administrator",
+ "number_cards": [
+  {"number_card_name": "Parc Total Véhicules", "label": "Parc Total Véhicules"},
+  {"number_card_name": "Sorties cette année", "label": "Sorties cette année"},
+  {"number_card_name": "Km parcourus (total)", "label": "Km parcourus (total)"},
+  {"number_card_name": "Missions en cours", "label": "Missions en cours"},
+  {"number_card_name": "Documents expirés", "label": "Documents expirés"},
+  {"number_card_name": "Coût docs cette année (XOF)", "label": "Coût docs (XOF)"},
+  {"number_card_name": "Véhicules Disponibles", "label": "Véhicules Disponibles"},
+  {"number_card_name": "Véhicules En Mission", "label": "Véhicules En Mission"},
+  {"number_card_name": "Sorties du Mois", "label": "Sorties du Mois"},
+  {"number_card_name": "Docs Expirant 30j", "label": "Docs Expirant 30j"}
+ ],
+ "owner": "Administrator",
+ "parent_page": "",
+ "pin_to_bottom": 0,
+ "pin_to_top": 0,
+ "quick_lists": [],
+ "restrict_to_domain": "",
+ "roles": [],
+ "shortcuts": [
+  {
+   "color": "Purple",
+   "doc_view": "",
+   "format": "",
+   "icon": "dashboard",
+   "label": "📊 Dashboard Flotte (DG/DGA)",
+   "link_to": "Tableau de Bord Flotte",
+   "stats_filter": "{}",
+   "type": "Dashboard",
+   "url": "/app/dashboard-view/Tableau de Bord Flotte"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "New",
+   "format": "",
+   "icon": "plus",
+   "label": "Nouvelle Sortie Véhicule",
+   "link_to": "Sortie Vehicule",
+   "stats_filter": "{}",
+   "type": "DocType",
+   "url": "/app/sortie-vehicule/new"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "List",
+   "format": "{} en cours",
+   "icon": "log-out",
+   "label": "Sorties en cours",
+   "link_to": "Sortie Vehicule",
+   "stats_filter": "{\"statut\":[\"in\",[\"Approuv\u00e9e\",\"En mission\"]]}",
+   "type": "DocType",
+   "url": "/app/sortie-vehicule?statut=En%20mission"
+  },
+  {
+   "color": "Green",
+   "doc_view": "List",
+   "format": "{} véhicule(s)",
+   "icon": "truck",
+   "label": "Véhicules",
+   "link_to": "Vehicle",
+   "stats_filter": "{}",
+   "type": "DocType",
+   "url": "/app/vehicle"
+  },
+  {
+   "color": "Red",
+   "doc_view": "List",
+   "format": "{} doc(s) à renouveler",
+   "icon": "alert-triangle",
+   "label": "Documents à renouveler",
+   "link_to": "Document Vehicule",
+   "stats_filter": "{}",
+   "type": "DocType",
+   "url": "/app/document-vehicule"
+  }
+ ],
+ "title": "Logistique",
+ "for_user": "",
+ "sidebar_items": []
+}

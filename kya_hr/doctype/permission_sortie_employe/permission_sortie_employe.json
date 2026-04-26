@@ -255,6 +255,46 @@
    "read_only": 1
   },
   {
+   "fieldname": "notif_chef_email",
+   "label": "Email Chef (notif)",
+   "fieldtype": "Data",
+   "options": "Email",
+   "hidden": 1,
+   "read_only": 1,
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "notif_rh_email",
+   "label": "Email RH (notif)",
+   "fieldtype": "Data",
+   "options": "Email",
+   "hidden": 1,
+   "read_only": 1,
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "notif_dga_email",
+   "label": "Email DGA (notif)",
+   "fieldtype": "Data",
+   "options": "Email",
+   "hidden": 1,
+   "read_only": 1,
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "notif_dg_email",
+   "label": "Email DG (notif)",
+   "fieldtype": "Data",
+   "options": "Email",
+   "hidden": 1,
+   "read_only": 1,
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
    "fieldname": "amended_from",
    "label": "Modifié depuis",
    "fieldtype": "Link",

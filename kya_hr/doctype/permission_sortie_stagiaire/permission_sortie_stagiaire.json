@@ -78,7 +78,7 @@
   },
   {
    "fieldname": "date_fin",
-   "label": "Date de Fin",
+   "label": "Date de Retour Prévue",
    "fieldtype": "Date",
    "description": "Laisser vide si sortie dans la journée"
   },
@@ -94,7 +94,8 @@
    "fieldname": "heure_depart",
    "label": "Heure de Départ",
    "fieldtype": "Time",
-   "reqd": 1
+   "reqd": 0,
+   "description": "Obligatoire pour une sortie dans la journée. Optionnel pour une absence de plusieurs jours."
   },
   {
    "fieldname": "col_retour",

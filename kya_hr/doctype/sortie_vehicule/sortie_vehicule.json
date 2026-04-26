@@ -1,0 +1,326 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "format:SV-{YYYY}-{#####}",
+ "creation": "2026-04-25 10:00:00.000000",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_mission",
+  "vehicle",
+  "license_plate",
+  "vehicle_make_model",
+  "fuel_type",
+  "column_break_1",
+  "chauffeur",
+  "chauffeur_name",
+  "demandeur",
+  "demandeur_name",
+  "section_mission_details",
+  "motif_mission",
+  "destination",
+  "column_break_2",
+  "date_depart",
+  "date_retour_prevue",
+  "section_passagers",
+  "passagers",
+  "section_releves",
+  "km_depart",
+  "carburant_depart_pourcent",
+  "column_break_3",
+  "km_retour",
+  "carburant_retour_pourcent",
+  "km_parcourus",
+  "section_validation",
+  "controle_par",
+  "date_controle",
+  "column_break_4",
+  "observations",
+  "section_state",
+  "statut",
+  "workflow_state",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_mission",
+   "fieldtype": "Section Break",
+   "label": "Véhicule & Chauffeur"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Véhicule",
+   "options": "Vehicle",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "vehicle.license_plate",
+   "fieldname": "license_plate",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Immatriculation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_make_model",
+   "fieldtype": "Data",
+   "label": "Marque / Modèle",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle.fuel_type",
+   "fieldname": "fuel_type",
+   "fieldtype": "Data",
+   "label": "Carburant",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Employé KYA assigné comme chauffeur de la mission.",
+   "fieldname": "chauffeur",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Chauffeur (Employé)",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "chauffeur.employee_name",
+   "fieldname": "chauffeur_name",
+   "fieldtype": "Data",
+   "label": "Nom du Chauffeur",
+   "read_only": 1
+  },
+  {
+   "default": "user",
+   "fieldname": "demandeur",
+   "fieldtype": "Link",
+   "label": "Demandeur",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "demandeur.full_name",
+   "fieldname": "demandeur_name",
+   "fieldtype": "Data",
+   "label": "Nom du Demandeur",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_mission_details",
+   "fieldtype": "Section Break",
+   "label": "Mission"
+  },
+  {
+   "fieldname": "motif_mission",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Motif / Objet de la mission",
+   "reqd": 1
+  },
+  {
+   "fieldname": "destination",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Destination",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "date_depart",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Date & Heure de départ",
+   "reqd": 1
+  },
+  {
+   "fieldname": "date_retour_prevue",
+   "fieldtype": "Datetime",
+   "label": "Retour prévu",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_passagers",
+   "fieldtype": "Section Break",
+   "label": "Passagers"
+  },
+  {
+   "fieldname": "passagers",
+   "fieldtype": "Table",
+   "label": "Liste des passagers",
+   "options": "Sortie Vehicule Passager"
+  },
+  {
+   "fieldname": "section_releves",
+   "fieldtype": "Section Break",
+   "label": "Relevés (départ / retour)"
+  },
+  {
+   "description": "Kilométrage affiché au compteur au moment du départ.",
+   "fieldname": "km_depart",
+   "fieldtype": "Int",
+   "label": "Km au départ"
+  },
+  {
+   "description": "Niveau du carburant à 0–100 %.",
+   "fieldname": "carburant_depart_pourcent",
+   "fieldtype": "Percent",
+   "label": "Carburant départ (%)"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "km_retour",
+   "fieldtype": "Int",
+   "label": "Km au retour",
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "carburant_retour_pourcent",
+   "fieldtype": "Percent",
+   "label": "Carburant retour (%)",
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "km_parcourus",
+   "fieldtype": "Int",
+   "label": "Km parcourus",
+   "read_only": 1,
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "section_validation",
+   "fieldtype": "Section Break",
+   "label": "Contrôle Logistique"
+  },
+  {
+   "fieldname": "controle_par",
+   "fieldtype": "Link",
+   "label": "Contrôlé par",
+   "options": "User",
+   "read_only": 1,
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "date_controle",
+   "fieldtype": "Datetime",
+   "label": "Date du contrôle",
+   "read_only": 1,
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "observations",
+   "fieldtype": "Small Text",
+   "label": "Observations / Incidents",
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "section_state",
+   "fieldtype": "Section Break",
+   "label": "Statut"
+  },
+  {
+   "default": "Brouillon",
+   "fieldname": "statut",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Statut",
+   "options": "Brouillon\nApprouvée\nEn mission\nRetour confirmé\nAnnulée",
+   "read_only": 1,
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "workflow_state",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Workflow State",
+   "read_only": 1,
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amendée depuis",
+   "no_copy": 1,
+   "options": "Sortie Vehicule",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-04-25 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "KYA HR",
+ "name": "Sortie Vehicule",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Gestionnaire de Flotte",
+   "share": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "submit": 1,
+   "write": 1,
+   "if_owner": 1
+  }
+ ],
+ "search_fields": "license_plate,chauffeur_name,destination,motif_mission",
+ "sort_field": "date_depart",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "license_plate",
+ "track_changes": 1
+}
