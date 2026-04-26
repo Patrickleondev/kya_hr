@@ -91,6 +91,8 @@ after_migrate = [
     "kya_hr.setup_fleet.run",
     "kya_hr.setup_fleet_workspace.run",
     "kya_hr.setup_fleet_dashboard.run",
+    "kya_hr.setup_pv_extensions.run",
+    "kya_hr.setup_inventaire_dashboard.run",
 ]
 
 # Translations

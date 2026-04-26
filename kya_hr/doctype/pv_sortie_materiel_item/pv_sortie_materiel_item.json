@@ -3,7 +3,7 @@
     "module": "KYA HR",
     "doctype": "DocType",
     "istable": 1,
-    "custom": 1,
+    "custom": 0,
     "fields": [
         {
             "fieldname": "item_code",
