@@ -3,7 +3,7 @@
  "module": "KYA HR",
  "doctype": "DocType",
  "is_submittable": 1,
- "custom": 1,
+ "custom": 0,
  "autoname": "format:PV-SORT-{YYYY}-{#####}",
  "title_field": "objet",
  "search_fields": "objet, demandeur_nom, date_sortie, statut",
