@@ -1,0 +1,292 @@
+{%- extends "templates/web.html" -%}
+{%- block title %}Stock par Projet / Client — KYA Energy{%- endblock -%}
+
+{%- block page_content -%}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+<style>
+:root {
+  --kya-blue: #0054A6; --kya-orange: #F58220; --kya-green: #22c55e; --kya-red: #ef4444;
+  --kya-bg: #f1f5f9; --kya-card: #ffffff; --kya-border: #e2e8f0;
+  --kya-text: #1e293b; --kya-muted: #64748b; --kya-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+body { background: var(--kya-bg) !important; }
+.page-container { max-width: 1600px !important; }
+
+.kya-hero {
+  background: linear-gradient(135deg, var(--kya-blue) 0%, #003d7a 100%);
+  color: white; border-radius: 16px; padding: 1.8rem 2.2rem;
+  margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+}
+.kya-hero-left { display: flex; align-items: center; gap: 1rem; }
+.kya-hero-logo { background: white; padding: .5rem; border-radius: 12px; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; }
+.kya-hero-logo img { max-width: 100%; max-height: 100%; }
+.kya-hero h1 { font-size: 1.6rem; font-weight: 700; margin: 0; }
+.kya-hero p { opacity: .85; margin: .25rem 0 0; font-size: .85rem; }
+
+.kya-filter {
+  background: var(--kya-card); border-radius: 12px; padding: 1rem 1.5rem;
+  border: 1px solid var(--kya-border); margin-bottom: 1.5rem;
+  box-shadow: var(--kya-shadow);
+  display: grid; grid-template-columns: 1.4fr 1.4fr 1fr 1fr auto; gap: 1rem; align-items: end;
+}
+@media (max-width: 992px) { .kya-filter { grid-template-columns: 1fr 1fr; } }
+.kya-filter label { font-size: .72rem; font-weight: 600; color: var(--kya-muted); text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: .25rem; }
+.kya-filter select, .kya-filter input { font-size: .85rem; border-radius: 8px; border: 1px solid var(--kya-border); padding: .45rem .65rem; width: 100%; }
+
+.kya-kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+.kya-kpi { background: var(--kya-card); border-radius: 12px; padding: 1.3rem; border: 1px solid var(--kya-border); box-shadow: var(--kya-shadow); display: flex; align-items: center; gap: 1rem; }
+.kya-kpi-icon { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; color: white; }
+.icon-blue { background: var(--kya-blue); } .icon-orange { background: var(--kya-orange); } .icon-green { background: var(--kya-green); } .icon-red { background: var(--kya-red); }
+.kya-kpi-value { font-size: 1.7rem; font-weight: 800; line-height: 1; color: var(--kya-text); }
+.kya-kpi-value.sm { font-size: 1.15rem; }
+.kya-kpi-label { font-size: .72rem; color: var(--kya-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-top: .3rem; }
+
+.kya-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+@media (max-width: 992px) { .kya-grid { grid-template-columns: 1fr; } }
+.kya-panel { background: var(--kya-card); border-radius: 12px; border: 1px solid var(--kya-border); box-shadow: var(--kya-shadow); overflow: hidden; }
+.kya-panel-header { padding: 1rem 1.3rem; border-bottom: 1px solid var(--kya-border); background: linear-gradient(135deg, #fafbfc 0%, #f1f5f9 100%); display:flex; justify-content:space-between; align-items:center; }
+.kya-panel-header h3 { margin: 0; font-size: 1rem; font-weight: 700; display:flex; align-items:center; gap:.5rem; }
+.pill { background: var(--kya-blue); color: white; border-radius: 12px; padding: .15rem .65rem; font-size: .7rem; font-weight: 700; }
+.kya-panel-body { padding: 1.2rem; }
+
+.kya-table { width: 100%; font-size: .82rem; }
+.kya-table thead th {
+  background: linear-gradient(135deg, var(--kya-blue), #1976D2);
+  color: white; padding: .55rem .75rem; text-transform: uppercase; letter-spacing: .3px; font-size: .7rem; font-weight: 700; text-align: left;
+}
+.kya-table tbody td { padding: .55rem .75rem; border-bottom: 1px solid var(--kya-border); }
+.kya-table tbody tr:nth-child(even) { background: #f8fafd; }
+.kya-table tbody tr:hover { background: #fff7ed; }
+
+.kya-tabs { display: flex; gap: .5rem; border-bottom: 2px solid var(--kya-border); margin-bottom: 1rem; }
+.kya-tab { padding: .6rem 1.2rem; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; color: var(--kya-muted); font-weight: 600; font-size: .9rem; }
+.kya-tab.active { color: var(--kya-blue); border-bottom-color: var(--kya-orange); }
+.kya-tab-content { display: none; }
+.kya-tab-content.active { display: block; }
+
+.kya-empty { padding: 2rem; text-align: center; color: var(--kya-muted); font-style: italic; }
+.btn-export { background: var(--kya-orange); color: white; border: none; font-weight: 600; padding: .4rem .9rem; border-radius: 8px; font-size: .85rem; }
+.btn-export:hover { background: #d96d10; }
+</style>
+
+<div class="kya-hero">
+  <div class="kya-hero-left">
+    <div class="kya-hero-logo"><img src="/assets/kya_hr/images/logo_kya.png" alt="KYA" onerror="this.src='/files/vrai.png'"></div>
+    <div>
+      <h1><i class="bi bi-diagram-3"></i> Classification Stock — Projets & Clients</h1>
+      <p>Ventilation des mouvements de stock par projet, client et magasin</p>
+    </div>
+  </div>
+  <div>
+    <button class="btn-export" onclick="exportCSV()"><i class="bi bi-download"></i> Exporter CSV</button>
+  </div>
+</div>
+
+<div class="kya-filter">
+  <div><label>Projet</label><select id="f-project"><option value="">Tous les projets</option></select></div>
+  <div><label>Client</label><select id="f-customer"><option value="">Tous les clients</option></select></div>
+  <div><label>Magasin</label><select id="f-warehouse"><option value="">Tous</option></select></div>
+  <div><label>Période</label><select id="f-period">
+    <option value="30">30 jours</option>
+    <option value="90" selected>90 jours</option>
+    <option value="180">6 mois</option>
+    <option value="365">12 mois</option>
+  </select></div>
+  <div><button class="btn-export" style="background:var(--kya-blue);" onclick="loadReport()"><i class="bi bi-arrow-clockwise"></i> Actualiser</button></div>
+</div>
+
+<div class="kya-kpis" id="kpis"></div>
+
+<div class="kya-grid">
+  <div class="kya-panel">
+    <div class="kya-panel-header"><h3><i class="bi bi-bar-chart"></i> Top Projets</h3></div>
+    <div class="kya-panel-body"><canvas id="chart-projets" height="220"></canvas></div>
+  </div>
+  <div class="kya-panel">
+    <div class="kya-panel-header"><h3><i class="bi bi-pie-chart"></i> Top Clients</h3></div>
+    <div class="kya-panel-body"><canvas id="chart-clients" height="220"></canvas></div>
+  </div>
+</div>
+
+<div class="kya-panel" style="margin-bottom: 1.5rem;">
+  <div class="kya-panel-header">
+    <div class="kya-tabs" style="margin-bottom:0;border:none;">
+      <div class="kya-tab active" data-tab="synthese"><i class="bi bi-list-check"></i> Synthèse Articles</div>
+      <div class="kya-tab" data-tab="mouvements"><i class="bi bi-arrow-left-right"></i> Mouvements Stock</div>
+      <div class="kya-tab" data-tab="livraisons"><i class="bi bi-truck"></i> Livraisons Clients</div>
+    </div>
+    <span class="pill" id="cnt-tab">0</span>
+  </div>
+  <div class="kya-panel-body" style="padding:0;">
+    <div class="kya-tab-content active" id="tab-synthese">
+      <table class="kya-table"><thead><tr><th>Article</th><th>Désignation</th><th class="text-end">Qté entrée</th><th class="text-end">Qté sortie</th><th class="text-end">Valeur (XOF)</th></tr></thead><tbody id="tbl-synthese"></tbody></table>
+    </div>
+    <div class="kya-tab-content" id="tab-mouvements">
+      <table class="kya-table"><thead><tr><th>N°</th><th>Date</th><th>Type</th><th>Projet</th><th>Article</th><th class="text-end">Qté</th><th>Depuis</th><th>Vers</th><th class="text-end">Montant</th></tr></thead><tbody id="tbl-mouv"></tbody></table>
+    </div>
+    <div class="kya-tab-content" id="tab-livraisons">
+      <table class="kya-table"><thead><tr><th>N°</th><th>Date</th><th>Client</th><th>Projet</th><th>Article</th><th class="text-end">Qté</th><th>Magasin</th><th class="text-end">Montant</th></tr></thead><tbody id="tbl-liv"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<script>
+const fmtXOF = n => new Intl.NumberFormat('fr-FR').format(Math.round(n||0)) + ' XOF';
+const fmtNb = n => new Intl.NumberFormat('fr-FR').format(Math.round(n||0));
+const fmtDate = d => d ? new Date(d).toLocaleDateString('fr-FR') : '—';
+// Traduit les abréviations UOM ERPNext en français lisible
+const fmtUOM = u => ({'Nos':'Pce(s)','Nos.':'Pce(s)','NOS':'Pce(s)','nos':'Pce(s)'}[u] || (u||''));
+let chartPrj = null, chartCli = null;
+let lastData = {};
+
+function renderKPIs(k) {
+  document.getElementById('kpis').innerHTML = `
+    <div class="kya-kpi"><div class="kya-kpi-icon icon-blue"><i class="bi bi-arrow-left-right"></i></div><div><div class="kya-kpi-value">${fmtNb(k.nb_mouvements)}</div><div class="kya-kpi-label">Mouvements Stock</div></div></div>
+    <div class="kya-kpi"><div class="kya-kpi-icon icon-orange"><i class="bi bi-truck"></i></div><div><div class="kya-kpi-value">${fmtNb(k.nb_livraisons)}</div><div class="kya-kpi-label">Lignes livrées</div></div></div>
+    <div class="kya-kpi"><div class="kya-kpi-icon icon-green"><i class="bi bi-cash-coin"></i></div><div><div class="kya-kpi-value sm">${fmtXOF(k.valeur_livree)}</div><div class="kya-kpi-label">Valeur livrée clients</div></div></div>
+    <div class="kya-kpi"><div class="kya-kpi-icon icon-red"><i class="bi bi-box"></i></div><div><div class="kya-kpi-value sm">${fmtXOF(k.valeur_mouvements)}</div><div class="kya-kpi-label">Valeur mouvements</div></div></div>
+  `;
+}
+
+function renderProjets(data) {
+  if (chartPrj) chartPrj.destroy();
+  const ctx = document.getElementById('chart-projets');
+  const labels = data.map(r => (r.project_name || r.project || 'Sans projet').slice(0,25));
+  chartPrj = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ label: 'Valeur (XOF)', data: data.map(r => r.valeur), backgroundColor: '#0054A6' }] },
+    options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' }
+  });
+}
+
+function renderClients(data) {
+  if (chartCli) chartCli.destroy();
+  const ctx = document.getElementById('chart-clients');
+  const palette = ['#0054A6','#F58220','#22c55e','#ef4444','#a855f7','#06b6d4','#f59e0b','#10b981','#ec4899','#64748b'];
+  chartCli = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels: data.map(r => r.customer_name || r.customer), datasets: [{ data: data.map(r => r.valeur), backgroundColor: palette }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 } } } } }
+  });
+}
+
+function renderSynthese(data) {
+  const t = document.getElementById('tbl-synthese');
+  if (!data.length) { t.innerHTML = '<tr><td colspan="5" class="kya-empty">Aucune donnée.</td></tr>'; return; }
+  t.innerHTML = data.map(r => `<tr>
+    <td><a href="/app/item/${r.item_code}">${r.item_code}</a></td>
+    <td>${r.item_name||'—'}</td>
+    <td class="text-end">${fmtNb(r.qty_entree)}</td>
+    <td class="text-end">${fmtNb(r.qty_sortie)}</td>
+    <td class="text-end" style="font-weight:600;">${fmtXOF(r.valeur_totale)}</td>
+  </tr>`).join('');
+}
+
+function renderMouv(data) {
+  const t = document.getElementById('tbl-mouv');
+  if (!data.length) { t.innerHTML = '<tr><td colspan="9" class="kya-empty">Aucun mouvement.</td></tr>'; return; }
+  t.innerHTML = data.map(r => `<tr>
+    <td><a href="/app/stock-entry/${r.name}">${r.name}</a></td>
+    <td>${fmtDate(r.posting_date)}</td>
+    <td>${r.stock_entry_type||'—'}</td>
+    <td>${r.project||'—'}</td>
+    <td>${r.item_code} <span style="color:#64748b;font-size:.75rem;">${(r.item_name||'').slice(0,30)}</span></td>
+    <td class="text-end">${fmtNb(r.qty)} ${fmtUOM(r.uom)}</td>
+    <td>${r.s_warehouse||'—'}</td>
+    <td>${r.t_warehouse||'—'}</td>
+    <td class="text-end">${fmtXOF(r.basic_amount)}</td>
+  </tr>`).join('');
+}
+
+function renderLiv(data) {
+  const t = document.getElementById('tbl-liv');
+  if (!data.length) { t.innerHTML = '<tr><td colspan="8" class="kya-empty">Aucune livraison.</td></tr>'; return; }
+  t.innerHTML = data.map(r => `<tr>
+    <td><a href="/app/delivery-note/${r.name}">${r.name}</a></td>
+    <td>${fmtDate(r.posting_date)}</td>
+    <td>${r.customer_name||r.customer||'—'}</td>
+    <td>${r.project||'—'}</td>
+    <td>${r.item_code} <span style="color:#64748b;font-size:.75rem;">${(r.item_name||'').slice(0,30)}</span></td>
+    <td class="text-end">${fmtNb(r.qty)} ${fmtUOM(r.uom)}</td>
+    <td>${r.warehouse||'—'}</td>
+    <td class="text-end" style="font-weight:600;">${fmtXOF(r.amount)}</td>
+  </tr>`).join('');
+}
+
+function updateTabCount() {
+  const active = document.querySelector('.kya-tab.active').dataset.tab;
+  const d = lastData;
+  const n = { synthese: (d.synthese||[]).length, mouvements: (d.mouvements||[]).length, livraisons: (d.livraisons||[]).length }[active] || 0;
+  document.getElementById('cnt-tab').textContent = n;
+}
+
+document.querySelectorAll('.kya-tab').forEach(t => {
+  t.onclick = () => {
+    document.querySelectorAll('.kya-tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.kya-tab-content').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('tab-' + t.dataset.tab).classList.add('active');
+    updateTabCount();
+  };
+});
+
+function loadFilters() {
+  frappe.call({ method: 'kya_hr.api.stock_projet_client.get_filters', callback: r => {
+    if (!r.message) return;
+    const fill = (id, items, keyLabel) => {
+      const sel = document.getElementById(id);
+      items.forEach(it => {
+        const o = document.createElement('option');
+        o.value = it.name;
+        o.textContent = it[keyLabel] || it.name;
+        sel.appendChild(o);
+      });
+    };
+    fill('f-project', r.message.projects, 'project_name');
+    fill('f-customer', r.message.customers, 'customer_name');
+    fill('f-warehouse', r.message.warehouses, 'warehouse_name');
+  }});
+}
+
+function loadReport() {
+  frappe.call({
+    method: 'kya_hr.api.stock_projet_client.get_report',
+    args: {
+      project: document.getElementById('f-project').value,
+      customer: document.getElementById('f-customer').value,
+      warehouse: document.getElementById('f-warehouse').value,
+      period: document.getElementById('f-period').value,
+    },
+    callback: r => {
+      if (!r.message) return;
+      lastData = r.message;
+      renderKPIs(r.message.kpis);
+      renderProjets(r.message.par_projet || []);
+      renderClients(r.message.par_client || []);
+      renderSynthese(r.message.synthese || []);
+      renderMouv(r.message.mouvements || []);
+      renderLiv(r.message.livraisons || []);
+      updateTabCount();
+    }
+  });
+}
+
+function exportCSV() {
+  const active = document.querySelector('.kya-tab.active').dataset.tab;
+  const rows = lastData[active] || [];
+  if (!rows.length) { alert('Aucune donnée à exporter.'); return; }
+  const keys = Object.keys(rows[0]);
+  const csv = [keys.join(';'), ...rows.map(r => keys.map(k => `"${(r[k]??'').toString().replace(/"/g,'""')}"`).join(';'))].join('\n');
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `kya-stock-${active}-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+document.addEventListener('DOMContentLoaded', () => { loadFilters(); loadReport(); });
+</script>
+{%- endblock -%}

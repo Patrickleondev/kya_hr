@@ -1,0 +1,443 @@
+{% extends "templates/web.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block head_include %}
+<style>
+.kya-portail { max-width: 1000px; margin: 30px auto; background: #fff; box-shadow: 0 2px 14px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
+.kya-header { background: linear-gradient(135deg, #f7a800 0%, #e07b00 100%); padding: 26px 40px; color: #fff; display: flex; justify-content: space-between; align-items: center; flex-wrap:wrap; gap:18px;}
+.kya-header img { height: 56px; background:#fff; padding:6px 10px; border-radius:4px; }
+.kya-header h2 { margin: 0 0 4px 0; font-size: 22px; }
+.kya-header small { opacity: 0.96; font-size:13px; }
+.kya-badge { padding:6px 14px; border-radius:14px; font-size:12px; font-weight:700; background:#fff; color:#e07b00; display:inline-block; text-transform:uppercase; letter-spacing:0.5px;}
+.kya-body { padding: 30px 50px; }
+.kya-alert { padding:14px 20px; border-radius:6px; margin-bottom:22px; font-size:14px; }
+.alert-info { background:#eaf3fb; border-left:4px solid #1a5276; color:#1a3a52; }
+.alert-warn { background:#fff8e7; border-left:4px solid #f7a800; color:#7a4600; }
+.alert-success { background:#e8f7ed; border-left:4px solid #27ae60; color:#1d6d3a; }
+.alert-error { background:#fdecea; border-left:4px solid #c0392b; color:#7a2018; }
+.kya-card { background:#fafbfc; border:1px solid #e8eaed; border-radius:6px; padding:20px 24px; margin-bottom:20px; }
+.kya-card h3 { margin:0 0 16px 0; color:#1a5276; font-size:17px; }
+.kya-row { display:flex; gap:18px; flex-wrap:wrap; }
+.kya-field { flex:1; min-width:240px; margin-bottom:12px; }
+.kya-field label { display:block; font-size:12px; font-weight:600; color:#555; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.3px;}
+.kya-field input { width:100%; padding:9px 12px; border:1px solid #ccc; border-radius:4px; font-size:14px; box-sizing:border-box;}
+.kya-field input:disabled { background:#f5f5f5; color:#666; }
+.btn-kya { background:#e07b00; color:#fff; padding:10px 22px; border:none; border-radius:5px; cursor:pointer; font-weight:600; font-size:14px; transition:background 0.2s; }
+.btn-kya:hover:not(:disabled) { background:#c46a00; }
+.btn-kya:disabled { background:#ccc; cursor:not-allowed; }
+.btn-secondary { background:#1a5276; color:#fff; padding:8px 18px; border:none; border-radius:5px; cursor:pointer; font-weight:600; font-size:13px;}
+.btn-secondary:hover { background:#134060; }
+
+/* Sections */
+.kya-section { border:1px solid #e0e4e8; border-radius:6px; margin-bottom:14px; background:#fff; overflow:hidden; transition:border-color 0.2s; }
+.kya-section.signed { border-color:#27ae60; }
+.kya-section-header { background:#f4f6f8; padding:10px 18px; font-weight:600; color:#1a5276; display:flex; justify-content:space-between; align-items:center; cursor:pointer; }
+.kya-section.signed .kya-section-header { background:#e8f7ed; color:#1d6d3a; }
+.kya-section-content { padding:18px 24px; line-height:1.7; font-size:14px; }
+.kya-section-content h2, .kya-section-content h3 { color:#e07b00; margin-top:0; }
+.kya-section-footer { background:#fafbfc; padding:12px 18px; border-top:1px solid #eaedef; display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap;}
+.kya-check-row { display:flex; align-items:center; gap:8px; }
+.kya-check-row input[type=checkbox] { transform:scale(1.2); cursor:pointer; }
+.paraphes { font-family:'Brush Script MT', cursive; font-size:18px; color:#1a5276; padding:4px 12px; border-bottom:1px solid #1a5276; min-width:80px; text-align:center; display:none;}
+.kya-section.signed .paraphes { display:inline-block; }
+
+/* Signature finale */
+.kya-sig-zone { display:flex; gap:24px; margin-top:30px; padding-top:22px; border-top:2px solid #f7a800; flex-wrap:wrap;}
+.kya-sig-bloc { flex:1; min-width:300px; padding:18px; background:#fafbfc; border-radius:6px; border:1px solid #e8eaed; }
+.kya-sig-bloc h4 { margin:0 0 12px 0; color:#1a5276; font-size:15px;}
+.sig-tabs { display:flex; gap:8px; margin-bottom:12px;}
+.sig-tab { flex:1; padding:8px 12px; background:#eef0f2; border:1px solid #d0d4d8; border-radius:4px; cursor:pointer; text-align:center; font-size:13px; font-weight:600;}
+.sig-tab.active { background:#e07b00; color:#fff; border-color:#e07b00;}
+.sig-canvas { border:2px dashed #999; border-radius:4px; background:#fff; cursor:crosshair; touch-action:none; width:100%; height:140px; display:block; }
+.sig-img-display { max-height:120px; max-width:100%; border:1px solid #ddd; padding:4px; background:#fff; }
+.sig-mode-block { display:none; }
+.sig-mode-block.active { display:block; }
+
+@media (max-width: 700px) {
+  .kya-body { padding: 20px 18px; }
+  .kya-header { padding: 20px 22px; }
+}
+</style>
+{% endblock %}
+
+{% block page_content %}
+
+{% if is_error %}
+<div class="kya-portail">
+  <div class="kya-header">
+    <div><img src="/assets/kya_hr/images/kya_logo.png" alt="KYA"><h2 style="display:inline-block;margin-left:14px;vertical-align:middle;">KYA-Energy Group</h2></div>
+  </div>
+  <div class="kya-body">
+    <div class="kya-alert alert-error"><b>{{ error_msg }}</b></div>
+    <p>Si vous pensez qu'il s'agit d'une erreur, contactez la RH : <a href="mailto:rh@kya-energy.com">rh@kya-energy.com</a></p>
+  </div>
+</div>
+{% else %}
+
+<div class="kya-portail">
+  <div class="kya-header">
+    <div style="display:flex;align-items:center;gap:16px;">
+      <img src="/assets/kya_hr/images/kya_logo.png" alt="KYA">
+      <div>
+        <h2>{{ contrat.contract_type }}</h2>
+        <small>{{ contrat.employee_name }} · Réf. {{ contrat.name }}</small>
+      </div>
+    </div>
+    <div>
+      {% if is_finalized %}<span class="kya-badge" style="background:#27ae60;color:#fff;">✓ Finalisé</span>
+      {% elif peut_signer_dg %}<span class="kya-badge" style="background:#1a5276;color:#fff;">À co-signer (DG)</span>
+      {% elif peut_signer_employe %}<span class="kya-badge">À signer</span>
+      {% else %}<span class="kya-badge" style="background:#7f8c8d;color:#fff;">{{ contrat.workflow_state }}</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="kya-body">
+
+  {# ─── ÉTAPE 1 : Confirmation téléphone (signataire seulement) ─── #}
+  {% if role == 'employe' and not phone_confirmed and peut_signer_employe %}
+    <div class="kya-alert alert-warn">
+      <b>🔒 Vérification d'identité</b><br>
+      Pour accéder au contenu du contrat, veuillez confirmer votre numéro de téléphone (les 9 chiffres).
+      Numéro enregistré : <code>…{{ phone_hint }}</code>
+    </div>
+    <div class="kya-card">
+      <h3>Confirmation du numéro de téléphone</h3>
+      <div class="kya-field">
+        <label>Votre numéro de téléphone (9 chiffres)</label>
+        <input type="tel" id="phone-input" placeholder="Ex: 90123456" maxlength="15" autofocus>
+      </div>
+      <button class="btn-kya" onclick="verifyPhone()">✓ Confirmer mon identité</button>
+      <div id="phone-error" style="color:#c0392b; margin-top:12px; font-size:13px;"></div>
+    </div>
+
+    <script>
+    async function verifyPhone() {
+      const phone = document.getElementById('phone-input').value.trim();
+      const errEl = document.getElementById('phone-error');
+      errEl.textContent = '';
+      if (!phone || phone.length < 8) { errEl.textContent = "Veuillez saisir un numéro valide."; return; }
+      try {
+        const r = await fetch('/api/method/kya_hr.api.kya_contracts.verify_phone', {
+          method: 'POST',
+          headers: { 'X-Frappe-CSRF-Token': frappe.csrf_token || '', 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ contract_id: '{{ contract_id }}', token: '{{ token }}', phone: phone })
+        });
+        const data = await r.json();
+        if (data.message && data.message.ok) location.reload();
+        else throw new Error((data._server_messages && JSON.parse(data._server_messages)[0]) || 'Erreur');
+      } catch (e) {
+        errEl.textContent = "Numéro incorrect. Vérifiez et réessayez.";
+      }
+    }
+    document.getElementById('phone-input').addEventListener('keypress', e => { if (e.key === 'Enter') verifyPhone(); });
+    </script>
+
+  {% else %}
+  {# ─── Alertes contextuelles ─── #}
+
+  {% if peut_signer_employe %}
+    <div class="kya-alert alert-info">
+      Bonjour <b>{{ contrat.employee_name }}</b>, lisez chaque section, complétez vos informations personnelles, cochez « Lu et approuvé » sur chaque section, puis apposez votre signature.
+    </div>
+  {% elif peut_signer_dg %}
+    <div class="kya-alert alert-info">
+      <b>Co-signature DG.</b> Le signataire a déjà signé. Lisez chaque section, cochez « Lu et approuvé », puis apposez votre signature.
+    </div>
+  {% elif is_finalized %}
+    <div class="kya-alert alert-success">
+      <b>✓ Contrat finalisé.</b> Signé par les deux parties. Vous pouvez télécharger le PDF officiel.
+      {% if contrat.pdf_final %}<br><a href="{{ contrat.pdf_final }}" target="_blank" class="btn-secondary" style="margin-top:8px;display:inline-block;text-decoration:none;">📄 Télécharger le PDF</a>{% endif %}
+    </div>
+  {% endif %}
+
+  {# ─── Infos personnelles (signataire seulement) ─── #}
+  {% if role == 'employe' %}
+  <div class="kya-card">
+    <h3>👤 Informations personnelles</h3>
+    {% if peut_editer_perso %}
+      <p style="font-size:13px;color:#666;margin-top:0;">Complétez ces informations avant de signer. Elles apparaîtront sur le contrat.</p>
+    {% endif %}
+    <div class="kya-row">
+      <div class="kya-field"><label>Nom complet</label><input type="text" id="ip_nom" value="{{ contrat.employee_name or '' }}" disabled></div>
+      <div class="kya-field"><label>Email</label><input type="email" value="{{ contrat.employee_email or '' }}" disabled></div>
+    </div>
+    <div class="kya-row">
+      <div class="kya-field"><label>Téléphone</label><input type="tel" id="ip_tel" value="{{ contrat.telephone or '' }}" {% if not peut_editer_perso %}disabled{% endif %}></div>
+      <div class="kya-field"><label>Date de naissance</label><input type="date" id="ip_naissance" value="{{ contrat.date_naissance or '' }}" {% if not peut_editer_perso %}disabled{% endif %}></div>
+    </div>
+    <div class="kya-row">
+      <div class="kya-field"><label>Domicile</label><input type="text" id="ip_domicile" value="{{ contrat.domicile or '' }}" {% if not peut_editer_perso %}disabled{% endif %}></div>
+    </div>
+    <div class="kya-row">
+      <div class="kya-field"><label>Fils/Fille de (Père)</label><input type="text" id="ip_pere" value="{{ contrat.filiation_pere or '' }}" {% if not peut_editer_perso %}disabled{% endif %}></div>
+      <div class="kya-field"><label>Et de (Mère)</label><input type="text" id="ip_mere" value="{{ contrat.filiation_mere or '' }}" {% if not peut_editer_perso %}disabled{% endif %}></div>
+    </div>
+    {% if peut_editer_perso %}
+    <button class="btn-secondary" onclick="savePersonalInfo()">💾 Enregistrer mes informations</button>
+    <span id="ip-status" style="margin-left:12px;font-size:13px;color:#27ae60;"></span>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {# ─── Sections du contrat ─── #}
+  <div class="kya-card">
+    <h3>📄 Contrat ({{ total_sections }} section{% if total_sections > 1 %}s{% endif %})</h3>
+    {% if peut_signer_employe or peut_signer_dg %}
+      <p style="font-size:13px;color:#666;margin-top:0;">Lisez attentivement chaque section et cochez « Lu et approuvé » sur chacune. Toutes les sections doivent être validées avant de pouvoir signer.</p>
+    {% endif %}
+    <div id="sections-container">
+    {% for sec in sections %}
+      <div class="kya-section {% if sec.id in sections_signed %}signed{% endif %}" data-section-id="{{ sec.id }}">
+        <div class="kya-section-header" onclick="toggleSection(this)">
+          <span>{{ loop.index }}. {{ sec.title }}</span>
+          <span class="paraphes">{% if contrat.employee_name %}{{ contrat.employee_name.split()[0][0] }}{% if contrat.employee_name.split()|length > 1 %}{{ contrat.employee_name.split()[-1][0] }}{% endif %}{% endif %}</span>
+        </div>
+        <div class="kya-section-content">{{ sec.html | safe }}</div>
+        {% if peut_signer_employe or peut_signer_dg %}
+        <div class="kya-section-footer">
+          <label class="kya-check-row">
+            <input type="checkbox" class="sec-check" data-section="{{ sec.id }}" {% if sec.id in sections_signed %}checked disabled{% endif %} onchange="markSection(this)">
+            <span><b>Lu et approuvé</b> — section {{ loop.index }}</span>
+          </label>
+          <span class="sec-status" id="status-{{ sec.id }}" style="font-size:12px;color:#27ae60;">{% if sec.id in sections_signed %}✓ Validé{% endif %}</span>
+        </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+    </div>
+    <div style="margin-top:14px; font-size:14px;">Progression : <span id="progress-text">{{ sections_signed|length }}/{{ total_sections }}</span> sections validées</div>
+  </div>
+
+  {# ─── Signature finale ─── #}
+  {% if peut_signer_employe or peut_signer_dg %}
+  <div class="kya-card">
+    <h3>✍️ Signature</h3>
+    <div class="kya-sig-zone">
+      <div class="kya-sig-bloc">
+        <h4>{% if role == 'employe' %}Le Signataire{% else %}Le Directeur Général{% endif %}</h4>
+        <div class="sig-tabs">
+          <div class="sig-tab active" data-mode="draw" onclick="switchMode('draw')">✏️ Dessiner</div>
+          <div class="sig-tab" data-mode="upload" onclick="switchMode('upload')">📷 Importer une image</div>
+        </div>
+        <div class="sig-mode-block active" id="mode-draw">
+          <canvas id="sig-canvas" class="sig-canvas" width="500" height="140"></canvas>
+          <button class="btn-secondary" onclick="clearCanvas()" style="margin-top:8px;">Effacer</button>
+        </div>
+        <div class="sig-mode-block" id="mode-upload">
+          <input type="file" id="sig-file" accept="image/png,image/jpeg" onchange="loadImage(this)">
+          <div id="sig-preview" style="margin-top:10px;"></div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:18px; padding-top:14px; border-top:1px dashed #ccc;">
+      <label class="kya-check-row" style="margin-bottom:14px;">
+        <input type="checkbox" id="lu-approuve" style="transform:scale(1.3);">
+        <span><b>J'ai lu et approuvé l'intégralité du présent contrat.</b></span>
+      </label>
+      <button class="btn-kya" onclick="signContract()" style="font-size:15px;padding:12px 28px;">
+        {% if role == 'employe' %}✓ Signer et Soumettre{% else %}✓ Co-signer le contrat{% endif %}
+      </button>
+      <div id="sign-status" style="margin-top:12px;font-size:14px;"></div>
+    </div>
+  </div>
+  {% endif %}
+
+  {# ─── Signatures déjà apposées (info) ─── #}
+  {% if contrat.signature_employe or contrat.signature_dg %}
+  <div class="kya-card">
+    <h3>🖋️ Signatures apposées</h3>
+    <div class="kya-row">
+      {% if contrat.signature_employe %}
+      <div class="kya-field">
+        <label>Signataire — {{ contrat.nom_signe_employe }}</label>
+        <img src="{{ contrat.signature_employe }}" class="sig-img-display" alt="signature">
+        <div style="font-size:12px;color:#666;margin-top:4px;">{{ date_signature_employe_fmt }}</div>
+      </div>
+      {% endif %}
+      {% if contrat.signature_dg %}
+      <div class="kya-field">
+        <label>Directeur Général</label>
+        <img src="{{ contrat.signature_dg }}" class="sig-img-display" alt="signature">
+        <div style="font-size:12px;color:#666;margin-top:4px;">{{ date_signature_dg_fmt }}</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% endif %} {# fin du if phone_confirmed else #}
+
+  </div>
+</div>
+
+<script>
+const CONTRACT = '{{ contract_id }}';
+const TOKEN = '{{ token }}';
+const ROLE = '{{ role }}';
+const TOTAL_SECTIONS = {{ total_sections }};
+const SIGNED_SET = new Set({{ sections_signed | tojson }});
+let sigData = null;  // dataURL signature image (si import)
+let sigMode = 'draw';
+
+function toggleSection(header) {
+  const content = header.nextElementSibling;
+  content.style.display = content.style.display === 'none' ? '' : 'none';
+}
+
+async function callApi(method, params) {
+  const body = new URLSearchParams(Object.assign({ contract_id: CONTRACT, token: TOKEN }, params));
+  const r = await fetch('/api/method/' + method, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Frappe-CSRF-Token': (window.frappe && frappe.csrf_token) || '' },
+    body: body
+  });
+  const j = await r.json();
+  if (!r.ok || j.exc_type) {
+    let msg = 'Erreur';
+    try { msg = JSON.parse(j._server_messages || '[]')[0] || msg; if (typeof msg === 'string' && msg.startsWith('{')) msg = JSON.parse(msg).message || msg; } catch (e) {}
+    throw new Error(msg);
+  }
+  return j.message;
+}
+
+async function savePersonalInfo() {
+  const data = {
+    telephone: document.getElementById('ip_tel').value,
+    date_naissance: document.getElementById('ip_naissance').value,
+    domicile: document.getElementById('ip_domicile').value,
+    filiation_pere: document.getElementById('ip_pere').value,
+    filiation_mere: document.getElementById('ip_mere').value,
+  };
+  const status = document.getElementById('ip-status');
+  status.textContent = '...';
+  try {
+    await callApi('kya_hr.api.kya_contracts.update_personal_info', { data: JSON.stringify(data) });
+    status.textContent = '✓ Enregistré';
+    setTimeout(() => { status.textContent = ''; }, 3000);
+  } catch (e) {
+    status.style.color = '#c0392b';
+    status.textContent = e.message;
+  }
+}
+
+async function markSection(checkbox) {
+  const secId = checkbox.dataset.section;
+  const statusEl = document.getElementById('status-' + secId);
+  if (!checkbox.checked) return;  // ne décoche pas (signé une fois = signé)
+  try {
+    await callApi('kya_hr.api.kya_contracts.mark_section_signed', { section_id: secId, role: ROLE });
+    SIGNED_SET.add(secId);
+    checkbox.disabled = true;
+    checkbox.closest('.kya-section').classList.add('signed');
+    statusEl.textContent = '✓ Validé';
+    document.getElementById('progress-text').textContent = SIGNED_SET.size + '/' + TOTAL_SECTIONS;
+  } catch (e) {
+    checkbox.checked = false;
+    alert(e.message);
+  }
+}
+
+// ─── Signature canvas ───
+function setupCanvas() {
+  const canvas = document.getElementById('sig-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  // Adapter pixel ratio
+  const ratio = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * ratio;
+  canvas.height = rect.height * ratio;
+  ctx.scale(ratio, ratio);
+  ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.strokeStyle = '#1a3a52';
+  let drawing = false, lastX = 0, lastY = 0;
+  function getPos(e) {
+    const r = canvas.getBoundingClientRect();
+    const t = e.touches ? e.touches[0] : e;
+    return { x: t.clientX - r.left, y: t.clientY - r.top };
+  }
+  function start(e) { e.preventDefault(); drawing = true; const p = getPos(e); lastX = p.x; lastY = p.y; }
+  function move(e) { if (!drawing) return; e.preventDefault(); const p = getPos(e); ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(p.x, p.y); ctx.stroke(); lastX = p.x; lastY = p.y; }
+  function end() { drawing = false; }
+  canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', move);
+  canvas.addEventListener('mouseup', end); canvas.addEventListener('mouseleave', end);
+  canvas.addEventListener('touchstart', start); canvas.addEventListener('touchmove', move); canvas.addEventListener('touchend', end);
+}
+
+function clearCanvas() {
+  const canvas = document.getElementById('sig-canvas');
+  if (canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function isCanvasBlank(canvas) {
+  const blank = document.createElement('canvas');
+  blank.width = canvas.width; blank.height = canvas.height;
+  return canvas.toDataURL() === blank.toDataURL();
+}
+
+function switchMode(mode) {
+  sigMode = mode;
+  document.querySelectorAll('.sig-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
+  document.getElementById('mode-draw').classList.toggle('active', mode === 'draw');
+  document.getElementById('mode-upload').classList.toggle('active', mode === 'upload');
+}
+
+function loadImage(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) { alert('Image trop volumineuse (max 2 Mo).'); input.value = ''; return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    sigData = e.target.result;
+    document.getElementById('sig-preview').innerHTML = '<img src="' + sigData + '" class="sig-img-display">';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function signContract() {
+  const status = document.getElementById('sign-status');
+  status.style.color = '#c0392b';
+  if (!document.getElementById('lu-approuve').checked) { status.textContent = "⚠️ Cochez « J'ai lu et approuvé » avant de signer."; return; }
+  if (SIGNED_SET.size < TOTAL_SECTIONS) { status.textContent = `⚠️ Validez les ${TOTAL_SECTIONS} sections (${SIGNED_SET.size}/${TOTAL_SECTIONS}).`; return; }
+
+  let finalSig = null;
+  if (sigMode === 'upload') {
+    if (!sigData) { status.textContent = "⚠️ Importez une image ou dessinez votre signature."; return; }
+    finalSig = sigData;
+  } else {
+    const canvas = document.getElementById('sig-canvas');
+    if (isCanvasBlank(canvas)) { status.textContent = "⚠️ Veuillez dessiner votre signature."; return; }
+    finalSig = canvas.toDataURL('image/png');
+  }
+
+  // Vérif perso si employe
+  if (ROLE === 'employe') {
+    const required = ['ip_pere', 'ip_mere', 'ip_domicile', 'ip_naissance'];
+    const missing = required.filter(id => { const el = document.getElementById(id); return !el || !el.value.trim(); });
+    if (missing.length) { status.textContent = "⚠️ Complétez vos informations personnelles avant de signer."; return; }
+    try { await savePersonalInfo(); } catch (e) {}
+  }
+
+  status.style.color = '#1a5276'; status.textContent = '⏳ Signature en cours...';
+  try {
+    const r = await callApi('kya_hr.api.kya_contracts.sign_contract', {
+      signature_data: finalSig, role: ROLE, total_sections: TOTAL_SECTIONS,
+    });
+    status.style.color = '#27ae60';
+    status.innerHTML = '✓ Contrat signé avec succès. ' + (r.state === 'Finalisé'
+      ? 'Vous recevrez le PDF par email.' : 'Le DG va recevoir une notification pour co-signer.');
+    setTimeout(() => location.reload(), 2500);
+  } catch (e) {
+    status.style.color = '#c0392b';
+    status.textContent = '❌ ' + e.message;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (document.getElementById('sig-canvas')) setupCanvas();
+});
+</script>
+
+{% endif %}
+{% endblock %}

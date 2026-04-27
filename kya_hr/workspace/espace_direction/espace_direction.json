@@ -1,0 +1,243 @@
+{
+ "app": "kya_hr",
+ "charts": [],
+ "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Direction Générale'>🏢 Espace Direction Générale — KYA</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Tableau de Bord Global\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Demandes d'Achat\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Permissions Employé\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"PV Sortie Matériel\", \"col\": 3}}, {\"id\": \"spacer1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}]",
+ "creation": "2026-01-01 00:00:00.000000",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "type": "Workspace",
+ "hide_custom": 0,
+ "color": "#1a1a2e",
+ "icon": "building",
+ "idx": 0,
+ "is_hidden": 0,
+ "is_standard": 1,
+ "name": "Espace Direction",
+ "label": "Direction Générale",
+ "module": "KYA HR",
+ "public": 1,
+ "sequence_id": 15,
+ "roles": [
+  {"role": "Directeur Général"},
+  {"role": "System Manager"},
+  {"role": "Administrator"}
+ ],
+ "shortcuts": [
+  {
+   "label": "Tableau de Bord Global",
+   "type": "URL",
+   "url": "/kya-tableau-de-bord",
+   "color": "#0054a6",
+   "icon": "graph-up"
+  },
+  {
+   "label": "Demandes d'Achat",
+   "type": "DocType",
+   "link_to": "Demande Achat KYA",
+   "color": "#e65100",
+   "icon": "shopping-cart"
+  },
+  {
+   "label": "Permissions Employé",
+   "type": "DocType",
+   "link_to": "Permission Sortie Employe",
+   "color": "#1565c0",
+   "icon": "exit"
+  },
+  {
+   "label": "PV Sortie Matériel",
+   "type": "DocType",
+   "link_to": "PV Sortie Materiel",
+   "color": "#2e7d32",
+   "icon": "upload"
+  },
+  {
+   "label": "Contrats KYA",
+   "type": "DocType",
+   "link_to": "KYA Contrat",
+   "color": "#7d3c98",
+   "icon": "file"
+  },
+  {
+   "label": "Templates Contrats",
+   "type": "DocType",
+   "link_to": "KYA Contract Template",
+   "color": "#5b2c6f",
+   "icon": "small-file"
+  }
+ ],
+ "links": [
+  {
+   "type": "Card Break",
+   "label": "Tableau de Bord",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "📊 Tableau de Bord Global KYA",
+   "link_to": "/kya-tableau-de-bord",
+   "link_type": "URL",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 1
+  },
+  {
+   "type": "Card Break",
+   "label": "RH",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Permissions Sortie Employé",
+   "link_to": "Permission Sortie Employe",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Permissions Sortie Stagiaire",
+   "link_to": "Permission Sortie Stagiaire",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Plannings de Congé",
+   "link_to": "Planning Conge",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Card Break",
+   "label": "Achats",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Demandes d'Achat",
+   "link_to": "Demande Achat KYA",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Bons de Commande",
+   "link_to": "Bon Commande KYA",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Appels d'Offre",
+   "link_to": "Appel Offre KYA",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Card Break",
+   "label": "Stock",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "PV Sorties Matériel",
+   "link_to": "PV Sortie Materiel",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "PV Entrées Matériel",
+   "link_to": "PV Entree Materiel",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Inventaires",
+   "link_to": "Inventaire KYA",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Card Break",
+   "label": "Comptabilité",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Brouillards de Caisse",
+   "link_to": "Brouillard Caisse",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "États Récap. Chèques",
+   "link_to": "Etat Recap Cheques",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 0
+  }
+ ],
+ "modified": "2026-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "quick_lists": []
+}

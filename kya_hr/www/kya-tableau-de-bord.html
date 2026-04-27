@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tableau de Bord KYA-Energy Group</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+/* ─── Base ─────────────────────────────────────────────────────── */
+:root {
+  --kya-navy:   #1a1a2e;
+  --kya-blue:   #0054a6;
+  --kya-orange: #e07b00;
+  --kya-green:  #2e7d32;
+  --kya-red:    #c62828;
+  --kya-purple: #6a1b9a;
+  --kya-bg:     #f0f4f8;
+  --radius:     10px;
+}
+body { background: var(--kya-bg); font-family: 'Segoe UI', sans-serif; margin: 0; color: var(--kya-navy); }
+
+/* ─── Header ────────────────────────────────────────────────────── */
+.kya-header {
+  background: linear-gradient(135deg, var(--kya-navy) 0%, var(--kya-blue) 100%);
+  color: #fff; padding: 20px 32px; display: flex; align-items: center; gap: 20px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  position: sticky; top: 0; z-index: 100;
+}
+.kya-header img { height: 52px; border-radius: 6px; }
+.kya-header-title { flex: 1; }
+.kya-header-title h1 { margin: 0; font-size: 1.4rem; font-weight: 700; }
+.kya-header-title p  { margin: 0; font-size: 0.8rem; opacity: 0.8; }
+.kya-header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+/* ─── Controls ──────────────────────────────────────────────────── */
+.kya-controls {
+  background: #fff; border-bottom: 1px solid #dde2ea;
+  padding: 12px 32px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+}
+.kya-controls label { font-size: 13px; font-weight: 600; color: var(--kya-navy); }
+.kya-controls select, .kya-controls input {
+  border: 1px solid #c9d3df; border-radius: 6px; padding: 6px 12px; font-size: 13px;
+  background: #f8fafc; color: var(--kya-navy);
+}
+.kya-search { flex: 1; min-width: 180px; max-width: 300px; }
+
+/* ─── KPI Cards ─────────────────────────────────────────────────── */
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; padding: 24px 32px 8px; }
+.kpi-card {
+  background: #fff; border-radius: var(--radius); padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.07); border-left: 4px solid var(--kya-blue);
+  transition: transform .15s;
+}
+.kpi-card:hover { transform: translateY(-2px); }
+.kpi-card.pending { border-color: var(--kya-orange); }
+.kpi-card.approved { border-color: var(--kya-green); }
+.kpi-card.rejected { border-color: var(--kya-red); }
+.kpi-card.total { border-color: var(--kya-blue); }
+.kpi-value { font-size: 2rem; font-weight: 800; line-height: 1; }
+.kpi-label { font-size: 12px; color: #64748b; margin-top: 4px; text-transform: uppercase; letter-spacing: .5px; }
+
+/* ─── Module Tabs ───────────────────────────────────────────────── */
+.kya-nav { padding: 8px 32px 0; background: #fff; border-bottom: 2px solid #e2e8f0; }
+.kya-nav .nav-tabs { border: none; gap: 4px; }
+.kya-nav .nav-link { font-weight: 600; font-size: 13px; color: #64748b; border: none; border-radius: 8px 8px 0 0; padding: 10px 18px; }
+.kya-nav .nav-link.active { background: var(--kya-blue); color: #fff; }
+.kya-nav .nav-link:hover:not(.active) { background: #f1f5f9; color: var(--kya-navy); }
+
+/* ─── Content ───────────────────────────────────────────────────── */
+.kya-content { padding: 24px 32px; }
+
+/* ─── Module Panel ──────────────────────────────────────────────── */
+.mod-panel {
+  background: #fff; border-radius: var(--radius);
+  box-shadow: 0 2px 8px rgba(0,0,0,.07); margin-bottom: 24px; overflow: hidden;
+}
+.mod-header {
+  display: flex; align-items: center; gap: 12px; padding: 16px 20px;
+  border-bottom: 1px solid #e2e8f0; background: #f8fafc;
+}
+.mod-icon { font-size: 1.6rem; }
+.mod-title { font-weight: 700; font-size: 1rem; }
+.mod-sub { font-size: 12px; color: #64748b; }
+.mod-badge { margin-left: auto; background: var(--kya-blue); color: #fff; border-radius: 20px; padding: 3px 12px; font-size: 12px; font-weight: 700; }
+
+/* ─── DocType Sub-Cards ─────────────────────────────────────────── */
+.dt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0; }
+.dt-card { padding: 16px 20px; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; }
+.dt-card:last-child { border-right: none; }
+.dt-name { font-weight: 700; font-size: 13px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.dt-name a { color: var(--kya-blue); font-size: 11px; font-weight: 600; text-decoration: none; margin-left: auto; }
+.dt-name a:hover { text-decoration: underline; }
+.dt-stats { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.dt-stat { text-align: center; background: #f8fafc; border-radius: 6px; padding: 4px 10px; min-width: 55px; }
+.dt-stat-val { font-size: 1.3rem; font-weight: 800; line-height: 1; }
+.dt-stat-lbl { font-size: 9px; text-transform: uppercase; color: #64748b; }
+.dt-stat.s-pending .dt-stat-val { color: var(--kya-orange); }
+.dt-stat.s-approved .dt-stat-val { color: var(--kya-green); }
+.dt-stat.s-rejected .dt-stat-val { color: var(--kya-red); }
+.dt-stat.s-total .dt-stat-val { color: var(--kya-blue); }
+
+/* ─── Recent Records mini-list ──────────────────────────────────── */
+.dt-recents { margin-top: 8px; }
+.dt-rec-row {
+  display: flex; align-items: center; gap: 8px; padding: 5px 0;
+  border-top: 1px solid #f1f5f9; font-size: 12px;
+}
+.dt-rec-row:first-child { border-top: none; }
+.dt-rec-name { font-weight: 600; color: var(--kya-blue); text-decoration: none; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dt-rec-name:hover { text-decoration: underline; }
+.dt-rec-date { color: #94a3b8; font-size: 11px; }
+.status-badge {
+  font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 700; white-space: nowrap;
+}
+.status-badge.pending  { background: #fff3e0; color: #e65100; }
+.status-badge.approved { background: #e8f5e9; color: #2e7d32; }
+.status-badge.rejected { background: #ffebee; color: #c62828; }
+.status-badge.draft    { background: #eeeeee; color: #616161; }
+.status-badge.other    { background: #e3f2fd; color: #1565c0; }
+
+/* ─── Charts ────────────────────────────────────────────────────── */
+.chart-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; padding: 16px 20px; border-top: 1px solid #e2e8f0; }
+.chart-wrap { position: relative; height: 180px; }
+
+/* ─── Buttons ───────────────────────────────────────────────────── */
+.btn-kya-primary   { background: var(--kya-blue);   color: #fff; border: none; border-radius: 8px; padding: 8px 18px; font-weight: 600; font-size: 13px; cursor: pointer; }
+.btn-kya-primary:hover { background: #003d7a; }
+.btn-kya-success   { background: var(--kya-green);  color: #fff; border: none; border-radius: 8px; padding: 8px 18px; font-weight: 600; font-size: 13px; cursor: pointer; }
+.btn-kya-success:hover { background: #1b5e20; }
+.btn-kya-outline   { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,.4); border-radius: 8px; padding: 8px 16px; font-weight: 600; font-size: 13px; cursor: pointer; }
+.btn-kya-outline:hover { border-color: #fff; background: rgba(255,255,255,.15); }
+
+/* ─── Loading overlay ───────────────────────────────────────────── */
+.kya-loader {
+  position: fixed; inset: 0; background: rgba(255,255,255,.85);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 9999; font-weight: 700; color: var(--kya-blue); font-size: 1rem; gap: 16px;
+}
+.kya-spinner { width: 48px; height: 48px; border: 5px solid #e2e8f0; border-top-color: var(--kya-blue); border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Empty ─────────────────────────────────────────────────────── */
+.kya-empty { text-align: center; color: #94a3b8; padding: 32px; font-size: 14px; }
+
+/* ─── Responsive ────────────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .kya-header { padding: 14px 16px; flex-wrap: wrap; }
+  .kpi-row, .kya-content, .kya-controls { padding-left: 16px; padding-right: 16px; }
+  .dt-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div class="kya-loader" id="kya-loader">
+  <div class="kya-spinner"></div>
+  <span>Chargement du tableau de bord…</span>
+</div>
+
+<!-- Header -->
+<div class="kya-header">
+  <img src="/assets/kya_hr/images/kya_logo.png" alt="KYA" onerror="this.style.display='none'">
+  <div class="kya-header-title">
+    <h1>📊 Tableau de Bord Global</h1>
+    <p>KYA-Energy Group — Vue de synthèse Direction Générale</p>
+  </div>
+  <div class="kya-header-actions">
+    <button class="btn-kya-outline" onclick="refreshData()"><i class="bi bi-arrow-clockwise"></i> Rafraîchir</button>
+    <button class="btn-kya-success" onclick="exportExcel()"><i class="bi bi-file-earmark-excel"></i> Exporter Excel</button>
+    <a href="/app" class="btn-kya-outline"><i class="bi bi-house"></i> Bureau</a>
+  </div>
+</div>
+
+<!-- Controls -->
+<div class="kya-controls">
+  <label>Période :</label>
+  <select id="ctrl-period" onchange="refreshData()">
+    <option value="30" selected>30 derniers jours</option>
+    <option value="90">3 mois</option>
+    <option value="180">6 mois</option>
+    <option value="365">12 mois</option>
+    <option value="3650">Tout</option>
+  </select>
+  <label>Module :</label>
+  <select id="ctrl-module" onchange="refreshData()">
+    <option value="">Tous les modules</option>
+    <option value="rh">👥 Ressources Humaines</option>
+    <option value="achats">🛒 Achats</option>
+    <option value="stock">📦 Stock</option>
+    <option value="compta">💰 Comptabilité</option>
+  </select>
+  <label>Mis à jour :</label>
+  <span id="last-update" style="font-size:12px;color:#64748b;">—</span>
+</div>
+
+<!-- KPI Row -->
+<div class="kpi-row" id="kpi-row">
+  <div class="kpi-card total"><div class="kpi-value" id="kpi-total">—</div><div class="kpi-label">Total fiches</div></div>
+  <div class="kpi-card pending"><div class="kpi-value" id="kpi-pending" style="color:var(--kya-orange)">—</div><div class="kpi-label">En attente</div></div>
+  <div class="kpi-card approved"><div class="kpi-value" id="kpi-approved" style="color:var(--kya-green)">—</div><div class="kpi-label">Approuvées</div></div>
+  <div class="kpi-card rejected"><div class="kpi-value" id="kpi-rejected" style="color:var(--kya-red)">—</div><div class="kpi-label">Rejetées</div></div>
+</div>
+
+<!-- Module Tabs -->
+<div class="kya-nav">
+  <ul class="nav nav-tabs" id="mod-tabs" role="tablist"></ul>
+</div>
+
+<!-- Content -->
+<div class="kya-content">
+  <div class="tab-content" id="mod-content"></div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   KYA Global Dashboard — JavaScript
+   ═══════════════════════════════════════════════════════════════ */
+let _lastData = null;
+let _charts = {};
+
+const fmtN  = n => new Intl.NumberFormat('fr-FR').format(Math.round(n||0));
+const fmtXOF= n => fmtN(n) + ' XOF';
+const fmtD  = s => s ? s.slice(0,10).split('-').reverse().join('/') : '—';
+
+function statusBadge(cls, label) {
+  return `<span class="status-badge ${cls}">${label}</span>`;
+}
+
+function showLoader(v) {
+  document.getElementById('kya-loader').style.display = v ? '' : 'none';
+}
+
+/* ─── API call (via Frappe) ──────────────────────────────────── */
+async function fetchStats(period, mod) {
+  return new Promise((resolve, reject) => {
+    frappe.call({
+      method: 'kya_hr.api.kya_dashboard.get_global_stats',
+      args: { period, module: mod || '' },
+      callback: r => { if (r && r.message) resolve(r.message); else reject(r); },
+      error: reject,
+    });
+  });
+}
+
+/* ─── Render KPIs ────────────────────────────────────────────── */
+function renderKPIs(totals) {
+  document.getElementById('kpi-total').textContent   = fmtN(totals.total);
+  document.getElementById('kpi-pending').textContent = fmtN(totals.pending);
+  document.getElementById('kpi-approved').textContent= fmtN(totals.approved);
+  document.getElementById('kpi-rejected').textContent= fmtN(totals.rejected);
+}
+
+/* ─── Render module tabs + content ──────────────────────────── */
+function renderModules(modules) {
+  const tabs    = document.getElementById('mod-tabs');
+  const content = document.getElementById('mod-content');
+
+  // Destroy old charts
+  Object.values(_charts).forEach(c => { try { c.destroy(); } catch(e){} });
+  _charts = {};
+
+  tabs.innerHTML = '';
+  content.innerHTML = '';
+
+  const keys = Object.keys(modules);
+  if (!keys.length) {
+    content.innerHTML = '<div class="kya-empty">Aucune donnée disponible pour cette période.</div>';
+    return;
+  }
+
+  keys.forEach((modKey, idx) => {
+    const mod = modules[modKey];
+    const isFirst = idx === 0;
+    const tabId = 'tab-' + modKey;
+    const paneId = 'pane-' + modKey;
+
+    // Tab
+    tabs.insertAdjacentHTML('beforeend', `
+      <li class="nav-item" role="presentation">
+        <button class="nav-link ${isFirst ? 'active' : ''}"
+          id="${tabId}" data-bs-toggle="tab" data-bs-target="#${paneId}"
+          type="button" role="tab">
+          ${mod.icon} ${mod.label}
+          <span class="ms-2 badge rounded-pill text-bg-secondary">${fmtN(mod.totals.total)}</span>
+        </button>
+      </li>
+    `);
+
+    // Pane
+    const dtCards = (mod.doctypes || []).map(dt => renderDtCard(modKey, dt)).join('');
+    const chartIds = (mod.doctypes || []).map(dt => `chart-${modKey}-${dt.name.replace(/\s+/g,'_')}`);
+
+    content.insertAdjacentHTML('beforeend', `
+      <div class="tab-pane fade ${isFirst ? 'show active' : ''}" id="${paneId}" role="tabpanel">
+        <div class="mod-panel">
+          <div class="mod-header">
+            <span class="mod-icon">${mod.icon}</span>
+            <div>
+              <div class="mod-title">${mod.label}</div>
+              <div class="mod-sub">${mod.totals.total} fiches · ${mod.totals.pending} en attente · ${mod.totals.approved} approuvées
+                ${mod.totals.amount > 0 ? '· ' + fmtXOF(mod.totals.amount) : ''}
+              </div>
+            </div>
+            <span class="mod-badge">${fmtN(mod.totals.total)}</span>
+          </div>
+
+          <div class="dt-grid">
+            ${dtCards}
+          </div>
+
+          <div class="chart-row">
+            ${(mod.doctypes||[]).map(dt => {
+              const cId = `chart-${modKey}-${dt.name.replace(/\s+/g,'_')}`;
+              return `
+                <div>
+                  <div style="font-size:12px;font-weight:700;color:#64748b;margin-bottom:6px;text-align:center;">${dt.label}</div>
+                  <div class="chart-wrap"><canvas id="${cId}"></canvas></div>
+                </div>`;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+    `);
+
+    // Draw charts after DOM inserted
+    setTimeout(() => {
+      (mod.doctypes || []).forEach(dt => {
+        drawDtChart(modKey, dt);
+      });
+    }, 100);
+  });
+}
+
+function renderDtCard(modKey, dt) {
+  const c = dt.classified || {};
+  const recents = (dt.recents || []).map(r => `
+    <div class="dt-rec-row">
+      <a href="${r.desk_url || dt.list_url + '/' + r.name}" class="dt-rec-name" title="${r.name}">${r.name}</a>
+      ${statusBadge(r.class, r.status)}
+      <span class="dt-rec-date">${fmtD(r.date)}</span>
+      ${r.amount ? '<span style="font-size:11px;font-weight:700;color:#475569;">' + fmtXOF(r.amount) + '</span>' : ''}
+    </div>
+  `).join('') || '<div class="dt-rec-row" style="color:#94a3b8;font-size:12px;">Aucun enregistrement.</div>';
+
+  return `
+    <div class="dt-card">
+      <div class="dt-name">
+        ${dt.label}
+        <a href="${dt.list_url}" target="_blank"><i class="bi bi-box-arrow-up-right"></i> Voir la liste</a>
+      </div>
+      <div class="dt-stats">
+        <div class="dt-stat s-total"><div class="dt-stat-val">${fmtN(dt.total)}</div><div class="dt-stat-lbl">Total</div></div>
+        <div class="dt-stat s-pending"><div class="dt-stat-val">${fmtN(c.pending||0)}</div><div class="dt-stat-lbl">Attente</div></div>
+        <div class="dt-stat s-approved"><div class="dt-stat-val">${fmtN(c.approved||0)}</div><div class="dt-stat-lbl">Approuvé</div></div>
+        <div class="dt-stat s-rejected"><div class="dt-stat-val">${fmtN(c.rejected||0)}</div><div class="dt-stat-lbl">Rejeté</div></div>
+        ${dt.total_amount > 0 ? `<div class="dt-stat"><div class="dt-stat-val" style="font-size:.9rem;color:var(--kya-purple)">${fmtXOF(dt.total_amount)}</div><div class="dt-stat-lbl">Montant</div></div>` : ''}
+      </div>
+      <div class="dt-recents">
+        <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:4px;">Derniers enregistrements</div>
+        ${recents}
+      </div>
+      <div style="margin-top:10px;">
+        <a href="${dt.form_url}/new" class="btn btn-sm btn-outline-primary" style="font-size:11px;">
+          <i class="bi bi-plus-lg"></i> Nouveau
+        </a>
+        <a href="${dt.list_url}" class="btn btn-sm btn-outline-secondary ms-1" style="font-size:11px;">
+          <i class="bi bi-list-ul"></i> Toutes les fiches
+        </a>
+      </div>
+    </div>
+  `;
+}
+
+function drawDtChart(modKey, dt) {
+  const cId = `chart-${modKey}-${dt.name.replace(/\s+/g,'_')}`;
+  const canvas = document.getElementById(cId);
+  if (!canvas) return;
+
+  const c = dt.classified || {};
+  const labels = ['En attente', 'Approuvé', 'Rejeté', 'Brouillon'];
+  const values = [c.pending||0, c.approved||0, c.rejected||0, c.draft||0];
+  const colors = ['#e65100','#2e7d32','#c62828','#9e9e9e'];
+
+  if (values.every(v => v === 0)) {
+    canvas.parentElement.innerHTML = '<div class="kya-empty" style="font-size:12px;padding:20px;">Aucune donnée</div>';
+    return;
+  }
+
+  _charts[cId] = new Chart(canvas, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{ data: values, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 10 }, boxWidth: 12 } }
+      }
+    }
+  });
+}
+
+/* ─── Export Excel ───────────────────────────────────────────── */
+function exportExcel() {
+  if (!_lastData) return;
+  const wb = XLSX.utils.book_new();
+
+  // Feuille synthèse globale
+  const sumRows = [['Module', 'Fiche', 'Total', 'En attente', 'Approuvé', 'Rejeté', 'Brouillon', 'Montant (XOF)']];
+  Object.values(_lastData.modules || {}).forEach(mod => {
+    (mod.doctypes || []).forEach(dt => {
+      const c = dt.classified || {};
+      sumRows.push([mod.label, dt.label, dt.total, c.pending||0, c.approved||0, c.rejected||0, c.draft||0, Math.round(dt.total_amount||0)]);
+    });
+  });
+  const wsSynth = XLSX.utils.aoa_to_sheet(sumRows);
+  wsSynth['!cols'] = [20,30,10,12,12,10,12,18].map(w => ({wch: w}));
+  XLSX.utils.book_append_sheet(wb, wsSynth, 'Synthèse Globale');
+
+  // Feuilles par module
+  Object.entries(_lastData.modules || {}).forEach(([modKey, mod]) => {
+    const modRows = [['Fiche', 'Référence', 'Statut', 'Date', 'Montant (XOF)']];
+    (mod.doctypes || []).forEach(dt => {
+      (dt.recents || []).forEach(r => {
+        modRows.push([dt.label, r.name, r.status, r.date, r.amount ? Math.round(r.amount) : '']);
+      });
+    });
+    if (modRows.length > 1) {
+      const ws = XLSX.utils.aoa_to_sheet(modRows);
+      XLSX.utils.book_append_sheet(wb, ws, mod.label.slice(0, 31));
+    }
+  });
+
+  const period = document.getElementById('ctrl-period').value;
+  const today = new Date().toISOString().slice(0,10).replace(/-/g,'');
+  XLSX.writeFile(wb, `KYA_Dashboard_${today}_P${period}j.xlsx`);
+}
+
+/* ─── Main refresh ───────────────────────────────────────────── */
+async function refreshData() {
+  showLoader(true);
+  const period = document.getElementById('ctrl-period').value;
+  const mod    = document.getElementById('ctrl-module').value;
+  try {
+    const data = await fetchStats(period, mod);
+    _lastData = data;
+    renderKPIs(data.totals || {});
+    renderModules(data.modules || {});
+    document.getElementById('last-update').textContent =
+      new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  } catch (err) {
+    console.error('Dashboard error:', err);
+    document.getElementById('mod-content').innerHTML =
+      '<div class="kya-empty"><i class="bi bi-exclamation-triangle" style="font-size:2rem;color:var(--kya-red);"></i><br>Erreur de chargement. Vérifiez vos droits d\'accès.</div>';
+  } finally {
+    showLoader(false);
+  }
+}
+
+/* ─── Init ────────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', function() {
+  // Attendre que frappe soit prêt
+  if (window.frappe && frappe.ready) {
+    frappe.ready(refreshData);
+  } else {
+    setTimeout(refreshData, 800);
+  }
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

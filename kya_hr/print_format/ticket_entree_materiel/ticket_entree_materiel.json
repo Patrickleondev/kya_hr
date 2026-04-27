@@ -1,0 +1,10 @@
+{
+    "name": "Ticket Entrée Matériel KYA",
+    "doctype": "Print Format",
+    "doc_type": "PV Entree Materiel",
+    "module": "KYA HR",
+    "print_format_type": "Jinja",
+    "standard": "Yes",
+    "custom_format": 1,
+    "html": ""
+}
