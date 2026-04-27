@@ -871,6 +871,49 @@ footer .web-footer-menu { display: none !important; }
 }
 
 /* == OVERFLOW / TEXT WRAPPING (global fix) ================ */
+
+/* == WIDTH & TABLES (2026-04 responsive polish) =========== */
+/* Container plus large pour les formulaires denses (bon-commande, etat-recap) */
+[data-path*="bon-commande"] .web-form-container,
+[data-path*="etat-recap"] .web-form-container,
+[data-path*="brouillard-caisse"] .web-form-container,
+[data-path*="appel-offre"] .web-form-container {
+  max-width: 1180px !important;
+}
+
+/* Tables enfants (lignes chèques, articles, etc.) : en-têtes lisibles + wrap */
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-row {
+  font-size: 12px;
+}
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-static-col,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-row .col {
+  white-space: normal !important;
+  word-break: break-word;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  padding: 6px 8px !important;
+}
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row .col {
+  font-weight: 700;
+  color: var(--kya-blue) !important;
+  text-transform: none;
+  letter-spacing: 0;
+  line-height: 1.25;
+}
+/* Largeur min pour éviter écrasement sur petits écrans */
+.kya-form-section .frappe-control[data-fieldtype="Table"] .form-grid-container,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .form-grid {
+  overflow-x: auto;
+}
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-row,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row {
+  min-width: 680px;
+}
+
+/* Signature grid: si 4 signatures, garder 4 colonnes sur desktop */
+.kya-section-body.kya-sig-grid .frappe-control { min-height: 150px; }
+
 /* Prevent long labels and text from overflowing containers  */
 .control-label,
 .frappe-control .control-label,

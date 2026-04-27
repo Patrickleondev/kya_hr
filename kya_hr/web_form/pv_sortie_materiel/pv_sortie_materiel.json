@@ -25,7 +25,7 @@
  "show_sidebar": 1,
  "success_message": "✅ Le PV de sortie matériel a été créé avec succès. Il suivra le circuit d’approbation : Chef → Audit → Direction → Magasin.",
  "title": "PV de Sortie Matériel",
- "client_script": "frappe.web_form.after_load = function() {\n  // INJECTION: Dynamic Reference Number\n  if (doc && doc.name) {\n    var refEl = document.createElement('div');\n    refEl.innerHTML = '<div style=\"margin-bottom:12px;padding:8px 16px;background:#f1f8e9;color:#33691e;border-left:4px solid #8bc34a;border-radius:6px;display:inline-block;font-weight:700;margin-right:10px;font-size:14px;\">Réf. Dossier : ' + doc.name + '</div>';\n    var w = document.querySelector('.web-form-wrapper') || document.querySelector('.container');\n    if (w) w.prepend(refEl);\n  }\n\n  var doc = frappe.web_form.doc;\n  var roles = (frappe.boot && frappe.boot.user && frappe.boot.user.roles) ? frappe.boot.user.roles : [];\n  var state = (doc && (doc.workflow_state || doc.statut)) || 'Brouillon';\n  var rules = {\n    'signature_demandeur': { states: ['Brouillon'], roles: [] },\n    'signature_chef': { states: ['En attente Chef'], roles: ['Chef Service','System Manager'] },\n    'signature_audit': { states: ['En attente Audit'], roles: ['Auditeur Interne','System Manager'] },\n    'signature_dga': { states: ['En attente DGA'], roles: ['DGA','Directeur Général','System Manager'] },\n    'signature_magasin': { states: ['En attente Magasin'], roles: ['Chargé des Stocks','Responsable Stock','System Manager'] }\n  };\n  var allSig = ['signature_demandeur','signature_chef','signature_audit','signature_dga','signature_magasin','demandeur_nom'];\n  allSig.forEach(function(f){ frappe.web_form.set_df_property(f, 'read_only', 1); });\n  Object.keys(rules).forEach(function(field) {\n    var rule = rules[field];\n    var stateOk = rule.states.indexOf(state) !== -1;\n    var roleOk = rule.roles.length === 0 || rule.roles.some(function(r){ return roles.indexOf(r) !== -1; });\n    if (stateOk && roleOk) frappe.web_form.set_df_property(field, 'read_only', 0);\n  });\n  if (doc && doc.statut) {\n    var cm = {'Approuv\\u00e9':'#2e7d32','Rejet\\u00e9':'#c62828','Brouillon':'#757575'};\n    var c = cm[doc.statut] || '#e65100';\n    var el = document.createElement('div');\n    el.innerHTML = '<div style=\"margin-bottom:12px;padding:8px 16px;background:'+c+';color:#fff;border-radius:6px;display:inline-block;font-weight:700;\">\\u00c9tat\\u00a0: '+doc.statut+'</div>';\n    var w = document.querySelector('.web-form-wrapper') || document.querySelector('.container');\n    if (w) w.prepend(el);\n  }\n};\nfrappe.web_form.on('load', function(){\n  var doc = frappe.web_form.doc;\n  if (!doc.demandeur_nom && frappe.session && frappe.session.user) {\n    frappe.call({ method:'frappe.client.get_value', args:{ doctype:'Employee', filters:{ user_id: frappe.session.user }, fieldname:'employee_name' }, callback:function(r){ if(r.message && r.message.employee_name) frappe.web_form.set_value('demandeur_nom', r.message.employee_name); } });\n  }\n});\n",
+ "client_script": "frappe.web_form.after_load = function() {\n  // INJECTION: Dynamic Reference Number\n  if (doc && doc.name) {\n    var refEl = document.createElement('div');\n    refEl.innerHTML = '<div style=\"margin-bottom:12px;padding:8px 16px;background:#f1f8e9;color:#33691e;border-left:4px solid #8bc34a;border-radius:6px;display:inline-block;font-weight:700;margin-right:10px;font-size:14px;\">Réf. Dossier : ' + doc.name + '</div>';\n    var w = document.querySelector('.web-form-wrapper') || document.querySelector('.container');\n    if (w) w.prepend(refEl);\n  }\n\n  var doc = frappe.web_form.doc;\n  var roles = (frappe.boot && frappe.boot.user && frappe.boot.user.roles) ? frappe.boot.user.roles : [];\n  var state = (doc && (doc.workflow_state || doc.statut)) || 'Brouillon';\n  var rules = {\n    'signature_demandeur': { states: ['Brouillon'], roles: [] },\n    'signature_chef': { states: ['En attente Chef'], roles: ['Chef Service','System Manager'] },\n    'signature_audit': { states: ['En attente Audit'], roles: ['Auditeur Interne','System Manager'] },\n    'signature_dga': { states: ['En attente DGA'], roles: ['DGA','Directeur Général','System Manager'] },\n    'signature_magasin': { states: ['En attente Magasin'], roles: ['Chargé des Stocks','Responsable Stock','System Manager'] }\n  };\n  var allSig = ['signature_demandeur','signature_chef','signature_audit','signature_dga','signature_magasin','demandeur_nom'];\n  allSig.forEach(function(f){ frappe.web_form.set_df_property(f, 'read_only', 1); });\n  Object.keys(rules).forEach(function(field) {\n    var rule = rules[field];\n    var stateOk = rule.states.indexOf(state) !== -1;\n    var roleOk = rule.roles.length === 0 || rule.roles.some(function(r){ return roles.indexOf(r) !== -1; });\n    if (stateOk && roleOk) frappe.web_form.set_df_property(field, 'read_only', 0);\n  });\n  if (doc && doc.statut) {\n    var cm = {'Approuv\\u00e9':'#2e7d32','Rejet\\u00e9':'#c62828','Brouillon':'#757575'};\n    var c = cm[doc.statut] || '#e65100';\n    var el = document.createElement('div');\n    el.innerHTML = '<div style=\"margin-bottom:12px;padding:8px 16px;background:'+c+';color:#fff;border-radius:6px;display:inline-block;font-weight:700;\">\\u00c9tat\\u00a0: '+doc.statut+'</div>';\n    var w = document.querySelector('.web-form-wrapper') || document.querySelector('.container');\n    if (w) w.prepend(el);\n  }\n};\nfrappe.web_form.on('load', function(){\n  var doc = frappe.web_form.doc;\n  if (!doc.demandeur_nom && frappe.session && frappe.session.user) {\n    frappe.call({ method:'frappe.client.get_value', args:{ doctype:'Employee', filters:{ user_id: frappe.session.user }, fieldname:'employee_name' }, callback:function(r){ if(r.message && r.message.employee_name) frappe.web_form.set_value('demandeur_nom', r.message.employee_name); } });\n  }\n});\nfrappe.web_form.on('customer_manuel', function(field, value){\n  if (!value) return;\n  var d = frappe.web_form.doc;\n  if (d && d.customer) return;\n  if (window.__kya_customer_prompt_shown) return;\n  window.__kya_customer_prompt_shown = true;\n  frappe.confirm('Le client \"' + value + '\" n\\'existe pas dans la base.\\n\\nVoulez-vous l\\'enregistrer maintenant ?\\n\\n(OK = ouvrir le formulaire client dans un nouvel onglet ; Annuler = continuer sans enregistrer)', function(){\n    var url = '/app/customer/new?customer_name=' + encodeURIComponent(value);\n    window.open(url, '_blank');\n  });\n});\n",
  "web_form_fields": [
   {
    "fieldname": "objet",
@@ -40,6 +40,35 @@
    "label": "Date de Sortie",
    "reqd": 1,
    "default": "Today"
+  },
+  {
+   "fieldname": "destination_type",
+   "fieldtype": "Select",
+   "label": "Destination de la sortie",
+   "options": "Équipe interne\nClient / Projet",
+   "default": "Équipe interne",
+   "reqd": 1,
+   "description": "Interne = matériel utilisé par l'équipe KYA. Client/Projet = matériel livré ou mobilisé pour un client."
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "options": "Project",
+   "label": "Projet / Chantier",
+   "description": "Obligatoire si destination = Client / Projet"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "options": "Customer",
+   "label": "Client (référence)",
+   "description": "Sélectionnez un client existant. Laissez vide si nouveau client (utilisez le champ manuel ci-dessous)."
+  },
+  {
+   "fieldname": "customer_manuel",
+   "fieldtype": "Data",
+   "label": "Nom du client (saisie manuelle)",
+   "description": "À remplir uniquement si le client n'est pas encore dans la base. Vous pourrez l'enregistrer ensuite."
   },
   {
    "fieldname": "items",

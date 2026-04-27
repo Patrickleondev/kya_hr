@@ -30,6 +30,13 @@
   "signature_dfc",
   "signataire_dfc",
   "date_signature_dfc",
+  "col_sig_dg",
+  "signature_dg",
+  "signataire_dg",
+  "date_signature_dg",
+  "signature_dga",
+  "signataire_dga",
+  "date_signature_dga",
   "section_workflow",
   "statut",
   "workflow_state",
@@ -176,6 +183,45 @@
    "fieldname": "date_signature_dfc",
    "fieldtype": "Date",
    "label": "Date Signature DFC",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_sig_dg",
+   "fieldtype": "Column Break",
+   "label": "DG / DGA"
+  },
+  {
+   "fieldname": "signature_dg",
+   "fieldtype": "Signature",
+   "label": "Visa DG"
+  },
+  {
+   "fieldname": "signataire_dg",
+   "fieldtype": "Data",
+   "label": "Signataire DG",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date_signature_dg",
+   "fieldtype": "Date",
+   "label": "Date Signature DG",
+   "read_only": 1
+  },
+  {
+   "fieldname": "signature_dga",
+   "fieldtype": "Signature",
+   "label": "Visa DGA"
+  },
+  {
+   "fieldname": "signataire_dga",
+   "fieldtype": "Data",
+   "label": "Signataire DGA",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date_signature_dga",
+   "fieldtype": "Date",
+   "label": "Date Signature DGA",
    "read_only": 1
   },
   {

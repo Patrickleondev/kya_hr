@@ -1,0 +1,56 @@
+{
+ "name": "KYA Dashboard Settings",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "issingle": 1,
+ "is_submittable": 0,
+ "custom": 0,
+ "track_changes": 1,
+ "creation": "2026-04-24 00:00:00.000000",
+ "modified": "2026-04-24 00:00:00.000000",
+ "modified_by": "Administrator",
+ "owner": "Administrator",
+ "fields": [
+  {
+   "fieldname": "help_html",
+   "fieldtype": "HTML",
+   "label": "Aide",
+   "options": "<div style='background:#e3f2fd;border-left:4px solid #1565c0;padding:14px 18px;border-radius:6px;margin-bottom:16px;line-height:1.7'><b>📊 Configuration du Tableau de Bord DG</b><br><br>Cette page permet de configurer les types de documents (web forms) affichés dans le tableau de bord global accessible à <b>/kya-tableau-de-bord</b>.<br><br><b>Comment ajouter un nouveau web form au tableau de bord :</b><br>① Cliquez sur <b>Ajouter une ligne</b> dans le tableau ci-dessous<br>② Sélectionnez le <b>module</b> (rh, achats, stocks, compta, autre)<br>③ Renseignez le <b>Libellé Module</b> (ex: Ressources Humaines) et l'<b>icône</b> (emoji)<br>④ Entrez le <b>nom exact du DocType</b> ERPNext (ex: Permission Sortie Employe)<br>⑤ Indiquez le <b>champ statut</b> (généralement <code>workflow_state</code>) et le <b>champ date</b> (ex: <code>creation</code>)<br>⑥ Ajoutez l'<b>URL liste</b> (ex: <code>/app/permission-sortie-employe</code>) et la <b>route web form</b> (ex: <code>/permission-sortie-employe</code>)<br>⑦ Cochez <b>Actif</b> et <b>Sauvegardez</b> → le tableau de bord se met à jour automatiquement<br><br><b>Note :</b> Si le tableau est vide, les valeurs par défaut intégrées sont utilisées. Utilisez le bouton ci-dessous pour les initialiser.</div>"
+  },
+  {
+   "fieldname": "section_entries",
+   "label": "Modules et DocTypes à suivre",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "entries",
+   "label": "Entrées du Tableau de Bord",
+   "fieldtype": "Table",
+   "options": "KYA Dashboard Entry"
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "permlevel": 0,
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 0
+  },
+  {
+   "role": "DG",
+   "permlevel": 0,
+   "read": 1,
+   "write": 0,
+   "create": 0
+  },
+  {
+   "role": "Directeur Général",
+   "permlevel": 0,
+   "read": 1,
+   "write": 0,
+   "create": 0
+  }
+ ]
+}

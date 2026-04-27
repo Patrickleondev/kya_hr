@@ -176,15 +176,15 @@
   },
   {
    "fieldname": "section_sig_chef",
-   "label": "Visa du Chef de Département",
+   "label": "Visa du Chef Service",
    "fieldtype": "Section Break"
   },
   {
    "fieldname": "signature_chef",
-   "label": "Signature du Chef",
+   "label": "Signature du Chef Service",
    "fieldtype": "Signature",
    "read_only": 1,
-   "description": "Le Chef de Département signe ici"
+   "description": "Le Chef Service signe ici"
   },
   {
    "fieldname": "signataire_chef",

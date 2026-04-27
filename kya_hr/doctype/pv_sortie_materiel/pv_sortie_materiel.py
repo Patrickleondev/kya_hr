@@ -10,6 +10,26 @@ class PVSortieMateriel(Document):
     def validate(self):
         self.validate_items()
         self.set_demandeur_info()
+        self._compute_valorisation()
+
+    def _compute_valorisation(self):
+        """Compute valeur_totale per item line + total PV (XOF)."""
+        total = 0.0
+        nb = 0
+        items_list = list(self.get("items") or [])
+        frappe.logger().info(f"[PV {self.name}] _compute_valorisation: {len(items_list)} items")
+        for it in items_list:
+            qty = it.qte_reellement_sortie or it.qte_demandee or 0
+            unit = it.get("valeur_unitaire") or 0
+            if it.get("item_code") and not unit:
+                unit = frappe.db.get_value("Item", it.item_code, "valuation_rate") or 0
+                it.valeur_unitaire = unit
+            line_total = (qty or 0) * (unit or 0)
+            it.valeur_totale = line_total
+            total += line_total
+            nb += 1
+        self.valeur_totale_xof = total
+        self.nb_lignes = nb
 
     def validate_items(self):
         if not self.items:

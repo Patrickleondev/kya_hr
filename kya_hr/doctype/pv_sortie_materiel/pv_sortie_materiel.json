@@ -3,7 +3,7 @@
  "module": "KYA HR",
  "doctype": "DocType",
  "is_submittable": 1,
- "custom": 1,
+ "custom": 0,
  "autoname": "format:PV-SORT-{YYYY}-{#####}",
  "title_field": "objet",
  "search_fields": "objet, demandeur_nom, date_sortie, statut",
@@ -90,6 +90,22 @@
    "fetch_from": "project.customer",
    "in_standard_filter": 1,
    "description": "Client associé (rempli automatiquement si projet lié)"
+  },
+  {
+   "fieldname": "customer_manuel",
+   "label": "Client (saisie manuelle)",
+   "fieldtype": "Data",
+   "description": "Nom du client si non encore enregistré dans la base. Sera proposé pour création lors de l'approbation."
+  },
+  {
+   "fieldname": "destination_type",
+   "label": "Destination",
+   "fieldtype": "Select",
+   "options": "Équipe interne\nClient / Projet",
+   "default": "Équipe interne",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "description": "Distingue le matériel consommé en interne vs livré à un client"
   },
   {
    "fieldname": "stock_entry",

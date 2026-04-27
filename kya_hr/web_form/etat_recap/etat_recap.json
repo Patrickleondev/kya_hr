@@ -37,6 +37,8 @@
         {"fieldname": "nombre_cheques", "fieldtype": "Int", "label": "Nombre de ch\u00e8ques", "read_only": 1},
         {"fieldname": "commentaires", "fieldtype": "Small Text", "label": "Commentaires"},
         {"fieldname": "signature_redacteur", "fieldtype": "Signature", "label": "Signature R\u00e9dacteur"},
-        {"fieldname": "signature_dfc", "fieldtype": "Signature", "label": "Signature DFC"}
+        {"fieldname": "signature_dfc", "fieldtype": "Signature", "label": "Signature DFC"},
+        {"fieldname": "signature_dg", "fieldtype": "Signature", "label": "Signature DG"},
+        {"fieldname": "signature_dga", "fieldtype": "Signature", "label": "Signature DGA"}
     ]
 }

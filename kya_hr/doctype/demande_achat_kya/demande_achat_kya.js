@@ -27,7 +27,7 @@ frappe.ui.form.on("Demande Achat KYA", {
                 );
             } else {
                 frm.dashboard.set_headline(
-                    "Palier 1 : Approbation du Chef de Département uniquement",
+                    "Palier 1 : Approbation du Chef Service uniquement",
                     "blue"
                 );
             }

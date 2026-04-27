@@ -1,0 +1,156 @@
+{
+ "creation": "2026-04-08 00:00:00",
+ "doctype": "Workspace",
+ "docstatus": 0,
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "package",
+ "idx": 0,
+ "is_hidden": 0,
+ "label": "Inventaire & Sorties Matériel",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "📊 Tableau de Bord",
+   "link_count": 0,
+   "link_to": "Inventaire & Sorties Matériel",
+   "link_type": "Dashboard",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "📋 Rapport Sorties par Client / Projet",
+   "link_count": 0,
+   "link_to": "Sorties Matériel par Client/Projet",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sorties Matériel",
+   "link_count": 0,
+   "link_to": "PV Sortie Materiel",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Articles",
+   "link_count": 0,
+   "link_to": "Item",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Magasins",
+   "link_count": 0,
+   "link_to": "Warehouse",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Mouvements de Stock",
+   "link_count": 0,
+   "link_to": "Stock Entry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Clients",
+   "link_count": 0,
+   "link_to": "Customer",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Projets",
+   "link_count": 0,
+   "link_to": "Project",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-04-08 00:00:00",
+ "modified_by": "Administrator",
+ "module": "KYA HR",
+ "name": "Inventaire Sorties Materiel",
+ "number_cards": [
+  {"number_card_name": "Valeur Stock Total (XOF)"},
+  {"number_card_name": "Sorties Matériel cette année"},
+  {"number_card_name": "Valeur Sorties cette année (XOF)"},
+  {"number_card_name": "Sorties en attente approbation"},
+  {"number_card_name": "Articles en Stock"},
+  {"number_card_name": "Articles Rupture"},
+  {"number_card_name": "Projets actifs avec sorties"},
+  {"number_card_name": "Clients avec sorties"}
+ ],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "restrict_to_domain": "",
+ "roles": [
+  {"role": "System Manager"},
+  {"role": "DG"},
+  {"role": "DGA"},
+  {"role": "Auditeur"},
+  {"role": "Stock Manager"},
+  {"role": "Magasinier"}
+ ],
+ "sequence_id": 7.0,
+ "shortcuts": [
+  {
+   "color": "Blue",
+   "doc_view": "",
+   "format": "{} sorties",
+   "label": "Sorties Matériel",
+   "link_to": "PV Sortie Materiel",
+   "stats_filter": "{\"docstatus\":[\"=\",1]}",
+   "type": "DocType"
+  },
+  {
+   "color": "Green",
+   "doc_view": "",
+   "label": "Tableau de Bord",
+   "link_to": "Inventaire & Sorties Matériel",
+   "type": "Dashboard"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "",
+   "label": "Rapport par Client / Projet",
+   "link_to": "Sorties Matériel par Client/Projet",
+   "type": "Report"
+  },
+  {
+   "color": "Cyan",
+   "doc_view": "",
+   "format": "{} articles",
+   "label": "Articles",
+   "link_to": "Item",
+   "stats_filter": "{\"disabled\":[\"=\",0]}",
+   "type": "DocType"
+  }
+ ],
+ "title": "Inventaire & Sorties Matériel",
+ "type": "Workspace"
+}

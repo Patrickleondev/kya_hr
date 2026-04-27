@@ -137,6 +137,8 @@ body { background: var(--kya-bg) !important; }
 const fmtXOF = n => new Intl.NumberFormat('fr-FR').format(Math.round(n||0)) + ' XOF';
 const fmtNb = n => new Intl.NumberFormat('fr-FR').format(Math.round(n||0));
 const fmtDate = d => d ? new Date(d).toLocaleDateString('fr-FR') : '—';
+// Traduit les abréviations UOM ERPNext en français lisible
+const fmtUOM = u => ({'Nos':'Pce(s)','Nos.':'Pce(s)','NOS':'Pce(s)','nos':'Pce(s)'}[u] || (u||''));
 let chartPrj = null, chartCli = null;
 let lastData = {};
 
@@ -192,7 +194,7 @@ function renderMouv(data) {
     <td>${r.stock_entry_type||'—'}</td>
     <td>${r.project||'—'}</td>
     <td>${r.item_code} <span style="color:#64748b;font-size:.75rem;">${(r.item_name||'').slice(0,30)}</span></td>
-    <td class="text-end">${fmtNb(r.qty)} ${r.uom||''}</td>
+    <td class="text-end">${fmtNb(r.qty)} ${fmtUOM(r.uom)}</td>
     <td>${r.s_warehouse||'—'}</td>
     <td>${r.t_warehouse||'—'}</td>
     <td class="text-end">${fmtXOF(r.basic_amount)}</td>
@@ -208,7 +210,7 @@ function renderLiv(data) {
     <td>${r.customer_name||r.customer||'—'}</td>
     <td>${r.project||'—'}</td>
     <td>${r.item_code} <span style="color:#64748b;font-size:.75rem;">${(r.item_name||'').slice(0,30)}</span></td>
-    <td class="text-end">${fmtNb(r.qty)} ${r.uom||''}</td>
+    <td class="text-end">${fmtNb(r.qty)} ${fmtUOM(r.uom)}</td>
     <td>${r.warehouse||'—'}</td>
     <td class="text-end" style="font-weight:600;">${fmtXOF(r.amount)}</td>
   </tr>`).join('');
