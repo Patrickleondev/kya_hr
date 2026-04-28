@@ -973,3 +973,219 @@ footer .web-footer-menu { display: none !important; }
   overflow-x: hidden;
   word-break: break-word;
 }
+
+/* ==========================================================
+   v5 — POLISH RESPONSIVE & UX (2026-04)
+   - Signatures qui se miniaturisent vraiment (4 → 2 → 1 col)
+   - Tips d'import / popovers
+   - Sticky submit on mobile
+   - Meilleure densité de section sur formulaires riches
+   ========================================================== */
+
+/* Signatures — breakpoints intermédiaires manquants */
+@media (max-width: 1100px) and (min-width: 769px) {
+  .kya-section-body.kya-sig-grid { grid-template-columns: repeat(2, 1fr); }
+  .kya-section-body.kya-sig-grid .frappe-control { min-height: 140px; }
+  .kya-section-body.kya-sig-grid .frappe-control canvas,
+  .kya-section-body.kya-sig-grid .frappe-control .signature-pad {
+    min-height: 110px !important;
+    height: 110px !important;
+    max-height: 110px !important;
+  }
+}
+@media (max-width: 520px) {
+  .kya-section-body.kya-sig-grid { grid-template-columns: 1fr; gap: 10px; }
+  .kya-section-body.kya-sig-grid .frappe-control {
+    min-height: 130px;
+    padding: 8px 6px 6px;
+  }
+  .kya-section-body.kya-sig-grid .frappe-control canvas,
+  .kya-section-body.kya-sig-grid .frappe-control .signature-pad {
+    min-height: 100px !important;
+    height: 100px !important;
+    max-height: 100px !important;
+  }
+  .kya-section-body.kya-sig-grid .frappe-control .control-label {
+    font-size: 9px !important;
+    margin-bottom: 6px;
+  }
+  /* Signature seule (hors grid) — réduire aussi */
+  .web-form-container .signature-field .signature-pad,
+  .kya-form-section .signature-field .signature-pad,
+  .kya-form-section .frappe-control[data-fieldtype="Signature"] canvas {
+    min-height: 90px;
+  }
+  /* Section padding mobile compact */
+  .kya-section-body { padding: 12px 10px; }
+  .kya-form-section .form-group { margin-bottom: 12px; }
+}
+
+/* Signature read-only — image PNG bien centrée et nette */
+.kya-section-body.kya-sig-grid .frappe-control .signature-display,
+.web-form-container .signature-field .signature-display,
+.kya-form-section .signature-field .signature-display {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+}
+.kya-section-body.kya-sig-grid .frappe-control .signature-display img,
+.web-form-container .signature-field .signature-display img {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  filter: contrast(1.1);
+}
+
+/* Bouton Submit "sticky" sur mobile pour les longs formulaires */
+@media (max-width: 768px) {
+  .web-form-container .web-form-actions,
+  .web-form-container .form-actions {
+    position: sticky;
+    bottom: 0;
+    background: linear-gradient(to top, #fff 70%, rgba(255,255,255,0.85));
+    padding: 12px 8px env(safe-area-inset-bottom, 12px);
+    margin: 0 -8px -16px;
+    z-index: 10;
+    border-top: 1px solid var(--kya-border);
+    backdrop-filter: blur(6px);
+  }
+  .web-form-container .btn-primary { width: 100%; }
+}
+
+/* Section "dense" — plus utilisé sur Bon Commande / Etat Récap / Brouillard */
+[data-path*="bon-commande"] .kya-section-body.kya-grid,
+[data-path*="etat-recap"] .kya-section-body.kya-grid,
+[data-path*="brouillard-caisse"] .kya-section-body.kya-grid,
+[data-path*="appel-offre"] .kya-section-body.kya-grid,
+[data-path*="demande-achat"] .kya-section-body.kya-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+@media (max-width: 1024px) {
+  [data-path*="bon-commande"] .kya-section-body.kya-grid,
+  [data-path*="etat-recap"] .kya-section-body.kya-grid,
+  [data-path*="brouillard-caisse"] .kya-section-body.kya-grid,
+  [data-path*="appel-offre"] .kya-section-body.kya-grid,
+  [data-path*="demande-achat"] .kya-section-body.kya-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  [data-path*="bon-commande"] .kya-section-body.kya-grid,
+  [data-path*="etat-recap"] .kya-section-body.kya-grid,
+  [data-path*="brouillard-caisse"] .kya-section-body.kya-grid,
+  [data-path*="appel-offre"] .kya-section-body.kya-grid,
+  [data-path*="demande-achat"] .kya-section-body.kya-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Highlight visuel : section "Statut / Workflow" */
+.kya-form-section.kya-section-status {
+  border-left: 4px solid var(--kya-orange);
+  background: linear-gradient(to right, var(--kya-orange-light), #fff 60%);
+}
+
+/* Tips & popovers d'aide à l'import / formats attendus */
+.kya-hint,
+.kya-import-tip {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: var(--kya-blue-light);
+  border-left: 3px solid var(--kya-blue-accent);
+  border-radius: 0 var(--kya-r-md) var(--kya-r-md) 0;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--kya-heading) !important;
+  margin: 8px 0 14px;
+}
+.kya-hint::before,
+.kya-import-tip::before {
+  content: "ℹ";
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--kya-blue-accent);
+  color: #fff !important;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  margin-top: 1px;
+}
+.kya-import-tip code {
+  background: #fff;
+  border: 1px solid var(--kya-border);
+  border-radius: 3px;
+  padding: 1px 6px;
+  font-size: 11.5px;
+  color: var(--kya-blue-dark) !important;
+}
+.kya-hint--warn {
+  background: var(--kya-orange-light);
+  border-left-color: var(--kya-orange);
+}
+.kya-hint--warn::before {
+  content: "!";
+  background: var(--kya-orange);
+}
+
+/* Popover natif Frappe — coller au branding KYA quand disponible */
+.popover.kya-popover {
+  border: 1px solid var(--kya-border);
+  box-shadow: var(--kya-shadow-card);
+  border-radius: var(--kya-r-md);
+  font-family: var(--kya-font);
+  font-size: 12.5px;
+  max-width: 320px;
+}
+.popover.kya-popover .popover-header {
+  background: var(--kya-blue);
+  color: #fff !important;
+  font-weight: 700;
+  border-radius: var(--kya-r-md) var(--kya-r-md) 0 0;
+}
+
+/* Toast de feedback (succès / info) — stylé KYA si appelé via frappe.show_alert */
+.kya-toast {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 10000;
+  background: #fff;
+  border-left: 4px solid var(--kya-green);
+  box-shadow: var(--kya-shadow-card);
+  padding: 12px 18px;
+  border-radius: var(--kya-r-md);
+  font-weight: 600;
+  font-size: 13px;
+  animation: kya-toast-in .25s var(--kya-ease);
+}
+.kya-toast--info { border-left-color: var(--kya-blue); }
+.kya-toast--warn { border-left-color: var(--kya-orange); }
+.kya-toast--error { border-left-color: #e74c3c; }
+@keyframes kya-toast-in {
+  from { transform: translateY(-12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Workflow signature labels lisibles même très réduits */
+.kya-section-body.kya-sig-grid .frappe-control .control-label {
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.25;
+  min-height: 24px;
+}
+
+/* Forcer la taille du child-table en mobile pour rester lisible */
+@media (max-width: 600px) {
+  .kya-form-section .frappe-control[data-fieldtype="Table"] .grid-row,
+  .kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row {
+    min-width: 540px;
+    font-size: 11.5px;
+  }
+}
