@@ -1,7 +1,7 @@
 {
  "app": "kya_hr",
  "charts": [],
- "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Stock'>📦 Espace Stocks</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"PV Sortie Matériel\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"PV Entrée Matériel\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Inventaires\", \"col\": 3}}, {\"id\": \"spacer1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}]",
+ "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Stock'>📦 Espace Stock & Logistique Matériel</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"sub\", \"type\": \"paragraph\", \"data\": {\"text\": \"<i>Mouvements matériel → audit réel (Stock Entry ERPNext) → inventaires</i>\", \"col\": 12}}, {\"id\": \"sp0\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_act\", \"type\": \"header\", \"data\": {\"text\": \"<b>⚡ Opérations courantes</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"PV Sortie Matériel\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"PV Entrée Matériel\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"À valider (mes approbations)\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Inventaires\", \"col\": 3}}, {\"id\": \"sp1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_erpnext\", \"type\": \"header\", \"data\": {\"text\": \"<b>📊 Audit ERPNext (stock réel)</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Stock Entries\", \"col\": 3}}, {\"id\": \"s6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Articles\", \"col\": 3}}, {\"id\": \"s7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Entrepôts\", \"col\": 3}}, {\"id\": \"s8\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Bilan Stock\", \"col\": 3}}]",
  "creation": "2026-01-01 00:00:00.000000",
  "custom_blocks": [],
  "docstatus": 0,
@@ -60,11 +60,46 @@
    "icon": "download"
   },
   {
+   "label": "À valider (mes approbations)",
+   "type": "URL",
+   "url": "/app/pv-sortie-materiel?workflow_state=%5B%22in%22%2C%5B%22En%20attente%20Chef%20Service%22%2C%22En%20attente%20Auditeur%22%2C%22En%20attente%20DGA%22%2C%22En%20attente%20Magasin%22%5D%5D",
+   "color": "#d84315",
+   "icon": "check-circle"
+  },
+  {
    "label": "Inventaires",
    "type": "DocType",
    "link_to": "Inventaire KYA",
    "color": "#0d47a1",
    "icon": "clipboard"
+  },
+  {
+   "label": "Stock Entries",
+   "type": "DocType",
+   "link_to": "Stock Entry",
+   "color": "#00695c",
+   "icon": "layers"
+  },
+  {
+   "label": "Articles",
+   "type": "DocType",
+   "link_to": "Item",
+   "color": "#37474f",
+   "icon": "box"
+  },
+  {
+   "label": "Entrepôts",
+   "type": "DocType",
+   "link_to": "Warehouse",
+   "color": "#455a64",
+   "icon": "home"
+  },
+  {
+   "label": "Bilan Stock",
+   "type": "URL",
+   "url": "/app/query-report/Stock%20Balance",
+   "color": "#F58220",
+   "icon": "bar-chart"
   }
  ],
  "links": [

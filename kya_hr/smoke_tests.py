@@ -166,7 +166,7 @@ def run():
     print("\n[9] WORKSPACES")
     workspaces = ["Espace Stagiaires", "KYA Services",
                   "Espace Achats", "Espace Stock", "Espace Comptabilité",
-                  "Espace Employés", "Logistique"]
+                  "Espace Employés", "Espace RH", "Logistique"]
     for ws in workspaces:
         check(f"Workspace '{ws}'", bool(frappe.db.exists("Workspace", ws)),
               warn=True)

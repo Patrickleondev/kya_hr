@@ -1,7 +1,7 @@
 {
  "app": "kya_hr",
  "charts": [],
- "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Achats'>🛒 Espace Achats</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Nouvelle Demande d'Achat\", \"col\": 3}}, {\"id\": \"spacer0\", \"type\": \"spacer\", \"data\": {\"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Demandes d'Achat\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Bons de Commande\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Appels d'Offre\", \"col\": 3}}, {\"id\": \"spacer1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}]",
+ "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Achats'>🛒 Espace Achats KYA</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"sub\", \"type\": \"paragraph\", \"data\": {\"text\": \"<i>Cycle des achats : Demande → Validation hiérarchique → Bon de Commande → Réception</i>\", \"col\": 12}}, {\"id\": \"sp0\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_act\", \"type\": \"header\", \"data\": {\"text\": \"<b>⚡ Actions rapides</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Nouvelle Demande d'Achat\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"À valider (mes approbations)\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"En attente DG\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Approuvées ce mois\", \"col\": 3}}, {\"id\": \"sp1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_doc\", \"type\": \"header\", \"data\": {\"text\": \"<b>📄 Documents</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Demandes d'Achat\", \"col\": 3}}, {\"id\": \"s6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Bons de Commande\", \"col\": 3}}, {\"id\": \"s7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Appels d'Offre\", \"col\": 3}}, {\"id\": \"s8\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fournisseurs\", \"col\": 3}}]",
  "creation": "2026-01-01 00:00:00.000000",
  "custom_blocks": [],
  "docstatus": 0,
@@ -53,6 +53,27 @@
    "icon": "shopping-cart"
   },
   {
+   "label": "À valider (mes approbations)",
+   "type": "URL",
+   "url": "/app/demande-achat-kya?workflow_state=%5B%22in%22%2C%5B%22En%20attente%20Chef%20Service%22%2C%22En%20attente%20DAAF%22%2C%22En%20attente%20DG%22%5D%5D",
+   "color": "#d84315",
+   "icon": "check-circle"
+  },
+  {
+   "label": "En attente DG",
+   "type": "URL",
+   "url": "/app/demande-achat-kya?workflow_state=En%20attente%20DG",
+   "color": "#bf360c",
+   "icon": "clock"
+  },
+  {
+   "label": "Approuvées ce mois",
+   "type": "URL",
+   "url": "/app/demande-achat-kya?workflow_state=Approuv%C3%A9",
+   "color": "#2e7d32",
+   "icon": "check-square"
+  },
+  {
    "label": "Demandes d'Achat",
    "type": "DocType",
    "link_to": "Demande Achat KYA",
@@ -72,6 +93,13 @@
    "link_to": "Appel Offre KYA",
    "color": "#1565c0",
    "icon": "megaphone"
+  },
+  {
+   "label": "Fournisseurs",
+   "type": "DocType",
+   "link_to": "Supplier",
+   "color": "#37474f",
+   "icon": "truck"
   }
  ],
  "links": [

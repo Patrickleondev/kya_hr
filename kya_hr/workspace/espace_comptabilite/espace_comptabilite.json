@@ -1,7 +1,7 @@
 {
  "app": "kya_hr",
  "charts": [],
- "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Comptabilité'>💰 Comptabilité & Finance KYA</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Brouillards de Caisse\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"États Récap Chèques\", \"col\": 3}}, {\"id\": \"spacer1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}]",
+ "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Comptabilité'>💰 Comptabilité & Finance KYA</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"sub\", \"type\": \"paragraph\", \"data\": {\"text\": \"<i>Caisse hebdomadaire • Chèques • Reporting DG / DAAF</i>\", \"level\": 4, \"col\": 12}}, {\"id\": \"sp0\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_act\", \"type\": \"header\", \"data\": {\"text\": \"<b>⚡ Actions</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Brouillards de Caisse\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"États Récap Chèques\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Récap Hebdo (DG)\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Plan Comptable\", \"col\": 3}}, {\"id\": \"sp1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_erp\", \"type\": \"header\", \"data\": {\"text\": \"<b>📊 Comptabilité ERPNext</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Journaux\", \"col\": 3}}, {\"id\": \"s6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Paiements\", \"col\": 3}}, {\"id\": \"s7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Factures Achat\", \"col\": 3}}, {\"id\": \"s8\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Bilan & Compte de Résultat\", \"col\": 3}}]",
  "creation": "2026-01-01 00:00:00.000000",
  "custom_blocks": [],
  "docstatus": 0,
@@ -52,6 +52,48 @@
    "link_to": "Etat Recap Cheques",
    "color": "#4a148c",
    "icon": "journal-check"
+  },
+  {
+   "label": "Récap Hebdo (DG)",
+   "type": "URL",
+   "url": "/recap-brouillards",
+   "color": "#1565c0",
+   "icon": "file-text"
+  },
+  {
+   "label": "Plan Comptable",
+   "type": "DocType",
+   "link_to": "Account",
+   "color": "#37474f",
+   "icon": "list"
+  },
+  {
+   "label": "Journaux",
+   "type": "DocType",
+   "link_to": "Journal Entry",
+   "color": "#00695c",
+   "icon": "book"
+  },
+  {
+   "label": "Paiements",
+   "type": "DocType",
+   "link_to": "Payment Entry",
+   "color": "#2e7d32",
+   "icon": "credit-card"
+  },
+  {
+   "label": "Factures Achat",
+   "type": "DocType",
+   "link_to": "Purchase Invoice",
+   "color": "#bf360c",
+   "icon": "file-text"
+  },
+  {
+   "label": "Bilan & Compte de Résultat",
+   "type": "URL",
+   "url": "/app/query-report/Profit%20and%20Loss%20Statement",
+   "color": "#F58220",
+   "icon": "bar-chart"
   }
  ],
  "links": [
