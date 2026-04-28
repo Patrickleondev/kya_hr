@@ -160,29 +160,33 @@ def _ensure_role(role_name, desk_access=1, home_page=None):
 
 
 def _add_role_permission(dt, role):
-    """Ajoute une DocPerm row au DocType pour un rôle (full access)."""
+    """Ajoute une DocPerm row au DocType pour un rôle (full access).
+
+    Insère directement dans tabDocPerm (sans doc.save() sur le DocType parent)
+    pour éviter CannotCreateStandardDoctypeError en mode non-développeur.
+    """
     existing = frappe.db.get_value(
         "DocPerm", {"parent": dt, "role": role, "permlevel": 0}, "name"
     )
     if existing:
         return f"perm already on {dt} for {role}"
-    doc = frappe.get_doc("DocType", dt)
-    perm = doc.append("permissions", {})
-    perm.role = role
-    perm.permlevel = 0
-    perm.read = 1
-    perm.write = 1
-    perm.create = 1
-    perm.delete = 1
-    perm.submit = 1 if doc.is_submittable else 0
-    perm.cancel = 1 if doc.is_submittable else 0
-    perm.amend = 1 if doc.is_submittable else 0
-    perm.report = 1
-    perm.export = 1
-    perm.share = 1
-    perm.print = 1
-    perm.email = 1
-    doc.save(ignore_permissions=True)
+    is_submittable = frappe.db.get_value("DocType", dt, "is_submittable") or 0
+    sub = 1 if is_submittable else 0
+    frappe.db.sql(
+        """INSERT INTO `tabDocPerm`
+            (name, creation, modified, modified_by, owner,
+             parent, parenttype, parentfield, role, permlevel,
+             `read`, `write`, `create`, `delete`,
+             submit, cancel, amend,
+             report, export, `share`, print, email)
+           VALUES
+            (%s, NOW(), NOW(), 'Administrator', 'Administrator',
+             %s, 'DocType', 'permissions', %s, 0,
+             1, 1, 1, 1,
+             %s, %s, %s,
+             1, 1, 1, 1, 1)""",
+        (frappe.generate_hash(length=10), dt, role, sub, sub, sub),
+    )
     return f"added perm on {dt} for {role}"
 
 
