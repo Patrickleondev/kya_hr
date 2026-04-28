@@ -37,7 +37,7 @@
   {"label": "Plannings Congé", "type": "DocType", "link_to": "Planning Conge", "color": "#2e7d32", "icon": "calendar"},
   {"label": "Tableau de Bord Employés", "type": "URL", "url": "/app/dashboard-view/Employee", "color": "#F58220", "icon": "bar-chart"},
   {"label": "➕ Nouveau Contrat", "type": "URL", "url": "/app/kya-contrat/new?workflow_state=Brouillon", "color": "#5e35b1", "icon": "plus-circle"},
-  {"label": "Contrats à signer", "type": "URL", "url": "/app/kya-contrat?workflow_state=%5B%22in%22%2C%5B%22En%20attente%20Signature%20Salari%C3%A9%22%2C%22En%20attente%20Signature%20DG%22%2C%22RH%20(revue)%22%5D%5D", "color": "#7e57c2", "icon": "edit"},
+  {"label": "Contrats à signer", "type": "URL", "url": "/app/kya-contrat?workflow_state=En%20attente%20Signature%20Salari%C3%A9", "color": "#7e57c2", "icon": "edit"},
   {"label": "Contrats KYA", "type": "DocType", "link_to": "KYA Contrat", "color": "#5e35b1", "icon": "file-text"},
   {"label": "Bilans de Stage", "type": "DocType", "link_to": "Bilan Fin De Stage", "color": "#7b1fa2", "icon": "clipboard"},
   {"label": "Demandes Congé Stagiaire", "type": "DocType", "link_to": "Demande Conge Stagiaire", "color": "#8e24aa", "icon": "calendar"},
