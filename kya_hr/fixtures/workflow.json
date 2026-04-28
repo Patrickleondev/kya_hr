@@ -974,7 +974,7 @@
     "action": "Approuver",
     "allow_self_approval": 0,
     "allowed": "DAAF",
-    "condition": "doc.montant_total < 100000",
+    "condition": "doc.montant_total <= 100000 and (doc.urgence or 'Normal') == 'Normal'",
     "next_state": "Approuvé",
     "state": "En attente DAAF"
    },
@@ -982,7 +982,7 @@
     "action": "Approuver",
     "allow_self_approval": 0,
     "allowed": "DAAF",
-    "condition": "doc.montant_total >= 100000",
+    "condition": "doc.montant_total > 100000 or (doc.urgence and doc.urgence != 'Normal')",
     "next_state": "En attente DG",
     "state": "En attente DAAF"
    },

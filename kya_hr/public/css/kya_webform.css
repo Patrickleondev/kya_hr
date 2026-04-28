@@ -1189,3 +1189,126 @@ footer .web-footer-menu { display: none !important; }
     font-size: 11.5px;
   }
 }
+
+/* ==========================================================
+   v6 — HARD-LOCK SIGNATURES (2026-04-28)
+   Objectif : empêcher la déformation/miniaturisation des canvas
+   et des images de signature après signature/recharge/resize.
+   ========================================================== */
+
+/* Wrapper canvas : box-sizing strict + display block (élimine espaces) */
+.web-form-container .frappe-control[data-fieldtype="Signature"],
+.kya-form-section .frappe-control[data-fieldtype="Signature"] {
+  box-sizing: border-box !important;
+  display: block !important;
+}
+.web-form-container .frappe-control[data-fieldtype="Signature"] *,
+.kya-form-section .frappe-control[data-fieldtype="Signature"] *,
+.kya-section-body.kya-sig-grid .frappe-control[data-fieldtype="Signature"] * {
+  box-sizing: border-box !important;
+}
+
+/* Canvas : aspect ratio fixe pour empêcher squash quand le parent change */
+.web-form-container .frappe-control[data-fieldtype="Signature"] canvas,
+.kya-form-section .frappe-control[data-fieldtype="Signature"] canvas,
+.kya-section-body.kya-sig-grid .frappe-control[data-fieldtype="Signature"] canvas {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 130px !important;
+  height: 130px !important;
+  max-height: 130px !important;
+  aspect-ratio: 16 / 5;
+  background: #ffffff;
+  border: 1px dashed var(--kya-border, #d0d7de);
+  border-radius: 6px;
+  touch-action: none;       /* évite le pan tactile pendant la signature */
+  user-select: none;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Conteneur signature-pad (Frappe) : pas d'inline-block qui squash */
+.web-form-container .frappe-control[data-fieldtype="Signature"] .signature-pad,
+.kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-pad,
+.kya-section-body.kya-sig-grid .frappe-control[data-fieldtype="Signature"] .signature-pad {
+  display: block !important;
+  width: 100% !important;
+  min-height: 130px !important;
+  height: 130px !important;
+  max-height: 130px !important;
+  position: relative;
+}
+
+/* Image de signature (read-only / signed) — pas de stretch */
+.web-form-container .frappe-control[data-fieldtype="Signature"] .signature-display,
+.kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-display,
+.kya-section-body.kya-sig-grid .frappe-control[data-fieldtype="Signature"] .signature-display {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  min-height: 130px !important;
+  height: 130px !important;
+  max-height: 130px !important;
+  background: #fff;
+  border: 1px solid var(--kya-border, #d0d7de);
+  border-radius: 6px;
+  overflow: hidden !important;
+  padding: 6px;
+}
+.web-form-container .frappe-control[data-fieldtype="Signature"] .signature-display img,
+.kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-display img,
+.kya-section-body.kya-sig-grid .frappe-control[data-fieldtype="Signature"] .signature-display img {
+  display: block !important;
+  width: auto !important;
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: 110px !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  image-rendering: -webkit-optimize-contrast;
+  filter: contrast(1.1);
+  transform: none !important;        /* anti-zoom CSS hérité */
+}
+
+/* Empêcher Bootstrap responsive img de stretcher le canvas */
+.web-form-container .frappe-control[data-fieldtype="Signature"] img.img-fluid,
+.kya-form-section .frappe-control[data-fieldtype="Signature"] img.img-fluid {
+  width: auto !important;
+  max-width: 100% !important;
+}
+
+/* Mobile : conserver des proportions confortables */
+@media (max-width: 520px) {
+  .web-form-container .frappe-control[data-fieldtype="Signature"] canvas,
+  .kya-form-section .frappe-control[data-fieldtype="Signature"] canvas,
+  .kya-section-body.kya-sig-grid .frappe-control[data-fieldtype="Signature"] canvas {
+    min-height: 110px !important;
+    height: 110px !important;
+    max-height: 110px !important;
+    aspect-ratio: 12 / 5;
+  }
+  .web-form-container .frappe-control[data-fieldtype="Signature"] .signature-display,
+  .kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-display {
+    min-height: 110px !important;
+    height: 110px !important;
+    max-height: 110px !important;
+  }
+  .web-form-container .frappe-control[data-fieldtype="Signature"] .signature-display img {
+    max-height: 92px !important;
+  }
+}
+
+/* Section visa Audit/Compta : style discret optionnel */
+.kya-form-section .form-section[data-fieldname="section_sig_audit"],
+.kya-form-section .form-section[data-fieldname="section_sig_compta"] {
+  background: #fafbfc;
+  border-left: 3px solid #607d8b;
+  padding-left: 10px;
+}
+
+/* Niveau d'urgence — badge visuel sur Select */
+.kya-form-section .frappe-control[data-fieldname="urgence"] select option[value="Urgent"] { color: #e65100; font-weight: 700; }
+.kya-form-section .frappe-control[data-fieldname="urgence"] select option[value="Très Urgent"] { color: #c62828; font-weight: 700; }
+
