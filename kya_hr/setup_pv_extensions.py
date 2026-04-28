@@ -1,9 +1,10 @@
 """
-Setup Inventaire & Sorties Matériel — Extensions PV + Dashboard DG/DGA
-─────────────────────────────────────────────────────────────────────
-1) Étend PV Sortie Materiel : client, projet, chantier_libre, valeur_totale
-2) Étend PV Sortie Materiel Item : item_code, warehouse, uom, valeur_unitaire, valeur_totale
-3) Custom Field stock_projet sur Project (libellé chantier KYA)
+Setup Sorties Matériel — Extensions PV (traçabilité Client/Projet)
+──────────────────────────────────────────────────────────────────────
+Fidèle à la fiche papier AEA-ENG-32.V01 — PAS de montants en argent.
+Champs standards (item_code, designation, uom, qte_demandee, qte_reellement_sortie,
+warehouse) sont déjà dans pv_sortie_materiel_item.json — NE PAS les redoubler ici.
+Étend uniquement PV Sortie Materiel : client, projet, chantier_libre.
 """
 import frappe
 
@@ -60,83 +61,12 @@ PV_CUSTOM_FIELDS = [
         "description": "Si pas de Project ERPNext — saisie libre du nom du chantier",
         "insert_after": "projet",
     },
-    {
-        "dt": "PV Sortie Materiel",
-        "fieldname": "section_valeur",
-        "label": "Valorisation",
-        "fieldtype": "Section Break",
-        "collapsible": 1,
-        "insert_after": "items",
-    },
-    {
-        "dt": "PV Sortie Materiel",
-        "fieldname": "valeur_totale_xof",
-        "label": "Valeur Totale Sortie (XOF)",
-        "fieldtype": "Currency",
-        "options": "XOF",
-        "read_only": 1,
-        "in_list_view": 1,
-        "insert_after": "section_valeur",
-    },
-    {
-        "dt": "PV Sortie Materiel",
-        "fieldname": "nb_lignes",
-        "label": "Nombre de lignes",
-        "fieldtype": "Int",
-        "read_only": 1,
-        "insert_after": "valeur_totale_xof",
-    },
 ]
 
-# ─────────────── CUSTOM FIELDS ITEM CHILD ───────────────
-PV_ITEM_CUSTOM_FIELDS = [
-    {
-        "dt": "PV Sortie Materiel Item",
-        "fieldname": "item_code",
-        "label": "Code Article",
-        "fieldtype": "Link",
-        "options": "Item",
-        "in_list_view": 1,
-        "insert_after": "designation",
-    },
-    {
-        "dt": "PV Sortie Materiel Item",
-        "fieldname": "warehouse",
-        "label": "Magasin",
-        "fieldtype": "Link",
-        "options": "Warehouse",
-        "in_list_view": 1,
-        "insert_after": "qte_reellement_sortie",
-    },
-    {
-        "dt": "PV Sortie Materiel Item",
-        "fieldname": "uom",
-        "label": "Unité",
-        "fieldtype": "Link",
-        "options": "UOM",
-        "fetch_from": "item_code.stock_uom",
-        "insert_after": "warehouse",
-    },
-    {
-        "dt": "PV Sortie Materiel Item",
-        "fieldname": "valeur_unitaire",
-        "label": "Valeur Unit. (XOF)",
-        "fieldtype": "Currency",
-        "options": "XOF",
-        "fetch_from": "item_code.valuation_rate",
-        "insert_after": "uom",
-    },
-    {
-        "dt": "PV Sortie Materiel Item",
-        "fieldname": "valeur_totale",
-        "label": "Valeur Totale (XOF)",
-        "fieldtype": "Currency",
-        "options": "XOF",
-        "read_only": 1,
-        "in_list_view": 1,
-        "insert_after": "valeur_unitaire",
-    },
-]
+# Aucune extension de PV Sortie Materiel Item — les champs (item_code, designation,
+# uom, qte_demandee, qte_reellement_sortie, warehouse) sont déjà déclarés en standard
+# dans pv_sortie_materiel_item.json. Pas de valorisation : la fiche n'a pas d'argent.
+PV_ITEM_CUSTOM_FIELDS = []
 
 
 def _create_custom_field(cfg):
@@ -152,8 +82,30 @@ def _create_custom_field(cfg):
     cf.save(ignore_permissions=True)
 
 
+# Champs obsolètes à supprimer (anciennes versions ajoutaient ces Custom Fields)
+OBSOLETE_CUSTOM_FIELDS = [
+    ("PV Sortie Materiel", "section_valeur"),
+    ("PV Sortie Materiel", "valeur_totale_xof"),
+    ("PV Sortie Materiel", "nb_lignes"),
+    ("PV Sortie Materiel Item", "item_code"),
+    ("PV Sortie Materiel Item", "warehouse"),
+    ("PV Sortie Materiel Item", "uom"),
+    ("PV Sortie Materiel Item", "valeur_unitaire"),
+    ("PV Sortie Materiel Item", "valeur_totale"),
+]
+
+
+def _drop_obsolete_custom_fields():
+    for dt, fn in OBSOLETE_CUSTOM_FIELDS:
+        name = f"{dt}-{fn}"
+        if frappe.db.exists("Custom Field", name):
+            frappe.delete_doc("Custom Field", name, ignore_permissions=True, force=True)
+            print(f"  ✘ supprimé {name}")
+
+
 def run():
-    print("=== Extension PV Sortie Materiel — Client/Projet/Items ===")
+    print("=== Extension PV Sortie Materiel — Client/Projet ===")
+    _drop_obsolete_custom_fields()
     for cf in PV_CUSTOM_FIELDS:
         try:
             _create_custom_field(cf)

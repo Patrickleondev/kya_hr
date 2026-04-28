@@ -10,20 +10,20 @@ def create_pv_workflow():
             "is_active": 1,
             "states": [
                 {"state": "Brouillon", "doc_status": 0, "allow_edit": "All"},
-                {"state": "En attente Magasin", "doc_status": 0, "allow_edit": "System Manager"},
                 {"state": "En attente Audit", "doc_status": 0, "allow_edit": "System Manager"},
-                {"state": "En attente DGA", "doc_status": 0, "allow_edit": "System Manager"},
+                {"state": "En attente Direction", "doc_status": 0, "allow_edit": "System Manager"},
+                {"state": "En attente Magasin", "doc_status": 0, "allow_edit": "System Manager"},
                 {"state": "Approuv\u00e9", "doc_status": 1, "allow_edit": "System Manager"},
                 {"state": "Rejet\u00e9", "doc_status": 2, "allow_edit": "System Manager"}
             ],
             "transitions": [
-                {"state": "Brouillon", "action": "Envoyer au Magasin", "next_state": "En attente Magasin", "allowed": "All"},
-                {"state": "En attente Magasin", "action": "Valider Magasin", "next_state": "En attente Audit", "allowed": "System Manager"},
-                {"state": "En attente Audit", "action": "Valider Audit", "next_state": "En attente DGA", "allowed": "System Manager"},
-                {"state": "En attente DGA", "action": "Approuver Final", "next_state": "Approuv\u00e9", "allowed": "System Manager"},
-                {"state": "En attente Magasin", "action": "Rejeter", "next_state": "Rejet\u00e9", "allowed": "System Manager"},
+                {"state": "Brouillon", "action": "Envoyer \u00e0 l'Audit", "next_state": "En attente Audit", "allowed": "All"},
+                {"state": "En attente Audit", "action": "Valider Audit", "next_state": "En attente Direction", "allowed": "System Manager"},
+                {"state": "En attente Direction", "action": "Valider Direction", "next_state": "En attente Magasin", "allowed": "System Manager"},
+                {"state": "En attente Magasin", "action": "Valider Magasin (Sortie effective)", "next_state": "Approuv\u00e9", "allowed": "System Manager"},
                 {"state": "En attente Audit", "action": "Rejeter", "next_state": "Rejet\u00e9", "allowed": "System Manager"},
-                {"state": "En attente DGA", "action": "Rejeter", "next_state": "Rejet\u00e9", "allowed": "System Manager"}
+                {"state": "En attente Direction", "action": "Rejeter", "next_state": "Rejet\u00e9", "allowed": "System Manager"},
+                {"state": "En attente Magasin", "action": "Rejeter", "next_state": "Rejet\u00e9", "allowed": "System Manager"}
             ]
         })
         wf.insert(ignore_permissions=True)

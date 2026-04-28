@@ -10,26 +10,6 @@ class PVSortieMateriel(Document):
     def validate(self):
         self.validate_items()
         self.set_demandeur_info()
-        self._compute_valorisation()
-
-    def _compute_valorisation(self):
-        """Compute valeur_totale per item line + total PV (XOF)."""
-        total = 0.0
-        nb = 0
-        items_list = list(self.get("items") or [])
-        frappe.logger().info(f"[PV {self.name}] _compute_valorisation: {len(items_list)} items")
-        for it in items_list:
-            qty = it.qte_reellement_sortie or it.qte_demandee or 0
-            unit = it.get("valeur_unitaire") or 0
-            if it.get("item_code") and not unit:
-                unit = frappe.db.get_value("Item", it.item_code, "valuation_rate") or 0
-                it.valeur_unitaire = unit
-            line_total = (qty or 0) * (unit or 0)
-            it.valeur_totale = line_total
-            total += line_total
-            nb += 1
-        self.valeur_totale_xof = total
-        self.nb_lignes = nb
 
     def validate_items(self):
         if not self.items:
@@ -80,15 +60,15 @@ class PVSortieMateriel(Document):
         ws = self.workflow_state
         signer = emp or frappe.utils.get_fullname(user)
 
-        if ws == "En attente Magasin" and not self.get("magasin_nom"):
-            self.db_set("magasin_nom", signer, update_modified=False)
-            self.db_set("magasin_date", today, update_modified=False)
-        elif ws == "En attente Audit" and not self.get("audit_nom"):
+        if ws == "En attente Audit" and not self.get("audit_nom"):
             self.db_set("audit_nom", signer, update_modified=False)
             self.db_set("audit_date", today, update_modified=False)
         elif ws == "En attente Direction" and not self.get("dga_nom"):
             self.db_set("dga_nom", signer, update_modified=False)
             self.db_set("dga_date", today, update_modified=False)
+        elif ws == "En attente Magasin" and not self.get("magasin_nom"):
+            self.db_set("magasin_nom", signer, update_modified=False)
+            self.db_set("magasin_date", today, update_modified=False)
 
     # ------------------------------------------------------------------
     # ERPNext Stock integration — Material Issue

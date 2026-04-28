@@ -94,7 +94,6 @@ def run():
                 "qte_reellement_sortie": 5,
                 "item_code": item.name,
                 "warehouse": wh,
-                "valeur_unitaire": 75000,
             },
             {
                 "designation": "Câble 6mm²",
@@ -102,7 +101,6 @@ def run():
                 "qte_reellement_sortie": 90,
                 "item_code": item.name,
                 "warehouse": wh,
-                "valeur_unitaire": 2000,
             },
         ],
     }).insert(ignore_permissions=True)
@@ -110,17 +108,10 @@ def run():
     # Debug: print row-by-row
     for i, it in enumerate(pv_doc.items):
         print(f"    [item {i}] qte_d={it.qte_demandee} qte_r={it.qte_reellement_sortie} "
-              f"unit={it.get('valeur_unitaire')} total={it.get('valeur_totale')} "
               f"item_code={it.get('item_code')} wh={it.get('warehouse')}")
-    val = pv_doc.get("valeur_totale_xof") or 0
-    nbl = pv_doc.get("nb_lignes") or 0
-    print(f"    - valeur_totale_xof = {val:,.0f} XOF")
-    print(f"    - nb_lignes = {nbl}")
-
-    expected = (5 * 75000) + (90 * 75000)
-    assert val == expected, f"Attendu {expected}, reçu {val}"
-    assert nbl == 2
-    print("  ✓ Valorisation auto OK")
+    print(f"    - {len(pv_doc.items)} ligne(s) sur le PV")
+    assert len(pv_doc.items) == 2
+    print("  ✓ Saisie PV OK (fid\u00e8le \u00e0 la fiche papier — pas de montants)")
 
     # 6) Report
     from kya_hr.report.sorties_materiel_par_client_projet.sorties_materiel_par_client_projet import execute as run_report
