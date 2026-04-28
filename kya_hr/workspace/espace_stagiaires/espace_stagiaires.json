@@ -188,14 +188,6 @@
    "type": "DocType"
   },
   {
-   "color": "#e67e22",
-   "doc_view": "",
-   "label": "Bilan de Stage ↗",
-   "link_to": "/bilan-fin-de-stage/new",
-   "type": "URL",
-   "url": "/bilan-fin-de-stage/new"
-  },
-  {
    "color": "#2c3e50",
    "doc_view": "",
    "label": "Mon Espace",

@@ -20,7 +20,7 @@
     "module": "KYA HR",
     "name": "bilan-fin-de-stage",
     "owner": "Administrator",
-    "published": 1,
+    "published": 0,
     "route": "bilan-fin-de-stage",
     "show_sidebar": 1,
     "success_message": "\u2705 Votre bilan de stage a \u00e9t\u00e9 soumis avec succ\u00e8s. Votre encadrant proc\u00e9dera \u00e0 l'\u00e9valuation.",

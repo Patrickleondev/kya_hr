@@ -27,7 +27,7 @@
  "title": "Bon de Commande",
  "web_form_fields": [
   { "fieldname": "numero_bc", "fieldtype": "Data", "label": "N° du Bon de Commande", "reqd": 1, "description": "ex: O4026/KYA/DG/SMA" },
-  { "fieldname": "date_bc", "fieldtype": "Date", "label": "Date du BC", "reqd": 1, "default": "Today" },
+  { "fieldname": "date_bc", "fieldtype": "Date", "label": "Date du BC", "reqd": 1 },
   { "fieldname": "demande_achat", "fieldtype": "Link", "label": "Demande d'Achat liée (optionnel)", "options": "Demande Achat KYA" },
   { "fieldname": "objet", "fieldtype": "Small Text", "label": "Objet de la Commande", "reqd": 1 },
   { "fieldname": "fournisseur", "fieldtype": "Link", "label": "Client (référence)", "options": "Customer" },
