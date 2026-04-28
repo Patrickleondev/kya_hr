@@ -1,0 +1,142 @@
+<style>
+    @page { size: A4 landscape; margin: 12mm; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; color: #333; }
+    .kya-doc { max-width: 100%; margin: 0 auto; }
+    .kya-doc-header { display: flex; align-items: flex-start; gap: 24px; padding: 10px 0 0; }
+    .kya-doc-logo img { max-height: 70px; }
+    .kya-doc-info { flex: 1; text-align: right; }
+    .kya-doc-title { font-size: 22px; font-weight: 800; color: #1a5276; text-transform: uppercase; margin: 0 0 4px; }
+    .kya-doc-slogan { font-style: italic; color: #F58220; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    .kya-doc-company { font-size: 9px; color: #666; line-height: 1.6; }
+    .kya-doc-line { height: 3px; background: #1a5276; margin: 12px 0 8px; }
+    .kya-doc-ref { text-align: center; font-size: 14px; font-weight: 800; color: #1a5276; margin: 8px 0 14px; }
+    .kya-sec-header { background: #009688; color: #fff; padding: 7px 14px; font-size: 12px; font-weight: 700; text-transform: uppercase; margin: 12px 0 0; }
+    .kya-sec-body { padding: 10px 14px; border: 1px solid #dee2e6; border-top: none; }
+    .kya-row { display: flex; gap: 16px; margin-bottom: 6px; }
+    .kya-col { flex: 1; }
+    .kya-lbl { font-weight: 700; color: #1a5276; font-size: 9px; text-transform: uppercase; margin-bottom: 2px; }
+    .kya-val { font-size: 12px; padding: 3px 0; min-height: 18px; }
+    .kya-items { width: 100%; border-collapse: collapse; margin: 6px 0; }
+    .kya-items th { background: #009688; color: #fff; padding: 7px 10px; text-align: left; font-size: 10px; }
+    .kya-items td { padding: 5px 10px; border-bottom: 1px solid #eee; font-size: 11px; }
+    .kya-items .num { text-align: right; }
+    .kya-totals { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 8px; }
+    .kya-totals .kpi { background: #f5f5f5; padding: 10px; border-radius: 6px; border-left: 4px solid #009688; }
+    .kya-totals .kpi.pos { border-left-color: #2e7d32; }
+    .kya-totals .kpi.neg { border-left-color: #c62828; }
+    .kya-totals .kpi .lbl { font-size: 9px; color: #666; text-transform: uppercase; }
+    .kya-totals .kpi .val { font-size: 14px; font-weight: 700; color: #1a1a1a; margin-top: 4px; }
+    .kya-status { text-align: center; margin: 12px 0; }
+    .kya-badge { display: inline-block; padding: 5px 18px; border-radius: 14px; font-weight: 700; font-size: 11px; }
+    .kya-badge-ok { background: #e8f5e9; color: #2e7d32; border: 2px solid #4caf50; }
+    .kya-badge-wait { background: #fff3e0; color: #e65100; border: 2px solid #ff9800; }
+    .kya-sigs { display: flex; justify-content: space-around; gap: 10px; margin-top: 10px; }
+    .kya-sig { text-align: center; min-width: 100px; flex: 1; }
+    .kya-sig img { max-height: 50px; display: block; margin: 0 auto 4px; }
+    .kya-sig .sig-line { border-top: 1px solid #333; margin-top: 28px; padding-top: 4px; font-size: 9px; font-weight: 600; }
+    .kya-sig .sig-date { font-size: 8px; color: #888; }
+    .kya-doc-footer { text-align: center; padding: 10px 0 0; margin-top: 14px; border-top: 2px solid #1a5276; font-size: 9px; color: #999; }
+</style>
+<div class="kya-doc">
+  <div class="kya-doc-header">
+    <div class="kya-doc-logo">
+      <img src="/assets/kya_hr/images/logo_kya.png" alt="KYA"
+           onerror="this.src='/files/vrai.png'">
+    </div>
+    <div class="kya-doc-info">
+      <div class="kya-doc-title">BROUILLARD DE CAISSE</div>
+      <div class="kya-doc-slogan">Move beyond the sky!</div>
+      <div class="kya-doc-company">
+        info@kya-energy.com<br>
+        N° RCCM : TG-LOM 2015 B 975<br>
+        NIF : 1000430317 | CNSS : 48863
+      </div>
+    </div>
+  </div>
+  <div class="kya-doc-line"></div>
+  <div class="kya-doc-ref">N° {{ doc.name }} — {{ frappe.utils.format_date(doc.date_brouillard) }}</div>
+
+  <div class="kya-sec-header">1. IDENTIFICATION</div>
+  <div class="kya-sec-body">
+    <div class="kya-row">
+      <div class="kya-col"><div class="kya-lbl">Caissier(ère)</div><div class="kya-val"><strong>{{ doc.caissiere_name or doc.caissiere or '' }}</strong></div></div>
+      <div class="kya-col"><div class="kya-lbl">Date du brouillard</div><div class="kya-val">{{ frappe.utils.format_date(doc.date_brouillard) }}</div></div>
+      <div class="kya-col"><div class="kya-lbl">Solde précédent</div><div class="kya-val">{{ frappe.utils.fmt_money(doc.solde_precedent or 0, currency='XOF') }}</div></div>
+      <div class="kya-col"><div class="kya-lbl">Date solde précédent</div><div class="kya-val">{{ frappe.utils.format_date(doc.date_solde_precedent) if doc.date_solde_precedent else '—' }}</div></div>
+    </div>
+  </div>
+
+  <div class="kya-sec-header">2. MOUVEMENTS DE CAISSE</div>
+  <div class="kya-sec-body">
+    <table class="kya-items">
+      <thead><tr>
+        <th>#</th><th>Date</th><th>Désignation</th>
+        <th class="num">Entrée (XOF)</th><th class="num">Sortie (XOF)</th><th class="num">Solde (XOF)</th>
+      </tr></thead>
+      <tbody>
+        {% for row in doc.lignes %}
+        <tr>
+          <td>{{ row.idx }}</td>
+          <td>{{ frappe.utils.format_date(row.date_ligne) }}</td>
+          <td>{{ row.designation or '' }}</td>
+          <td class="num">{{ frappe.utils.fmt_money(row.entree or 0, currency='XOF') }}</td>
+          <td class="num">{{ frappe.utils.fmt_money(row.sortie or 0, currency='XOF') }}</td>
+          <td class="num"><strong>{{ frappe.utils.fmt_money(row.solde or 0, currency='XOF') }}</strong></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" style="text-align:center;padding:18px;color:#999;">Aucun mouvement saisi</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="kya-sec-header">3. RÉCAPITULATIF</div>
+  <div class="kya-sec-body">
+    <div class="kya-totals">
+      <div class="kpi pos"><div class="lbl">Total entrées</div><div class="val">{{ frappe.utils.fmt_money(doc.total_entrees or 0, currency='XOF') }}</div></div>
+      <div class="kpi neg"><div class="lbl">Total sorties</div><div class="val">{{ frappe.utils.fmt_money(doc.total_sorties or 0, currency='XOF') }}</div></div>
+      <div class="kpi"><div class="lbl">Solde final théorique</div><div class="val">{{ frappe.utils.fmt_money(doc.solde_final or 0, currency='XOF') }}</div></div>
+      <div class="kpi"><div class="lbl">Réel en caisse</div><div class="val">{{ frappe.utils.fmt_money(doc.total_reel_caisse or 0, currency='XOF') }}</div></div>
+    </div>
+    {% set ecart = (doc.total_reel_caisse or 0) - (doc.solde_final or 0) %}
+    {% if ecart != 0 %}
+    <div style="margin-top:8px;padding:8px 12px;background:#fff3e0;border-left:4px solid #ff9800;border-radius:4px;">
+      <strong>Écart caisse :</strong> {{ frappe.utils.fmt_money(ecart, currency='XOF') }}
+      {% if ecart > 0 %}(<span style="color:#2e7d32;">excédent</span>){% else %}(<span style="color:#c62828;">déficit</span>){% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="kya-status">
+    {% if doc.workflow_state == "Validé" or doc.workflow_state == "Approuvé" %}
+      <span class="kya-badge kya-badge-ok">{{ doc.workflow_state }}</span>
+    {% else %}
+      <span class="kya-badge kya-badge-wait">{{ doc.workflow_state or doc.statut or 'EN ATTENTE' }}</span>
+    {% endif %}
+  </div>
+
+  <div class="kya-sec-header">4. SIGNATURES</div>
+  <div class="kya-sec-body">
+    <div class="kya-sigs">
+      <div class="kya-sig">
+        {% if doc.signature_caissiere %}<img src="{{ doc.signature_caissiere }}">{% endif %}
+        <div class="sig-line">{{ doc.signataire_caissiere or doc.caissiere_name or 'Caissier(ère)' }}</div>
+        {% if doc.date_signature_caissiere %}<div class="sig-date">{{ frappe.utils.format_date(doc.date_signature_caissiere) }}</div>{% endif %}
+      </div>
+      <div class="kya-sig">
+        {% if doc.signature_comptable %}<img src="{{ doc.signature_comptable }}">{% endif %}
+        <div class="sig-line">{{ doc.signataire_comptable or 'Comptable' }}</div>
+        {% if doc.date_signature_comptable %}<div class="sig-date">{{ frappe.utils.format_date(doc.date_signature_comptable) }}</div>{% endif %}
+      </div>
+      <div class="kya-sig">
+        {% if doc.signature_dfc %}<img src="{{ doc.signature_dfc }}">{% endif %}
+        <div class="sig-line">{{ doc.signataire_dfc or 'DAAF / DFC' }}</div>
+        {% if doc.date_signature_dfc %}<div class="sig-date">{{ frappe.utils.format_date(doc.date_signature_dfc) }}</div>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="kya-doc-footer">
+    Généré le {{ frappe.utils.now_datetime().strftime('%d/%m/%Y à %H:%M') }} — KYA-Energy Group, Lomé, Togo
+  </div>
+</div>

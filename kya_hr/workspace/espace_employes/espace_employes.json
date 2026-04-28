@@ -91,13 +91,6 @@
    "url": "/mon-espace",
    "color": "#2c3e50",
    "icon": "home"
-  },
-  {
-   "label": "Mes Contrats",
-   "type": "DocType",
-   "link_to": "KYA Contrat",
-   "color": "#7d3c98",
-   "icon": "file"
   }
  ],
  "links": [
@@ -231,7 +224,6 @@
  ],
  "modified": "2026-03-25 00:00:00.000000",
  "modified_by": "Administrator",
- "name": "Espace Employes",
  "number_cards": [],
  "owner": "Administrator",
  "parent_page": "",

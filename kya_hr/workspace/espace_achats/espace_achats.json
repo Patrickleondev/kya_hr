@@ -1,7 +1,7 @@
 {
  "app": "kya_hr",
  "charts": [],
- "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Achats'>🛒 Espace Achats</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Nouvelle Demande d'Achat\", \"col\": 3}}, {\"id\": \"s5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Nouveau Bon de Commande (Web)\", \"col\": 3}}, {\"id\": \"s6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Nouvel Appel d'Offre (Web)\", \"col\": 3}}, {\"id\": \"spacer0\", \"type\": \"spacer\", \"data\": {\"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Demandes d'Achat\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Bons de Commande\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Appels d'Offre\", \"col\": 3}}, {\"id\": \"spacer1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}]",
+ "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Achats'>🛒 Espace Achats</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Nouvelle Demande d'Achat\", \"col\": 3}}, {\"id\": \"spacer0\", \"type\": \"spacer\", \"data\": {\"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Demandes d'Achat\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Bons de Commande\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Appels d'Offre\", \"col\": 3}}, {\"id\": \"spacer1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}]",
  "creation": "2026-01-01 00:00:00.000000",
  "custom_blocks": [],
  "docstatus": 0,
@@ -19,14 +19,30 @@
  "public": 1,
  "sequence_id": 12,
  "roles": [
-  {"role": "Purchase User"},
-  {"role": "Purchase Manager"},
-  {"role": "Responsable Achats"},
-  {"role": "Chef Service"},
-  {"role": "DAAF"},
-  {"role": "Auditeur Interne"},
-  {"role": "Directeur Général"},
-  {"role": "System Manager"}
+  {
+   "role": "Purchase User"
+  },
+  {
+   "role": "Purchase Manager"
+  },
+  {
+   "role": "Responsable Achats"
+  },
+  {
+   "role": "Chef Service"
+  },
+  {
+   "role": "DAAF"
+  },
+  {
+   "role": "Auditeur Interne"
+  },
+  {
+   "role": "Directeur Général"
+  },
+  {
+   "role": "System Manager"
+  }
  ],
  "shortcuts": [
   {
@@ -56,20 +72,6 @@
    "link_to": "Appel Offre KYA",
    "color": "#1565c0",
    "icon": "megaphone"
-  },
-  {
-   "label": "Nouveau Bon de Commande (Web)",
-   "type": "URL",
-   "url": "/bon-commande/new",
-   "color": "#6a1b9a",
-   "icon": "plus-circle"
-  },
-  {
-   "label": "Nouvel Appel d'Offre (Web)",
-   "type": "URL",
-   "url": "/appel-offre/new",
-   "color": "#1565c0",
-   "icon": "plus-circle"
   }
  ],
  "links": [
@@ -111,45 +113,6 @@
    "is_query_report": 0,
    "link_count": 0,
    "onboard": 1
-  },
-  {
-   "type": "Card Break",
-   "label": "Formulaires Web",
-   "hidden": 0,
-   "is_query_report": 0,
-   "link_count": 0,
-   "link_type": "DocType",
-   "onboard": 0
-  },
-  {
-   "type": "Link",
-   "label": "Saisir une Demande d'Achat (Web)",
-   "link_to": "/demande-achat/new",
-   "link_type": "URL",
-   "hidden": 0,
-   "is_query_report": 0,
-   "link_count": 0,
-   "onboard": 0
-  },
-  {
-   "type": "Link",
-   "label": "Nouveau Bon de Commande (Web)",
-   "link_to": "/bon-commande/new",
-   "link_type": "URL",
-   "hidden": 0,
-   "is_query_report": 0,
-   "link_count": 0,
-   "onboard": 0
-  },
-  {
-   "type": "Link",
-   "label": "Nouvel Appel d'Offre (Web)",
-   "link_to": "/appel-offre/new",
-   "link_type": "URL",
-   "hidden": 0,
-   "is_query_report": 0,
-   "link_count": 0,
-   "onboard": 0
   }
  ],
  "modified": "2026-01-01 00:00:00.000000",

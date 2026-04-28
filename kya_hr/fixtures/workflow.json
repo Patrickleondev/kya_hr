@@ -1202,5 +1202,40 @@
     "condition": null
    }
   ]
+ },
+ {
+  "doctype": "Workflow",
+  "document_type": "KYA Contrat",
+  "is_active": 1,
+  "name": "Flux Contrat KYA",
+  "override_status": 0,
+  "send_email_alert": 1,
+  "workflow_name": "Flux Contrat KYA",
+  "workflow_state_field": "workflow_state",
+  "workflow_data": null,
+  "states": [
+   {"state": "Brouillon", "doc_status": "0", "allow_edit": "Responsable RH", "is_optional_state": 0, "send_email": 0},
+   {"state": "En attente Signature Salarié", "doc_status": "0", "allow_edit": "Responsable RH", "is_optional_state": 0, "send_email": 1, "message": "Le contrat est prêt à être signé par le salarié."},
+   {"state": "Signé Salarié", "doc_status": "0", "allow_edit": "Responsable RH", "is_optional_state": 0, "send_email": 1, "message": "Le salarié a signé le contrat. En attente de validation DG."},
+   {"state": "En attente DG", "doc_status": "0", "allow_edit": "Directeur Général", "is_optional_state": 0, "send_email": 1, "message": "Le contrat attend la validation du Directeur Général."},
+   {"state": "Validé", "doc_status": "1", "allow_edit": "Responsable RH", "is_optional_state": 0, "send_email": 1, "message": "Contrat validé par le DG. Doit être revu et archivé par la RH."},
+   {"state": "RH (revue)", "doc_status": "1", "allow_edit": "Responsable RH", "is_optional_state": 0, "send_email": 0},
+   {"state": "Archivé", "doc_status": "1", "allow_edit": "Responsable RH", "is_optional_state": 0, "send_email": 0},
+   {"state": "Rejeté", "doc_status": "0", "allow_edit": "Responsable RH", "is_optional_state": 0, "send_email": 1, "message": "Le contrat a été rejeté."}
+  ],
+  "transitions": [
+   {"state": "Brouillon", "action": "Envoyer au Salarié", "next_state": "En attente Signature Salarié", "allowed": "Responsable RH", "allow_self_approval": 1, "condition": null},
+   {"state": "Brouillon", "action": "Envoyer au Salarié", "next_state": "En attente Signature Salarié", "allowed": "HR Manager", "allow_self_approval": 1, "condition": null},
+   {"state": "En attente Signature Salarié", "action": "Signer", "next_state": "Signé Salarié", "allowed": "KYA Signataire Contrat", "allow_self_approval": 1, "condition": null},
+   {"state": "En attente Signature Salarié", "action": "Refuser", "next_state": "Rejeté", "allowed": "KYA Signataire Contrat", "allow_self_approval": 1, "condition": null},
+   {"state": "Signé Salarié", "action": "Soumettre au DG", "next_state": "En attente DG", "allowed": "Responsable RH", "allow_self_approval": 1, "condition": null},
+   {"state": "Signé Salarié", "action": "Soumettre au DG", "next_state": "En attente DG", "allowed": "HR Manager", "allow_self_approval": 1, "condition": null},
+   {"state": "En attente DG", "action": "Valider", "next_state": "Validé", "allowed": "Directeur Général", "allow_self_approval": 1, "condition": null},
+   {"state": "En attente DG", "action": "Rejeter", "next_state": "Rejeté", "allowed": "Directeur Général", "allow_self_approval": 1, "condition": null},
+   {"state": "Validé", "action": "Marquer revue RH", "next_state": "RH (revue)", "allowed": "Responsable RH", "allow_self_approval": 1, "condition": null},
+   {"state": "Validé", "action": "Marquer revue RH", "next_state": "RH (revue)", "allowed": "HR Manager", "allow_self_approval": 1, "condition": null},
+   {"state": "RH (revue)", "action": "Archiver", "next_state": "Archivé", "allowed": "Responsable RH", "allow_self_approval": 1, "condition": null},
+   {"state": "RH (revue)", "action": "Archiver", "next_state": "Archivé", "allowed": "HR Manager", "allow_self_approval": 1, "condition": null}
+  ]
  }
 ]

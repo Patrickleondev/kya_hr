@@ -344,7 +344,12 @@
    "delete": 1,
    "submit": 1,
    "cancel": 1,
-   "amend": 1
+   "amend": 1,
+   "print": 1,
+   "email": 1,
+   "export": 1,
+   "report": 1,
+   "share": 1
   },
   {
    "role": "HR Manager",

@@ -1,0 +1,10 @@
+{
+    "name": "Brouillard Caisse KYA Officiel",
+    "doctype": "Print Format",
+    "doc_type": "Brouillard Caisse",
+    "module": "KYA HR",
+    "print_format_type": "Jinja",
+    "standard": "Yes",
+    "default_print_language": "fr",
+    "custom_format": 1
+}

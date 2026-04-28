@@ -1,7 +1,7 @@
 {
  "app": "kya_hr",
  "charts": [],
- "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Stock'>📦 Espace Stocks</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"PV Sortie Matériel\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"PV Entrée Matériel\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Inventaires\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Nouvelle Sortie (Web)\", \"col\": 3}}, {\"id\": \"s5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Nouvelle Entrée (Web)\", \"col\": 3}}, {\"id\": \"s6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Nouvel Inventaire (Web)\", \"col\": 3}}, {\"id\": \"spacer1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}]",
+ "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Stock'>📦 Espace Stocks</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"PV Sortie Matériel\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"PV Entrée Matériel\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Inventaires\", \"col\": 3}}, {\"id\": \"spacer1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}]",
  "creation": "2026-01-01 00:00:00.000000",
  "custom_blocks": [],
  "docstatus": 0,
@@ -19,14 +19,30 @@
  "public": 1,
  "sequence_id": 13,
  "roles": [
-  {"role": "Stock User"},
-  {"role": "Stock Manager"},
-  {"role": "Chargé des Stocks"},
-  {"role": "Chef Service"},
-  {"role": "Auditeur Interne"},
-  {"role": "DAAF"},
-  {"role": "Directeur Général"},
-  {"role": "System Manager"}
+  {
+   "role": "Stock User"
+  },
+  {
+   "role": "Stock Manager"
+  },
+  {
+   "role": "Chargé des Stocks"
+  },
+  {
+   "role": "Chef Service"
+  },
+  {
+   "role": "Auditeur Interne"
+  },
+  {
+   "role": "DAAF"
+  },
+  {
+   "role": "Directeur Général"
+  },
+  {
+   "role": "System Manager"
+  }
  ],
  "shortcuts": [
   {
@@ -49,27 +65,6 @@
    "link_to": "Inventaire KYA",
    "color": "#0d47a1",
    "icon": "clipboard"
-  },
-  {
-   "label": "Nouvelle Sortie (Web)",
-   "type": "URL",
-   "url": "/pv-sortie-materiel/new",
-   "color": "#c62828",
-   "icon": "plus-circle"
-  },
-  {
-   "label": "Nouvelle Entrée (Web)",
-   "type": "URL",
-   "url": "/pv-entree-materiel/new",
-   "color": "#1b5e20",
-   "icon": "plus-circle"
-  },
-  {
-   "label": "Nouvel Inventaire (Web)",
-   "type": "URL",
-   "url": "/inventaire-kya/new",
-   "color": "#0d47a1",
-   "icon": "plus-circle"
   }
  ],
  "links": [
@@ -111,45 +106,6 @@
    "is_query_report": 0,
    "link_count": 0,
    "onboard": 1
-  },
-  {
-   "type": "Card Break",
-   "label": "Formulaires Web",
-   "hidden": 0,
-   "is_query_report": 0,
-   "link_count": 0,
-   "link_type": "DocType",
-   "onboard": 0
-  },
-  {
-   "type": "Link",
-   "label": "Nouveau PV Sortie (Web)",
-   "link_to": "/pv-sortie-materiel/new",
-   "link_type": "URL",
-   "hidden": 0,
-   "is_query_report": 0,
-   "link_count": 0,
-   "onboard": 0
-  },
-  {
-   "type": "Link",
-   "label": "Nouvelle Entrée Matériel (Web)",
-   "link_to": "/pv-entree-materiel/new",
-   "link_type": "URL",
-   "hidden": 0,
-   "is_query_report": 0,
-   "link_count": 0,
-   "onboard": 0
-  },
-  {
-   "type": "Link",
-   "label": "Nouvel Inventaire (Web)",
-   "link_to": "/inventaire-kya/new",
-   "link_type": "URL",
-   "hidden": 0,
-   "is_query_report": 0,
-   "link_count": 0,
-   "onboard": 0
   }
  ],
  "modified": "2026-01-01 00:00:00.000000",

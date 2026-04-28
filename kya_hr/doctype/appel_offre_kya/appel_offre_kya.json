@@ -109,11 +109,12 @@
  "owner": "Administrator",
  "permissions": [
   {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "submit": 1, "cancel": 1, "amend": 1, "print": 1, "email": 1, "export": 1, "report": 1, "share": 1},
+  {"role": "Responsable Achats", "read": 1, "write": 1, "create": 1, "submit": 1, "cancel": 1, "amend": 1, "print": 1, "email": 1, "export": 1, "report": 1, "share": 1},
   {"role": "Purchase Manager", "read": 1, "write": 1, "create": 1, "submit": 1, "print": 1, "email": 1, "export": 1, "report": 1, "share": 1},
   {"role": "Purchase User", "read": 1, "write": 1, "create": 1, "print": 1, "email": 1, "export": 1, "report": 1},
-  {"role": "DG", "read": 1, "write": 1, "submit": 1, "print": 1, "email": 1},
-  {"role": "DAAF", "read": 1, "write": 1, "submit": 1, "print": 1, "email": 1},
-  {"role": "Employee", "read": 1, "write": 1, "create": 1, "if_owner": 1}
+  {"role": "DG", "read": 1, "submit": 1, "print": 1, "email": 1},
+  {"role": "DAAF", "read": 1, "submit": 1, "print": 1, "email": 1},
+  {"role": "Auditeur Interne", "read": 1, "print": 1, "email": 1, "export": 1, "report": 1}
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
