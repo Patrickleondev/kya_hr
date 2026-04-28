@@ -28,14 +28,16 @@ fixtures = [
 ]
 
 # DocType client scripts
+# IMPORTANT : tous les chemins doivent pointer vers public/js/ pour que bench build
+# copie les fichiers dans sites/assets/kya_hr/js/ (nginx les sert).
 doctype_js = {
     "Employee": "public/js/employee.js",
-    "Permission Sortie Stagiaire": "doctype/permission_sortie_stagiaire/permission_sortie_stagiaire.js",
-    "Permission Sortie Employe": "doctype/permission_sortie_employe/permission_sortie_employe.js",
-    "Bilan Fin de Stage": "doctype/bilan_fin_de_stage/bilan_fin_de_stage.js",
-    "PV Sortie Materiel": "doctype/pv_sortie_materiel/pv_sortie_materiel.js",
-    "Planning Conge": "doctype/planning_conge/planning_conge.js",
-    "Demande Achat KYA": "doctype/demande_achat_kya/demande_achat_kya.js",
+    "Permission Sortie Stagiaire": "public/js/permission_sortie_stagiaire.js",
+    "Permission Sortie Employe": "public/js/permission_sortie_employe.js",
+    "Bilan Fin de Stage": "public/js/bilan_fin_de_stage.js",
+    "PV Sortie Materiel": "public/js/pv_sortie_materiel.js",
+    "Planning Conge": "public/js/planning_conge.js",
+    "Demande Achat KYA": "public/js/demande_achat_kya.js",
     "PV Entree Materiel": "doctype/pv_entree_materiel/pv_entree_materiel.js",
     "Inventaire KYA": "doctype/inventaire_kya/inventaire_kya.js",
     "KYA Contrat": "doctype/kya_contrat/kya_contrat.js",
@@ -93,6 +95,7 @@ after_migrate = [
     "kya_hr.setup_fleet_dashboard.run",
     "kya_hr.setup_pv_extensions.run",
     "kya_hr.setup_inventaire_dashboard.run",
+    "kya_hr.desktop_icons.execute",
 ]
 
 # Translations
