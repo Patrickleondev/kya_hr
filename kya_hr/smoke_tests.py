@@ -67,6 +67,7 @@ def run():
         "Permission de Sortie Employé", "Permission Sortie Stagiaire",
         "Demande Conge Stagiaire", "Planning Conge",
         "KYA Contrat", "Equipe KYA", "Plan Trimestriel", "Tache Equipe",
+        "Sortie Vehicule", "Document Vehicule",
     ]
     for dt in custom_dts:
         exists = frappe.db.exists("DocType", dt)
@@ -155,6 +156,7 @@ def run():
         "Responsable des Stagiaires", "Supérieur Immédiat", "Stagiaire",
         "Responsable RH", "Directeur Général", "DGA", "Comptable",
         "Caissière", "KYA Signataire Contrat",
+        "Gestionnaire de Flotte",
     ]
     for r in expected_roles:
         check(f"Rôle '{r}' existe", bool(frappe.db.exists("Role", r)),
