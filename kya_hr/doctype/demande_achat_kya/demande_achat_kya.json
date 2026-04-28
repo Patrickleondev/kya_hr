@@ -200,59 +200,104 @@
   },
   {
    "fieldname": "section_sig_dga",
-   "label": "Visa de la DGA / Responsable Achats",
-   "fieldtype": "Section Break",
-   "depends_on": "eval:doc.montant_total >= 100000"
+   "label": "Visa DAAF / Responsable Achats & Approvisionnement",
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "signature_dga",
-   "label": "Signature DGA",
+   "label": "Signature DAAF / Responsable Achats",
    "fieldtype": "Signature",
    "read_only": 1,
-   "depends_on": "eval:doc.montant_total >= 100000",
-   "description": "Le DGA signe pour les achats ≥ 100 000 XOF"
+   "description": "Visa obligatoire pour tous les paliers (procédure AEA-PRO-01-V01)"
   },
   {
    "fieldname": "signataire_dga",
-   "label": "Nom du DGA",
+   "label": "Nom du DAAF / Responsable Achats",
    "fieldtype": "Data",
-   "read_only": 1,
-   "depends_on": "eval:doc.montant_total >= 100000"
+   "read_only": 1
   },
   {
    "fieldname": "date_signature_dga",
-   "label": "Date du visa DGA",
+   "label": "Date du visa DAAF",
    "fieldtype": "Date",
-   "read_only": 1,
-   "depends_on": "eval:doc.montant_total >= 100000"
+   "read_only": 1
   },
   {
    "fieldname": "section_sig_dg",
    "label": "Approbation du Directeur Général",
    "fieldtype": "Section Break",
-   "depends_on": "eval:doc.montant_total >= 2000000"
+   "depends_on": "eval:doc.montant_total > 100000 || (doc.urgence && doc.urgence !== 'Normal')"
   },
   {
    "fieldname": "signature_dg",
    "label": "Signature du DG",
    "fieldtype": "Signature",
    "read_only": 1,
-   "depends_on": "eval:doc.montant_total >= 2000000",
-   "description": "Le Directeur Général signe pour les achats ≥ 2 000 000 XOF"
+   "depends_on": "eval:doc.montant_total > 100000 || (doc.urgence && doc.urgence !== 'Normal')",
+   "description": "Approbation DG : achats > 100 000 XOF, ou demandes urgentes (procédure AEA-PRO-01-V01)"
   },
   {
    "fieldname": "signataire_dg",
    "label": "Nom du DG",
    "fieldtype": "Data",
    "read_only": 1,
-   "depends_on": "eval:doc.montant_total >= 2000000"
+   "depends_on": "eval:doc.montant_total > 100000 || (doc.urgence && doc.urgence !== 'Normal')"
   },
   {
    "fieldname": "date_signature_dg",
    "label": "Date du visa DG",
    "fieldtype": "Date",
    "read_only": 1,
-   "depends_on": "eval:doc.montant_total >= 2000000"
+   "depends_on": "eval:doc.montant_total > 100000 || (doc.urgence && doc.urgence !== 'Normal')"
+  },
+  {
+   "fieldname": "section_sig_audit",
+   "label": "Visa Audit Interne",
+   "fieldtype": "Section Break",
+   "collapsible": 1,
+   "description": "L'audit interne vérifie le bon suivi de la procédure (BC + fiche d'engagement)"
+  },
+  {
+   "fieldname": "signature_audit",
+   "label": "Visa Audit Interne",
+   "fieldtype": "Signature",
+   "read_only": 1
+  },
+  {
+   "fieldname": "signataire_audit",
+   "label": "Nom Auditeur",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date_signature_audit",
+   "label": "Date visa Audit",
+   "fieldtype": "Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_sig_compta",
+   "label": "Visa Comptabilité (émission fiche caisse / paiement)",
+   "fieldtype": "Section Break",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "signature_compta",
+   "label": "Visa Comptable",
+   "fieldtype": "Signature",
+   "read_only": 1
+  },
+  {
+   "fieldname": "signataire_compta",
+   "label": "Nom Comptable",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date_signature_compta",
+   "label": "Date visa Comptabilité",
+   "fieldtype": "Date",
+   "read_only": 1
   },
   {
    "fieldname": "section_workflow",
@@ -330,6 +375,39 @@
    "write": 1,
    "create": 1,
    "if_owner": 1
+  },
+  {
+   "role": "Chef Service",
+   "read": 1,
+   "write": 1,
+   "submit": 0
+  },
+  {
+   "role": "DAAF",
+   "read": 1,
+   "write": 1,
+   "submit": 1
+  },
+  {
+   "role": "Directeur Général",
+   "read": 1,
+   "write": 1,
+   "submit": 1
+  },
+  {
+   "role": "DGA",
+   "read": 1,
+   "write": 1
+  },
+  {
+   "role": "Auditeur Interne",
+   "read": 1,
+   "write": 1
+  },
+  {
+   "role": "Comptable",
+   "read": 1,
+   "write": 1
   }
  ]
 }

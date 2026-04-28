@@ -125,6 +125,13 @@
             "create": 0
         },
         {
+            "role": "Chef d'Équipe",
+            "read": 1,
+            "write": 1,
+            "create": 0,
+            "if_owner": 0
+        },
+        {
             "role": "Employee",
             "read": 1,
             "write": 0,
