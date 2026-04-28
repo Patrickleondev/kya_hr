@@ -83,7 +83,7 @@
   {
    "label": "À valider (mes approbations)",
    "type": "URL",
-   "url": "/app/pv-sortie-materiel?workflow_state=%5B%22in%22%2C%5B%22En%20attente%20Chef%20Service%22%2C%22En%20attente%20Auditeur%22%2C%22En%20attente%20DGA%22%2C%22En%20attente%20Magasin%22%5D%5D",
+   "url": "/app/pv-sortie-materiel?workflow_state=En%20attente%20Chef%20Service",
    "color": "#d84315",
    "icon": "check-circle"
   },
