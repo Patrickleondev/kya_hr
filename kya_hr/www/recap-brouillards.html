@@ -1,0 +1,135 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Récap Hebdomadaire Caisse - Semaine {{ iso_week }}/{{ iso_year }}{% endblock %}
+
+{% block page_content %}
+<style>
+.recap-page { max-width: 1100px; margin: 24px auto; font-family: 'Segoe UI', Arial, sans-serif; padding: 0 16px; }
+.recap-header { background: linear-gradient(135deg, #009688, #00bcd4); color: white; padding: 28px 32px; border-radius: 14px 14px 0 0; }
+.recap-header h1 { margin: 0 0 6px; font-size: 24px; }
+.recap-header .week { font-size: 14px; opacity: 0.95; }
+.recap-body { background: white; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 14px 14px; padding: 24px 32px; }
+
+.kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 18px 0 24px; }
+.kpi { background: #f8f9fa; border-radius: 10px; padding: 18px; border-left: 4px solid #009688; }
+.kpi.neg { border-left-color: #c62828; }
+.kpi.pos { border-left-color: #2e7d32; }
+.kpi .label { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi .value { font-size: 22px; font-weight: 700; color: #1a1a1a; margin-top: 6px; }
+.kpi.pos .value { color: #2e7d32; }
+.kpi.neg .value { color: #c62828; }
+
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 24px; }
+.btn-export { display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; border: 1px solid transparent; transition: all 0.2s; cursor: pointer; }
+.btn-pdf { background: #d32f2f; color: white; }
+.btn-pdf:hover { background: #b71c1c; color: white; }
+.btn-docx { background: #1565c0; color: white; }
+.btn-docx:hover { background: #0d47a1; color: white; }
+.btn-print { background: #424242; color: white; }
+.btn-print:hover { background: #212121; color: white; }
+.btn-nav { background: #fff; color: #009688; border-color: #009688; }
+.btn-nav:hover { background: #e0f2f1; }
+
+.recap-nav { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; align-items: center; padding: 12px; background: #f5f5f5; border-radius: 8px; }
+.recap-nav .nav-label { font-size: 12px; color: #666; font-weight: 600; }
+
+table.brouillards { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.brouillards thead { background: #009688; color: white; }
+table.brouillards th, table.brouillards td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; }
+table.brouillards th.num, table.brouillards td.num { text-align: right; }
+table.brouillards tbody tr:hover { background: #f1f8e9; }
+table.brouillards tfoot { background: #f1f8e9; font-weight: 700; }
+table.brouillards tfoot td { padding: 12px; }
+
+.empty { text-align: center; padding: 60px 20px; color: #999; }
+.empty .icon { font-size: 48px; margin-bottom: 12px; }
+
+@media print {
+    .actions, .recap-nav, .web-footer, header, .navbar { display: none !important; }
+    .recap-page { margin: 0; max-width: none; }
+}
+</style>
+
+<div class="recap-page">
+    <div class="recap-header">
+        <h1>📊 Récap Hebdomadaire — Caisse</h1>
+        <div class="week">Semaine {{ iso_week }} / {{ iso_year }} — du {{ start_label }} au {{ end_label }}</div>
+    </div>
+    <div class="recap-body">
+        <div class="recap-nav">
+            <span class="nav-label">Naviguer :</span>
+            {% for pw in prev_weeks %}
+                <a href="?semaine={{ pw.tag }}" class="btn-export btn-nav">← {{ pw.label }}</a>
+            {% endfor %}
+            {% if next_week %}
+                <a href="?semaine={{ next_week.tag }}" class="btn-export btn-nav">{{ next_week.label }} →</a>
+            {% endif %}
+        </div>
+
+        <div class="kpi-row">
+            <div class="kpi pos">
+                <div class="label">Total entrées</div>
+                <div class="value">{{ "{:,.0f}".format(total_e).replace(",", " ") }} XOF</div>
+            </div>
+            <div class="kpi neg">
+                <div class="label">Total sorties</div>
+                <div class="value">{{ "{:,.0f}".format(total_s).replace(",", " ") }} XOF</div>
+            </div>
+            <div class="kpi">
+                <div class="label">Solde net ({{ nb }} brouillard{% if nb > 1 %}s{% endif %})</div>
+                <div class="value">{{ "{:,.0f}".format(solde).replace(",", " ") }} XOF</div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="/api/method/kya_hr.kya_hr.doctype.brouillard_caisse.brouillard_caisse.export_recap?semaine={{ iso_tag }}&fmt=pdf" class="btn-export btn-pdf">📄 Télécharger PDF</a>
+            <a href="/api/method/kya_hr.kya_hr.doctype.brouillard_caisse.brouillard_caisse.export_recap?semaine={{ iso_tag }}&fmt=docx" class="btn-export btn-docx">📝 Télécharger Word</a>
+            <button onclick="window.print()" class="btn-export btn-print">🖨️ Imprimer / HTML</button>
+        </div>
+
+        {% if brouillards %}
+        <table class="brouillards">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Référence</th>
+                    <th>Caissier(ère)</th>
+                    <th class="num">Entrées</th>
+                    <th class="num">Sorties</th>
+                    <th class="num">Solde Final</th>
+                    <th>Statut</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in brouillards %}
+                <tr>
+                    <td>{{ frappe.utils.formatdate(b.date_brouillard) }}</td>
+                    <td><a href="/app/brouillard-caisse/{{ b.name }}">{{ b.name }}</a></td>
+                    <td>{{ b.caissiere_name or "" }}</td>
+                    <td class="num">{{ "{:,.0f}".format(b.total_entrees or 0).replace(",", " ") }}</td>
+                    <td class="num">{{ "{:,.0f}".format(b.total_sorties or 0).replace(",", " ") }}</td>
+                    <td class="num"><b>{{ "{:,.0f}".format(b.solde_final or 0).replace(",", " ") }}</b></td>
+                    <td>{{ b.statut or "" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3">Totaux semaine</td>
+                    <td class="num">{{ "{:,.0f}".format(total_e).replace(",", " ") }}</td>
+                    <td class="num">{{ "{:,.0f}".format(total_s).replace(",", " ") }}</td>
+                    <td class="num">{{ "{:,.0f}".format(solde).replace(",", " ") }}</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+        {% else %}
+        <div class="empty">
+            <div class="icon">📭</div>
+            <h3>Aucun brouillard approuvé cette semaine</h3>
+            <p>Les brouillards de caisse approuvés (docstatus=1) apparaîtront ici.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

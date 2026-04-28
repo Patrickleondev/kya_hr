@@ -1,143 +1,147 @@
 {
-    "name": "Equipe KYA",
-    "module": "KYA HR",
-    "doctype": "DocType",
-    "custom": 1,
-    "is_submittable": 0,
-    "autoname": "field:nom_equipe",
-    "title_field": "nom_equipe",
-    "search_fields": "nom_equipe,departement,chef_equipe_name",
-    "track_changes": 1,
-    "fields": [
-        {
-            "fieldname": "section_info",
-            "label": "Informations \u00c9quipe",
-            "fieldtype": "Section Break"
-        },
-        {
-            "fieldname": "nom_equipe",
-            "label": "Nom de l'\u00c9quipe",
-            "fieldtype": "Data",
-            "reqd": 1,
-            "unique": 1,
-            "in_list_view": 1
-        },
-        {
-            "fieldname": "abreviation",
-            "label": "Abr\u00e9viation",
-            "fieldtype": "Data",
-            "in_list_view": 1
-        },
-        {
-            "fieldname": "departement",
-            "label": "D\u00e9partement",
-            "fieldtype": "Link",
-            "options": "Department",
-            "reqd": 1,
-            "in_list_view": 1,
-            "in_standard_filter": 1
-        },
-        {
-            "fieldname": "col_info",
-            "fieldtype": "Column Break"
-        },
-        {
-            "fieldname": "chef_equipe",
-            "label": "Chef d'\u00c9quipe",
-            "fieldtype": "Link",
-            "options": "Employee",
-            "in_list_view": 1,
-            "in_standard_filter": 1
-        },
-        {
-            "fieldname": "chef_equipe_name",
-            "label": "Nom du Chef",
-            "fieldtype": "Data",
-            "fetch_from": "chef_equipe.employee_name",
-            "read_only": 1,
-            "in_list_view": 1
-        },
-        {
-            "fieldname": "est_active",
-            "label": "Active",
-            "fieldtype": "Check",
-            "default": 1,
-            "in_standard_filter": 1
-        },
-        {
-            "fieldname": "section_description",
-            "label": "Description",
-            "fieldtype": "Section Break",
-            "collapsible": 1
-        },
-        {
-            "fieldname": "description",
-            "label": "Description / Mission",
-            "fieldtype": "Small Text"
-        },
-        {
-            "fieldname": "section_membres",
-            "label": "Membres de l'\u00c9quipe",
-            "fieldtype": "Section Break",
-            "description": "Liste auto-calcul\u00e9e : employ\u00e9s dont le champ \u00ab \u00c9quipe \u00bb pointe vers cette \u00e9quipe."
-        },
-        {
-            "fieldname": "membres_html",
-            "label": "Membres",
-            "fieldtype": "HTML"
-        },
-        {
-            "fieldname": "nombre_membres",
-            "label": "Nombre de Membres",
-            "fieldtype": "Int",
-            "read_only": 1
-        }
-    ],
-    "permissions": [
-        {
-            "role": "System Manager",
-            "read": 1,
-            "write": 1,
-            "create": 1,
-            "delete": 1,
-            "export": 1,
-            "import": 1
-        },
-        {
-            "role": "HR Manager",
-            "read": 1,
-            "write": 1,
-            "create": 1,
-            "delete": 1,
-            "export": 1
-        },
-        {
-            "role": "HR User",
-            "read": 1,
-            "write": 1,
-            "create": 1,
-            "export": 1
-        },
-        {
-            "role": "Chef Service",
-            "read": 1,
-            "write": 0,
-            "create": 0
-        },
-        {
-            "role": "Chef d'Équipe",
-            "read": 1,
-            "write": 1,
-            "create": 0,
-            "if_owner": 0
-        },
-        {
-            "role": "Employee",
-            "read": 1,
-            "write": 0,
-            "create": 0
-        }
-    ],
-    "sort_field": "nom_equipe",
-    "sort_order": "ASC"
+ "name": "Equipe KYA",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "custom": 1,
+ "is_submittable": 0,
+ "autoname": "field:nom_equipe",
+ "title_field": "nom_equipe",
+ "search_fields": "nom_equipe,departement,chef_equipe_name",
+ "track_changes": 1,
+ "fields": [
+  {
+   "fieldname": "section_info",
+   "label": "Informations Équipe",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "nom_equipe",
+   "label": "Nom de l'Équipe",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "unique": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "abreviation",
+   "label": "Abréviation",
+   "fieldtype": "Data",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "departement",
+   "label": "Département",
+   "fieldtype": "Link",
+   "options": "Department",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "col_info",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "chef_equipe",
+   "label": "Chef d'Équipe",
+   "fieldtype": "Link",
+   "options": "Employee",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "chef_equipe_name",
+   "label": "Nom du Chef",
+   "fieldtype": "Data",
+   "fetch_from": "chef_equipe.employee_name",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "est_active",
+   "label": "Active",
+   "fieldtype": "Check",
+   "default": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "section_description",
+   "label": "Description",
+   "fieldtype": "Section Break",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "description",
+   "label": "Description / Mission",
+   "fieldtype": "Small Text"
+  },
+  {
+   "fieldname": "section_membres",
+   "label": "Membres de l'Équipe",
+   "fieldtype": "Section Break",
+   "description": "Liste auto-calculée : employés dont le champ « Équipe » pointe vers cette équipe."
+  },
+  {
+   "fieldname": "membres_html",
+   "label": "Membres",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "nombre_membres",
+   "label": "Nombre de Membres",
+   "fieldtype": "Int",
+   "read_only": 1
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "email": 1,
+   "report": 1,
+   "share": 1
+  },
+  {
+   "role": "HR Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "export": 1
+  },
+  {
+   "role": "HR User",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "export": 1
+  },
+  {
+   "role": "Chef Service",
+   "read": 1,
+   "write": 0,
+   "create": 0
+  },
+  {
+   "role": "Chef d'Équipe",
+   "read": 1,
+   "write": 1,
+   "create": 0,
+   "if_owner": 0
+  },
+  {
+   "role": "Employee",
+   "read": 1,
+   "write": 0,
+   "create": 0
+  }
+ ],
+ "sort_field": "nom_equipe",
+ "sort_order": "ASC"
 }

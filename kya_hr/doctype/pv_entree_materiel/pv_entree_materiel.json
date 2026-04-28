@@ -9,42 +9,216 @@
  "search_fields": "objet, livreur_nom, date_entree, statut",
  "track_changes": 1,
  "fields": [
-  { "fieldname": "section_general", "label": "Informations Générales", "fieldtype": "Section Break" },
-  { "fieldname": "objet", "label": "Objet / Motif de l'Entrée", "fieldtype": "Small Text", "reqd": 1, "in_list_view": 1 },
-  { "fieldname": "date_entree", "label": "Date d'Entrée", "fieldtype": "Date", "reqd": 1, "default": "Today", "in_list_view": 1, "in_standard_filter": 1 },
-  { "fieldname": "col_ref", "fieldtype": "Column Break" },
-  { "fieldname": "reference", "label": "Référence", "fieldtype": "Data", "default": "KYA-STK-PEM-V01", "read_only": 1 },
-  { "fieldname": "fournisseur", "label": "Fournisseur / Provenance", "fieldtype": "Link", "options": "Supplier", "in_list_view": 1, "description": "Fournisseur si achat externe, ou provenance (chantier, retour matériel, etc.)" },
-  { "fieldname": "fournisseur_libre", "label": "Provenance (texte libre)", "fieldtype": "Data", "description": "À remplir si le fournisseur n'est pas encore référencé" },
-
-  { "fieldname": "section_link", "label": "Lien avec Achat (optionnel)", "fieldtype": "Section Break", "collapsible": 1 },
-  { "fieldname": "purchase_order", "label": "Bon de Commande lié", "fieldtype": "Link", "options": "Purchase Order", "description": "Si cette entrée correspond à un PO ERPNext approuvé" },
-  { "fieldname": "col_link", "fieldtype": "Column Break" },
-  { "fieldname": "demande_achat", "label": "Demande d'achat liée", "fieldtype": "Link", "options": "Demande Achat KYA" },
-
-  { "fieldname": "section_items", "label": "Articles Reçus", "fieldtype": "Section Break" },
-  { "fieldname": "items", "label": "Liste du Matériel", "fieldtype": "Table", "options": "PV Entree Materiel Item", "reqd": 1 },
-
-  { "fieldname": "section_signatures", "label": "Validations & Signatures", "fieldtype": "Section Break", "description": "Circuit : Livreur → Responsable Magasin" },
-  { "fieldname": "col_livreur", "fieldtype": "Column Break", "label": "Employé Livreur / Réceptionnaire" },
-  { "fieldname": "livreur_nom", "label": "Nom Livreur", "fieldtype": "Data", "reqd": 1 },
-  { "fieldname": "livreur_date", "label": "Date Livraison", "fieldtype": "Date", "default": "Today" },
-  { "fieldname": "signature_livreur", "label": "Signature Livreur", "fieldtype": "Signature" },
-  { "fieldname": "col_magasin", "fieldtype": "Column Break", "label": "Responsable Magasin" },
-  { "fieldname": "magasin_nom", "label": "Nom Responsable Magasin", "fieldtype": "Data", "read_only": 1 },
-  { "fieldname": "magasin_date", "label": "Date Réception Magasin", "fieldtype": "Date", "read_only": 1 },
-  { "fieldname": "signature_magasin", "label": "Signature Magasin", "fieldtype": "Signature", "read_only": 1 },
-
-  { "fieldname": "section_statut", "label": "Statut", "fieldtype": "Section Break" },
-  { "fieldname": "statut", "label": "Statut", "fieldtype": "Select", "options": "Brouillon\nEn attente Magasin\nApprouvé\nRejeté", "default": "Brouillon", "in_list_view": 1, "in_standard_filter": 1, "read_only": 1 },
-  { "fieldname": "workflow_state", "label": "État du Flux", "fieldtype": "Data", "hidden": 1, "read_only": 1 },
-  { "fieldname": "stock_entry", "label": "Stock Entry généré", "fieldtype": "Link", "options": "Stock Entry", "read_only": 1, "print_hide": 1 },
-  { "fieldname": "amended_from", "label": "Modifié depuis", "fieldtype": "Link", "options": "PV Entree Materiel", "no_copy": 1, "print_hide": 1, "read_only": 1 }
+  {
+   "fieldname": "section_general",
+   "label": "Informations Générales",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "objet",
+   "label": "Objet / Motif de l'Entrée",
+   "fieldtype": "Small Text",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "date_entree",
+   "label": "Date d'Entrée",
+   "fieldtype": "Date",
+   "reqd": 1,
+   "default": "Today",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "col_ref",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reference",
+   "label": "Référence",
+   "fieldtype": "Data",
+   "default": "KYA-STK-PEM-V01",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fournisseur",
+   "label": "Fournisseur / Provenance",
+   "fieldtype": "Link",
+   "options": "Supplier",
+   "in_list_view": 1,
+   "description": "Fournisseur si achat externe, ou provenance (chantier, retour matériel, etc.)"
+  },
+  {
+   "fieldname": "fournisseur_libre",
+   "label": "Provenance (texte libre)",
+   "fieldtype": "Data",
+   "description": "À remplir si le fournisseur n'est pas encore référencé"
+  },
+  {
+   "fieldname": "section_link",
+   "label": "Lien avec Achat (optionnel)",
+   "fieldtype": "Section Break",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "purchase_order",
+   "label": "Bon de Commande lié",
+   "fieldtype": "Link",
+   "options": "Purchase Order",
+   "description": "Si cette entrée correspond à un PO ERPNext approuvé"
+  },
+  {
+   "fieldname": "col_link",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "demande_achat",
+   "label": "Demande d'achat liée",
+   "fieldtype": "Link",
+   "options": "Demande Achat KYA"
+  },
+  {
+   "fieldname": "section_items",
+   "label": "Articles Reçus",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "items",
+   "label": "Liste du Matériel",
+   "fieldtype": "Table",
+   "options": "PV Entree Materiel Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_signatures",
+   "label": "Validations & Signatures",
+   "fieldtype": "Section Break",
+   "description": "Circuit : Livreur → Responsable Magasin"
+  },
+  {
+   "fieldname": "col_livreur",
+   "fieldtype": "Column Break",
+   "label": "Employé Livreur / Réceptionnaire"
+  },
+  {
+   "fieldname": "livreur_nom",
+   "label": "Nom Livreur",
+   "fieldtype": "Data",
+   "reqd": 1
+  },
+  {
+   "fieldname": "livreur_date",
+   "label": "Date Livraison",
+   "fieldtype": "Date",
+   "default": "Today"
+  },
+  {
+   "fieldname": "signature_livreur",
+   "label": "Signature Livreur",
+   "fieldtype": "Signature"
+  },
+  {
+   "fieldname": "col_magasin",
+   "fieldtype": "Column Break",
+   "label": "Responsable Magasin"
+  },
+  {
+   "fieldname": "magasin_nom",
+   "label": "Nom Responsable Magasin",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "magasin_date",
+   "label": "Date Réception Magasin",
+   "fieldtype": "Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "signature_magasin",
+   "label": "Signature Magasin",
+   "fieldtype": "Signature",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_statut",
+   "label": "Statut",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "statut",
+   "label": "Statut",
+   "fieldtype": "Select",
+   "options": "Brouillon\nEn attente Magasin\nApprouvé\nRejeté",
+   "default": "Brouillon",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "workflow_state",
+   "label": "État du Flux",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "stock_entry",
+   "label": "Stock Entry généré",
+   "fieldtype": "Link",
+   "options": "Stock Entry",
+   "read_only": 1,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "label": "Modifié depuis",
+   "fieldtype": "Link",
+   "options": "PV Entree Materiel",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  }
  ],
  "permissions": [
-  { "role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "submit": 1, "cancel": 1, "amend": 1 },
-  { "role": "Stock Manager",  "read": 1, "write": 1, "create": 1, "submit": 1, "cancel": 1, "amend": 1 },
-  { "role": "Stock User",     "read": 1, "write": 1, "create": 1, "submit": 1 },
-  { "role": "Employee",       "read": 1, "write": 1, "create": 1, "if_owner": 1 }
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1,
+   "print": 1,
+   "email": 1,
+   "export": 1,
+   "report": 1,
+   "share": 1
+  },
+  {
+   "role": "Stock Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1
+  },
+  {
+   "role": "Stock User",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1
+  },
+  {
+   "role": "Employee",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "if_owner": 1
+  }
  ]
 }
