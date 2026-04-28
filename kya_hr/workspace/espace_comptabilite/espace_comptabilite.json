@@ -40,6 +40,20 @@
  ],
  "shortcuts": [
   {
+   "label": "➕ Nouveau Brouillard (Web)",
+   "type": "URL",
+   "url": "/brouillard-caisse/new",
+   "color": "#6a1b9a",
+   "icon": "plus-circle"
+  },
+  {
+   "label": "➕ Nouvel État Chèques (Web)",
+   "type": "URL",
+   "url": "/etat-recap/new",
+   "color": "#4a148c",
+   "icon": "plus-circle"
+  },
+  {
    "label": "Brouillards de Caisse",
    "type": "DocType",
    "link_to": "Brouillard Caisse",

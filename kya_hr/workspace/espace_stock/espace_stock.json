@@ -46,6 +46,27 @@
  ],
  "shortcuts": [
   {
+   "label": "➕ Nouveau PV Sortie (Web)",
+   "type": "URL",
+   "url": "/pv-sortie-materiel/new",
+   "color": "#c62828",
+   "icon": "plus-circle"
+  },
+  {
+   "label": "➕ Nouveau PV Entrée (Web)",
+   "type": "URL",
+   "url": "/pv-entree-materiel/new",
+   "color": "#1b5e20",
+   "icon": "plus-circle"
+  },
+  {
+   "label": "➕ Nouvel Inventaire (Web)",
+   "type": "URL",
+   "url": "/inventaire-kya/new",
+   "color": "#0d47a1",
+   "icon": "plus-circle"
+  },
+  {
    "label": "PV Sortie Matériel",
    "type": "DocType",
    "link_to": "PV Sortie Materiel",
