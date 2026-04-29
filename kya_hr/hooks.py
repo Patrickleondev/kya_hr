@@ -88,6 +88,7 @@ scheduler_events = {
 # Post-migration: nettoyage workspaces obsolètes + branding KYA
 after_migrate = [
     "kya_hr.setup_locale.execute",
+    "kya_hr.setup_leave_types.execute",
     "kya_hr.force_sync_workspaces.execute",
     "kya_hr.force_publish_webforms.execute",
     "kya_hr.setup_branding.execute",
