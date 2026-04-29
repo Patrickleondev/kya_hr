@@ -11,7 +11,9 @@
   var KYA_WF_ROUTES = [
     "permission-sortie-stagiaire", "permission-sortie-employe",
     "demande-achat", "pv-sortie-materiel",
-    "planning-conge", "bilan-fin-de-stage"
+    "planning-conge", "bilan-fin-de-stage",
+    "appel-offre", "bon-commande", "demande-conge",
+    "pv-entree-materiel", "etat-recap", "brouillard-caisse"
   ];
   var path = window.location.pathname.replace(/^\//, "").replace(/\/$/, "");
   if (KYA_WF_ROUTES.indexOf(path) !== -1) {
@@ -158,6 +160,148 @@
         fields: ["note_globale", "mention"],
         grid: { note_globale: "col", mention: "col" }
       }
+    ],
+    "appel-offre": [
+      {
+        title: "IDENTIFICATION DU DEMANDEUR",
+        icon: "\u{1F464}",
+        fields: ["demandeur", "demandeur_name", "service"],
+        grid: { demandeur: "col", demandeur_name: "col", service: "span 2" }
+      },
+      {
+        title: "D\u00c9TAILS DE L\u2019APPEL D\u2019OFFRE",
+        icon: "\u{1F4CB}",
+        fields: ["date_ao", "date_limite", "objet", "demande_achat"],
+        grid: { date_ao: "col", date_limite: "col", objet: "span 2", demande_achat: "span 2" }
+      },
+      {
+        title: "ARTICLES \u00c0 CONSULTER",
+        icon: "\u{1F6D2}",
+        fields: ["items"]
+      },
+      {
+        title: "FOURNISSEURS CONSULT\u00c9S",
+        icon: "\u{1F3E2}",
+        fields: ["fournisseurs"]
+      },
+      {
+        title: "MODALIT\u00c9S & CRIT\u00c8RES",
+        icon: "\u{1F4DD}",
+        fields: ["modalites", "criteres_selection", "message_fournisseur"]
+      },
+      {
+        title: "VALIDATIONS & SIGNATURES",
+        icon: "\u270D\uFE0F",
+        fields: ["signature_demandeur", "signature_daaf", "signature_dg"],
+        sigGrid: true
+      }
+    ],
+    "bon-commande": [
+      {
+        title: "IDENTIFICATION DU FOURNISSEUR",
+        icon: "\u{1F3E2}",
+        fields: ["fournisseur", "fournisseur_name", "date_bc"],
+        grid: { fournisseur: "col", fournisseur_name: "col", date_bc: "span 2" }
+      },
+      {
+        title: "D\u00c9TAILS DE LA COMMANDE",
+        icon: "\u{1F4CB}",
+        fields: ["objet", "appel_offre", "demande_achat"]
+      },
+      {
+        title: "ARTICLES COMMAND\u00c9S",
+        icon: "\u{1F6D2}",
+        fields: ["items", "montant_total"]
+      },
+      {
+        title: "VALIDATIONS & SIGNATURES",
+        icon: "\u270D\uFE0F",
+        fields: ["signature_resp_achats", "signature_daaf", "signature_dg"],
+        sigGrid: true
+      }
+    ],
+    "demande-conge": [
+      {
+        title: "IDENTIFICATION DE L\u2019EMPLOY\u00c9",
+        icon: "\u{1F464}",
+        fields: ["employee", "employee_name", "department"],
+        grid: { employee: "span 2", employee_name: "col", department: "col" }
+      },
+      {
+        title: "D\u00c9TAILS DU CONG\u00c9",
+        icon: "\u{1F4C5}",
+        fields: ["leave_type", "from_date", "to_date", "total_leave_days", "posting_date", "description"],
+        grid: {
+          leave_type: "span 2",
+          from_date: "col", to_date: "col",
+          total_leave_days: "col", posting_date: "col",
+          description: "span 2"
+        }
+      },
+      {
+        title: "VALIDATIONS & SIGNATURES",
+        icon: "\u270D\uFE0F",
+        fields: ["signature_employe_la", "signature_superieur_la", "signature_rh_la", "signature_dg_la"],
+        sigGrid: true
+      }
+    ],
+    "pv-entree-materiel": [
+      {
+        title: "INFORMATIONS DE L\u2019ENTR\u00c9E",
+        icon: "\u{1F4E5}",
+        fields: ["date_entree", "fournisseur", "reference_bl"],
+        grid: { date_entree: "col", fournisseur: "col", reference_bl: "span 2" }
+      },
+      {
+        title: "LISTE DU MAT\u00c9RIEL RE\u00c7U",
+        icon: "\u{1F4E6}",
+        fields: ["items"]
+      },
+      {
+        title: "VALIDATIONS & SIGNATURES",
+        icon: "\u270D\uFE0F",
+        fields: ["signature_livreur", "signature_magasin", "signature_audit"],
+        sigGrid: true
+      }
+    ],
+    "etat-recap": [
+      {
+        title: "INFORMATIONS G\u00c9N\u00c9RALES",
+        icon: "\u{1F4DD}",
+        fields: ["date_recap", "periode", "caissiere"],
+        grid: { date_recap: "col", periode: "col", caissiere: "span 2" }
+      },
+      {
+        title: "LISTE DES CH\u00c8QUES",
+        icon: "\u{1F4B5}",
+        fields: ["cheques", "montant_total"]
+      },
+      {
+        title: "VALIDATIONS & SIGNATURES",
+        icon: "\u270D\uFE0F",
+        fields: ["signature_caissiere", "signature_comptable", "signature_daaf"],
+        sigGrid: true
+      }
+    ],
+    "brouillard-caisse": [
+      {
+        title: "INFORMATIONS DE LA CAISSE",
+        icon: "\u{1F4B0}",
+        fields: ["date_brouillard", "caissiere", "solde_precedent"],
+        grid: { date_brouillard: "col", caissiere: "col", solde_precedent: "span 2" }
+      },
+      {
+        title: "MOUVEMENTS",
+        icon: "\u{1F4CA}",
+        fields: ["lignes", "total_entrees", "total_sorties", "solde_final"],
+        grid: { total_entrees: "col", total_sorties: "col", solde_final: "span 2" }
+      },
+      {
+        title: "VALIDATIONS & SIGNATURES",
+        icon: "\u270D\uFE0F",
+        fields: ["signature_caissiere", "signature_comptable", "signature_dfc"],
+        sigGrid: true
+      }
     ]
   };
 
@@ -226,11 +370,6 @@
       title: "PV D\u2019ENTR\u00c9E DE MAT\u00c9RIEL",
       subtitle: "Achat et Stock",
       workflow: "Livreur \u2192 Magasin \u2192 Audit"
-    },
-    "demande-conge": {
-      title: "DEMANDE DE CONG\u00c9",
-      subtitle: "Ressources Humaines",
-      workflow: "Employ\u00e9 \u2192 Chef \u2192 RH \u2192 DG"
     }
   };
 
