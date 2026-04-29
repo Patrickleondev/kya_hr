@@ -165,85 +165,71 @@
     "permission-sortie-stagiaire": {
       title: "DEMANDE DE PERMISSION DE SORTIE",
       subtitle: "Stagiaire",
-      ref: "AEA-RH-30-V01",
       workflow: "Ma\u00eetre de Stage \u2192 Resp. Stagiaires \u2192 Direction"
     },
     "permission-sortie-employe": {
       title: "DEMANDE DE PERMISSION DE SORTIE",
       subtitle: "Employ\u00e9",
-      ref: "AEA-RH-29-V01",
       workflow: "Chef de Service \u2192 RH \u2192 Direction"
     },
     "demande-achat": {
       title: "FICHE D\u2019ENGAGEMENT DE D\u00c9PENSES",
       subtitle: "Approvisionnement",
-      ref: "AEA-PRO-01-V01",
       workflow: "Chef \u2192 Auditeur \u2192 DAAF \u2192 DG"
     },
     "pv-sortie-materiel": {
       title: "PV DE SORTIE DE MAT\u00c9RIEL",
       subtitle: "Achat et Stock",
-      ref: "AEA-LOG-01-V01",
       workflow: "Chef \u2192 Audit \u2192 Direction \u2192 Magasin"
     },
     "planning-conge": {
       title: "PLANNING DE CONG\u00c9 ANNUEL",
       subtitle: "Ressources Humaines",
-      ref: "AEA-RH-31-V01",
       workflow: "Employ\u00e9 \u2192 RH \u2192 DG"
     },
     "demande-conge": {
       title: "DEMANDE DE CONG\u00c9",
       subtitle: "Ressources Humaines",
-      ref: "AEA-RH-33-V01",
       workflow: "Employ\u00e9 \u2192 Sup\u00e9rieur \u2192 RH \u2192 DG"
     },
     "bilan-fin-de-stage": {
       title: "BILAN DE FIN DE STAGE",
       subtitle: "Formation & Stages",
-      ref: "AEA-RH-32-V01",
       workflow: "Stagiaire \u2192 Encadrant \u2192 RH"
     },
     "appel-offre": {
       title: "APPEL D\u2019OFFRE FOURNISSEURS",
       subtitle: "Achats & Approvisionnement",
-      ref: "AEA-PRO-01-V01",
       workflow: "Demandeur \u2192 Resp. Achats \u2192 DAAF \u2192 DG"
     },
     "bon-commande": {
       title: "BON DE COMMANDE",
       subtitle: "Achats & Approvisionnement",
-      ref: "AEA-PRO-01-V01",
       workflow: "Resp. Achats \u2192 DAAF \u2192 DG"
     },
     "demande-achat-old": {
       title: "DEMANDE D\u2019ACHAT",
       subtitle: "Approvisionnement",
-      ref: "AEA-PRO-01-V01",
       workflow: "Demandeur \u2192 Chef \u2192 DAAF \u2192 DG"
     },
     "etat-recap": {
       title: "\u00c9TAT R\u00c9CAPITULATIF DES CH\u00c8QUES",
       subtitle: "Comptabilit\u00e9 & Tr\u00e9sorerie",
-      ref: "AEA-COMP-01-V01",
       workflow: "Caissi\u00e8re \u2192 Comptable \u2192 DAAF"
     },
     "brouillard-caisse": {
       title: "BROUILLARD DE CAISSE",
       subtitle: "Comptabilit\u00e9 & Tr\u00e9sorerie",
-      ref: "AEA-COMP-02-V01",
       workflow: "Caissi\u00e8re \u2192 Comptable \u2192 DFC"
     },
     "pv-entree-materiel": {
       title: "PV D\u2019ENTR\u00c9E DE MAT\u00c9RIEL",
       subtitle: "Achat et Stock",
-      ref: "AEA-ENG-29-V01",
       workflow: "Livreur \u2192 Magasin \u2192 Audit"
     },
     "demande-conge": {
       title: "DEMANDE DE CONG\u00c9",
       subtitle: "Ressources Humaines",
-      ref: "AEA-RH-01-V01",
       workflow: "Employ\u00e9 \u2192 Chef \u2192 RH \u2192 DG"
     }
   };
