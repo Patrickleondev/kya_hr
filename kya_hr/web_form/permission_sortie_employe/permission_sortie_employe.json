@@ -66,6 +66,15 @@
    "label": "Heure de Retour Prévue"
   },
   {
+   "fieldname": "type_permission",
+   "fieldtype": "Select",
+   "label": "Type de Permission",
+   "options": "Personnelle\nMédicale\nAdministrative\nFamiliale\nFormation\nAutre",
+   "default": "Personnelle",
+   "reqd": 1,
+   "description": "Catégorie de votre permission de sortie"
+  },
+  {
    "fieldname": "motif",
    "fieldtype": "Small Text",
    "label": "Motif de la Sortie",
