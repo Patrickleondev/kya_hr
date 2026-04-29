@@ -1,4 +1,4 @@
-﻿/* ===================================================================
+/* ===================================================================
    KYA-Energy Group — Web Form Design v4
    Design : Ordre de Mission / Fiche officielle
    Palette : Teal #0d7377 · Orange #F58220 · Green #8DC63F
@@ -77,6 +77,10 @@ body {
   background: var(--kya-bg) !important;
   min-height: 100vh;
   font-family: var(--kya-font);
+  /* Désactiver TOUTES les ligatures OpenType pour éviter substitutions de caractères (ac→é etc.) */
+  font-variant-ligatures: none !important;
+  font-feature-settings: "liga" 0, "calt" 0, "dlig" 0, "hlig" 0 !important;
+  -webkit-font-feature-settings: "liga" 0, "calt" 0, "dlig" 0, "hlig" 0;
 }
 
 .web-form-container {

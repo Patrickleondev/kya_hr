@@ -1,4 +1,4 @@
-﻿"""
+"""
 force_sync_workspaces.py v10 -- Post-migrate hook (KYA).
 
 Regles :
@@ -28,6 +28,90 @@ KYA_WORKSPACES = [
     "KYA Services",
     "Gestion Équipe",
     "Gestion Equipe",
+    "Espace Achats",
+    "Espace Stock",
+    "Espace RH",
+    "Espace Comptabilité",
+    "Direction Générale",
+    "Logistique",
+    "Inventaire & Sorties Matériel",
+]
+
+# Sidebar a auto-creer si manquant : (titre, icon Lucide, workspace_name, items)
+KYA_AUTO_SIDEBARS = [
+    {
+        "title": "Espace Achats",
+        "icon": "shopping-cart",
+        "module": "KYA HR",
+        "app": "kya_hr",
+        "workspace": "Espace Achats",
+        "items": [
+            {"label": "Demandes d'Achat", "link_to": "Demande Achat KYA", "link_type": "DocType", "icon": "shopping-cart"},
+            {"label": "Bons de Commande", "link_to": "Bon Commande KYA", "link_type": "DocType", "icon": "file-text"},
+            {"label": "Appels d'Offre", "link_to": "Appel Offre KYA", "link_type": "DocType", "icon": "megaphone"},
+        ],
+    },
+    {
+        "title": "Espace Stock",
+        "icon": "package",
+        "module": "KYA HR",
+        "app": "kya_hr",
+        "workspace": "Espace Stock",
+        "items": [
+            {"label": "PV Sortie Matériel", "link_to": "PV Sortie Materiel", "link_type": "DocType", "icon": "upload"},
+            {"label": "PV Entrée Matériel", "link_to": "PV Entree Materiel", "link_type": "DocType", "icon": "download"},
+            {"label": "Articles", "link_to": "Item", "link_type": "DocType", "icon": "box"},
+        ],
+    },
+    {
+        "title": "Espace RH",
+        "icon": "users",
+        "module": "KYA HR",
+        "app": "kya_hr",
+        "workspace": "Espace RH",
+        "items": [
+            {"label": "Permissions Sortie Employé", "link_to": "Permission Sortie Employe", "link_type": "DocType", "icon": "log-out"},
+            {"label": "Permissions Sortie Stagiaire", "link_to": "Permission Sortie Stagiaire", "link_type": "DocType", "icon": "log-out"},
+            {"label": "Demandes de Congé", "link_to": "Leave Application", "link_type": "DocType", "icon": "calendar"},
+            {"label": "Plannings Congé", "link_to": "Planning Conge", "link_type": "DocType", "icon": "calendar"},
+        ],
+    },
+    {
+        "title": "Espace Comptabilité",
+        "icon": "wallet",
+        "module": "KYA HR",
+        "app": "kya_hr",
+        "workspace": "Espace Comptabilité",
+        "items": [
+            {"label": "Brouillards de Caisse", "link_to": "Brouillard Caisse", "link_type": "DocType", "icon": "book"},
+            {"label": "États Récap Chèques", "link_to": "Etat Recap Cheques", "link_type": "DocType", "icon": "file-text"},
+        ],
+    },
+    {
+        "title": "Direction Générale",
+        "icon": "briefcase",
+        "module": "KYA HR",
+        "app": "kya_hr",
+        "workspace": "Direction Générale",
+        "items": [
+            {"label": "Tableau de Bord Global", "url": "/app/dashboard-view", "link_type": "URL", "icon": "bar-chart"},
+            {"label": "Demandes d'Achat", "link_to": "Demande Achat KYA", "link_type": "DocType", "icon": "shopping-cart"},
+            {"label": "Permissions Employé", "link_to": "Permission Sortie Employe", "link_type": "DocType", "icon": "log-out"},
+            {"label": "Contrats KYA", "link_to": "Contrat KYA", "link_type": "DocType", "icon": "file"},
+        ],
+    },
+    {
+        "title": "Logistique",
+        "icon": "truck",
+        "module": "KYA HR",
+        "app": "kya_hr",
+        "workspace": "Logistique",
+        "items": [
+            {"label": "Sorties Véhicule", "link_to": "Sortie Vehicule", "link_type": "DocType", "icon": "log-out"},
+            {"label": "Véhicules", "link_to": "Vehicle", "link_type": "DocType", "icon": "truck"},
+            {"label": "Documents Véhicule", "link_to": "Document Vehicule", "link_type": "DocType", "icon": "alert-triangle"},
+        ],
+    },
 ]
 
 
@@ -414,6 +498,48 @@ def execute():
     _link_desktop_icon_to_sidebar("Espace Employes", ["Espace Employes", "Espace Employés"])
     _link_desktop_icon_to_sidebar("Espace Employés", ["Espace Employes", "Espace Employés"])
     _link_desktop_icon_to_sidebar("Espace Stagiaires", ["Espace Stagiaires"])
+
+    # 9b. Auto-create Workspace Sidebar for Achats/Stock/RH/Compta/Direction/Logistique
+    for cfg in KYA_AUTO_SIDEBARS:
+        title = cfg["title"]
+        ws_name = cfg["workspace"]
+        if not frappe.db.exists("Workspace", ws_name):
+            print(f"  [SKIP SIDEBAR] {title} (workspace '{ws_name}' missing)")
+            continue
+        if not _sidebar_exists(title):
+            sidebar = frappe.new_doc("Workspace Sidebar")
+            sidebar.title = title
+            sidebar.module = cfg["module"]
+            sidebar.header_icon = cfg["icon"]
+            sidebar.app = cfg["app"]
+            sidebar.standard = 0
+            sidebar.append("items", {
+                "label": title,
+                "type": "Link",
+                "link_to": ws_name,
+                "link_type": "Workspace",
+                "icon": cfg["icon"],
+            })
+            for it in cfg["items"]:
+                # Skip items pointing to non-existent doctypes
+                if it.get("link_type") == "DocType" and not frappe.db.exists("DocType", it.get("link_to")):
+                    continue
+                sidebar.append("items", {
+                    "label": it["label"],
+                    "type": "Link",
+                    "link_type": it["link_type"],
+                    "link_to": it.get("link_to", ""),
+                    "url": it.get("url", ""),
+                    "icon": it.get("icon", "file"),
+                })
+            sidebar.insert(ignore_permissions=True)
+            print(f"  [CREATED SIDEBAR] {title} (icon={cfg['icon']})")
+        else:
+            # Sidebar exists -> ensure header icon is the Lucide icon
+            sidebar_name = frappe.db.exists("Workspace Sidebar", {"title": title})
+            if sidebar_name:
+                frappe.db.set_value("Workspace Sidebar", sidebar_name, "header_icon", cfg["icon"], update_modified=False)
+        _link_desktop_icon_to_sidebar(title, [title])
 
     # 10. Fix setup_complete default value if needed
     try:
