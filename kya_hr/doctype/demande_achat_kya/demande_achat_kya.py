@@ -16,11 +16,28 @@ class DemandeAchatKYA(Document):
             self.employee_name = frappe.db.get_value("Employee", self.employee, "employee_name")
 
     def calculate_totals(self):
-        total = 0
-        for row in self.items or []:
+        """Recalcule la somme des items.
+
+        Si l'utilisateur a saisi un montant_total manuel ET qu'il n'y a pas
+        d'items renseignés avec prix, on conserve la valeur saisie.
+        Sinon on écrase avec la somme des lignes.
+        """
+        items = self.items or []
+        items_total = 0
+        items_have_values = False
+        for row in items:
             row.montant = (row.quantite or 0) * (row.prix_unitaire or 0)
-            total += row.montant
-        self.montant_total = total
+            if row.montant:
+                items_have_values = True
+            items_total += row.montant
+
+        if items_have_values:
+            # Items renseignés = source de vérité
+            self.montant_total = items_total
+        elif not self.montant_total:
+            # Aucune saisie manuelle ni items → 0
+            self.montant_total = 0
+        # Sinon : on conserve la valeur manuelle saisie
 
     def set_palier(self):
         m = self.montant_total or 0

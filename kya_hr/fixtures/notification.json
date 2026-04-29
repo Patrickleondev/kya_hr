@@ -616,7 +616,7 @@
     "bcc": null,
     "cc": null,
     "condition": null,
-    "receiver_by_document_field": "notif_chef_email",
+    "receiver_by_document_field": "report_to_user",
     "receiver_by_role": null
    }
   ],

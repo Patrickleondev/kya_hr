@@ -134,10 +134,9 @@
    "fieldname": "montant_total",
    "label": "Montant total estimé (XOF)",
    "fieldtype": "Currency",
-   "read_only": 1,
    "in_list_view": 1,
    "bold": 1,
-   "description": "Calculé automatiquement à partir des articles"
+   "description": "Calculé à partir des articles — modifiable manuellement si besoin"
   },
   {
    "fieldname": "col_palier",
