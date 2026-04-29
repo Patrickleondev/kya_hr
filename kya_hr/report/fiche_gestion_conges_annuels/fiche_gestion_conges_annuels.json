@@ -1,0 +1,19 @@
+{
+ "name": "Fiche Gestion Conges Annuels",
+ "doctype": "Report",
+ "ref_doctype": "Leave Application",
+ "report_name": "Fiche Gestion Conges Annuels",
+ "report_type": "Script Report",
+ "is_standard": "Yes",
+ "module": "KYA HR",
+ "disabled": 0,
+ "add_total_row": 1,
+ "roles": [
+  {"role": "HR User"},
+  {"role": "HR Manager"},
+  {"role": "Responsable RH"},
+  {"role": "Directeur Général"},
+  {"role": "DAAF"},
+  {"role": "System Manager"}
+ ]
+}
