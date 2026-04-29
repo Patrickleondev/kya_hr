@@ -4,30 +4,16 @@ import frappe
 from frappe.desk.doctype.desktop_icon.desktop_icon import clear_desktop_icons_cache
 
 WORKSPACE_ICONS = [
-    {
-        "label": "Espace Employes",
-        "link_to": "Espace Employes",
-        "icon": "employee",
-        "idx": 13,
-    },
-    {
-        "label": "Espace Stagiaires",
-        "link_to": "Espace Stagiaires",
-        "icon": "graduation-cap",
-        "idx": 14,
-    },
-    {
-        "label": "KYA Services",
-        "link_to": "KYA Services",
-        "icon": "clipboard-list",
-        "idx": 15,
-    },
-    {
-        "label": "Gestion Équipe",
-        "link_to": "Gestion Équipe",
-        "icon": "users",
-        "idx": 16,
-    },
+    {"label": "Espace Direction", "link_to": "Espace Direction", "icon": "building", "idx": 10},
+    {"label": "Espace RH", "link_to": "Espace RH", "icon": "users", "idx": 11},
+    {"label": "Espace Achats", "link_to": "Espace Achats", "icon": "basket", "idx": 12},
+    {"label": "Espace Stock", "link_to": "Espace Stock", "icon": "package", "idx": 13},
+    {"label": "Espace Comptabilite", "link_to": "Espace Comptabilite", "icon": "currency-exchange", "idx": 14},
+    {"label": "Logistique", "link_to": "Logistique", "icon": "car", "idx": 15},
+    {"label": "Espace Employes", "link_to": "Espace Employes", "icon": "person-vcard", "idx": 16},
+    {"label": "Espace Stagiaires", "link_to": "Espace Stagiaires", "icon": "graduation-cap", "idx": 17},
+    {"label": "Inventaire Sorties Materiel", "link_to": "Inventaire Sorties Materiel", "icon": "package", "idx": 18},
+    {"label": "KYA Services", "link_to": "KYA Services", "icon": "clipboard-list", "idx": 19},
 ]
 
 LAYOUT_FIELDS = [
@@ -192,18 +178,38 @@ def _sync_all_desktop_layouts() -> bool:
 
 @frappe.whitelist()
 def execute():
+    """Sync KYA Desktop Icons. Defensive: never raise to avoid breaking install/migrate."""
+    # Skip if Desktop Icon table doesn't exist (fresh install before frappe.desk migration)
+    if not frappe.db.has_table("Desktop Icon") or not frappe.db.has_table("Desktop Layout"):
+        print("[kya_hr.desktop_icons] Desktop Icon/Layout tables missing, skipping.")
+        return {"skipped": True}
+
     changed = False
+    errors = []
 
     for config in WORKSPACE_ICONS:
-        changed = _sync_workspace_icon(config) or changed
+        try:
+            changed = _sync_workspace_icon(config) or changed
+        except Exception as e:
+            errors.append(f"{config['label']}: {e}")
 
-    changed = _sync_all_desktop_layouts() or changed
+    try:
+        changed = _sync_all_desktop_layouts() or changed
+    except Exception as e:
+        errors.append(f"layouts: {e}")
 
-    for user in frappe.get_all("User", filters={"enabled": 1}, pluck="name"):
-        clear_desktop_icons_cache(user)
-    frappe.clear_cache()
+    try:
+        for user in frappe.get_all("User", filters={"enabled": 1}, pluck="name"):
+            clear_desktop_icons_cache(user)
+        frappe.clear_cache()
+    except Exception as e:
+        errors.append(f"clear_cache: {e}")
+
+    if errors:
+        print(f"[kya_hr.desktop_icons] Warnings: {errors}")
 
     return {
         "changed": changed,
         "labels": [config["label"] for config in WORKSPACE_ICONS],
+        "errors": errors,
     }
