@@ -105,6 +105,50 @@ def _backfill_workspace_titles():
     return fixed
 
 
+def _force_workspace_home_page():
+    """In Frappe v15+, the modern Desk uses Workspaces (sidebar + SPA at /app).
+    The legacy Desktop Icon grid (rendered at /desk) is enabled when
+    System Setting ``desktop:home_page`` = ``"desktop"`` instead of ``"workspace"``.
+    On some sites the value drifts back to ``"desktop"`` after migrations and
+    the user sees a basic icon grid with no sidebar, broken right-click,
+    non-clickable navbar.
+
+    This forces it back to ``"workspace"`` and clears any user-level override.
+    """
+    fixed = []
+    try:
+        # System Settings (Single doctype) — value lives in tabSingles
+        frappe.db.sql(
+            """
+            UPDATE tabSingles
+            SET value = 'workspace'
+            WHERE doctype = 'System Settings'
+              AND field = 'desktop:home_page'
+              AND (value IS NULL OR value <> 'workspace')
+            """
+        )
+        fixed.append("system_desktop_home_page")
+    except Exception as exc:
+        _safe_log("force home_page error", str(exc))
+
+    # User-level: Administrator.default_app / default_workspace should not
+    # force "desk" (legacy). Clear them so Frappe falls back to the system
+    # default ("workspace").
+    for user in ADMIN_USERS:
+        try:
+            current = frappe.db.get_value(
+                "User", user, ["default_app", "default_workspace"], as_dict=True
+            ) or {}
+            if (current.get("default_app") or "").lower() in ("desk", "desktop"):
+                frappe.db.set_value(
+                    "User", user, "default_app", "", update_modified=False
+                )
+                fixed.append(f"{user}.default_app")
+        except Exception as exc:
+            _safe_log(f"clear default_app {user} error", str(exc))
+    return fixed
+
+
 def _normalize_workspace_visibility():
     """For workspaces of our apps + HRMS, force ``public=1``, ``hide_custom=0``,
     and clear ``for_user`` / ``parent_page`` if they would hide the workspace
@@ -220,6 +264,7 @@ def execute():
         "titles_backfilled": 0,
         "workspaces_fixed": 0,
         "roles_granted": 0,
+        "home_page_forced": [],
         "errors": [],
     }
     try:
@@ -230,6 +275,10 @@ def execute():
         result["home_settings_reset"] = _reset_home_settings_for_admins()
     except Exception as exc:
         result["errors"].append(("reset_home_settings", str(exc)))
+    try:
+        result["home_page_forced"] = _force_workspace_home_page()
+    except Exception as exc:
+        result["errors"].append(("force_home_page", str(exc)))
     try:
         result["titles_backfilled"] = _backfill_workspace_titles()
     except Exception as exc:
