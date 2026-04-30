@@ -76,6 +76,35 @@ def _reset_home_settings_for_admins():
     return reset
 
 
+def _backfill_workspace_titles():
+    """CRITICAL: Workspace.title=NULL crashes Desk JS rendering (slug(null)
+    in frappe.utils.generate_route -> entire desk page goes blank: right-click
+    broken, search bar non-clickable, notification panel empty).
+    Backfill title from name for any workspace missing it."""
+    fixed = 0
+    try:
+        rows = frappe.db.sql(
+            """
+            SELECT name FROM tabWorkspace
+            WHERE title IS NULL OR title = ''
+            """,
+            as_dict=True,
+        ) or []
+    except Exception as exc:
+        _safe_log("select missing titles error", str(exc))
+        return 0
+    for row in rows:
+        try:
+            frappe.db.set_value(
+                "Workspace", row["name"], "title", row["name"],
+                update_modified=False,
+            )
+            fixed += 1
+        except Exception as exc:
+            _safe_log(f"backfill title {row['name']} error", str(exc))
+    return fixed
+
+
 def _normalize_workspace_visibility():
     """For workspaces of our apps + HRMS, force ``public=1``, ``hide_custom=0``,
     and clear ``for_user`` / ``parent_page`` if they would hide the workspace
@@ -188,6 +217,7 @@ def execute():
     result = {
         "blocked_modules_removed": 0,
         "home_settings_reset": 0,
+        "titles_backfilled": 0,
         "workspaces_fixed": 0,
         "roles_granted": 0,
         "errors": [],
@@ -200,6 +230,10 @@ def execute():
         result["home_settings_reset"] = _reset_home_settings_for_admins()
     except Exception as exc:
         result["errors"].append(("reset_home_settings", str(exc)))
+    try:
+        result["titles_backfilled"] = _backfill_workspace_titles()
+    except Exception as exc:
+        result["errors"].append(("backfill_titles", str(exc)))
     try:
         result["workspaces_fixed"] = _normalize_workspace_visibility()
     except Exception as exc:
