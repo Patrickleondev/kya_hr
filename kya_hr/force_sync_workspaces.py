@@ -32,7 +32,7 @@ KYA_WORKSPACES = [
     "Espace Stock",
     "Espace RH",
     "Espace Comptabilité",
-    "Direction Générale",
+    "Espace Direction",
     "Logistique",
     "Inventaire & Sorties Matériel",
 ]
@@ -92,7 +92,7 @@ KYA_AUTO_SIDEBARS = [
         "icon": "briefcase",
         "module": "KYA HR",
         "app": "kya_hr",
-        "workspace": "Direction Générale",
+        "workspace": "Espace Direction",
         "items": [
             {"label": "Tableau de Bord Global", "url": "/app/dashboard-view", "link_type": "URL", "icon": "bar-chart"},
             {"label": "Demandes d'Achat", "link_to": "Demande Achat KYA", "link_type": "DocType", "icon": "shopping-cart"},
