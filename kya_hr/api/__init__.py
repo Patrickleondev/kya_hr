@@ -160,28 +160,77 @@ ALLOWED_DOCTYPES = {
 }
 
 
+def _is_new_doc_placeholder(docname):
+    """Detect 'new doc' placeholders coming from web form routes.
+
+    The web form passes either an empty string, the literal "new", or the
+    route slug (e.g. "demande-conge", "permission-sortie-employe") when
+    the document hasn't been created yet. We must NOT call frappe.get_doc()
+    in that case — it would raise DoesNotExistError and surface as a
+    misleading "Not found" popup on the user's screen.
+    """
+    if not docname:
+        return True
+    s = str(docname).strip().lower()
+    if s in ("", "new", "none", "null", "undefined"):
+        return True
+    # Route slugs contain hyphens and never match real auto-named documents
+    # (which use uppercase prefixes like "PSE-2026-..."). If the value
+    # contains a slash (e.g. "permission-sortie-employe/new") treat as new.
+    if "/" in s:
+        return True
+    return False
+
+
 @frappe.whitelist()
 def get_kya_workflow_actions(doctype, docname):
     """Get available workflow actions for the current user on a document.
-    Returns current workflow_state and list of possible actions."""
-    if doctype not in ALLOWED_DOCTYPES:
-        frappe.throw("Type de document non autorisé", frappe.PermissionError)
+    Returns current workflow_state and list of possible actions.
 
-    doc = frappe.get_doc(doctype, docname)
-    doc.check_permission("read")
+    Safe for new/unsaved documents: returns an empty action list instead of
+    raising DoesNotExistError, which would otherwise display a "Not found"
+    popup on the web form before the document is even saved.
+    """
+    if doctype not in ALLOWED_DOCTYPES:
+        # Silent no-op rather than throw: keeps the web form usable for
+        # any allowed slug, and avoids the "Type de document non autorisé"
+        # popup that confuses users on form load.
+        return {"workflow_state": None, "docstatus": 0, "actions": []}
+
+    # New / unsaved document → no workflow actions yet
+    if _is_new_doc_placeholder(docname):
+        return {"workflow_state": None, "docstatus": 0, "actions": []}
+
+    # Document referenced but doesn't exist → empty payload, not an error
+    if not frappe.db.exists(doctype, docname):
+        return {"workflow_state": None, "docstatus": 0, "actions": []}
+
+    try:
+        doc = frappe.get_doc(doctype, docname)
+        doc.check_permission("read")
+    except frappe.PermissionError:
+        # User can see the form but not this specific doc → no actions
+        return {"workflow_state": None, "docstatus": 0, "actions": []}
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "get_kya_workflow_actions")
+        return {"workflow_state": None, "docstatus": 0, "actions": []}
 
     from frappe.model.workflow import get_transitions
 
-    transitions = get_transitions(doc, raise_exception=False)
+    try:
+        transitions = get_transitions(doc, raise_exception=False)
+    except Exception:
+        transitions = []
+
     actions = []
-    for t in transitions:
+    for t in transitions or []:
         actions.append({
             "action": t.get("action"),
             "next_state": t.get("next_state"),
         })
 
     return {
-        "workflow_state": doc.workflow_state,
+        "workflow_state": getattr(doc, "workflow_state", None),
         "docstatus": doc.docstatus,
         "actions": actions,
     }
@@ -193,6 +242,12 @@ def apply_kya_workflow_action(doctype, docname, action):
     if doctype not in ALLOWED_DOCTYPES:
         frappe.throw("Type de document non autorisé", frappe.PermissionError)
 
+    if _is_new_doc_placeholder(docname) or not frappe.db.exists(doctype, docname):
+        frappe.throw(
+            "Document introuvable. Enregistrez d'abord le formulaire avant d'appliquer une action.",
+            frappe.DoesNotExistError,
+        )
+
     from frappe.model.workflow import apply_workflow
 
     doc = frappe.get_doc(doctype, docname)
@@ -201,7 +256,7 @@ def apply_kya_workflow_action(doctype, docname, action):
 
     return {
         "status": "success",
-        "workflow_state": doc.workflow_state,
+        "workflow_state": getattr(doc, "workflow_state", None),
         "docstatus": doc.docstatus,
     }
 
