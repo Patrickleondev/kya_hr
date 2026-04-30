@@ -1232,6 +1232,69 @@ footer .web-footer-menu { display: none !important; }
   image-rendering: crisp-edges;
 }
 
+/* ==========================================================
+   v6 — FIX SIGNATURE THUMBNAIL CROPPING (2026-04-30)
+   - L'image signée doit remplir tout le cadre (object-fit contain)
+   - Masquer le canvas vide en lecture seule quand image présente
+   ========================================================== */
+.web-form-container .frappe-control[data-fieldtype="Signature"] .signature-display,
+.kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-display,
+.kya-section-body.kya-sig-grid .frappe-control .signature-display {
+  width: 100% !important;
+  height: 130px !important;
+  min-height: 130px !important;
+  max-height: 130px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #fff !important;
+  border: 1px solid var(--kya-border-input, #d0d7de) !important;
+  border-radius: var(--kya-r-sm, 6px) !important;
+  overflow: hidden !important;
+  padding: 4px !important;
+}
+.web-form-container .frappe-control[data-fieldtype="Signature"] .signature-display img,
+.kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-display img,
+.kya-section-body.kya-sig-grid .frappe-control .signature-display img {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  display: block !important;
+  margin: 0 auto !important;
+  filter: contrast(1.05);
+}
+
+/* Lecture seule : masquer le canvas vide et le bouton clear quand on n'a
+   pas le droit de signer. Le JS ajoute .read-only / [data-read-only] */
+.web-form-container .frappe-control[data-fieldtype="Signature"].read-only .signature-pad,
+.web-form-container .frappe-control[data-fieldtype="Signature"][data-read-only] .signature-pad,
+.kya-form-section .frappe-control[data-fieldtype="Signature"].read-only .signature-pad,
+.kya-form-section .frappe-control[data-fieldtype="Signature"][data-read-only] .signature-pad,
+.web-form-container .frappe-control[data-fieldtype="Signature"].read-only canvas,
+.web-form-container .frappe-control[data-fieldtype="Signature"][data-read-only] canvas,
+.kya-form-section .frappe-control[data-fieldtype="Signature"].read-only canvas,
+.kya-form-section .frappe-control[data-fieldtype="Signature"][data-read-only] canvas,
+.web-form-container .frappe-control[data-fieldtype="Signature"].read-only .btn-xs,
+.web-form-container .frappe-control[data-fieldtype="Signature"][data-read-only] .btn-xs,
+.kya-form-section .frappe-control[data-fieldtype="Signature"].read-only .btn-xs,
+.kya-form-section .frappe-control[data-fieldtype="Signature"][data-read-only] .btn-xs {
+  display: none !important;
+}
+
+/* Quand une signature est déjà enregistrée (image visible), masquer le pad
+   vide en dessous (navigateurs récents - :has) */
+.web-form-container .frappe-control[data-fieldtype="Signature"]:has(.signature-display img) .signature-pad,
+.web-form-container .frappe-control[data-fieldtype="Signature"]:has(.signature-display img) canvas,
+.web-form-container .frappe-control[data-fieldtype="Signature"]:has(.signature-display img) .btn-xs,
+.kya-form-section .frappe-control[data-fieldtype="Signature"]:has(.signature-display img) .signature-pad,
+.kya-form-section .frappe-control[data-fieldtype="Signature"]:has(.signature-display img) canvas,
+.kya-form-section .frappe-control[data-fieldtype="Signature"]:has(.signature-display img) .btn-xs {
+  display: none !important;
+}
+
 /* Conteneur signature-pad (Frappe) : pas d'inline-block qui squash */
 .web-form-container .frappe-control[data-fieldtype="Signature"] .signature-pad,
 .kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-pad,

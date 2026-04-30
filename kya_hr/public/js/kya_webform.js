@@ -512,6 +512,14 @@
     if (!docName) return;
     var doctype = frappe.web_form_doc.doc_type;
     if (!doctype) return;
+    // Skip when on a new/unsaved document — docName is "new" or matches the
+    // route slug. Calling the API would surface a misleading "Not Found" popup.
+    var route = getRoute();
+    var lc = String(docName).toLowerCase();
+    if (lc === "new" || lc === "none" || lc === "null" || lc === "undefined" ||
+        lc === route || lc.indexOf("/") !== -1) {
+      return;
+    }
     frappe.call({
       method: "kya_hr.api.get_kya_workflow_actions",
       args: { doctype: doctype, docname: docName },

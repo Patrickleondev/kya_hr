@@ -99,12 +99,16 @@ after_migrate = [
     "kya_hr.setup_pv_extensions.run",
     "kya_hr.setup_inventaire_dashboard.run",
     "kya_hr.desktop_icons.execute",
+    "kya_hr.ensure_visibility.execute",
 ]
 
-# Post-install: create desktop icons (workaround for Frappe v16 core bug
-# "'list' object is not callable" in create_desktop_icons_from_workspace)
+# Post-install: create desktop icons + ensure all KYA / HRMS workspaces are
+# visible to Administrator (workaround for Frappe v16 core bug
+# "'list' object is not callable" in create_desktop_icons_from_workspace,
+# plus block_module / for_user / parent_page hiding rules).
 after_install = [
     "kya_hr.desktop_icons.execute",
+    "kya_hr.ensure_visibility.execute",
 ]
 
 # Translations
