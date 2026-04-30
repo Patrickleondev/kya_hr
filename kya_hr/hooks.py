@@ -101,5 +101,11 @@ after_migrate = [
     "kya_hr.desktop_icons.execute",
 ]
 
+# Post-install: create desktop icons (workaround for Frappe v16 core bug
+# "'list' object is not callable" in create_desktop_icons_from_workspace)
+after_install = [
+    "kya_hr.desktop_icons.execute",
+]
+
 # Translations
 # Note: translations are automatically picked up from the translations folder
