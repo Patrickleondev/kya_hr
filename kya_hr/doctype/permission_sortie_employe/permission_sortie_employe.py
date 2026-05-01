@@ -146,48 +146,45 @@ class PermissionSortieEmploye(Document):
         Permet aux notifications fixtures de cibler le BON destinataire (l'email du
         responsable concerné) au lieu d'une boîte générique rh@kya-energy.com.
         """
-        # Chef : reports_to de l'employé
+        # Chef : reports_to de l'employé (toujours ré-évalué)
         if self.employee:
             chef_emp = frappe.db.get_value("Employee", self.employee, "reports_to")
             self.notif_chef_email = _user_id_of_employee(chef_emp)
 
-        # Responsable RH : par designation (fallback rôle Frappe "Responsable RH")
-        if not self.notif_rh_email:
-            self.notif_rh_email = _resolve_designated_employee_email(
-                ["DRH", "Responsable RH", "Ressources Humaines", "RESP. RH", "DIR. RH"],
-                department=self.department,
-            ) or _resolve_user_by_role("Responsable RH", department=self.department) \
-              or _resolve_user_by_role("HR Manager", department=self.department)
+        # Responsable RH : toujours ré-évalué pour éviter un email figé si le RH change
+        self.notif_rh_email = _resolve_designated_employee_email(
+            ["DRH", "Responsable RH", "Ressources Humaines", "RESP. RH", "DIR. RH"],
+            department=self.department,
+        ) or _resolve_user_by_role("Responsable RH", department=self.department) \
+          or _resolve_user_by_role("HR Manager", department=self.department)
 
-        # DGA : designation "Directeur Général Adjoint" / "DGA" / "G. ADJOINT" / "Adjoint"
-        if not self.notif_dga_email:
-            self.notif_dga_email = _resolve_designated_employee_email(
-                ["Directeur Général Adjoint", "DGA", "G. ADJOINT", "G ADJOINT", "DIR. ADJOINT"],
-            ) or _resolve_user_by_role("DGA")
+        # DGA : toujours ré-évalué
+        self.notif_dga_email = _resolve_designated_employee_email(
+            ["Directeur Général Adjoint", "DGA", "G. ADJOINT", "G ADJOINT", "DIR. ADJOINT"],
+        ) or _resolve_user_by_role("DGA")
 
-        # DG : designation "Directeur Général" (mais pas "Adjoint")
-        if not self.notif_dg_email:
-            dg_email = _resolve_designated_employee_email(["Directeur Général"])
-            # Filtre exclusion "Adjoint" : on prend le 1er DG dont la designation
-            # ne contient PAS "Adjoint".
-            if dg_email:
-                desig = frappe.db.get_value(
-                    "Employee", {"user_id": dg_email}, "designation"
-                ) or ""
-                if "Adjoint" in desig:
-                    # Cherche un autre DG sans "Adjoint"
-                    rows = frappe.get_all(
-                        "Employee",
-                        filters={"status": "Active"},
-                        or_filters=[["designation", "like", "%Directeur Général%"]],
-                        fields=["user_id", "designation"],
-                        limit=20,
-                    )
-                    for r in rows:
-                        if r.get("user_id") and "Adjoint" not in (r.get("designation") or ""):
-                            dg_email = r["user_id"]
-                            break
-            self.notif_dg_email = dg_email
+        # DG : designation "Directeur Général" (mais pas "Adjoint") — toujours ré-évalué
+        dg_email = _resolve_designated_employee_email(["Directeur Général"])
+        # Filtre exclusion "Adjoint" : on prend le 1er DG dont la designation
+        # ne contient PAS "Adjoint".
+        if dg_email:
+            desig = frappe.db.get_value(
+                "Employee", {"user_id": dg_email}, "designation"
+            ) or ""
+            if "Adjoint" in desig:
+                # Cherche un autre DG sans "Adjoint"
+                rows = frappe.get_all(
+                    "Employee",
+                    filters={"status": "Active"},
+                    or_filters=[["designation", "like", "%Directeur Général%"]],
+                    fields=["user_id", "designation"],
+                    limit=20,
+                )
+                for r in rows:
+                    if r.get("user_id") and "Adjoint" not in (r.get("designation") or ""):
+                        dg_email = r["user_id"]
+                        break
+        self.notif_dg_email = dg_email
 
     def guard_self_approval(self):
         """Empêche le créateur d'approuver/transitioner sa propre demande
