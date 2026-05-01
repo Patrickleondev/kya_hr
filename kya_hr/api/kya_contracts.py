@@ -120,7 +120,7 @@ def send_to_signataire(contract_id):
         now=False,
     )
 
-    doc.workflow_state = "Envoyé Signataire"
+    doc.workflow_state = "En attente Signature Salarié"
     doc.flags.ignore_permissions = True
     doc.save()
     frappe.db.commit()
@@ -149,7 +149,7 @@ def update_personal_info(contract_id, token, data):
     doc = _load_contract_with_token(contract_id, token, "employe")
     if not doc.phone_confirmed:
         frappe.throw(_("Confirmez d'abord votre numéro de téléphone."))
-    if doc.workflow_state not in ("Envoyé Signataire", "Brouillon"):
+    if doc.workflow_state not in ("En attente Signature Salarié", "Brouillon"):
         frappe.throw(_("Le contrat n'est plus modifiable."))
     if isinstance(data, str):
         data = json.loads(data)
@@ -197,24 +197,24 @@ def sign_contract(contract_id, token, signature_data, role="employe", total_sect
     if role == "employe":
         if not doc.phone_confirmed:
             frappe.throw(_("Confirmez d'abord votre numéro de téléphone."))
-        if doc.workflow_state != "Envoyé Signataire":
+        if doc.workflow_state != "En attente Signature Salarié":
             frappe.throw(_("Le contrat n'est pas en attente de votre signature."))
         doc.signature_employe = signature_data
         doc.contrat_lu = 1
         doc.nom_signe_employe = doc.employee_name
         doc.date_signature_employe = now_datetime()
-        doc.workflow_state = "Signé Employé"
+        doc.workflow_state = "Signé Salarié"
         if not doc.access_token_dg:
             doc.access_token_dg = _generate_token()
         doc.flags.ignore_permissions = True
         doc.save()
-        _notify_dg(doc)
+        _notify_rh_after_signataire(doc)
     elif role == "dg":
-        if doc.workflow_state != "Signé Employé":
+        if doc.workflow_state != "En attente DG":
             frappe.throw(_("Le contrat n'est pas en attente de la signature DG."))
         doc.signature_dg = signature_data
         doc.date_signature_dg = now_datetime()
-        doc.workflow_state = "Finalisé"
+        doc.workflow_state = "Validé"
         doc.flags.ignore_permissions = True
         doc.save()
         try:
@@ -228,9 +228,66 @@ def sign_contract(contract_id, token, signature_data, role="employe", total_sect
     return {"ok": True, "state": doc.workflow_state}
 
 
-# ─── 6. Notification DG après signature signataire ───────────────────────────
+# ─── 6. Notifications après chaque signature ────────────────────────────────
 
-def _notify_dg(doc):
+def _notify_rh_after_signataire(doc):
+    """Après signature du salarié/stagiaire : notifier la RH (gateway).
+    La RH cliquera ensuite l'action workflow 'Soumettre au DG' qui déclenchera
+    `notify_dg_after_rh_gateway` via le hook on_update du controller.
+    """
+    rh_recipients = []
+    if doc.rh_sender_email:
+        rh_recipients.append(doc.rh_sender_email)
+    try:
+        rh_email = frappe.db.get_single_value("KYA Dashboard Settings", "rh_email")
+        if rh_email and rh_email not in rh_recipients:
+            rh_recipients.append(rh_email)
+    except Exception:
+        pass
+    for u in frappe.get_all("Has Role", filters={"role": "Responsable RH", "parenttype": "User"}, fields=["parent"]):
+        em = frappe.db.get_value("User", u.parent, "email")
+        if em and em not in rh_recipients:
+            rh_recipients.append(em)
+    if not rh_recipients:
+        return
+    site = frappe.utils.get_url()
+    desk_url = f"{site}/app/kya-contrat/{doc.name}"
+    frappe.sendmail(
+        recipients=rh_recipients,
+        subject=f"✅ {doc.employee_name} a signé son contrat — À soumettre au DG",
+        message=f"""
+        <div style="font-family:Arial,sans-serif; max-width:640px; margin:0 auto; border:1px solid #eee; border-radius:6px; overflow:hidden;">
+          <div style="background:linear-gradient(135deg,#1a5276 0%,#2980b9 100%); padding:20px; color:#fff;">
+            <h2 style="margin:0;">Contrat signé par le salarié</h2>
+          </div>
+          <div style="padding:24px 28px;">
+            <p>Bonjour,</p>
+            <p><b>{doc.employee_name}</b> a signé son contrat de <b>{doc.contract_type}</b>
+            le {frappe.format_value(doc.date_signature_employe, {'fieldtype':'Datetime'})}.</p>
+            <p>Veuillez relire le contrat puis cliquer sur l'action <b>« Soumettre au DG »</b>
+            pour déclencher la co-signature du Directeur Général.</p>
+            <p style="text-align:center; margin:24px 0;">
+              <a href="{desk_url}" style="display:inline-block; background:#1a5276; color:#fff; padding:12px 26px; text-decoration:none; border-radius:5px; font-weight:600;">→ Ouvrir le contrat</a>
+            </p>
+            <p style="font-size:13px; color:#666;">Référence : <b>{doc.name}</b></p>
+          </div>
+        </div>
+        """,
+        now=False,
+    )
+
+
+def notify_dg_after_rh_gateway(doc, method=None):
+    """Hook on_update : quand l'état passe à 'En attente DG' (RH a cliqué
+    'Soumettre au DG'), envoyer le lien magique du portail au DG.
+    """
+    if doc.workflow_state != "En attente DG":
+        return
+    if doc.get("_dg_notified"):
+        return
+    if not doc.access_token_dg:
+        doc.access_token_dg = _generate_token()
+        doc.db_set("access_token_dg", doc.access_token_dg, update_modified=False)
     site = frappe.utils.get_url()
     url = f"{site}/kya-contrat?name={doc.name}&token={doc.access_token_dg}"
     dg_emails = []
@@ -242,17 +299,17 @@ def _notify_dg(doc):
         return
     frappe.sendmail(
         recipients=dg_emails,
-        subject=f"✅ {doc.employee_name} a signé son contrat — Votre co-signature requise",
+        subject=f"✍️ Co-signature requise — Contrat {doc.contract_type} de {doc.employee_name}",
         message=f"""
         <div style="font-family:Arial,sans-serif; max-width:640px; margin:0 auto; border:1px solid #eee; border-radius:6px; overflow:hidden;">
           <div style="background:linear-gradient(135deg,#1a5276 0%,#2980b9 100%); padding:20px; color:#fff;">
-            <h2 style="margin:0;">Co-signature requise</h2>
+            <h2 style="margin:0;">Co-signature DG requise</h2>
           </div>
           <div style="padding:24px 28px;">
             <p>Monsieur le Directeur Général,</p>
-            <p><b>{doc.employee_name}</b> a signé son contrat de <b>{doc.contract_type}</b>
-            le {frappe.format_value(doc.date_signature_employe, {'fieldtype':'Datetime'})}.</p>
-            <p>Votre co-signature est requise pour finaliser le contrat.</p>
+            <p>La RH a transmis pour co-signature le contrat de <b>{doc.contract_type}</b>
+            de <b>{doc.employee_name}</b>.</p>
+            <p>Le salarié a déjà signé le {frappe.format_value(doc.date_signature_employe, {'fieldtype':'Datetime'})}.</p>
             <p style="text-align:center; margin:24px 0;">
               <a href="{url}" style="display:inline-block; background:#1a5276; color:#fff; padding:12px 26px; text-decoration:none; border-radius:5px; font-weight:600;">→ Accéder au contrat</a>
             </p>
@@ -284,7 +341,7 @@ def get_contract_view(contract_id, token):
         "role": role,
         "phone_confirmed": bool(doc.phone_confirmed),
         "sections_signees": json.loads(doc.sections_signees or "{}").get(role, []),
-        "can_sign": (role == "employe" and doc.workflow_state == "Envoyé Signataire") or
-                    (role == "dg" and doc.workflow_state == "Signé Employé"),
-        "is_finalized": doc.workflow_state == "Finalisé",
+        "can_sign": (role == "employe" and doc.workflow_state == "En attente Signature Salarié") or
+                    (role == "dg" and doc.workflow_state == "En attente DG"),
+        "is_finalized": doc.workflow_state in ("Validé", "RH (revue)", "Archivé"),
     }

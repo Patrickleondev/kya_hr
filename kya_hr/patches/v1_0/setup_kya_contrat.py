@@ -9,25 +9,27 @@ WORKFLOW_NAME = "Flux KYA Contrat"
 DOCTYPE = "KYA Contrat"
 
 STATES = [
+    # Anciens (legacy — conservés pour rétro-compat)
     ("Brouillon", "Pending", 0),
     ("Envoyé Signataire", "Warning", 0),
     ("Signé Employé", "Info", 0),
     ("Signé DG", "Success", 1),
     ("Finalisé", "Success", 1),
     ("Annulé", "Danger", 2),
+    # Nouveaux (Flux Contrat KYA — fixture)
+    ("En attente Signature Salarié", "Warning", 0),
+    ("Signé Salarié", "Info", 0),
+    ("En attente DG", "Warning", 0),
+    ("Validé", "Success", 1),
+    ("RH (revue)", "Info", 1),
+    ("Archivé", "Success", 1),
+    ("Rejeté", "Danger", 2),
 ]
 
-ACTIONS = ["Envoyer au Signataire", "Signer", "Co-signer", "Finaliser", "Annuler"]
-
-TRANSITIONS = [
-    # (state, action, next_state, allowed_role)
-    ("Brouillon", "Envoyer au Signataire", "Envoyé Signataire", "HR Manager"),
-    ("Brouillon", "Envoyer au Signataire", "Envoyé Signataire", "Responsable RH"),
-    ("Envoyé Signataire", "Signer", "Signé Employé", "KYA Signataire Contrat"),
-    ("Signé Employé", "Co-signer", "Finalisé", "Directeur Général"),
-    ("Brouillon", "Annuler", "Annulé", "HR Manager"),
-    ("Envoyé Signataire", "Annuler", "Annulé", "HR Manager"),
-    ("Signé Employé", "Annuler", "Annulé", "HR Manager"),
+ACTIONS = [
+    "Envoyer au Signataire", "Signer", "Co-signer", "Finaliser", "Annuler",
+    "Envoyer au Salarié", "Soumettre au DG", "Valider", "Rejeter",
+    "Marquer revue RH", "Archiver", "Refuser",
 ]
 
 
@@ -37,7 +39,7 @@ def execute():
     _ensure_role("Responsable RH")
     _ensure_workflow_states()
     _ensure_workflow_actions()
-    _ensure_workflow()
+    _disable_legacy_workflow()
     _seed_templates()
     frappe.db.commit()
 
@@ -62,36 +64,17 @@ def _ensure_workflow_actions():
             frappe.get_doc({"doctype": "Workflow Action Master", "workflow_action_name": a}).insert(ignore_permissions=True)
 
 
-def _ensure_workflow():
-    if frappe.db.exists("Workflow", WORKFLOW_NAME):
-        wf = frappe.get_doc("Workflow", WORKFLOW_NAME)
-        wf.states = []
-        wf.transitions = []
-    else:
-        wf = frappe.new_doc("Workflow")
-        wf.workflow_name = WORKFLOW_NAME
-        wf.document_type = DOCTYPE
-        wf.is_active = 1
-        wf.send_email_alert = 1
-        wf.workflow_state_field = "workflow_state"
-
-    for state, style, doc_status in STATES:
-        wf.append("states", {
-            "state": state,
-            "doc_status": doc_status,
-            "allow_edit": "HR Manager" if state in ("Brouillon",) else "System Manager",
-        })
-
-    for state, action, next_state, allowed in TRANSITIONS:
-        wf.append("transitions", {
-            "state": state,
-            "action": action,
-            "next_state": next_state,
-            "allowed": allowed,
-            "allow_self_approval": 1,
-        })
-
-    wf.save(ignore_permissions=True)
+def _disable_legacy_workflow():
+    """L'ancien workflow 'Flux KYA Contrat' utilisait des noms d'états divergents
+    (Envoyé Signataire / Signé Employé / Finalisé). Il est remplacé par le
+    fixture 'Flux Contrat KYA' (RH → Salarié → RH → DG). On désactive l'ancien
+    pour éviter les conflits de double workflow sur le même DocType.
+    """
+    if frappe.db.exists("Workflow", "Flux KYA Contrat"):
+        try:
+            frappe.db.set_value("Workflow", "Flux KYA Contrat", "is_active", 0)
+        except Exception:
+            pass
 
 
 # ----- Seed des 5 templates par défaut -----

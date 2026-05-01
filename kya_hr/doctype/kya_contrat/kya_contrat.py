@@ -19,8 +19,8 @@ class KYAContrat(Document):
         self._validate_signatures()
 
     def before_submit(self):
-        # On submit only when workflow has reached Finalisé (after DG signature) or via direct submit by HR
-        if self.workflow_state not in ("Finalisé", "Signé DG"):
+        # On submit only when workflow has reached Validé (after DG signature) or via direct submit by HR
+        if self.workflow_state not in ("Validé", "RH (revue)", "Archivé"):
             # allow direct submit only for HR Manager / System Manager fast-path
             if not any(r in frappe.get_roles() for r in ("HR Manager", "System Manager")):
                 frappe.throw(_("Le contrat doit être signé par les deux parties avant soumission."))
@@ -29,8 +29,10 @@ class KYAContrat(Document):
         self._maybe_generate_pdf()
 
     def on_update(self):
-        # Détecte transition vers Signé DG en édition standard (avant submit final)
+        # Détecte transition vers Validé (DG vient de signer) puis génère PDF + emails finaux.
+        # Détecte aussi 'En attente DG' pour notifier le DG via lien magique.
         self._maybe_generate_pdf()
+        self._maybe_notify_dg()
 
     # ----- HELPERS -----
     def _select_template(self):
@@ -51,12 +53,12 @@ class KYAContrat(Document):
             self.date_fin = add_months(getdate(self.date_debut), int(self.duree_mois))
 
     def _validate_signatures(self):
-        # Si workflow passe en Signé Employé, exige signature + check lu/approuvé
-        if self.workflow_state == "Signé Employé" and not self.signature_employe:
-            frappe.throw(_("La signature du signataire est requise pour passer à 'Signé Employé'."))
-        if self.workflow_state == "Signé Employé" and not self.contrat_lu:
+        # Si workflow passe en Signé Salarié, exige signature + check lu/approuvé
+        if self.workflow_state == "Signé Salarié" and not self.signature_employe:
+            frappe.throw(_("La signature du signataire est requise pour passer à 'Signé Salarié'."))
+        if self.workflow_state == "Signé Salarié" and not self.contrat_lu:
             frappe.throw(_("Vous devez cocher 'J'ai lu et approuvé' avant de signer."))
-        if self.workflow_state in ("Signé DG", "Finalisé") and not self.signature_dg:
+        if self.workflow_state in ("Validé", "RH (revue)", "Archivé") and not self.signature_dg:
             frappe.throw(_("La signature du Directeur Général est requise."))
 
         # Auto-fill nom signé + dates
@@ -67,12 +69,23 @@ class KYAContrat(Document):
             self.date_signature_dg = now_datetime()
 
     def _maybe_generate_pdf(self):
-        if self.workflow_state == "Finalisé" and not self.pdf_final and self.signature_employe and self.signature_dg:
+        if self.workflow_state in ("Validé", "RH (revue)", "Archivé") and not self.pdf_final and self.signature_employe and self.signature_dg:
             try:
                 self._generate_and_attach_pdf()
                 self._send_final_emails()
             except Exception:
                 frappe.log_error(frappe.get_traceback(), "KYA Contrat — Génération PDF")
+
+    def _maybe_notify_dg(self):
+        """Quand la RH clique 'Soumettre au DG' (workflow_state -> En attente DG),
+        envoyer le lien magique au DG via le helper API."""
+        if self.workflow_state != "En attente DG":
+            return
+        try:
+            from kya_hr.api.kya_contracts import notify_dg_after_rh_gateway
+            notify_dg_after_rh_gateway(self)
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), "KYA Contrat — Notification DG")
 
     def _generate_and_attach_pdf(self):
         from frappe.utils.pdf import get_pdf
@@ -80,7 +93,7 @@ class KYAContrat(Document):
         html = frappe.get_print(
             "KYA Contrat",
             self.name,
-            print_format="KYA Contrat PDF",
+            print_format="Contrat de Stage KYA" if (self.contract_type or "").lower().startswith("stage") else "KYA Contrat PDF",
             no_letterhead=0,
         )
         pdf_bytes = get_pdf(html)
