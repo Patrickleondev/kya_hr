@@ -359,12 +359,12 @@
     "etat-recap": {
       title: "\u00c9TAT R\u00c9CAPITULATIF DES CH\u00c8QUES",
       subtitle: "Comptabilit\u00e9 & Tr\u00e9sorerie",
-      workflow: "Caissi\u00e8re \u2192 Comptable \u2192 DAAF"
+      workflow: "Caissier \u2192 Comptable \u2192 DAAF"
     },
     "brouillard-caisse": {
       title: "BROUILLARD DE CAISSE",
       subtitle: "Comptabilit\u00e9 & Tr\u00e9sorerie",
-      workflow: "Caissi\u00e8re \u2192 Comptable \u2192 DFC"
+      workflow: "Caissier \u2192 Comptable \u2192 DFC"
     },
     "pv-entree-materiel": {
       title: "PV D\u2019ENTR\u00c9E DE MAT\u00c9RIEL",

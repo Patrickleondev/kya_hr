@@ -6,9 +6,9 @@ from kya_hr.utils.approval_guards import block_self_approval
 
 
 class BrouillardCaisse(Document):
-    """Brouillard de Caisse — saisie quotidienne par la Caissière.
+    """Brouillard de Caisse — saisie quotidienne par le Caissier (genre neutre).
 
-    Workflow: Caissière (saisit) → Comptable (vise) → DFC (valide).
+    Workflow: Caissier (saisit) → Comptable (vise) → DFC (valide).
     Totaux calculés + solde ligne-à-ligne côté serveur pour cohérence,
     même si le JS fait la même chose côté client.
     """
@@ -231,7 +231,7 @@ def _export_recap_pdf(brouillards, start, end, iso_week, iso_year,
         <span class='kpi'>Brouillards : <b>{len(brouillards)}</b></span>
     </div>
     <table><thead><tr>
-    <th>Date</th><th>Réf.</th><th>Caissier(ère)</th>
+    <th>Date</th><th>Réf.</th><th>Caissier</th>
     <th style='text-align:right;'>Entrées</th><th style='text-align:right;'>Sorties</th>
     <th style='text-align:right;'>Solde Final</th><th>Statut</th>
     </tr></thead>
@@ -278,7 +278,7 @@ def _export_recap_docx(brouillards, start, end, iso_week, iso_year,
     table = doc.add_table(rows=1, cols=7)
     table.style = "Light Grid Accent 1"
     hdr = table.rows[0].cells
-    for i, h in enumerate(["Date", "Réf.", "Caissier(ère)", "Entrées",
+    for i, h in enumerate(["Date", "Réf.", "Caissier", "Entrées",
                            "Sorties", "Solde Final", "Statut"]):
         hdr[i].text = h
 
