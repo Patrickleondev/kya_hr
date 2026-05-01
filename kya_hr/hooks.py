@@ -58,18 +58,35 @@ doc_events = {
     "Employee": {
         "before_save": "kya_hr.grille_indiciaire.calculer_indice_employee",
     },
-    # Auto-rempli report_to_user pour notifications "En attente Chef"
+    # Chef routing + notifications demandeur (confirmation soumission + mises à jour état)
     "Demande Achat KYA": {
         "before_save": "kya_hr.chef_routing.populate_chef",
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_update": "kya_hr.email_notifications.send_workflow_update",
     },
     "Permission Sortie Employe": {
         "before_save": "kya_hr.chef_routing.populate_chef",
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_update": "kya_hr.email_notifications.send_workflow_update",
     },
     "Permission Sortie Stagiaire": {
         "before_save": "kya_hr.chef_routing.populate_chef",
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_update": "kya_hr.email_notifications.send_workflow_update",
     },
     "Planning Conge": {
         "before_save": "kya_hr.chef_routing.populate_chef",
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_update": "kya_hr.email_notifications.send_workflow_update",
+    },
+    # PV et Bilan : pas de chef_routing (employee_field suffit)
+    "PV Sortie Materiel": {
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_update": "kya_hr.email_notifications.send_workflow_update",
+    },
+    "Bilan Fin de Stage": {
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_update": "kya_hr.email_notifications.send_workflow_update",
     },
 }
 
