@@ -771,20 +771,134 @@
     if (!empField) return;
     var empInput = empField.querySelector("input");
     if (!empInput) return;
+
+    function setInput(fieldName, value) {
+      var el = findFieldEl(fieldName);
+      if (!el) return;
+      var input = el.querySelector("input");
+      if (!input) return;
+      input.value = value || "";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+
+    function applyEmployee(emp) {
+      if (!emp || !emp.name) return;
+      setInput("employee", emp.name);
+      setInput("employee_name", emp.employee_name);
+      setInput("department", emp.department);
+      if (emp.designation) setInput("designation", emp.designation);
+    }
+
     function fetchEmployeeData(empId) {
       if (!empId || !window.frappe) return;
       frappe.call({
         method: "frappe.client.get_value",
-        args: { doctype: "Employee", filters: { name: empId }, fieldname: ["employee_name", "department"] },
+        args: {
+          doctype: "Employee",
+          filters: { name: empId },
+          fieldname: ["employee_name", "department", "designation"]
+        },
         callback: function (r) {
           if (!r || !r.message) return;
-          var nf = findFieldEl("employee_name");
-          var df = findFieldEl("department");
-          if (nf) { var ni = nf.querySelector("input"); if (ni) { ni.value = r.message.employee_name || ""; ni.dispatchEvent(new Event("change")); } }
-          if (df) { var di = df.querySelector("input"); if (di) { di.value = r.message.department || ""; di.dispatchEvent(new Event("change")); } }
+          setInput("employee_name", r.message.employee_name);
+          setInput("department", r.message.department);
+          if (r.message.designation) setInput("designation", r.message.designation);
         }
       });
     }
+
+    // ---- Auto-fill au chargement via la session ---------------------
+    if (!empInput.value && window.frappe && frappe.session && frappe.session.user && frappe.session.user !== "Guest") {
+      frappe.call({
+        method: "kya_hr.api.webform_helpers.get_current_employee",
+        callback: function (r) {
+          if (r && r.message && r.message.name) {
+            applyEmployee(r.message);
+          }
+        }
+      });
+    }
+
+    // ---- Fuzzy search par nom (matricule oublié) -------------------
+    function buildFuzzySearch() {
+      if (empField.querySelector(".kya-fuzzy-wrap")) return;
+      var wrap = document.createElement("div");
+      wrap.className = "kya-fuzzy-wrap";
+      wrap.style.cssText = "margin-top:6px;position:relative;";
+      wrap.innerHTML =
+        '<button type="button" class="kya-fuzzy-toggle" style="background:none;border:none;color:#0066cc;cursor:pointer;padding:0;font-size:0.85em;text-decoration:underline;">' +
+        '🔍 Matricule oublié ? Rechercher par nom</button>' +
+        '<div class="kya-fuzzy-box" style="display:none;margin-top:6px;">' +
+        '  <input type="text" class="form-control kya-fuzzy-input" placeholder="Tapez au moins 2 lettres du nom…" autocomplete="off" />' +
+        '  <ul class="kya-fuzzy-results" style="list-style:none;padding:0;margin:4px 0 0;border:1px solid #ddd;border-radius:4px;max-height:200px;overflow-y:auto;background:#fff;display:none;position:absolute;left:0;right:0;z-index:50;"></ul>' +
+        '</div>';
+      empField.appendChild(wrap);
+
+      var toggle = wrap.querySelector(".kya-fuzzy-toggle");
+      var box = wrap.querySelector(".kya-fuzzy-box");
+      var input = wrap.querySelector(".kya-fuzzy-input");
+      var results = wrap.querySelector(".kya-fuzzy-results");
+
+      toggle.addEventListener("click", function () {
+        var visible = box.style.display !== "none";
+        box.style.display = visible ? "none" : "block";
+        if (!visible) setTimeout(function () { input.focus(); }, 50);
+      });
+
+      var debounce = null;
+      input.addEventListener("input", function () {
+        var q = input.value.trim();
+        if (debounce) clearTimeout(debounce);
+        if (q.length < 2) {
+          results.style.display = "none";
+          results.innerHTML = "";
+          return;
+        }
+        debounce = setTimeout(function () {
+          frappe.call({
+            method: "kya_hr.api.webform_helpers.search_employees",
+            args: { query: q, limit: 10 },
+            callback: function (r) {
+              var rows = (r && r.message) || [];
+              results.innerHTML = "";
+              if (!rows.length) {
+                results.innerHTML = '<li style="padding:8px;color:#888;">Aucun employé trouvé.</li>';
+                results.style.display = "block";
+                return;
+              }
+              rows.forEach(function (emp) {
+                var li = document.createElement("li");
+                li.style.cssText = "padding:8px;cursor:pointer;border-bottom:1px solid #eee;";
+                li.innerHTML =
+                  '<strong>' + (emp.employee_name || "") + '</strong> ' +
+                  '<span style="color:#666;font-size:0.9em;">— ' + (emp.name || "") +
+                  (emp.department ? ' · ' + emp.department : '') + '</span>';
+                li.addEventListener("mouseenter", function () { li.style.background = "#f5f7fa"; });
+                li.addEventListener("mouseleave", function () { li.style.background = ""; });
+                li.addEventListener("click", function () {
+                  applyEmployee(emp);
+                  results.style.display = "none";
+                  box.style.display = "none";
+                });
+                results.appendChild(li);
+              });
+              results.style.display = "block";
+            }
+          });
+        }, 250);
+      });
+
+      // Ferme la liste si clic en dehors
+      document.addEventListener("click", function (e) {
+        if (!wrap.contains(e.target)) {
+          results.style.display = "none";
+        }
+      });
+    }
+    buildFuzzySearch();
+
+    // ---- Auto-fetch quand l'utilisateur tape un matricule ----------
     var obs = new MutationObserver(function () {
       var val = empInput.value;
       if (val && val.length > 3) fetchEmployeeData(val);
