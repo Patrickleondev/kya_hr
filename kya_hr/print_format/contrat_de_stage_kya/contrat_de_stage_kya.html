@@ -17,18 +17,30 @@
   .ctr-meta { text-align: right; font-size: 9pt; line-height: 1.3; }
   .ctr-title-bar { width: 100%; border-collapse: collapse; margin: 4mm 0 6mm 0; }
   .ctr-title-bar td { padding: 0; vertical-align: middle; }
-  .ctr-logo-cell { width: 60mm; padding: 4px 8px; }
-  .ctr-logo-cell img { max-height: 22mm; }
+  .ctr-logo-cell { width: 50mm; padding: 4px 8px; border: 1px solid #ccc; }
+  .ctr-logo-cell img { max-height: 22mm; display: block; margin: 0 auto; }
   .ctr-title-cell {
-    background: linear-gradient(90deg,#F58220 0%, #F39200 100%);
+    background: #F58220;
     color: #fff; font-weight: bold; font-size: 18pt;
     text-align: center; padding: 6mm 4mm; letter-spacing: 1.5px;
+    border-top: 1px solid #ccc; border-bottom: 1px solid #ccc;
   }
   .ctr-ref-cell {
-    width: 45mm; background: #fff; border: 1px solid #ccc;
-    text-align: center; font-size: 9.5pt; padding: 3mm;
+    width: 42mm; background: #fff; border: 1px solid #ccc;
+    text-align: center; font-size: 9.5pt; padding: 0; vertical-align: top;
   }
-  .ctr-tagline { color: #F58220; font-style: italic; font-weight: bold; font-size: 10pt; }
+  .ctr-ref-tagline {
+    font-style: italic; font-weight: bold; font-size: 10pt;
+    padding: 4px 4px 2px; border-bottom: 1px solid #ccc; display: block;
+  }
+  .ctr-ref-code {
+    font-weight: bold; padding: 4px; border-bottom: 1px solid #ccc; display: block;
+  }
+  .ctr-ref-date { padding: 4px; display: block; }
+  .ctr-part-title {
+    text-align: center; font-weight: bold; font-size: 12pt;
+    text-decoration: underline; margin: 8mm 0 4mm; text-transform: uppercase;
+  }
   h3.art { font-size: 11.5pt; margin: 5mm 0 2mm 0; text-decoration: underline; }
   p { text-align: justify; margin: 0 0 3mm 0; }
   .sig-block { margin-top: 12mm; width: 100%; border-collapse: collapse; }
@@ -63,12 +75,12 @@
     <tr>
       <td class="ctr-logo-cell">
         <img src="{{ logo_url }}" alt="KYA-Energy">
-        <div class="ctr-tagline">Move beyond the sky !</div>
       </td>
       <td class="ctr-title-cell">CONTRAT DE STAGE</td>
       <td class="ctr-ref-cell">
-        <strong>RH-ENG-07-V01</strong><br>
-        Date : {{ frappe.utils.formatdate(doc.creation, "dd/MM/yyyy") }}
+        <span class="ctr-ref-tagline"><em>Move beyond the sky !</em></span>
+        <span class="ctr-ref-code">RH-ENG-07-V01</span>
+        <span class="ctr-ref-date">{{ frappe.utils.formatdate(doc.date_debut or doc.creation, "dd/MM/yyyy") }}</span>
       </td>
     </tr>
   </table>
@@ -128,21 +140,34 @@
      entrant dans le cadre strict du programme défini par la société.</p>
 
   <h3 class="art">Article 5 : Indemnités de stage</h3>
-  <p>En contrepartie des activités qui seront attribuées au poste de stage dans la société, le stagiaire
+  {%- if doc.contract_type == "Stage Académique" -%}
+  <p>Dans le cadre de ce stage académique, aucune indemnité n'est due au/à la stagiaire.</p>
+  {%- else -%}
+  <p>En contrepartie des activités qui seront attribuées au poste de stage dans la société, le/la stagiaire
      percevra une indemnité forfaitaire mensuelle de
      <strong>{{ "{:,.0f}".format(doc.indemnite_mensuelle or 0).replace(",", " ") }} francs CFA</strong>.</p>
+  {%- endif -%}
 
   <h3 class="art">Article 6 : Rapport et Attestation de stage</h3>
-  <p>À la fin de la période de stage, le stagiaire devra produire un rapport de stage et une attestation
-     lui sera délivrée par le premier responsable de la société.</p>
+  <p>A la fin de la période de stage, le/la stagiaire devra produire un rapport de stage et une attestation
+     lui sera délivrée par le premier responsable de la société. L'obtention de l'attestation est
+     subordonnée à une évaluation globale satisfaisante. Le/la stagiaire doit impérativement obtenir
+     une moyenne minimale de <strong>12/20</strong>, calculée par le <strong>maître de stage</strong>
+     selon les obligations définies à <strong>l'article 8</strong> de la première partie du présent contrat.</p>
 
-  <h3 class="art">Article 7 : Obligations générales du stagiaire</h3>
+  <h3 class="art">Article 7 : Renouvellement du stage</h3>
+  <p>Le renouvellement de l'engagement du stagiaire n'est envisageable que si le <strong>maître
+     de stage</strong> atteste d'une maîtrise supérieure des missions confiées. A ce titre, une
+     note moyenne de <strong>15/20</strong>, basée sur les obligations mentionnées à <strong>l'article 8</strong> de la
+     première partie du présent contrat, est exigée pour toute demande d'extension de la durée du stage.</p>
+
+  <h3 class="art">Article 8 : Obligations générales du stagiaire</h3>
   <p>Le stagiaire est astreint au respect du règlement intérieur de la société et au secret professionnel
      notamment l'assiduité, la ponctualité et la confidentialité.</p>
   <p>Il doit avoir une conduite honorable. Il doit être honnête et loyal envers tout le personnel, les clients
      et les autres collaborateurs de la société.</p>
 
-  <h3 class="art">Article 8 : Résiliation du contrat de stage</h3>
+  <h3 class="art">Article 9 : Résiliation du contrat de stage</h3>
   <p>Outre sa résiliation unilatérale et réciproque, la présente convention de stage est résiliée de plein droit
      sans indemnités, soit lorsqu'il y a défaut de renouvellement exprès de la convention initiale, soit par la
      fermeture de la société, soit par abandon de poste ou non-respect du règlement intérieur constaté par la
@@ -151,9 +176,6 @@
      de présentation au cours de l'animation scientifique, le contrat de stage est rompu).</p>
   <p>Sous réserve de convention exprès, aucune indemnité n'est due à la fin ou à la rupture du contrat de stage.</p>
 
-  <h3 class="art">Article 9 : Dispositions finales</h3>
-  <p>Pour tous les aspects non précisés dans la présente convention, les parties s'en remettent aux
-     dispositions législatives et réglementaires en vigueur en la matière au Togo.</p>
   <p>La présente convention de stage est établie en deux exemplaires, chaque partie devant recevoir copie.</p>
 
   <p>Fait à <strong>{{ fait_a }}</strong> le
