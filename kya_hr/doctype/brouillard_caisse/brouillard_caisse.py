@@ -2,6 +2,8 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import flt, today
 
+from kya_hr.utils.approval_guards import block_self_approval
+
 
 class BrouillardCaisse(Document):
     """Brouillard de Caisse — saisie quotidienne par la Caissière.
@@ -12,6 +14,7 @@ class BrouillardCaisse(Document):
     """
 
     def validate(self):
+        block_self_approval(self)
         self._compute_line_soldes()
         self._compute_totals()
         self._auto_sign_caissiere()

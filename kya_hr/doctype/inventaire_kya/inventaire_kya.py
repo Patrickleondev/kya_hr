@@ -5,9 +5,12 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+from kya_hr.utils.approval_guards import block_self_approval
+
 
 class InventaireKYA(Document):
     def validate(self):
+        block_self_approval(self)
         self.set_responsable_info()
         self.compute_ecarts_and_totals()
 

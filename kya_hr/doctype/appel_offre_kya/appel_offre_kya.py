@@ -3,9 +3,12 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import now_datetime, get_url
 
+from kya_hr.utils.approval_guards import block_self_approval
+
 
 class AppelOffreKYA(Document):
     def validate(self):
+        block_self_approval(self)
         self.numero_ao = self.name
         if self.items and len(self.items) == 0:
             frappe.throw(_("Au moins un article doit \u00eatre renseign\u00e9"))
