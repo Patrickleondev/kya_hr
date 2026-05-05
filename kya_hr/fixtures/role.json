@@ -865,9 +865,9 @@
   "home_page": null,
   "is_custom": 1,
   "modified": "2026-04-23 00:00:00.000000",
-  "name": "Caissier(ère)",
+  "name": "Caissier",
   "restrict_to_domain": null,
-  "role_name": "Caissier(ère)",
+  "role_name": "Caissier",
   "two_factor_auth": 0
  },
  {

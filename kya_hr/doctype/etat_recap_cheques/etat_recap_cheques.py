@@ -2,6 +2,8 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import flt, formatdate, today
 
+from kya_hr.utils.approval_guards import block_self_approval
+
 
 MOIS_FR = {
     1: "JANVIER", 2: "FÉVRIER", 3: "MARS", 4: "AVRIL", 5: "MAI", 6: "JUIN",
@@ -16,6 +18,7 @@ class EtatRecapCheques(Document):
     """
 
     def validate(self):
+        block_self_approval(self)
         self._compute_totals()
         self._compute_libelle_periode()
         self._auto_sign_redacteur()

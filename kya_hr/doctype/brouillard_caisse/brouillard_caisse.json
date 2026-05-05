@@ -60,14 +60,14 @@
    "fieldname": "caissiere",
    "fieldtype": "Link",
    "options": "Employee",
-   "label": "Caissier(ère)",
+   "label": "Caissier",
    "reqd": 1,
    "in_list_view": 1
   },
   {
    "fieldname": "caissiere_name",
    "fieldtype": "Data",
-   "label": "Nom Caissier(ère)",
+   "label": "Nom Caissier",
    "fetch_from": "caissiere.employee_name",
    "read_only": 1,
    "in_list_view": 1
@@ -148,7 +148,7 @@
    "fieldtype": "Currency",
    "options": "XOF",
    "label": "Total Réel de la Caisse",
-   "description": "Saisie caissière après comptage physique",
+   "description": "Saisie caissier après comptage physique",
    "reqd": 1
   },
   {
@@ -159,23 +159,23 @@
   {
    "fieldname": "col_sig_caissiere",
    "fieldtype": "Column Break",
-   "label": "Caissier(ère)"
+   "label": "Caissier"
   },
   {
    "fieldname": "signature_caissiere",
    "fieldtype": "Signature",
-   "label": "Visa Caissier(ère)"
+   "label": "Visa Caissier"
   },
   {
    "fieldname": "signataire_caissiere",
    "fieldtype": "Data",
-   "label": "Signataire Caissier(ère)",
+   "label": "Signataire Caissier",
    "read_only": 1
   },
   {
    "fieldname": "date_signature_caissiere",
    "fieldtype": "Date",
-   "label": "Date Signature Caissière",
+   "label": "Date Signature Caissier",
    "read_only": 1
   },
   {
@@ -263,7 +263,7 @@
  "naming_rule": "Expression",
  "permissions": [
   {
-   "role": "Caissière",
+   "role": "Caissier",
    "read": 1,
    "write": 1,
    "create": 1,

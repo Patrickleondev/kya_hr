@@ -5,9 +5,12 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+from kya_hr.utils.approval_guards import block_self_approval
+
 
 class PVEntreeMateriel(Document):
     def validate(self):
+        block_self_approval(self)
         self.validate_items()
         self.set_livreur_info()
 

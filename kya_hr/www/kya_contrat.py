@@ -65,19 +65,26 @@ def get_context(context):
         context.title = "Accès refusé"
         return context
 
-    # Render template Jinja
+    # Render via le print format "Contrat de Stage KYA" (fidélité visuelle au
+    # modèle PDF RH-ENG-07-V01) ou "KYA Contrat PDF" pour les autres types.
     contrat_dict = doc.as_dict(convert_dates_to_str=False)
     rendered_body = ""
-    if doc.template:
-        try:
-            tpl = frappe.get_doc("KYA Contract Template", doc.template)
-            if tpl.html_body:
-                rendered_body = frappe.render_template(
-                    tpl.html_body,
-                    {"doc": contrat_dict, "frappe": frappe}
-                )
-        except Exception as e:
-            rendered_body = f"<p style='color:red'>Erreur rendu template : {frappe.utils.escape_html(str(e))}</p>"
+    pf_name = "Contrat de Stage KYA" if (doc.contract_type or "").lower().startswith("stage") else "KYA Contrat PDF"
+    try:
+        rendered_body = frappe.get_print(
+            "KYA Contrat", doc.name, print_format=pf_name, no_letterhead=1
+        )
+    except Exception:
+        # Fallback : ancien rendu via KYA Contract Template
+        if doc.template:
+            try:
+                tpl = frappe.get_doc("KYA Contract Template", doc.template)
+                if tpl.html_body:
+                    rendered_body = frappe.render_template(
+                        tpl.html_body, {"doc": contrat_dict, "frappe": frappe}
+                    )
+            except Exception as e:
+                rendered_body = f"<p style='color:red'>Erreur rendu template : {frappe.utils.escape_html(str(e))}</p>"
 
     sections = _split_sections(rendered_body)
 
@@ -85,8 +92,8 @@ def get_context(context):
     sigs = json.loads(doc.sections_signees or "{}")
     sections_signed_for_role = sigs.get(role, [])
 
-    peut_signer_employe = (role == "employe" and doc.workflow_state == "Envoyé Signataire")
-    peut_signer_dg = (role == "dg" and doc.workflow_state == "Signé Employé")
+    peut_signer_employe = (role == "employe" and doc.workflow_state == "En attente Signature Salarié")
+    peut_signer_dg = (role == "dg" and doc.workflow_state == "En attente DG")
     peut_editer_perso = peut_signer_employe and bool(doc.phone_confirmed)
 
     fmt = lambda v, ft="Date": frappe.format_value(v, {"fieldtype": ft}) if v else ""
@@ -106,7 +113,7 @@ def get_context(context):
     context.peut_signer_employe = peut_signer_employe
     context.peut_signer_dg = peut_signer_dg
     context.peut_editer_perso = peut_editer_perso
-    context.is_finalized = doc.workflow_state == "Finalisé"
+    context.is_finalized = doc.workflow_state in ("Validé", "RH (revue)", "Archivé")
     context.date_signature_employe_fmt = fmt(doc.date_signature_employe, "Datetime")
     context.date_signature_dg_fmt = fmt(doc.date_signature_dg, "Datetime")
     context.title = f"Contrat {doc.name} — KYA-Energy Group"

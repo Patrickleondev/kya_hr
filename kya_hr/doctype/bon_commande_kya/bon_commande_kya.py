@@ -3,9 +3,12 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import flt
 
+from kya_hr.utils.approval_guards import block_self_approval
+
 
 class BonCommandeKYA(Document):
     def validate(self):
+        block_self_approval(self)
         self.calculate_totals()
         if self.fournisseur and not self.fournisseur_nom:
             self.fournisseur_nom = frappe.db.get_value("Supplier", self.fournisseur, "supplier_name")

@@ -59,7 +59,7 @@
   <div class="kya-sec-header">1. IDENTIFICATION</div>
   <div class="kya-sec-body">
     <div class="kya-row">
-      <div class="kya-col"><div class="kya-lbl">Caissier(ère)</div><div class="kya-val"><strong>{{ doc.caissiere_name or doc.caissiere or '' }}</strong></div></div>
+      <div class="kya-col"><div class="kya-lbl">Caissier</div><div class="kya-val"><strong>{{ doc.caissiere_name or doc.caissiere or '' }}</strong></div></div>
       <div class="kya-col"><div class="kya-lbl">Date du brouillard</div><div class="kya-val">{{ frappe.utils.format_date(doc.date_brouillard) }}</div></div>
       <div class="kya-col"><div class="kya-lbl">Solde précédent</div><div class="kya-val">{{ frappe.utils.fmt_money(doc.solde_precedent or 0, currency='XOF') }}</div></div>
       <div class="kya-col"><div class="kya-lbl">Date solde précédent</div><div class="kya-val">{{ frappe.utils.format_date(doc.date_solde_precedent) if doc.date_solde_precedent else '—' }}</div></div>
@@ -120,7 +120,7 @@
     <div class="kya-sigs">
       <div class="kya-sig">
         {% if doc.signature_caissiere %}<img src="{{ doc.signature_caissiere }}">{% endif %}
-        <div class="sig-line">{{ doc.signataire_caissiere or doc.caissiere_name or 'Caissier(ère)' }}</div>
+        <div class="sig-line">{{ doc.signataire_caissiere or doc.caissiere_name or 'Caissier' }}</div>
         {% if doc.date_signature_caissiere %}<div class="sig-date">{{ frappe.utils.format_date(doc.date_signature_caissiere) }}</div>{% endif %}
       </div>
       <div class="kya-sig">

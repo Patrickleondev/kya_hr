@@ -2,9 +2,12 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import date_diff, today
 
+from kya_hr.utils.approval_guards import block_self_approval
+
 
 class DemandeCongeStagiaire(Document):
     def validate(self):
+        block_self_approval(self)
         self._calculate_nombre_jours()
         self._auto_sign_stagiaire()
 

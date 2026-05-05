@@ -4,9 +4,12 @@
 import frappe
 from frappe.model.document import Document
 
+from kya_hr.utils.approval_guards import block_self_approval
+
 
 class DemandeAchatKYA(Document):
     def validate(self):
+        block_self_approval(self)
         self.set_employee_details()
         self.calculate_totals()
         self.set_palier()

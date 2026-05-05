@@ -5,9 +5,12 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import date_diff, today, get_fullname
 
+from kya_hr.utils.approval_guards import block_self_approval
+
 
 class PermissionSortieStagiaire(Document):
     def validate(self):
+        block_self_approval(self)
         self.validate_employee_is_intern()
         self.set_employee_details()
         self.calc_nombre_jours()

@@ -75,7 +75,7 @@ def _build_recap_body(doc, config, emp_name, is_update=False):
     desk_url = "{}/app/{}/{}".format(base_url, doc.doctype.lower().replace(" ", "-"), doc.name)
 
     state = getattr(doc, "workflow_state", None) or "Brouillon"
-    state_color = "#009688" if "Approuv" in state else (
+    state_color = "#2e7d32" if "Approuv" in state else (
         "#e53935" if "Rejet" in state else (
             "#f59e0b" if "attente" in state.lower() else "#546e7a"
         )
@@ -86,7 +86,7 @@ def _build_recap_body(doc, config, emp_name, is_update=False):
 
     return """
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background: #009688; padding: 24px; border-radius: 12px 12px 0 0; text-align:center;">
+      <div style="background: linear-gradient(135deg,#f7a800 0%,#e07b00 100%); padding: 24px; border-radius: 12px 12px 0 0; text-align:center;">
         <img src="{logo_url}"
              alt="KYA-Energy Group" width="60" height="60" border="0" style="margin-bottom:8px;display:block;margin:0 auto;">
         <h2 style="color:white; margin:0;">{icon} {label}</h2>
@@ -112,11 +112,11 @@ def _build_recap_body(doc, config, emp_name, is_update=False):
           </tr>
         </table>
         <div style="text-align:center; margin:24px 0;">
-          <a href="{doc_url}" style="display:inline-block; padding:12px 28px; background:#009688;
+          <a href="{doc_url}" style="display:inline-block; padding:12px 28px; background:#f7a800;
              color:#fff; text-decoration:none; border-radius:8px; font-weight:700; font-size:14px;">
             📱 Voir ma fiche
           </a>
-          <a href="{espace_url}" style="display:inline-block; padding:12px 28px; background:#0054A6;
+          <a href="{espace_url}" style="display:inline-block; padding:12px 28px; background:#1a5276;
              color:#fff; text-decoration:none; border-radius:8px; font-weight:700; font-size:14px; margin-left:8px;">
             🏠 Mon Espace
           </a>
@@ -195,7 +195,7 @@ def send_submission_recap(doc, method=None):
         subject="[KYA] {} {} — Confirmation".format(config["icon"], config["label"]),
         message=body,
         attachments=attachments or None,
-        now=True,
+        now=False,  # file dans la queue email, ne bloque pas le save
     )
 
 
@@ -215,15 +215,26 @@ def send_workflow_update(doc, method=None):
     if doc.is_new():
         return
 
+    # Les états finaux (Approuvé/Rejeté) sont couverts par les Frappe native
+    # Notifications (notification.json) — pas de doublon
+    _FINAL_STATES = frozenset({
+        "Approuvé", "Approuvée", "Rejeté", "Rejetée",
+        "Approuvé(e)", "Rejeté(e)", "Terminé", "Clôturé",
+    })
+    curr_ws = getattr(doc, "workflow_state", None)
+    if curr_ws in _FINAL_STATES:
+        return
+
     # Ne pas envoyer si workflow_state n'a pas changé
     old_state = doc.get_doc_before_save()
     if old_state:
         prev_ws = getattr(old_state, "workflow_state", None)
-        curr_ws = getattr(doc, "workflow_state", None)
         if prev_ws == curr_ws:
             return
     else:
-        return
+        # get_doc_before_save() absent = save sans before_save (ex: submit/cancel)
+        # on ne peut pas déterminer le changement → on laisse passer prudemment
+        pass
 
     emp_info = _get_employee_email(doc, config)
     if not emp_info:
@@ -257,7 +268,7 @@ def send_workflow_update(doc, method=None):
         ),
         message=body,
         attachments=attachments or None,
-        now=True,
+        now=False,  # file dans la queue email, ne bloque pas le save
     )
 
     # Diffusion temps réel → les fiches ouvertes dans l'interface se rafraîchissent

@@ -4,9 +4,12 @@
 import frappe
 from frappe.model.document import Document
 
+from kya_hr.utils.approval_guards import block_self_approval
+
 
 class BilanFinDeStage(Document):
     def validate(self):
+        block_self_approval(self)
         self.validate_dates()
         self.compute_mention()
         self.set_employee_details()
