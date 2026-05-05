@@ -261,16 +261,18 @@ body {
 }
 .kya-section-body.kya-sig-grid .frappe-control canvas,
 .kya-section-body.kya-sig-grid .frappe-control .signature-pad {
-  min-height: 130px !important;
-  height: 130px !important;
-  max-height: 130px !important;
+  min-height: 150px !important;
+  height: 150px !important;
+  max-height: none !important;
   width: 100% !important;
+  display: block !important;
 }
 .kya-section-body.kya-sig-grid .frappe-control .signature-field .signature-display img {
-  min-height: 110px;
-  max-height: 130px;
-  width: auto;
-  object-fit: contain;
+  min-height: 120px;
+  max-height: 150px;
+  width: 100% !important;
+  max-width: 100% !important;
+  object-fit: contain !important;
 }
 .kya-section-body.kya-sig-grid .frappe-control.read-only .signature-pad,
 .kya-section-body.kya-sig-grid .frappe-control[data-read-only] canvas {
@@ -519,27 +521,32 @@ body {
 /* Keep signed image size stable after save/refresh */
 .web-form-container .frappe-control[data-fieldtype="Signature"] .signature-display,
 .kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-display {
-  min-height: 130px !important;
+  min-height: 150px !important;
+  width: 100% !important;
 }
 .web-form-container .frappe-control[data-fieldtype="Signature"] .signature-field,
 .kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-field {
-  min-height: 130px !important;
-  height: 130px !important;
-  max-height: 130px !important;
-  overflow: hidden !important;
+  min-height: 150px !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  width: 100% !important;
 }
 .web-form-container .frappe-control[data-fieldtype="Signature"] .signature-pad,
 .kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-pad,
 .web-form-container .frappe-control[data-fieldtype="Signature"] canvas,
 .kya-form-section .frappe-control[data-fieldtype="Signature"] canvas {
-  min-height: 130px !important;
-  height: 130px !important;
-  max-height: 130px !important;
+  min-height: 150px !important;
+  height: 150px !important;
+  max-height: none !important;
+  width: 100% !important;
+  display: block !important;
 }
 .web-form-container .frappe-control[data-fieldtype="Signature"] .signature-display img,
 .kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-display img {
-  max-height: 130px !important;
-  width: auto !important;
+  max-height: 150px !important;
+  width: 100% !important;
+  max-width: 100% !important;
   object-fit: contain !important;
 }
 .web-form-container .frappe-control[data-fieldtype="Link"] .link-btn,

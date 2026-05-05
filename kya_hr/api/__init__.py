@@ -182,6 +182,34 @@ def _is_new_doc_placeholder(docname):
     return False
 
 
+def _get_requester_user(doc):
+    """Return the user account of the employee/requester linked to a KYA document."""
+    employee_fields = ("employee", "demandeur", "applicant")
+    for fieldname in employee_fields:
+        employee = getattr(doc, fieldname, None)
+        if employee:
+            user_id = frappe.db.get_value("Employee", employee, "user_id")
+            if user_id:
+                return user_id
+    return getattr(doc, "owner", None)
+
+
+def _is_requester_self_approval(doc, action=None):
+    """Block requester from approving/rejecting their own document after submit."""
+    user = frappe.session.user
+    if user in ("Administrator", "Guest"):
+        return False
+
+    requester_user = _get_requester_user(doc)
+    if not requester_user or requester_user != user:
+        return False
+
+    state = (getattr(doc, "workflow_state", None) or "").lower()
+    action_value = (action or "").lower()
+    is_submit_step = state in ("", "brouillon", "draft", "open") or "soumettre" in action_value or "submit" in action_value
+    return not is_submit_step
+
+
 @frappe.whitelist()
 def get_kya_workflow_actions(doctype, docname):
     """Get available workflow actions for the current user on a document.
@@ -224,6 +252,8 @@ def get_kya_workflow_actions(doctype, docname):
 
     actions = []
     for t in transitions or []:
+        if _is_requester_self_approval(doc, t.get("action")):
+            continue
         actions.append({
             "action": t.get("action"),
             "next_state": t.get("next_state"),
@@ -252,6 +282,11 @@ def apply_kya_workflow_action(doctype, docname, action):
 
     doc = frappe.get_doc(doctype, docname)
     doc.check_permission("write")
+    if _is_requester_self_approval(doc, action):
+        frappe.throw(
+            "Le demandeur ne peut pas valider sa propre demande. La fiche doit être traitée par le rôle suivant du circuit.",
+            frappe.PermissionError,
+        )
     apply_workflow(doc, action)
 
     return {

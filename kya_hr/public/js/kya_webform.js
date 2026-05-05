@@ -378,27 +378,87 @@
     "permission-sortie-stagiaire": {
       signature_stagiaire: null,
       signature_chef: ["Chef Service", "HR Manager", "System Manager"],
-      signature_resp_stagiaires: ["HR Manager", "HR User", "System Manager"],
-      signature_dg: ["DG", "System Manager"]
+      signature_resp_stagiaires: ["Responsable des Stagiaires", "HR Manager", "HR User", "System Manager"],
+      signature_dg: ["DG", "Directeur Général", "System Manager"]
     },
     "permission-sortie-employe": {
       signature_employe: null,
       signature_chef: ["Chef Service", "HR Manager", "System Manager"],
       signature_rh: ["HR Manager", "HR User", "System Manager"],
-      signature_dga: ["DGA", "DG", "System Manager"]
+      signature_dga: ["DGA", "DG", "Directeur Général", "System Manager"]
     },
     "demande-achat": {
       signature_demandeur: null,
       signature_chef: ["Chef Service", "System Manager"],
-      signature_dga: ["DGA", "DG", "System Manager"],
-      signature_dg: ["DG", "System Manager"]
+      signature_dga: ["DGA", "DAAF", "System Manager"],
+      signature_dg: ["DG", "Directeur Général", "System Manager"]
     },
     "pv-sortie-materiel": {
       signature_demandeur: null,
       signature_chef: ["Chef Service", "System Manager"],
-      signature_audit: ["DGA", "System Manager"],
-      signature_dga: ["DGA", "DG", "System Manager"],
+      signature_audit: ["Auditeur Interne", "DGA", "System Manager"],
+      signature_dga: ["DGA", "DG", "Directeur Général", "System Manager"],
       signature_magasin: ["Stock Manager", "Stock User", "System Manager"]
+    },
+    "demande-conge": {
+      signature_employe_la: null,
+      signature_superieur_la: ["Chef Service", "HR Manager", "System Manager"],
+      signature_rh_la: ["HR Manager", "HR User", "Responsable RH", "System Manager"],
+      signature_dg_la: ["DG", "Directeur Général", "System Manager"]
+    },
+    "pv-entree-materiel": {
+      signature_livreur: null,
+      signature_magasin: ["Stock Manager", "Stock User", "Chargé des Stocks", "System Manager"],
+      signature_audit: ["Auditeur Interne", "DGA", "System Manager"]
+    },
+    "etat-recap": {
+      signature_caissiere: null,
+      signature_comptable: ["Accounts User", "Accounts Manager", "System Manager"],
+      signature_daaf: ["DAAF", "System Manager"]
+    },
+    "brouillard-caisse": {
+      signature_caissiere: null,
+      signature_comptable: ["Accounts User", "Accounts Manager", "System Manager"],
+      signature_dfc: ["DAAF", "System Manager"]
+    }
+  };
+
+  var SIGNATURE_STATES = {
+    "permission-sortie-stagiaire": {
+      signature_stagiaire: ["Brouillon", "En attente Chef", "En attente Maitre de Stage", "En attente Maître de Stage"],
+      signature_chef: ["En attente Chef", "En attente Maitre de Stage", "En attente Maître de Stage"],
+      signature_resp_stagiaires: ["En attente Resp. Stagiaires"],
+      signature_dg: ["En attente DG"]
+    },
+    "permission-sortie-employe": {
+      signature_employe: ["Brouillon", "En attente Chef"],
+      signature_chef: ["En attente Chef"],
+      signature_rh: ["En attente RH"],
+      signature_dga: ["En attente DGA", "En attente DG"]
+    },
+    "demande-achat": {
+      signature_demandeur: ["Brouillon", "En attente Chef", "En attente Chef Service"],
+      signature_chef: ["En attente Chef", "En attente Chef Service"],
+      signature_dga: ["En attente DGA", "En attente DAAF"],
+      signature_dg: ["En attente DG"]
+    },
+    "pv-sortie-materiel": {
+      signature_demandeur: ["Brouillon", "En attente Chef"],
+      signature_chef: ["En attente Chef"],
+      signature_audit: ["En attente Audit"],
+      signature_dga: ["En attente DGA", "En attente DG"],
+      signature_magasin: ["En attente Magasin"]
+    },
+    "demande-conge": {
+      signature_employe_la: ["Brouillon", "Open", "En attente Chef", "En attente Supérieur"],
+      signature_superieur_la: ["En attente Chef", "En attente Supérieur"],
+      signature_rh_la: ["En attente RH"],
+      signature_dg_la: ["En attente DG"]
+    },
+    "pv-entree-materiel": {
+      signature_livreur: ["Brouillon", "En attente Magasin"],
+      signature_magasin: ["En attente Magasin"],
+      signature_audit: ["En attente Audit"]
     }
   };
 
@@ -453,6 +513,43 @@
     return !owner || owner === frappe.session.user;
   }
 
+  function getWorkflowState() {
+    if (!window.frappe || !frappe.web_form_doc) return "Brouillon";
+    return frappe.web_form_doc.workflow_state || frappe.web_form_doc.statut || frappe.web_form_doc.status || "Brouillon";
+  }
+
+  function stateAllowsSignature(route, fieldname) {
+    var routeStates = SIGNATURE_STATES[route] || {};
+    var allowedStates = routeStates[fieldname];
+    if (!allowedStates || !allowedStates.length) return true;
+    var state = getWorkflowState();
+    return allowedStates.indexOf(state) !== -1;
+  }
+
+  function normalizeSignaturePads() {
+    document.querySelectorAll('.frappe-control[data-fieldtype="Signature"]').forEach(function (el) {
+      var canvas = el.querySelector("canvas");
+      if (canvas && !canvas.getAttribute("data-kya-sized")) {
+        var width = Math.max(280, Math.round((el.clientWidth || canvas.clientWidth || 320) - 18));
+        var height = 150;
+        canvas.style.width = "100%";
+        canvas.style.height = height + "px";
+        if (!canvas.toDataURL || canvas.toDataURL().length < 2000) {
+          canvas.width = width;
+          canvas.height = height;
+        }
+        canvas.setAttribute("data-kya-sized", "1");
+      }
+      var img = el.querySelector(".signature-display img");
+      if (img) {
+        img.style.width = "100%";
+        img.style.maxWidth = "100%";
+        img.style.maxHeight = "150px";
+        img.style.objectFit = "contain";
+      }
+    });
+  }
+
   function setupSignaturePermissions(route) {
     var sigMap = SIGNATURE_ROLES[route];
     if (!sigMap) return;
@@ -462,9 +559,9 @@
       var allowedRoles = sigMap[fieldname];
       var canSign = false;
       if (allowedRoles === null) {
-        canSign = isDocOwner();
+        canSign = isDocOwner() && stateAllowsSignature(route, fieldname);
       } else {
-        canSign = userHasAnyRole(allowedRoles);
+        canSign = userHasAnyRole(allowedRoles) && stateAllowsSignature(route, fieldname);
       }
       if (canSign) {
         el.classList.remove("read-only");
@@ -749,6 +846,7 @@
 
     setupWorkflowActions(wrapper);
     setTimeout(function() {
+      normalizeSignaturePads();
       setupSignaturePermissions(route);
       setupFieldEditPermissions(route);
     }, 500);
@@ -911,11 +1009,11 @@
     var route = getRoute();
     if (!FORM_SECTIONS[route] && !FORM_META[route]) return;
     var formReady = document.querySelector(".frappe-control") || document.querySelector("[data-fieldname]");
-    if (formReady) { restructureForm(); setupEmployeeAutoFill(); return; }
+    if (formReady) { restructureForm(); setupEmployeeAutoFill(); setTimeout(normalizeSignaturePads, 700); return; }
     var obs = new MutationObserver(function (m, observer) {
       if (document.querySelector(".frappe-control") || document.querySelector("[data-fieldname]")) {
         observer.disconnect();
-        setTimeout(function () { restructureForm(); setupEmployeeAutoFill(); }, 300);
+          setTimeout(function () { restructureForm(); setupEmployeeAutoFill(); normalizeSignaturePads(); }, 300);
       }
     });
     obs.observe(document.body, { childList: true, subtree: true });
@@ -923,7 +1021,7 @@
     setTimeout(function () { obs.disconnect(); if (!document.querySelector(".kya-form-section")) { restructureForm(); setupEmployeeAutoFill(); } }, 5000);
   }
 
-  window.kyaRestructureForm = function () { restructureForm(); setupEmployeeAutoFill(); };
+  window.kyaRestructureForm = function () { restructureForm(); setupEmployeeAutoFill(); normalizeSignaturePads(); };
   if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", function() { waitForForm(); setupAdminPreviewButton(); }); }
   else { waitForForm(); setupAdminPreviewButton(); }
   if (window.frappe && window.frappe.ready) { frappe.ready(function () { setTimeout(function() { waitForForm(); setupAdminPreviewButton(); }, 300); }); }
