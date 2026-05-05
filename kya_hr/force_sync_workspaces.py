@@ -94,7 +94,7 @@ KYA_AUTO_SIDEBARS = [
         "app": "kya_hr",
         "workspace": "Espace Direction",
         "items": [
-            {"label": "Tableau de Bord Global", "url": "/app/dashboard-view", "link_type": "URL", "icon": "bar-chart"},
+            {"label": "Tableau de Bord Global", "url": "/kya-tableau-de-bord", "link_type": "URL", "icon": "chart-column"},
             {"label": "Demandes d'Achat", "link_to": "Demande Achat KYA", "link_type": "DocType", "icon": "shopping-cart"},
             {"label": "Permissions Employé", "link_to": "Permission Sortie Employe", "link_type": "DocType", "icon": "log-out"},
             {"label": "Contrats KYA", "link_to": "Contrat KYA", "link_type": "DocType", "icon": "file"},
@@ -110,6 +110,20 @@ KYA_AUTO_SIDEBARS = [
             {"label": "Sorties Véhicule", "link_to": "Sortie Vehicule", "link_type": "DocType", "icon": "log-out"},
             {"label": "Véhicules", "link_to": "Vehicle", "link_type": "DocType", "icon": "truck"},
             {"label": "Documents Véhicule", "link_to": "Document Vehicule", "link_type": "DocType", "icon": "alert-triangle"},
+        ],
+    },
+    {
+        "title": "Inventaire & Sorties Matériel",
+        "icon": "boxes",
+        "module": "KYA HR",
+        "app": "kya_hr",
+        "workspace": "Inventaire Sorties Materiel",
+        "items": [
+            {"label": "Tableau de Bord Inventaires", "url": "/inventaire-dashboard", "link_type": "URL", "icon": "chart-column"},
+            {"label": "Inventaires", "link_to": "Inventaire KYA", "link_type": "DocType", "icon": "clipboard-list"},
+            {"label": "PV Entrée Matériel", "link_to": "PV Entree Materiel", "link_type": "DocType", "icon": "download"},
+            {"label": "PV Sortie Matériel", "link_to": "PV Sortie Materiel", "link_type": "DocType", "icon": "upload"},
+            {"label": "Mouvements Stock", "link_to": "Stock Entry", "link_type": "DocType", "icon": "repeat-2"},
         ],
     },
 ]
@@ -159,7 +173,7 @@ def _ensure_sidebar_home_link(sidebar_title, workspace_name):
     print(f"  [SIDEBAR LINK] {sidebar_title} -> Workspace:{workspace_name}")
 
 
-def _link_desktop_icon_to_sidebar(label, sidebar_candidates):
+def _link_desktop_icon_to_sidebar(label, sidebar_candidates, icon=None):
     """Desktop icons must point to Workspace Sidebar for route resolution in Frappe desk."""
     icon_name = frappe.db.exists("Desktop Icon", {"label": label})
     sidebar_name, sidebar_title = _resolve_existing_sidebar(sidebar_candidates)
@@ -171,7 +185,7 @@ def _link_desktop_icon_to_sidebar(label, sidebar_candidates):
         icon_doc = frappe.new_doc("Desktop Icon")
         icon_doc.label = label
         icon_doc.icon_type = "Link"
-        icon_doc.icon = "folder-normal"
+        icon_doc.icon = icon or "folder"
         icon_doc.standard = 1
         icon_doc.hidden = 0
         icon_doc.link_type = "Workspace Sidebar"
@@ -180,12 +194,15 @@ def _link_desktop_icon_to_sidebar(label, sidebar_candidates):
         print(f"  [ICON CREATED] {label} -> Sidebar:{sidebar_title}")
         return
 
-    frappe.db.set_value("Desktop Icon", icon_name, {
+    values = {
         "link_type": "Workspace Sidebar",
         "link": "",
         "link_to": sidebar_name,
         "hidden": 0,
-    }, update_modified=False)
+    }
+    if icon:
+        values["icon"] = icon
+    frappe.db.set_value("Desktop Icon", icon_name, values, update_modified=False)
     print(f"  [ICON LINK] {label} -> Sidebar:{sidebar_title}")
 
 
@@ -284,7 +301,7 @@ def _ensure_gestion_equipe_content():
         "Dashboard Equipe",
         "URL",
         url="/kya-dashboard-equipe",
-        icon="bar-chart-2",
+        icon="chart-column",
         color="#4CAF50",
     )
 
@@ -294,7 +311,7 @@ def _ensure_gestion_equipe_content():
     frappe.db.set_value("Workspace", "Gestion Équipe", "content", json.dumps(content_blocks), update_modified=False)
 
     frappe.db.delete("Workspace Sidebar Item", {"parent": "Gestion Équipe"})
-    _ensure_sidebar_item("Gestion Équipe", "Dashboard Equipe", "URL", url="/kya-dashboard-equipe", icon="bar-chart-2")
+    _ensure_sidebar_item("Gestion Équipe", "Dashboard Equipe", "URL", url="/kya-dashboard-equipe", icon="chart-column")
     print("  [MINIMAL] Gestion Équipe content + sidebar (Dashboard only)")
 
 
@@ -436,7 +453,7 @@ def execute():
         sidebar = frappe.new_doc("Workspace Sidebar")
         sidebar.title = "Espace Employes"
         sidebar.module = "KYA HR"
-        sidebar.header_icon = "employee"
+        sidebar.header_icon = "user-round"
         sidebar.app = "kya_hr"
         sidebar.standard = 0
         sidebar.append("items", {
@@ -444,7 +461,7 @@ def execute():
             "type": "Link",
             "link_to": espace_employes_name,
             "link_type": "Workspace",
-            "icon": "employee"
+            "icon": "user-round"
         })
         sidebar.append("items", {
             "label": "Permissions de Sortie",
@@ -492,12 +509,14 @@ def execute():
         _ensure_sidebar_item("KYA Services", "Réponses Formulaires", "DocType", link_to="KYA Form Response", icon="list")
 
     # 9. Desktop icons must target Workspace Sidebar to avoid route=null popup.
-    _link_desktop_icon_to_sidebar("KYA Services", ["KYA Services"])
-    _link_desktop_icon_to_sidebar("Gestion Équipe", ["Gestion Équipe", "Gestion Equipe"])
-    _link_desktop_icon_to_sidebar("Gestion Equipe", ["Gestion Équipe", "Gestion Equipe"])
-    _link_desktop_icon_to_sidebar("Espace Employes", ["Espace Employes", "Espace Employés"])
-    _link_desktop_icon_to_sidebar("Espace Employés", ["Espace Employes", "Espace Employés"])
-    _link_desktop_icon_to_sidebar("Espace Stagiaires", ["Espace Stagiaires"])
+    _link_desktop_icon_to_sidebar("KYA Services", ["KYA Services"], "clipboard-list")
+    _link_desktop_icon_to_sidebar("Gestion Équipe", ["Gestion Équipe", "Gestion Equipe"], "users")
+    _link_desktop_icon_to_sidebar("Gestion Equipe", ["Gestion Équipe", "Gestion Equipe"], "users")
+    _link_desktop_icon_to_sidebar("Direction Générale", ["Direction Générale", "Espace Direction"], "briefcase")
+    _link_desktop_icon_to_sidebar("Espace Employes", ["Espace Employes", "Espace Employés"], "user-round")
+    _link_desktop_icon_to_sidebar("Espace Employés", ["Espace Employes", "Espace Employés"], "user-round")
+    _link_desktop_icon_to_sidebar("Espace Stagiaires", ["Espace Stagiaires"], "graduation-cap")
+    _link_desktop_icon_to_sidebar("Inventaire & Sorties Matériel", ["Inventaire & Sorties Matériel", "Inventaire Sorties Materiel"], "boxes")
 
     # 9b. Auto-create Workspace Sidebar for Achats/Stock/RH/Compta/Direction/Logistique
     for cfg in KYA_AUTO_SIDEBARS:
@@ -539,7 +558,7 @@ def execute():
             sidebar_name = frappe.db.exists("Workspace Sidebar", {"title": title})
             if sidebar_name:
                 frappe.db.set_value("Workspace Sidebar", sidebar_name, "header_icon", cfg["icon"], update_modified=False)
-        _link_desktop_icon_to_sidebar(title, [title])
+        _link_desktop_icon_to_sidebar(title, [title], cfg["icon"])
 
     # 10. Fix setup_complete default value if needed
     try:

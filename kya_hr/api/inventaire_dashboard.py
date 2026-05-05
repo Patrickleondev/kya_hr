@@ -65,7 +65,7 @@ def get_dashboard_stats(warehouse=None, period="30"):
         WHERE inv.date_inventaire >= %(date_from)s {wh_filter}
         AND inv.docstatus < 2
         GROUP BY i.item_code
-        ORDER BY ABS(valeur_ecart) DESC
+        ORDER BY ABS(COALESCE(SUM(i.amount_difference), 0)) DESC
         LIMIT 10
     """, args, as_dict=True)
 
@@ -98,18 +98,24 @@ def get_dashboard_stats(warehouse=None, period="30"):
         limit=100,
     )
 
+    mouvements = get_stock_movements(warehouse=warehouse, period=period)
+
     return {
         "kpis": {
             "total": total_inv,
             "pending": pending,
             "approved": approved,
             "valeur_ecart": flt(valeur_ecart),
+            "entrees_qty": mouvements["totals"]["entrees_qty"],
+            "sorties_qty": mouvements["totals"]["sorties_qty"],
+            "mouvements": mouvements["totals"]["mouvements"],
         },
         "evolution": evolution,
         "top_ecarts": top_ecarts,
         "recents": recents,
         "par_statut": par_statut,
         "warehouses": warehouses,
+        "mouvements_stock": mouvements["rows"],
         "currency": "XOF",
     }
 
@@ -117,6 +123,9 @@ def get_dashboard_stats(warehouse=None, period="30"):
 @frappe.whitelist()
 def create_inventaire(objet, date_inventaire=None, warehouse=None, type_inventaire="Partiel"):
     """Création rapide d'un inventaire depuis le dashboard."""
+    if not warehouse:
+        frappe.throw(_("Veuillez choisir un magasin pour créer un inventaire depuis le dashboard."))
+
     user = frappe.session.user
     emp_name = frappe.db.get_value("Employee", {"user_id": user}, "employee_name") or user
 
@@ -128,8 +137,76 @@ def create_inventaire(objet, date_inventaire=None, warehouse=None, type_inventai
     doc.responsable_nom = emp_name
     doc.responsable_date = today()
     doc.statut = "Brouillon"
+
+    for row in _get_stock_rows(warehouse):
+        doc.append("items", {
+            "item_code": row.item_code,
+            "designation": row.designation,
+            "uom": row.uom,
+            "warehouse": row.warehouse,
+            "qte_theorique": row.qte_theorique,
+            "qte_comptee": row.qte_theorique,
+            "valuation_rate": row.valuation_rate,
+        })
+
+    if not doc.items:
+        frappe.throw(_("Aucun article avec stock positif trouvé dans le magasin {0}.").format(warehouse))
+
     doc.insert(ignore_permissions=False)
     return {"name": doc.name, "url": f"/app/inventaire-kya/{doc.name}"}
+
+
+def _get_stock_rows(warehouse):
+    return frappe.db.sql(
+        """
+        SELECT b.item_code, b.warehouse, b.actual_qty AS qte_theorique, b.valuation_rate,
+               i.item_name AS designation, i.stock_uom AS uom
+        FROM `tabBin` b
+        INNER JOIN `tabItem` i ON i.name = b.item_code
+        WHERE b.warehouse = %s AND b.actual_qty > 0 AND i.disabled = 0
+        ORDER BY i.item_name
+        """,
+        (warehouse,),
+        as_dict=True,
+    )
+
+
+@frappe.whitelist()
+def get_stock_movements(warehouse=None, period="30"):
+    """Entrées/sorties de stock soumises, utilisées par le dashboard inventaire."""
+    period = int(period or 30)
+    date_from = add_days(today(), -period)
+    args = {"date_from": date_from}
+
+    wh_condition = ""
+    if warehouse:
+        wh_condition = "AND COALESCE(d.t_warehouse, d.s_warehouse) = %(warehouse)s"
+        args["warehouse"] = warehouse
+
+    rows = frappe.db.sql(f"""
+        SELECT se.name, se.posting_date, se.stock_entry_type, se.purpose,
+               se.pv_entree_materiel, se.pv_sortie_materiel,
+               d.item_code, d.item_name, d.qty,
+               COALESCE(d.t_warehouse, d.s_warehouse) AS warehouse,
+               COALESCE(d.amount, d.basic_amount, 0) AS amount
+        FROM `tabStock Entry` se
+        INNER JOIN `tabStock Entry Detail` d ON d.parent = se.name
+        WHERE se.docstatus = 1
+          AND se.posting_date >= %(date_from)s
+          AND se.purpose IN ('Material Receipt', 'Material Issue')
+          {wh_condition}
+        ORDER BY se.posting_date DESC, se.modified DESC
+        LIMIT 30
+    """, args, as_dict=True)
+
+    totals = {"entrees_qty": 0, "sorties_qty": 0, "mouvements": len(rows)}
+    for row in rows:
+        if row.purpose == "Material Receipt":
+            totals["entrees_qty"] += flt(row.qty)
+        elif row.purpose == "Material Issue":
+            totals["sorties_qty"] += flt(row.qty)
+
+    return {"totals": totals, "rows": rows}
 
 
 @frappe.whitelist()

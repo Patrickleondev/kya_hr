@@ -61,7 +61,7 @@ def _get_employee_email(doc, config):
         return None
     return frappe.db.get_value(
         "Employee", emp_id,
-        ["company_email", "personal_email", "employee_name"],
+        ["company_email", "personal_email", "user_id", "employee_name"],
         as_dict=True,
     )
 
@@ -162,7 +162,7 @@ def send_submission_recap(doc, method=None):
     if not emp_info:
         return
 
-    email = emp_info.get("company_email") or emp_info.get("personal_email")
+    email = emp_info.get("company_email") or emp_info.get("personal_email") or emp_info.get("user_id")
     if not email:
         return
 
@@ -240,7 +240,7 @@ def send_workflow_update(doc, method=None):
     if not emp_info:
         return
 
-    email = emp_info.get("company_email") or emp_info.get("personal_email")
+    email = emp_info.get("company_email") or emp_info.get("personal_email") or emp_info.get("user_id")
     if not email:
         return
 

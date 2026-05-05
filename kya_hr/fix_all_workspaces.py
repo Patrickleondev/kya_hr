@@ -141,7 +141,7 @@ def fix_kya_services_content():
     )
     _upsert_workspace_shortcut(
         "KYA Services", "📈 Statistiques",
-        "URL", "/kya-stats", "#1565c0", "bar-chart-2"
+        "URL", "/kya-stats", "#1565c0", "chart-column"
     )
     print("  [KYA Services] Content JSON rebuilt ✓")
 
@@ -720,7 +720,7 @@ def fix_gestion_equipe_dashboard():
     # ── Shortcut dans workspace Gestion Équipe ────────────────────────────────
     _upsert_workspace_shortcut(
         "Gestion Équipe", "📊 Dashboard Équipe",
-        "URL", "/app/dashboard/Gestion%20%C3%89quipe", "#673ab7", "bar-chart-2"
+        "URL", "/app/dashboard/Gestion%20%C3%89quipe", "#673ab7", "chart-column"
     )
     print("  [Dashboard] Shortcuts Gestion Équipe + KYA Services mis à jour ✓")
 
@@ -799,7 +799,7 @@ def fix_dashboard_shortcuts_to_stats_page():
     # Shortcut dans Gestion Équipe → dashboard custom KYA
     _upsert_workspace_shortcut(
         "Gestion Équipe", "📊 Dashboard Équipe",
-        "URL", "/kya-dashboard-equipe", "#673ab7", "bar-chart-2"
+        "URL", "/kya-dashboard-equipe", "#673ab7", "chart-column"
     )
 
     print("  [Dashboard Shortcuts] /kya-stats et /app/dashboard mis à jour ✓")
@@ -919,7 +919,7 @@ def fix_tableau_de_bord_shortcut():
     """Fix 'Tableau de Bord' shortcut in Gestion Equipe to point to /kya-dashboard-equipe."""
     _upsert_workspace_shortcut(
         "Gestion \u00c9quipe", "Tableau de Bord",
-        "URL", "/kya-dashboard-equipe", "#1a237e", "bar-chart-2"
+        "URL", "/kya-dashboard-equipe", "#1a237e", "chart-column"
     )
     # Remove the '📊 Dashboard Equipe' duplicate if it still exists
     frappe.db.sql("""

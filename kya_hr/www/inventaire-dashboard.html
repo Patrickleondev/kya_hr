@@ -199,6 +199,16 @@ body { background: var(--kya-bg) !important; }
   </div>
 </div>
 
+<div class="kya-panel" style="margin-bottom: 1.5rem;">
+  <div class="kya-panel-header"><h3><i class="bi bi-arrow-left-right"></i> Entrées / Sorties Stock Synchronisées</h3></div>
+  <div class="kya-panel-body" style="padding: 0;">
+    <table class="kya-table">
+      <thead><tr><th>Date</th><th>Type</th><th>Référence</th><th>Article</th><th>Magasin</th><th class="text-end">Qté</th><th class="text-end">Valeur</th></tr></thead>
+      <tbody id="tbl-mouvements"></tbody>
+    </table>
+  </div>
+</div>
+
 <!-- Modal créer -->
 <div class="kya-modal-bg" id="modal-create">
   <div class="kya-modal">
@@ -207,8 +217,8 @@ body { background: var(--kya-bg) !important; }
     <input id="m-objet" placeholder="ex: Inventaire mensuel magasin Lomé">
     <label>Date</label>
     <input id="m-date" type="date">
-    <label>Magasin</label>
-    <select id="m-warehouse"><option value="">Tous</option></select>
+    <label>Magasin *</label>
+    <select id="m-warehouse"><option value="">Choisir un magasin</option></select>
     <label>Type</label>
     <select id="m-type">
       <option value="Partiel">Partiel</option>
@@ -239,7 +249,29 @@ function renderKPIs(k) {
     <div class="kya-kpi"><div class="kya-kpi-icon icon-amber"><i class="bi bi-hourglass-split"></i></div><div><div class="kya-kpi-value">${k.pending||0}</div><div class="kya-kpi-label">En attente</div></div></div>
     <div class="kya-kpi"><div class="kya-kpi-icon icon-green"><i class="bi bi-check-circle"></i></div><div><div class="kya-kpi-value">${k.approved||0}</div><div class="kya-kpi-label">Approuvés</div></div></div>
     <div class="kya-kpi"><div class="kya-kpi-icon icon-red"><i class="bi bi-cash-stack"></i></div><div><div class="kya-kpi-value" style="font-size:1.3rem">${fmtXOF(k.valeur_ecart)}</div><div class="kya-kpi-label">Valeur écart total</div></div></div>
+    <div class="kya-kpi"><div class="kya-kpi-icon icon-green"><i class="bi bi-box-arrow-in-down"></i></div><div><div class="kya-kpi-value">${k.entrees_qty||0}</div><div class="kya-kpi-label">Entrées stock</div></div></div>
+    <div class="kya-kpi"><div class="kya-kpi-icon icon-amber"><i class="bi bi-box-arrow-up"></i></div><div><div class="kya-kpi-value">${k.sorties_qty||0}</div><div class="kya-kpi-label">Sorties stock</div></div></div>
   `;
+}
+
+function renderMouvements(data) {
+  const tbody = document.getElementById('tbl-mouvements');
+  if (!data.length) { tbody.innerHTML = '<tr><td colspan="7" class="kya-empty">Aucun mouvement de stock sur la période.</td></tr>'; return; }
+  tbody.innerHTML = data.map(r => {
+    const isIn = r.purpose === 'Material Receipt';
+    const ref = r.pv_entree_materiel || r.pv_sortie_materiel || r.name;
+    const refRoute = r.pv_entree_materiel ? `/app/pv-entree-materiel/${r.pv_entree_materiel}` : (r.pv_sortie_materiel ? `/app/pv-sortie-materiel/${r.pv_sortie_materiel}` : `/app/stock-entry/${r.name}`);
+    return `
+      <tr>
+        <td>${fmtDate(r.posting_date)}</td>
+        <td><span class="badge-status ${isIn ? 'badge-approuve' : 'badge-attente'}">${isIn ? 'Entrée' : 'Sortie'}</span></td>
+        <td><a href="${refRoute}">${ref}</a></td>
+        <td>${r.item_name || r.item_code || '—'}</td>
+        <td>${r.warehouse || '—'}</td>
+        <td class="text-end">${r.qty || 0}</td>
+        <td class="text-end">${fmtXOF(r.amount || 0)}</td>
+      </tr>`;
+  }).join('');
 }
 
 function renderEvolution(data) {
@@ -336,6 +368,7 @@ function loadAll() {
       renderStatut(d.par_statut);
       renderEcarts(d.top_ecarts);
       renderRecents(d.recents);
+      renderMouvements(d.mouvements_stock || []);
       populateWarehouses(d.warehouses);
     }
   });
@@ -355,6 +388,7 @@ function closeCreateModal() { document.getElementById('modal-create').classList.
 function submitCreate() {
   const objet = document.getElementById('m-objet').value.trim();
   if (!objet) { alert('Veuillez saisir un objet.'); return; }
+  if (!document.getElementById('m-warehouse').value) { alert('Veuillez choisir un magasin.'); return; }
   frappe.call({
     method: 'kya_hr.api.inventaire_dashboard.create_inventaire',
     args: {

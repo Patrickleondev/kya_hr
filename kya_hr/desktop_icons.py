@@ -4,15 +4,15 @@ import frappe
 from frappe.desk.doctype.desktop_icon.desktop_icon import clear_desktop_icons_cache
 
 WORKSPACE_ICONS = [
-    {"label": "Espace Direction", "link_to": "Espace Direction", "icon": "building", "idx": 10},
+    {"label": "Direction Générale", "link_to": "Espace Direction", "icon": "briefcase", "idx": 10},
     {"label": "Espace RH", "link_to": "Espace RH", "icon": "users", "idx": 11},
-    {"label": "Espace Achats", "link_to": "Espace Achats", "icon": "basket", "idx": 12},
+    {"label": "Espace Achats", "link_to": "Espace Achats", "icon": "shopping-cart", "idx": 12},
     {"label": "Espace Stock", "link_to": "Espace Stock", "icon": "package", "idx": 13},
-    {"label": "Espace Comptabilite", "link_to": "Espace Comptabilite", "icon": "currency-exchange", "idx": 14},
-    {"label": "Logistique", "link_to": "Logistique", "icon": "car", "idx": 15},
-    {"label": "Espace Employes", "link_to": "Espace Employes", "icon": "person-vcard", "idx": 16},
+    {"label": "Espace Comptabilité", "link_to": "Espace Comptabilité", "icon": "wallet", "idx": 14},
+    {"label": "Logistique", "link_to": "Logistique", "icon": "truck", "idx": 15},
+    {"label": "Espace Employés", "link_to": "Espace Employes", "icon": "user-round", "idx": 16},
     {"label": "Espace Stagiaires", "link_to": "Espace Stagiaires", "icon": "graduation-cap", "idx": 17},
-    {"label": "Inventaire Sorties Materiel", "link_to": "Inventaire Sorties Materiel", "icon": "package", "idx": 18},
+    {"label": "Inventaire & Sorties Matériel", "link_to": "Inventaire Sorties Materiel", "icon": "boxes", "idx": 18},
     {"label": "KYA Services", "link_to": "KYA Services", "icon": "clipboard-list", "idx": 19},
 ]
 
@@ -57,6 +57,27 @@ def _sync_workspace_icon(config: dict) -> bool:
     if not frappe.db.exists("Workspace", config["link_to"]):
         return False
 
+    workspace_title = frappe.db.get_value("Workspace", config["link_to"], "title")
+    workspace_label = frappe.db.get_value("Workspace", config["link_to"], "label")
+
+    sidebar_name = frappe.db.get_value(
+        "Workspace Sidebar",
+        {"title": config["label"]},
+        "name",
+    ) or frappe.db.get_value(
+        "Workspace Sidebar",
+        {"title": config["link_to"]},
+        "name",
+    ) or frappe.db.get_value(
+        "Workspace Sidebar",
+        {"title": workspace_title},
+        "name",
+    ) or frappe.db.get_value(
+        "Workspace Sidebar",
+        {"title": workspace_label},
+        "name",
+    ) or config["link_to"]
+
     icon = _get_icon_doc(config["label"])
     previous = {
         "label": icon.get("label"),
@@ -73,7 +94,7 @@ def _sync_workspace_icon(config: dict) -> bool:
     icon.label = config["label"]
     icon.link_type = "Workspace Sidebar"
     icon.icon_type = "Link"
-    icon.link_to = config["link_to"]
+    icon.link_to = sidebar_name
     icon.icon = config["icon"]
     icon.idx = config["idx"]
     icon.hidden = 0

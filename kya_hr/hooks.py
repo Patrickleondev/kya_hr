@@ -111,6 +111,7 @@ after_migrate = [
     "kya_hr.setup_leave_types.execute",
     "kya_hr.force_sync_workspaces.execute",
     "kya_hr.force_publish_webforms.execute",
+    "kya_hr.notification_fixes.execute",
     "kya_hr.setup_branding.execute",
     "kya_hr.fix_all_workspaces.execute",
     "kya_hr.setup_fleet.run",
@@ -119,6 +120,7 @@ after_migrate = [
     "kya_hr.setup_pv_extensions.run",
     "kya_hr.setup_inventaire_dashboard.run",
     "kya_hr.desktop_icons.execute",
+    "kya_hr.coherence_fixes.execute",
     "kya_hr.ensure_visibility.execute",
 ]
 
@@ -128,6 +130,7 @@ after_migrate = [
 # plus block_module / for_user / parent_page hiding rules).
 after_install = [
     "kya_hr.desktop_icons.execute",
+    "kya_hr.coherence_fixes.execute",
     "kya_hr.ensure_visibility.execute",
 ]
 
