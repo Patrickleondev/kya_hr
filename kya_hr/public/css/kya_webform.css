@@ -261,16 +261,18 @@ body {
 }
 .kya-section-body.kya-sig-grid .frappe-control canvas,
 .kya-section-body.kya-sig-grid .frappe-control .signature-pad {
-  min-height: 130px !important;
-  height: 130px !important;
-  max-height: 130px !important;
+  min-height: 150px !important;
+  height: 150px !important;
+  max-height: none !important;
   width: 100% !important;
+  display: block !important;
 }
 .kya-section-body.kya-sig-grid .frappe-control .signature-field .signature-display img {
-  min-height: 110px;
-  max-height: 130px;
-  width: auto;
-  object-fit: contain;
+  min-height: 120px;
+  max-height: 150px;
+  width: 100% !important;
+  max-width: 100% !important;
+  object-fit: contain !important;
 }
 .kya-section-body.kya-sig-grid .frappe-control.read-only .signature-pad,
 .kya-section-body.kya-sig-grid .frappe-control[data-read-only] canvas {
@@ -519,27 +521,32 @@ body {
 /* Keep signed image size stable after save/refresh */
 .web-form-container .frappe-control[data-fieldtype="Signature"] .signature-display,
 .kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-display {
-  min-height: 130px !important;
+  min-height: 150px !important;
+  width: 100% !important;
 }
 .web-form-container .frappe-control[data-fieldtype="Signature"] .signature-field,
 .kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-field {
-  min-height: 130px !important;
-  height: 130px !important;
-  max-height: 130px !important;
-  overflow: hidden !important;
+  min-height: 150px !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  width: 100% !important;
 }
 .web-form-container .frappe-control[data-fieldtype="Signature"] .signature-pad,
 .kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-pad,
 .web-form-container .frappe-control[data-fieldtype="Signature"] canvas,
 .kya-form-section .frappe-control[data-fieldtype="Signature"] canvas {
-  min-height: 130px !important;
-  height: 130px !important;
-  max-height: 130px !important;
+  min-height: 150px !important;
+  height: 150px !important;
+  max-height: none !important;
+  width: 100% !important;
+  display: block !important;
 }
 .web-form-container .frappe-control[data-fieldtype="Signature"] .signature-display img,
 .kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-display img {
-  max-height: 130px !important;
-  width: auto !important;
+  max-height: 150px !important;
+  width: 100% !important;
+  max-width: 100% !important;
   object-fit: contain !important;
 }
 .web-form-container .frappe-control[data-fieldtype="Link"] .link-btn,
@@ -992,9 +999,9 @@ footer .web-footer-menu { display: none !important; }
   .kya-section-body.kya-sig-grid .frappe-control { min-height: 140px; }
   .kya-section-body.kya-sig-grid .frappe-control canvas,
   .kya-section-body.kya-sig-grid .frappe-control .signature-pad {
-    min-height: 110px !important;
-    height: 110px !important;
-    max-height: 110px !important;
+    min-height: 140px !important;
+    height: 140px !important;
+    max-height: 140px !important;
   }
 }
 @media (max-width: 520px) {
@@ -1005,9 +1012,9 @@ footer .web-footer-menu { display: none !important; }
   }
   .kya-section-body.kya-sig-grid .frappe-control canvas,
   .kya-section-body.kya-sig-grid .frappe-control .signature-pad {
-    min-height: 100px !important;
-    height: 100px !important;
-    max-height: 100px !important;
+    min-height: 130px !important;
+    height: 130px !important;
+    max-height: 130px !important;
   }
   .kya-section-body.kya-sig-grid .frappe-control .control-label {
     font-size: 9px !important;
@@ -1017,7 +1024,7 @@ footer .web-footer-menu { display: none !important; }
   .web-form-container .signature-field .signature-pad,
   .kya-form-section .signature-field .signature-pad,
   .kya-form-section .frappe-control[data-fieldtype="Signature"] canvas {
-    min-height: 90px;
+    min-height: 130px;
   }
   /* Section padding mobile compact */
   .kya-section-body { padding: 12px 10px; }
@@ -1219,9 +1226,9 @@ footer .web-footer-menu { display: none !important; }
   display: block !important;
   width: 100% !important;
   max-width: 100% !important;
-  min-height: 130px !important;
-  height: 130px !important;
-  max-height: 130px !important;
+  min-height: 150px !important;
+  height: 150px !important;
+  max-height: 150px !important;
   aspect-ratio: 16 / 5;
   background: #ffffff;
   border: 1px dashed var(--kya-border, #d0d7de);
@@ -1241,9 +1248,9 @@ footer .web-footer-menu { display: none !important; }
 .kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-display,
 .kya-section-body.kya-sig-grid .frappe-control .signature-display {
   width: 100% !important;
-  height: 130px !important;
-  min-height: 130px !important;
-  max-height: 130px !important;
+  height: 150px !important;
+  min-height: 150px !important;
+  max-height: 150px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -1301,9 +1308,9 @@ footer .web-footer-menu { display: none !important; }
 .kya-section-body.kya-sig-grid .frappe-control[data-fieldtype="Signature"] .signature-pad {
   display: block !important;
   width: 100% !important;
-  min-height: 130px !important;
-  height: 130px !important;
-  max-height: 130px !important;
+  min-height: 150px !important;
+  height: 150px !important;
+  max-height: 150px !important;
   position: relative;
 }
 
@@ -1315,9 +1322,9 @@ footer .web-footer-menu { display: none !important; }
   align-items: center !important;
   justify-content: center !important;
   width: 100% !important;
-  min-height: 130px !important;
-  height: 130px !important;
-  max-height: 130px !important;
+  min-height: 150px !important;
+  height: 150px !important;
+  max-height: 150px !important;
   background: #fff;
   border: 1px solid var(--kya-border, #d0d7de);
   border-radius: 6px;
@@ -1331,7 +1338,7 @@ footer .web-footer-menu { display: none !important; }
   width: auto !important;
   max-width: 100% !important;
   height: auto !important;
-  max-height: 110px !important;
+  max-height: 130px !important;
   object-fit: contain !important;
   object-position: center !important;
   image-rendering: -webkit-optimize-contrast;
@@ -1351,19 +1358,19 @@ footer .web-footer-menu { display: none !important; }
   .web-form-container .frappe-control[data-fieldtype="Signature"] canvas,
   .kya-form-section .frappe-control[data-fieldtype="Signature"] canvas,
   .kya-section-body.kya-sig-grid .frappe-control[data-fieldtype="Signature"] canvas {
-    min-height: 110px !important;
-    height: 110px !important;
-    max-height: 110px !important;
+    min-height: 130px !important;
+    height: 130px !important;
+    max-height: 130px !important;
     aspect-ratio: 12 / 5;
   }
   .web-form-container .frappe-control[data-fieldtype="Signature"] .signature-display,
   .kya-form-section .frappe-control[data-fieldtype="Signature"] .signature-display {
-    min-height: 110px !important;
-    height: 110px !important;
-    max-height: 110px !important;
+    min-height: 130px !important;
+    height: 130px !important;
+    max-height: 130px !important;
   }
   .web-form-container .frappe-control[data-fieldtype="Signature"] .signature-display img {
-    max-height: 92px !important;
+    max-height: 112px !important;
   }
 }
 

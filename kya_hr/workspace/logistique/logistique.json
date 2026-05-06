@@ -184,7 +184,7 @@
    "color": "Purple",
    "doc_view": "",
    "format": "",
-   "icon": "dashboard",
+    "icon": "chart-column",
    "label": "📊 Dashboard Flotte (DG/DGA)",
    "link_to": "Tableau de Bord Flotte",
    "stats_filter": "{}",

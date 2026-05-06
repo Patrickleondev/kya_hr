@@ -61,7 +61,7 @@ def _get_employee_email(doc, config):
         return None
     return frappe.db.get_value(
         "Employee", emp_id,
-        ["company_email", "personal_email", "employee_name"],
+        ["company_email", "personal_email", "user_id", "employee_name"],
         as_dict=True,
     )
 
@@ -162,7 +162,7 @@ def send_submission_recap(doc, method=None):
     if not emp_info:
         return
 
-    email = emp_info.get("company_email") or emp_info.get("personal_email")
+    email = emp_info.get("company_email") or emp_info.get("personal_email") or emp_info.get("user_id")
     if not email:
         return
 
@@ -200,11 +200,12 @@ def send_submission_recap(doc, method=None):
 
 
 def send_workflow_update(doc, method=None):
-    """Envoie un email à l'employé quand le workflow change.
+    """Publie le changement workflow sans email intermédiaire au demandeur.
 
     Déclenché par doc_events → on_update.
-    Le document reste le même, seul le statut change.
-    Inclut le PDF mis à jour (avec signatures progressives).
+    Le demandeur reçoit la confirmation à la soumission et les états finaux
+    via les Notifications Frappe ciblées. Les étapes intermédiaires sont
+    réservées aux approbateurs pour éviter les mails peu pertinents.
     """
     dt = doc.doctype
     config = DOCTYPE_CONFIG.get(dt)
@@ -236,42 +237,9 @@ def send_workflow_update(doc, method=None):
         # on ne peut pas déterminer le changement → on laisse passer prudemment
         pass
 
-    emp_info = _get_employee_email(doc, config)
-    if not emp_info:
-        return
-
-    email = emp_info.get("company_email") or emp_info.get("personal_email")
-    if not email:
-        return
-
-    emp_name = emp_info.get("employee_name") or "Employé"
-    body = _build_recap_body(doc, config, emp_name, is_update=True)
-
-    # PDF avec signatures mises à jour
-    attachments = []
-    try:
-        pdf_content = frappe.get_print(dt, doc.name, as_pdf=True)
-        if pdf_content:
-            filename = "{}-{}.pdf".format(
-                config["route"],
-                doc.name.replace("/", "-"),
-            )
-            attachments.append({"fname": filename, "fcontent": pdf_content})
-    except Exception:
-        pass
-
-    frappe.sendmail(
-        recipients=[email],
-        subject="[KYA] {} {} — {}".format(
-            config["icon"], config["label"],
-            getattr(doc, "workflow_state", "Mis à jour"),
-        ),
-        message=body,
-        attachments=attachments or None,
-        now=False,  # file dans la queue email, ne bloque pas le save
-    )
-
-    # Diffusion temps réel → les fiches ouvertes dans l'interface se rafraîchissent
+    # Le demandeur reçoit déjà la confirmation à la soumission et les états
+    # finaux via les Notifications Frappe ciblées. Les états intermédiaires
+    # doivent rester pour les approbateurs, pas spammer le demandeur.
     try:
         frappe.publish_realtime(
             event="workflow_state_change",

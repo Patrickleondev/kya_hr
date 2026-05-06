@@ -14,6 +14,7 @@ app_include_css = ["/assets/kya_hr/css/kya_webform.css"]
 app_include_js = [
     "/assets/kya_hr/js/employee_list.js",
     "/assets/kya_hr/js/kya_new_doc_to_webform.js",
+    "/assets/kya_hr/js/kya_sidebar_router.js",
 ]
 
 # Fixtures pour les flux, rôles et personnalisations de champs
@@ -43,7 +44,7 @@ doctype_js = {
     "Demande Achat KYA": "public/js/demande_achat_kya.js",
     "PV Entree Materiel": "doctype/pv_entree_materiel/pv_entree_materiel.js",
     "Inventaire KYA": "doctype/inventaire_kya/inventaire_kya.js",
-    "KYA Contrat": "doctype/kya_contrat/kya_contrat.js",
+    "KYA Contrat": "public/js/kya_contrat.js",
 }
 
 # Jinja environment
@@ -111,6 +112,7 @@ after_migrate = [
     "kya_hr.setup_leave_types.execute",
     "kya_hr.force_sync_workspaces.execute",
     "kya_hr.force_publish_webforms.execute",
+    "kya_hr.notification_fixes.execute",
     "kya_hr.setup_branding.execute",
     "kya_hr.fix_all_workspaces.execute",
     "kya_hr.setup_fleet.run",
@@ -119,6 +121,7 @@ after_migrate = [
     "kya_hr.setup_pv_extensions.run",
     "kya_hr.setup_inventaire_dashboard.run",
     "kya_hr.desktop_icons.execute",
+    "kya_hr.coherence_fixes.execute",
     "kya_hr.ensure_visibility.execute",
 ]
 
@@ -128,6 +131,7 @@ after_migrate = [
 # plus block_module / for_user / parent_page hiding rules).
 after_install = [
     "kya_hr.desktop_icons.execute",
+    "kya_hr.coherence_fixes.execute",
     "kya_hr.ensure_visibility.execute",
 ]
 

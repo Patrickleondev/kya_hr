@@ -127,6 +127,8 @@ NUMBER_CARDS = [
         "label": "Km parcourus (total)",
         "color": "#17a2b8",
         "filters_json": '[["docstatus","=",1]]',
+        "is_currency": 0,
+        "currency": "",
     },
     {
         "name": "Sorties En Cours",
@@ -212,7 +214,14 @@ def _upsert_number_card(cfg):
     for k, v in cfg.items():
         if k == "name":
             continue
+        if not doc.meta.has_field(k):
+            continue
         setattr(doc, k, v)
+    if label == "Km parcourus (total)":
+        if doc.meta.has_field("is_currency"):
+            doc.is_currency = 0
+        if doc.meta.has_field("currency"):
+            doc.currency = ""
     doc.is_public = 1
     doc.show_percentage_stats = 1
     doc.stats_time_interval = "Monthly"

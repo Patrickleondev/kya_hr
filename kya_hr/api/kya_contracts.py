@@ -345,3 +345,32 @@ def get_contract_view(contract_id, token):
                     (role == "dg" and doc.workflow_state == "En attente DG"),
         "is_finalized": doc.workflow_state in ("Validé", "RH (revue)", "Archivé"),
     }
+
+
+@frappe.whitelist(allow_guest=True)
+def download_final_pdf(contract_id, token):
+    if not frappe.db.exists("KYA Contrat", contract_id):
+        frappe.throw(_("Contrat introuvable"), frappe.DoesNotExistError)
+
+    doc = frappe.get_doc("KYA Contrat", contract_id)
+    if not (_verify_token(doc, token, "employe") or _verify_token(doc, token, "dg")):
+        frappe.throw(_("Lien invalide ou expiré"), frappe.PermissionError)
+
+    if doc.workflow_state not in ("Validé", "RH (revue)", "Archivé"):
+        frappe.throw(_("Le PDF final sera disponible après la co-signature."))
+
+    if not doc.pdf_final and doc.signature_employe and doc.signature_dg:
+        doc._generate_and_attach_pdf()
+        frappe.db.commit()
+
+    if not doc.pdf_final:
+        frappe.throw(_("PDF final introuvable."))
+
+    file_name = frappe.db.get_value("File", {"file_url": doc.pdf_final}, "name")
+    if not file_name:
+        frappe.throw(_("Fichier PDF introuvable."))
+
+    file_doc = frappe.get_doc("File", file_name)
+    frappe.local.response.filename = file_doc.file_name or f"Contrat_{doc.name}.pdf"
+    frappe.local.response.filecontent = file_doc.get_content()
+    frappe.local.response.type = "download"

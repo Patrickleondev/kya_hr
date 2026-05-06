@@ -58,10 +58,29 @@
 
   .me-quick-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
 
+  .me-sync-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(260px, .8fr); gap: 14px; margin-bottom: 24px; }
+  .me-panel { background: #fff; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.08); overflow: hidden; }
+  .me-panel-head { padding: 13px 16px; border-bottom: 1px solid #eef2f7; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .me-panel-head h3 { margin: 0; font-size: .96rem; color: #333; font-weight: 700; }
+  .me-panel-head .pill { background: #eef6ff; color: var(--kya-blue); padding: 2px 9px; border-radius: 999px; font-size: .72rem; font-weight: 700; }
+  .me-list { display: grid; gap: 0; }
+  .me-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 16px; border-bottom: 1px solid #f1f5f9; text-decoration: none !important; color: inherit !important; }
+  .me-row:last-child { border-bottom: 0; }
+  .me-row:hover { background: #f8fbff; }
+  .me-row-title { font-weight: 700; font-size: .86rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .me-row-sub { color: #7b8794; font-size: .74rem; margin-top: 2px; }
+  .me-status { border-radius: 999px; padding: 3px 9px; font-size: .7rem; font-weight: 700; white-space: nowrap; }
+  .me-status.encours { background: #e3f2fd; color: #1565c0; }
+  .me-status.ok { background: #e8f5e9; color: #2e7d32; }
+  .me-status.ko { background: #ffebee; color: #c62828; }
+  .me-status.draft { background: #f3f4f6; color: #4b5563; }
+  .me-empty { padding: 18px 16px; color: #8a94a6; font-size: .84rem; }
+
   @media (max-width: 576px) {
     .me-header { flex-direction: column; text-align: center; }
     .me-stats { grid-template-columns: repeat(2, 1fr); }
     .me-grid { grid-template-columns: 1fr; }
+    .me-sync-grid { grid-template-columns: 1fr; }
   }
 </style>
 
@@ -105,7 +124,7 @@
 
 <!-- ═══ Actions rapides ═══ -->
 <div class="me-quick-actions">
-  <a href="/mes-demandes" class="me-btn">📋 Suivi de mes demandes</a>
+  <a href="#sec-suivi-demandes" class="me-btn">📋 Suivi de mes demandes</a>
   {% if show_rh %}
     <a href="/app/employee" class="me-btn blue">👥 Gestion Employés</a>
   {% endif %}
@@ -113,6 +132,55 @@
     <a href="/app/stock-entry" class="me-btn orange">📦 Mouvements Stock</a>
   {% endif %}
 </div>
+
+<!-- ═══ Synchronisation personnelle : demandes + notifications ═══ -->
+{% if emp %}
+<div class="me-sync-grid" id="sec-suivi-demandes">
+  <div class="me-panel">
+    <div class="me-panel-head">
+      <h3>Suivi synchronisé de mes demandes</h3>
+      <span class="pill">{{ recent_demandes|length }} récent(s)</span>
+    </div>
+    <div class="me-list">
+      {% if recent_demandes %}
+        {% for d in recent_demandes[:8] %}
+        <a href="{{ d.url }}" class="me-row">
+          <div>
+            <div class="me-row-title">{{ d.icon }} {{ d.label }} · {{ d.name }}</div>
+            <div class="me-row-sub">{{ d.doctype }}{% if d.date %} · {{ d.date }}{% endif %}</div>
+          </div>
+          <span class="me-status {{ d.state_class }}">{{ d.status }}</span>
+        </a>
+        {% endfor %}
+      {% else %}
+        <div class="me-empty">Aucune demande liée à votre fiche employé pour le moment.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="me-panel">
+    <div class="me-panel-head">
+      <h3>Notifications & actions</h3>
+      <span class="pill">{{ notification_count }}</span>
+    </div>
+    <div class="me-list">
+      {% if sync_notifications %}
+        {% for n in sync_notifications[:8] %}
+        <a href="{{ n.url or '#' }}" class="me-row">
+          <div>
+            <div class="me-row-title">{{ n.title }}</div>
+            <div class="me-row-sub">{{ n.text }}{% if n.date %} · {{ n.date }}{% endif %}</div>
+          </div>
+          <span class="me-status {{ n.state_class or 'encours' }}">{{ n.type }}</span>
+        </a>
+        {% endfor %}
+      {% else %}
+        <div class="me-empty">Aucune notification ou action en attente.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endif %}
 
 <!-- ═══ Section : Mes fiches disponibles ═══ -->
 {% if fiches_disponibles %}
@@ -145,7 +213,23 @@
 {% if show_forms %}
 <div class="me-section" id="sec-forms-pending">
   <h2>📊 Formulaires & enquêtes</h2>
-  <p style="color:#666; font-size:.9rem;">Répondez aux enquêtes et évaluations via les liens reçus par email.</p>
+  {% if form_notifications %}
+    <div class="me-panel">
+      <div class="me-list">
+        {% for n in form_notifications[:6] %}
+        <a href="{{ n.url or '#' }}" class="me-row">
+          <div>
+            <div class="me-row-title">{{ n.title }}</div>
+            <div class="me-row-sub">{{ n.text }}{% if n.date %} · {{ n.date }}{% endif %}</div>
+          </div>
+          <span class="me-status encours">À remplir</span>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  {% else %}
+    <p style="color:#666; font-size:.9rem;">Aucun formulaire en attente. Les enquêtes et évaluations apparaîtront ici dès qu'elles seront assignées à votre fiche employé.</p>
+  {% endif %}
 </div>
 {% endif %}
 

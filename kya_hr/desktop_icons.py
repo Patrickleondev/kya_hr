@@ -4,15 +4,15 @@ import frappe
 from frappe.desk.doctype.desktop_icon.desktop_icon import clear_desktop_icons_cache
 
 WORKSPACE_ICONS = [
-    {"label": "Espace Direction", "link_to": "Espace Direction", "icon": "building", "idx": 10},
+    {"label": "Direction Générale", "link_to": "Espace Direction", "sidebar": "Espace Direction", "icon": "briefcase", "idx": 10},
     {"label": "Espace RH", "link_to": "Espace RH", "icon": "users", "idx": 11},
-    {"label": "Espace Achats", "link_to": "Espace Achats", "icon": "basket", "idx": 12},
+    {"label": "Espace Achats", "link_to": "Espace Achats", "icon": "shopping-cart", "idx": 12},
     {"label": "Espace Stock", "link_to": "Espace Stock", "icon": "package", "idx": 13},
-    {"label": "Espace Comptabilite", "link_to": "Espace Comptabilite", "icon": "currency-exchange", "idx": 14},
-    {"label": "Logistique", "link_to": "Logistique", "icon": "car", "idx": 15},
-    {"label": "Espace Employes", "link_to": "Espace Employes", "icon": "person-vcard", "idx": 16},
+    {"label": "Espace Comptabilité", "link_to": "Espace Comptabilité", "icon": "wallet", "idx": 14},
+    {"label": "Logistique", "link_to": "Logistique", "icon": "truck", "idx": 15},
+    {"label": "Espace Employés", "link_to": "Espace Employes", "icon": "user-round", "idx": 16},
     {"label": "Espace Stagiaires", "link_to": "Espace Stagiaires", "icon": "graduation-cap", "idx": 17},
-    {"label": "Inventaire Sorties Materiel", "link_to": "Inventaire Sorties Materiel", "icon": "package", "idx": 18},
+    {"label": "Inventaire & Sorties Matériel", "link_to": "Inventaire Sorties Materiel", "icon": "boxes", "idx": 18},
     {"label": "KYA Services", "link_to": "KYA Services", "icon": "clipboard-list", "idx": 19},
 ]
 
@@ -57,6 +57,31 @@ def _sync_workspace_icon(config: dict) -> bool:
     if not frappe.db.exists("Workspace", config["link_to"]):
         return False
 
+    workspace_title = frappe.db.get_value("Workspace", config["link_to"], "title")
+    workspace_label = frappe.db.get_value("Workspace", config["link_to"], "label")
+
+    sidebar_name = frappe.db.get_value(
+        "Workspace Sidebar",
+        {"title": config.get("sidebar") or config["label"]},
+        "name",
+    ) or frappe.db.get_value(
+        "Workspace Sidebar",
+        {"title": config["label"]},
+        "name",
+    ) or frappe.db.get_value(
+        "Workspace Sidebar",
+        {"title": config["link_to"]},
+        "name",
+    ) or frappe.db.get_value(
+        "Workspace Sidebar",
+        {"title": workspace_title},
+        "name",
+    ) or frappe.db.get_value(
+        "Workspace Sidebar",
+        {"title": workspace_label},
+        "name",
+    ) or config["link_to"]
+
     icon = _get_icon_doc(config["label"])
     previous = {
         "label": icon.get("label"),
@@ -73,7 +98,7 @@ def _sync_workspace_icon(config: dict) -> bool:
     icon.label = config["label"]
     icon.link_type = "Workspace Sidebar"
     icon.icon_type = "Link"
-    icon.link_to = config["link_to"]
+    icon.link_to = sidebar_name
     icon.icon = config["icon"]
     icon.idx = config["idx"]
     icon.hidden = 0
@@ -95,9 +120,28 @@ def _sync_workspace_icon(config: dict) -> bool:
     if icon.is_new() or previous != current:
         icon.flags.ignore_links = True
         icon.save(ignore_permissions=True)
-        return True
+        changed = True
+    else:
+        changed = False
 
-    return False
+    duplicate_values = {
+        "link_type": "Workspace Sidebar",
+        "icon_type": "Link",
+        "link_to": sidebar_name,
+        "icon": config["icon"],
+        "idx": config["idx"],
+        "hidden": 0,
+        "parent_icon": None,
+        "standard": 1,
+    }
+    for duplicate in frappe.get_all("Desktop Icon", filters={"label": config["label"]}, pluck="name"):
+        current_values = frappe.db.get_value("Desktop Icon", duplicate, list(duplicate_values), as_dict=True)
+        updates = {key: value for key, value in duplicate_values.items() if current_values.get(key) != value}
+        if updates:
+            frappe.db.set_value("Desktop Icon", duplicate, updates, update_modified=False)
+            changed = True
+
+    return changed
 
 
 def _build_default_layout() -> list[dict]:
@@ -124,13 +168,9 @@ def _build_default_layout() -> list[dict]:
 
 def _sync_layout_doc(layout_doc) -> bool:
     layout = json.loads(layout_doc.layout or "[]")
-    existing_labels = {item.get("label") for item in layout}
     changed = False
 
     for config in WORKSPACE_ICONS:
-        if config["label"] in existing_labels:
-            continue
-
         icon = frappe.db.get_value(
             "Desktop Icon",
             {"label": config["label"], "link_type": "Workspace Sidebar"},
@@ -140,9 +180,21 @@ def _sync_layout_doc(layout_doc) -> bool:
         if not icon:
             continue
 
-        layout.append(_serialize_icon(icon))
-        existing_labels.add(config["label"])
-        changed = True
+        serialized = _serialize_icon(icon)
+        existing_items = [item for item in layout if item.get("label") == config["label"]]
+        if existing_items:
+            keep = existing_items[0]
+            for field in LAYOUT_FIELDS:
+                if keep.get(field) != serialized.get(field):
+                    keep[field] = serialized.get(field)
+                    changed = True
+            keep["child_icons"] = keep.get("child_icons") or []
+            for duplicate in existing_items[1:]:
+                layout.remove(duplicate)
+                changed = True
+        else:
+            layout.append(serialized)
+            changed = True
 
     layout.sort(key=lambda item: (item.get("idx") or 0, item.get("label") or ""))
 

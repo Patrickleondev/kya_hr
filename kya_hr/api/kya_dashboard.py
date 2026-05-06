@@ -6,8 +6,10 @@ Route : /kya-tableau-de-bord
 """
 import frappe
 from frappe import _
-from frappe.utils import flt, getdate, add_days, today, nowdate
+from frappe.utils import cint, flt, getdate, add_days, today, nowdate, now_datetime
 import json
+import hashlib
+from urllib.parse import quote
 
 
 # ─── Cartographie des modules → DocTypes (valeurs par défaut / fallback) ──
@@ -154,6 +156,91 @@ MODULE_MAP = {
 APPROVED_STATES = {"Approuvé", "Approuvée", "Clôturé", "Livré", "Validé", "Terminé"}
 REJECTED_STATES = {"Rejeté", "Rejetée", "Annulé", "Annulée"}
 DRAFT_STATES = {"Brouillon", "Draft"}
+CORE_WEB_FORM_MODULES = {"Core", "Website", "Utilities", "Contacts", "Support", "HR", "Projects"}
+
+
+def _normalize_route(route):
+    route = (route or "").strip()
+    if not route:
+        return ""
+    return "/" + route.strip("/")
+
+
+def _route_key(route):
+    return _normalize_route(route).strip("/")
+
+
+def _classify(state):
+    if state in (0, "0"):
+        return "draft"
+    if state in (1, "1"):
+        return "approved"
+    if state in (2, "2"):
+        return "rejected"
+    if not state:
+        return "other"
+    s = str(state).strip()
+    if s in APPROVED_STATES:
+        return "approved"
+    if s in REJECTED_STATES:
+        return "rejected"
+    if s in DRAFT_STATES:
+        return "draft"
+    return "pending"
+
+
+def _has_field(doctype, fieldname):
+    if not fieldname:
+        return False
+    if fieldname in {"docstatus", "creation", "modified", "owner", "name"}:
+        return True
+    try:
+        return bool(frappe.get_meta(doctype).has_field(fieldname))
+    except Exception:
+        return False
+
+
+def _default_print_format(doctype):
+    if not doctype:
+        return None
+    try:
+        preferred = frappe.db.get_value(
+            "Print Format",
+            {"doc_type": doctype, "name": ["like", "%KYA%"]},
+            "name",
+        )
+        return preferred or frappe.db.get_value("Print Format", {"doc_type": doctype, "standard": "Yes"}, "name")
+    except Exception:
+        return None
+
+
+def _pdf_url(doctype, name, print_format=None):
+    if not doctype or not name:
+        return ""
+    params = f"doctype={quote(doctype)}&name={quote(name)}&no_letterhead=0"
+    if print_format:
+        params += f"&format={quote(print_format)}"
+    return "/api/method/frappe.utils.print_format.download_pdf?" + params
+
+
+def _desk_url(doctype, name=None):
+    route = f"/app/{frappe.scrub(doctype).replace('_', '-')}"
+    return route + (f"/{quote(name)}" if name else "")
+
+
+def _guess_module_from_web_form(web_form):
+    title = f"{web_form.get('title') or ''} {web_form.get('route') or ''} {web_form.get('doc_type') or ''}".lower()
+    if any(k in title for k in ("achat", "commande", "offre")):
+        return "achats", "Achats", "Achats", "🛒", "#e65100"
+    if any(k in title for k in ("stock", "materiel", "matériel", "inventaire")):
+        return "stock", "Stock", "Stock", "📦", "#2e7d32"
+    if any(k in title for k in ("conge", "congé", "permission", "stage", "rh")):
+        return "rh", "Ressources Humaines", "RH", "👥", "#1565c0"
+    if any(k in title for k in ("caisse", "cheque", "chèque", "compta", "finance")):
+        return "comptabilite", "Comptabilité", "Comptabilité", "💰", "#6a1b9a"
+    if any(k in title for k in ("vehicule", "véhicule", "logistique")):
+        return "logistique", "Logistique", "Logistique", "🚚", "#455a64"
+    return "autre", "Autres Services", web_form.get("module") or "Autre", "📋", "#607d8b"
 
 
 def _get_config():
@@ -176,6 +263,9 @@ def _get_config():
                     "icon": e.icon or "📋",
                     "color": e.color or "#607d8b",
                     "doctypes": [],
+                    "department": getattr(e, "department", None),
+                    "service_label": getattr(e, "service_label", None),
+                    "team_label": getattr(e, "team_label", None),
                 }
             config[mk]["doctypes"].append({
                 "name": e.doctype_name,
@@ -184,49 +274,49 @@ def _get_config():
                 "date_field": e.date_field or "creation",
                 "amount_field": e.amount_field or None,
                 "list_url": e.list_url or f"/app/{frappe.scrub(e.doctype_name).replace('_', '-')}",
-                "form_url": e.web_form_route or "",
+                "form_url": _normalize_route(e.web_form_route),
+                "web_form": getattr(e, "web_form_name", None),
+                "web_form_route": _normalize_route(e.web_form_route),
+                "print_format": getattr(e, "print_format", None) or _default_print_format(e.doctype_name),
+                "department": getattr(e, "department", None),
+                "service_label": getattr(e, "service_label", None),
+                "team_label": getattr(e, "team_label", None),
             })
         return config
     except Exception:
         return MODULE_MAP  # fallback si le DocType n'existe pas encore
 
 
-
-    if not state:
-        return "other"
-    s = str(state).strip()
-    if s in APPROVED_STATES:
-        return "approved"
-    if s in REJECTED_STATES:
-        return "rejected"
-    if s in DRAFT_STATES:
-        return "draft"
-    return "pending"  # En attente Chef, En attente DAAF, etc.
-
-
 def _get_doctype_stats(dt_cfg, date_from, date_to):
     """Retourne les stats agrégées pour un DocType donné."""
     dt_name = dt_cfg["name"]
-    sf = dt_cfg["status_field"]
-    df = dt_cfg["date_field"]
+    sf = dt_cfg.get("status_field") or "workflow_state"
+    df = dt_cfg.get("date_field") or "creation"
     af = dt_cfg.get("amount_field")
+    print_format = dt_cfg.get("print_format") or _default_print_format(dt_name)
 
     # Vérifier que le DocType existe
     try:
-        if not frappe.db.table_exists(f"tab{dt_name}"):
+        if not frappe.db.table_exists(dt_name):
             return None
     except Exception:
         return None
+
+    if not _has_field(dt_name, df):
+        df = "creation"
+    status_expr = f"`{sf}`" if _has_field(dt_name, sf) and sf != "docstatus" else "CASE docstatus WHEN 0 THEN 'Brouillon' WHEN 1 THEN 'Approuvé' ELSE 'Rejeté' END"
+    amount_expr = f"`{af}`" if af and _has_field(dt_name, af) else "NULL"
+    amount_sum_expr = f"COALESCE(SUM(`{af}`), 0)" if af and _has_field(dt_name, af) else "0"
 
     try:
         # Compte par statut
         rows = frappe.db.sql(
             f"""
-            SELECT `{sf}` AS status, COUNT(*) AS cnt
+                        SELECT {status_expr} AS status, COUNT(*) AS cnt
             FROM `tab{dt_name}`
             WHERE docstatus < 2
               AND `{df}` >= %(df)s AND `{df}` <= %(dt)s
-            GROUP BY `{sf}`
+                        GROUP BY status
             """,
             {"df": date_from, "dt": date_to},
             as_dict=True,
@@ -245,11 +335,11 @@ def _get_doctype_stats(dt_cfg, date_from, date_to):
 
     # Montant total si applicable
     total_amount = 0
-    if af:
+    if af and _has_field(dt_name, af):
         try:
             res = frappe.db.sql(
                 f"""
-                SELECT COALESCE(SUM(`{af}`), 0) AS s
+                SELECT {amount_sum_expr} AS s
                 FROM `tab{dt_name}`
                 WHERE docstatus < 2 AND `{df}` >= %(df)s AND `{df}` <= %(dt)s
                 """,
@@ -263,9 +353,9 @@ def _get_doctype_stats(dt_cfg, date_from, date_to):
     try:
         recents = frappe.db.sql(
             f"""
-            SELECT name, `{sf}` AS status,
+                 SELECT name, {status_expr} AS status,
                    `{df}` AS record_date,
-                   {('`' + af + '`') if af else 'NULL'} AS amount,
+                     {amount_expr} AS amount,
                    creation, modified_by
             FROM `tab{dt_name}`
             WHERE docstatus < 2
@@ -285,7 +375,13 @@ def _get_doctype_stats(dt_cfg, date_from, date_to):
         "classified": classified,
         "total_amount": total_amount,
         "list_url": dt_cfg["list_url"],
-        "form_url": dt_cfg["form_url"],
+        "form_url": dt_cfg.get("form_url") or dt_cfg.get("web_form_route") or "",
+        "web_form": dt_cfg.get("web_form"),
+        "web_form_route": dt_cfg.get("web_form_route") or dt_cfg.get("form_url") or "",
+        "department": dt_cfg.get("department"),
+        "service_label": dt_cfg.get("service_label"),
+        "team_label": dt_cfg.get("team_label"),
+        "print_format": print_format,
         "recents": [
             {
                 "name": r.name,
@@ -293,6 +389,9 @@ def _get_doctype_stats(dt_cfg, date_from, date_to):
                 "date": str(r.record_date or "")[:10],
                 "amount": flt(r.amount) if r.amount else None,
                 "class": _classify(r.status or ""),
+                "desk_url": _desk_url(dt_name, r.name),
+                "pdf_url": _pdf_url(dt_name, r.name, print_format),
+                "print_format": print_format,
             }
             for r in recents
         ],
@@ -316,7 +415,12 @@ def get_global_stats(period="30", module=None):
     date_from = add_days(today(), -period)
     date_to = today()
 
-    result = {"modules": {}, "totals": {"total": 0, "pending": 0, "approved": 0, "rejected": 0, "draft": 0}}
+    result = {
+        "modules": {},
+        "totals": {"total": 0, "pending": 0, "approved": 0, "rejected": 0, "draft": 0},
+        "filters": {"modules": []},
+        "generated_on": str(now_datetime()),
+    }
 
     active_config = _get_config()
     modules_to_process = {module: active_config[module]} if module and module in active_config else active_config
@@ -326,7 +430,11 @@ def get_global_stats(period="30", module=None):
             "label": mod_cfg["label"],
             "icon": mod_cfg["icon"],
             "color": mod_cfg["color"],
+            "department": mod_cfg.get("department"),
+            "service_label": mod_cfg.get("service_label"),
+            "team_label": mod_cfg.get("team_label"),
             "doctypes": [],
+            "services": {},
             "totals": {"total": 0, "pending": 0, "approved": 0, "rejected": 0, "draft": 0, "amount": 0},
         }
         for dt_cfg in mod_cfg["doctypes"]:
@@ -334,12 +442,22 @@ def get_global_stats(period="30", module=None):
             if stats is None:
                 continue
             mod_result["doctypes"].append(stats)
+            service_key = stats.get("service_label") or mod_cfg.get("service_label") or mod_cfg["label"]
+            service = mod_result["services"].setdefault(
+                service_key,
+                {"label": service_key, "total": 0, "pending": 0, "approved": 0, "rejected": 0, "draft": 0, "teams": {}},
+            )
+            service["total"] += stats["total"]
             for k in ("pending", "approved", "rejected", "draft"):
                 mod_result["totals"][k] += stats["classified"][k]
+                service[k] += stats["classified"][k]
             mod_result["totals"]["total"] += stats["total"]
             mod_result["totals"]["amount"] += stats["total_amount"]
+            team_key = stats.get("team_label") or "Non classé"
+            service["teams"][team_key] = service["teams"].get(team_key, 0) + stats["total"]
 
         result["modules"][mod_key] = mod_result
+        result["filters"]["modules"].append({"key": mod_key, "label": mod_cfg["label"]})
         for k in ("total", "pending", "approved", "rejected", "draft"):
             result["totals"][k] += mod_result["totals"][k]
 
@@ -369,20 +487,28 @@ def get_module_records(doctype, filters=None, limit=50, offset=0):
     sf = dt_cfg["status_field"]
     df = dt_cfg["date_field"]
     af = dt_cfg.get("amount_field")
+    if not _has_field(doctype, df):
+        df = "creation"
+    status_expr = f"`{sf}`" if _has_field(doctype, sf) and sf != "docstatus" else "CASE docstatus WHEN 0 THEN 'Brouillon' WHEN 1 THEN 'Approuvé' ELSE 'Rejeté' END"
+    amount_expr = f"`{af}`" if af and _has_field(doctype, af) else "NULL"
 
     conditions = "docstatus < 2"
     if filters:
         try:
             f = json.loads(filters) if isinstance(filters, str) else filters
             if f.get("status"):
-                conditions += f" AND `{sf}` = {frappe.db.escape(f['status'])}"
+                if _has_field(doctype, sf) and sf != "docstatus":
+                    conditions += f" AND `{sf}` = {frappe.db.escape(f['status'])}"
             if f.get("date_from"):
                 conditions += f" AND `{df}` >= {frappe.db.escape(f['date_from'])}"
             if f.get("date_to"):
                 conditions += f" AND `{df}` <= {frappe.db.escape(f['date_to'])}"
             if f.get("search"):
                 s = frappe.db.escape(f"%" + f["search"] + "%")
-                conditions += f" AND (name LIKE {s} OR `{sf}` LIKE {s})"
+                if _has_field(doctype, sf) and sf != "docstatus":
+                    conditions += f" AND (name LIKE {s} OR `{sf}` LIKE {s})"
+                else:
+                    conditions += f" AND name LIKE {s}"
         except Exception:
             pass
 
@@ -393,9 +519,9 @@ def get_module_records(doctype, filters=None, limit=50, offset=0):
 
         rows = frappe.db.sql(
             f"""
-            SELECT name, `{sf}` AS status,
+             SELECT name, {status_expr} AS status,
                    `{df}` AS record_date,
-                   {('`' + af + '`') if af else 'NULL'} AS amount,
+                 {amount_expr} AS amount,
                    owner, creation, modified
             FROM `tab{doctype}`
             WHERE {conditions}
@@ -418,7 +544,8 @@ def get_module_records(doctype, filters=None, limit=50, offset=0):
                 "owner": r.owner,
                 "modified": str(r.modified or "")[:16],
                 "form_url": dt_cfg["form_url"] + "/" + r.name,
-                "desk_url": dt_cfg["list_url"].replace("/app/", "/app/") + "/" + r.name,
+                "desk_url": _desk_url(doctype, r.name),
+                "pdf_url": _pdf_url(doctype, r.name, dt_cfg.get("print_format") or _default_print_format(doctype)),
             }
             for r in rows
         ],
@@ -436,14 +563,18 @@ def export_stats_csv(period="30"):
         frappe.throw(_("Accès refusé"), frappe.PermissionError)
 
     data = get_global_stats(period=period)
-    lines = ["Module,Fiche,Total,En attente,Approuvé,Rejeté,Brouillon,Montant (XOF)"]
+    lines = ["Module,Service,Equipe,Fiche,Web Form,Print Format,Total,En attente,Approuvé,Rejeté,Brouillon,Montant (XOF)"]
     for mod_key, mod in data.get("modules", {}).items():
         for dt in mod.get("doctypes", []):
             c = dt["classified"]
             lines.append(
                 ",".join(str(x) for x in [
                     mod["label"],
+                    dt.get("service_label") or "",
+                    dt.get("team_label") or "",
                     dt["label"],
+                    dt.get("web_form_route") or "",
+                    dt.get("print_format") or "",
                     dt["total"],
                     c["pending"],
                     c["approved"],
@@ -486,6 +617,8 @@ def seed_dashboard_config():
                 "amount_field": dt.get("amount_field") or "",
                 "list_url": dt.get("list_url") or "",
                 "web_form_route": dt.get("form_url") or "",
+                "print_format": dt.get("print_format") or _default_print_format(dt["name"]),
+                "service_label": dt.get("service_label") or mod_cfg["label"],
                 "is_active": 1,
             })
 
@@ -511,3 +644,179 @@ def reset_dashboard_config():
     frappe.db.commit()
     # Re-seed
     return seed_dashboard_config()
+
+
+def _can_manage_dashboard():
+    return bool(set(frappe.get_roles()).intersection({"System Manager", "Dashboard Manager", "Administrator"}))
+
+
+def _pick_field(doctype, candidates, fallback="creation"):
+    for fieldname in candidates:
+        if _has_field(doctype, fieldname):
+            return fieldname
+    return fallback
+
+
+def _entry_hash(data):
+    return hashlib.sha256(json.dumps(data, sort_keys=True, ensure_ascii=False, default=str).encode("utf-8")).hexdigest()
+
+
+def _entry_from_web_form(web_form, overrides=None):
+    overrides = overrides or {}
+    module_key, module_label, service_label, icon, color = _guess_module_from_web_form(web_form)
+    doctype = web_form.get("doc_type")
+    status_field = _pick_field(doctype, ["workflow_state", "statut", "status", "docstatus"], "docstatus")
+    date_field = _pick_field(
+        doctype,
+        ["date_sortie", "date_entree", "date_demande", "date_bc", "date_ao", "date_brouillard", "date_etat", "date_inventaire", "posting_date", "creation"],
+        "creation",
+    )
+    amount_field = _pick_field(
+        doctype,
+        ["montant_total", "total_montant", "budget_estime", "valeur_ecart_total", "grand_total", "amount"],
+        "",
+    )
+    if amount_field == "creation":
+        amount_field = ""
+
+    route = _normalize_route(web_form.get("route"))
+    print_format = web_form.get("print_format") or _default_print_format(doctype)
+    payload = {
+        "doctype": "KYA Dashboard Entry",
+        "module_key": overrides.get("module_key") or module_key,
+        "module_label": overrides.get("module_label") or module_label,
+        "icon": overrides.get("icon") or icon,
+        "color": overrides.get("color") or color,
+        "department": overrides.get("department"),
+        "service_label": overrides.get("service_label") or service_label,
+        "team_label": overrides.get("team_label"),
+        "doctype_name": doctype,
+        "web_form_name": web_form.get("name"),
+        "dt_label": overrides.get("dt_label") or web_form.get("title") or doctype,
+        "status_field": overrides.get("status_field") or status_field,
+        "date_field": overrides.get("date_field") or date_field,
+        "amount_field": overrides.get("amount_field") or amount_field,
+        "list_url": overrides.get("list_url") or _desk_url(doctype),
+        "web_form_route": route,
+        "print_format": overrides.get("print_format") or print_format,
+        "sync_mode": overrides.get("sync_mode") or "Synchronisé depuis Web Form",
+        "last_synced_on": now_datetime(),
+        "is_active": cint(overrides.get("is_active", 1)),
+    }
+    payload["sync_fingerprint"] = _entry_hash(payload)
+    return payload
+
+
+def _find_dashboard_entry(settings, web_form_name=None, route=None, doctype=None):
+    normalized = _normalize_route(route)
+    for row in settings.entries or []:
+        if web_form_name and getattr(row, "web_form_name", None) == web_form_name:
+            return row
+        if normalized and _normalize_route(getattr(row, "web_form_route", None)) == normalized:
+            return row
+        if doctype and getattr(row, "doctype_name", None) == doctype and not normalized:
+            return row
+    return None
+
+
+def _apply_entry_payload(row, payload):
+    for key, value in payload.items():
+        if key == "doctype":
+            continue
+        setattr(row, key, value)
+
+
+@frappe.whitelist()
+def register_web_form_route(route, module_key=None, module_label=None, service_label=None, team_label=None, department=None):
+    """Ajoute ou met à jour une entrée dashboard à partir d'un chemin Web Form collé."""
+    if not _can_manage_dashboard():
+        frappe.throw(_("Réservé aux gestionnaires du tableau de bord."), frappe.PermissionError)
+
+    route_key = _route_key(route)
+    if not route_key:
+        frappe.throw(_("Route Web Form requise."))
+
+    web_form = frappe.db.get_value(
+        "Web Form",
+        {"route": route_key},
+        ["name", "title", "route", "doc_type", "module", "print_format", "published"],
+        as_dict=True,
+    )
+    if not web_form:
+        frappe.throw(_("Aucun Web Form trouvé pour la route {0}").format(_normalize_route(route)))
+    if not web_form.doc_type or not frappe.db.exists("DocType", web_form.doc_type):
+        frappe.throw(_("Le Web Form {0} n'est pas relié à un DocType valide.").format(web_form.name))
+
+    settings = frappe.get_single("KYA Dashboard Settings")
+    payload = _entry_from_web_form(
+        web_form,
+        {
+            "module_key": module_key,
+            "module_label": module_label,
+            "service_label": service_label,
+            "team_label": team_label,
+            "department": department,
+        },
+    )
+    row = _find_dashboard_entry(settings, web_form_name=web_form.name, route=route_key, doctype=web_form.doc_type)
+    if row:
+        _apply_entry_payload(row, payload)
+        action = "updated"
+    else:
+        settings.append("entries", payload)
+        action = "created"
+
+    settings.save(ignore_permissions=True)
+    frappe.db.commit()
+    return {"status": action, "route": payload["web_form_route"], "doctype": payload["doctype_name"], "print_format": payload.get("print_format")}
+
+
+@frappe.whitelist()
+def sync_dashboard_entries_from_web_forms(published_only=1, include_core=0):
+    """Synchronise le registre DG depuis les Web Forms publiées.
+
+    Les statistiques restent calculées en temps réel depuis les DocTypes ; cette méthode ne crée
+    que la cartographie contrôlée entre route Web Form, DocType, service et Print Format.
+    """
+    if not _can_manage_dashboard():
+        frappe.throw(_("Réservé aux gestionnaires du tableau de bord."), frappe.PermissionError)
+
+    filters = {}
+    if cint(published_only):
+        filters["published"] = 1
+    web_forms = frappe.get_all(
+        "Web Form",
+        filters=filters,
+        fields=["name", "title", "route", "doc_type", "module", "print_format", "published", "is_standard"],
+        order_by="modified desc",
+    )
+
+    settings = frappe.get_single("KYA Dashboard Settings")
+    created = 0
+    updated = 0
+    skipped = []
+
+    for web_form in web_forms:
+        if not web_form.get("route") or not web_form.get("doc_type"):
+            skipped.append({"web_form": web_form.name, "reason": "route/doc_type manquant"})
+            continue
+        if not cint(include_core) and web_form.get("module") in CORE_WEB_FORM_MODULES:
+            skipped.append({"web_form": web_form.name, "reason": "module standard ignoré"})
+            continue
+        if not frappe.db.exists("DocType", web_form.doc_type):
+            skipped.append({"web_form": web_form.name, "reason": "DocType introuvable"})
+            continue
+
+        payload = _entry_from_web_form(web_form)
+        row = _find_dashboard_entry(settings, web_form_name=web_form.name, route=web_form.route, doctype=web_form.doc_type)
+        if row:
+            if (getattr(row, "sync_mode", None) or "Synchronisé depuis Web Form") != "Manuel verrouillé":
+                _apply_entry_payload(row, payload)
+                updated += 1
+        else:
+            settings.append("entries", payload)
+            created += 1
+
+    settings.save(ignore_permissions=True)
+    frappe.db.commit()
+    return {"created": created, "updated": updated, "skipped": skipped, "total_scanned": len(web_forms)}

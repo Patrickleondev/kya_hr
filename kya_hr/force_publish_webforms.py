@@ -24,12 +24,11 @@ KYA_WEB_FORMS = [
     "etat-recap",
     "demande-conge",
     "planning-conge",
+    "bilan-fin-de-stage",
 ]
 
 # Webforms à dépublier (obsolètes ou désactivés)
-KYA_WEB_FORMS_UNPUBLISH = [
-    "bilan-fin-de-stage",
-]
+KYA_WEB_FORMS_UNPUBLISH = []
 
 
 def execute():

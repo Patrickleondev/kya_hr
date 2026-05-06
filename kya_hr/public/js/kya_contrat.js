@@ -1,4 +1,4 @@
-// KYA Contrat — Client Script (Desk)
+// KYA Contrat - Client Script (Desk)
 frappe.ui.form.on('KYA Contrat', {
     refresh(frm) {
         force_kya_contract_sidebar();
@@ -20,7 +20,6 @@ frappe.ui.form.on('KYA Contrat', {
 
         render_contract_preview(frm);
 
-        // Bouton "Envoyer au Signataire" (création du compte + email bienvenue)
         if (!frm.is_new() && frm.doc.workflow_state === 'Brouillon') {
             frm.add_custom_button(__('Envoyer au Signataire'), () => {
                 frappe.confirm(
@@ -30,7 +29,7 @@ frappe.ui.form.on('KYA Contrat', {
                             method: 'kya_hr.api.kya_contracts.send_to_signataire',
                             args: { contract_id: frm.doc.name },
                             freeze: true,
-                            freeze_message: __('Envoi en cours…'),
+                            freeze_message: __('Envoi en cours...'),
                             callback: (r) => {
                                 if (!r.exc) {
                                     frappe.show_alert({ message: __('Email envoyé'), indicator: 'green' });
@@ -43,7 +42,6 @@ frappe.ui.form.on('KYA Contrat', {
             }, __('Actions'));
         }
 
-        // Aperçu PDF si finalisé
         if (frm.doc.pdf_final) {
             frm.add_custom_button(__('Télécharger PDF'), () => {
                 window.open(frm.doc.pdf_final, '_blank');
@@ -54,7 +52,6 @@ frappe.ui.form.on('KYA Contrat', {
             window.open(`/printview?doctype=KYA%20Contrat&name=${encodeURIComponent(frm.doc.name)}&format=${encodeURIComponent((frm.doc.contract_type || '').startsWith('Stage') ? 'Contrat de Stage KYA' : 'KYA Contrat PDF')}&no_letterhead=0`, '_blank');
         });
 
-        // Lien portail
         if (!frm.is_new() && ['En attente Signature Salarié', 'Signé Salarié', 'En attente DG'].includes(frm.doc.workflow_state)) {
             frm.add_custom_button(__('Ouvrir Portail Signature'), () => {
                 frappe.msgprint(__('Le portail est accessible uniquement depuis les liens sécurisés envoyés par email au signataire ou au DG.'));
@@ -63,7 +60,6 @@ frappe.ui.form.on('KYA Contrat', {
     },
 
     contract_type(frm) {
-        // Sélection auto du template actif
         if (frm.doc.contract_type) {
             frappe.db.get_value('KYA Contract Template',
                 { contract_type: frm.doc.contract_type, is_active: 1 }, 'name')

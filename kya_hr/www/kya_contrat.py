@@ -2,6 +2,7 @@
 import frappe
 import json
 import re
+from urllib.parse import quote
 from frappe import _
 
 
@@ -114,6 +115,10 @@ def get_context(context):
     context.peut_signer_dg = peut_signer_dg
     context.peut_editer_perso = peut_editer_perso
     context.is_finalized = doc.workflow_state in ("Validé", "RH (revue)", "Archivé")
+    context.final_pdf_download_url = (
+        "/api/method/kya_hr.api.kya_contracts.download_final_pdf"
+        f"?contract_id={quote(doc.name)}&token={quote(token)}"
+    ) if context.is_finalized and doc.pdf_final else ""
     context.date_signature_employe_fmt = fmt(doc.date_signature_employe, "Datetime")
     context.date_signature_dg_fmt = fmt(doc.date_signature_dg, "Datetime")
     context.title = f"Contrat {doc.name} — KYA-Energy Group"

@@ -36,6 +36,8 @@
   "montant_mission",
   "section_maitres",
   "maitres_stage",
+    "section_document_preview",
+    "contract_preview",
   "section_sig_employe",
   "contrat_lu",
   "signature_employe",
@@ -86,6 +88,9 @@
 
   {"fieldname": "section_maitres", "fieldtype": "Section Break", "label": "Maîtres de Stage", "depends_on": "eval:['Stage Professionnel','Stage Académique'].includes(doc.contract_type)"},
   {"fieldname": "maitres_stage", "fieldtype": "Table", "label": "Maîtres de Stage", "options": "KYA Contrat Maitre Stage"},
+
+    {"fieldname": "section_document_preview", "fieldtype": "Section Break", "label": "Aperçu du Document", "collapsible": 1},
+    {"fieldname": "contract_preview", "fieldtype": "HTML", "label": "Aperçu du Contrat"},
 
   {"fieldname": "section_sig_employe", "fieldtype": "Section Break", "label": "Signature du Signataire"},
   {"fieldname": "contrat_lu", "fieldtype": "Check", "label": "J'ai lu et approuvé le présent contrat"},
