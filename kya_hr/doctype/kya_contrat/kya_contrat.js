@@ -22,6 +22,8 @@ frappe.ui.form.on('KYA Contrat', {
             frm.dashboard.set_headline(__('Préparez le contrat ici. Le signataire le lira et le signera via le portail envoyé par email.'));
         }
 
+        render_contract_preview(frm);
+
         // Bouton "Envoyer au Signataire" (création du compte + email bienvenue)
         if (!frm.is_new() && frm.doc.workflow_state === 'Brouillon') {
             frm.add_custom_button(__('Envoyer au Signataire'), () => {
@@ -91,3 +93,29 @@ frappe.ui.form.on('KYA Contrat', {
         }
     }
 });
+
+function render_contract_preview(frm) {
+    if (!frm.fields_dict.contract_preview) return;
+
+    if (frm.is_new()) {
+        frm.set_df_property('contract_preview', 'options', `
+            <div style="border:1px solid #e5e7eb;border-radius:6px;padding:14px 16px;background:#fff8e7;color:#6b4300;">
+                <b>Document en préparation</b><br>
+                Enregistrez le contrat pour afficher ici le texte complet avec les articles et les champs du candidat.
+            </div>
+        `);
+        return;
+    }
+
+    const print_format = (frm.doc.contract_type || '').startsWith('Stage') ? 'Contrat de Stage KYA' : 'KYA Contrat PDF';
+    const print_url = `/printview?doctype=KYA%20Contrat&name=${encodeURIComponent(frm.doc.name)}&format=${encodeURIComponent(print_format)}&no_letterhead=0`;
+    frm.set_df_property('contract_preview', 'options', `
+        <div style="border:1px solid #d9dee3;border-radius:6px;overflow:hidden;background:#fff;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 12px;background:#f7f9fb;border-bottom:1px solid #d9dee3;">
+                <div style="font-weight:600;color:#1f2937;">Aperçu du contrat généré</div>
+                <a class="btn btn-xs btn-default" href="${print_url}" target="_blank">Ouvrir en pleine page</a>
+            </div>
+            <iframe src="${print_url}" style="width:100%;height:720px;border:0;background:#fff;"></iframe>
+        </div>
+    `);
+}
