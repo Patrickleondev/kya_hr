@@ -52,6 +52,12 @@
    .mention-text { margin-top: 3mm; font-style: italic; font-weight: bold; }
   .sig-line { border-top: 1px solid #000; margin-top: 18mm; padding-top: 1mm; font-size: 9pt; font-style: italic; }
    .signature-trace { margin-top: 2mm; font-size: 8.5pt; color: #555; }
+  /* Signature manuelle (impression) */
+  .sig-hand-label { font-style: italic; font-size: 9.5pt; margin-top: 4mm; margin-bottom: 1mm; }
+  .sig-hand-write-line { border-bottom: 1px solid #555; min-height: 8mm; margin-bottom: 4mm; }
+  .sig-hand-space { min-height: 28mm; border-bottom: 1px solid #000; margin: 6mm 0 2mm 0; }
+  .sig-hand-name { font-size: 9.5pt; font-weight: bold; margin-top: 1mm; }
+  .sig-hand-date { font-size: 8.5pt; color: #555; margin-top: 1mm; font-style: italic; }
    .ctr-foot { margin-top: 8mm; text-align: center; font-size: 9pt; color: #555; border-top: 1px solid #ccc; padding-top: 2mm; }
    .page-break { page-break-before: always; break-before: page; height: 0; }
    .ctr-page-markers { display: none; }
@@ -115,7 +121,7 @@
   <p><strong>Entre</strong></p>
   <p><strong>KYA-Energy Group</strong> ayant son siège social à Lomé, quartier Logopé 08BP81101, Lomé-Togo,
      téléphone : (00228) 70 45 34 81 / 91 50 21 49, e-mail : info@kya-energy.com, représenté par son
-     Directeur Général, monsieur <strong>{{ doc.nom_dg or "AZOUMAH Yao Kétowoglo" }}</strong>, majeur non
+     Directeur Général, monsieur <strong>{{ doc.nom_dg or "Prof. Yao AZOUMAH" }}</strong>, majeur non
      interdit ayant pleine capacité aux fins des présentes</p>
 
   <p><strong>Et</strong></p>
@@ -350,33 +356,41 @@
     <tr>
       <td>
         <strong>Le/La stagiaire</strong>
-            {% if doc.mention_lu_approuve_image %}
-               <img src="{{ doc.mention_lu_approuve_image }}" class="mention-img" alt="Mention manuscrite">
-            {% elif doc.mention_lu_approuve %}
-               <div class="mention-text">{{ doc.mention_lu_approuve }}</div>
-            {% else %}
-               <div class="sig-line">(*) Signature précédée de la mention manuscrite "lu et approuvé"</div>
-            {% endif %}
+        {# ── Mention "Lu et approuvé" ─── #}
+        {% if doc.mention_lu_approuve_image %}
+          <img src="{{ doc.mention_lu_approuve_image }}" class="mention-img" alt="Mention manuscrite">
+        {% elif doc.mention_lu_approuve %}
+          <div class="mention-text">{{ doc.mention_lu_approuve }}</div>
+        {% else %}
+          <div class="sig-hand-label">Lu et approuvé :</div>
+          <div class="sig-hand-write-line"></div>
+        {% endif %}
+        {# ── Signature ─── #}
         {% if doc.signature_employe %}
           <img src="{{ doc.signature_employe }}" class="sig-img" alt="Signature">
+          <div class="signature-trace">
+            {% if doc.nom_signe_employe %}{{ doc.nom_signe_employe }}<br>{% endif %}
+            {% if doc.date_signature_employe %}Signé le {{ frappe.utils.format_datetime(doc.date_signature_employe, "dd/MM/yyyy HH:mm:ss") }}{% endif %}
+          </div>
+        {% else %}
+          <div class="sig-hand-space"></div>
+          <div class="sig-hand-name">{{ doc.employee_name or "" }}</div>
+          <div class="sig-hand-date">Date : _____ / _____ / __________</div>
         {% endif %}
-            <div class="signature-trace">
-               {% if doc.nom_signe_employe %}{{ doc.nom_signe_employe }}<br>{% endif %}
-               {% if doc.date_signature_employe %}Signé le {{ frappe.utils.format_datetime(doc.date_signature_employe, "dd/MM/yyyy HH:mm:ss") }}{% endif %}
-            </div>
       </td>
       <td>
         <strong>Le Directeur Général</strong>
         {% if doc.signature_dg %}
           <img src="{{ doc.signature_dg }}" class="sig-img" alt="Signature DG">
+          <div class="signature-trace">
+            {% if doc.date_signature_dg %}Signé le {{ frappe.utils.format_datetime(doc.date_signature_dg, "dd/MM/yyyy HH:mm:ss") }}{% endif %}
+          </div>
         {% else %}
-          <div class="sig-line">&nbsp;</div>
+          <div class="sig-hand-space"></div>
+          <div class="sig-hand-date">Date : _____ / _____ / __________</div>
         {% endif %}
         <div style="margin-top:2mm;"><strong>{{ doc.nom_dg or "Prof. Yao AZOUMAH" }}</strong></div>
         <div style="font-size:9pt; font-style:italic;">{{ doc.fonction_dg or "Directeur Général" }}</div>
-            <div class="signature-trace">
-               {% if doc.date_signature_dg %}Signé le {{ frappe.utils.format_datetime(doc.date_signature_dg, "dd/MM/yyyy HH:mm:ss") }}{% endif %}
-            </div>
       </td>
     </tr>
   </table>
