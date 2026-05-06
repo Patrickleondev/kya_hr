@@ -43,7 +43,7 @@ doctype_js = {
     "Demande Achat KYA": "public/js/demande_achat_kya.js",
     "PV Entree Materiel": "doctype/pv_entree_materiel/pv_entree_materiel.js",
     "Inventaire KYA": "doctype/inventaire_kya/inventaire_kya.js",
-    "KYA Contrat": "doctype/kya_contrat/kya_contrat.js",
+    "KYA Contrat": "public/js/kya_contrat.js",
 }
 
 # Jinja environment

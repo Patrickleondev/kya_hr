@@ -32,7 +32,7 @@
 		"Permission Sortie Employe": "/permission-sortie-employe/new",
 		"Demande Conge KYA": "/demande-conge/new",
 		"Planning Conge": "/planning-conge/new",
-		"Bilan Fin De Stage": "/bilan-fin-de-stage/new",
+		"Bilan Fin de Stage": "/bilan-fin-de-stage/new",
 	};
 
 	const ORIGINAL_NEW_DOC = frappe.new_doc.bind(frappe);

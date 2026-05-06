@@ -20,9 +20,13 @@ ICON_REPLACEMENTS = {
 
 SIDEBAR_FIXES = {
     "Espace Direction": {"workspace": "Espace Direction", "icon": "briefcase", "module": "KYA HR", "app": "kya_hr"},
+    "Espace Achats": {"workspace": "Espace Achats", "icon": "shopping-cart", "module": "KYA HR", "app": "kya_hr"},
+    "Espace Stock": {"workspace": "Espace Stock", "icon": "package", "module": "KYA HR", "app": "kya_hr"},
+    "Espace RH": {"workspace": "Espace RH", "icon": "users", "module": "KYA HR", "app": "kya_hr"},
     "Espace Comptabilité": {"workspace": "Espace Comptabilité", "icon": "wallet", "module": "KYA HR", "app": "kya_hr"},
     "Espace Employes": {"workspace": "Espace Employes", "icon": "user-round", "module": "KYA HR", "app": "kya_hr"},
     "Espace Employés": {"workspace": "Espace Employes", "icon": "user-round", "module": "KYA HR", "app": "kya_hr"},
+    "Espace Stagiaires": {"workspace": "Espace Stagiaires", "icon": "graduation-cap", "module": "KYA HR", "app": "kya_hr"},
     "Inventaire & Sorties Matériel": {"workspace": "Inventaire Sorties Materiel", "icon": "boxes", "module": "KYA HR", "app": "kya_hr"},
     "Logistique": {"workspace": "Logistique", "icon": "truck", "module": "KYA HR", "app": "kya_hr"},
     "KYA Services": {"workspace": "KYA Services", "icon": "clipboard-list", "module": "KYA Services", "app": "kya_services"},
@@ -116,7 +120,6 @@ def _ensure_desktop_icon(label, sidebar_title, icon):
     if not sidebar_name:
         return False
 
-    icon_name = frappe.db.exists("Desktop Icon", {"label": label})
     values = {
         "label": label,
         "link_type": "Workspace Sidebar",
@@ -128,8 +131,12 @@ def _ensure_desktop_icon(label, sidebar_title, icon):
         "standard": 1,
     }
 
-    if icon_name:
-        return _set_values("Desktop Icon", icon_name, values)
+    icon_names = frappe.get_all("Desktop Icon", filters={"label": label}, pluck="name")
+    if icon_names:
+        changed = False
+        for icon_name in icon_names:
+            changed = _set_values("Desktop Icon", icon_name, values) or changed
+        return changed
 
     doc = frappe.new_doc("Desktop Icon")
     for key, value in values.items():
@@ -225,25 +232,49 @@ def _existing_fields(doctype, candidates):
 
 @frappe.whitelist()
 def audit():
+    sidebar_titles = sorted(set(SIDEBAR_FIXES) | {cfg["sidebar"] for cfg in DESKTOP_ICON_FIXES.values()})
+    bad_bilan_refs = {}
+    for doctype in ["Workspace Link", "Workspace Shortcut", "Workspace Sidebar Item"]:
+        if not frappe.db.has_table(doctype):
+            continue
+        bad_bilan_refs[doctype] = [
+            row
+            for row in frappe.get_all(doctype, fields=["name", "parent", "label", "link_to"])
+            if row.get("link_to") == "Bilan Fin De Stage"
+        ]
+    sidebar_items = {}
+    for sidebar in sidebar_titles:
+        sidebar_name = frappe.db.exists("Workspace Sidebar", sidebar) or frappe.db.exists("Workspace Sidebar", {"title": sidebar})
+        if not sidebar_name:
+            continue
+        sidebar_items[sidebar] = frappe.get_all(
+            "Workspace Sidebar Item",
+            filters={"parent": sidebar_name},
+            fields=["idx", "label", "link_type", "link_to", "url"],
+            order_by="idx asc",
+        )
     return {
         "desktop_icons": frappe.get_all(
             "Desktop Icon",
             filters={"label": ["in", list(DESKTOP_ICON_FIXES) + list(OBSOLETE_DESKTOP_LABELS)]},
-            fields=["label", "link_type", "link_to", "icon", "hidden"],
+            fields=["name", "label", "link_type", "link_to", "icon", "hidden"],
             order_by="idx asc, label asc",
         ),
         "sidebars": frappe.get_all(
             "Workspace Sidebar",
-            filters={"title": ["in", list(SIDEBAR_FIXES)]},
-            fields=_existing_fields("Workspace Sidebar", ["title", "type", "link_to", "header_icon", "module", "app"]),
+            filters={"title": ["in", sidebar_titles]},
+            fields=_existing_fields("Workspace Sidebar", ["name", "title", "type", "link_to", "header_icon", "module", "app"]),
             order_by="title asc",
         ),
+        "sidebar_items": sidebar_items,
+        "bad_bilan_refs": bad_bilan_refs,
         "km_card": frappe.db.get_value(
             "Number Card",
             {"label": "Km parcourus (total)"},
             ["name", "document_type", "function", "aggregate_function_based_on"],
             as_dict=True,
         ),
+        "bilan_count": frappe.db.count("Bilan Fin de Stage") if frappe.db.exists("DocType", "Bilan Fin de Stage") else None,
     }
 
 

@@ -120,9 +120,28 @@ def _sync_workspace_icon(config: dict) -> bool:
     if icon.is_new() or previous != current:
         icon.flags.ignore_links = True
         icon.save(ignore_permissions=True)
-        return True
+        changed = True
+    else:
+        changed = False
 
-    return False
+    duplicate_values = {
+        "link_type": "Workspace Sidebar",
+        "icon_type": "Link",
+        "link_to": sidebar_name,
+        "icon": config["icon"],
+        "idx": config["idx"],
+        "hidden": 0,
+        "parent_icon": None,
+        "standard": 1,
+    }
+    for duplicate in frappe.get_all("Desktop Icon", filters={"label": config["label"]}, pluck="name"):
+        current_values = frappe.db.get_value("Desktop Icon", duplicate, list(duplicate_values), as_dict=True)
+        updates = {key: value for key, value in duplicate_values.items() if current_values.get(key) != value}
+        if updates:
+            frappe.db.set_value("Desktop Icon", duplicate, updates, update_modified=False)
+            changed = True
+
+    return changed
 
 
 def _build_default_layout() -> list[dict]:
@@ -149,13 +168,9 @@ def _build_default_layout() -> list[dict]:
 
 def _sync_layout_doc(layout_doc) -> bool:
     layout = json.loads(layout_doc.layout or "[]")
-    existing_labels = {item.get("label") for item in layout}
     changed = False
 
     for config in WORKSPACE_ICONS:
-        if config["label"] in existing_labels:
-            continue
-
         icon = frappe.db.get_value(
             "Desktop Icon",
             {"label": config["label"], "link_type": "Workspace Sidebar"},
@@ -165,9 +180,21 @@ def _sync_layout_doc(layout_doc) -> bool:
         if not icon:
             continue
 
-        layout.append(_serialize_icon(icon))
-        existing_labels.add(config["label"])
-        changed = True
+        serialized = _serialize_icon(icon)
+        existing_items = [item for item in layout if item.get("label") == config["label"]]
+        if existing_items:
+            keep = existing_items[0]
+            for field in LAYOUT_FIELDS:
+                if keep.get(field) != serialized.get(field):
+                    keep[field] = serialized.get(field)
+                    changed = True
+            keep["child_icons"] = keep.get("child_icons") or []
+            for duplicate in existing_items[1:]:
+                layout.remove(duplicate)
+                changed = True
+        else:
+            layout.append(serialized)
+            changed = True
 
     layout.sort(key=lambda item: (item.get("idx") or 0, item.get("label") or ""))
 
