@@ -54,6 +54,10 @@ jinja = {
     ],
 }
 
+override_whitelisted_methods = {
+    "frappe.utils.print_format.download_pdf": "kya_hr.api.print_format.download_pdf",
+}
+
 # Grille indiciaire : calcul automatique de la valeur indiciaire (Employee)
 doc_events = {
     "Employee": {

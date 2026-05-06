@@ -16,6 +16,7 @@ import json
 import hmac
 import time
 import re
+import base64
 from frappe import _
 from frappe.utils import now_datetime
 
@@ -66,10 +67,28 @@ EMPLOYEE_SIGNATURE_STATES = ("En attente Signature Salarié", "Envoyé Signatair
 FINAL_STATES = ("Validé", "RH (revue)", "Archivé")
 
 
+def _kya_logo_data_uri():
+    try:
+        path = frappe.get_app_path("kya_hr", "public", "images", "kya_logo.png")
+        with open(path, "rb") as logo_file:
+            encoded = base64.b64encode(logo_file.read()).decode("ascii")
+        return f"data:image/png;base64,{encoded}"
+    except Exception:
+        return ""
+
+
 def _sanitize_contract_pdf_html(html):
-    html = re.sub(r'<link[^>]+href=["\']/assets/[^"\']+["\'][^>]*>', '', html or '', flags=re.I)
+    html = re.sub(r'<link[^>]+href=["\'](?:https?://[^"\']+)?/assets/[^"\']+["\'][^>]*>', '', html or '', flags=re.I)
     html = re.sub(r'<a[^>]+href=["\']/api/method/frappe\.utils\.print_format\.download_pdf[^"\']*["\'][^>]*>.*?</a>', '', html, flags=re.I | re.S)
     html = html.replace('/assets/frappe/images/signature-placeholder.png', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==')
+    logo_data_uri = _kya_logo_data_uri()
+    if logo_data_uri:
+        html = re.sub(
+            r'(src=["\'])(?:https?://[^"\']+)?/assets/kya_hr/images/kya_logo\.png(["\'])',
+            lambda match: f"{match.group(1)}{logo_data_uri}{match.group(2)}",
+            html,
+            flags=re.I,
+        )
     return html
 
 
