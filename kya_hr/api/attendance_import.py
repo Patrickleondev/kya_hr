@@ -20,6 +20,7 @@ from frappe.utils.file_manager import get_file_path
 
 import os
 import unicodedata
+from datetime import datetime, time
 
 
 STATUS_MAP = {
@@ -87,6 +88,140 @@ def _find_employee(matricule, name):
     return None
 
 
+def _parse_bool(val):
+    if val is None:
+        return None
+    if isinstance(val, bool):
+        return val
+    if isinstance(val, (int, float)):
+        return bool(val)
+    value = _norm(val)
+    if value in {"1", "oui", "yes", "y", "vrai", "true", "retard", "en retard", "late"}:
+        return True
+    if value in {"0", "non", "no", "n", "faux", "false", "", "a l heure", "ponctuel"}:
+        return False
+    return None
+
+
+def _parse_float(val):
+    if val is None or val == "":
+        return None
+    if isinstance(val, (int, float)):
+        return float(val)
+    value = str(val).strip().replace(",", ".")
+    try:
+        return float(value)
+    except ValueError:
+        return None
+
+
+def _time_minutes(val):
+    if val is None or val == "":
+        return None
+    if isinstance(val, datetime):
+        return val.hour * 60 + val.minute
+    if isinstance(val, time):
+        return val.hour * 60 + val.minute
+    if isinstance(val, (int, float)):
+        if 0 <= float(val) < 1:
+            return int(round(float(val) * 24 * 60))
+        return None
+    value = str(val).strip()
+    for fmt in ("%H:%M:%S", "%H:%M"):
+        try:
+            parsed = datetime.strptime(value, fmt).time()
+            return parsed.hour * 60 + parsed.minute
+        except ValueError:
+            continue
+    return None
+
+
+def _compute_hours(check_in, check_out):
+    start = _time_minutes(check_in)
+    end = _time_minutes(check_out)
+    if start is None or end is None:
+        return None
+    if end < start:
+        end += 24 * 60
+    return round((end - start) / 60, 2)
+
+
+@frappe.whitelist()
+def get_attendance_import_template():
+    """Retourne un modèle Excel mensuel RH en base64."""
+    if not frappe.has_permission("Attendance", "create"):
+        frappe.throw(_("Permission refusée : création d'Attendance."), frappe.PermissionError)
+
+    try:
+        import base64
+        import io
+        import openpyxl
+        from openpyxl.styles import Font, PatternFill
+    except ImportError:
+        frappe.throw(_("openpyxl non installé sur le site."))
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Modele RH Mensuel"
+    headers = [
+        "matricule",
+        "nom",
+        "date",
+        "statut",
+        "heure_entree",
+        "heure_sortie",
+        "heures",
+        "retard",
+        "departement",
+        "commentaire",
+    ]
+    examples = [
+        ["KYA001", "Nom Employe", "2026-01-05", "Present", "08:00", "17:00", "", "Non", "IT", ""],
+        ["KYA002", "Autre Employe", "2026-01-05", "Absent", "", "", "0", "Non", "IT", "Absence saisie RH"],
+        ["KYA003", "Employe Retard", "2026-01-05", "Present", "08:35", "17:00", "", "Oui", "IT", ""],
+    ]
+    notes = [
+        ["Colonnes obligatoires", "matricule ou nom, date"],
+        ["Statuts acceptes", "Present, Absent, Half Day, On Leave, Work From Home"],
+        ["Retards", "5 retards comptent comme 1 absence dans le calcul KYA"],
+        ["Heures", "Si heures est vide, le système calcule avec heure_entree et heure_sortie"],
+    ]
+
+    head_fill = PatternFill("solid", fgColor="1F4E78")
+    head_font = Font(color="FFFFFF", bold=True)
+    for column_index, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=column_index, value=header)
+        cell.fill = head_fill
+        cell.font = head_font
+
+    for row_index, row in enumerate(examples, 2):
+        for column_index, value in enumerate(row, 1):
+            ws.cell(row=row_index, column=column_index, value=value)
+
+    notes_sheet = wb.create_sheet("Aide")
+    notes_sheet.append(["Point", "Explication"])
+    for cell in notes_sheet[1]:
+        cell.fill = head_fill
+        cell.font = head_font
+    for row in notes:
+        notes_sheet.append(row)
+
+    widths = {"A": 14, "B": 28, "C": 14, "D": 18, "E": 14, "F": 14, "G": 12, "H": 10, "I": 22, "J": 34}
+    for column, width in widths.items():
+        ws.column_dimensions[column].width = width
+    notes_sheet.column_dimensions["A"].width = 24
+    notes_sheet.column_dimensions["B"].width = 72
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return {
+        "filename": "modele_import_presences_rh_mensuel.xlsx",
+        "data": base64.b64encode(buf.read()).decode(),
+        "mime": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    }
+
+
 @frappe.whitelist()
 def import_attendance(file_url: str):
     """Importe les présences depuis un Excel uploadé.
@@ -128,6 +263,8 @@ def import_attendance(file_url: str):
     idx_status = col("statut", "status", "etat", "presence")
     idx_in = col("check in", "arrivee", "heure entree", "in time")
     idx_out = col("check out", "depart", "heure sortie", "out time")
+    idx_late = col("retard", "en retard", "late", "late entry")
+    idx_hours = col("heures", "heure", "heures travaillees", "working hours", "total heures")
     idx_dept = col("departement", "department", "service")
 
     if idx_date == -1:
@@ -160,6 +297,10 @@ def import_attendance(file_url: str):
 
             check_in = r[idx_in] if idx_in != -1 else None
             check_out = r[idx_out] if idx_out != -1 else None
+            late_entry = _parse_bool(r[idx_late]) if idx_late != -1 else None
+            working_hours = _parse_float(r[idx_hours]) if idx_hours != -1 else None
+            if working_hours is None:
+                working_hours = _compute_hours(check_in, check_out)
 
             # Existe déjà ?
             existing = frappe.db.get_value(
@@ -172,6 +313,10 @@ def import_attendance(file_url: str):
                     doc.in_time = check_in
                 if check_out:
                     doc.out_time = check_out
+                if late_entry is not None:
+                    doc.late_entry = 1 if late_entry else 0
+                if working_hours is not None:
+                    doc.working_hours = working_hours
                 doc.save(ignore_permissions=False)
                 updated += 1
             else:
@@ -183,6 +328,10 @@ def import_attendance(file_url: str):
                     doc.in_time = check_in
                 if check_out:
                     doc.out_time = check_out
+                if late_entry is not None:
+                    doc.late_entry = 1 if late_entry else 0
+                if working_hours is not None:
+                    doc.working_hours = working_hours
                 doc.company = frappe.db.get_value("Employee", emp, "company") or frappe.defaults.get_user_default("Company")
                 doc.insert(ignore_permissions=False)
                 try:
