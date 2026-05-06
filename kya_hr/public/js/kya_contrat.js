@@ -1,23 +1,19 @@
 // KYA Contrat - Client Script (Desk)
 frappe.ui.form.on('KYA Contrat', {
     refresh(frm) {
+        force_kya_contract_sidebar();
+
         const roles = frappe.user_roles || [];
-        const is_signataire = roles.includes('KYA Signataire Contrat');
-        const is_dg = roles.includes('Directeur Général') || roles.includes('System Manager');
         const is_rh = roles.includes('Responsable RH') || roles.includes('HR Manager') || roles.includes('System Manager');
 
         // Le Desk RH sert à préparer, relire, transmettre et archiver.
         // Les signatures se font sur le portail documentaire tokenisé (/kya-contrat).
-        if (!is_signataire) {
-            ['section_sig_employe', 'contrat_lu', 'signature_employe', 'nom_signe_employe', 'date_signature_employe'].forEach((fieldname) => {
-                frm.set_df_property(fieldname, 'hidden', 1);
-            });
-        }
-        if (!is_dg || frm.doc.workflow_state !== 'En attente DG') {
-            ['section_sig_dg', 'signature_dg', 'nom_dg', 'fonction_dg', 'date_signature_dg'].forEach((fieldname) => {
-                frm.set_df_property(fieldname, 'hidden', 1);
-            });
-        }
+        [
+            'section_sig_employe', 'contrat_lu', 'signature_employe', 'nom_signe_employe', 'date_signature_employe',
+            'section_sig_dg', 'signature_dg', 'nom_dg', 'fonction_dg', 'date_signature_dg'
+        ].forEach((fieldname) => {
+            frm.set_df_property(fieldname, 'hidden', 1);
+        });
         if (is_rh && frm.doc.workflow_state === 'Brouillon') {
             frm.dashboard.set_headline(__('Préparez le contrat ici. Le signataire le lira et le signera via le portail envoyé par email.'));
         }
@@ -114,4 +110,13 @@ function render_contract_preview(frm) {
             <iframe src="${print_url}" style="width:100%;height:720px;border:0;background:#fff;"></iframe>
         </div>
     `);
+}
+
+function force_kya_contract_sidebar() {
+    if (!frappe.app || !frappe.app.sidebar) return;
+    setTimeout(() => {
+        if (frappe.app.sidebar.sidebar_title !== 'Espace RH') {
+            frappe.app.sidebar.setup('Espace RH');
+        }
+    }, 150);
 }

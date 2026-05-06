@@ -148,7 +148,7 @@
   {% elif is_finalized %}
     <div class="kya-alert alert-success">
       <b>✓ Contrat finalisé.</b> Signé par les deux parties. Vous pouvez télécharger le PDF officiel.
-      {% if contrat.pdf_final %}<br><a href="{{ contrat.pdf_final }}" target="_blank" class="btn-secondary" style="margin-top:8px;display:inline-block;text-decoration:none;">📄 Télécharger le PDF</a>{% endif %}
+      {% if final_pdf_download_url %}<br><a href="{{ final_pdf_download_url }}" target="_blank" class="btn-secondary" style="margin-top:8px;display:inline-block;text-decoration:none;">Télécharger le PDF signé</a>{% endif %}
     </div>
   {% endif %}
 
@@ -425,8 +425,8 @@ async function signContract() {
       signature_data: finalSig, role: ROLE, total_sections: TOTAL_SECTIONS,
     });
     status.style.color = '#27ae60';
-    status.innerHTML = '✓ Contrat signé avec succès. ' + (r.state === 'Finalisé'
-      ? 'Vous recevrez le PDF par email.' : 'Le DG va recevoir une notification pour co-signer.');
+    status.innerHTML = '✓ Contrat signé avec succès. ' + (ROLE === 'dg'
+      ? 'Le PDF final signé va être généré et rendu téléchargeable.' : 'La RH va relire puis transmettre au DG pour co-signature.');
     setTimeout(() => location.reload(), 2500);
   } catch (e) {
     status.style.color = '#c0392b';
