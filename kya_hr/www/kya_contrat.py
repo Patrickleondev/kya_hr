@@ -1,3 +1,4 @@
+# pyright: reportMissingImports=false
 """Portail web /kya-contrat?name=XXX&token=YYY (accès via token, pas de login)."""
 import frappe
 import json
@@ -8,6 +9,9 @@ from frappe import _
 
 no_cache = 1
 allow_guest = True
+
+EMPLOYEE_SIGNATURE_STATES = ("En attente Signature Salarié", "Envoyé Signataire")
+FINAL_STATES = ("Validé", "RH (revue)", "Archivé")
 
 
 def _split_sections(html):
@@ -93,7 +97,7 @@ def get_context(context):
     sigs = json.loads(doc.sections_signees or "{}")
     sections_signed_for_role = sigs.get(role, [])
 
-    peut_signer_employe = (role == "employe" and doc.workflow_state == "En attente Signature Salarié")
+    peut_signer_employe = (role == "employe" and doc.workflow_state in EMPLOYEE_SIGNATURE_STATES)
     peut_signer_dg = (role == "dg" and doc.workflow_state == "En attente DG")
     peut_editer_perso = peut_signer_employe and bool(doc.phone_confirmed)
 
@@ -114,11 +118,11 @@ def get_context(context):
     context.peut_signer_employe = peut_signer_employe
     context.peut_signer_dg = peut_signer_dg
     context.peut_editer_perso = peut_editer_perso
-    context.is_finalized = doc.workflow_state in ("Validé", "RH (revue)", "Archivé")
+    context.is_finalized = doc.workflow_state in FINAL_STATES
     context.final_pdf_download_url = (
         "/api/method/kya_hr.api.kya_contracts.download_final_pdf"
         f"?contract_id={quote(doc.name)}&token={quote(token)}"
-    ) if context.is_finalized and doc.pdf_final else ""
+    ) if context.is_finalized else ""
     context.date_signature_employe_fmt = fmt(doc.date_signature_employe, "Datetime")
     context.date_signature_dg_fmt = fmt(doc.date_signature_dg, "Datetime")
     context.title = f"Contrat {doc.name} — KYA-Energy Group"

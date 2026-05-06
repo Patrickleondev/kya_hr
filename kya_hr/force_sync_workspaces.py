@@ -321,6 +321,31 @@ def _rebuild_sidebar_items(sidebar_title, workspace_name, icon, items):
         )
 
 
+def _restrict_workspace_roles(workspace_name, roles):
+    if not frappe.db.exists("Workspace", workspace_name):
+        return
+    existing = set(frappe.get_all(
+        "Has Role",
+        filters={"parenttype": "Workspace", "parent": workspace_name},
+        pluck="role",
+    ))
+    changed = False
+    for role in roles:
+        if role not in existing and frappe.db.exists("Role", role):
+            role_doc = frappe.get_doc({
+                "doctype": "Has Role",
+                "parent": workspace_name,
+                "parenttype": "Workspace",
+                "parentfield": "roles",
+                "role": role,
+            })
+            role_doc.insert(ignore_permissions=True)
+            changed = True
+    if changed:
+        frappe.db.set_value("Workspace", workspace_name, "public", 1, update_modified=False)
+        print(f"  [WORKSPACE ROLES] {workspace_name} restricted to: {', '.join(roles)}")
+
+
 def _fix_bad_bilan_doctype_refs():
     bad_name = "Bilan Fin De Stage"
     good_name = "Bilan Fin de Stage"
@@ -488,6 +513,19 @@ def execute():
             print("  [CREATED] Espace Stagiaires sidebar")
         else:
             print("  [SKIP] Espace Stagiaires sidebar (workspace not found)")
+
+    _restrict_workspace_roles(
+        "Espace Stagiaires",
+        [
+            "Stagiaire",
+            "Maître de Stage",
+            "Responsable des Stagiaires",
+            "Responsable RH",
+            "HR Manager",
+            "Directeur Général",
+            "System Manager",
+        ],
+    )
 
     # 6b. Creer le Workspace Sidebar pour Espace Employes s'il n'existe pas
     espace_employes_name = None

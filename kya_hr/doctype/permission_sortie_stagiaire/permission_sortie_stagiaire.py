@@ -8,12 +8,41 @@ from frappe.utils import date_diff, today, get_fullname
 from kya_hr.utils.approval_guards import block_self_approval
 
 
+def _can_select_any_employee(user=None):
+    roles = set(frappe.get_roles(user or frappe.session.user))
+    return bool({"System Manager", "HR Manager", "HR User", "Responsable RH"} & roles)
+
+
+def _current_active_employee(user=None):
+    return frappe.db.get_value(
+        "Employee",
+        {"user_id": user or frappe.session.user, "status": "Active"},
+        "name",
+    )
+
+
 class PermissionSortieStagiaire(Document):
     def validate(self):
         block_self_approval(self)
+        self.validate_requester_employee_scope()
         self.validate_employee_is_intern()
         self.set_employee_details()
         self.calc_nombre_jours()
+
+    def validate_requester_employee_scope(self):
+        user = frappe.session.user
+        if user in ("Administrator", "Guest") or _can_select_any_employee(user):
+            return
+        current_employee = _current_active_employee(user)
+        if not current_employee:
+            frappe.throw("Aucun stagiaire actif n'est lié à votre compte utilisateur.")
+        if not self.employee:
+            self.employee = current_employee
+        elif self.employee != current_employee:
+            frappe.throw(
+                "Vous ne pouvez pas créer une demande de permission pour un autre stagiaire. "
+                "Le champ Stagiaire doit correspondre à votre compte connecté."
+            )
 
     def validate_employee_is_intern(self):
         if self.employee:

@@ -954,8 +954,20 @@ footer .web-footer-menu { display: none !important; }
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 160px;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
   vertical-align: middle;
+}
+
+.list-row .workflow-state-indicator,
+.list-row .indicator-pill,
+.list-row .badge,
+.report-list .indicator-pill {
+  min-height: 22px;
+  padding-top: 2px;
+  padding-bottom: 2px;
 }
 
 /* Form field values (read-only long text) */

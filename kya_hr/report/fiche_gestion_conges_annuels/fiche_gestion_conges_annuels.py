@@ -79,11 +79,23 @@ def get_data(filters):
         }
         if leave_type:
             alloc_filters["leave_type"] = leave_type
-        acquis = frappe.db.get_value(
-            "Leave Allocation",
-            alloc_filters,
-            "SUM(total_leaves_allocated)",
-        ) or 0
+        alloc_conditions = ["docstatus = 1", "employee = %(employee)s", "from_date >= %(year_start)s", "to_date <= %(year_end)s"]
+        alloc_values = {
+            "employee": emp.name,
+            "year_start": year_start,
+            "year_end": year_end,
+        }
+        if leave_type:
+            alloc_conditions.append("leave_type = %(leave_type)s")
+            alloc_values["leave_type"] = leave_type
+        acquis = frappe.db.sql(
+            f"""
+            SELECT COALESCE(SUM(total_leaves_allocated), 0)
+            FROM `tabLeave Allocation`
+            WHERE {' AND '.join(alloc_conditions)}
+            """,
+            alloc_values,
+        )[0][0] or 0
 
         # Pris (toutes Leave Applications validées de l'année)
         la_filters = {

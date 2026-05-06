@@ -507,6 +507,10 @@
     for (var i = 0; i < roles.length; i++) { if (userHasRole(roles[i])) return true; }
     return false;
   }
+
+  function canSelectAnyEmployee() {
+    return userHasAnyRole(["System Manager", "HR Manager", "HR User", "Responsable RH"]);
+  }
   function isDocOwner() {
     if (!window.frappe || !frappe.web_form_doc) return true;
     var owner = frappe.web_form_doc.doc_owner || frappe.web_form_doc.owner || "";
@@ -869,6 +873,7 @@
     if (!empField) return;
     var empInput = empField.querySelector("input");
     if (!empInput) return;
+    var canSelectAny = canSelectAnyEmployee();
 
     function setInput(fieldName, value) {
       var el = findFieldEl(fieldName);
@@ -886,6 +891,17 @@
       setInput("employee_name", emp.employee_name);
       setInput("department", emp.department);
       if (emp.designation) setInput("designation", emp.designation);
+    }
+
+    function lockEmployeeInputForSelfService() {
+      if (canSelectAny) return;
+      empInput.setAttribute("readonly", "readonly");
+      empInput.setAttribute("aria-readonly", "true");
+      empInput.style.pointerEvents = "none";
+      empField.classList.add("read-only");
+      empField.setAttribute("data-read-only", "1");
+      var control = empField.querySelector(".link-field, .awesomplete, .input-group");
+      if (control) control.style.pointerEvents = "none";
     }
 
     function fetchEmployeeData(empId) {
@@ -917,9 +933,11 @@
         }
       });
     }
+    lockEmployeeInputForSelfService();
 
     // ---- Fuzzy search par nom (matricule oublié) -------------------
     function buildFuzzySearch() {
+      if (!canSelectAny) return;
       if (empField.querySelector(".kya-fuzzy-wrap")) return;
       var wrap = document.createElement("div");
       wrap.className = "kya-fuzzy-wrap";
@@ -1003,6 +1021,7 @@
     });
     obs.observe(empInput, { attributes: true });
     empInput.addEventListener("change", function () { fetchEmployeeData(empInput.value); });
+    lockEmployeeInputForSelfService();
   }
 
   function waitForForm() {

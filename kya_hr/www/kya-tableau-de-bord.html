@@ -171,7 +171,7 @@ body { background: var(--kya-bg); font-family: 'Segoe UI', sans-serif; margin: 0
   <div class="kya-header-actions">
     <button class="btn-kya-outline" onclick="refreshData()"><i class="bi bi-arrow-clockwise"></i> Rafraîchir</button>
     <button class="btn-kya-outline" onclick="syncWebForms()"><i class="bi bi-diagram-3"></i> Synchroniser Web Forms</button>
-    <button class="btn-kya-success" onclick="exportExcel()"><i class="bi bi-file-earmark-excel"></i> Exporter Excel</button>
+    <button class="btn-kya-success" onclick="exportExcel()"><i class="bi bi-file-earmark-excel"></i> Exporter le module</button>
     <a href="/app" class="btn-kya-outline"><i class="bi bi-house"></i> Bureau</a>
   </div>
 </div>
@@ -313,12 +313,19 @@ function renderModules(modules) {
               </div>
               ${renderServiceSummary(mod.services || {})}
             </div>
-            <span class="mod-badge">${fmtN(mod.totals.total)}</span>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+              <button class="btn btn-sm btn-outline-success" onclick="exportExcel('${modKey}')" style="font-size:11px;">
+                <i class="bi bi-file-earmark-excel"></i> Exporter cette section
+              </button>
+              <span class="mod-badge">${fmtN(mod.totals.total)}</span>
+            </div>
           </div>
 
           <div class="dt-grid">
             ${dtCards}
           </div>
+
+          ${renderModuleExtra(modKey, mod)}
 
           <div class="chart-row">
             ${(mod.doctypes||[]).map(dt => {
@@ -341,6 +348,28 @@ function renderModules(modules) {
       });
     }, 100);
   });
+}
+
+function renderModuleExtra(modKey, mod) {
+  if (modKey !== 'reunions') return '';
+  const dt = (mod.doctypes || []).find(item => item.name === 'KYA Reunion Meeting');
+  const s = (dt && dt.reunion_summary) || {};
+  return `
+    <div class="dt-card" style="margin-top:16px;">
+      <div class="dt-name">
+        Synthèse réunions centralisées
+        <a href="/app/kya-reunion-sync-log" target="_blank"><i class="bi bi-clock-history"></i> Historique sync</a>
+      </div>
+      <div class="dt-stats">
+        <div class="dt-stat s-total"><div class="dt-stat-val">${fmtN(s.participants||0)}</div><div class="dt-stat-lbl">Participants</div></div>
+        <div class="dt-stat s-approved"><div class="dt-stat-val">${fmtN(s.closed||0)}</div><div class="dt-stat-lbl">Clôturées</div></div>
+        <div class="dt-stat s-pending"><div class="dt-stat-val">${fmtN(s.active||0)}</div><div class="dt-stat-lbl">Actives</div></div>
+        <div class="dt-stat s-rejected"><div class="dt-stat-val">${fmtN(s.expired||0)}</div><div class="dt-stat-lbl">Expirées</div></div>
+        <div class="dt-stat"><div class="dt-stat-val" style="color:var(--kya-orange)">${fmtN(s.late_count||0)}</div><div class="dt-stat-lbl">Retards</div></div>
+        <div class="dt-stat"><div class="dt-stat-val" style="color:var(--kya-purple)">${fmtN(s.late_minutes||0)}</div><div class="dt-stat-lbl">Minutes retard</div></div>
+      </div>
+    </div>
+  `;
 }
 
 function renderServiceSummary(services) {
@@ -430,39 +459,49 @@ function drawDtChart(modKey, dt) {
 }
 
 /* ─── Export Excel ───────────────────────────────────────────── */
-function exportExcel() {
+function getActiveModuleKey() {
+  const selected = document.getElementById('ctrl-module').value;
+  if (selected) return selected;
+  const active = document.querySelector('#mod-tabs .nav-link.active');
+  if (!active) return Object.keys((_lastData && _lastData.modules) || {})[0] || '';
+  const target = active.getAttribute('data-bs-target') || '';
+  return target.replace('#pane-', '');
+}
+
+function exportExcel(moduleKey) {
   if (!_lastData) return;
+  const selectedKey = moduleKey || getActiveModuleKey();
+  const selectedModule = selectedKey ? _lastData.modules?.[selectedKey] : null;
+  if (!selectedModule) {
+    alert('Sélectionnez un module à exporter.');
+    return;
+  }
   const wb = XLSX.utils.book_new();
 
-  // Feuille synthèse globale
-  const sumRows = [['Module', 'Service', 'Équipe', 'Fiche', 'Web Form', 'Print Format', 'Total', 'En attente', 'Approuvé', 'Rejeté', 'Brouillon', 'Montant (XOF)']];
-  Object.values(_lastData.modules || {}).forEach(mod => {
-    (mod.doctypes || []).forEach(dt => {
-      const c = dt.classified || {};
-      sumRows.push([mod.label, dt.service_label || '', dt.team_label || '', dt.label, dt.web_form_route || '', dt.print_format || '', dt.total, c.pending||0, c.approved||0, c.rejected||0, c.draft||0, Math.round(dt.total_amount||0)]);
-    });
+  // Feuille synthèse du module actif uniquement
+  const sumRows = [['Module', 'Service', 'Équipe', 'Fiche', 'Web Form', 'Print Format', 'Total', 'En attente', 'Approuvé', 'Rejeté', 'Brouillon', 'Montant (XOF)', 'Participants', 'Actives', 'Clôturées', 'Expirées', 'Retards', 'Minutes retard']];
+  (selectedModule.doctypes || []).forEach(dt => {
+    const c = dt.classified || {};
+    const rs = dt.reunion_summary || {};
+    sumRows.push([selectedModule.label, dt.service_label || '', dt.team_label || '', dt.label, dt.web_form_route || '', dt.print_format || '', dt.total, c.pending||0, c.approved||0, c.rejected||0, c.draft||0, Math.round(dt.total_amount||0), rs.participants || '', rs.active || '', rs.closed || '', rs.expired || '', rs.late_count || '', rs.late_minutes || '']);
   });
   const wsSynth = XLSX.utils.aoa_to_sheet(sumRows);
-  wsSynth['!cols'] = [22,22,20,30,24,28,10,12,12,10,12,18].map(w => ({wch: w}));
-  XLSX.utils.book_append_sheet(wb, wsSynth, 'Synthèse Globale');
+  wsSynth['!cols'] = [22,22,20,30,24,28,10,12,12,10,12,18,14,10,10,10,10,16].map(w => ({wch: w}));
+  XLSX.utils.book_append_sheet(wb, wsSynth, 'Synthèse Module');
 
-  // Feuilles par module
-  Object.entries(_lastData.modules || {}).forEach(([modKey, mod]) => {
-    const modRows = [['Service', 'Équipe', 'Fiche', 'Référence', 'Statut', 'Date', 'Montant (XOF)', 'PDF', 'Desk']];
-    (mod.doctypes || []).forEach(dt => {
-      (dt.recents || []).forEach(r => {
-        modRows.push([dt.service_label || '', dt.team_label || '', dt.label, r.name, r.status, r.date, r.amount ? Math.round(r.amount) : '', r.pdf_url || '', r.desk_url || '']);
-      });
+  const modRows = [['Service', 'Équipe', 'Fiche', 'Référence', 'Statut', 'Date', 'Montant (XOF)', 'PDF', 'Desk']];
+  (selectedModule.doctypes || []).forEach(dt => {
+    (dt.recents || []).forEach(r => {
+      modRows.push([dt.service_label || '', dt.team_label || '', dt.label, r.name, r.status, r.date, r.amount ? Math.round(r.amount) : '', r.pdf_url || '', r.desk_url || '']);
     });
-    if (modRows.length > 1) {
-      const ws = XLSX.utils.aoa_to_sheet(modRows);
-      XLSX.utils.book_append_sheet(wb, ws, mod.label.slice(0, 31));
-    }
   });
+  const wsRecords = XLSX.utils.aoa_to_sheet(modRows);
+  XLSX.utils.book_append_sheet(wb, wsRecords, 'Enregistrements');
 
   const period = document.getElementById('ctrl-period').value;
   const today = new Date().toISOString().slice(0,10).replace(/-/g,'');
-  XLSX.writeFile(wb, `KYA_Dashboard_${today}_P${period}j.xlsx`);
+  const safeModule = (selectedModule.label || selectedKey).replace(/[^a-z0-9]+/gi, '_').replace(/^_|_$/g, '').slice(0, 40);
+  XLSX.writeFile(wb, `KYA_Dashboard_${safeModule}_${today}_P${period}j.xlsx`);
 }
 
 /* ─── Main refresh ───────────────────────────────────────────── */
