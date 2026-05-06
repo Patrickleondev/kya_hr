@@ -15,7 +15,7 @@
    "fieldname": "module_key",
    "label": "Module",
    "fieldtype": "Select",
-   "options": "rh\nachats\nstocks\ncompta\nautre",
+    "options": "services_supports\nrh\nachats\nstock\nstocks\nlogistique\ncomptabilite\ncompta\ndirection_generale\ninformatique\nservice_technique\nservice_commercial\nkya_services\nautre",
    "reqd": 1,
    "in_list_view": 1,
    "columns": 1
@@ -44,6 +44,30 @@
    "in_list_view": 1,
    "columns": 1
   },
+    {
+     "fieldname": "department",
+     "label": "Département",
+     "fieldtype": "Link",
+     "options": "Department",
+     "in_list_view": 1,
+     "columns": 2,
+     "description": "Département propriétaire du processus. Optionnel si le service n'est pas encore modélisé dans ERPNext."
+    },
+    {
+     "fieldname": "service_label",
+     "label": "Service",
+     "fieldtype": "Data",
+     "in_list_view": 1,
+     "columns": 2,
+     "description": "Ex: Achats, Stock, Service Technique, Commercial, Informatique."
+    },
+    {
+     "fieldname": "team_label",
+     "label": "Équipe",
+     "fieldtype": "Data",
+     "columns": 2,
+     "description": "Sous-équipe ou cellule responsable, si applicable."
+    },
   {
    "fieldname": "doctype_name",
    "label": "DocType ERPNext",
@@ -53,6 +77,15 @@
    "columns": 2,
    "description": "Nom exact du DocType tel qu'il existe dans ERPNext (ex: Permission Sortie Employe)"
   },
+    {
+     "fieldname": "web_form_name",
+     "label": "Web Form",
+     "fieldtype": "Link",
+     "options": "Web Form",
+     "in_list_view": 1,
+     "columns": 2,
+     "description": "Formulaire web source. Peut être rempli automatiquement depuis la route."
+    },
   {
    "fieldname": "dt_label",
    "label": "Libellé Affiché",
@@ -92,7 +125,36 @@
    "fieldname": "web_form_route",
    "label": "Route Web Form",
    "fieldtype": "Data",
-   "description": "Route du formulaire web public (ex: /permission-sortie-employe). Laisser vide si pas de web form."
+    "description": "Route du formulaire web public (ex: /permission-sortie-employe). Collez le chemin ici pour synchroniser le DocType, la route et le print format."
+  },
+  {
+    "fieldname": "print_format",
+    "label": "Print Format PDF",
+    "fieldtype": "Link",
+    "options": "Print Format",
+    "description": "Format d'impression utilisé pour ouvrir les fiches en PDF signé/designé depuis le dashboard."
+  },
+  {
+    "fieldname": "sync_mode",
+    "label": "Mode Sync",
+    "fieldtype": "Select",
+    "options": "Synchronisé depuis Web Form\nManuel verrouillé",
+    "default": "Synchronisé depuis Web Form",
+    "description": "Synchronisé garde les métadonnées alignées avec le Web Form ; Manuel verrouillé protège les réglages saisis à la main."
+  },
+  {
+    "fieldname": "last_synced_on",
+    "label": "Dernière synchronisation",
+    "fieldtype": "Datetime",
+    "read_only": 1
+  },
+  {
+    "fieldname": "sync_fingerprint",
+    "label": "Empreinte de configuration",
+    "fieldtype": "Data",
+    "read_only": 1,
+    "hidden": 1,
+    "description": "Empreinte serveur utilisée pour détecter les modifications de configuration."
   },
   {
    "fieldname": "is_active",
