@@ -19,7 +19,7 @@ ICON_REPLACEMENTS = {
 }
 
 SIDEBAR_FIXES = {
-    "Direction Générale": {"workspace": "Espace Direction", "icon": "briefcase", "module": "KYA HR", "app": "kya_hr"},
+    "Espace Direction": {"workspace": "Espace Direction", "icon": "briefcase", "module": "KYA HR", "app": "kya_hr"},
     "Espace Comptabilité": {"workspace": "Espace Comptabilité", "icon": "wallet", "module": "KYA HR", "app": "kya_hr"},
     "Espace Employes": {"workspace": "Espace Employes", "icon": "user-round", "module": "KYA HR", "app": "kya_hr"},
     "Espace Employés": {"workspace": "Espace Employes", "icon": "user-round", "module": "KYA HR", "app": "kya_hr"},
@@ -30,7 +30,7 @@ SIDEBAR_FIXES = {
 }
 
 DESKTOP_ICON_FIXES = {
-    "Direction Générale": {"sidebar": "Direction Générale", "icon": "briefcase"},
+    "Direction Générale": {"sidebar": "Espace Direction", "icon": "briefcase"},
     "Espace Achats": {"sidebar": "Espace Achats", "icon": "shopping-cart"},
     "Espace Stock": {"sidebar": "Espace Stock", "icon": "package"},
     "Espace RH": {"sidebar": "Espace RH", "icon": "users"},

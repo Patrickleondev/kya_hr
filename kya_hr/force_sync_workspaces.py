@@ -18,7 +18,7 @@ import json
 ORPHAN_WORKSPACES = ["KYA Stagiaires", "Conges & Permissions"]
 
 # Workspace Sidebars orphelins a supprimer
-ORPHAN_SIDEBARS = ["KYA Stagiaires", "Personnes"]
+ORPHAN_SIDEBARS = ["KYA Stagiaires", "Personnes", "Direction Générale"]
 
 # Workspaces geres par les fichiers JSON (on s'assure juste qu'ils sont visibles)
 KYA_WORKSPACES = [
@@ -88,7 +88,7 @@ KYA_AUTO_SIDEBARS = [
         ],
     },
     {
-        "title": "Direction Générale",
+        "title": "Espace Direction",
         "icon": "briefcase",
         "module": "KYA HR",
         "app": "kya_hr",
@@ -253,7 +253,7 @@ def _upsert_workspace_shortcut(workspace_name, label, link_type, link_to=None, u
     return shortcut.name
 
 
-def _ensure_sidebar_item(sidebar_title, label, link_type, link_to=None, url=None, icon=None):
+def _ensure_sidebar_item(sidebar_title, label, link_type, link_to=None, url=None, icon=None, idx=None):
     sidebar_name = frappe.db.exists("Workspace Sidebar", {"title": sidebar_title})
     if not sidebar_name:
         return
@@ -277,6 +277,8 @@ def _ensure_sidebar_item(sidebar_title, label, link_type, link_to=None, url=None
         values.update({"link_to": link_to or "", "url": ""})
     if icon is not None:
         values["icon"] = icon
+    if idx is not None:
+        values["idx"] = idx
 
     if existing:
         frappe.db.set_value("Workspace Sidebar Item", existing, values, update_modified=False)
@@ -290,6 +292,27 @@ def _ensure_sidebar_item(sidebar_title, label, link_type, link_to=None, url=None
         **values,
     })
     item.insert(ignore_permissions=True)
+
+
+def _rebuild_sidebar_items(sidebar_title, workspace_name, icon, items):
+    sidebar_name = frappe.db.exists("Workspace Sidebar", {"title": sidebar_title})
+    if not sidebar_name:
+        return
+
+    frappe.db.delete("Workspace Sidebar Item", {"parent": sidebar_name})
+    _ensure_sidebar_item(sidebar_title, sidebar_title, "Workspace", link_to=workspace_name, icon=icon, idx=1)
+    for idx, item in enumerate(items, start=2):
+        if item.get("link_type") == "DocType" and not frappe.db.exists("DocType", item.get("link_to")):
+            continue
+        _ensure_sidebar_item(
+            sidebar_title,
+            item["label"],
+            item["link_type"],
+            link_to=item.get("link_to"),
+            url=item.get("url"),
+            icon=item.get("icon", "file"),
+            idx=idx,
+        )
 
 
 def _ensure_gestion_equipe_content():
@@ -512,7 +535,7 @@ def execute():
     _link_desktop_icon_to_sidebar("KYA Services", ["KYA Services"], "clipboard-list")
     _link_desktop_icon_to_sidebar("Gestion Équipe", ["Gestion Équipe", "Gestion Equipe"], "users")
     _link_desktop_icon_to_sidebar("Gestion Equipe", ["Gestion Équipe", "Gestion Equipe"], "users")
-    _link_desktop_icon_to_sidebar("Direction Générale", ["Direction Générale", "Espace Direction"], "briefcase")
+    _link_desktop_icon_to_sidebar("Direction Générale", ["Espace Direction"], "briefcase")
     _link_desktop_icon_to_sidebar("Espace Employes", ["Espace Employes", "Espace Employés"], "user-round")
     _link_desktop_icon_to_sidebar("Espace Employés", ["Espace Employes", "Espace Employés"], "user-round")
     _link_desktop_icon_to_sidebar("Espace Stagiaires", ["Espace Stagiaires"], "graduation-cap")
@@ -532,32 +555,18 @@ def execute():
             sidebar.header_icon = cfg["icon"]
             sidebar.app = cfg["app"]
             sidebar.standard = 0
-            sidebar.append("items", {
-                "label": title,
-                "type": "Link",
-                "link_to": ws_name,
-                "link_type": "Workspace",
-                "icon": cfg["icon"],
-            })
-            for it in cfg["items"]:
-                # Skip items pointing to non-existent doctypes
-                if it.get("link_type") == "DocType" and not frappe.db.exists("DocType", it.get("link_to")):
-                    continue
-                sidebar.append("items", {
-                    "label": it["label"],
-                    "type": "Link",
-                    "link_type": it["link_type"],
-                    "link_to": it.get("link_to", ""),
-                    "url": it.get("url", ""),
-                    "icon": it.get("icon", "file"),
-                })
             sidebar.insert(ignore_permissions=True)
             print(f"  [CREATED SIDEBAR] {title} (icon={cfg['icon']})")
         else:
             # Sidebar exists -> ensure header icon is the Lucide icon
             sidebar_name = frappe.db.exists("Workspace Sidebar", {"title": title})
             if sidebar_name:
-                frappe.db.set_value("Workspace Sidebar", sidebar_name, "header_icon", cfg["icon"], update_modified=False)
+                frappe.db.set_value("Workspace Sidebar", sidebar_name, {
+                    "header_icon": cfg["icon"],
+                    "module": cfg["module"],
+                    "app": cfg["app"],
+                }, update_modified=False)
+        _rebuild_sidebar_items(title, ws_name, cfg["icon"], cfg["items"])
         _link_desktop_icon_to_sidebar(title, [title], cfg["icon"])
 
     # 10. Fix setup_complete default value if needed

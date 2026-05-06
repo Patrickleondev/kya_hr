@@ -4,7 +4,7 @@ import frappe
 from frappe.desk.doctype.desktop_icon.desktop_icon import clear_desktop_icons_cache
 
 WORKSPACE_ICONS = [
-    {"label": "Direction Générale", "link_to": "Espace Direction", "icon": "briefcase", "idx": 10},
+    {"label": "Direction Générale", "link_to": "Espace Direction", "sidebar": "Espace Direction", "icon": "briefcase", "idx": 10},
     {"label": "Espace RH", "link_to": "Espace RH", "icon": "users", "idx": 11},
     {"label": "Espace Achats", "link_to": "Espace Achats", "icon": "shopping-cart", "idx": 12},
     {"label": "Espace Stock", "link_to": "Espace Stock", "icon": "package", "idx": 13},
@@ -61,6 +61,10 @@ def _sync_workspace_icon(config: dict) -> bool:
     workspace_label = frappe.db.get_value("Workspace", config["link_to"], "label")
 
     sidebar_name = frappe.db.get_value(
+        "Workspace Sidebar",
+        {"title": config.get("sidebar") or config["label"]},
+        "name",
+    ) or frappe.db.get_value(
         "Workspace Sidebar",
         {"title": config["label"]},
         "name",
