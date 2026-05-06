@@ -106,12 +106,41 @@ def _resolve_user_by_role(role_name, department=None):
     return active[0]
 
 
+def _can_select_any_employee(user=None):
+    roles = set(frappe.get_roles(user or frappe.session.user))
+    return bool({"System Manager", "HR Manager", "HR User", "Responsable RH"} & roles)
+
+
+def _current_active_employee(user=None):
+    return frappe.db.get_value(
+        "Employee",
+        {"user_id": user or frappe.session.user, "status": "Active"},
+        "name",
+    )
+
+
 class PermissionSortieEmploye(Document):
     def validate(self):
+        self.validate_requester_employee_scope()
         self.validate_employee_is_not_intern()
         self.set_employee_details()
         self.resolve_notification_recipients()
         self.guard_self_approval()
+
+    def validate_requester_employee_scope(self):
+        user = frappe.session.user
+        if user in ("Administrator", "Guest") or _can_select_any_employee(user):
+            return
+        current_employee = _current_active_employee(user)
+        if not current_employee:
+            frappe.throw("Aucun employé actif n'est lié à votre compte utilisateur.")
+        if not self.employee:
+            self.employee = current_employee
+        elif self.employee != current_employee:
+            frappe.throw(
+                "Vous ne pouvez pas créer une demande de permission pour un autre employé. "
+                "Le champ Employé doit correspondre à votre compte connecté."
+            )
 
     def before_insert(self):
         """When HR creates manually via Desk, start workflow at 'En attente RH'

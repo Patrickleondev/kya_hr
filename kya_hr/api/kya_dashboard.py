@@ -150,6 +150,22 @@ MODULE_MAP = {
             },
         ],
     },
+    "reunions": {
+        "label": "Réunions & Émargements",
+        "icon": "🗓️",
+        "color": "#00838f",
+        "doctypes": [
+            {
+                "name": "KYA Reunion Meeting",
+                "label": "Réunions synchronisées",
+                "status_field": "status",
+                "date_field": "start_at",
+                "amount_field": None,
+                "list_url": "/app/kya-reunion-meeting",
+                "form_url": "",
+            },
+        ],
+    },
 }
 
 # Statuts classés comme "approuvé", "en attente", "rejeté"
@@ -282,6 +298,9 @@ def _get_config():
                 "service_label": getattr(e, "service_label", None),
                 "team_label": getattr(e, "team_label", None),
             })
+        for module_key, module_cfg in MODULE_MAP.items():
+            if module_key not in config:
+                config[module_key] = module_cfg
         return config
     except Exception:
         return MODULE_MAP  # fallback si le DocType n'existe pas encore
@@ -367,6 +386,13 @@ def _get_doctype_stats(dt_cfg, date_from, date_to):
     except Exception:
         recents = []
 
+    extra = {}
+    if dt_name == "KYA Reunion Meeting":
+        try:
+            extra["reunion_summary"] = frappe.get_attr("kya_hr.api.kya_reunion.get_summary_for_dashboard")(date_from, date_to)
+        except Exception:
+            extra["reunion_summary"] = {}
+
     return {
         "name": dt_name,
         "label": dt_cfg["label"],
@@ -395,6 +421,7 @@ def _get_doctype_stats(dt_cfg, date_from, date_to):
             }
             for r in recents
         ],
+        **extra,
     }
 
 

@@ -6,6 +6,7 @@ Lifecycle:
 - on_update: générer PDF + envoyer emails finaux quand workflow_state=Finalisé
 """
 import frappe
+import re
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_months, getdate, now_datetime
@@ -94,8 +95,9 @@ class KYAContrat(Document):
             "KYA Contrat",
             self.name,
             print_format="Contrat de Stage KYA" if (self.contract_type or "").lower().startswith("stage") else "KYA Contrat PDF",
-            no_letterhead=0,
+            no_letterhead=1,
         )
+        html = _sanitize_contract_pdf_html(html)
         pdf_bytes = get_pdf(html)
         file_doc = frappe.get_doc({
             "doctype": "File",
@@ -178,3 +180,11 @@ class KYAContrat(Document):
             attachments=attachments,
             now=False,
         )
+
+
+def _sanitize_contract_pdf_html(html):
+    """Remove Desk print chrome/assets that wkhtmltopdf cannot fetch in Docker."""
+    html = re.sub(r'<link[^>]+href=["\']/assets/[^"\']+["\'][^>]*>', '', html or '', flags=re.I)
+    html = re.sub(r'<a[^>]+href=["\']/api/method/frappe\.utils\.print_format\.download_pdf[^"\']*["\'][^>]*>.*?</a>', '', html, flags=re.I | re.S)
+    html = html.replace('/assets/frappe/images/signature-placeholder.png', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==')
+    return html

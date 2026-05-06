@@ -6,10 +6,10 @@
 {%- set type_label = "stage professionnel" if doc.contract_type == "Stage Professionnel" else "stage académique" -%}
 {%- set genre = "M." -%}
 {%- set fait_a = "Lomé" -%}
-{%- set logo_url = "/assets/kya_hr/images/kya_logo.png" -%}
 
 <style>
   body { font-family: Arial, Helvetica, sans-serif; font-size: 11pt; color: #000; line-height: 1.45; }
+   @page { size: A4; margin: 15mm; }
   .ctr-page { padding: 0 4mm; }
   .ctr-header { width: 100%; border-collapse: collapse; margin-bottom: 4mm; }
   .ctr-header td { vertical-align: top; padding: 0; }
@@ -18,7 +18,9 @@
   .ctr-title-bar { width: 100%; border-collapse: collapse; margin: 4mm 0 6mm 0; }
   .ctr-title-bar td { padding: 0; vertical-align: middle; }
   .ctr-logo-cell { width: 50mm; padding: 4px 8px; border: 1px solid #ccc; }
-  .ctr-logo-cell img { max-height: 22mm; display: block; margin: 0 auto; }
+   .ctr-logo-mark { text-align: center; font-weight: bold; color: #1a5276; line-height: 1.2; }
+   .ctr-logo-mark .brand { font-size: 15pt; color: #f58220; }
+   .ctr-logo-mark .sub { font-size: 8.5pt; letter-spacing: 0.5px; }
   .ctr-title-cell {
     background: #F58220;
     color: #fff; font-weight: bold; font-size: 18pt;
@@ -46,12 +48,33 @@
   .sig-block { margin-top: 12mm; width: 100%; border-collapse: collapse; }
   .sig-block td { width: 50%; vertical-align: top; padding: 0 4mm; }
   .sig-img { max-height: 22mm; max-width: 55mm; display: block; margin-top: 3mm; }
+   .mention-img { max-height: 18mm; max-width: 62mm; display: block; margin-top: 3mm; }
+   .mention-text { margin-top: 3mm; font-style: italic; font-weight: bold; }
   .sig-line { border-top: 1px solid #000; margin-top: 18mm; padding-top: 1mm; font-size: 9pt; font-style: italic; }
-  .ctr-foot { margin-top: 8mm; text-align: center; font-size: 9pt; color: #555; border-top: 1px solid #ccc; padding-top: 2mm; }
+   .signature-trace { margin-top: 2mm; font-size: 8.5pt; color: #555; }
+   .ctr-foot { margin-top: 8mm; text-align: center; font-size: 9pt; color: #555; border-top: 1px solid #ccc; padding-top: 2mm; }
+   .page-break { page-break-before: always; break-before: page; height: 0; }
+   .ctr-page-markers { display: none; }
+   @media print {
+      .ctr-page { padding-bottom: 18mm; }
+      .ctr-page-markers {
+         display: block; position: fixed; left: 0; right: 0; bottom: 0;
+         font-size: 8.5pt; color: #555; border-top: 1px solid #ccc; padding-top: 2mm;
+      }
+      .ctr-page-markers .left { float: left; width: 35%; text-align: left; }
+      .ctr-page-markers .center { float: left; width: 30%; text-align: center; }
+      .ctr-page-markers .right { float: right; width: 35%; text-align: right; }
+   }
   strong, b { font-weight: bold; }
 </style>
 
 <div class="ctr-page">
+
+   <div class="ctr-page-markers">
+      <span class="left">Stagiaire{% if doc.date_signature_employe %} · {{ frappe.utils.format_datetime(doc.date_signature_employe, "dd/MM/yyyy HH:mm") }}{% endif %}</span>
+      <span class="center">CNSS N° 48863</span>
+      <span class="right">DG{% if doc.date_signature_dg %} · {{ frappe.utils.format_datetime(doc.date_signature_dg, "dd/MM/yyyy HH:mm") }}{% endif %}</span>
+   </div>
 
   {# ── Bandeau adresse + références fiscales ───────────────── #}
   <table class="ctr-header">
@@ -74,7 +97,10 @@
   <table class="ctr-title-bar">
     <tr>
       <td class="ctr-logo-cell">
-        <img src="{{ logo_url }}" alt="KYA-Energy">
+            <div class="ctr-logo-mark">
+               <div class="brand">KYA</div>
+               <div class="sub">ENERGY GROUP</div>
+            </div>
       </td>
       <td class="ctr-title-cell">CONTRAT DE STAGE</td>
       <td class="ctr-ref-cell">
@@ -141,6 +167,14 @@
   <p>Le stagiaire exercera, sous l'autorité et le contrôle de ses Tuteurs (Maîtres de stage), des tâches
      entrant dans le cadre strict du programme défini par la société.</p>
 
+   <div class="page-break"></div>
+   <table class="ctr-header">
+      <tr>
+         <td class="ctr-addr" style="width:55%;">08 BP 81101 AGOENYIVE,<br>LOGOPE<br>Tél. : +228 70 45 34 81 / 91 50 21 49</td>
+         <td class="ctr-meta" style="width:45%;">N° CFE : 6254PM2015/2015<br>N° RCCM : TG-LOM 2015 B 975<br>NIF N° 1000430317</td>
+      </tr>
+   </table>
+
   <h3 class="art">Article 5 : Indemnités de stage</h3>
   {%- if doc.contract_type == "Stage Académique" -%}
   <p>Dans le cadre de ce stage académique, aucune indemnité n'est due au/à la stagiaire.</p>
@@ -179,6 +213,13 @@
   <p>Sous réserve de convention exprès, aucune indemnité n'est due à la fin ou à la rupture du contrat de stage.</p>
 
   {# ────────────────────────────────────────────────────────────── #}
+   <div class="page-break"></div>
+   <table class="ctr-header">
+      <tr>
+         <td class="ctr-addr" style="width:55%;">08 BP 81101 AGOENYIVE,<br>LOGOPE<br>Tél. : +228 70 45 34 81 / 91 50 21 49</td>
+         <td class="ctr-meta" style="width:45%;">N° CFE : 6254PM2015/2015<br>N° RCCM : TG-LOM 2015 B 975<br>NIF N° 1000430317</td>
+      </tr>
+   </table>
   <div class="ctr-part-title">Deuxième Partie : Engagement de Confidentialité</div>
 
   <h3 class="art">Article 1<sup>er</sup> : Objet</h3>
@@ -236,6 +277,13 @@
      en relation avec le stage.</p>
 
   {# ────────────────────────────────────────────────────────────── #}
+   <div class="page-break"></div>
+   <table class="ctr-header">
+      <tr>
+         <td class="ctr-addr" style="width:55%;">08 BP 81101 AGOENYIVE,<br>LOGOPE<br>Tél. : +228 70 45 34 81 / 91 50 21 49</td>
+         <td class="ctr-meta" style="width:45%;">N° CFE : 6254PM2015/2015<br>N° RCCM : TG-LOM 2015 B 975<br>NIF N° 1000430317</td>
+      </tr>
+   </table>
   <div class="ctr-part-title">Troisième Partie : Cession d'Images</div>
 
   <h3 class="art">Article 1<sup>er</sup> : Objet</h3>
@@ -273,6 +321,13 @@
      et 2 de la troisième partie du présent contrat, sont accordés à <strong>titre gracieux</strong>.</p>
 
   {# ────────────────────────────────────────────────────────────── #}
+   <div class="page-break"></div>
+   <table class="ctr-header">
+      <tr>
+         <td class="ctr-addr" style="width:55%;">08 BP 81101 AGOENYIVE,<br>LOGOPE<br>Tél. : +228 70 45 34 81 / 91 50 21 49</td>
+         <td class="ctr-meta" style="width:45%;">N° CFE : 6254PM2015/2015<br>N° RCCM : TG-LOM 2015 B 975<br>NIF N° 1000430317</td>
+      </tr>
+   </table>
   <div class="ctr-part-title">Quatrième Partie : Dispositions Finales Communes</div>
 
   <h3 class="art">Article 1<sup>er</sup> : Droit applicable et litiges</h3>
@@ -295,11 +350,20 @@
     <tr>
       <td>
         <strong>Le/La stagiaire</strong>
+            {% if doc.mention_lu_approuve_image %}
+               <img src="{{ doc.mention_lu_approuve_image }}" class="mention-img" alt="Mention manuscrite">
+            {% elif doc.mention_lu_approuve %}
+               <div class="mention-text">{{ doc.mention_lu_approuve }}</div>
+            {% else %}
+               <div class="sig-line">(*) Signature précédée de la mention manuscrite "lu et approuvé"</div>
+            {% endif %}
         {% if doc.signature_employe %}
           <img src="{{ doc.signature_employe }}" class="sig-img" alt="Signature">
-        {% else %}
-          <div class="sig-line">(*) Signature précédée de la mention manuscrite "lu et approuvé"</div>
         {% endif %}
+            <div class="signature-trace">
+               {% if doc.nom_signe_employe %}{{ doc.nom_signe_employe }}<br>{% endif %}
+               {% if doc.date_signature_employe %}Signé le {{ frappe.utils.format_datetime(doc.date_signature_employe, "dd/MM/yyyy HH:mm:ss") }}{% endif %}
+            </div>
       </td>
       <td>
         <strong>Le Directeur Général</strong>
@@ -310,6 +374,9 @@
         {% endif %}
         <div style="margin-top:2mm;"><strong>{{ doc.nom_dg or "Prof. Yao AZOUMAH" }}</strong></div>
         <div style="font-size:9pt; font-style:italic;">{{ doc.fonction_dg or "Directeur Général" }}</div>
+            <div class="signature-trace">
+               {% if doc.date_signature_dg %}Signé le {{ frappe.utils.format_datetime(doc.date_signature_dg, "dd/MM/yyyy HH:mm:ss") }}{% endif %}
+            </div>
       </td>
     </tr>
   </table>

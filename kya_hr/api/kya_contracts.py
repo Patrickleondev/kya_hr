@@ -15,6 +15,7 @@ import frappe
 import json
 import hmac
 import time
+import re
 from frappe import _
 from frappe.utils import now_datetime
 
@@ -50,6 +51,28 @@ def _normalize_phone(p):
     return "".join(c for c in str(p) if c.isdigit())[-9:]
 
 
+def _request_ip():
+    try:
+        return frappe.local.request.headers.get("X-Forwarded-For", "").split(",")[0].strip() or frappe.local.request.remote_addr
+    except Exception:
+        return ""
+
+
+def _normalize_mention(text):
+    return " ".join((text or "").lower().replace("’", "'").split())
+
+
+EMPLOYEE_SIGNATURE_STATES = ("En attente Signature Salarié", "Envoyé Signataire")
+FINAL_STATES = ("Validé", "RH (revue)", "Archivé")
+
+
+def _sanitize_contract_pdf_html(html):
+    html = re.sub(r'<link[^>]+href=["\']/assets/[^"\']+["\'][^>]*>', '', html or '', flags=re.I)
+    html = re.sub(r'<a[^>]+href=["\']/api/method/frappe\.utils\.print_format\.download_pdf[^"\']*["\'][^>]*>.*?</a>', '', html, flags=re.I | re.S)
+    html = html.replace('/assets/frappe/images/signature-placeholder.png', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==')
+    return html
+
+
 # ─── 1. RH envoie le contrat au signataire ───────────────────────────────────
 
 @frappe.whitelist()
@@ -59,7 +82,7 @@ def send_to_signataire(contract_id):
 
     doc = frappe.get_doc("KYA Contrat", contract_id)
     if not doc.employee_email:
-        frappe.throw(_("L'employé n'a pas d'email enregistré."))
+        frappe.throw(_("L'email du signataire est requis avant l'envoi."))
     if not doc.telephone:
         frappe.throw(_("Le numéro de téléphone du signataire est requis avant l'envoi."))
 
@@ -149,7 +172,7 @@ def update_personal_info(contract_id, token, data):
     doc = _load_contract_with_token(contract_id, token, "employe")
     if not doc.phone_confirmed:
         frappe.throw(_("Confirmez d'abord votre numéro de téléphone."))
-    if doc.workflow_state not in ("En attente Signature Salarié", "Brouillon"):
+    if doc.workflow_state not in EMPLOYEE_SIGNATURE_STATES + ("Brouillon",):
         frappe.throw(_("Le contrat n'est plus modifiable."))
     if isinstance(data, str):
         data = json.loads(data)
@@ -182,7 +205,7 @@ def mark_section_signed(contract_id, token, section_id, role="employe"):
 # ─── 5. Signature finale ──────────────────────────────────────────────────────
 
 @frappe.whitelist(allow_guest=True)
-def sign_contract(contract_id, token, signature_data, role="employe", total_sections=None):
+def sign_contract(contract_id, token, signature_data, role="employe", total_sections=None, mention_text=None, mention_image=None):
     doc = _load_contract_with_token(contract_id, token, role)
 
     if total_sections:
@@ -197,12 +220,20 @@ def sign_contract(contract_id, token, signature_data, role="employe", total_sect
     if role == "employe":
         if not doc.phone_confirmed:
             frappe.throw(_("Confirmez d'abord votre numéro de téléphone."))
-        if doc.workflow_state != "En attente Signature Salarié":
+        if doc.workflow_state not in EMPLOYEE_SIGNATURE_STATES:
             frappe.throw(_("Le contrat n'est pas en attente de votre signature."))
+        normalized_mention = _normalize_mention(mention_text)
+        if "lu" not in normalized_mention or "approuv" not in normalized_mention:
+            frappe.throw(_("Veuillez saisir la mention 'lu et approuvé' avant de signer."))
+        doc.mention_lu_approuve = mention_text
+        if mention_image:
+            doc.mention_lu_approuve_image = mention_image
+        doc.date_mention_lu_approuve = now_datetime()
         doc.signature_employe = signature_data
         doc.contrat_lu = 1
         doc.nom_signe_employe = doc.employee_name
         doc.date_signature_employe = now_datetime()
+        doc.signature_employe_ip = _request_ip()
         doc.workflow_state = "Signé Salarié"
         if not doc.access_token_dg:
             doc.access_token_dg = _generate_token()
@@ -214,6 +245,7 @@ def sign_contract(contract_id, token, signature_data, role="employe", total_sect
             frappe.throw(_("Le contrat n'est pas en attente de la signature DG."))
         doc.signature_dg = signature_data
         doc.date_signature_dg = now_datetime()
+        doc.signature_dg_ip = _request_ip()
         doc.workflow_state = "Validé"
         doc.flags.ignore_permissions = True
         doc.save()
@@ -341,9 +373,9 @@ def get_contract_view(contract_id, token):
         "role": role,
         "phone_confirmed": bool(doc.phone_confirmed),
         "sections_signees": json.loads(doc.sections_signees or "{}").get(role, []),
-        "can_sign": (role == "employe" and doc.workflow_state == "En attente Signature Salarié") or
+        "can_sign": (role == "employe" and doc.workflow_state in EMPLOYEE_SIGNATURE_STATES) or
                     (role == "dg" and doc.workflow_state == "En attente DG"),
-        "is_finalized": doc.workflow_state in ("Validé", "RH (revue)", "Archivé"),
+        "is_finalized": doc.workflow_state in FINAL_STATES,
     }
 
 
@@ -356,7 +388,7 @@ def download_final_pdf(contract_id, token):
     if not (_verify_token(doc, token, "employe") or _verify_token(doc, token, "dg")):
         frappe.throw(_("Lien invalide ou expiré"), frappe.PermissionError)
 
-    if doc.workflow_state not in ("Validé", "RH (revue)", "Archivé"):
+    if doc.workflow_state not in FINAL_STATES:
         frappe.throw(_("Le PDF final sera disponible après la co-signature."))
 
     if not doc.pdf_final and doc.signature_employe and doc.signature_dg:
@@ -373,4 +405,20 @@ def download_final_pdf(contract_id, token):
     file_doc = frappe.get_doc("File", file_name)
     frappe.local.response.filename = file_doc.file_name or f"Contrat_{doc.name}.pdf"
     frappe.local.response.filecontent = file_doc.get_content()
+    frappe.local.response.type = "download"
+
+
+@frappe.whitelist()
+def download_current_pdf(contract_id):
+    if not frappe.has_permission("KYA Contrat", "print", contract_id):
+        frappe.throw(_("Permission refusée"), frappe.PermissionError)
+
+    from frappe.utils.pdf import get_pdf
+
+    doc = frappe.get_doc("KYA Contrat", contract_id)
+    print_format = "Contrat de Stage KYA" if (doc.contract_type or "").lower().startswith("stage") else "KYA Contrat PDF"
+    html = _sanitize_contract_pdf_html(frappe.get_print("KYA Contrat", doc.name, print_format=print_format, no_letterhead=1))
+
+    frappe.local.response.filename = f"Contrat_{doc.name}.pdf"
+    frappe.local.response.filecontent = get_pdf(html)
     frappe.local.response.type = "download"

@@ -162,7 +162,15 @@
  "parent_page": "",
  "public": 1,
  "quick_lists": [],
- "roles": [],
+ "roles": [
+  {"role": "Stagiaire"},
+  {"role": "Maître de Stage"},
+  {"role": "Responsable des Stagiaires"},
+  {"role": "Responsable RH"},
+  {"role": "HR Manager"},
+  {"role": "Directeur Général"},
+  {"role": "System Manager"}
+ ],
  "sequence_id": 5.0,
  "shortcuts": [
   {

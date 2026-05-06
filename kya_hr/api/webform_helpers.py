@@ -53,6 +53,10 @@ def search_employees(query: str = "", limit: int = 10):
     son matricule. Retourne une liste légère (name, employee_name,
     department) — aucune donnée sensible.
     """
+    roles = set(frappe.get_roles(frappe.session.user))
+    if not ({"System Manager", "HR Manager", "HR User", "Responsable RH"} & roles):
+        frappe.throw(_("Vous n'êtes pas autorisé à rechercher d'autres employés."))
+
     query = (query or "").strip()
     if len(query) < 2:
         return []

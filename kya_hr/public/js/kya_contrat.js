@@ -10,7 +10,8 @@ frappe.ui.form.on('KYA Contrat', {
         // Les signatures se font sur le portail documentaire tokenisé (/kya-contrat).
         [
             'section_sig_employe', 'contrat_lu', 'signature_employe', 'nom_signe_employe', 'date_signature_employe',
-            'section_sig_dg', 'signature_dg', 'nom_dg', 'fonction_dg', 'date_signature_dg'
+            'mention_lu_approuve', 'mention_lu_approuve_image', 'date_mention_lu_approuve', 'signature_employe_ip',
+            'section_sig_dg', 'signature_dg', 'nom_dg', 'fonction_dg', 'date_signature_dg', 'signature_dg_ip'
         ].forEach((fieldname) => {
             frm.set_df_property(fieldname, 'hidden', 1);
         });
@@ -23,7 +24,7 @@ frappe.ui.form.on('KYA Contrat', {
         if (!frm.is_new() && frm.doc.workflow_state === 'Brouillon') {
             frm.add_custom_button(__('Envoyer au Signataire'), () => {
                 frappe.confirm(
-                    __('Créer le compte signataire et envoyer le contrat par email à ') + frm.doc.employee_email + ' ?',
+                    __('Envoyer le lien sécurisé de signature à ') + frm.doc.employee_email + ' ?',
                     () => {
                         frappe.call({
                             method: 'kya_hr.api.kya_contracts.send_to_signataire',
@@ -45,12 +46,16 @@ frappe.ui.form.on('KYA Contrat', {
         if (frm.doc.pdf_final) {
             frm.add_custom_button(__('Télécharger PDF'), () => {
                 window.open(frm.doc.pdf_final, '_blank');
-            });
+            }, __('Document'));
+        } else if (!frm.is_new()) {
+            frm.add_custom_button(__('Télécharger PDF'), () => {
+                window.open(`/api/method/kya_hr.api.kya_contracts.download_current_pdf?contract_id=${encodeURIComponent(frm.doc.name)}`, '_blank');
+            }, __('Document'));
         }
 
         frm.add_custom_button(__('Aperçu Document'), () => {
-            window.open(`/printview?doctype=KYA%20Contrat&name=${encodeURIComponent(frm.doc.name)}&format=${encodeURIComponent((frm.doc.contract_type || '').startsWith('Stage') ? 'Contrat de Stage KYA' : 'KYA Contrat PDF')}&no_letterhead=0`, '_blank');
-        });
+            window.open(`/printview?doctype=KYA%20Contrat&name=${encodeURIComponent(frm.doc.name)}&format=${encodeURIComponent((frm.doc.contract_type || '').startsWith('Stage') ? 'Contrat de Stage KYA' : 'KYA Contrat PDF')}&no_letterhead=1`, '_blank');
+        }, __('Document'));
 
         if (!frm.is_new() && ['En attente Signature Salarié', 'Signé Salarié', 'En attente DG'].includes(frm.doc.workflow_state)) {
             frm.add_custom_button(__('Ouvrir Portail Signature'), () => {
@@ -100,12 +105,16 @@ function render_contract_preview(frm) {
     }
 
     const print_format = (frm.doc.contract_type || '').startsWith('Stage') ? 'Contrat de Stage KYA' : 'KYA Contrat PDF';
-    const print_url = `/printview?doctype=KYA%20Contrat&name=${encodeURIComponent(frm.doc.name)}&format=${encodeURIComponent(print_format)}&no_letterhead=0`;
+    const print_url = `/printview?doctype=KYA%20Contrat&name=${encodeURIComponent(frm.doc.name)}&format=${encodeURIComponent(print_format)}&no_letterhead=1`;
+    const pdf_url = `/api/method/kya_hr.api.kya_contracts.download_current_pdf?contract_id=${encodeURIComponent(frm.doc.name)}`;
     frm.set_df_property('contract_preview', 'options', `
         <div style="border:1px solid #d9dee3;border-radius:6px;overflow:hidden;background:#fff;">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 12px;background:#f7f9fb;border-bottom:1px solid #d9dee3;">
                 <div style="font-weight:600;color:#1f2937;">Aperçu du contrat généré</div>
-                <a class="btn btn-xs btn-default" href="${print_url}" target="_blank">Ouvrir en pleine page</a>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <a class="btn btn-xs btn-default" href="${print_url}" target="_blank">Ouvrir en pleine page</a>
+                    <a class="btn btn-xs btn-primary" href="${pdf_url}" target="_blank">Télécharger PDF</a>
+                </div>
             </div>
             <iframe src="${print_url}" style="width:100%;height:720px;border:0;background:#fff;"></iframe>
         </div>

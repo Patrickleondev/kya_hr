@@ -34,6 +34,7 @@ frappe.ui.form.on("Permission Sortie Stagiaire", {
     },
 
     onload: function(frm) {
+        _lock_employee_field_for_self_service(frm);
         // Remplissage automatique du stagiaire connecté
         if (frm.is_new() && !frm.doc.employee) {
             frappe.db.get_value("Employee", {"user_id": frappe.session.user},
@@ -76,6 +77,21 @@ frappe.ui.form.on("Permission Sortie Stagiaire", {
     date_sortie: function(frm) { _calc_nombre_jours(frm); _toggle_heures(frm); },
     date_fin: function(frm) { _calc_nombre_jours(frm); _toggle_heures(frm); }
 });
+
+function _can_select_any_employee() {
+    var roles = frappe.user_roles || [];
+    return roles.includes("System Manager") || roles.includes("HR Manager")
+        || roles.includes("HR User") || roles.includes("Responsable RH");
+}
+
+function _lock_employee_field_for_self_service(frm) {
+    var can_select = _can_select_any_employee();
+    frm.set_query("employee", function() {
+        if (can_select) return { filters: { status: "Active", employment_type: "Stage" } };
+        return { filters: { user_id: frappe.session.user, status: "Active", employment_type: "Stage" } };
+    });
+    frm.set_df_property("employee", "read_only", can_select ? 0 : 1);
+}
 
 function _calc_duree(frm) {
     if (frm.doc.heure_depart && frm.doc.heure_retour) {

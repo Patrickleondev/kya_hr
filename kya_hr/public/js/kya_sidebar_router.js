@@ -1,5 +1,15 @@
 // Force the intended KYA workspace sidebar for ambiguous DocType routes.
 (function () {
+    const STAGIAIRE_WORKSPACE_ROLES = [
+        'Stagiaire',
+        'Maître de Stage',
+        'Responsable des Stagiaires',
+        'Responsable RH',
+        'HR Manager',
+        'System Manager',
+        'Directeur Général',
+    ];
+
     const DOCTYPE_SIDEBARS = {
         'KYA Contrat': 'Espace RH',
         'Permission Sortie Employe': 'Espace RH',
@@ -32,6 +42,36 @@
         'Tache Equipe': 'Gestion Équipe',
     };
 
+    function has_any_role(roles) {
+        const user_roles = (window.frappe && frappe.user_roles) || [];
+        return roles.some(role => user_roles.includes(role));
+    }
+
+    function can_see_stagiaire_space() {
+        return has_any_role(STAGIAIRE_WORKSPACE_ROLES);
+    }
+
+    function hide_restricted_workspace_links() {
+        if (can_see_stagiaire_space()) return;
+        const selectors = [
+            '.standard-sidebar-item',
+            '.desk-sidebar-item',
+            '.sidebar-item',
+            '.workspace-sidebar-item',
+            '.app-icon',
+            'a[href*="espace-stagiaires"]',
+            'a[href*="Espace%20Stagiaires"]',
+        ];
+        document.querySelectorAll(selectors.join(',')).forEach(el => {
+            const text = (el.textContent || '').trim().toLowerCase();
+            const href = (el.getAttribute && (el.getAttribute('href') || '')) || '';
+            if (text.includes('espace stagiaires') || href.toLowerCase().includes('espace-stagiaires')) {
+                el.style.display = 'none';
+                el.setAttribute('aria-hidden', 'true');
+            }
+        });
+    }
+
     function current_doctype() {
         if (!window.frappe || !frappe.get_route) return null;
         const route = frappe.get_route() || [];
@@ -44,6 +84,7 @@
         const doctype = current_doctype();
         const sidebar = DOCTYPE_SIDEBARS[doctype];
         if (!sidebar) return;
+        if (sidebar === 'Espace Stagiaires' && !can_see_stagiaire_space()) return;
 
         const key = sidebar.toLowerCase();
         if (!frappe.boot.workspace_sidebar_item || !frappe.boot.workspace_sidebar_item[key]) return;
@@ -57,8 +98,10 @@
     }
 
     function schedule_force_sidebar() {
+        hide_restricted_workspace_links();
         setTimeout(force_sidebar, 120);
         setTimeout(force_sidebar, 350);
+        setTimeout(hide_restricted_workspace_links, 450);
     }
 
     if (window.frappe && frappe.router) {
@@ -67,4 +110,8 @@
 
     $(document).on('form-refresh page-change list-refresh', schedule_force_sidebar);
     $(document).ready(schedule_force_sidebar);
+    if (document.body) {
+        new MutationObserver(hide_restricted_workspace_links)
+            .observe(document.body, { childList: true, subtree: true });
+    }
 })();
