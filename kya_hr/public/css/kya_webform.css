@@ -403,12 +403,46 @@ body {
 .kya-form-section .frappe-control[data-fieldtype="Table"] .form-group {
   border: 1px solid var(--kya-border);
   border-radius: var(--kya-r-md);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: visible;
+  max-width: 100%;
+  padding-bottom: 6px;
+  scrollbar-color: var(--kya-primary) rgba(0,84,166,0.12);
 }
 .web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row,
 .kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row {
   background: #eaf2f8 !important;
   border-bottom: 1px solid var(--kya-border) !important;
+}
+
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-body,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-body,
+.web-form-container .frappe-control[data-fieldtype="Table"] .rows,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .rows,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-row,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-row {
+  min-width: 820px;
+}
+
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row .grid-row,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row .grid-row,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-row .data-row,
+.kya-form-section .frappe-control[data-fieldtype="Table"] .grid-row .data-row {
+  min-width: 820px;
+  width: max-content;
+}
+
+.web-form-container .frappe-control[data-fieldtype="Table"] input,
+.kya-form-section .frappe-control[data-fieldtype="Table"] input,
+.web-form-container .frappe-control[data-fieldtype="Table"] select,
+.kya-form-section .frappe-control[data-fieldtype="Table"] select,
+.web-form-container .frappe-control[data-fieldtype="Table"] textarea,
+.kya-form-section .frappe-control[data-fieldtype="Table"] textarea {
+  min-width: 120px;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 .web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row .static-area,
 .kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row .static-area {

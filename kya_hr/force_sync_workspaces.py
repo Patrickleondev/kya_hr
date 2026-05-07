@@ -324,14 +324,19 @@ def _rebuild_sidebar_items(sidebar_title, workspace_name, icon, items):
 def _restrict_workspace_roles(workspace_name, roles):
     if not frappe.db.exists("Workspace", workspace_name):
         return
-    existing = set(frappe.get_all(
+    existing_rows = frappe.get_all(
         "Has Role",
         filters={"parenttype": "Workspace", "parent": workspace_name},
-        pluck="role",
-    ))
-    changed = False
+        fields=["name", "role"],
+    )
+    allowed = [role for role in roles if frappe.db.exists("Role", role)]
+    allowed_set = set(allowed)
+    for row in existing_rows:
+        if row.role not in allowed_set:
+            frappe.delete_doc("Has Role", row.name, force=True, ignore_missing=True)
+    existing = {row.role for row in existing_rows if row.role in allowed_set}
     for role in roles:
-        if role not in existing and frappe.db.exists("Role", role):
+        if role not in existing and role in allowed_set:
             role_doc = frappe.get_doc({
                 "doctype": "Has Role",
                 "parent": workspace_name,
@@ -340,10 +345,31 @@ def _restrict_workspace_roles(workspace_name, roles):
                 "role": role,
             })
             role_doc.insert(ignore_permissions=True)
-            changed = True
-    if changed:
-        frappe.db.set_value("Workspace", workspace_name, "public", 1, update_modified=False)
-        print(f"  [WORKSPACE ROLES] {workspace_name} restricted to: {', '.join(roles)}")
+    frappe.db.set_value("Workspace", workspace_name, "public", 1, update_modified=False)
+    print(f"  [WORKSPACE ROLES] {workspace_name} -> {', '.join(allowed)}")
+
+
+def _upsert_desktop_url_icon(label, url, icon="home", idx=10):
+    existing = frappe.db.exists("Desktop Icon", {"label": label})
+    values = {
+        "label": label,
+        "icon_type": "Link",
+        "link_type": "URL",
+        "link": url,
+        "link_to": "",
+        "icon": icon,
+        "idx": idx,
+        "hidden": 0,
+        "parent_icon": None,
+        "standard": 1,
+    }
+    if existing:
+        frappe.db.set_value("Desktop Icon", existing, values, update_modified=False)
+        print(f"  [ICON LINK] {label} -> {url}")
+        return
+    icon_doc = frappe.get_doc({"doctype": "Desktop Icon", **values})
+    icon_doc.insert(ignore_permissions=True)
+    print(f"  [ICON CREATED] {label} -> {url}")
 
 
 def _fix_bad_bilan_doctype_refs():
@@ -517,10 +543,10 @@ def execute():
     _restrict_workspace_roles(
         "Espace Stagiaires",
         [
-            "Stagiaire",
             "Maître de Stage",
             "Responsable des Stagiaires",
             "Responsable RH",
+            "HR User",
             "HR Manager",
             "Directeur Général",
             "System Manager",
@@ -580,10 +606,30 @@ def execute():
         _ensure_gestion_equipe_content()
         _ensure_sidebar_item("Gestion Équipe", "Plans Trimestriels", "DocType", link_to="Plan Trimestriel", icon="list")
         _ensure_sidebar_item("Gestion Équipe", "Taches d'Equipe", "DocType", link_to="Tache Equipe", icon="task")
+        _restrict_workspace_roles(gestion_ws, ["Chef d'Équipe", "Chef Service", "System Manager"])
 
     espace_ws = _resolve_existing_workspace(["Espace Employes", "Espace Employés"])
     if espace_ws:
         _ensure_sidebar_home_link("Espace Employes", espace_ws)
+        _restrict_workspace_roles(
+            espace_ws,
+            [
+                "Chef Service",
+                "Supérieur Immédiat",
+                "Responsable RH",
+                "HR User",
+                "HR Manager",
+                "Directeur Général",
+                "DAAF",
+                "Auditeur Interne",
+                "Stock User",
+                "Purchase User",
+                "Responsable Achats",
+                "Chargé des Stocks",
+                "KYA Destinataire Notif",
+                "System Manager",
+            ],
+        )
 
     # Ensure KYA Services sidebar contains functional entries even if sidebar existed but got emptied.
     kya_services_ws = _resolve_existing_workspace(["KYA Services"])
@@ -592,6 +638,7 @@ def execute():
         _ensure_sidebar_item("KYA Services", "Formulaires", "DocType", link_to="KYA Form", icon="file")
         _ensure_sidebar_item("KYA Services", "Évaluations", "DocType", link_to="KYA Evaluation", icon="clipboard")
         _ensure_sidebar_item("KYA Services", "Réponses Formulaires", "DocType", link_to="KYA Form Response", icon="list")
+        _restrict_workspace_roles(kya_services_ws, ["KYA Survey Admin", "System Manager"])
 
     # 9. Desktop icons must target Workspace Sidebar to avoid route=null popup.
     _link_desktop_icon_to_sidebar("KYA Services", ["KYA Services"], "clipboard-list")
@@ -603,7 +650,7 @@ def execute():
     _link_desktop_icon_to_sidebar("Espace Stagiaires", ["Espace Stagiaires"], "graduation-cap")
     _link_desktop_icon_to_sidebar("Inventaire & Sorties Matériel", ["Inventaire & Sorties Matériel", "Inventaire Sorties Materiel"], "boxes")
 
-    # 9b. Auto-create Workspace Sidebar for Achats/Stock/RH/Compta/Direction/Logistique
+    _upsert_desktop_url_icon("Mon Espace", "/mon-espace", "home", idx=5)
     for cfg in KYA_AUTO_SIDEBARS:
         title = cfg["title"]
         ws_name = cfg["workspace"]

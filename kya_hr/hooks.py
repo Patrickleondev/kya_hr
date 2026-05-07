@@ -9,10 +9,11 @@ app_license = "mit"
 web_include_css = ["/assets/kya_hr/css/kya_webform.css"]
 web_include_js = ["/assets/kya_hr/js/kya_webform.js"]
 
-# CSS sur le desk (branding, sidebar, logo)
-app_include_css = ["/assets/kya_hr/css/kya_webform.css"]
+# CSS Desk léger uniquement (le CSS webform reste limité aux web forms publics)
+app_include_css = ["/assets/kya_hr/css/kya_desk.css"]
 app_include_js = [
     "/assets/kya_hr/js/employee_list.js",
+    "/assets/kya_hr/js/kya_desktop_fix.js",
     "/assets/kya_hr/js/kya_new_doc_to_webform.js",
     "/assets/kya_hr/js/kya_sidebar_router.js",
 ]

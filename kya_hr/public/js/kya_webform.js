@@ -893,17 +893,6 @@
       if (emp.designation) setInput("designation", emp.designation);
     }
 
-    function lockEmployeeInputForSelfService() {
-      if (canSelectAny) return;
-      empInput.setAttribute("readonly", "readonly");
-      empInput.setAttribute("aria-readonly", "true");
-      empInput.style.pointerEvents = "none";
-      empField.classList.add("read-only");
-      empField.setAttribute("data-read-only", "1");
-      var control = empField.querySelector(".link-field, .awesomplete, .input-group");
-      if (control) control.style.pointerEvents = "none";
-    }
-
     function fetchEmployeeData(empId) {
       if (!empId || !window.frappe) return;
       frappe.call({
@@ -922,31 +911,17 @@
       });
     }
 
-    // ---- Auto-fill au chargement via la session ---------------------
-    if (!empInput.value && window.frappe && frappe.session && frappe.session.user && frappe.session.user !== "Guest") {
-      frappe.call({
-        method: "kya_hr.api.webform_helpers.get_current_employee",
-        callback: function (r) {
-          if (r && r.message && r.message.name) {
-            applyEmployee(r.message);
-          }
-        }
-      });
-    }
-    lockEmployeeInputForSelfService();
-
-    // ---- Fuzzy search par nom (matricule oublié) -------------------
+    // ---- Recherche explicite par nom/matricule (pas d'auto-remplissage silencieux) ----
     function buildFuzzySearch() {
-      if (!canSelectAny) return;
       if (empField.querySelector(".kya-fuzzy-wrap")) return;
       var wrap = document.createElement("div");
       wrap.className = "kya-fuzzy-wrap";
       wrap.style.cssText = "margin-top:6px;position:relative;";
       wrap.innerHTML =
         '<button type="button" class="kya-fuzzy-toggle" style="background:none;border:none;color:#0066cc;cursor:pointer;padding:0;font-size:0.85em;text-decoration:underline;">' +
-        '🔍 Matricule oublié ? Rechercher par nom</button>' +
+        '🔍 Je ne connais pas mon ID / matricule</button>' +
         '<div class="kya-fuzzy-box" style="display:none;margin-top:6px;">' +
-        '  <input type="text" class="form-control kya-fuzzy-input" placeholder="Tapez au moins 2 lettres du nom…" autocomplete="off" />' +
+        '  <input type="text" class="form-control kya-fuzzy-input" placeholder="Tapez votre nom ou matricule…" autocomplete="off" />' +
         '  <ul class="kya-fuzzy-results" style="list-style:none;padding:0;margin:4px 0 0;border:1px solid #ddd;border-radius:4px;max-height:200px;overflow-y:auto;background:#fff;display:none;position:absolute;left:0;right:0;z-index:50;"></ul>' +
         '</div>';
       empField.appendChild(wrap);
@@ -973,13 +948,13 @@
         }
         debounce = setTimeout(function () {
           frappe.call({
-            method: "kya_hr.api.webform_helpers.search_employees",
-            args: { query: q, limit: 10 },
+            method: canSelectAny ? "kya_hr.api.webform_helpers.search_employees" : "kya_hr.api.webform_helpers.find_my_employee",
+            args: canSelectAny ? { query: q, limit: 10 } : { query: q },
             callback: function (r) {
               var rows = (r && r.message) || [];
               results.innerHTML = "";
               if (!rows.length) {
-                results.innerHTML = '<li style="padding:8px;color:#888;">Aucun employé trouvé.</li>';
+                results.innerHTML = '<li style="padding:8px;color:#888;">Aucune correspondance autorisée. Vérifiez votre saisie ou contactez la RH.</li>';
                 results.style.display = "block";
                 return;
               }

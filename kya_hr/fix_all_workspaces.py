@@ -545,17 +545,17 @@ def fix_navbar_logo():
     """Set Navbar Settings app_logo to KYA logo."""
     frappe.db.sql("""
         UPDATE tabSingles
-        SET value = '/assets/kya_hr/images/kya_logo.png'
+        SET value = '/assets/kya_hr/images/logo_kya.png'
         WHERE doctype = 'Navbar Settings' AND field = 'app_logo'
     """)
     count = frappe.db.sql("SELECT ROW_COUNT()")[0][0]
     if not count:
         frappe.db.sql("""
             INSERT INTO tabSingles (doctype, field, value)
-            VALUES ('Navbar Settings', 'app_logo', '/assets/kya_hr/images/kya_logo.png')
-            ON DUPLICATE KEY UPDATE value = '/assets/kya_hr/images/kya_logo.png'
+            VALUES ('Navbar Settings', 'app_logo', '/assets/kya_hr/images/logo_kya.png')
+            ON DUPLICATE KEY UPDATE value = '/assets/kya_hr/images/logo_kya.png'
         """)
-    print("  [Navbar] app_logo → /assets/kya_hr/images/kya_logo.png ✓")
+    print("  [Navbar] app_logo -> /assets/kya_hr/images/logo_kya.png OK")
 
 
 def fix_splash_logo():
@@ -564,15 +564,15 @@ def fix_splash_logo():
         frappe.db.sql("""
             UPDATE tabSingles SET value = %s
             WHERE doctype = 'Website Settings' AND field = %s
-        """, ("/assets/kya_hr/images/kya_logo.png", field))
+        """, ("/assets/kya_hr/images/logo_kya.png", field))
         count = frappe.db.sql("SELECT ROW_COUNT()")[0][0]
         if not count:
             frappe.db.sql("""
                 INSERT INTO tabSingles (doctype, field, value)
                 VALUES ('Website Settings', %s, %s)
                 ON DUPLICATE KEY UPDATE value = %s
-            """, (field, "/assets/kya_hr/images/kya_logo.png", "/assets/kya_hr/images/kya_logo.png"))
-    print("  [Website Settings] app_logo + splash_image → KYA logo ✓")
+            """, (field, "/assets/kya_hr/images/logo_kya.png", "/assets/kya_hr/images/logo_kya.png"))
+    print("  [Website Settings] app_logo + splash_image -> KYA logo OK")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

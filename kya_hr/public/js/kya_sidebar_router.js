@@ -1,14 +1,34 @@
 // Force the intended KYA workspace sidebar for ambiguous DocType routes.
 (function () {
     const STAGIAIRE_WORKSPACE_ROLES = [
-        'Stagiaire',
         'Maître de Stage',
         'Responsable des Stagiaires',
         'Responsable RH',
+        'HR User',
         'HR Manager',
         'System Manager',
         'Directeur Général',
     ];
+
+    const EMPLOYES_WORKSPACE_ROLES = [
+        'Chef Service',
+        'Supérieur Immédiat',
+        'Responsable RH',
+        'HR User',
+        'HR Manager',
+        'Directeur Général',
+        'DAAF',
+        'Auditeur Interne',
+        'Stock User',
+        'Purchase User',
+        'Responsable Achats',
+        'Chargé des Stocks',
+        'KYA Destinataire Notif',
+        'System Manager',
+    ];
+
+    const GESTION_EQUIPE_ROLES = ['Chef d’Équipe', "Chef d'Équipe", 'Chef Service', 'System Manager'];
+    const KYA_SERVICES_ROLES = ['KYA Survey Admin', 'System Manager'];
 
     const DOCTYPE_SIDEBARS = {
         'KYA Contrat': 'Espace RH',
@@ -51,25 +71,57 @@
         return has_any_role(STAGIAIRE_WORKSPACE_ROLES);
     }
 
-    function hide_restricted_workspace_links() {
-        if (can_see_stagiaire_space()) return;
+    function can_see_employes_space() {
+        return has_any_role(EMPLOYES_WORKSPACE_ROLES);
+    }
+
+    function can_see_gestion_equipe() {
+        return has_any_role(GESTION_EQUIPE_ROLES);
+    }
+
+    function can_see_kya_services() {
+        return has_any_role(KYA_SERVICES_ROLES);
+    }
+
+    function is_simple_self_service_user() {
+        const user_roles = (window.frappe && frappe.user_roles) || [];
+        return (user_roles.includes('Employee Self Service') || user_roles.includes('Employee') || user_roles.includes('Stagiaire'))
+            && !can_see_employes_space()
+            && !can_see_stagiaire_space()
+            && !can_see_gestion_equipe()
+            && !can_see_kya_services();
+    }
+
+    function hide_matching_links(terms) {
         const selectors = [
             '.standard-sidebar-item',
             '.desk-sidebar-item',
             '.sidebar-item',
             '.workspace-sidebar-item',
             '.app-icon',
-            'a[href*="espace-stagiaires"]',
-            'a[href*="Espace%20Stagiaires"]',
+            '.desktop-icon',
+            '.module-link',
+            'a[href]',
         ];
         document.querySelectorAll(selectors.join(',')).forEach(el => {
             const text = (el.textContent || '').trim().toLowerCase();
-            const href = (el.getAttribute && (el.getAttribute('href') || '')) || '';
-            if (text.includes('espace stagiaires') || href.toLowerCase().includes('espace-stagiaires')) {
+            const href = (el.getAttribute && (el.getAttribute('href') || '').toLowerCase()) || '';
+            const title = (el.getAttribute && (el.getAttribute('title') || '').toLowerCase()) || '';
+            if (terms.some(term => text.includes(term) || href.includes(term) || title.includes(term))) {
                 el.style.display = 'none';
                 el.setAttribute('aria-hidden', 'true');
             }
         });
+    }
+
+    function hide_restricted_workspace_links() {
+        if (!can_see_stagiaire_space()) hide_matching_links(['espace stagiaires', 'espace-stagiaires']);
+        if (!can_see_employes_space()) hide_matching_links(['espace employés', 'espace employes', 'espace-employes', 'espace-employés']);
+        if (!can_see_gestion_equipe()) hide_matching_links(['gestion équipe', 'gestion equipe', 'gestion-equipe']);
+        if (!can_see_kya_services()) hide_matching_links(['kya services', 'kya-services']);
+        if (is_simple_self_service_user()) {
+            hide_matching_links(['espace rh', 'espace-rh', 'espace direction', 'espace-direction']);
+        }
     }
 
     function current_doctype() {

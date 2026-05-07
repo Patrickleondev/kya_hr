@@ -191,7 +191,7 @@ def _sanitize_contract_pdf_html(html):
     logo_data_uri = _kya_logo_data_uri()
     if logo_data_uri:
         html = re.sub(
-            r'(src=["\'])(?:https?://[^"\']+)?/assets/kya_hr/images/kya_logo\.png(["\'])',
+            r'(src=["\'])(?:https?://[^"\']+)?(?:/assets/kya_hr/images/(?:kya_logo|logo_kya)\.png|/files/(?:logo_kya|vrai)\.png)(["\'])',
             lambda match: f"{match.group(1)}{logo_data_uri}{match.group(2)}",
             html,
             flags=re.I,
@@ -200,10 +200,12 @@ def _sanitize_contract_pdf_html(html):
 
 
 def _kya_logo_data_uri():
-    try:
-        path = frappe.get_app_path("kya_hr", "public", "images", "kya_logo.png")
-        with open(path, "rb") as logo_file:
-            encoded = base64.b64encode(logo_file.read()).decode("ascii")
-        return f"data:image/png;base64,{encoded}"
-    except Exception:
-        return ""
+    for filename in ("kya_logo.png", "logo_kya.png"):
+        try:
+            path = frappe.get_app_path("kya_hr", "public", "images", filename)
+            with open(path, "rb") as logo_file:
+                encoded = base64.b64encode(logo_file.read()).decode("ascii")
+            return f"data:image/png;base64,{encoded}"
+        except Exception:
+            continue
+    return ""

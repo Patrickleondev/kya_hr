@@ -91,14 +91,6 @@ def execute():
             frappe.db.set_value("Desktop Icon", existing, "hidden", 1)
             print(f"  HIDDEN (stale): {label}")
 
-    # Ensure current KYA workspace icons are visible
-    kya_icons = ["Espace Stagiaires", "KYA Services", "Congés & Permissions"]
-    for label in kya_icons:
-        existing = frappe.db.exists("Desktop Icon", {"label": label})
-        if existing:
-            frappe.db.set_value("Desktop Icon", existing, "hidden", 0)
-            print(f"  VISIBLE: {label}")
-
     if fixed:
         frappe.db.commit()
         print(f"\n  Total fixes: {fixed}")
