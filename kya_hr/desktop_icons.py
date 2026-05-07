@@ -16,6 +16,37 @@ WORKSPACE_ICONS = [
     {"label": "KYA Services", "link_to": "KYA Services", "icon": "clipboard-list", "idx": 19},
 ]
 
+RESTRICTED_LAYOUT_ROLES = {
+    "Direction Générale": ["Directeur Général", "DGA", "System Manager"],
+    "Espace RH": ["HR Manager", "HR User", "Responsable RH", "Directeur Général", "System Manager"],
+    "Espace Employés": [
+        "Chef Service",
+        "Supérieur Immédiat",
+        "Responsable RH",
+        "HR User",
+        "HR Manager",
+        "Directeur Général",
+        "DAAF",
+        "Auditeur Interne",
+        "Stock User",
+        "Purchase User",
+        "Responsable Achats",
+        "Chargé des Stocks",
+        "KYA Destinataire Notif",
+        "System Manager",
+    ],
+    "Espace Stagiaires": [
+        "Maître de Stage",
+        "Responsable des Stagiaires",
+        "Responsable RH",
+        "HR User",
+        "HR Manager",
+        "Directeur Général",
+        "System Manager",
+    ],
+    "KYA Services": ["KYA Survey Admin", "System Manager"],
+}
+
 LAYOUT_FIELDS = [
     "label",
     "bg_color",
@@ -228,6 +259,63 @@ def _sync_all_desktop_layouts() -> bool:
     return changed
 
 
+def _user_has_any_role(user: str, allowed_roles: list[str]) -> bool:
+    if user == "Administrator":
+        return True
+    roles = set(frappe.get_roles(user) or [])
+    return bool(roles.intersection(allowed_roles))
+
+
+def _prune_restricted_layout_doc(layout_doc) -> bool:
+    layout = json.loads(layout_doc.layout or "[]")
+    user = layout_doc.get("user") or layout_doc.get("owner")
+    changed = False
+
+    def allowed(item):
+        label = item.get("label")
+        roles = RESTRICTED_LAYOUT_ROLES.get(label)
+        return not roles or _user_has_any_role(user, roles)
+
+    pruned = []
+    for item in layout:
+        child_icons = item.get("child_icons") or []
+        filtered_children = [child for child in child_icons if allowed(child)]
+        if len(filtered_children) != len(child_icons):
+            item["child_icons"] = filtered_children
+            changed = True
+        if allowed(item):
+            pruned.append(item)
+        else:
+            changed = True
+
+    if changed:
+        layout_doc.layout = json.dumps(pruned, ensure_ascii=False)
+        layout_doc.save(ignore_permissions=True)
+
+    return changed
+
+
+def _prune_restricted_desktop_layouts() -> bool:
+    changed = False
+    for row in frappe.get_all("Desktop Layout", fields=["name"]):
+        layout_doc = frappe.get_doc("Desktop Layout", row.name)
+        changed = _prune_restricted_layout_doc(layout_doc) or changed
+    return changed
+
+
+def _sync_administrator_layout() -> bool:
+    if not frappe.db.exists("Desktop Layout", "Administrator"):
+        layout_doc = frappe.new_doc("Desktop Layout")
+        layout_doc.user = "Administrator"
+        layout_doc.owner = "Administrator"
+        layout_doc.layout = json.dumps(_build_default_layout(), ensure_ascii=False)
+        layout_doc.save(ignore_permissions=True)
+        return True
+
+    admin_doc = frappe.get_doc("Desktop Layout", "Administrator")
+    return _sync_layout_doc(admin_doc)
+
+
 @frappe.whitelist()
 def execute():
     """Sync KYA Desktop Icons. Defensive: never raise to avoid breaking install/migrate."""
@@ -246,7 +334,8 @@ def execute():
             errors.append(f"{config['label']}: {e}")
 
     try:
-        changed = _sync_all_desktop_layouts() or changed
+        changed = _sync_administrator_layout() or changed
+        changed = _prune_restricted_desktop_layouts() or changed
     except Exception as e:
         errors.append(f"layouts: {e}")
 
