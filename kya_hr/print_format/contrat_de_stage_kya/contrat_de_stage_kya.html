@@ -6,6 +6,7 @@
 {%- set type_label = "stage professionnel" if doc.contract_type == "Stage Professionnel" else "stage académique" -%}
 {%- set genre = "M." -%}
 {%- set fait_a = "Lomé" -%}
+{%- set logo_url = frappe.utils.get_url() + "/assets/kya_hr/images/kya_logo.png" -%}
 
 <style>
   body { font-family: Arial, Helvetica, sans-serif; font-size: 11pt; color: #000; line-height: 1.45; }
@@ -17,18 +18,17 @@
   .ctr-meta { text-align: right; font-size: 9pt; line-height: 1.3; }
   .ctr-title-bar { width: 100%; border-collapse: collapse; margin: 4mm 0 6mm 0; }
   .ctr-title-bar td { padding: 0; vertical-align: middle; }
-  .ctr-logo-cell { width: 50mm; padding: 4px 8px; border: 1px solid #ccc; }
-   .ctr-logo-mark { text-align: center; font-weight: bold; color: #1a5276; line-height: 1.2; }
-   .ctr-logo-mark .brand { font-size: 15pt; color: #f58220; }
-   .ctr-logo-mark .sub { font-size: 8.5pt; letter-spacing: 0.5px; }
+   .ctr-title-bar { table-layout: fixed; }
+   .ctr-logo-cell { width: 45mm; padding: 4px 8px; border: 1px solid #ccc; text-align: center; }
+   .ctr-logo-img { max-width: 36mm; max-height: 18mm; object-fit: contain; }
   .ctr-title-cell {
     background: #F58220;
-    color: #fff; font-weight: bold; font-size: 18pt;
+      color: #fff; font-weight: bold; font-size: 15pt;
     text-align: center; padding: 6mm 4mm; letter-spacing: 1.5px;
     border-top: 1px solid #ccc; border-bottom: 1px solid #ccc;
   }
   .ctr-ref-cell {
-    width: 42mm; background: #fff; border: 1px solid #ccc;
+      width: 40mm; background: #fff; border: 1px solid #ccc;
     text-align: center; font-size: 9.5pt; padding: 0; vertical-align: top;
   }
   .ctr-ref-tagline {
@@ -52,6 +52,12 @@
    .mention-text { margin-top: 3mm; font-style: italic; font-weight: bold; }
   .sig-line { border-top: 1px solid #000; margin-top: 18mm; padding-top: 1mm; font-size: 9pt; font-style: italic; }
    .signature-trace { margin-top: 2mm; font-size: 8.5pt; color: #555; }
+  /* Signature manuelle (impression) */
+  .sig-hand-label { font-style: italic; font-size: 9.5pt; margin-top: 4mm; margin-bottom: 1mm; }
+  .sig-hand-write-line { border-bottom: 1px solid #555; min-height: 8mm; margin-bottom: 4mm; }
+  .sig-hand-space { min-height: 28mm; border-bottom: 1px solid #000; margin: 6mm 0 2mm 0; }
+  .sig-hand-name { font-size: 9.5pt; font-weight: bold; margin-top: 1mm; }
+  .sig-hand-date { font-size: 8.5pt; color: #555; margin-top: 1mm; font-style: italic; }
    .ctr-foot { margin-top: 8mm; text-align: center; font-size: 9pt; color: #555; border-top: 1px solid #ccc; padding-top: 2mm; }
    .page-break { page-break-before: always; break-before: page; height: 0; }
    .ctr-page-markers { display: none; }
@@ -97,10 +103,7 @@
   <table class="ctr-title-bar">
     <tr>
       <td class="ctr-logo-cell">
-            <div class="ctr-logo-mark">
-               <div class="brand">KYA</div>
-               <div class="sub">ENERGY GROUP</div>
-            </div>
+             <img src="{{ logo_url }}" class="ctr-logo-img" alt="KYA-Energy Group">
       </td>
       <td class="ctr-title-cell">CONTRAT DE STAGE</td>
       <td class="ctr-ref-cell">
@@ -115,7 +118,7 @@
   <p><strong>Entre</strong></p>
   <p><strong>KYA-Energy Group</strong> ayant son siège social à Lomé, quartier Logopé 08BP81101, Lomé-Togo,
      téléphone : (00228) 70 45 34 81 / 91 50 21 49, e-mail : info@kya-energy.com, représenté par son
-     Directeur Général, monsieur <strong>{{ doc.nom_dg or "AZOUMAH Yao Kétowoglo" }}</strong>, majeur non
+     Directeur Général, monsieur <strong>{{ doc.nom_dg or "Prof. Yao AZOUMAH" }}</strong>, majeur non
      interdit ayant pleine capacité aux fins des présentes</p>
 
   <p><strong>Et</strong></p>
@@ -151,7 +154,7 @@
   <p>Durant la période définie à l'article 2,
     {%- set tuteurs = [] -%}
     {%- for m in (doc.maitres_stage or []) -%}
-      {%- if m.nom -%}{%- set _ = tuteurs.append("M. " + m.nom) -%}{%- endif -%}
+         {%- if m.employee_name -%}{%- set _ = tuteurs.append("M. " + m.employee_name) -%}{%- endif -%}
     {%- endfor -%}
     {%- if tuteurs -%}
       <strong>{{ tuteurs|join(" et ") }}</strong>
@@ -350,33 +353,41 @@
     <tr>
       <td>
         <strong>Le/La stagiaire</strong>
-            {% if doc.mention_lu_approuve_image %}
-               <img src="{{ doc.mention_lu_approuve_image }}" class="mention-img" alt="Mention manuscrite">
-            {% elif doc.mention_lu_approuve %}
-               <div class="mention-text">{{ doc.mention_lu_approuve }}</div>
-            {% else %}
-               <div class="sig-line">(*) Signature précédée de la mention manuscrite "lu et approuvé"</div>
-            {% endif %}
+        {# ── Mention "Lu et approuvé" ─── #}
+        {% if doc.mention_lu_approuve_image %}
+          <img src="{{ doc.mention_lu_approuve_image }}" class="mention-img" alt="Mention manuscrite">
+        {% elif doc.mention_lu_approuve %}
+          <div class="mention-text">{{ doc.mention_lu_approuve }}</div>
+        {% else %}
+          <div class="sig-hand-label">Lu et approuvé :</div>
+          <div class="sig-hand-write-line"></div>
+        {% endif %}
+        {# ── Signature ─── #}
         {% if doc.signature_employe %}
           <img src="{{ doc.signature_employe }}" class="sig-img" alt="Signature">
+          <div class="signature-trace">
+            {% if doc.nom_signe_employe %}{{ doc.nom_signe_employe }}<br>{% endif %}
+            {% if doc.date_signature_employe %}Signé le {{ frappe.utils.format_datetime(doc.date_signature_employe, "dd/MM/yyyy HH:mm:ss") }}{% endif %}
+          </div>
+        {% else %}
+          <div class="sig-hand-space"></div>
+          <div class="sig-hand-name">{{ doc.employee_name or "" }}</div>
+          <div class="sig-hand-date">Date : _____ / _____ / __________</div>
         {% endif %}
-            <div class="signature-trace">
-               {% if doc.nom_signe_employe %}{{ doc.nom_signe_employe }}<br>{% endif %}
-               {% if doc.date_signature_employe %}Signé le {{ frappe.utils.format_datetime(doc.date_signature_employe, "dd/MM/yyyy HH:mm:ss") }}{% endif %}
-            </div>
       </td>
       <td>
         <strong>Le Directeur Général</strong>
         {% if doc.signature_dg %}
           <img src="{{ doc.signature_dg }}" class="sig-img" alt="Signature DG">
+          <div class="signature-trace">
+            {% if doc.date_signature_dg %}Signé le {{ frappe.utils.format_datetime(doc.date_signature_dg, "dd/MM/yyyy HH:mm:ss") }}{% endif %}
+          </div>
         {% else %}
-          <div class="sig-line">&nbsp;</div>
+          <div class="sig-hand-space"></div>
+          <div class="sig-hand-date">Date : _____ / _____ / __________</div>
         {% endif %}
         <div style="margin-top:2mm;"><strong>{{ doc.nom_dg or "Prof. Yao AZOUMAH" }}</strong></div>
         <div style="font-size:9pt; font-style:italic;">{{ doc.fonction_dg or "Directeur Général" }}</div>
-            <div class="signature-trace">
-               {% if doc.date_signature_dg %}Signé le {{ frappe.utils.format_datetime(doc.date_signature_dg, "dd/MM/yyyy HH:mm:ss") }}{% endif %}
-            </div>
       </td>
     </tr>
   </table>
