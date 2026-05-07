@@ -65,3 +65,34 @@
   white-space: normal !important;
   line-height: 1.2 !important;
 }
+
+.desktop-icon,
+.desk-icon,
+.module-link,
+.app-icon {
+  min-width: 92px !important;
+  max-width: 128px !important;
+  height: auto !important;
+  min-height: 96px !important;
+  align-items: center !important;
+}
+
+.desktop-icon .icon-label,
+.desktop-icon .label,
+.desktop-icon .ellipsis,
+.desk-icon .icon-label,
+.desk-icon .label,
+.desk-icon .ellipsis,
+.module-link .module-label,
+.module-link .ellipsis,
+.app-icon .app-label,
+.app-icon .ellipsis {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  word-break: normal !important;
+  overflow-wrap: anywhere !important;
+  line-height: 1.2 !important;
+  text-align: center !important;
+  letter-spacing: 0 !important;
+}
