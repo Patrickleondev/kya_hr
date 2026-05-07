@@ -87,3 +87,49 @@ def search_employees(query: str = "", limit: int = 10):
         as_dict=True,
     )
     return rows or []
+
+
+@frappe.whitelist()
+def find_my_employee(query: str = ""):
+    """Retourne uniquement l'Employee rattaché à l'utilisateur courant.
+
+    Cette méthode aide un utilisateur qui ne connaît pas son matricule sans
+    exposer l'annuaire complet. Elle ne renvoie un résultat que si le texte
+    saisi correspond à son propre nom, matricule ou email.
+    """
+    user = frappe.session.user
+    if not user or user == "Guest":
+        return []
+
+    query = (query or "").strip().lower()
+    if len(query) < 2:
+        return []
+
+    fields = ["name", "employee_name", "department", "designation", "company_email", "personal_email", "user_id"]
+    candidates = []
+
+    for filters in (
+        {"user_id": user, "status": "Active"},
+        {"company_email": user, "status": "Active"},
+        {"personal_email": user, "status": "Active"},
+        {"prefered_email": user, "status": "Active"},
+    ):
+        emp = frappe.db.get_value("Employee", filters, fields, as_dict=True)
+        if emp and emp.name not in {row.name for row in candidates}:
+            candidates.append(emp)
+
+    matches = []
+    for emp in candidates:
+        haystack = " ".join(
+            str(emp.get(field) or "")
+            for field in ("name", "employee_name", "department", "designation", "company_email", "personal_email")
+        ).lower()
+        if query in haystack:
+            matches.append({
+                "name": emp.name,
+                "employee_name": emp.employee_name,
+                "department": emp.department,
+                "designation": emp.designation,
+            })
+
+    return matches

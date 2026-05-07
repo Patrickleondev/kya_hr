@@ -163,10 +163,10 @@
  "public": 1,
  "quick_lists": [],
  "roles": [
-  {"role": "Stagiaire"},
   {"role": "Maître de Stage"},
   {"role": "Responsable des Stagiaires"},
   {"role": "Responsable RH"},
+  {"role": "HR User"},
   {"role": "HR Manager"},
   {"role": "Directeur Général"},
   {"role": "System Manager"}

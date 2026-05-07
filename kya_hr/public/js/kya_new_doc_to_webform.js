@@ -11,13 +11,6 @@
  * Centralise tout via un monkey-patch unique de `frappe.new_doc`.
  */
 (function () {
-	if (!window.frappe || !frappe.new_doc) {
-		return;
-	}
-	if (frappe._kya_new_doc_patched) {
-		return;
-	}
-
 	// DocType -> route web form publique
 	const WEBFORM_MAP = {
 		"Demande Achat KYA": "/demande-achat/new",
@@ -35,17 +28,60 @@
 		"Bilan Fin de Stage": "/bilan-fin-de-stage/new",
 	};
 
-	const ORIGINAL_NEW_DOC = frappe.new_doc.bind(frappe);
+	const ROUTE_MAP = Object.keys(WEBFORM_MAP).reduce((routes, doctype) => {
+		const slug = doctype.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+		routes[slug] = WEBFORM_MAP[doctype];
+		routes[encodeURIComponent(doctype).toLowerCase()] = WEBFORM_MAP[doctype];
+		return routes;
+	}, {});
 
-	frappe.new_doc = function (doctype) {
-		const route = WEBFORM_MAP[doctype];
-		if (route) {
-			// Système Manager / Admin gardent l'accès Desk via Shift+clic / URL directe.
-			window.location.href = route;
-			return Promise.resolve();
+	function webform_route_from_href(href) {
+		if (!href) return null;
+		const normalized = href.toLowerCase();
+		const match = normalized.match(/(?:#|\/app\/)form\/([^/?#]+)\/new|\/app\/([^/?#]+)\/new/);
+		const route_key = match && (match[1] || match[2]);
+		return route_key ? ROUTE_MAP[route_key] : null;
+	}
+
+	function patch_new_doc() {
+		if (!window.frappe || !frappe.new_doc || frappe._kya_new_doc_patched) {
+			return Boolean(window.frappe && frappe._kya_new_doc_patched);
 		}
-		return ORIGINAL_NEW_DOC.apply(frappe, arguments);
-	};
 
-	frappe._kya_new_doc_patched = true;
+		const original_new_doc = frappe.new_doc.bind(frappe);
+
+		frappe.new_doc = function (doctype) {
+			const route = WEBFORM_MAP[doctype];
+			if (route) {
+				window.location.href = route;
+				return Promise.resolve();
+			}
+			return original_new_doc.apply(frappe, arguments);
+		};
+
+		frappe._kya_new_doc_patched = true;
+		return true;
+	}
+
+	document.addEventListener("click", function (event) {
+		if (event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) {
+			return;
+		}
+		const link = event.target.closest && event.target.closest("a[href]");
+		if (!link) return;
+		const route = webform_route_from_href(link.getAttribute("href"));
+		if (route) {
+			event.preventDefault();
+			window.location.href = route;
+		}
+	}, true);
+
+	patch_new_doc();
+	let attempts = 0;
+	const interval = window.setInterval(function () {
+		attempts += 1;
+		if (patch_new_doc() || attempts >= 40) {
+			window.clearInterval(interval);
+		}
+	}, 250);
 })();

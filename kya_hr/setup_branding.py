@@ -6,7 +6,7 @@ Ou via after_migrate (appelé automatiquement).
 """
 import frappe
 
-KYA_LOGO_URL = "/assets/kya_hr/images/kya_logo.png"
+KYA_LOGO_URL = "/assets/kya_hr/images/logo_kya.png"
 KYA_APP_NAME = "KYA-Energy Group"
 
 

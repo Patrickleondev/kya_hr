@@ -1,0 +1,67 @@
+/* KYA Desk-only adjustments. Keep web form CSS out of Desk to avoid layout bleed. */
+
+:root {
+  --kya-desk-blue: #0d7377;
+  --kya-desk-orange: #f58220;
+  --kya-desk-blue-light: #e0f2f1;
+}
+
+.navbar-brand img,
+.sidebar-header img,
+.page-card .app-logo,
+.for-login .app-logo {
+  max-height: 42px !important;
+  width: auto !important;
+  object-fit: contain !important;
+}
+
+.desk-sidebar .sidebar-item.selected,
+.standard-sidebar .standard-sidebar-item.selected,
+.standard-sidebar-item.selected {
+  border-left: 3px solid var(--kya-desk-orange) !important;
+  background: var(--kya-desk-blue-light) !important;
+}
+
+.workspace .shortcut-widget-box,
+.workspace .widget.shortcut-widget-box,
+.shortcut-widget-box {
+  min-height: 88px !important;
+  align-items: flex-start !important;
+}
+
+.workspace .shortcut-widget-box .widget-label,
+.workspace .shortcut-widget-box .ellipsis,
+.shortcut-widget-box .widget-label,
+.shortcut-widget-box .ellipsis {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  line-height: 1.25 !important;
+  word-break: normal !important;
+}
+
+.workspace .widget-head,
+.workspace .widget-body,
+.workspace .shortcut-widget-box {
+  overflow: visible !important;
+}
+
+.workspace .widget-title,
+.workspace h3,
+.workspace h4 {
+  line-height: 1.25 !important;
+  letter-spacing: 0 !important;
+}
+
+.layout-side-section,
+.desk-sidebar,
+.standard-sidebar {
+  min-width: 230px;
+}
+
+.desk-sidebar .sidebar-item-label,
+.standard-sidebar-item .sidebar-item-label,
+.standard-sidebar-item .item-label {
+  white-space: normal !important;
+  line-height: 1.2 !important;
+}
