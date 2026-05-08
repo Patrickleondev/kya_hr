@@ -1214,28 +1214,165 @@
   "workflow_state_field": "workflow_state",
   "workflow_data": null,
   "states": [
-   {"state": "Brouillon", "doc_status": "0", "allow_edit": "Responsable RH", "is_optional_state": 0, "send_email": 0},
-   {"state": "En attente Signature Salarié", "doc_status": "0", "allow_edit": "Responsable RH", "is_optional_state": 0, "send_email": 1, "message": "Le contrat est prêt à être signé par le salarié."},
-   {"state": "Signé Salarié", "doc_status": "0", "allow_edit": "Responsable RH", "is_optional_state": 0, "send_email": 1, "message": "Le salarié a signé le contrat. En attente de validation DG."},
-   {"state": "En attente DG", "doc_status": "0", "allow_edit": "Directeur Général", "is_optional_state": 0, "send_email": 1, "message": "Le contrat attend la validation du Directeur Général."},
-   {"state": "Validé", "doc_status": "1", "allow_edit": "Responsable RH", "is_optional_state": 0, "send_email": 1, "message": "Contrat validé par le DG. Doit être revu et archivé par la RH."},
-   {"state": "RH (revue)", "doc_status": "1", "allow_edit": "Responsable RH", "is_optional_state": 0, "send_email": 0},
-   {"state": "Archivé", "doc_status": "1", "allow_edit": "Responsable RH", "is_optional_state": 0, "send_email": 0},
-   {"state": "Rejeté", "doc_status": "0", "allow_edit": "Responsable RH", "is_optional_state": 0, "send_email": 1, "message": "Le contrat a été rejeté."}
+   {
+    "state": "Brouillon",
+    "doc_status": "0",
+    "allow_edit": "Responsable RH",
+    "is_optional_state": 0,
+    "send_email": 0
+   },
+   {
+    "state": "En attente Signature Salarié",
+    "doc_status": "0",
+    "allow_edit": "Responsable RH",
+    "is_optional_state": 0,
+    "send_email": 1,
+    "message": "Le contrat est prêt à être signé par le salarié."
+   },
+   {
+    "state": "Signé Salarié",
+    "doc_status": "0",
+    "allow_edit": "Responsable RH",
+    "is_optional_state": 0,
+    "send_email": 1,
+    "message": "Le salarié a signé le contrat. En attente de validation DG."
+   },
+   {
+    "state": "En attente DG",
+    "doc_status": "0",
+    "allow_edit": "Directeur Général",
+    "is_optional_state": 0,
+    "send_email": 1,
+    "message": "Le contrat attend la validation du Directeur Général."
+   },
+   {
+    "state": "Validé",
+    "doc_status": "1",
+    "allow_edit": "Responsable RH",
+    "is_optional_state": 0,
+    "send_email": 1,
+    "message": "Contrat validé par le DG. Doit être revu et archivé par la RH."
+   },
+   {
+    "state": "RH (revue)",
+    "doc_status": "1",
+    "allow_edit": "Responsable RH",
+    "is_optional_state": 0,
+    "send_email": 0
+   },
+   {
+    "state": "Archivé",
+    "doc_status": "1",
+    "allow_edit": "Responsable RH",
+    "is_optional_state": 0,
+    "send_email": 0
+   },
+   {
+    "state": "Rejeté",
+    "doc_status": "0",
+    "allow_edit": "Responsable RH",
+    "is_optional_state": 0,
+    "send_email": 1,
+    "message": "Le contrat a été rejeté."
+   }
   ],
   "transitions": [
-   {"state": "Brouillon", "action": "Envoyer au Salarié", "next_state": "En attente Signature Salarié", "allowed": "Responsable RH", "allow_self_approval": 1, "condition": null},
-   {"state": "Brouillon", "action": "Envoyer au Salarié", "next_state": "En attente Signature Salarié", "allowed": "HR Manager", "allow_self_approval": 1, "condition": null},
-   {"state": "En attente Signature Salarié", "action": "Signer", "next_state": "Signé Salarié", "allowed": "KYA Signataire Contrat", "allow_self_approval": 1, "condition": null},
-   {"state": "En attente Signature Salarié", "action": "Refuser", "next_state": "Rejeté", "allowed": "KYA Signataire Contrat", "allow_self_approval": 1, "condition": null},
-   {"state": "Signé Salarié", "action": "Soumettre au DG", "next_state": "En attente DG", "allowed": "Responsable RH", "allow_self_approval": 1, "condition": null},
-   {"state": "Signé Salarié", "action": "Soumettre au DG", "next_state": "En attente DG", "allowed": "HR Manager", "allow_self_approval": 1, "condition": null},
-   {"state": "En attente DG", "action": "Valider", "next_state": "Validé", "allowed": "Directeur Général", "allow_self_approval": 1, "condition": null},
-   {"state": "En attente DG", "action": "Rejeter", "next_state": "Rejeté", "allowed": "Directeur Général", "allow_self_approval": 1, "condition": null},
-   {"state": "Validé", "action": "Marquer revue RH", "next_state": "RH (revue)", "allowed": "Responsable RH", "allow_self_approval": 1, "condition": null},
-   {"state": "Validé", "action": "Marquer revue RH", "next_state": "RH (revue)", "allowed": "HR Manager", "allow_self_approval": 1, "condition": null},
-   {"state": "RH (revue)", "action": "Archiver", "next_state": "Archivé", "allowed": "Responsable RH", "allow_self_approval": 1, "condition": null},
-   {"state": "RH (revue)", "action": "Archiver", "next_state": "Archivé", "allowed": "HR Manager", "allow_self_approval": 1, "condition": null}
+   {
+    "state": "Brouillon",
+    "action": "Envoyer au Salarié",
+    "next_state": "En attente Signature Salarié",
+    "allowed": "Responsable RH",
+    "allow_self_approval": 1,
+    "condition": null
+   },
+   {
+    "state": "Brouillon",
+    "action": "Envoyer au Salarié",
+    "next_state": "En attente Signature Salarié",
+    "allowed": "HR Manager",
+    "allow_self_approval": 1,
+    "condition": null
+   },
+   {
+    "state": "En attente Signature Salarié",
+    "action": "Signer",
+    "next_state": "Signé Salarié",
+    "allowed": "KYA Signataire Contrat",
+    "allow_self_approval": 1,
+    "condition": null
+   },
+   {
+    "state": "En attente Signature Salarié",
+    "action": "Refuser",
+    "next_state": "Rejeté",
+    "allowed": "KYA Signataire Contrat",
+    "allow_self_approval": 1,
+    "condition": null
+   },
+   {
+    "state": "Signé Salarié",
+    "action": "Soumettre au DG",
+    "next_state": "En attente DG",
+    "allowed": "Responsable RH",
+    "allow_self_approval": 1,
+    "condition": null
+   },
+   {
+    "state": "Signé Salarié",
+    "action": "Soumettre au DG",
+    "next_state": "En attente DG",
+    "allowed": "HR Manager",
+    "allow_self_approval": 1,
+    "condition": null
+   },
+   {
+    "state": "En attente DG",
+    "action": "Valider",
+    "next_state": "Validé",
+    "allowed": "Directeur Général",
+    "allow_self_approval": 1,
+    "condition": null
+   },
+   {
+    "state": "En attente DG",
+    "action": "Rejeter",
+    "next_state": "Rejeté",
+    "allowed": "Directeur Général",
+    "allow_self_approval": 1,
+    "condition": null
+   },
+   {
+    "state": "Validé",
+    "action": "Marquer revue RH",
+    "next_state": "RH (revue)",
+    "allowed": "Responsable RH",
+    "allow_self_approval": 1,
+    "condition": null
+   },
+   {
+    "state": "Validé",
+    "action": "Marquer revue RH",
+    "next_state": "RH (revue)",
+    "allowed": "HR Manager",
+    "allow_self_approval": 1,
+    "condition": null
+   },
+   {
+    "state": "RH (revue)",
+    "action": "Archiver",
+    "next_state": "Archivé",
+    "allowed": "Responsable RH",
+    "allow_self_approval": 1,
+    "condition": null
+   },
+   {
+    "state": "RH (revue)",
+    "action": "Archiver",
+    "next_state": "Archivé",
+    "allowed": "HR Manager",
+    "allow_self_approval": 1,
+    "condition": null
+   }
   ]
  },
  {
@@ -1247,24 +1384,128 @@
   "send_email_alert": 1,
   "workflow_state_field": "workflow_state",
   "states": [
-   {"state": "Brouillon", "doc_status": "0", "allow_edit": "Caissier", "is_optional_state": 0, "send_email": 0},
-   {"state": "Brouillon", "doc_status": "0", "allow_edit": "Accounts Manager", "is_optional_state": 0, "send_email": 0},
-   {"state": "En attente Comptable", "doc_status": "0", "allow_edit": "Comptable", "is_optional_state": 0, "send_email": 1, "message": "Un brouillard de caisse attend votre visa Comptable."},
-   {"state": "En attente DFC", "doc_status": "0", "allow_edit": "DFC", "is_optional_state": 0, "send_email": 1, "message": "Un brouillard de caisse attend votre validation DFC."},
-   {"state": "Approuvé", "doc_status": "1", "allow_edit": "DFC", "is_optional_state": 0, "send_email": 1, "message": "Brouillard de caisse approuvé et soumis."},
-   {"state": "Rejeté", "doc_status": "0", "allow_edit": "Caissier", "is_optional_state": 0, "send_email": 1, "message": "Le brouillard de caisse a été rejeté. Veuillez corriger et resoumettre."}
+   {
+    "state": "Brouillon",
+    "doc_status": "0",
+    "allow_edit": "Caissier",
+    "is_optional_state": 0,
+    "send_email": 0
+   },
+   {
+    "state": "Brouillon",
+    "doc_status": "0",
+    "allow_edit": "Accounts Manager",
+    "is_optional_state": 0,
+    "send_email": 0
+   },
+   {
+    "state": "En attente Comptable",
+    "doc_status": "0",
+    "allow_edit": "Comptable",
+    "is_optional_state": 0,
+    "send_email": 1,
+    "message": "Un brouillard de caisse attend votre visa Comptable."
+   },
+   {
+    "state": "En attente DFC",
+    "doc_status": "0",
+    "allow_edit": "DFC",
+    "is_optional_state": 0,
+    "send_email": 1,
+    "message": "Un brouillard de caisse attend votre validation DFC."
+   },
+   {
+    "state": "Approuvé",
+    "doc_status": "1",
+    "allow_edit": "DFC",
+    "is_optional_state": 0,
+    "send_email": 1,
+    "message": "Brouillard de caisse approuvé et soumis."
+   },
+   {
+    "state": "Rejeté",
+    "doc_status": "0",
+    "allow_edit": "Caissier",
+    "is_optional_state": 0,
+    "send_email": 1,
+    "message": "Le brouillard de caisse a été rejeté. Veuillez corriger et resoumettre."
+   }
   ],
   "transitions": [
-   {"state": "Brouillon", "action": "Soumettre au Comptable", "next_state": "En attente Comptable", "allowed": "Caissier", "allow_self_approval": 0, "condition": null},
-   {"state": "Brouillon", "action": "Soumettre au Comptable", "next_state": "En attente Comptable", "allowed": "Accounts Manager", "allow_self_approval": 1, "condition": null},
-   {"state": "En attente Comptable", "action": "Viser (Comptable)", "next_state": "En attente DFC", "allowed": "Comptable", "allow_self_approval": 0, "condition": null},
-   {"state": "En attente Comptable", "action": "Viser (Comptable)", "next_state": "En attente DFC", "allowed": "Accounts Manager", "allow_self_approval": 1, "condition": null},
-   {"state": "En attente Comptable", "action": "Rejeter", "next_state": "Rejeté", "allowed": "Comptable", "allow_self_approval": 0, "condition": null},
-   {"state": "En attente DFC", "action": "Approuver (DFC)", "next_state": "Approuvé", "allowed": "DFC", "allow_self_approval": 0, "condition": null},
-   {"state": "En attente DFC", "action": "Approuver (DFC)", "next_state": "Approuvé", "allowed": "Accounts Manager", "allow_self_approval": 1, "condition": null},
-   {"state": "En attente DFC", "action": "Rejeter", "next_state": "Rejeté", "allowed": "DFC", "allow_self_approval": 0, "condition": null},
-   {"state": "Rejeté", "action": "Soumettre au Comptable", "next_state": "En attente Comptable", "allowed": "Caissier", "allow_self_approval": 0, "condition": null}
-  ]
+   {
+    "state": "Brouillon",
+    "action": "Soumettre au Comptable",
+    "next_state": "En attente Comptable",
+    "allowed": "Caissier",
+    "allow_self_approval": 0,
+    "condition": null
+   },
+   {
+    "state": "Brouillon",
+    "action": "Soumettre au Comptable",
+    "next_state": "En attente Comptable",
+    "allowed": "Accounts Manager",
+    "allow_self_approval": 1,
+    "condition": null
+   },
+   {
+    "state": "En attente Comptable",
+    "action": "Viser (Comptable)",
+    "next_state": "En attente DFC",
+    "allowed": "Comptable",
+    "allow_self_approval": 0,
+    "condition": null
+   },
+   {
+    "state": "En attente Comptable",
+    "action": "Viser (Comptable)",
+    "next_state": "En attente DFC",
+    "allowed": "Accounts Manager",
+    "allow_self_approval": 1,
+    "condition": null
+   },
+   {
+    "state": "En attente Comptable",
+    "action": "Rejeter",
+    "next_state": "Rejeté",
+    "allowed": "Comptable",
+    "allow_self_approval": 0,
+    "condition": null
+   },
+   {
+    "state": "En attente DFC",
+    "action": "Approuver (DFC)",
+    "next_state": "Approuvé",
+    "allowed": "DFC",
+    "allow_self_approval": 0,
+    "condition": null
+   },
+   {
+    "state": "En attente DFC",
+    "action": "Approuver (DFC)",
+    "next_state": "Approuvé",
+    "allowed": "Accounts Manager",
+    "allow_self_approval": 1,
+    "condition": null
+   },
+   {
+    "state": "En attente DFC",
+    "action": "Rejeter",
+    "next_state": "Rejeté",
+    "allowed": "DFC",
+    "allow_self_approval": 0,
+    "condition": null
+   },
+   {
+    "state": "Rejeté",
+    "action": "Soumettre au Comptable",
+    "next_state": "En attente Comptable",
+    "allowed": "Caissier",
+    "allow_self_approval": 0,
+    "condition": null
+   }
+  ],
+  "workflow_name": "Flux Brouillard Caisse"
  },
  {
   "doctype": "Workflow",
@@ -1275,21 +1516,110 @@
   "send_email_alert": 1,
   "workflow_state_field": "workflow_state",
   "states": [
-   {"state": "Brouillon", "doc_status": "0", "allow_edit": "Comptable", "is_optional_state": 0, "send_email": 0},
-   {"state": "Brouillon", "doc_status": "0", "allow_edit": "DFC", "is_optional_state": 0, "send_email": 0},
-   {"state": "Brouillon", "doc_status": "0", "allow_edit": "Accounts Manager", "is_optional_state": 0, "send_email": 0},
-   {"state": "En attente Validation DFC", "doc_status": "0", "allow_edit": "DFC", "is_optional_state": 0, "send_email": 1, "message": "Un état récapitulatif de chèques attend votre validation DFC."},
-   {"state": "Validé DFC", "doc_status": "1", "allow_edit": "DFC", "is_optional_state": 0, "send_email": 1, "message": "L'état récapitulatif a été validé et transmis à la Direction."},
-   {"state": "Rejeté", "doc_status": "0", "allow_edit": "Comptable", "is_optional_state": 0, "send_email": 1, "message": "L'état récapitulatif a été rejeté. Veuillez corriger et resoumettre."}
+   {
+    "state": "Brouillon",
+    "doc_status": "0",
+    "allow_edit": "Comptable",
+    "is_optional_state": 0,
+    "send_email": 0
+   },
+   {
+    "state": "Brouillon",
+    "doc_status": "0",
+    "allow_edit": "DFC",
+    "is_optional_state": 0,
+    "send_email": 0
+   },
+   {
+    "state": "Brouillon",
+    "doc_status": "0",
+    "allow_edit": "Accounts Manager",
+    "is_optional_state": 0,
+    "send_email": 0
+   },
+   {
+    "state": "En attente Validation DFC",
+    "doc_status": "0",
+    "allow_edit": "DFC",
+    "is_optional_state": 0,
+    "send_email": 1,
+    "message": "Un état récapitulatif de chèques attend votre validation DFC."
+   },
+   {
+    "state": "Validé DFC",
+    "doc_status": "1",
+    "allow_edit": "DFC",
+    "is_optional_state": 0,
+    "send_email": 1,
+    "message": "L'état récapitulatif a été validé et transmis à la Direction."
+   },
+   {
+    "state": "Rejeté",
+    "doc_status": "0",
+    "allow_edit": "Comptable",
+    "is_optional_state": 0,
+    "send_email": 1,
+    "message": "L'état récapitulatif a été rejeté. Veuillez corriger et resoumettre."
+   }
   ],
   "transitions": [
-   {"state": "Brouillon", "action": "Soumettre au DFC", "next_state": "En attente Validation DFC", "allowed": "Comptable", "allow_self_approval": 0, "condition": null},
-   {"state": "Brouillon", "action": "Soumettre au DFC", "next_state": "En attente Validation DFC", "allowed": "DFC", "allow_self_approval": 1, "condition": null},
-   {"state": "Brouillon", "action": "Soumettre au DFC", "next_state": "En attente Validation DFC", "allowed": "Accounts Manager", "allow_self_approval": 1, "condition": null},
-   {"state": "En attente Validation DFC", "action": "Valider", "next_state": "Validé DFC", "allowed": "DFC", "allow_self_approval": 0, "condition": null},
-   {"state": "En attente Validation DFC", "action": "Valider", "next_state": "Validé DFC", "allowed": "Accounts Manager", "allow_self_approval": 1, "condition": null},
-   {"state": "En attente Validation DFC", "action": "Rejeter", "next_state": "Rejeté", "allowed": "DFC", "allow_self_approval": 0, "condition": null},
-   {"state": "Rejeté", "action": "Soumettre au DFC", "next_state": "En attente Validation DFC", "allowed": "Comptable", "allow_self_approval": 0, "condition": null}
-  ]
+   {
+    "state": "Brouillon",
+    "action": "Soumettre au DFC",
+    "next_state": "En attente Validation DFC",
+    "allowed": "Comptable",
+    "allow_self_approval": 0,
+    "condition": null
+   },
+   {
+    "state": "Brouillon",
+    "action": "Soumettre au DFC",
+    "next_state": "En attente Validation DFC",
+    "allowed": "DFC",
+    "allow_self_approval": 1,
+    "condition": null
+   },
+   {
+    "state": "Brouillon",
+    "action": "Soumettre au DFC",
+    "next_state": "En attente Validation DFC",
+    "allowed": "Accounts Manager",
+    "allow_self_approval": 1,
+    "condition": null
+   },
+   {
+    "state": "En attente Validation DFC",
+    "action": "Valider",
+    "next_state": "Validé DFC",
+    "allowed": "DFC",
+    "allow_self_approval": 0,
+    "condition": null
+   },
+   {
+    "state": "En attente Validation DFC",
+    "action": "Valider",
+    "next_state": "Validé DFC",
+    "allowed": "Accounts Manager",
+    "allow_self_approval": 1,
+    "condition": null
+   },
+   {
+    "state": "En attente Validation DFC",
+    "action": "Rejeter",
+    "next_state": "Rejeté",
+    "allowed": "DFC",
+    "allow_self_approval": 0,
+    "condition": null
+   },
+   {
+    "state": "Rejeté",
+    "action": "Soumettre au DFC",
+    "next_state": "En attente Validation DFC",
+    "allowed": "Comptable",
+    "allow_self_approval": 0,
+    "condition": null
+   }
+  ],
+  "workflow_name": "Flux Etat Recap Cheques"
  }
 ]
