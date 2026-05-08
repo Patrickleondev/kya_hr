@@ -1,7 +1,7 @@
 {
  "app": "kya_hr",
  "charts": [],
- "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Comptabilité'>💰 Comptabilité & Finance KYA</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"sub\", \"type\": \"paragraph\", \"data\": {\"text\": \"<i>Caisse hebdomadaire • Chèques • Clients SoP • Marchés • Reporting DG / DAAF</i>\", \"level\": 4, \"col\": 12}}, {\"id\": \"sp0\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_act\", \"type\": \"header\", \"data\": {\"text\": \"<b>⚡ Actions Rapides</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Brouillards de Caisse\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"États Récap Chèques\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Récap Hebdo (DG)\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Plan Comptable\", \"col\": 3}}, {\"id\": \"sp1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_sop\", \"type\": \"header\", \"data\": {\"text\": \"<b>☀️ Portefeuille Clients SoP</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s9\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Clients SoP KYA\", \"col\": 3}}, {\"id\": \"s10\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Marchés KYA\", \"col\": 3}}, {\"id\": \"sp2\", \"type\": \"spacer\", \"data\": {\"col\": 6}}, {\"id\": \"sp3\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_erp\", \"type\": \"header\", \"data\": {\"text\": \"<b>📊 Comptabilité ERPNext</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Journaux\", \"col\": 3}}, {\"id\": \"s6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Paiements\", \"col\": 3}}, {\"id\": \"s7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Factures Achat\", \"col\": 3}}, {\"id\": \"s8\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Bilan & Compte de Résultat\", \"col\": 3}}]",
+ "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Comptabilité'>💰 Comptabilité & Finance KYA</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"sub\", \"type\": \"paragraph\", \"data\": {\"text\": \"<i>Caisse hebdomadaire • Chèques • Imports Excel • Clients SoP • Marchés • Reporting DG / DAAF</i>\", \"level\": 4, \"col\": 12}}, {\"id\": \"sp0\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_act\", \"type\": \"header\", \"data\": {\"text\": \"<b>⚡ Actions Rapides</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s11\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dashboard Comptabilité\", \"col\": 3}}, {\"id\": \"s12\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Importer Excel Comptabilité\", \"col\": 3}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Brouillards de Caisse\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"États Récap Chèques\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Récap Hebdo (DG)\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Plan Comptable\", \"col\": 3}}, {\"id\": \"sp1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_sop\", \"type\": \"header\", \"data\": {\"text\": \"<b>☀️ Portefeuille Clients SoP</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s9\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Clients SoP KYA\", \"col\": 3}}, {\"id\": \"s10\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Marchés KYA\", \"col\": 3}}, {\"id\": \"sp2\", \"type\": \"spacer\", \"data\": {\"col\": 6}}, {\"id\": \"sp3\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_erp\", \"type\": \"header\", \"data\": {\"text\": \"<b>📊 Comptabilité ERPNext</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Journaux\", \"col\": 3}}, {\"id\": \"s6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Paiements\", \"col\": 3}}, {\"id\": \"s7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Factures Achat\", \"col\": 3}}, {\"id\": \"s8\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Bilan & Compte de Résultat\", \"col\": 3}}]",
  "creation": "2026-01-01 00:00:00.000000",
  "custom_blocks": [],
  "docstatus": 0,
@@ -45,6 +45,20 @@
   }
  ],
  "shortcuts": [
+  {
+    "label": "Dashboard Comptabilité",
+    "type": "URL",
+    "url": "/comptabilite-dashboard",
+    "color": "#0f3d68",
+    "icon": "bar-chart"
+  },
+  {
+    "label": "Importer Excel Comptabilité",
+    "type": "URL",
+    "url": "/comptabilite-import/new",
+    "color": "#f59e0b",
+    "icon": "upload"
+  },
   {
    "label": "➕ Nouveau Brouillard (Web)",
    "type": "URL",
@@ -139,6 +153,16 @@
    "link_count": 0,
    "link_type": "DocType",
    "onboard": 0
+  },
+  {
+    "type": "Link",
+    "label": "Imports Comptabilité",
+    "link_to": "KYA Compta Import",
+    "link_type": "DocType",
+    "hidden": 0,
+    "is_query_report": 0,
+    "link_count": 0,
+    "onboard": 1
   },
   {
    "type": "Link",

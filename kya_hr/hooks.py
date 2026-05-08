@@ -47,6 +47,7 @@ doctype_js = {
     "Inventaire KYA": "doctype/inventaire_kya/inventaire_kya.js",
     "KYA Contrat": "public/js/kya_contrat.js",
     "Brouillard Caisse": "doctype/brouillard_caisse/brouillard_caisse.js",
+    "KYA Compta Import": "doctype/kya_compta_import/kya_compta_import.js",
     "Marche KYA": "doctype/marche_kya/marche_kya.js",
 }
 

@@ -22,6 +22,7 @@ KYA_WEB_FORMS = [
     "inventaire-kya",
     "brouillard-caisse",
     "etat-recap",
+    "comptabilite-import",
     "demande-conge",
     "planning-conge",
     "bilan-fin-de-stage",

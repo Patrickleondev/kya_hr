@@ -21,6 +21,7 @@
 		"Inventaire KYA": "/inventaire-kya/new",
 		"Brouillard Caisse": "/brouillard-caisse/new",
 		"Etat Recap Cheques": "/etat-recap/new",
+		"KYA Compta Import": "/comptabilite-import/new",
 		"Permission Sortie Stagiaire": "/permission-sortie-stagiaire/new",
 		"Permission Sortie Employe": "/permission-sortie-employe/new",
 		"Demande Conge KYA": "/demande-conge/new",

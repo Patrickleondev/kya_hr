@@ -1,0 +1,144 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Tableau de Bord Comptabilité KYA{% endblock %}
+
+{% block page_content %}
+<style>
+.kya-compta-page { max-width: 1180px; margin: 18px auto 32px; padding: 0 16px; font-family: Arial, sans-serif; color: #18212f; }
+.kya-letterhead { border: 1px solid #d9dee7; border-radius: 6px; overflow: hidden; background: #fff; }
+.kya-letterhead-top { display: grid; grid-template-columns: 120px 1fr 180px; gap: 18px; align-items: center; padding: 18px 22px; border-bottom: 4px solid #f59e0b; }
+.kya-logo { width: 84px; height: 84px; object-fit: contain; }
+.kya-company h1 { margin: 0; font-size: 22px; color: #0f3d68; letter-spacing: 0; }
+.kya-company p { margin: 4px 0 0; font-size: 12px; color: #5c6573; line-height: 1.45; }
+.kya-doc-meta { text-align: right; font-size: 12px; color: #4b5563; }
+.kya-title-band { background: #0f3d68; color: #fff; padding: 14px 22px; display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+.kya-title-band h2 { margin: 0; font-size: 20px; letter-spacing: 0; }
+.kya-title-band span { font-size: 13px; opacity: .92; }
+.kya-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0; }
+.kya-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 9px 14px; border-radius: 6px; border: 1px solid #d8dee8; background: #fff; color: #0f3d68; text-decoration: none; font-weight: 700; font-size: 13px; }
+.kya-btn.primary { background: #f59e0b; border-color: #d97706; color: #fff; }
+.kya-btn.dark { background: #0f3d68; border-color: #0f3d68; color: #fff; }
+.kya-btn:hover { text-decoration: none; filter: brightness(.97); }
+.kya-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 14px 0 20px; }
+.kya-kpi { border: 1px solid #d9dee7; border-radius: 6px; background: #fff; padding: 14px; }
+.kya-kpi .label { color: #667085; font-size: 12px; text-transform: uppercase; }
+.kya-kpi .value { font-size: 20px; color: #101828; font-weight: 800; margin-top: 5px; }
+.kya-section { margin-top: 18px; border: 1px solid #d9dee7; border-radius: 6px; background: #fff; overflow: hidden; }
+.kya-section h3 { margin: 0; padding: 13px 16px; background: #f7f8fa; border-bottom: 1px solid #d9dee7; font-size: 15px; color: #0f3d68; }
+.kya-table-wrap { overflow-x: auto; }
+table.kya-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.kya-table th, .kya-table td { padding: 10px 12px; border-bottom: 1px solid #edf0f5; text-align: left; vertical-align: top; }
+.kya-table th { background: #fbfcfe; color: #475467; font-size: 12px; text-transform: uppercase; }
+.kya-table td.num { text-align: right; white-space: nowrap; }
+.kya-badge { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #eef6ff; color: #175cd3; }
+.kya-badge.ok { background: #ecfdf3; color: #067647; }
+.kya-badge.err { background: #fef3f2; color: #b42318; }
+.kya-help { padding: 14px 16px; color: #475467; font-size: 13px; line-height: 1.5; }
+.kya-models { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 14px 16px; }
+.kya-model { border: 1px solid #edf0f5; border-radius: 6px; padding: 12px; }
+.kya-model b { display: block; color: #0f3d68; margin-bottom: 5px; }
+@media (max-width: 860px) {
+  .kya-letterhead-top { grid-template-columns: 80px 1fr; }
+  .kya-doc-meta { grid-column: 1 / -1; text-align: left; }
+  .kya-grid, .kya-models { grid-template-columns: 1fr; }
+  .kya-title-band { display: block; }
+}
+@media print {
+  .navbar, header, .web-footer, .kya-actions { display: none !important; }
+  .kya-compta-page { margin: 0; max-width: none; }
+}
+</style>
+
+<div class="kya-compta-page">
+  <div class="kya-letterhead">
+    <div class="kya-letterhead-top">
+      <img class="kya-logo" src="/assets/kya_hr/images/kya_logo.png" alt="KYA-Energy Group">
+      <div class="kya-company">
+        <h1>KYA-ENERGY GROUP</h1>
+        <p>Solutions solaires • Services techniques • Gestion administrative et financière</p>
+        <p>Agoè-Logopé, Lomé - Togo</p>
+      </div>
+      <div class="kya-doc-meta">
+        <b>Comptabilité & Finance</b><br>
+        Données importées depuis modèles Excel<br>
+        Traçabilité: utilisateur, fichier source, date
+      </div>
+    </div>
+    <div class="kya-title-band">
+      <h2>Tableau de bord comptabilité</h2>
+      <span>Grand livre • Etat de salaire • Facture • Brouillard • SoP</span>
+    </div>
+  </div>
+
+  <div class="kya-actions">
+    <a class="kya-btn primary" href="/comptabilite-import/new">Nouvel import Excel</a>
+    <a class="kya-btn" href="/brouillard-caisse/new">Nouveau brouillard</a>
+    <a class="kya-btn" href="/etat-recap/new">Nouvel état chèques</a>
+    <a class="kya-btn dark" href="/recap-brouillards">Récap caisse DG</a>
+    <button class="kya-btn" onclick="window.print()">Imprimer</button>
+  </div>
+
+  <div class="kya-grid">
+    <div class="kya-kpi"><div class="label">Imports</div><div class="value">{{ stats.imports }}</div></div>
+    <div class="kya-kpi"><div class="label">Lignes</div><div class="value">{{ stats.lignes|int }}</div></div>
+    <div class="kya-kpi"><div class="label">Net salaires</div><div class="value">{{ "{:,.0f}".format(stats.salaires).replace(",", " ") }} XOF</div></div>
+    <div class="kya-kpi"><div class="label">Factures</div><div class="value">{{ "{:,.0f}".format(stats.factures).replace(",", " ") }} XOF</div></div>
+  </div>
+
+  <div class="kya-section">
+    <h3>Modèles Excel acceptés</h3>
+    <div class="kya-models">
+      <div class="kya-model"><b>Etat de Salaire</b>Feuille mensuelle type JANVIER, lignes personnel, brut, retenues, net à payer et charges patronales.<br><br><a class="kya-btn" href="/api/method/kya_hr.api.comptabilite.download_template?type_document=Etat%20de%20Salaire">Modèle Excel</a></div>
+      <div class="kya-model"><b>Grand Livre Général</b>Format Sage: compte, date, journal, pièce, libellé, débit, crédit et solde progressif.<br><br><a class="kya-btn" href="/api/method/kya_hr.api.comptabilite.download_template?type_document=Grand%20Livre%20G%C3%A9n%C3%A9ral">Modèle Excel</a></div>
+      <div class="kya-model"><b>Facture</b>Entête facture KYA, numéro, objet, lignes désignation, unité, quantité, prix unitaire et total.<br><br><a class="kya-btn" href="/api/method/kya_hr.api.comptabilite.download_template?type_document=Facture">Modèle Excel</a></div>
+    </div>
+  </div>
+
+  <div class="kya-section">
+    <h3>Derniers imports</h3>
+    {% if imports %}
+    <div class="kya-table-wrap">
+      <table class="kya-table">
+        <thead>
+          <tr>
+            <th>Référence</th>
+            <th>Type</th>
+            <th>Période</th>
+            <th>Statut</th>
+            <th class="num">Lignes</th>
+            <th class="num">Débit</th>
+            <th class="num">Crédit</th>
+            <th class="num">Net / Total</th>
+            <th>Trace</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in imports %}
+          <tr>
+            <td><a href="/app/kya-compta-import/{{ row.name }}">{{ row.name }}</a></td>
+            <td>{{ row.type_document }}</td>
+            <td>{{ row.periode or "" }}</td>
+            <td><span class="kya-badge {% if row.statut_import == 'Importé' %}ok{% elif row.statut_import == 'Erreur' %}err{% endif %}">{{ row.statut_import }}</span></td>
+            <td class="num">{{ row.total_lignes or 0 }}</td>
+            <td class="num">{{ "{:,.0f}".format(row.total_debit or 0).replace(",", " ") }}</td>
+            <td class="num">{{ "{:,.0f}".format(row.total_credit or 0).replace(",", " ") }}</td>
+            <td class="num">{{ "{:,.0f}".format((row.total_salaire_net or row.total_facture or 0)).replace(",", " ") }}</td>
+            <td>{{ row.imported_by }}<br>{{ row.date_import_label }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="kya-help">Aucun import enregistré pour le moment. Utilisez <b>Nouvel import Excel</b> pour charger un fichier mock ou un fichier au même format.</div>
+    {% endif %}
+  </div>
+
+  <div class="kya-section">
+    <h3>Traçabilité</h3>
+    <div class="kya-help">
+      Chaque import conserve le fichier Excel source, l'utilisateur, la date d'import, les totaux calculés et la ligne brute JSON. Les données sont consultables sans modifier les écritures ERPNext natives tant que la validation métier comptable n'a pas été définie.
+    </div>
+  </div>
+</div>
+{% endblock %}
