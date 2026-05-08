@@ -412,9 +412,36 @@ def _ensure_gestion_equipe_content():
     print("  [MINIMAL] Gestion Équipe content + sidebar (Dashboard only)")
 
 
+# Icônes timeless Frappe v16 pour les cartes workspace (tabWorkspace.icon)
+# Les icônes Lucide ne fonctionnent pas pour les cartes workspace → fallback lettre
+KYA_WORKSPACE_ICONS = {
+    "Espace Achats": "buying",
+    "Espace Comptabilité": "accounting",
+    "Espace Comptabilite": "accounting",
+    "Espace Direction": "organization",
+    "Espace Employés": "hr",
+    "Espace Employes": "hr",
+    "Espace RH": "hr",
+    "Espace Stagiaires": "education",
+    "Espace Stock": "stock",
+    "Inventaire & Sorties Matériel": "stock",
+    "Inventaire Sorties Materiel": "stock",
+    "Logistique": "retail",
+    "KYA Services": "project",
+    "Gestion Équipe": "project",
+    "Gestion Equipe": "project",
+}
+
+
 def execute():
     """Post-migrate hook -- nettoyage et visibilite uniquement."""
     print("=== KYA WORKSPACE SYNC v10 ===")
+
+    # 0. Corriger les icônes timeless des cartes workspace KYA
+    for ws_name, icon in KYA_WORKSPACE_ICONS.items():
+        if frappe.db.exists("Workspace", ws_name):
+            frappe.db.set_value("Workspace", ws_name, "icon", icon, update_modified=False)
+            print(f"  [ICON] {ws_name} → {icon}")
 
     # 1. Supprimer les Workspace Sidebar orphelins
     for sb_name in ORPHAN_SIDEBARS:

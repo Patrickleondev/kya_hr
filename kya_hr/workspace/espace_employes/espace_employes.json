@@ -9,7 +9,7 @@
  "type": "Workspace",
  "hide_custom": 0,
  "color": "#1a73e8",
- "icon": "user-round",
+ "icon": "hr",
  "idx": 0,
  "is_hidden": 0,
  "is_standard": 1,
@@ -20,20 +20,48 @@
  "public": 1,
  "sequence_id": 11,
  "roles": [
-  {"role": "Chef Service"},
-  {"role": "Supérieur Immédiat"},
-  {"role": "HR Manager"},
-    {"role": "HR User"},
-  {"role": "Responsable RH"},
-  {"role": "Directeur Général"},
-  {"role": "DAAF"},
-  {"role": "Auditeur Interne"},
-  {"role": "Stock User"},
-  {"role": "Purchase User"},
-  {"role": "Responsable Achats"},
-  {"role": "Chargé des Stocks"},
-  {"role": "KYA Destinataire Notif"},
-  {"role": "System Manager"}
+  {
+   "role": "Chef Service"
+  },
+  {
+   "role": "Supérieur Immédiat"
+  },
+  {
+   "role": "HR Manager"
+  },
+  {
+   "role": "HR User"
+  },
+  {
+   "role": "Responsable RH"
+  },
+  {
+   "role": "Directeur Général"
+  },
+  {
+   "role": "DAAF"
+  },
+  {
+   "role": "Auditeur Interne"
+  },
+  {
+   "role": "Stock User"
+  },
+  {
+   "role": "Purchase User"
+  },
+  {
+   "role": "Responsable Achats"
+  },
+  {
+   "role": "Chargé des Stocks"
+  },
+  {
+   "role": "KYA Destinataire Notif"
+  },
+  {
+   "role": "System Manager"
+  }
  ],
  "shortcuts": [
   {

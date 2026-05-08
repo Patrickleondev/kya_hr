@@ -9,7 +9,7 @@
  "type": "Workspace",
  "hide_custom": 0,
  "color": "#6a1b9a",
- "icon": "wallet",
+ "icon": "accounting",
  "idx": 0,
  "is_hidden": 0,
  "is_standard": 1,
@@ -46,18 +46,18 @@
  ],
  "shortcuts": [
   {
-    "label": "Dashboard Comptabilité",
-    "type": "URL",
-    "url": "/comptabilite-dashboard",
-    "color": "#0f3d68",
-    "icon": "bar-chart"
+   "label": "Dashboard Comptabilité",
+   "type": "URL",
+   "url": "/comptabilite-dashboard",
+   "color": "#0f3d68",
+   "icon": "bar-chart"
   },
   {
-    "label": "Importer Excel Comptabilité",
-    "type": "URL",
-    "url": "/comptabilite-import/new",
-    "color": "#f59e0b",
-    "icon": "upload"
+   "label": "Importer Excel Comptabilité",
+   "type": "URL",
+   "url": "/comptabilite-import/new",
+   "color": "#f59e0b",
+   "icon": "upload"
   },
   {
    "label": "➕ Nouveau Brouillard (Web)",
@@ -155,14 +155,14 @@
    "onboard": 0
   },
   {
-    "type": "Link",
-    "label": "Imports Comptabilité",
-    "link_to": "KYA Compta Import",
-    "link_type": "DocType",
-    "hidden": 0,
-    "is_query_report": 0,
-    "link_count": 0,
-    "onboard": 1
+   "type": "Link",
+   "label": "Imports Comptabilité",
+   "link_to": "KYA Compta Import",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 1
   },
   {
    "type": "Link",

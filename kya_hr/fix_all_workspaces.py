@@ -237,7 +237,7 @@ def fix_espace_stagiaires():
     """Ensure Espace Stagiaires is visible, public, with correct icon and content."""
     frappe.db.sql("""
         UPDATE tabWorkspace
-        SET public = 1, is_hidden = 0, icon = 'graduation-cap'
+        SET public = 1, is_hidden = 0, icon = 'education'
         WHERE name = 'Espace Stagiaires'
     """)
     # Rebuild content with 3 Number Cards + shortcuts
