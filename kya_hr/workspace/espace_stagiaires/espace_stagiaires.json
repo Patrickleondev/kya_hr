@@ -183,17 +183,27 @@
   },
   {
    "color": "#29CD42",
-   "doc_view": "List",
+   "doc_view": "",
    "label": "Permissions",
-   "link_to": "Permission Sortie Stagiaire",
-   "type": "DocType"
+   "link_to": "/permission-sortie-stagiaire",
+   "type": "URL",
+   "url": "/permission-sortie-stagiaire"
   },
   {
    "color": "#7C5CFC",
-   "doc_view": "List",
+   "doc_view": "",
    "label": "Bilan",
-   "link_to": "Bilan Fin de Stage",
-   "type": "DocType"
+   "link_to": "/bilan-fin-de-stage",
+   "type": "URL",
+   "url": "/bilan-fin-de-stage"
+  },
+  {
+   "color": "#8e24aa",
+   "doc_view": "",
+   "label": "Bilan de Stage \u2197",
+   "link_to": "/bilan-fin-de-stage/new",
+   "type": "URL",
+   "url": "/bilan-fin-de-stage/new"
   },
   {
    "color": "#2c3e50",

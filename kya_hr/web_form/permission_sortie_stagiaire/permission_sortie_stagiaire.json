@@ -48,6 +48,14 @@
    "read_only": 1
   },
   {
+   "fieldname": "equipe",
+   "label": "Équipe / Service",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "reqd": 0,
+   "hidden": 0
+  },
+  {
    "fieldname": "date_sortie",
    "fieldtype": "Date",
    "label": "Date de Début",

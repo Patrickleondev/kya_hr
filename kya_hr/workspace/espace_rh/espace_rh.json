@@ -31,9 +31,9 @@
   {"role": "System Manager"}
  ],
  "shortcuts": [
-  {"label": "Permissions Sortie Employé", "type": "DocType", "link_to": "Permission Sortie Employe", "color": "#1976d2", "icon": "exit"},
-  {"label": "Permissions Sortie Stagiaire", "type": "DocType", "link_to": "Permission Sortie Stagiaire", "color": "#0288d1", "icon": "exit"},
-  {"label": "Demandes de Congé", "type": "DocType", "link_to": "Leave Application", "color": "#388e3c", "icon": "calendar"},
+  {"label": "Permissions Sortie Employé", "type": "URL", "url": "/permission-sortie-employe", "color": "#1976d2", "icon": "exit"},
+  {"label": "Permissions Sortie Stagiaire", "type": "URL", "url": "/permission-sortie-stagiaire", "color": "#0288d1", "icon": "exit"},
+  {"label": "Demandes de Congé", "type": "URL", "url": "/demande-conge", "color": "#388e3c", "icon": "calendar"},
   {"label": "Plannings Congé", "type": "DocType", "link_to": "Planning Conge", "color": "#2e7d32", "icon": "calendar"},
   {"label": "Tableau de Bord Employés", "type": "URL", "url": "/tableau-bord-employes", "color": "#F58220", "icon": "bar-chart"},
   {"label": "Tableau de Bord Stagiaires", "type": "URL", "url": "/tableau-bord-stagiaires", "color": "#ad1457", "icon": "graduation-cap"},

@@ -18,30 +18,37 @@ def get_context(context):
     if not _ALLOWED_ROLES.intersection(user_roles):
         frappe.throw(_("Accès réservé à la comptabilité."), frappe.PermissionError)
 
-    imports = frappe.get_all(
-        "KYA Compta Import",
-        fields=[
-            "name", "type_document", "periode", "statut_import", "total_lignes",
-            "total_debit", "total_credit", "total_salaire_net", "total_facture",
-            "imported_by", "date_import", "source_file", "modified",
-        ],
-        order_by="modified desc",
-        limit_page_length=20,
-    )
-
-    stats = {
-        "imports": len(imports),
-        "lignes": sum(flt(row.total_lignes) for row in imports),
-        "debit": sum(flt(row.total_debit) for row in imports),
-        "credit": sum(flt(row.total_credit) for row in imports),
-        "salaires": sum(flt(row.total_salaire_net) for row in imports),
-        "factures": sum(flt(row.total_facture) for row in imports),
-    }
-
+    imports = []
+    stats = {"imports": 0, "lignes": 0, "debit": 0, "credit": 0, "salaires": 0, "factures": 0}
     type_counts = {}
-    for row in imports:
-        type_counts[row.type_document] = type_counts.get(row.type_document, 0) + 1
-        row.date_import_label = formatdate(row.date_import) if row.date_import else ""
+
+    try:
+        imports = frappe.get_all(
+            "KYA Compta Import",
+            fields=[
+                "name", "type_document", "periode", "statut_import", "total_lignes",
+                "total_debit", "total_credit", "total_salaire_net", "total_facture",
+                "imported_by", "date_import", "source_file", "modified",
+            ],
+            order_by="modified desc",
+            limit_page_length=20,
+        )
+
+        stats = {
+            "imports": len(imports),
+            "lignes": sum(flt(row.total_lignes) for row in imports),
+            "debit": sum(flt(row.total_debit) for row in imports),
+            "credit": sum(flt(row.total_credit) for row in imports),
+            "salaires": sum(flt(row.total_salaire_net) for row in imports),
+            "factures": sum(flt(row.total_facture) for row in imports),
+        }
+
+        for row in imports:
+            type_counts[row.type_document] = type_counts.get(row.type_document, 0) + 1
+            row.date_import_label = formatdate(row.date_import) if row.date_import else ""
+
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "comptabilite-dashboard: erreur chargement")
 
     context.imports = imports
     context.stats = stats

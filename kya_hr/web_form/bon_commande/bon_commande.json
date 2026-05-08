@@ -26,29 +26,141 @@
  "success_message": "✅ Bon de Commande enregistré avec succès. Il sera visé par la Direction puis envoyé au client.",
  "title": "Bon de Commande",
  "web_form_fields": [
-  { "fieldname": "numero_bc", "fieldtype": "Data", "label": "N° du Bon de Commande", "reqd": 1, "description": "ex: O4026/KYA/DG/SMA" },
-  { "fieldname": "date_bc", "fieldtype": "Date", "label": "Date du BC", "reqd": 1 },
-  { "fieldname": "demande_achat", "fieldtype": "Link", "label": "Demande d'Achat liée (optionnel)", "options": "Demande Achat KYA" },
-  { "fieldname": "objet", "fieldtype": "Small Text", "label": "Objet de la Commande", "reqd": 1 },
-  { "fieldname": "fournisseur", "fieldtype": "Link", "label": "Client (référence)", "options": "Customer" },
-  { "fieldname": "fournisseur_nom", "fieldtype": "Data", "label": "Nom / Raison Sociale du Client", "reqd": 1 },
-  { "fieldname": "fournisseur_entreprise", "fieldtype": "Data", "label": "Entreprise" },
-  { "fieldname": "fournisseur_adresse", "fieldtype": "Data", "label": "Adresse" },
-  { "fieldname": "fournisseur_ville", "fieldtype": "Data", "label": "Ville", "default": "Lomé" },
-  { "fieldname": "fournisseur_telephone", "fieldtype": "Data", "label": "Téléphone" },
-  { "fieldname": "fournisseur_email", "fieldtype": "Data", "label": "Email" },
-  { "fieldname": "articles", "fieldtype": "Table", "label": "Articles commandés", "options": "Bon Commande KYA Item", "reqd": 1 },
-  { "fieldname": "remise", "fieldtype": "Currency", "label": "Remise (XOF)" },
-  { "fieldname": "tva_taux", "fieldtype": "Percent", "label": "TVA (%)", "default": 18 },
-  { "fieldname": "garantie", "fieldtype": "Data", "label": "Garantie", "default": "12 mois" },
-  { "fieldname": "delai_livraison", "fieldtype": "Data", "label": "Délai de livraison", "default": "72 heures" },
-  { "fieldname": "validite", "fieldtype": "Data", "label": "Validité", "default": "30 jours" },
-  { "fieldname": "lieu_livraison", "fieldtype": "Data", "label": "Lieu de livraison", "default": "Lomé — Agoè Logopé" },
-  { "fieldname": "modalites_paiement", "fieldtype": "Data", "label": "Modalités de paiement", "default": "100% à la livraison" },
-  { "fieldname": "reglement", "fieldtype": "Small Text", "label": "Règlement / coordonnées" },
-  { "fieldname": "autorise_par_nom", "fieldtype": "Data", "label": "Autorisé par (nom)" },
-  { "fieldname": "autorise_par_fonction", "fieldtype": "Data", "label": "Fonction", "default": "Directrice Générale" },
-  { "fieldname": "signature_dg", "fieldtype": "Signature", "label": "Signature DG" },
-  { "fieldname": "date_autorisation", "fieldtype": "Date", "label": "Date d'autorisation" }
+  {
+   "fieldname": "numero_bc",
+   "fieldtype": "Data",
+   "label": "N° du Bon de Commande",
+   "reqd": 1,
+   "description": "ex: O4026/KYA/DG/SMA"
+  },
+  {
+   "fieldname": "date_bc",
+   "fieldtype": "Date",
+   "label": "Date du BC",
+   "reqd": 1
+  },
+  {
+   "fieldname": "demande_achat",
+   "fieldtype": "Link",
+   "label": "Demande d'Achat liée (optionnel)",
+   "options": "Demande Achat KYA"
+  },
+  {
+   "fieldname": "objet",
+   "fieldtype": "Small Text",
+   "label": "Objet de la Commande",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fournisseur",
+   "fieldtype": "Link",
+   "label": "Client (référence)",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "fournisseur_nom",
+   "fieldtype": "Data",
+   "label": "Nom / Raison Sociale du Client",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fournisseur_entreprise",
+   "fieldtype": "Data",
+   "label": "Entreprise"
+  },
+  {
+   "fieldname": "fournisseur_adresse",
+   "fieldtype": "Data",
+   "label": "Adresse"
+  },
+  {
+   "fieldname": "fournisseur_ville",
+   "fieldtype": "Data",
+   "label": "Ville",
+   "default": "Lomé"
+  },
+  {
+   "fieldname": "fournisseur_telephone",
+   "fieldtype": "Data",
+   "label": "Téléphone"
+  },
+  {
+   "fieldname": "fournisseur_email",
+   "fieldtype": "Data",
+   "label": "Email"
+  },
+  {
+   "fieldname": "articles",
+   "fieldtype": "Table",
+   "label": "Articles commandés",
+   "options": "Bon Commande KYA Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "remise",
+   "fieldtype": "Currency",
+   "label": "Remise (XOF)"
+  },
+  {
+   "fieldname": "tva_taux",
+   "fieldtype": "Percent",
+   "label": "TVA (%)",
+   "default": 18
+  },
+  {
+   "fieldname": "garantie",
+   "fieldtype": "Data",
+   "label": "Garantie",
+   "default": "12 mois"
+  },
+  {
+   "fieldname": "delai_livraison",
+   "fieldtype": "Data",
+   "label": "Délai de livraison",
+   "default": "72 heures"
+  },
+  {
+   "fieldname": "validite",
+   "fieldtype": "Data",
+   "label": "Validité",
+   "default": "30 jours"
+  },
+  {
+   "fieldname": "lieu_livraison",
+   "fieldtype": "Data",
+   "label": "Lieu de livraison",
+   "default": "Lomé — Agoè Logopé"
+  },
+  {
+   "fieldname": "modalites_paiement",
+   "fieldtype": "Data",
+   "label": "Modalités de paiement",
+   "default": "100% à la livraison"
+  },
+  {
+   "fieldname": "reglement",
+   "fieldtype": "Small Text",
+   "label": "Règlement / coordonnées"
+  },
+  {
+   "fieldname": "autorise_par_nom",
+   "fieldtype": "Data",
+   "label": "Autorisé par (nom)"
+  },
+  {
+   "fieldname": "autorise_par_fonction",
+   "fieldtype": "Data",
+   "label": "Fonction"
+  },
+  {
+   "fieldname": "signature_dg",
+   "fieldtype": "Signature",
+   "label": "Signature DG"
+  },
+  {
+   "fieldname": "date_autorisation",
+   "fieldtype": "Date",
+   "label": "Date d'autorisation"
+  }
  ]
 }

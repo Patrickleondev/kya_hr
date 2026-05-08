@@ -220,7 +220,7 @@
    "fieldname": "autorise_par_fonction",
    "label": "Fonction",
    "fieldtype": "Data",
-   "default": "Directrice Générale"
+   "default": null
   },
   {
    "fieldname": "signature_dg",

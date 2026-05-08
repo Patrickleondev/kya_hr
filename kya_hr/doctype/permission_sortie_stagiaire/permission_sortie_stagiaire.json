@@ -54,6 +54,16 @@
    "read_only": 1
   },
   {
+   "fieldname": "equipe",
+   "fieldtype": "Data",
+   "label": "Équipe / Service",
+   "read_only": 1,
+   "fetch_from": "employee.custom_kya_equipe",
+   "fetch_if_empty": 0,
+   "in_list_view": 0,
+   "print_hide": 0
+  },
+  {
    "fieldname": "company",
    "label": "Société",
    "fieldtype": "Link",
