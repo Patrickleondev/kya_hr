@@ -46,6 +46,8 @@ doctype_js = {
     "PV Entree Materiel": "doctype/pv_entree_materiel/pv_entree_materiel.js",
     "Inventaire KYA": "doctype/inventaire_kya/inventaire_kya.js",
     "KYA Contrat": "public/js/kya_contrat.js",
+    "Brouillard Caisse": "doctype/brouillard_caisse/brouillard_caisse.js",
+    "Marche KYA": "doctype/marche_kya/marche_kya.js",
 }
 
 # Jinja environment

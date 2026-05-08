@@ -1,0 +1,22 @@
+{
+ "creation": "2026-05-08 00:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "istable": 1,
+ "editable_grid": 1,
+ "field_order": ["annee", "mois", "montant_prevu", "montant_paye", "date_paiement", "observation"],
+ "fields": [
+  {"fieldname": "annee", "fieldtype": "Int", "label": "Année", "in_list_view": 1, "columns": 1, "reqd": 1},
+  {"fieldname": "mois", "fieldtype": "Select", "label": "Mois", "options": "Janvier\nFévrier\nMars\nAvril\nMai\nJuin\nJuillet\nAoût\nSeptembre\nOctobre\nNovembre\nDécembre", "in_list_view": 1, "columns": 2, "reqd": 1},
+  {"fieldname": "montant_prevu", "fieldtype": "Currency", "label": "Montant Prévu", "options": "XOF", "in_list_view": 1, "columns": 2, "default": "0"},
+  {"fieldname": "montant_paye", "fieldtype": "Currency", "label": "Montant Payé", "options": "XOF", "in_list_view": 1, "columns": 2, "default": "0"},
+  {"fieldname": "date_paiement", "fieldtype": "Date", "label": "Date Paiement", "in_list_view": 1, "columns": 2},
+  {"fieldname": "observation", "fieldtype": "Data", "label": "Observation", "columns": 3}
+ ],
+ "modified": "2026-05-08 00:00:00",
+ "module": "KYA HR",
+ "name": "KYA SoP Echeancier Ligne",
+ "sort_field": "idx",
+ "sort_order": "ASC",
+ "track_changes": 0
+}

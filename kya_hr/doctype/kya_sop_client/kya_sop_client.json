@@ -1,0 +1,245 @@
+{
+ "actions": [],
+ "autoname": "format:SOP-{YYYY}-{#####}",
+ "creation": "2026-05-08 00:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "is_submittable": 0,
+ "track_changes": 1,
+ "field_order": [
+  "section_entete",
+  "nom_client",
+  "type_client",
+  "col_entete",
+  "mode_paiement",
+  "statut",
+  "section_installation",
+  "date_installation",
+  "puissance_kw",
+  "col_installation",
+  "montant_total",
+  "montant_avance",
+  "section_solde",
+  "solde_du",
+  "date_prevue_solde",
+  "col_solde",
+  "statut_paiement",
+  "observations",
+  "section_echeancier",
+  "echeancier",
+  "section_location",
+  "montant_mensuel",
+  "date_fin_location",
+  "etat_paiement_location"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_entete",
+   "fieldtype": "Section Break",
+   "label": "Informations Client"
+  },
+  {
+   "fieldname": "nom_client",
+   "fieldtype": "Data",
+   "label": "Nom du Client",
+   "reqd": 1,
+   "in_list_view": 1,
+   "bold": 1
+  },
+  {
+   "fieldname": "type_client",
+   "fieldtype": "Select",
+   "label": "Type de Client",
+   "options": "Ménage\nInstitution",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "col_entete",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mode_paiement",
+   "fieldtype": "Select",
+   "label": "Mode de Paiement",
+   "options": "Cash\nTransche\nLocation",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "statut",
+   "fieldtype": "Select",
+   "label": "Statut",
+   "options": "En cours\nSoldé\nEn retard\nAnnulé",
+   "default": "En cours",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "section_installation",
+   "fieldtype": "Section Break",
+   "label": "Installation"
+  },
+  {
+   "fieldname": "date_installation",
+   "fieldtype": "Date",
+   "label": "Date d'Installation",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "puissance_kw",
+   "fieldtype": "Data",
+   "label": "Puissance Crête Solaire",
+   "description": "Ex: 455 × 10 (4,5 kWc)"
+  },
+  {
+   "fieldname": "col_installation",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "montant_total",
+   "fieldtype": "Currency",
+   "label": "Montant Total Installation",
+   "options": "XOF"
+  },
+  {
+   "fieldname": "montant_avance",
+   "fieldtype": "Currency",
+   "label": "Montant de l'Avance (1er décaissement)",
+   "options": "XOF"
+  },
+  {
+   "fieldname": "section_solde",
+   "fieldtype": "Section Break",
+   "label": "Suivi du Solde"
+  },
+  {
+   "fieldname": "solde_du",
+   "fieldtype": "Currency",
+   "label": "Solde Dû",
+   "options": "XOF",
+   "read_only": 1,
+   "description": "Calculé automatiquement depuis l'échéancier"
+  },
+  {
+   "fieldname": "date_prevue_solde",
+   "fieldtype": "Date",
+   "label": "Date Prévue pour le Solde"
+  },
+  {
+   "fieldname": "col_solde",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "statut_paiement",
+   "fieldtype": "Select",
+   "label": "Statut Paiement",
+   "options": "Non soldé\nSoldé\nPartiel",
+   "default": "Non soldé"
+  },
+  {
+   "fieldname": "observations",
+   "fieldtype": "Small Text",
+   "label": "Observations / Commentaires"
+  },
+  {
+   "fieldname": "section_echeancier",
+   "fieldtype": "Section Break",
+   "label": "Échéancier (Paiement par Tranche)",
+   "depends_on": "eval:doc.mode_paiement === 'Transhe' || doc.mode_paiement === 'Tranche'"
+  },
+  {
+   "fieldname": "echeancier",
+   "fieldtype": "Table",
+   "label": "Échéancier des Paiements",
+   "options": "KYA SoP Echeancier Ligne",
+   "depends_on": "eval:doc.mode_paiement === 'Transhe' || doc.mode_paiement === 'Tranche'"
+  },
+  {
+   "fieldname": "section_location",
+   "fieldtype": "Section Break",
+   "label": "Contrat de Location",
+   "depends_on": "eval:doc.mode_paiement === 'Location'"
+  },
+  {
+   "fieldname": "montant_mensuel",
+   "fieldtype": "Currency",
+   "label": "Montant Mensuel Dû",
+   "options": "XOF",
+   "depends_on": "eval:doc.mode_paiement === 'Location'"
+  },
+  {
+   "fieldname": "date_fin_location",
+   "fieldtype": "Date",
+   "label": "Date de Fin de Paiement Mensuel",
+   "depends_on": "eval:doc.mode_paiement === 'Location'"
+  },
+  {
+   "fieldname": "etat_paiement_location",
+   "fieldtype": "Table",
+   "label": "État des Paiements Mensuels",
+   "options": "KYA SoP Paiement Mensuel",
+   "depends_on": "eval:doc.mode_paiement === 'Location'"
+  }
+ ],
+ "modified": "2026-05-08 00:00:00",
+ "module": "KYA HR",
+ "name": "KYA SoP Client",
+ "naming_rule": "Expression",
+ "permissions": [
+  {
+   "role": "Comptable",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "print": 1,
+   "email": 1,
+   "export": 1
+  },
+  {
+   "role": "DFC",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "print": 1,
+   "email": 1,
+   "export": 1
+  },
+  {
+   "role": "DAAF",
+   "read": 1,
+   "print": 1,
+   "email": 1,
+   "export": 1
+  },
+  {
+   "role": "Directeur Général",
+   "read": 1,
+   "print": 1,
+   "email": 1,
+   "export": 1
+  },
+  {
+   "role": "Accounts Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "print": 1,
+   "email": 1,
+   "export": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "print": 1,
+   "email": 1,
+   "export": 1
+  }
+ ],
+ "sort_field": "date_installation",
+ "sort_order": "DESC",
+ "title_field": "nom_client"
+}

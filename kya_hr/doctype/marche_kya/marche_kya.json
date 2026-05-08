@@ -1,0 +1,404 @@
+{
+ "actions": [],
+ "autoname": "format:MKY-{YYYY}-{#####}",
+ "creation": "2026-05-08 00:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "is_submittable": 0,
+ "track_changes": 1,
+ "field_order": [
+  "section_entete",
+  "nom_marche",
+  "type_marche",
+  "col_entete",
+  "numero_marche",
+  "objet_marche",
+  "section_periode",
+  "date_debut",
+  "date_fin",
+  "col_periode",
+  "duree_jours",
+  "client_beneficiaire",
+  "section_facturation",
+  "montant_total_facture",
+  "montant_avance_demarrage",
+  "col_facturation",
+  "budget_previsionnel",
+  "section_couts",
+  "cout_supports_pv",
+  "cout_supports_batteries",
+  "cout_modules_pv",
+  "cout_batteries",
+  "cout_onduleurs",
+  "cout_cables",
+  "cout_terre",
+  "cout_protection",
+  "cout_accessoires_cablage",
+  "cout_gestionnaire",
+  "section_frais",
+  "frais_carburant",
+  "frais_location_camion",
+  "frais_perdiems",
+  "frais_hebergement",
+  "frais_autres",
+  "section_totaux",
+  "cout_total_realisation",
+  "ecart_avance",
+  "col_totaux",
+  "ecart_budget_previsionnel",
+  "marge_brute",
+  "taxes",
+  "marge_nette",
+  "section_meta",
+  "puissance_kwc",
+  "commentaires"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_entete",
+   "fieldtype": "Section Break",
+   "label": "Identification du Marché"
+  },
+  {
+   "fieldname": "nom_marche",
+   "fieldtype": "Data",
+   "label": "Nom du Marché / Client",
+   "reqd": 1,
+   "in_list_view": 1,
+   "bold": 1
+  },
+  {
+   "fieldname": "type_marche",
+   "fieldtype": "Select",
+   "label": "Type de Marché",
+   "options": "Ménage\nInstitution",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "col_entete",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "numero_marche",
+   "fieldtype": "Data",
+   "label": "N° Marché",
+   "depends_on": "eval:doc.type_marche === 'Institution'"
+  },
+  {
+   "fieldname": "objet_marche",
+   "fieldtype": "Small Text",
+   "label": "Objet du Marché"
+  },
+  {
+   "fieldname": "section_periode",
+   "fieldtype": "Section Break",
+   "label": "Période d'Exécution"
+  },
+  {
+   "fieldname": "date_debut",
+   "fieldtype": "Date",
+   "label": "Date de Début",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "date_fin",
+   "fieldtype": "Date",
+   "label": "Date de Fin"
+  },
+  {
+   "fieldname": "col_periode",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "duree_jours",
+   "fieldtype": "Int",
+   "label": "Durée (jours)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "client_beneficiaire",
+   "fieldtype": "Data",
+   "label": "Client / Bénéficiaire"
+  },
+  {
+   "fieldname": "section_facturation",
+   "fieldtype": "Section Break",
+   "label": "Facturation & Budget"
+  },
+  {
+   "fieldname": "montant_total_facture",
+   "fieldtype": "Currency",
+   "label": "Montant Total de la Facture",
+   "options": "XOF",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "montant_avance_demarrage",
+   "fieldtype": "Currency",
+   "label": "Montant Avance de Démarrage (1er décaissement)",
+   "options": "XOF"
+  },
+  {
+   "fieldname": "col_facturation",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "budget_previsionnel",
+   "fieldtype": "Currency",
+   "label": "Budget Prévisionnel des Achats",
+   "options": "XOF"
+  },
+  {
+   "fieldname": "section_couts",
+   "fieldtype": "Section Break",
+   "label": "Coûts de Réalisation"
+  },
+  {
+   "fieldname": "cout_supports_pv",
+   "fieldtype": "Currency",
+   "label": "Coût Supports PV",
+   "options": "XOF",
+   "default": "0"
+  },
+  {
+   "fieldname": "cout_supports_batteries",
+   "fieldtype": "Currency",
+   "label": "Coût Supports Batteries",
+   "options": "XOF",
+   "default": "0"
+  },
+  {
+   "fieldname": "cout_modules_pv",
+   "fieldtype": "Currency",
+   "label": "Coût Modules PV",
+   "options": "XOF",
+   "default": "0"
+  },
+  {
+   "fieldname": "cout_batteries",
+   "fieldtype": "Currency",
+   "label": "Coût Batteries",
+   "options": "XOF",
+   "default": "0"
+  },
+  {
+   "fieldname": "cout_onduleurs",
+   "fieldtype": "Currency",
+   "label": "Coût Onduleurs",
+   "options": "XOF",
+   "default": "0"
+  },
+  {
+   "fieldname": "cout_cables",
+   "fieldtype": "Currency",
+   "label": "Coût Câbles Électriques",
+   "options": "XOF",
+   "default": "0"
+  },
+  {
+   "fieldname": "cout_terre",
+   "fieldtype": "Currency",
+   "label": "Coût Composants Mise à la Terre",
+   "options": "XOF",
+   "default": "0"
+  },
+  {
+   "fieldname": "cout_protection",
+   "fieldtype": "Currency",
+   "label": "Coût Éléments de Protection",
+   "options": "XOF",
+   "default": "0"
+  },
+  {
+   "fieldname": "cout_accessoires_cablage",
+   "fieldtype": "Currency",
+   "label": "Coût Accessoires Câblage (goulottes, vis…)",
+   "options": "XOF",
+   "default": "0"
+  },
+  {
+   "fieldname": "cout_gestionnaire",
+   "fieldtype": "Currency",
+   "label": "Coût Composants Gestionnaire",
+   "options": "XOF",
+   "default": "0"
+  },
+  {
+   "fieldname": "section_frais",
+   "fieldtype": "Section Break",
+   "label": "Frais de Mission"
+  },
+  {
+   "fieldname": "frais_carburant",
+   "fieldtype": "Currency",
+   "label": "Frais de Carburant (Transport)",
+   "options": "XOF",
+   "default": "0"
+  },
+  {
+   "fieldname": "frais_location_camion",
+   "fieldtype": "Currency",
+   "label": "Location de Camion",
+   "options": "XOF",
+   "default": "0",
+   "depends_on": "eval:doc.type_marche === 'Institution'"
+  },
+  {
+   "fieldname": "frais_perdiems",
+   "fieldtype": "Currency",
+   "label": "Perdiems",
+   "options": "XOF",
+   "default": "0"
+  },
+  {
+   "fieldname": "frais_hebergement",
+   "fieldtype": "Currency",
+   "label": "Hébergement",
+   "options": "XOF",
+   "default": "0"
+  },
+  {
+   "fieldname": "frais_autres",
+   "fieldtype": "Currency",
+   "label": "Autres Frais",
+   "options": "XOF",
+   "default": "0"
+  },
+  {
+   "fieldname": "section_totaux",
+   "fieldtype": "Section Break",
+   "label": "Synthèse Financière (Calculé Auto)"
+  },
+  {
+   "fieldname": "cout_total_realisation",
+   "fieldtype": "Currency",
+   "label": "Coût Total de Réalisation",
+   "options": "XOF",
+   "read_only": 1,
+   "bold": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "ecart_avance",
+   "fieldtype": "Currency",
+   "label": "Écart Budget Réalisé vs Avance",
+   "options": "XOF",
+   "read_only": 1,
+   "description": "Budget réalisé - Avance de démarrage"
+  },
+  {
+   "fieldname": "col_totaux",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ecart_budget_previsionnel",
+   "fieldtype": "Currency",
+   "label": "Écart Budget Réalisé vs Prévisionnel",
+   "options": "XOF",
+   "read_only": 1
+  },
+  {
+   "fieldname": "marge_brute",
+   "fieldtype": "Currency",
+   "label": "Marge Bénéficiaire Brute",
+   "options": "XOF",
+   "read_only": 1,
+   "bold": 1
+  },
+  {
+   "fieldname": "taxes",
+   "fieldtype": "Currency",
+   "label": "Taxes à Payer",
+   "options": "XOF",
+   "default": "0"
+  },
+  {
+   "fieldname": "marge_nette",
+   "fieldtype": "Currency",
+   "label": "Marge Bénéficiaire Nette",
+   "options": "XOF",
+   "read_only": 1,
+   "bold": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "section_meta",
+   "fieldtype": "Section Break",
+   "label": "Informations Techniques"
+  },
+  {
+   "fieldname": "puissance_kwc",
+   "fieldtype": "Data",
+   "label": "Puissance (kWc)",
+   "depends_on": "eval:doc.type_marche === 'Institution'"
+  },
+  {
+   "fieldname": "commentaires",
+   "fieldtype": "Small Text",
+   "label": "Commentaires"
+  }
+ ],
+ "modified": "2026-05-08 00:00:00",
+ "module": "KYA HR",
+ "name": "Marche KYA",
+ "naming_rule": "Expression",
+ "permissions": [
+  {
+   "role": "Comptable",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "print": 1,
+   "email": 1,
+   "export": 1
+  },
+  {
+   "role": "DFC",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "print": 1,
+   "email": 1,
+   "export": 1
+  },
+  {
+   "role": "DAAF",
+   "read": 1,
+   "write": 1,
+   "print": 1,
+   "email": 1,
+   "export": 1
+  },
+  {
+   "role": "Directeur Général",
+   "read": 1,
+   "print": 1,
+   "email": 1,
+   "export": 1
+  },
+  {
+   "role": "Accounts Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "print": 1,
+   "email": 1,
+   "export": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "print": 1,
+   "email": 1,
+   "export": 1
+  }
+ ],
+ "sort_field": "date_debut",
+ "sort_order": "DESC",
+ "title_field": "nom_marche"
+}

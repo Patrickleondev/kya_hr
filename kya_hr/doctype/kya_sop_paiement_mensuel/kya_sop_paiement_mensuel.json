@@ -1,0 +1,21 @@
+{
+ "creation": "2026-05-08 00:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "istable": 1,
+ "editable_grid": 1,
+ "field_order": ["mois_label", "montant_du", "montant_paye", "date_paiement", "statut_mois"],
+ "fields": [
+  {"fieldname": "mois_label", "fieldtype": "Data", "label": "Mois", "in_list_view": 1, "columns": 2, "reqd": 1, "description": "Ex: Janv 2025"},
+  {"fieldname": "montant_du", "fieldtype": "Currency", "label": "Montant Dû", "options": "XOF", "in_list_view": 1, "columns": 2, "default": "0"},
+  {"fieldname": "montant_paye", "fieldtype": "Currency", "label": "Montant Payé", "options": "XOF", "in_list_view": 1, "columns": 2, "default": "0"},
+  {"fieldname": "date_paiement", "fieldtype": "Date", "label": "Date Paiement", "in_list_view": 1, "columns": 2},
+  {"fieldname": "statut_mois", "fieldtype": "Select", "label": "Statut", "options": "Non payé\nPayé\nPartiel\nExonéré", "in_list_view": 1, "columns": 2, "default": "Non payé"}
+ ],
+ "modified": "2026-05-08 00:00:00",
+ "module": "KYA HR",
+ "name": "KYA SoP Paiement Mensuel",
+ "sort_field": "idx",
+ "sort_order": "ASC",
+ "track_changes": 0
+}
