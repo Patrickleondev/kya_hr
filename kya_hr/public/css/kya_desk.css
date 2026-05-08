@@ -68,13 +68,55 @@
 
 .desktop-icon,
 .desk-icon,
-.module-link,
-.app-icon {
+.module-link {
   min-width: 92px !important;
   max-width: 128px !important;
   height: auto !important;
   min-height: 96px !important;
   align-items: center !important;
+}
+
+a.desktop-icon {
+  display: inline-flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  width: 126px !important;
+  min-width: 126px !important;
+  max-width: 126px !important;
+  min-height: 118px !important;
+  margin: 0 10px 24px !important;
+  vertical-align: top !important;
+}
+
+a.desktop-icon .icon-container {
+  flex: 0 0 auto !important;
+  margin: 0 auto 8px !important;
+}
+
+a.desktop-icon .icon-caption {
+  display: block !important;
+  width: 126px !important;
+  min-height: 34px !important;
+  padding: 0 4px !important;
+  box-sizing: border-box !important;
+}
+
+a.desktop-icon .icon-title {
+  display: block !important;
+  width: 100% !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
+  line-height: 1.2 !important;
+  text-align: center !important;
+  letter-spacing: 0 !important;
+}
+
+.app-icon {
+  object-fit: contain !important;
 }
 
 .desktop-icon .icon-label,

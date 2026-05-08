@@ -37,11 +37,11 @@ KYA_WORKSPACES = [
     "Inventaire & Sorties Matériel",
 ]
 
-# Sidebar a auto-creer si manquant : (titre, icon Lucide, workspace_name, items)
+# Sidebar a auto-creer si manquant : (titre, icon, workspace_name, items)
 KYA_AUTO_SIDEBARS = [
     {
         "title": "Espace Achats",
-        "icon": "shopping-cart",
+        "icon": "🛒",
         "module": "KYA HR",
         "app": "kya_hr",
         "workspace": "Espace Achats",
@@ -53,7 +53,7 @@ KYA_AUTO_SIDEBARS = [
     },
     {
         "title": "Espace Stock",
-        "icon": "package",
+        "icon": "📦",
         "module": "KYA HR",
         "app": "kya_hr",
         "workspace": "Espace Stock",
@@ -65,7 +65,7 @@ KYA_AUTO_SIDEBARS = [
     },
     {
         "title": "Espace RH",
-        "icon": "users",
+        "icon": "👥",
         "module": "KYA HR",
         "app": "kya_hr",
         "workspace": "Espace RH",
@@ -80,7 +80,7 @@ KYA_AUTO_SIDEBARS = [
     },
     {
         "title": "Espace Comptabilité",
-        "icon": "wallet",
+        "icon": "💰",
         "module": "KYA HR",
         "app": "kya_hr",
         "workspace": "Espace Comptabilité",
@@ -91,7 +91,7 @@ KYA_AUTO_SIDEBARS = [
     },
     {
         "title": "Espace Direction",
-        "icon": "briefcase",
+        "icon": "🏛️",
         "module": "KYA HR",
         "app": "kya_hr",
         "workspace": "Espace Direction",
@@ -104,7 +104,7 @@ KYA_AUTO_SIDEBARS = [
     },
     {
         "title": "Logistique",
-        "icon": "truck",
+        "icon": "🚚",
         "module": "KYA HR",
         "app": "kya_hr",
         "workspace": "Logistique",
@@ -116,7 +116,7 @@ KYA_AUTO_SIDEBARS = [
     },
     {
         "title": "Inventaire & Sorties Matériel",
-        "icon": "boxes",
+        "icon": "🧾",
         "module": "KYA HR",
         "app": "kya_hr",
         "workspace": "Inventaire Sorties Materiel",
@@ -175,7 +175,7 @@ def _ensure_sidebar_home_link(sidebar_title, workspace_name):
     print(f"  [SIDEBAR LINK] {sidebar_title} -> Workspace:{workspace_name}")
 
 
-def _link_desktop_icon_to_sidebar(label, sidebar_candidates, icon=None):
+def _link_desktop_icon_to_sidebar(label, sidebar_candidates, icon=None, app="kya_hr"):
     """Desktop icons must point to Workspace Sidebar for route resolution in Frappe desk."""
     sidebar_name, sidebar_title = _resolve_existing_sidebar(sidebar_candidates)
     if not sidebar_name:
@@ -192,6 +192,7 @@ def _link_desktop_icon_to_sidebar(label, sidebar_candidates, icon=None):
         icon_doc.hidden = 0
         icon_doc.link_type = "Workspace Sidebar"
         icon_doc.link_to = sidebar_name
+        icon_doc.app = app
         icon_doc.insert(ignore_permissions=True)
         print(f"  [ICON CREATED] {label} -> Sidebar:{sidebar_title}")
         return
@@ -201,6 +202,7 @@ def _link_desktop_icon_to_sidebar(label, sidebar_candidates, icon=None):
         "icon_type": "Link",
         "link": "",
         "link_to": sidebar_name,
+        "app": app,
         "hidden": 0,
         "parent_icon": None,
         "standard": 1,
@@ -412,24 +414,24 @@ def _ensure_gestion_equipe_content():
     print("  [MINIMAL] Gestion Équipe content + sidebar (Dashboard only)")
 
 
-# Icônes timeless Frappe v16 pour les cartes workspace (tabWorkspace.icon)
-# Les icônes Lucide ne fonctionnent pas pour les cartes workspace → fallback lettre
+# Icônes sûres pour les cartes workspace (tabWorkspace.icon).
+# Ne pas utiliser les noms ERPNext standards (buying, stock, hr, etc.) pour éviter les collisions.
 KYA_WORKSPACE_ICONS = {
-    "Espace Achats": "buying",
-    "Espace Comptabilité": "accounting",
-    "Espace Comptabilite": "accounting",
-    "Espace Direction": "organization",
-    "Espace Employés": "hr",
-    "Espace Employes": "hr",
-    "Espace RH": "hr",
-    "Espace Stagiaires": "education",
-    "Espace Stock": "stock",
-    "Inventaire & Sorties Matériel": "stock",
-    "Inventaire Sorties Materiel": "stock",
-    "Logistique": "retail",
-    "KYA Services": "project",
-    "Gestion Équipe": "project",
-    "Gestion Equipe": "project",
+    "Espace Achats": "🛒",
+    "Espace Comptabilité": "💰",
+    "Espace Comptabilite": "💰",
+    "Espace Direction": "🏛️",
+    "Espace Employés": "👤",
+    "Espace Employes": "👤",
+    "Espace RH": "👥",
+    "Espace Stagiaires": "🎓",
+    "Espace Stock": "📦",
+    "Inventaire & Sorties Matériel": "🧾",
+    "Inventaire Sorties Materiel": "🧾",
+    "Logistique": "🚚",
+    "KYA Services": "📋",
+    "Gestion Équipe": "👥",
+    "Gestion Equipe": "👥",
 }
 
 
@@ -669,14 +671,14 @@ def execute():
         _restrict_workspace_roles(kya_services_ws, ["KYA Survey Admin", "System Manager"])
 
     # 9. Desktop icons must target Workspace Sidebar to avoid route=null popup.
-    _link_desktop_icon_to_sidebar("KYA Services", ["KYA Services"], "clipboard-list")
-    _link_desktop_icon_to_sidebar("Gestion Équipe", ["Gestion Équipe", "Gestion Equipe"], "users")
-    _link_desktop_icon_to_sidebar("Gestion Equipe", ["Gestion Équipe", "Gestion Equipe"], "users")
-    _link_desktop_icon_to_sidebar("Direction Générale", ["Espace Direction"], "briefcase")
-    _link_desktop_icon_to_sidebar("Espace Employes", ["Espace Employes", "Espace Employés"], "user-round")
-    _link_desktop_icon_to_sidebar("Espace Employés", ["Espace Employes", "Espace Employés"], "user-round")
-    _link_desktop_icon_to_sidebar("Espace Stagiaires", ["Espace Stagiaires"], "graduation-cap")
-    _link_desktop_icon_to_sidebar("Inventaire & Sorties Matériel", ["Inventaire & Sorties Matériel", "Inventaire Sorties Materiel"], "boxes")
+    _link_desktop_icon_to_sidebar("KYA Services", ["KYA Services"], "📋", app="kya_services")
+    _link_desktop_icon_to_sidebar("Gestion Équipe", ["Gestion Équipe", "Gestion Equipe"], "👥", app="kya_services")
+    _link_desktop_icon_to_sidebar("Gestion Equipe", ["Gestion Équipe", "Gestion Equipe"], "👥", app="kya_services")
+    _link_desktop_icon_to_sidebar("Direction Générale", ["Espace Direction"], "🏛️")
+    _link_desktop_icon_to_sidebar("Espace Employes", ["Espace Employes", "Espace Employés"], "👤")
+    _link_desktop_icon_to_sidebar("Espace Employés", ["Espace Employes", "Espace Employés"], "👤")
+    _link_desktop_icon_to_sidebar("Espace Stagiaires", ["Espace Stagiaires"], "🎓")
+    _link_desktop_icon_to_sidebar("Inventaire & Sorties Matériel", ["Inventaire & Sorties Matériel", "Inventaire Sorties Materiel"], "🧾")
 
     _upsert_desktop_url_icon("Mon Espace", "/mon-espace", "home", idx=5)
     for cfg in KYA_AUTO_SIDEBARS:
@@ -704,7 +706,7 @@ def execute():
                     "app": cfg["app"],
                 }, update_modified=False)
         _rebuild_sidebar_items(title, ws_name, cfg["icon"], cfg["items"])
-        _link_desktop_icon_to_sidebar(title, [title], cfg["icon"])
+        _link_desktop_icon_to_sidebar(title, [title], cfg["icon"], app=cfg["app"])
 
     # 10. Fix setup_complete default value if needed
     try:

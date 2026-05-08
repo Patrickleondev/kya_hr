@@ -55,9 +55,11 @@ frappe.ui.form.on('KYA Contrat', {
             }, __('Document'));
         }
 
-        frm.add_custom_button(__('Aperçu Document'), () => {
-            window.open(`/printview?doctype=KYA%20Contrat&name=${encodeURIComponent(frm.doc.name)}&format=${encodeURIComponent((frm.doc.contract_type || '').startsWith('Stage') ? 'Contrat de Stage KYA' : 'KYA Contrat PDF')}&no_letterhead=1`, '_blank');
-        }, __('Document'));
+        if (!frm.is_new()) {
+            frm.add_custom_button(__('Aperçu Document'), () => {
+                window.open(`/api/method/kya_hr.api.kya_contracts.preview_current_pdf?contract_id=${encodeURIComponent(frm.doc.name)}`, '_blank');
+            }, __('Document'));
+        }
 
         // Lien portail
         if (!frm.is_new() && ['En attente Signature Salarié', 'Signé Salarié', 'En attente DG'].includes(frm.doc.workflow_state)) {
@@ -108,19 +110,18 @@ function render_contract_preview(frm) {
         return;
     }
 
-    const print_format = (frm.doc.contract_type || '').startsWith('Stage') ? 'Contrat de Stage KYA' : 'KYA Contrat PDF';
-    const print_url = `/printview?doctype=KYA%20Contrat&name=${encodeURIComponent(frm.doc.name)}&format=${encodeURIComponent(print_format)}&no_letterhead=1`;
+    const preview_url = `/api/method/kya_hr.api.kya_contracts.preview_current_pdf?contract_id=${encodeURIComponent(frm.doc.name)}`;
     const pdf_url = `/api/method/kya_hr.api.kya_contracts.download_current_pdf?contract_id=${encodeURIComponent(frm.doc.name)}`;
     frm.set_df_property('contract_preview', 'options', `
         <div style="border:1px solid #d9dee3;border-radius:6px;overflow:hidden;background:#fff;">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 12px;background:#f7f9fb;border-bottom:1px solid #d9dee3;">
                 <div style="font-weight:600;color:#1f2937;">Aperçu du contrat généré</div>
                 <div style="display:flex;gap:8px;align-items:center;">
-                    <a class="btn btn-xs btn-default" href="${print_url}" target="_blank">Ouvrir en pleine page</a>
+                    <a class="btn btn-xs btn-default" href="${preview_url}" target="_blank">Ouvrir en pleine page</a>
                     <a class="btn btn-xs btn-primary" href="${pdf_url}" target="_blank">Télécharger PDF</a>
                 </div>
             </div>
-            <iframe src="${print_url}" style="width:100%;height:720px;border:0;background:#fff;"></iframe>
+            <iframe src="${preview_url}" style="width:100%;height:720px;border:0;background:#fff;"></iframe>
         </div>
     `);
 }

@@ -47,6 +47,9 @@ def fix_missing_workflow_states():
         ("En attente Magasin", "Warning"),
         ("En attente Direction", "Warning"),
         ("En attente Resp. Stagiaires", "Warning"),
+        ("En attente Comptable", "Warning"),
+        ("En attente DFC", "Warning"),
+        ("En attente Validation DFC", "Warning"),
         ("Approuvé", "Success"),
         ("Rejeté", "Danger"),
     ]

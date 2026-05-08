@@ -81,6 +81,8 @@ def _kya_logo_data_uri():
 
 def _sanitize_contract_pdf_html(html):
     html = re.sub(r'<link[^>]+href=["\'](?:https?://[^"\']+)?/assets/[^"\']+["\'][^>]*>', '', html or '', flags=re.I)
+    html = re.sub(r'<div[^>]+class=["\'][^"\']*action-banner[^"\']*["\'][^>]*>.*?</div>', '', html, flags=re.I | re.S)
+    html = re.sub(r'<a[^>]+onclick=["\']window\.print\(\);?["\'][^>]*>.*?</a>', '', html, flags=re.I | re.S)
     html = re.sub(r'<a[^>]+href=["\']/api/method/frappe\.utils\.print_format\.download_pdf[^"\']*["\'][^>]*>.*?</a>', '', html, flags=re.I | re.S)
     html = html.replace('/assets/frappe/images/signature-placeholder.png', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==')
     logo_data_uri = _kya_logo_data_uri()
@@ -431,6 +433,21 @@ def download_final_pdf(contract_id, token):
 
 @frappe.whitelist()
 def download_current_pdf(contract_id):
+    pdf_file, filename = _render_current_contract_pdf(contract_id)
+    frappe.local.response.filename = filename
+    frappe.local.response.filecontent = pdf_file
+    frappe.local.response.type = "download"
+
+
+@frappe.whitelist()
+def preview_current_pdf(contract_id):
+    pdf_file, filename = _render_current_contract_pdf(contract_id)
+    frappe.local.response.filename = filename
+    frappe.local.response.filecontent = pdf_file
+    frappe.local.response.type = "pdf"
+
+
+def _render_current_contract_pdf(contract_id):
     if not frappe.has_permission("KYA Contrat", "print", contract_id):
         frappe.throw(_("Permission refusée"), frappe.PermissionError)
 
@@ -439,7 +456,4 @@ def download_current_pdf(contract_id):
     doc = frappe.get_doc("KYA Contrat", contract_id)
     print_format = "Contrat de Stage KYA" if (doc.contract_type or "").lower().startswith("stage") else "KYA Contrat PDF"
     html = _sanitize_contract_pdf_html(frappe.get_print("KYA Contrat", doc.name, print_format=print_format, no_letterhead=1))
-
-    frappe.local.response.filename = f"Contrat_{doc.name}.pdf"
-    frappe.local.response.filecontent = get_pdf(html)
-    frappe.local.response.type = "download"
+    return get_pdf(html), f"Contrat_{doc.name}.pdf"

@@ -142,5 +142,7 @@
  {"docstatus": 0, "doctype": "Workflow State", "icon": "", "modified": "2026-04-28 10:00:00", "name": "En attente Chef Service", "style": "Warning", "workflow_state_name": "En attente Chef Service"},
  {"docstatus": 0, "doctype": "Workflow State", "icon": "", "modified": "2026-04-28 10:00:00", "name": "En attente Auditeur", "style": "Warning", "workflow_state_name": "En attente Auditeur"},
  {"docstatus": 0, "doctype": "Workflow State", "icon": "", "modified": "2026-04-28 10:00:00", "name": "En attente Caissier", "style": "Warning", "workflow_state_name": "En attente Caissier"},
- {"docstatus": 0, "doctype": "Workflow State", "icon": "", "modified": "2026-04-28 10:00:00", "name": "En attente Comptable", "style": "Warning", "workflow_state_name": "En attente Comptable"}
+ {"docstatus": 0, "doctype": "Workflow State", "icon": "", "modified": "2026-04-28 10:00:00", "name": "En attente Comptable", "style": "Warning", "workflow_state_name": "En attente Comptable"},
+ {"docstatus": 0, "doctype": "Workflow State", "icon": "", "modified": "2026-05-08 15:55:00", "name": "En attente DFC", "style": "Warning", "workflow_state_name": "En attente DFC"},
+ {"docstatus": 0, "doctype": "Workflow State", "icon": "", "modified": "2026-05-08 15:55:00", "name": "En attente Validation DFC", "style": "Warning", "workflow_state_name": "En attente Validation DFC"}
 ]

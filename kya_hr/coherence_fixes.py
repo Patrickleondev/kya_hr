@@ -19,31 +19,31 @@ ICON_REPLACEMENTS = {
 }
 
 SIDEBAR_FIXES = {
-    "Espace Direction": {"workspace": "Espace Direction", "icon": "briefcase", "module": "KYA HR", "app": "kya_hr"},
-    "Espace Achats": {"workspace": "Espace Achats", "icon": "shopping-cart", "module": "KYA HR", "app": "kya_hr"},
-    "Espace Stock": {"workspace": "Espace Stock", "icon": "package", "module": "KYA HR", "app": "kya_hr"},
-    "Espace RH": {"workspace": "Espace RH", "icon": "users", "module": "KYA HR", "app": "kya_hr"},
-    "Espace Comptabilité": {"workspace": "Espace Comptabilité", "icon": "wallet", "module": "KYA HR", "app": "kya_hr"},
-    "Espace Employes": {"workspace": "Espace Employes", "icon": "user-round", "module": "KYA HR", "app": "kya_hr"},
-    "Espace Employés": {"workspace": "Espace Employes", "icon": "user-round", "module": "KYA HR", "app": "kya_hr"},
-    "Espace Stagiaires": {"workspace": "Espace Stagiaires", "icon": "graduation-cap", "module": "KYA HR", "app": "kya_hr"},
-    "Inventaire & Sorties Matériel": {"workspace": "Inventaire Sorties Materiel", "icon": "boxes", "module": "KYA HR", "app": "kya_hr"},
-    "Logistique": {"workspace": "Logistique", "icon": "truck", "module": "KYA HR", "app": "kya_hr"},
-    "KYA Services": {"workspace": "KYA Services", "icon": "clipboard-list", "module": "KYA Services", "app": "kya_services"},
-    "Gestion Équipe": {"workspace": "Gestion Équipe", "icon": "users", "module": "KYA Taches", "app": "kya_services"},
+    "Espace Direction": {"workspace": "Espace Direction", "icon": "🏛️", "module": "KYA HR", "app": "kya_hr"},
+    "Espace Achats": {"workspace": "Espace Achats", "icon": "🛒", "module": "KYA HR", "app": "kya_hr"},
+    "Espace Stock": {"workspace": "Espace Stock", "icon": "📦", "module": "KYA HR", "app": "kya_hr"},
+    "Espace RH": {"workspace": "Espace RH", "icon": "👥", "module": "KYA HR", "app": "kya_hr"},
+    "Espace Comptabilité": {"workspace": "Espace Comptabilité", "icon": "💰", "module": "KYA HR", "app": "kya_hr"},
+    "Espace Employes": {"workspace": "Espace Employes", "icon": "👤", "module": "KYA HR", "app": "kya_hr"},
+    "Espace Employés": {"workspace": "Espace Employes", "icon": "👤", "module": "KYA HR", "app": "kya_hr"},
+    "Espace Stagiaires": {"workspace": "Espace Stagiaires", "icon": "🎓", "module": "KYA HR", "app": "kya_hr"},
+    "Inventaire & Sorties Matériel": {"workspace": "Inventaire Sorties Materiel", "icon": "🧾", "module": "KYA HR", "app": "kya_hr"},
+    "Logistique": {"workspace": "Logistique", "icon": "🚚", "module": "KYA HR", "app": "kya_hr"},
+    "KYA Services": {"workspace": "KYA Services", "icon": "📋", "module": "KYA Services", "app": "kya_services"},
+    "Gestion Équipe": {"workspace": "Gestion Équipe", "icon": "👥", "module": "KYA Taches", "app": "kya_services"},
 }
 
 DESKTOP_ICON_FIXES = {
-    "Direction Générale": {"sidebar": "Espace Direction", "icon": "briefcase"},
-    "Espace Achats": {"sidebar": "Espace Achats", "icon": "shopping-cart"},
-    "Espace Stock": {"sidebar": "Espace Stock", "icon": "package"},
-    "Espace RH": {"sidebar": "Espace RH", "icon": "users"},
-    "Espace Comptabilité": {"sidebar": "Espace Comptabilité", "icon": "wallet"},
-    "Logistique": {"sidebar": "Logistique", "icon": "truck"},
-    "Espace Employés": {"sidebar": "Espace Employes", "icon": "user-round"},
-    "Espace Stagiaires": {"sidebar": "Espace Stagiaires", "icon": "graduation-cap"},
-    "Inventaire & Sorties Matériel": {"sidebar": "Inventaire & Sorties Matériel", "icon": "boxes"},
-    "KYA Services": {"sidebar": "KYA Services", "icon": "clipboard-list"},
+    "Direction Générale": {"sidebar": "Espace Direction", "icon": "🏛️", "app": "kya_hr"},
+    "Espace Achats": {"sidebar": "Espace Achats", "icon": "🛒", "app": "kya_hr"},
+    "Espace Stock": {"sidebar": "Espace Stock", "icon": "📦", "app": "kya_hr"},
+    "Espace RH": {"sidebar": "Espace RH", "icon": "👥", "app": "kya_hr"},
+    "Espace Comptabilité": {"sidebar": "Espace Comptabilité", "icon": "💰", "app": "kya_hr"},
+    "Logistique": {"sidebar": "Logistique", "icon": "🚚", "app": "kya_hr"},
+    "Espace Employés": {"sidebar": "Espace Employes", "icon": "👤", "app": "kya_hr"},
+    "Espace Stagiaires": {"sidebar": "Espace Stagiaires", "icon": "🎓", "app": "kya_hr"},
+    "Inventaire & Sorties Matériel": {"sidebar": "Inventaire & Sorties Matériel", "icon": "🧾", "app": "kya_hr"},
+    "KYA Services": {"sidebar": "KYA Services", "icon": "📋", "app": "kya_services"},
 }
 
 OBSOLETE_DESKTOP_LABELS = {"Espace Direction", "Inventaire Sorties Materiel"}
@@ -127,6 +127,7 @@ def _ensure_desktop_icon(label, sidebar_title, icon):
         "link_to": sidebar_name,
         "link": "",
         "icon": icon,
+        "app": DESKTOP_ICON_FIXES.get(label, {}).get("app") or "kya_hr",
         "hidden": 0,
         "standard": 1,
     }

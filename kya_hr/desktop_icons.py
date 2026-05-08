@@ -4,16 +4,16 @@ import frappe
 from frappe.desk.doctype.desktop_icon.desktop_icon import clear_desktop_icons_cache
 
 WORKSPACE_ICONS = [
-    {"label": "Direction Générale", "link_to": "Espace Direction", "sidebar": "Espace Direction", "icon": "briefcase", "idx": 10},
-    {"label": "Espace RH", "link_to": "Espace RH", "icon": "users", "idx": 11},
-    {"label": "Espace Achats", "link_to": "Espace Achats", "icon": "shopping-cart", "idx": 12},
-    {"label": "Espace Stock", "link_to": "Espace Stock", "icon": "package", "idx": 13},
-    {"label": "Espace Comptabilité", "link_to": "Espace Comptabilité", "icon": "wallet", "idx": 14},
-    {"label": "Logistique", "link_to": "Logistique", "icon": "truck", "idx": 15},
-    {"label": "Espace Employés", "link_to": "Espace Employes", "icon": "user-round", "idx": 16},
-    {"label": "Espace Stagiaires", "link_to": "Espace Stagiaires", "icon": "graduation-cap", "idx": 17},
-    {"label": "Inventaire & Sorties Matériel", "link_to": "Inventaire Sorties Materiel", "icon": "boxes", "idx": 18},
-    {"label": "KYA Services", "link_to": "KYA Services", "icon": "clipboard-list", "idx": 19},
+    {"label": "Direction Générale", "link_to": "Espace Direction", "sidebar": "Espace Direction", "icon": "🏛️", "app": "kya_hr", "idx": 10},
+    {"label": "Espace RH", "link_to": "Espace RH", "icon": "👥", "app": "kya_hr", "idx": 11},
+    {"label": "Espace Achats", "link_to": "Espace Achats", "icon": "🛒", "app": "kya_hr", "idx": 12},
+    {"label": "Espace Stock", "link_to": "Espace Stock", "icon": "📦", "app": "kya_hr", "idx": 13},
+    {"label": "Espace Comptabilité", "link_to": "Espace Comptabilité", "icon": "💰", "app": "kya_hr", "idx": 14},
+    {"label": "Logistique", "link_to": "Logistique", "icon": "🚚", "app": "kya_hr", "idx": 15},
+    {"label": "Espace Employés", "link_to": "Espace Employes", "icon": "👤", "app": "kya_hr", "idx": 16},
+    {"label": "Espace Stagiaires", "link_to": "Espace Stagiaires", "icon": "🎓", "app": "kya_hr", "idx": 17},
+    {"label": "Inventaire & Sorties Matériel", "link_to": "Inventaire Sorties Materiel", "icon": "🧾", "app": "kya_hr", "idx": 18},
+    {"label": "KYA Services", "link_to": "KYA Services", "icon": "📋", "app": "kya_services", "idx": 19},
 ]
 
 RESTRICTED_LAYOUT_ROLES = {
@@ -120,6 +120,7 @@ def _sync_workspace_icon(config: dict) -> bool:
         "icon_type": icon.get("icon_type"),
         "link_to": icon.get("link_to"),
         "icon": icon.get("icon"),
+        "app": icon.get("app"),
         "idx": icon.get("idx"),
         "hidden": icon.get("hidden"),
         "parent_icon": icon.get("parent_icon"),
@@ -131,6 +132,7 @@ def _sync_workspace_icon(config: dict) -> bool:
     icon.icon_type = "Link"
     icon.link_to = sidebar_name
     icon.icon = config["icon"]
+    icon.app = config.get("app") or "kya_hr"
     icon.idx = config["idx"]
     icon.hidden = 0
     icon.parent_icon = None
@@ -142,6 +144,7 @@ def _sync_workspace_icon(config: dict) -> bool:
         "icon_type": icon.get("icon_type"),
         "link_to": icon.get("link_to"),
         "icon": icon.get("icon"),
+        "app": icon.get("app"),
         "idx": icon.get("idx"),
         "hidden": icon.get("hidden"),
         "parent_icon": icon.get("parent_icon"),
@@ -160,6 +163,7 @@ def _sync_workspace_icon(config: dict) -> bool:
         "icon_type": "Link",
         "link_to": sidebar_name,
         "icon": config["icon"],
+        "app": config.get("app") or "kya_hr",
         "idx": config["idx"],
         "hidden": 0,
         "parent_icon": None,
