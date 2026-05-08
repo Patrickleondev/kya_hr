@@ -162,5 +162,6 @@
    "fieldtype": "Date",
    "label": "Date d'autorisation"
   }
- ]
+ ],
+ "no_sidebar": 1
 }

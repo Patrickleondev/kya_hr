@@ -27,9 +27,30 @@
  "title": "Import Comptabilité",
  "client_script": "frappe.web_form.on('load', function() {\n  if (window.kyaRestructureForm) {\n    setTimeout(window.kyaRestructureForm, 200);\n  }\n});",
  "web_form_fields": [
-  {"fieldname": "type_document", "fieldtype": "Select", "label": "Type de document", "options": "Etat de Salaire\nGrand Livre Général\nFacture", "reqd": 1},
-  {"fieldname": "periode", "fieldtype": "Data", "label": "Période / Référence", "description": "Ex: JANVIER 2025, 2025-01-01 au 2025-10-31, ou N° facture"},
-  {"fieldname": "source_file", "fieldtype": "Attach", "label": "Fichier Excel source", "reqd": 1},
-  {"fieldname": "notes_import", "fieldtype": "Small Text", "label": "Notes / contexte"}
- ]
+  {
+   "fieldname": "type_document",
+   "fieldtype": "Select",
+   "label": "Type de document",
+   "options": "Etat de Salaire\nGrand Livre Général\nFacture",
+   "reqd": 1
+  },
+  {
+   "fieldname": "periode",
+   "fieldtype": "Data",
+   "label": "Période / Référence",
+   "description": "Ex: JANVIER 2025, 2025-01-01 au 2025-10-31, ou N° facture"
+  },
+  {
+   "fieldname": "source_file",
+   "fieldtype": "Attach",
+   "label": "Fichier Excel source",
+   "reqd": 1
+  },
+  {
+   "fieldname": "notes_import",
+   "fieldtype": "Small Text",
+   "label": "Notes / contexte"
+  }
+ ],
+ "no_sidebar": 1
 }

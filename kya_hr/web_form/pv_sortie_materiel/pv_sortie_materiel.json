@@ -119,5 +119,6 @@
    "fieldtype": "Signature",
    "label": "Signature Responsable Magasin"
   }
- ]
+ ],
+ "no_sidebar": 1
 }

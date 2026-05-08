@@ -114,5 +114,6 @@
    "fieldtype": "Signature",
    "label": "Signature DGA"
   }
- ]
+ ],
+ "no_sidebar": 1
 }

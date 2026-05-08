@@ -112,5 +112,6 @@
    "fieldtype": "Signature",
    "label": "Approbation DG (≥ 100 001 XOF)"
   }
- ]
+ ],
+ "no_sidebar": 1
 }

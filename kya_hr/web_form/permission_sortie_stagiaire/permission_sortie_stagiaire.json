@@ -118,5 +118,6 @@
    "fieldtype": "Signature",
    "label": "Signature DG"
   }
- ]
+ ],
+ "no_sidebar": 1
 }
