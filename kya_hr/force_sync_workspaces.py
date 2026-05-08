@@ -350,11 +350,12 @@ def _restrict_workspace_roles(workspace_name, roles):
 
 
 def _upsert_desktop_url_icon(label, url, icon="home", idx=10):
+    # Frappe v16: Desktop Icon link_type n'accepte plus "URL" → utiliser "External"
     existing = frappe.db.exists("Desktop Icon", {"label": label})
     values = {
         "label": label,
         "icon_type": "Link",
-        "link_type": "URL",
+        "link_type": "External",
         "link": url,
         "link_to": "",
         "icon": icon,
