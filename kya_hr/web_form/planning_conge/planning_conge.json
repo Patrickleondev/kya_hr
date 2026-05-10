@@ -1,72 +1,131 @@
 {
- "allow_comments": 1,
- "allow_delete": 0,
- "allow_edit": 1,
- "allow_incomplete": 0,
- "allow_multiple": 1,
- "allow_print": 1,
- "anonymous": 0,
- "apply_document_permissions": 1,
- "creation": "2026-06-01 00:00:00.000000",
- "doc_type": "Planning Conge",
- "docstatus": 0,
- "doctype": "Web Form",
- "idx": 0,
- "introduction_text": "",
- "is_standard": 1,
- "login_required": 1,
- "modified": "2026-06-01 00:00:00.000000",
- "modified_by": "Administrator",
- "module": "KYA HR",
- "name": "planning-conge",
- "owner": "Administrator",
- "published": 1,
- "route": "planning-conge",
- "show_sidebar": 1,
- "success_message": "✅ Votre planning de congé a été soumis avec succès. Il sera examiné par les RH puis la Direction Générale.",
- "title": "Planning de Congé Annuel",
- "web_form_fields": [
-  {
-   "fieldname": "employee",
-   "fieldtype": "Link",
-   "label": "Employé",
-   "options": "Employee",
-   "reqd": 1
-  },
-  {
-   "fieldname": "employee_name",
-   "fieldtype": "Data",
-   "label": "Nom",
-   "read_only": 1
-  },
-  {
-   "fieldname": "department",
-   "fieldtype": "Link",
-   "label": "Département",
-   "options": "Department",
-   "read_only": 1
-  },
-  {
-   "fieldname": "annee",
-   "fieldtype": "Int",
-   "label": "Année",
-   "reqd": 1,
-   "description": "Année du planning (ex: 2026)"
-  },
-  {
-   "fieldname": "periodes",
-   "fieldtype": "Table",
-   "label": "Périodes de Congé Souhaitées",
-   "options": "Planning Conge Periode",
-   "reqd": 1,
-   "description": "Ajoutez les périodes de congé prévues pour l’année"
-  },
-  {
-   "fieldname": "commentaire_employe",
-   "fieldtype": "Small Text",
-   "label": "Commentaire",
-   "description": "Précisions ou contraintes particulières"
-  }
- ],
- "no_sidebar": 1
+    "allow_comments": 1,
+    "allow_delete": 0,
+    "allow_edit": 1,
+    "allow_incomplete": 0,
+    "allow_multiple": 1,
+    "allow_print": 1,
+    "anonymous": 0,
+    "apply_document_permissions": 1,
+    "creation": "2026-06-01 00:00:00.000000",
+    "doc_type": "Planning Conge",
+    "docstatus": 0,
+    "doctype": "Web Form",
+    "idx": 0,
+    "introduction_text": "",
+    "is_standard": 1,
+    "login_required": 1,
+    "modified": "2026-05-10 12:00:00",
+    "modified_by": "Administrator",
+    "module": "KYA HR",
+    "name": "planning-conge",
+    "owner": "Administrator",
+    "published": 1,
+    "route": "planning-conge",
+    "show_sidebar": 1,
+    "success_message": "✅ Votre planning de congé a été soumis avec succès. Il sera examiné par votre Chef de Service, puis transmis au Directeur Général. Vous serez notifié(e) par email à chaque étape.",
+    "title": "Planning de Congé Annuel",
+    "web_form_fields": [
+        {
+            "fieldname": "employee",
+            "fieldtype": "Link",
+            "label": "Employé",
+            "options": "Employee",
+            "reqd": 1
+        },
+        {
+            "fieldname": "employee_name",
+            "fieldtype": "Data",
+            "label": "Nom",
+            "read_only": 1
+        },
+        {
+            "fieldname": "department",
+            "fieldtype": "Link",
+            "label": "Département",
+            "options": "Department",
+            "read_only": 1
+        },
+        {
+            "fieldname": "annee",
+            "fieldtype": "Int",
+            "label": "Année",
+            "reqd": 1,
+            "description": "Année du planning (ex: 2026)"
+        },
+        {
+            "fieldname": "section_solde",
+            "fieldtype": "Section Break",
+            "label": "Votre Solde de Congés"
+        },
+        {
+            "fieldname": "solde_n1",
+            "fieldtype": "Float",
+            "label": "Jours restants N-1",
+            "read_only": 1,
+            "description": "Renseigné par la RH"
+        },
+        {
+            "fieldname": "jours_acquis",
+            "fieldtype": "Float",
+            "label": "Jours acquis (année en cours)",
+            "read_only": 1,
+            "description": "Renseigné par la RH"
+        },
+        {
+            "fieldname": "conges_obligatoires",
+            "fieldtype": "Int",
+            "label": "Congés obligatoires",
+            "read_only": 1
+        },
+        {
+            "fieldname": "solde_disponible",
+            "fieldtype": "Float",
+            "label": "Solde disponible",
+            "read_only": 1
+        },
+        {
+            "fieldname": "section_periodes",
+            "fieldtype": "Section Break",
+            "label": "Périodes de Congé Souhaitées"
+        },
+        {
+            "fieldname": "periodes",
+            "fieldtype": "Table",
+            "label": "Périodes",
+            "options": "Planning Conge Periode",
+            "reqd": 1,
+            "description": "Ajoutez les périodes de congé prévues pour l'année (jusqu'à 4 départs)"
+        },
+        {
+            "fieldname": "section_monetisation",
+            "fieldtype": "Section Break",
+            "label": "Monétisation et Solde Final"
+        },
+        {
+            "fieldname": "jours_monetisation",
+            "fieldtype": "Int",
+            "label": "Jours proposés à la monétisation",
+            "default": 0,
+            "description": "Nombre de jours que vous souhaitez convertir en compensation financière"
+        },
+        {
+            "fieldname": "solde_final",
+            "fieldtype": "Float",
+            "label": "Solde final",
+            "read_only": 1,
+            "description": "Calculé automatiquement"
+        },
+        {
+            "fieldname": "section_commentaire",
+            "fieldtype": "Section Break",
+            "label": "Commentaire"
+        },
+        {
+            "fieldname": "commentaire_employe",
+            "fieldtype": "Small Text",
+            "label": "Commentaire",
+            "description": "Précisions ou contraintes particulières"
+        }
+    ]
 }

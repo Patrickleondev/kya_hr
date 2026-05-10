@@ -13,9 +13,9 @@
   "doctype": "Workflow State",
   "icon": "",
   "modified": "2026-02-17 10:04:26.541867",
-  "name": "En attente du Sup\u00e9rieur Imm\u00e9diat",
+  "name": "En attente du Supérieur Immédiat",
   "style": "Warning",
-  "workflow_state_name": "En attente du Sup\u00e9rieur Imm\u00e9diat"
+  "workflow_state_name": "En attente du Supérieur Immédiat"
  },
  {
   "docstatus": 0,
@@ -112,18 +112,18 @@
   "doctype": "Workflow State",
   "icon": "",
   "modified": "2026-02-17 10:04:26.661343",
-  "name": "Approuv\u00e9",
+  "name": "Approuvé",
   "style": "Success",
-  "workflow_state_name": "Approuv\u00e9"
+  "workflow_state_name": "Approuvé"
  },
  {
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
   "modified": "2026-02-17 10:04:26.687941",
-  "name": "Rejet\u00e9",
+  "name": "Rejeté",
   "style": "Danger",
-  "workflow_state_name": "Rejet\u00e9"
+  "workflow_state_name": "Rejeté"
  },
  {
   "docstatus": 0,
@@ -134,15 +134,110 @@
   "style": "Warning",
   "workflow_state_name": "En attente Approbation"
  },
- {"docstatus": 0, "doctype": "Workflow State", "icon": "", "modified": "2026-04-28 10:00:00", "name": "En attente Signature Salari\u00e9", "style": "Warning", "workflow_state_name": "En attente Signature Salari\u00e9"},
- {"docstatus": 0, "doctype": "Workflow State", "icon": "", "modified": "2026-04-28 10:00:00", "name": "Sign\u00e9 Salari\u00e9", "style": "Primary", "workflow_state_name": "Sign\u00e9 Salari\u00e9"},
- {"docstatus": 0, "doctype": "Workflow State", "icon": "", "modified": "2026-04-28 10:00:00", "name": "Valid\u00e9", "style": "Success", "workflow_state_name": "Valid\u00e9"},
- {"docstatus": 0, "doctype": "Workflow State", "icon": "", "modified": "2026-04-28 10:00:00", "name": "RH (revue)", "style": "Inverse", "workflow_state_name": "RH (revue)"},
- {"docstatus": 0, "doctype": "Workflow State", "icon": "", "modified": "2026-04-28 10:00:00", "name": "Archiv\u00e9", "style": "Inverse", "workflow_state_name": "Archiv\u00e9"},
- {"docstatus": 0, "doctype": "Workflow State", "icon": "", "modified": "2026-04-28 10:00:00", "name": "En attente Chef Service", "style": "Warning", "workflow_state_name": "En attente Chef Service"},
- {"docstatus": 0, "doctype": "Workflow State", "icon": "", "modified": "2026-04-28 10:00:00", "name": "En attente Auditeur", "style": "Warning", "workflow_state_name": "En attente Auditeur"},
- {"docstatus": 0, "doctype": "Workflow State", "icon": "", "modified": "2026-04-28 10:00:00", "name": "En attente Caissier", "style": "Warning", "workflow_state_name": "En attente Caissier"},
- {"docstatus": 0, "doctype": "Workflow State", "icon": "", "modified": "2026-04-28 10:00:00", "name": "En attente Comptable", "style": "Warning", "workflow_state_name": "En attente Comptable"},
- {"docstatus": 0, "doctype": "Workflow State", "icon": "", "modified": "2026-05-08 15:55:00", "name": "En attente DFC", "style": "Warning", "workflow_state_name": "En attente DFC"},
- {"docstatus": 0, "doctype": "Workflow State", "icon": "", "modified": "2026-05-08 15:55:00", "name": "En attente Validation DFC", "style": "Warning", "workflow_state_name": "En attente Validation DFC"}
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-04-28 10:00:00",
+  "name": "En attente Signature Salarié",
+  "style": "Warning",
+  "workflow_state_name": "En attente Signature Salarié"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-04-28 10:00:00",
+  "name": "Signé Salarié",
+  "style": "Primary",
+  "workflow_state_name": "Signé Salarié"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-04-28 10:00:00",
+  "name": "Validé",
+  "style": "Success",
+  "workflow_state_name": "Validé"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-04-28 10:00:00",
+  "name": "RH (revue)",
+  "style": "Inverse",
+  "workflow_state_name": "RH (revue)"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-04-28 10:00:00",
+  "name": "Archivé",
+  "style": "Inverse",
+  "workflow_state_name": "Archivé"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-04-28 10:00:00",
+  "name": "En attente Chef Service",
+  "style": "Warning",
+  "workflow_state_name": "En attente Chef Service"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-04-28 10:00:00",
+  "name": "En attente Auditeur",
+  "style": "Warning",
+  "workflow_state_name": "En attente Auditeur"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-04-28 10:00:00",
+  "name": "En attente Caissier",
+  "style": "Warning",
+  "workflow_state_name": "En attente Caissier"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-04-28 10:00:00",
+  "name": "En attente Comptable",
+  "style": "Warning",
+  "workflow_state_name": "En attente Comptable"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-05-08 15:55:00",
+  "name": "En attente DFC",
+  "style": "Warning",
+  "workflow_state_name": "En attente DFC"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-05-08 15:55:00",
+  "name": "En attente Validation DFC",
+  "style": "Warning",
+  "workflow_state_name": "En attente Validation DFC"
+ },
+ {
+  "doctype": "Workflow State",
+  "name": "En attente Chef de Service",
+  "icon": "question-sign",
+  "style": "Warning",
+  "workflow_state_name": "En attente Chef de Service"
+ }
 ]

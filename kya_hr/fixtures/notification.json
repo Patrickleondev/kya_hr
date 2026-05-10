@@ -768,7 +768,7 @@
   "attach_files": null,
   "attach_print": 0,
   "channel": "Email",
-  "condition": "doc.workflow_state == 'En attente RH'",
+  "condition": "doc.workflow_state == 'En attente Chef de Service'",
   "condition_type": null,
   "date_changed": null,
   "datetime_changed": null,
@@ -782,16 +782,23 @@
   "filters": null,
   "from_attach_field": null,
   "is_standard": 0,
-  "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#009688,#00bcd4);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='{{ frappe.utils.get_url() }}/assets/kya_hr/images/kya_logo.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>Planning de Congé à Valider</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><div style='background:#f1f8e9;padding:10px;margin-bottom:15px;border-radius:6px;border-left:4px solid #8bc34a;color:#33691e;font-size:14px;'><b>Réf. Dossier :</b> {{ doc.name }}</div><p>Bonjour,</p><p>L’employé(e) <b>{{ doc.employee_name }}</b> a soumis son planning de congé pour l’année <b>{{ doc.annee }}</b> ({{ doc.total_jours }} jours planifiés).</p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url() }}/planning-conge/{{ doc.name }}' style='display:inline-block;padding:12px 32px;background:#009688;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>📱 Examiner la demande</a><br><a href='{{ frappe.utils.get_url_to_form(doc.doctype, doc.name) }}' style='display:inline-block;margin-top:10px;padding:8px 20px;background:#f5f5f5;color:#333;text-decoration:none;border-radius:6px;font-size:13px;border:1px solid #ddd;'>💻 Ouvrir dans le Bureau ERPNext</a></div></div>{{ get_kya_email_footer() }}</div>",
+  "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#009688,#00bcd4);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='{{ frappe.utils.get_url() }}/assets/kya_hr/images/kya_logo.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>Planning de Congé à Valider — Chef de Service</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><div style='background:#f1f8e9;padding:10px;margin-bottom:15px;border-radius:6px;border-left:4px solid #8bc34a;color:#33691e;font-size:14px;'><b>Réf. Dossier :</b> {{ doc.name }}</div><p>Bonjour,</p><p>Votre collaborateur(trice) <b>{{ doc.employee_name }}</b> a soumis son planning de congé pour l'année <b>{{ doc.annee }}</b> :</p><table style='width:100%;border-collapse:collapse;margin:15px 0;'><tr><td style='padding:8px;background:#f5f5f5;border:1px solid #ddd;'><b>Total jours planifiés</b></td><td style='padding:8px;border:1px solid #ddd;'>{{ doc.total_jours }} j</td></tr><tr><td style='padding:8px;background:#f5f5f5;border:1px solid #ddd;'><b>Solde disponible</b></td><td style='padding:8px;border:1px solid #ddd;'>{{ doc.solde_disponible or 0 }} j</td></tr><tr><td style='padding:8px;background:#f5f5f5;border:1px solid #ddd;'><b>Solde final après planning</b></td><td style='padding:8px;border:1px solid #ddd;'>{{ doc.solde_final or 0 }} j</td></tr></table><p>En tant que supérieur hiérarchique direct, votre validation est requise avant transmission au DG.</p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url() }}/planning-conge/{{ doc.name }}' style='display:inline-block;padding:12px 32px;background:#009688;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>📱 Examiner et valider</a><br><a href='{{ frappe.utils.get_url_to_form(doc.doctype, doc.name) }}' style='display:inline-block;margin-top:10px;padding:8px 20px;background:#f5f5f5;color:#333;text-decoration:none;border-radius:6px;font-size:13px;border:1px solid #ddd;'>💻 Ouvrir dans le Bureau ERPNext</a></div></div>{{ get_kya_email_footer() }}</div>",
   "message_type": null,
   "method": null,
   "minutes_offset": 0,
-  "modified": "2026-04-23 19:28:37.202566",
+  "modified": "2026-05-10 12:00:00",
   "module": null,
-  "name": "KYA - Planning Congé: En attente RH",
+  "name": "KYA - Planning Congé: En attente Chef de Service",
   "print_format": null,
   "property_value": null,
   "recipients": [
+   {
+    "bcc": null,
+    "cc": "{{ doc.owner }}",
+    "condition": null,
+    "receiver_by_document_field": "report_to_user",
+    "receiver_by_role": null
+   },
    {
     "bcc": null,
     "cc": null,
@@ -806,7 +813,7 @@
   "sender_email": null,
   "set_property_after_alert": null,
   "slack_webhook_url": null,
-  "subject": "Planning de congé de {{ doc.employee_name }} ({{ doc.annee }}) à examiner",
+  "subject": "Planning de congé de {{ doc.employee_name }} ({{ doc.annee }}) — votre validation requise",
   "value_changed": "workflow_state"
  },
  {
@@ -876,7 +883,7 @@
   "message_type": null,
   "method": null,
   "minutes_offset": 0,
-  "modified": "2026-04-23 19:28:37.364129",
+  "modified": "2026-05-10 12:00:00",
   "module": null,
   "name": "KYA - Planning Congé: Approuvé",
   "print_format": null,
@@ -888,6 +895,13 @@
     "condition": null,
     "receiver_by_document_field": "employee",
     "receiver_by_role": null
+   },
+   {
+    "bcc": null,
+    "cc": null,
+    "condition": null,
+    "receiver_by_document_field": null,
+    "receiver_by_role": "Responsable RH"
    }
   ],
   "send_system_notification": 0,
