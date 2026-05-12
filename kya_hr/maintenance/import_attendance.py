@@ -156,27 +156,92 @@ def parse_workbook(path: Path):
 
 
 def _employee_index():
-    """Pour chaque Employee actif, mappe NomNorm → name (HR-EMP-...)."""
+    """Construit deux index de matching pour les Employees actifs.
+
+    Retourne (exact_index, last_name_index) :
+    - exact_index  : norm(full_name) → employee_name  (unicité garantie)
+    - last_name_index : norm(last_name) → [list of employees]  (pour déambiguation prénom)
+    """
     import frappe
     employees = frappe.get_all(
         "Employee",
         filters={"status": "Active"},
         fields=["name", "employee_name", "first_name", "last_name", "custom_matricule_kya"],
     )
-    index = {}
+    exact_index: dict[str, str] = {}
+    last_name_index: dict[str, list] = {}
+
     for emp in employees:
-        for key_source in (emp.employee_name, f"{emp.last_name or ''} {emp.first_name or ''}".strip()):
-            if key_source:
-                index.setdefault(_norm(key_source), emp.name)
-    return index
+        fn = emp.first_name or ""
+        ln = emp.last_name or ""
+        en = emp.employee_name or ""
+
+        # Variantes du nom complet à indexer (NOM PRENOMS et PRENOMS NOM)
+        variants = [
+            _norm(en),
+            _norm(f"{ln} {fn}"),
+            _norm(f"{fn} {ln}"),
+        ]
+        for key in variants:
+            if key:
+                exact_index.setdefault(key, emp.name)
+
+        # Index secondaire par nom de famille (pour déambiguation si doublon de NOM)
+        lk = _norm(ln)
+        if lk:
+            last_name_index.setdefault(lk, []).append({
+                "employee": emp.name,
+                "first_norm": _norm(fn),
+                "employee_name": en,
+            })
+
+    return exact_index, last_name_index
+
+
+def _resolve_by_prenom(nom_excel: str, prenom_excel: str, last_name_index: dict) -> str | None:
+    """Si deux employés ont le même NOM, choisit celui dont le prénom correspond
+    à l'initiale ou aux premiers caractères du prénom Excel."""
+    ln_key = _norm(nom_excel)
+    candidates = last_name_index.get(ln_key, [])
+    if not candidates:
+        return None
+    if len(candidates) == 1:
+        return candidates[0]["employee"]
+
+    # Plusieurs candidats : comparer prénom normalisé
+    pn = _norm(prenom_excel)
+    # Match exact prénom
+    for c in candidates:
+        if c["first_norm"] == pn:
+            return c["employee"]
+    # Match partiel (prénom Excel commence par prénom DB ou vice-versa)
+    for c in candidates:
+        fp = c["first_norm"]
+        if fp and (pn.startswith(fp) or fp.startswith(pn)):
+            return c["employee"]
+    # Fallback : premier candidat (ambiguïté non résolue → loguer)
+    return None  # ambigu, ne pas forcer
 
 
 def build_attendance_payloads(rows, employee_index, include_absences=False, default_company=None):
-    """Transforme les lignes Excel en payloads Attendance pour insertion Frappe."""
+    """Transforme les lignes Excel en payloads Attendance pour insertion Frappe.
+
+    Matching robuste en 3 passes :
+    1. Correspondance exacte sur le nom complet normalisé (NOM PRENOMS)
+    2. Correspondance inversée (PRENOMS NOM) — déjà dans l'index
+    3. Déambiguïsation par nom de famille + prénom si NOM non-unique
+    """
+    exact_index, last_name_index = employee_index
     payloads = []
     unmatched = []
     for row in rows:
-        emp_name = employee_index.get(row["full_name_norm"])
+        # Passe 1 + 2 : exact match (toutes les variantes sont dans exact_index)
+        emp_name = exact_index.get(row["full_name_norm"])
+
+        # Passe 3 : déambiguïsation par NOM + PRENOMS séparés
+        if not emp_name:
+            emp_name = _resolve_by_prenom(row["nom"], row["prenoms"], last_name_index)
+
         if not emp_name:
             unmatched.append(row["full_name"])
             continue
@@ -270,8 +335,9 @@ def _main_cli():
 
     src = Path(args.path)
     rows = parse_workbook(src)
+    # En mode CLI sans Frappe, l'index est vide (2-tuple vide)
     payloads, unmatched = build_attendance_payloads(
-        rows, employee_index={}, include_absences=args.include_absences, default_company=None
+        rows, employee_index=({}, {}), include_absences=args.include_absences, default_company=None
     )
     Path(args.output).write_text(
         json.dumps({"rows": rows, "unmatched_will_be_all": True}, ensure_ascii=False, indent=2, default=str),
