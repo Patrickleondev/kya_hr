@@ -16,6 +16,7 @@ app_include_js = [
     "/assets/kya_hr/js/kya_desktop_fix.js",
     "/assets/kya_hr/js/kya_new_doc_to_webform.js",
     "/assets/kya_hr/js/kya_sidebar_router.js",
+    "/assets/kya_hr/js/kya_view_to_webform.js",
     "/assets/kya_hr/js/kya_list_to_webform.js",
 ]
 
@@ -31,6 +32,7 @@ fixtures = [
     {"dt": "Notification"},
     {"dt": "Letter Head"},
     {"dt": "Employment Type", "filters": [["name", "in", ["CDI", "CDD", "Stage", "Prestataire"]]]},
+    {"dt": "KYA Contract Template"},
 ]
 
 # DocType client scripts
@@ -68,11 +70,20 @@ doc_events = {
     "Employee": {
         "before_save": "kya_hr.grille_indiciaire.calculer_indice_employee",
     },
+    # Tache Equipe : notification des attributaires (creation + ajout d'un membre)
+    "Tache Equipe": {
+        "after_insert": "kya_hr.email_notifications.send_task_assignment_email",
+        "on_update": "kya_hr.email_notifications.send_task_assignment_email",
+    },
     # Chef routing + notifications demandeur (confirmation soumission + mises à jour état)
     "Demande Achat KYA": {
         "before_save": "kya_hr.chef_routing.populate_chef",
+        "validate": "kya_hr.auto_calc_logic.compute_demande_achat",
         "after_insert": "kya_hr.email_notifications.send_submission_recap",
         "on_update": "kya_hr.email_notifications.send_workflow_update",
+    },
+    "Bon Commande KYA": {
+        "validate": "kya_hr.auto_calc_logic.compute_bon_commande",
     },
     "Permission Sortie Employe": {
         "before_save": "kya_hr.chef_routing.populate_chef",
@@ -81,6 +92,7 @@ doc_events = {
     },
     "Permission Sortie Stagiaire": {
         "before_save": "kya_hr.chef_routing.populate_chef",
+        "validate": "kya_hr.auto_calc_logic.compute_permission_sortie_stagiaire",
         "after_insert": "kya_hr.email_notifications.send_submission_recap",
         "on_update": "kya_hr.email_notifications.send_workflow_update",
     },
@@ -110,6 +122,10 @@ doc_events = {
     "Bilan Fin de Stage": {
         "after_insert": "kya_hr.email_notifications.send_submission_recap",
         "on_update": "kya_hr.email_notifications.send_workflow_update",
+    },
+    # Tache Equipe : statut auto depuis taux_effectif (custom:1 -> controller Python inactif)
+    "Tache Equipe": {
+        "validate": "kya_hr.auto_calc_logic.compute_tache_equipe",
     },
 }
 

@@ -8,6 +8,7 @@
  "field_order": [
   "title",
   "contract_type",
+  "genre_cible",
   "version",
   "is_active",
   "section_body",
@@ -21,6 +22,7 @@
  "fields": [
   {"fieldname": "title", "fieldtype": "Data", "label": "Nom du Template", "reqd": 1, "unique": 1, "in_list_view": 1},
   {"fieldname": "contract_type", "fieldtype": "Select", "label": "Type de Contrat", "options": "Stage Professionnel\nStage Académique\nCDI\nCDD\nPrestataire", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "genre_cible", "fieldtype": "Select", "label": "Genre cible", "options": "Tous\nMasculin\nFéminin", "default": "Tous", "reqd": 1, "in_list_view": 1, "description": "Genre du signataire ciblé par ce template (pour les formulations FR genrées)."},
   {"fieldname": "version", "fieldtype": "Data", "label": "Version", "default": "RH-ENG-V01", "in_list_view": 1},
   {"fieldname": "is_active", "fieldtype": "Check", "label": "Actif (utilisé par défaut pour ce type)", "default": 1, "in_list_view": 1},
   {"fieldname": "section_body", "fieldtype": "Section Break", "label": "Corps du Contrat (HTML + Jinja)"},
