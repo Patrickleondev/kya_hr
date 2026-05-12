@@ -25,6 +25,8 @@
  "show_sidebar": 1,
  "success_message": "✅ Bon de Commande enregistré avec succès. Il sera visé par la Direction puis envoyé au client.",
  "title": "Bon de Commande",
+ "introduction_text": "<p>Enregistrez un Bon de Commande KYA. Renseignez les articles, le destinataire et validez. Le DG signera le document avant envoi.</p>",
+ "client_script": "frappe.web_form.after_load = function() {\n  var doc = frappe.web_form.doc;\n  if (doc && doc.name) {\n    var refEl = document.createElement('div');\n    refEl.innerHTML = '<div style=\"margin-bottom:12px;padding:8px 16px;background:#e3f2fd;color:#1565c0;border-left:4px solid #1976d2;border-radius:6px;display:inline-block;font-weight:700;font-size:14px;\">Réf. : ' + doc.name + '</div>';\n    var w = document.querySelector('.web-form-wrapper') || document.querySelector('.container');\n    if (w) w.prepend(refEl);\n  }\n  var roles = (frappe.boot && frappe.boot.user && frappe.boot.user.roles) ? frappe.boot.user.roles : [];\n  var state = (doc && (doc.workflow_state || doc.statut)) || 'Brouillon';\n  // Masquer la signature DG par défaut, l'activer seulement quand workflow=En attente DG\n  frappe.web_form.set_df_property('signature_dg', 'read_only', 1);\n  if (state === 'En attente DG' && (roles.indexOf('Directeur Général') !== -1 || roles.indexOf('System Manager') !== -1)) {\n    frappe.web_form.set_df_property('signature_dg', 'read_only', 0);\n  }\n  if (doc && doc.statut) {\n    var cm = {'Approuv\\u00e9':'#2e7d32','Rejet\\u00e9':'#c62828','Brouillon':'#757575'};\n    var c = cm[doc.statut] || '#1565c0';\n    var el = document.createElement('div');\n    el.innerHTML = '<div style=\"margin-bottom:12px;padding:8px 16px;background:'+c+';color:#fff;border-radius:6px;display:inline-block;font-weight:700;\">\\u00c9tat\\u00a0: '+doc.statut+'</div>';\n    var w2 = document.querySelector('.web-form-wrapper') || document.querySelector('.container');\n    if (w2) w2.prepend(el);\n  }\n};\n",
  "web_form_fields": [
   {
    "fieldname": "numero_bc",
@@ -54,8 +56,9 @@
   {
    "fieldname": "fournisseur",
    "fieldtype": "Link",
-   "label": "Client (référence)",
-   "options": "Customer"
+   "label": "Destinataire / Client (référence ERPNext)",
+   "options": "Customer",
+   "description": "Optionnel — sélectionnez si le destinataire est un client enregistré dans ERPNext"
   },
   {
    "fieldname": "fournisseur_nom",
@@ -163,5 +166,5 @@
    "label": "Date d'autorisation"
   }
  ],
- "no_sidebar": 1
+ "show_sidebar": 1
 }
