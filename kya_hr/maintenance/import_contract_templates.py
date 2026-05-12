@@ -107,6 +107,44 @@ def _slugify(value: str) -> str:
     return value or "template"
 
 
+_HEADER_PARA = re.compile(
+    r"^(Entre$|Entre les soussign[ée]s|EMPLOYEUR|TRAVAILLEUR|STAGIAIRE|D[’']une part)",
+    re.IGNORECASE,
+)
+
+
+def _drop_cover_page(html: str) -> str:
+    """Coupe la page de garde / en-tête avant le début réel du contrat.
+
+    Sentinelle stable sur les 6 templates KYA : la chaîne "siège social"
+    apparaît dans le 1er paragraphe identifiant KYA-Energy Group.
+    On garde aussi les paragraphes d'introduction "Entre les soussignés",
+    "EMPLOYEUR :", etc. juste avant.
+    """
+    m = re.search(r"si[èe]ge social", html, re.IGNORECASE)
+    if not m:
+        return html
+    pos = m.start()
+    p_start = html.rfind("<p", 0, pos)
+    if p_start < 0:
+        return html
+
+    candidate = p_start
+    for _ in range(6):
+        prev = html.rfind("<p", 0, candidate - 1)
+        if prev < 0:
+            break
+        end = html.find("</p>", prev)
+        if end < 0:
+            break
+        text = re.sub(r"<[^>]+>", "", html[prev:end]).strip()
+        if _HEADER_PARA.match(text):
+            candidate = prev
+        else:
+            break
+    return html[candidate:]
+
+
 def docx_to_html(path: Path) -> str:
     with path.open("rb") as fp:
         result = mammoth.convert_to_html(fp)
@@ -115,8 +153,15 @@ def docx_to_html(path: Path) -> str:
     html = re.sub(r"<\?xml[^>]*\?>", "", html)
     # Supprimer les images embarquées en data: URI (logos déjà ajoutés par le print format)
     html = re.sub(r'<img[^>]*src=["\']data:[^"\']+["\'][^>]*/?>', "", html)
-    # Supprimer les <table> d'en-tête vides résultantes (logo + slogan)
-    html = re.sub(r'<table[^>]*>\s*<thead>\s*<tr>\s*<th[^>]*>\s*<p>\s*</p>\s*</th>.*?</thead>\s*</table>', "", html, flags=re.S)
+    # Supprimer les <table> d'en-tête (logo + slogan + référence document)
+    html = re.sub(
+        r'<table[^>]*>\s*<thead>.*?</thead>\s*</table>',
+        "",
+        html,
+        flags=re.S,
+    )
+    # Couper la page de garde / cover page (Stage Académique) avant le contrat
+    html = _drop_cover_page(html)
     return html
 
 

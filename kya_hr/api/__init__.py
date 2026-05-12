@@ -803,31 +803,53 @@ def get_my_tasks():
     if not employee:
         return {"tasks": [], "plans": []}
 
-    # Tâches assignées directement
+    # Tâches assignées via Tache Equipe Attribution (child table)
     tasks = []
     try:
-        taches = frappe.get_all(
-            "Tache Equipe",
-            filters={"responsable": employee.name},
-            fields=["name", "titre", "statut", "priorite", "date_debut",
-                     "date_echeance", "progression", "plan_trimestriel"],
-            order_by="date_echeance asc",
-            limit_page_length=50,
+        attributions = frappe.get_all(
+            "Tache Equipe Attribution",
+            filters={"employe": employee.name},
+            fields=["parent", "role_attribution"],
+            limit_page_length=200,
         )
-        for t in taches:
-            tasks.append({
-                "name": t.name,
-                "titre": t.titre,
-                "statut": t.statut or "Non démarré",
-                "priorite": t.priorite or "Moyenne",
-                "date_debut": str(t.date_debut) if t.date_debut else None,
-                "date_echeance": str(t.date_echeance) if t.date_echeance else None,
-                "progression": t.progression or 0,
-                "plan": t.plan_trimestriel,
-                "url": f"/app/tache-equipe/{t.name}",
-            })
+        parent_names = list({a.parent for a in attributions if a.parent})
+        if parent_names:
+            taches = frappe.get_all(
+                "Tache Equipe",
+                filters={"name": ["in", parent_names]},
+                fields=[
+                    "name", "libelle", "resultat_libelle", "kpi", "statut",
+                    "taux_estime", "taux_effectif", "frequence", "equipe",
+                    "plan", "commentaire",
+                ],
+                order_by="modified desc",
+            )
+            role_map = {a.parent: a.role_attribution for a in attributions}
+            for t in taches:
+                tasks.append({
+                    "name": t.name,
+                    "libelle": t.libelle or "",
+                    "resultat_libelle": t.resultat_libelle or "",
+                    "kpi": t.kpi or "",
+                    "statut": t.statut or "À démarrer",
+                    "taux_estime": float(t.taux_estime or 0),
+                    "taux_effectif": float(t.taux_effectif or 0),
+                    "frequence": t.frequence or "",
+                    "equipe": t.equipe,
+                    "plan": t.plan,
+                    "role": role_map.get(t.name) or "Contributeur",
+                    "commentaire": t.commentaire or "",
+                    "url": f"/app/tache-equipe/{t.name}",
+                })
+
+        # Statistiques
+        if tasks:
+            taux_moyen = round(sum(t["taux_effectif"] for t in tasks) / len(tasks), 1)
+            tasks_stats = {"taux_moyen": taux_moyen, "total": len(tasks)}
+        else:
+            tasks_stats = {"taux_moyen": 0, "total": 0}
     except Exception:
-        pass
+        tasks_stats = {"taux_moyen": 0, "total": 0}
 
     # Plans trimestriels où l'utilisateur est chef d'équipe
     plans = []
@@ -853,7 +875,7 @@ def get_my_tasks():
     except Exception:
         pass
 
-    return {"tasks": tasks, "plans": plans}
+    return {"tasks": tasks, "plans": plans, "stats": tasks_stats}
 
 
 # ═══════════════════════════════════════════════════════════

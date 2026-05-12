@@ -69,6 +69,11 @@ doc_events = {
     "Employee": {
         "before_save": "kya_hr.grille_indiciaire.calculer_indice_employee",
     },
+    # Tache Equipe : notification des attributaires (creation + ajout d'un membre)
+    "Tache Equipe": {
+        "after_insert": "kya_hr.email_notifications.send_task_assignment_email",
+        "on_update": "kya_hr.email_notifications.send_task_assignment_email",
+    },
     # Chef routing + notifications demandeur (confirmation soumission + mises à jour état)
     "Demande Achat KYA": {
         "before_save": "kya_hr.chef_routing.populate_chef",
