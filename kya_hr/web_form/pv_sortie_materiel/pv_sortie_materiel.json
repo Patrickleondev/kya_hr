@@ -70,11 +70,9 @@
    "description": "À remplir uniquement si le client n'est pas encore dans la base. Vous pourrez l'enregistrer ensuite."
   },
   {
-   "fieldname": "items",
-   "fieldtype": "Table",
-   "label": "Liste du Matériel",
-   "options": "PV Sortie Materiel Item",
-   "reqd": 1
+   "fieldname": "demandeur_nom",
+   "fieldtype": "Data",
+   "label": "Nom du Demandeur"
   },
   {
    "fieldname": "au_nom_de",
@@ -84,15 +82,17 @@
    "description": "Laissez vide si vous soumettez pour vous-même"
   },
   {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Liste du Matériel",
+   "options": "PV Sortie Materiel Item",
+   "reqd": 1
+  },
+  {
    "fieldname": "statut",
    "fieldtype": "Data",
    "label": "État du PV",
    "read_only": 1
-  },
-  {
-   "fieldname": "demandeur_nom",
-   "fieldtype": "Data",
-   "label": "Nom du Demandeur"
   },
   {
    "fieldname": "signature_demandeur",
@@ -120,5 +120,5 @@
    "label": "Signature Responsable Magasin"
   }
  ],
- "no_sidebar": 1
+ "show_sidebar": 1
 }
