@@ -84,7 +84,7 @@
   {
    "fieldname": "montant_total",
    "fieldtype": "Currency",
-   "label": "Montant Total (XOF) — modifiable"
+   "label": "Montant Total (XOF)"
   },
   {
    "fieldname": "statut",
@@ -105,7 +105,7 @@
   {
    "fieldname": "signature_dga",
    "fieldtype": "Signature",
-   "label": "Visa DAAF / Responsable Achats"
+   "label": "Visa Responsable Comptable / DAAF"
   },
   {
    "fieldname": "signature_dg",
@@ -113,5 +113,5 @@
    "label": "Approbation DG (≥ 100 001 XOF)"
   }
  ],
- "no_sidebar": 1
+ "show_sidebar": 1
 }
