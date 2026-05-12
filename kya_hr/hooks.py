@@ -31,6 +31,7 @@ fixtures = [
     {"dt": "Notification"},
     {"dt": "Letter Head"},
     {"dt": "Employment Type", "filters": [["name", "in", ["CDI", "CDD", "Stage", "Prestataire"]]]},
+    {"dt": "KYA Contract Template"},
 ]
 
 # DocType client scripts
