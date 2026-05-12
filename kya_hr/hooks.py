@@ -113,9 +113,12 @@ doc_events = {
     },
 }
 
-# Permission Query Conditions : restreindre la visibilité Employee aux non-RH
+# Permission Query Conditions : restreindre la visibilité Employee + scope
+# Chef d'Équipe sur ses propres équipes / tâches.
 permission_query_conditions = {
     "Employee": "kya_hr.employee_permissions.employee_query",
+    "Equipe KYA": "kya_hr.equipe_permissions.equipe_kya_query",
+    "Tache Equipe": "kya_hr.equipe_permissions.tache_equipe_query",
 }
 
 has_permission = {
