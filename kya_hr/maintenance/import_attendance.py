@@ -161,7 +161,7 @@ def _employee_index():
     employees = frappe.get_all(
         "Employee",
         filters={"status": "Active"},
-        fields=["name", "employee_name", "first_name", "last_name", "kya_matricule"],
+        fields=["name", "employee_name", "first_name", "last_name", "custom_matricule_kya"],
     )
     index = {}
     for emp in employees:
