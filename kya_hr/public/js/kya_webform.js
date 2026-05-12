@@ -319,7 +319,7 @@
     "demande-achat": {
       title: "FICHE D\u2019ENGAGEMENT DE D\u00c9PENSES",
       subtitle: "Approvisionnement",
-      workflow: "Chef \u2192 Auditeur \u2192 DAAF \u2192 DG"
+      workflow: "Chef \u2192 Auditeur \u2192 Responsable Comptable \u2192 Directeur G\u00e9n\u00e9ral"
     },
     "pv-sortie-materiel": {
       title: "PV DE SORTIE DE MAT\u00c9RIEL",
@@ -344,27 +344,27 @@
     "appel-offre": {
       title: "APPEL D\u2019OFFRE FOURNISSEURS",
       subtitle: "Achats & Approvisionnement",
-      workflow: "Demandeur \u2192 Resp. Achats \u2192 DAAF \u2192 DG"
+      workflow: "Demandeur \u2192 Resp. Achats \u2192 Responsable Comptable \u2192 Directeur G\u00e9n\u00e9ral"
     },
     "bon-commande": {
       title: "BON DE COMMANDE",
       subtitle: "Achats & Approvisionnement",
-      workflow: "Resp. Achats \u2192 DAAF \u2192 DG"
+      workflow: "Resp. Achats \u2192 Responsable Comptable \u2192 Directeur G\u00e9n\u00e9ral"
     },
     "demande-achat-old": {
       title: "DEMANDE D\u2019ACHAT",
       subtitle: "Approvisionnement",
-      workflow: "Demandeur \u2192 Chef \u2192 DAAF \u2192 DG"
+      workflow: "Demandeur \u2192 Chef \u2192 Responsable Comptable \u2192 Directeur G\u00e9n\u00e9ral"
     },
     "etat-recap": {
       title: "\u00c9TAT R\u00c9CAPITULATIF DES CH\u00c8QUES",
       subtitle: "Comptabilit\u00e9 & Tr\u00e9sorerie",
-      workflow: "Caissier \u2192 Comptable \u2192 DAAF"
+      workflow: "Caissier \u2192 Comptable \u2192 Responsable Comptable"
     },
     "brouillard-caisse": {
       title: "BROUILLARD DE CAISSE",
       subtitle: "Comptabilit\u00e9 & Tr\u00e9sorerie",
-      workflow: "Caissier \u2192 Comptable \u2192 DFC"
+      workflow: "Caissier \u2192 Comptable \u2192 Responsable Comptable"
     },
     "pv-entree-materiel": {
       title: "PV D\u2019ENTR\u00c9E DE MAT\u00c9RIEL",
@@ -379,32 +379,32 @@
       signature_stagiaire: null,
       signature_chef: ["Chef Service", "HR Manager", "System Manager"],
       signature_resp_stagiaires: ["Responsable des Stagiaires", "HR Manager", "HR User", "System Manager"],
-      signature_dg: ["DG", "Directeur Général", "System Manager"]
+      signature_dg: ["Directeur Général", "System Manager"]
     },
     "permission-sortie-employe": {
       signature_employe: null,
       signature_chef: ["Chef Service", "HR Manager", "System Manager"],
       signature_rh: ["HR Manager", "HR User", "System Manager"],
-      signature_dga: ["DGA", "DG", "Directeur Général", "System Manager"]
+      signature_dga: ["DGA", "Directeur Général", "System Manager"]
     },
     "demande-achat": {
       signature_demandeur: null,
       signature_chef: ["Chef Service", "System Manager"],
-      signature_dga: ["DGA", "DAAF", "System Manager"],
-      signature_dg: ["DG", "Directeur Général", "System Manager"]
+      signature_dga: ["DGA", "Responsable Comptable", "System Manager"],
+      signature_dg: ["Directeur Général", "System Manager"]
     },
     "pv-sortie-materiel": {
       signature_demandeur: null,
       signature_chef: ["Chef Service", "System Manager"],
       signature_audit: ["Auditeur Interne", "DGA", "System Manager"],
-      signature_dga: ["DGA", "DG", "Directeur Général", "System Manager"],
+      signature_dga: ["DGA", "Directeur Général", "System Manager"],
       signature_magasin: ["Stock Manager", "Stock User", "System Manager"]
     },
     "demande-conge": {
       signature_employe_la: null,
       signature_superieur_la: ["Chef Service", "HR Manager", "System Manager"],
       signature_rh_la: ["HR Manager", "HR User", "Responsable RH", "System Manager"],
-      signature_dg_la: ["DG", "Directeur Général", "System Manager"]
+      signature_dg_la: ["Directeur Général", "System Manager"]
     },
     "pv-entree-materiel": {
       signature_livreur: null,
@@ -414,12 +414,12 @@
     "etat-recap": {
       signature_caissiere: null,
       signature_comptable: ["Accounts User", "Accounts Manager", "System Manager"],
-      signature_daaf: ["DAAF", "System Manager"]
+      signature_daaf: ["Responsable Comptable", "System Manager"]
     },
     "brouillard-caisse": {
       signature_caissiere: null,
       signature_comptable: ["Accounts User", "Accounts Manager", "System Manager"],
-      signature_dfc: ["DAAF", "System Manager"]
+      signature_dfc: ["Responsable Comptable", "System Manager"]
     }
   };
 
@@ -746,7 +746,18 @@
       document.querySelector("form.web-form") ||
       document.querySelector(".frappe-form");
     if (!formBody) return;
-    if (formBody.querySelector(".kya-form-section")) return;
+
+    // Si un wrapper KYA existe déjà, vérifier qu'il contient vraiment des champs.
+    // Sinon (rendu trop tôt avant que Frappe ait monté les .frappe-control),
+    // on retire le wrapper vide pour permettre un rebuild propre.
+    var existingWrapper = formBody.querySelector(".kya-sections-wrapper");
+    if (existingWrapper) {
+      var hasContent =
+        existingWrapper.querySelector(".kya-section-body .frappe-control") ||
+        existingWrapper.querySelector(".kya-section-body [data-fieldname]");
+      if (hasContent) return; // déjà construit correctement
+      existingWrapper.remove();
+    }
 
     /* cleanup old headers */
     document.querySelectorAll(".introduction .kya-wf-header, .web-form-header .kya-wf-header").forEach(function(h){h.remove();});
@@ -759,6 +770,11 @@
         if (el) allFields[fn] = el;
       });
     });
+
+    // Si aucun field trouvé (Frappe n'a pas encore monté les controls), on
+    // n'écrit pas un wrapper vide — le prochain trigger (MutationObserver,
+    // setTimeout, after_load) ré-essaiera quand les champs seront dans le DOM.
+    if (Object.keys(allFields).length === 0) return;
 
     var wrapper = document.createElement("div");
     wrapper.className = "kya-sections-wrapper";
