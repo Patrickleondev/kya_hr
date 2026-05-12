@@ -257,85 +257,117 @@ def send_workflow_update(doc, method=None):
 
 
 def send_task_assignment_email(doc, method=None):
-    """Envoie un email quand une tâche est assignée à un employé.
+    """Notifie chaque employé attributaire d'une Tache Equipe.
 
-    Déclenché par doc_events → after_insert sur Tache Equipe.
+    - À l'insertion : email à tous les attributaires.
+    - À l'update : email uniquement aux NOUVEAUX attributaires (diff avant/après).
+
+    Wiré via doc_events → after_insert + on_update sur Tache Equipe.
     """
-    attribution = getattr(doc, "attribution", None)
-    if not attribution:
+    attributions = doc.get("attributions") or []
+    if not attributions:
         return
 
-    emp = frappe.db.get_value(
-        "Employee", attribution,
-        ["employee_name", "company_email", "personal_email"],
-        as_dict=True,
-    )
-    if not emp:
-        return
+    # Calcul du delta sur on_update : attributaires ajoutés depuis le précédent état.
+    new_employees = set()
+    if method == "on_update":
+        try:
+            previous = frappe.get_doc(doc.doctype, doc.name)
+            previous_emps = {(a.get("employe") or "") for a in (previous.get("attributions") or [])}
+            for row in attributions:
+                emp = row.get("employe")
+                if emp and emp not in previous_emps:
+                    new_employees.add(emp)
+            if not new_employees:
+                return
+        except Exception:
+            # Si on n'arrive pas à diff, on évite de spammer : pas d'email sur on_update
+            return
+    else:
+        for row in attributions:
+            if row.get("employe"):
+                new_employees.add(row["employe"])
 
-    email = emp.get("company_email") or emp.get("personal_email")
-    if not email:
+    if not new_employees:
         return
 
     base_url = get_url()
     espace_url = "{}/mon-espace#sec-tasks".format(base_url)
+    logo_url = "{}/assets/kya_hr/images/kya_logo.png".format(base_url)
+    libelle = (getattr(doc, "libelle", "") or "")
+    resultat = (getattr(doc, "resultat_libelle", "") or "")
+    kpi = (getattr(doc, "kpi", "") or "Non défini")
+    taux = getattr(doc, "taux_estime", 0) or 0
+    frequence = getattr(doc, "frequence", "") or ""
 
-    body = """
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background: #1565c0; padding: 24px; border-radius: 12px 12px 0 0; text-align:center;">
-        <img src="{logo_url}"
-             alt="KYA-Energy Group" width="60" height="60" border="0" style="margin-bottom:8px;display:block;margin:0 auto;">
-        <h2 style="color:white; margin:0;">📌 Nouvelle tâche assignée</h2>
-      </div>
-      <div style="background: #ffffff; padding: 24px; border: 1px solid #e0e0e0;">
-        <p>Bonjour <b>{emp_name}</b>,</p>
-        <p>Une nouvelle tâche vous a été assignée dans le cadre du plan trimestriel :</p>
-        <table style="width:100%; border-collapse:collapse; margin:16px 0;">
-          <tr>
-            <td style="padding:8px; background:#f5f5f5; border:1px solid #e0e0e0; font-weight:600;">Tâche</td>
-            <td style="padding:8px; border:1px solid #e0e0e0;">{libelle}</td>
-          </tr>
-          <tr>
-            <td style="padding:8px; background:#f5f5f5; border:1px solid #e0e0e0; font-weight:600;">Résultat attendu</td>
-            <td style="padding:8px; border:1px solid #e0e0e0;">{resultat}</td>
-          </tr>
-          <tr>
-            <td style="padding:8px; background:#f5f5f5; border:1px solid #e0e0e0; font-weight:600;">KPI</td>
-            <td style="padding:8px; border:1px solid #e0e0e0;">{kpi}</td>
-          </tr>
-          <tr>
-            <td style="padding:8px; background:#f5f5f5; border:1px solid #e0e0e0; font-weight:600;">Taux estimé</td>
-            <td style="padding:8px; border:1px solid #e0e0e0;">{taux}%</td>
-          </tr>
-        </table>
-        <div style="text-align:center; margin:24px 0;">
-          <a href="{espace_url}" style="display:inline-block; padding:14px 32px; background:#1565c0;
-             color:#fff; text-decoration:none; border-radius:8px; font-weight:700; font-size:15px;">
-            📋 Voir mes tâches
-          </a>
+    for emp_id in new_employees:
+        emp = frappe.db.get_value(
+            "Employee", emp_id,
+            ["employee_name", "company_email", "personal_email"],
+            as_dict=True,
+        )
+        if not emp:
+            continue
+        email = emp.get("company_email") or emp.get("personal_email")
+        if not email:
+            continue
+
+        # Trouver le rôle attribué à cet employé sur cette tâche
+        role = "Contributeur"
+        for row in attributions:
+            if row.get("employe") == emp_id:
+                role = row.get("role_attribution") or "Contributeur"
+                break
+
+        body = """
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: #1565c0; padding: 24px; border-radius: 12px 12px 0 0; text-align:center;">
+            <img src="{logo_url}" alt="KYA-Energy Group" width="60" height="60" border="0" style="display:block;margin:0 auto 8px;">
+            <h2 style="color:white; margin:0;">📌 Nouvelle tâche assignée</h2>
+          </div>
+          <div style="background: #ffffff; padding: 24px; border: 1px solid #e0e0e0;">
+            <p>Bonjour <b>{emp_name}</b>,</p>
+            <p>Une nouvelle tâche vous a été assignée en tant que <b>{role}</b> :</p>
+            <table style="width:100%; border-collapse:collapse; margin:16px 0;">
+              <tr><td style="padding:8px; background:#f5f5f5; border:1px solid #e0e0e0; font-weight:600;">Tâche</td>
+                  <td style="padding:8px; border:1px solid #e0e0e0;">{libelle}</td></tr>
+              <tr><td style="padding:8px; background:#f5f5f5; border:1px solid #e0e0e0; font-weight:600;">Résultat attendu</td>
+                  <td style="padding:8px; border:1px solid #e0e0e0;">{resultat}</td></tr>
+              <tr><td style="padding:8px; background:#f5f5f5; border:1px solid #e0e0e0; font-weight:600;">KPI</td>
+                  <td style="padding:8px; border:1px solid #e0e0e0;">{kpi}</td></tr>
+              <tr><td style="padding:8px; background:#f5f5f5; border:1px solid #e0e0e0; font-weight:600;">Fréquence</td>
+                  <td style="padding:8px; border:1px solid #e0e0e0;">{frequence}</td></tr>
+              <tr><td style="padding:8px; background:#f5f5f5; border:1px solid #e0e0e0; font-weight:600;">Taux estimé</td>
+                  <td style="padding:8px; border:1px solid #e0e0e0;">{taux}%</td></tr>
+            </table>
+            <div style="text-align:center; margin:24px 0;">
+              <a href="{espace_url}" style="display:inline-block; padding:14px 32px; background:#1565c0;
+                 color:#fff; text-decoration:none; border-radius:8px; font-weight:700; font-size:15px;">
+                📋 Voir mes tâches
+              </a>
+            </div>
+            <p style="font-size:12px; color:#999; text-align:center;">
+              Mettez à jour votre progression depuis Mon Espace.
+            </p>
+          </div>
+          {footer}
         </div>
-        <p style="font-size:12px; color:#999; text-align:center;">
-          Vous pouvez mettre à jour votre progression depuis votre espace personnel.
-        </p>
-      </div>
-      {footer}
-    </div>
-    """.format(
-        logo_url="{}/assets/kya_hr/images/kya_logo.png".format(base_url),
-        emp_name=emp.get("employee_name"),
-        libelle=getattr(doc, "libelle", ""),
-        resultat=getattr(doc, "resultat_libelle", ""),
-        kpi=getattr(doc, "kpi", "Non défini"),
-        taux=getattr(doc, "taux_estime", 0),
-        espace_url=espace_url,
-        footer=frappe.get_attr("kya_hr.utils.get_kya_email_footer")(),
-    )
+        """.format(
+            logo_url=logo_url,
+            emp_name=emp.get("employee_name") or emp_id,
+            role=role,
+            libelle=libelle,
+            resultat=resultat,
+            kpi=kpi,
+            frequence=frequence,
+            taux=taux,
+            espace_url=espace_url,
+            footer=frappe.get_attr("kya_hr.utils.get_kya_email_footer")(),
+        )
 
-    frappe.sendmail(
-        recipients=[email],
-        subject="[KYA] 📌 Nouvelle tâche : {}".format(
-            (getattr(doc, "libelle", "") or "")[:60]
-        ),
-        message=body,
-        now=True,
-    )
+        frappe.sendmail(
+            recipients=[email],
+            subject="[KYA] 📌 Nouvelle tâche : {}".format(libelle[:60] or doc.name),
+            message=body,
+            now=False,
+        )

@@ -40,6 +40,39 @@ class KYAContrat(Document):
     def _select_template(self):
         if self.template:
             return
+        if not self.contract_type:
+            return
+
+        # 1. Tentative : type + genre exact
+        if self.sexe in ("Masculin", "Féminin"):
+            tpl = frappe.db.get_value(
+                "KYA Contract Template",
+                {
+                    "contract_type": self.contract_type,
+                    "genre_cible": self.sexe,
+                    "is_active": 1,
+                },
+                "name",
+            )
+            if tpl:
+                self.template = tpl
+                return
+
+        # 2. Fallback : type + genre_cible="Tous" (Stage Académique/Professionnel, etc.)
+        tpl = frappe.db.get_value(
+            "KYA Contract Template",
+            {
+                "contract_type": self.contract_type,
+                "genre_cible": "Tous",
+                "is_active": 1,
+            },
+            "name",
+        )
+        if tpl:
+            self.template = tpl
+            return
+
+        # 3. Fallback ultime : n'importe quel template actif pour ce type
         tpl = frappe.db.get_value(
             "KYA Contract Template",
             {"contract_type": self.contract_type, "is_active": 1},
