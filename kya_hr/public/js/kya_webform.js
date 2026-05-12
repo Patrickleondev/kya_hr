@@ -268,18 +268,25 @@
       {
         title: "INFORMATIONS G\u00c9N\u00c9RALES",
         icon: "\u{1F4DD}",
-        fields: ["date_recap", "periode", "caissiere"],
-        grid: { date_recap: "col", periode: "col", caissiere: "span 2" }
+        fields: ["date_etat", "redacteur", "redacteur_name", "semaine_du", "semaine_au"],
+        grid: {
+          date_etat: "col",
+          redacteur: "col",
+          redacteur_name: "span 2",
+          semaine_du: "col",
+          semaine_au: "col"
+        }
       },
       {
         title: "LISTE DES CH\u00c8QUES",
         icon: "\u{1F4B5}",
-        fields: ["cheques", "montant_total"]
+        fields: ["lignes", "total_montant", "nombre_cheques", "commentaires"],
+        grid: { total_montant: "col", nombre_cheques: "col", commentaires: "span 2" }
       },
       {
         title: "VALIDATIONS & SIGNATURES",
         icon: "\u270D\uFE0F",
-        fields: ["signature_caissiere", "signature_comptable", "signature_daaf"],
+        fields: ["signature_redacteur", "signature_dfc", "signature_dg", "signature_dga"],
         sigGrid: true
       }
     ],
@@ -359,7 +366,7 @@
     "etat-recap": {
       title: "\u00c9TAT R\u00c9CAPITULATIF DES CH\u00c8QUES",
       subtitle: "Comptabilit\u00e9 & Tr\u00e9sorerie",
-      workflow: "Caissier \u2192 Comptable \u2192 Responsable Comptable"
+      workflow: "R\u00e9dacteur (Comptable / DFC) \u2192 DG \u2192 DGA"
     },
     "brouillard-caisse": {
       title: "BROUILLARD DE CAISSE",
@@ -412,9 +419,10 @@
       signature_audit: ["Auditeur Interne", "DGA", "System Manager"]
     },
     "etat-recap": {
-      signature_caissiere: null,
-      signature_comptable: ["Accounts User", "Accounts Manager", "System Manager"],
-      signature_daaf: ["Responsable Comptable", "System Manager"]
+      signature_redacteur: null,
+      signature_dfc: ["Responsable Comptable", "Accounts Manager", "System Manager"],
+      signature_dg: ["Directeur Général", "DG", "System Manager"],
+      signature_dga: ["DGA", "Directeur Général", "DG", "System Manager"]
     },
     "brouillard-caisse": {
       signature_caissiere: null,
