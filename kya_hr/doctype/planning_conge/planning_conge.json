@@ -94,6 +94,65 @@
    "description": "Somme automatique des périodes"
   },
   {
+   "fieldname": "section_solde",
+   "label": "Solde de Congés",
+   "fieldtype": "Section Break",
+   "description": "Solde renseigné par la RH (jours restants N-1 et acquis cette année)"
+  },
+  {
+   "fieldname": "solde_n1",
+   "label": "Jours restants N-1",
+   "fieldtype": "Float",
+   "default": 0,
+   "permlevel": 1,
+   "precision": "1",
+   "description": "Jours de congés restants de l'année précédente"
+  },
+  {
+   "fieldname": "jours_acquis",
+   "label": "Jours acquis (année en cours)",
+   "fieldtype": "Float",
+   "default": 30,
+   "permlevel": 1,
+   "precision": "1",
+   "description": "Jours de congés acquis pour l'année (saisi par la RH selon ancienneté)"
+  },
+  {
+   "fieldname": "conges_obligatoires",
+   "label": "Congés obligatoires",
+   "fieldtype": "Int",
+   "default": 7,
+   "permlevel": 1,
+   "description": "Congés obligatoires fixés par l'employeur"
+  },
+  {
+   "fieldname": "col_solde",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "solde_disponible",
+   "label": "Solde disponible",
+   "fieldtype": "Float",
+   "read_only": 1,
+   "precision": "1",
+   "description": "(Jours N-1 + Jours acquis) - Congés obligatoires"
+  },
+  {
+   "fieldname": "jours_monetisation",
+   "label": "Jours proposés à la monétisation",
+   "fieldtype": "Int",
+   "default": 0,
+   "description": "Jours que vous proposez de convertir en compensation financière"
+  },
+  {
+   "fieldname": "solde_final",
+   "label": "Solde final",
+   "fieldtype": "Float",
+   "read_only": 1,
+   "precision": "1",
+   "description": "Solde disponible - Total jours planifiés - Jours monétisation"
+  },
+  {
    "fieldname": "section_periodes",
    "label": "Périodes de Congé Souhaitées",
    "fieldtype": "Section Break"
@@ -207,7 +266,7 @@
    "fieldname": "statut",
    "label": "Statut",
    "fieldtype": "Select",
-   "options": "Brouillon\nEn attente RH\nEn attente DG\nApprouvé\nRejeté",
+   "options": "Brouillon\nEn attente Chef de Service\nEn attente DG\nApprouvé\nRejeté",
    "default": "Brouillon",
    "in_list_view": 1,
    "in_standard_filter": 1,
@@ -251,6 +310,12 @@
    "share": 1
   },
   {
+   "role": "System Manager",
+   "permlevel": 1,
+   "read": 1,
+   "write": 1
+  },
+  {
    "role": "HR Manager",
    "read": 1,
    "write": 1,
@@ -260,6 +325,12 @@
    "amend": 1
   },
   {
+   "role": "HR Manager",
+   "permlevel": 1,
+   "read": 1,
+   "write": 1
+  },
+  {
    "role": "HR User",
    "read": 1,
    "write": 1,
@@ -267,11 +338,22 @@
    "submit": 1
   },
   {
+   "role": "HR User",
+   "permlevel": 1,
+   "read": 1,
+   "write": 1
+  },
+  {
    "role": "Employee",
    "read": 1,
    "write": 1,
    "create": 1,
    "if_owner": 1
+  },
+  {
+   "role": "Employee",
+   "permlevel": 1,
+   "read": 1
   }
  ]
 }

@@ -16,6 +16,7 @@ app_include_js = [
     "/assets/kya_hr/js/kya_desktop_fix.js",
     "/assets/kya_hr/js/kya_new_doc_to_webform.js",
     "/assets/kya_hr/js/kya_sidebar_router.js",
+    "/assets/kya_hr/js/kya_list_to_webform.js",
 ]
 
 # Fixtures pour les flux, rôles et personnalisations de champs
@@ -84,9 +85,22 @@ doc_events = {
         "on_update": "kya_hr.email_notifications.send_workflow_update",
     },
     "Planning Conge": {
-        "before_save": "kya_hr.chef_routing.populate_chef",
+        "before_save": [
+            "kya_hr.chef_routing.populate_chef",
+            "kya_hr.planning_conge_logic.compute",
+        ],
+        "validate": "kya_hr.planning_conge_logic.compute",
         "after_insert": "kya_hr.email_notifications.send_submission_recap",
-        "on_update": "kya_hr.email_notifications.send_workflow_update",
+        "on_update": [
+            "kya_hr.email_notifications.send_workflow_update",
+            "kya_hr.leave_bridge.create_leave_from_planning",
+            "kya_hr.planning_conge_logic.sync_statut",
+        ],
+        "on_update_after_submit": [
+            "kya_hr.email_notifications.send_workflow_update",
+            "kya_hr.leave_bridge.create_leave_from_planning",
+            "kya_hr.planning_conge_logic.sync_statut",
+        ],
     },
     # PV et Bilan : pas de chef_routing (employee_field suffit)
     "PV Sortie Materiel": {
@@ -97,6 +111,15 @@ doc_events = {
         "after_insert": "kya_hr.email_notifications.send_submission_recap",
         "on_update": "kya_hr.email_notifications.send_workflow_update",
     },
+}
+
+# Permission Query Conditions : restreindre la visibilité Employee aux non-RH
+permission_query_conditions = {
+    "Employee": "kya_hr.employee_permissions.employee_query",
+}
+
+has_permission = {
+    "Employee": "kya_hr.employee_permissions.employee_has_permission",
 }
 
 # Rappels quotidiens (anniversaires naissance & ancienneté)

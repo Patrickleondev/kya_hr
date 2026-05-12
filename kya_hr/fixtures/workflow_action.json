@@ -54,5 +54,15 @@
   "status": null,
   "user": null,
   "workflow_state": null
+ },
+ {
+  "doctype": "Workflow Action Master",
+  "name": "Approuver (RH)",
+  "workflow_action_name": "Approuver (RH)"
+ },
+ {
+  "doctype": "Workflow Action Master",
+  "name": "Rejeter (RH)",
+  "workflow_action_name": "Rejeter (RH)"
  }
 ]
