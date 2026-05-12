@@ -16,6 +16,7 @@ app_include_js = [
     "/assets/kya_hr/js/kya_desktop_fix.js",
     "/assets/kya_hr/js/kya_new_doc_to_webform.js",
     "/assets/kya_hr/js/kya_sidebar_router.js",
+    "/assets/kya_hr/js/kya_view_to_webform.js",
     "/assets/kya_hr/js/kya_list_to_webform.js",
 ]
 
