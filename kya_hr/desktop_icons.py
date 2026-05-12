@@ -68,13 +68,21 @@ RESTRICTED_LAYOUT_ROLES = {
         "DGA",
         "System Manager",
     ],
+    # Espace Employés contient Mon Espace + raccourcis formulaires de base.
+    # Accessible à TOUS les comptes liés à un employé actif : rôle Employee
+    # est le rôle par défaut HRMS. Les rôles métier élargissent simplement
+    # la portée (gestion RH, stock, achats, direction).
     "Espace Employés": [
+        "Employee",          # ← tout employé KYA (CDI/CDD/Stage/Prestataire)
+        "Stagiaire",
         "Chef Service",
         "Supérieur Immédiat",
+        "Chef Equipe",
         "Responsable RH",
         "HR User",
         "HR Manager",
         "Directeur Général",
+        "DGA",
         "Responsable Comptable",
         "Auditeur Interne",
         "Stock User",
