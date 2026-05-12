@@ -1,10 +1,14 @@
 <style>
     @page { size: A4 landscape; margin: 12mm; }
-    body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; color: #333; }
+    body { font-family: Arial, "DejaVu Sans", "Liberation Sans", sans-serif; font-size: 11px; color: #333; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    img { max-width: 100%; height: auto; }
     .kya-doc { max-width: 100%; margin: 0 auto; }
-    .kya-doc-header { display: flex; align-items: flex-start; gap: 24px; padding: 10px 0 0; }
-    .kya-doc-logo img { max-height: 70px; }
-    .kya-doc-info { flex: 1; text-align: right; }
+    .kya-sec-body { page-break-inside: avoid; }
+    .kya-doc-header { display: table; width: 100%; padding: 10px 0 0; border-collapse: collapse; }
+    .kya-doc-header > div { display: table-cell; vertical-align: top; }
+    .kya-doc-logo { width: 110px; padding-right: 24px; }
+    .kya-doc-logo img { max-height: 70px; max-width: 90px; }
+    .kya-doc-info { text-align: right; }
     .kya-doc-title { font-size: 22px; font-weight: 800; color: #1a5276; text-transform: uppercase; margin: 0 0 4px; }
     .kya-doc-slogan { font-style: italic; color: #F58220; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
     .kya-doc-company { font-size: 9px; color: #666; line-height: 1.6; }
@@ -12,16 +16,17 @@
     .kya-doc-ref { text-align: center; font-size: 14px; font-weight: 800; color: #1a5276; margin: 8px 0 14px; }
     .kya-sec-header { background: #009688; color: #fff; padding: 7px 14px; font-size: 12px; font-weight: 700; text-transform: uppercase; margin: 12px 0 0; }
     .kya-sec-body { padding: 10px 14px; border: 1px solid #dee2e6; border-top: none; }
-    .kya-row { display: flex; gap: 16px; margin-bottom: 6px; }
-    .kya-col { flex: 1; }
+    .kya-row { display: table; width: 100%; table-layout: fixed; margin-bottom: 6px; }
+    .kya-col { display: table-cell; vertical-align: top; padding-right: 16px; }
+    .kya-col:last-child { padding-right: 0; }
     .kya-lbl { font-weight: 700; color: #1a5276; font-size: 9px; text-transform: uppercase; margin-bottom: 2px; }
     .kya-val { font-size: 12px; padding: 3px 0; min-height: 18px; }
     .kya-items { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 6px 0; }
     .kya-items th { background: #009688; color: #fff; padding: 7px 10px; text-align: left; word-break: break-word; overflow-wrap: break-word; font-size: 10px; }
     .kya-items td { padding: 5px 10px; border-bottom: 1px solid #eee; word-break: break-word; overflow-wrap: break-word; font-size: 11px; }
     .kya-items .num { text-align: right; }
-    .kya-totals { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 8px; }
-    .kya-totals .kpi { background: #f5f5f5; padding: 10px; border-radius: 6px; border-left: 4px solid #009688; }
+    .kya-totals { display: table; width: 100%; table-layout: fixed; margin-top: 8px; border-collapse: separate; border-spacing: 12px 0; }
+    .kya-totals .kpi { display: table-cell; vertical-align: top; background: #f5f5f5; padding: 10px; border-radius: 6px; border-left: 4px solid #009688; }
     .kya-totals .kpi.pos { border-left-color: #2e7d32; }
     .kya-totals .kpi.neg { border-left-color: #c62828; }
     .kya-totals .kpi .lbl { font-size: 9px; color: #666; text-transform: uppercase; }
@@ -30,8 +35,8 @@
     .kya-badge { display: inline-block; padding: 5px 18px; border-radius: 14px; font-weight: 700; font-size: 11px; }
     .kya-badge-ok { background: #e8f5e9; color: #2e7d32; border: 2px solid #4caf50; }
     .kya-badge-wait { background: #fff3e0; color: #e65100; border: 2px solid #ff9800; }
-    .kya-sigs { display: flex; justify-content: space-around; gap: 10px; margin-top: 10px; }
-    .kya-sig { text-align: center; min-width: 100px; flex: 1; }
+    .kya-sigs { display: table; width: 100%; table-layout: fixed; margin-top: 10px; border-collapse: separate; border-spacing: 10px 0; page-break-inside: avoid; }
+    .kya-sig { display: table-cell; text-align: center; vertical-align: top; }
     .kya-sig img { max-height: 50px; display: block; margin: 0 auto 4px; }
     .kya-sig .sig-line { border-top: 1px solid #333; margin-top: 28px; padding-top: 4px; font-size: 9px; font-weight: 600; }
     .kya-sig .sig-date { font-size: 8px; color: #888; }
