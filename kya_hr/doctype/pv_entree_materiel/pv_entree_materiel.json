@@ -56,6 +56,29 @@
    "description": "À remplir si le fournisseur n'est pas encore référencé"
   },
   {
+   "fieldname": "project",
+   "label": "Projet / Chantier",
+   "fieldtype": "Link",
+   "options": "Project",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "description": "Projet pour lequel cette réception est effectuée"
+  },
+  {
+   "fieldname": "customer",
+   "label": "Client",
+   "fieldtype": "Link",
+   "options": "Customer",
+   "in_standard_filter": 1,
+   "description": "Client si la réception est liée à une commande client spécifique"
+  },
+  {
+   "fieldname": "customer_libre",
+   "label": "Client (saisie manuelle)",
+   "fieldtype": "Data",
+   "description": "Si le client n'est pas encore enregistré"
+  },
+  {
    "fieldname": "section_link",
    "label": "Lien avec Achat (optionnel)",
    "fieldtype": "Section Break",
@@ -94,50 +117,74 @@
    "fieldname": "section_signatures",
    "label": "Validations & Signatures",
    "fieldtype": "Section Break",
-   "description": "Circuit : Livreur → Responsable Magasin"
+   "description": "Circuit fidèle fiche AEA-ENG-32-V01 : Achats & Stock → Service Comptabilité → Audit Interne"
   },
   {
-   "fieldname": "col_livreur",
+   "fieldname": "col_achats_stock",
    "fieldtype": "Column Break",
-   "label": "Employé Livreur / Réceptionnaire"
+   "label": "Achats & Stock"
   },
   {
-   "fieldname": "livreur_nom",
-   "label": "Nom Livreur",
-   "fieldtype": "Data",
-   "reqd": 1
-  },
-  {
-   "fieldname": "livreur_date",
-   "label": "Date Livraison",
-   "fieldtype": "Date",
-   "default": "Today"
-  },
-  {
-   "fieldname": "signature_livreur",
-   "label": "Signature Livreur",
-   "fieldtype": "Signature"
-  },
-  {
-   "fieldname": "col_magasin",
-   "fieldtype": "Column Break",
-   "label": "Responsable Magasin"
-  },
-  {
-   "fieldname": "magasin_nom",
-   "label": "Nom Responsable Magasin",
+   "fieldname": "achats_stock_nom",
+   "label": "Nom — Achats & Stock",
    "fieldtype": "Data",
    "read_only": 1
   },
   {
-   "fieldname": "magasin_date",
-   "label": "Date Réception Magasin",
+   "fieldname": "achats_stock_date",
+   "label": "Date",
    "fieldtype": "Date",
    "read_only": 1
   },
   {
-   "fieldname": "signature_magasin",
-   "label": "Signature Magasin",
+   "fieldname": "signature_achats_stock",
+   "label": "Signature Achats & Stock",
+   "fieldtype": "Signature",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_comptable",
+   "fieldtype": "Column Break",
+   "label": "Service Comptabilité"
+  },
+  {
+   "fieldname": "comptable_nom",
+   "label": "Nom — Service Comptabilité",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "comptable_date",
+   "label": "Date",
+   "fieldtype": "Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "signature_comptable",
+   "label": "Signature Comptabilité",
+   "fieldtype": "Signature",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_audit_ent",
+   "fieldtype": "Column Break",
+   "label": "Audit Interne"
+  },
+  {
+   "fieldname": "audit_nom",
+   "label": "Nom — Audit Interne",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "audit_date",
+   "label": "Date",
+   "fieldtype": "Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "signature_audit",
+   "label": "Signature Audit Interne",
    "fieldtype": "Signature",
    "read_only": 1
   },
@@ -150,7 +197,7 @@
    "fieldname": "statut",
    "label": "Statut",
    "fieldtype": "Select",
-   "options": "Brouillon\nEn attente Magasin\nApprouvé\nRejeté",
+   "options": "Brouillon\nEn attente Achats & Stock\nEn attente Comptable\nEn attente Audit\nApprouvé\nRejeté",
    "default": "Brouillon",
    "in_list_view": 1,
    "in_standard_filter": 1,

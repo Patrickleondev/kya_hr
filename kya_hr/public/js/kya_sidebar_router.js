@@ -45,6 +45,7 @@
 
         'PV Sortie Materiel': 'Espace Stock',
         'PV Entree Materiel': 'Espace Stock',
+        'Retour Materiel KYA': 'Espace Stock',
         'Item': 'Espace Stock',
 
         'Brouillard Caisse': 'Espace Comptabilité',
@@ -93,25 +94,66 @@
     }
 
     function hide_matching_links(terms) {
+        // Sélecteurs Frappe v14/v15/v16 — du plus spécifique au plus large
         const selectors = [
             '.standard-sidebar-item',
             '.desk-sidebar-item',
             '.sidebar-item',
             '.workspace-sidebar-item',
+            '.workspace-link',
+            '.module-link',
             '.app-icon',
             '.desktop-icon',
-            '.module-link',
-            'a[href]',
+            'li.sidebar-item',
+            '.sidebar-menu-item',
         ];
+
+        // 1. Cacher les conteneurs de sidebar items (méthode robuste)
         document.querySelectorAll(selectors.join(',')).forEach(el => {
             const text = (el.textContent || '').trim().toLowerCase();
-            const href = (el.getAttribute && (el.getAttribute('href') || '').toLowerCase()) || '';
-            const title = (el.getAttribute && (el.getAttribute('title') || '').toLowerCase()) || '';
-            if (terms.some(term => text.includes(term) || href.includes(term) || title.includes(term))) {
+            const href = (el.querySelector('a') || {}).href || '';
+            const hrefLower = href.toLowerCase();
+            if (terms.some(term => text.startsWith(term) || text.includes(term) || hrefLower.includes(term.replace(/\s/g, '-')))) {
                 el.style.display = 'none';
                 el.setAttribute('aria-hidden', 'true');
+                // Cacher aussi le parent <li> si présent
+                if (el.parentElement && el.parentElement.tagName === 'LI') {
+                    el.parentElement.style.display = 'none';
+                }
             }
         });
+
+        // 2. Cacher les liens directs correspondants
+        document.querySelectorAll('a[href]').forEach(el => {
+            const href = (el.getAttribute('href') || '').toLowerCase();
+            const text = (el.textContent || '').trim().toLowerCase();
+            if (terms.some(term => href.includes(term.replace(/\s/g, '-')) || text === term)) {
+                const parent = el.closest('.standard-sidebar-item, .sidebar-item, .workspace-sidebar-item, li') || el;
+                parent.style.display = 'none';
+                parent.setAttribute('aria-hidden', 'true');
+            }
+        });
+    }
+
+    // Injection CSS permanente pour les espaces strictement restreints
+    // (fallback si le JS masquage arrive trop tard)
+    function inject_restriction_css() {
+        if (document.getElementById('kya-sidebar-restrictions')) return;
+        const user_roles = (window.frappe && frappe.user_roles) || [];
+        const stagiaire_roles = STAGIAIRE_WORKSPACE_ROLES;
+        const can_stagiaire = stagiaire_roles.some(r => user_roles.includes(r));
+        if (can_stagiaire) return; // a le droit, pas besoin de cacher
+
+        const style = document.createElement('style');
+        style.id = 'kya-sidebar-restrictions';
+        // Cacher tout item de sidebar dont le lien ou le texte correspond
+        style.textContent = [
+            'a[href*="espace-stagiaires"]',
+            'a[href*="espace_stagiaires"]',
+            '.standard-sidebar-item:has(a[href*="stagiaire"])',
+            '.sidebar-item:has(a[href*="stagiaire"])',
+        ].join(',') + ' { display: none !important; }';
+        document.head.appendChild(style);
     }
 
     function hide_restricted_workspace_links() {
@@ -150,10 +192,12 @@
     }
 
     function schedule_force_sidebar() {
+        inject_restriction_css();
         hide_restricted_workspace_links();
         setTimeout(force_sidebar, 120);
         setTimeout(force_sidebar, 350);
         setTimeout(hide_restricted_workspace_links, 450);
+        setTimeout(hide_restricted_workspace_links, 900);
     }
 
     if (window.frappe && frappe.router) {
@@ -161,9 +205,13 @@
     }
 
     $(document).on('form-refresh page-change list-refresh', schedule_force_sidebar);
-    $(document).ready(schedule_force_sidebar);
+    $(document).ready(function() {
+        inject_restriction_css();
+        schedule_force_sidebar();
+    });
     if (document.body) {
-        new MutationObserver(hide_restricted_workspace_links)
-            .observe(document.body, { childList: true, subtree: true });
+        new MutationObserver(function() {
+            hide_restricted_workspace_links();
+        }).observe(document.body, { childList: true, subtree: true });
     }
 })();

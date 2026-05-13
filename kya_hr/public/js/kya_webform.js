@@ -13,7 +13,8 @@
     "demande-achat", "pv-sortie-materiel",
     "planning-conge", "bilan-fin-de-stage",
     "appel-offre", "bon-commande", "demande-conge",
-    "pv-entree-materiel", "etat-recap", "brouillard-caisse"
+    "pv-entree-materiel", "etat-recap", "brouillard-caisse",
+    "retour-materiel"
   ];
   var path = window.location.pathname.replace(/^\//, "").replace(/\/$/, "");
   if (KYA_WF_ROUTES.indexOf(path) !== -1) {
@@ -247,20 +248,49 @@
     ],
     "pv-entree-materiel": [
       {
-        title: "INFORMATIONS DE L\u2019ENTR\u00c9E",
+        title: "INFORMATIONS DE LA R\u00c9CEPTION",
         icon: "\u{1F4E5}",
-        fields: ["date_entree", "fournisseur", "reference_bl"],
-        grid: { date_entree: "col", fournisseur: "col", reference_bl: "span 2" }
+        fields: ["date_entree", "fournisseur", "fournisseur_libre", "project", "customer", "customer_libre"],
+        grid: {
+          date_entree: "col", fournisseur: "col",
+          fournisseur_libre: "span 2",
+          project: "col", customer: "col",
+          customer_libre: "span 2"
+        }
       },
       {
-        title: "LISTE DU MAT\u00c9RIEL RE\u00c7U",
+        title: "ARTICLES RE\u00c7US",
         icon: "\u{1F4E6}",
         fields: ["items"]
       },
       {
         title: "VALIDATIONS & SIGNATURES",
         icon: "\u270D\uFE0F",
-        fields: ["signature_livreur", "signature_magasin", "signature_audit"],
+        fields: ["signature_achats_stock", "signature_comptable", "signature_audit"],
+        sigGrid: true
+      }
+    ],
+    "retour-materiel": [
+      {
+        title: "INFORMATIONS DU RETOUR",
+        icon: "\u{1F4E6}",
+        fields: ["pv_sortie_origine", "date_retour", "objet", "project", "customer", "customer_libre"],
+        grid: {
+          pv_sortie_origine: "span 2",
+          date_retour: "col", objet: "span 2",
+          project: "col", customer: "col",
+          customer_libre: "span 2"
+        }
+      },
+      {
+        title: "MAT\u00c9RIELS RETOURN\u00c9S",
+        icon: "\u{1F4CB}",
+        fields: ["items"]
+      },
+      {
+        title: "VALIDATIONS & SIGNATURES",
+        icon: "\u270D\uFE0F",
+        fields: ["signature_retourneur", "signature_magasin"],
         sigGrid: true
       }
     ],
@@ -374,9 +404,14 @@
       workflow: "Caissier \u2192 Comptable \u2192 Responsable Comptable"
     },
     "pv-entree-materiel": {
-      title: "PV D\u2019ENTR\u00c9E DE MAT\u00c9RIEL",
-      subtitle: "Achat et Stock",
-      workflow: "Livreur \u2192 Magasin \u2192 Audit"
+      title: "PV DE R\u00c9CEPTION DE MAT\u00c9RIELS",
+      subtitle: "Achats & Stock \u2014 AEA-ENG-32-V01",
+      workflow: "Achats & Stock \u2192 Comptabilit\u00e9 \u2192 Audit Interne"
+    },
+    "retour-materiel": {
+      title: "RETOUR DE MAT\u00c9RIEL AU MAGASIN",
+      subtitle: "Achats et Stock",
+      workflow: "Retourneur \u2192 Responsable Magasin"
     }
   };
 
@@ -414,9 +449,13 @@
       signature_dg_la: ["Directeur Général", "System Manager"]
     },
     "pv-entree-materiel": {
-      signature_livreur: null,
-      signature_magasin: ["Stock Manager", "Stock User", "Chargé des Stocks", "System Manager"],
-      signature_audit: ["Auditeur Interne", "DGA", "System Manager"]
+      signature_achats_stock: ["Stock Manager", "Stock User", "Chargé des Stocks", "Responsable Achats", "Purchase Manager", "System Manager"],
+      signature_comptable: ["Responsable Comptable", "Accounts Manager", "Accounts User", "System Manager"],
+      signature_audit: ["Auditeur Interne", "System Manager"]
+    },
+    "retour-materiel": {
+      signature_retourneur: null,
+      signature_magasin: ["Stock Manager", "Stock User", "Chargé des Stocks", "System Manager"]
     },
     "etat-recap": {
       signature_redacteur: null,
@@ -464,9 +503,24 @@
       signature_dg_la: ["En attente DG"]
     },
     "pv-entree-materiel": {
-      signature_livreur: ["Brouillon", "En attente Magasin"],
-      signature_magasin: ["En attente Magasin"],
+      signature_achats_stock: ["En attente Achats & Stock"],
+      signature_comptable: ["En attente Comptable"],
       signature_audit: ["En attente Audit"]
+    },
+    "retour-materiel": {
+      signature_retourneur: ["Brouillon", "En attente Magasin"],
+      signature_magasin: ["En attente Magasin"]
+    },
+    "etat-recap": {
+      signature_redacteur: ["Brouillon", "En attente DFC", "En attente DG"],
+      signature_dfc: ["En attente DFC"],
+      signature_dg: ["En attente DG"],
+      signature_dga: ["En attente DGA"]
+    },
+    "brouillard-caisse": {
+      signature_caissiere: ["Brouillon", "En attente Comptable"],
+      signature_comptable: ["En attente Comptable"],
+      signature_dfc: ["En attente DFC"]
     }
   };
 
@@ -755,16 +809,18 @@
       document.querySelector(".frappe-form");
     if (!formBody) return;
 
-    // Si un wrapper KYA existe déjà, vérifier qu'il contient vraiment des champs.
-    // Sinon (rendu trop tôt avant que Frappe ait monté les .frappe-control),
-    // on retire le wrapper vide pour permettre un rebuild propre.
+    // Vérifier si le wrapper existe et contient SUFFISAMMENT de champs attendus.
+    // Un wrapper construit trop tôt peut n'avoir qu'une fraction des champs
+    // (les Link fields et Tables se montent après les Data fields simples).
     var existingWrapper = formBody.querySelector(".kya-sections-wrapper");
     if (existingWrapper) {
-      var hasContent =
-        existingWrapper.querySelector(".kya-section-body .frappe-control") ||
-        existingWrapper.querySelector(".kya-section-body [data-fieldname]");
-      if (hasContent) return; // déjà construit correctement
-      existingWrapper.remove();
+      var _allExp = [];
+      sections.forEach(function(s) { s.fields.forEach(function(f) { _allExp.push(f); }); });
+      var _inWrapper = _allExp.filter(function(fn) {
+        return existingWrapper.querySelector('[data-fieldname="' + fn + '"]');
+      }).length;
+      if (_inWrapper >= Math.max(2, Math.ceil(_allExp.length * 0.55))) return; // OK
+      existingWrapper.remove(); // reconstruit avec plus de champs disponibles
     }
 
     /* cleanup old headers */
@@ -1026,22 +1082,71 @@
   function waitForForm() {
     var route = getRoute();
     if (!FORM_SECTIONS[route] && !FORM_META[route]) return;
-    var formReady = document.querySelector(".frappe-control") || document.querySelector("[data-fieldname]");
-    if (formReady) { restructureForm(); setupEmployeeAutoFill(); setTimeout(normalizeSignaturePads, 700); return; }
-    var obs = new MutationObserver(function (m, observer) {
-      if (document.querySelector(".frappe-control") || document.querySelector("[data-fieldname]")) {
-        observer.disconnect();
-          setTimeout(function () { restructureForm(); setupEmployeeAutoFill(); normalizeSignaturePads(); }, 300);
-      }
+
+    // Construire la liste de tous les champs attendus pour ce formulaire
+    var sections = FORM_SECTIONS[route] || [];
+    var expectedFields = [];
+    sections.forEach(function(sec) {
+      sec.fields.forEach(function(fn) { expectedFields.push(fn); });
     });
-    obs.observe(document.body, { childList: true, subtree: true });
-    setTimeout(function () { if (!document.querySelector(".kya-form-section")) { restructureForm(); setupEmployeeAutoFill(); } }, 2000);
-    setTimeout(function () { obs.disconnect(); if (!document.querySelector(".kya-form-section")) { restructureForm(); setupEmployeeAutoFill(); } }, 5000);
+    // Seuil : 55% des champs présents dans le DOM avant de construire le wrapper
+    var minRequired = Math.max(2, Math.ceil(expectedFields.length * 0.55));
+
+    function countReady() {
+      return expectedFields.filter(function(fn) { return !!findFieldEl(fn); }).length;
+    }
+
+    function alreadyBuiltCorrectly() {
+      var w = document.querySelector(".kya-sections-wrapper");
+      if (!w) return false;
+      var found = expectedFields.filter(function(fn) {
+        return w.querySelector('[data-fieldname="' + fn + '"]');
+      }).length;
+      return found >= Math.max(2, Math.ceil(expectedFields.length * 0.55));
+    }
+
+    function tryBuild() {
+      if (alreadyBuiltCorrectly()) return true;
+      if (countReady() >= minRequired) {
+        restructureForm();
+        setupEmployeeAutoFill();
+        setTimeout(normalizeSignaturePads, 700);
+        return true;
+      }
+      return false;
+    }
+
+    if (tryBuild()) return;
+
+    // Polling toutes les 350ms jusqu'à 10s — couvre les Link fields et Tables
+    // qui se montent après les champs Data simples
+    var attempts = 0;
+    var timer = setInterval(function() {
+      attempts++;
+      if (tryBuild() || attempts >= 28) clearInterval(timer);
+    }, 350);
   }
 
   window.kyaRestructureForm = function () { restructureForm(); setupEmployeeAutoFill(); normalizeSignaturePads(); };
-  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", function() { waitForForm(); setupAdminPreviewButton(); }); }
-  else { waitForForm(); setupAdminPreviewButton(); }
-  if (window.frappe && window.frappe.ready) { frappe.ready(function () { setTimeout(function() { waitForForm(); setupAdminPreviewButton(); }, 300); }); }
-  if (window.frappe && window.frappe.router) { document.addEventListener("page-change", function () { setTimeout(waitForForm, 500); }); }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function() { waitForForm(); setupAdminPreviewButton(); });
+  } else {
+    waitForForm(); setupAdminPreviewButton();
+  }
+  if (window.frappe && window.frappe.ready) {
+    frappe.ready(function () { setTimeout(waitForForm, 200); });
+  }
+  // Ré-initialiser à chaque navigation SPA
+  if (window.frappe && window.frappe.router) {
+    document.addEventListener("page-change", function () { setTimeout(waitForForm, 300); });
+  }
+  // Sécurité : si after_load du web form déclenche après notre polling
+  document.addEventListener("frappe:web_form_loaded", function() { setTimeout(waitForForm, 100); });
+  if (window.frappe && frappe.web_form) {
+    var _origAfterLoad = frappe.web_form.after_load;
+    frappe.web_form.after_load = function() {
+      if (_origAfterLoad) _origAfterLoad.apply(this, arguments);
+      setTimeout(waitForForm, 150);
+    };
+  }
 })();

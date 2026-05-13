@@ -33,6 +33,18 @@ fixtures = [
     {"dt": "Letter Head"},
     {"dt": "Employment Type", "filters": [["name", "in", ["CDI", "CDD", "Stage", "Prestataire"]]]},
     {"dt": "KYA Contract Template"},
+    # Groupes fournisseurs KYA (base de données fournisseurs par catégorie)
+    {"dt": "Supplier Group", "filters": [["name", "in", [
+        "Modules PV", "Batteries & Energie", "Onduleurs",
+        "Cables & Electricite", "Pneumatiques",
+        "Materiel de Plomberie", "Barres Metalliques", "Divers KYA"
+    ]]]},
+    # Fournisseurs réels KYA (base de données BGD-ENG-03-V01)
+    {"dt": "Supplier", "filters": [["supplier_group", "in", [
+        "Modules PV", "Batteries & Energie", "Onduleurs",
+        "Cables & Electricite", "Pneumatiques",
+        "Materiel de Plomberie", "Barres Metalliques", "Divers KYA"
+    ]]]},
 ]
 
 # DocType client scripts
@@ -116,6 +128,14 @@ doc_events = {
     },
     # PV et Bilan : pas de chef_routing (employee_field suffit)
     "PV Sortie Materiel": {
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_update": "kya_hr.email_notifications.send_workflow_update",
+    },
+    "PV Entree Materiel": {
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_update": "kya_hr.email_notifications.send_workflow_update",
+    },
+    "Retour Materiel KYA": {
         "after_insert": "kya_hr.email_notifications.send_submission_recap",
         "on_update": "kya_hr.email_notifications.send_workflow_update",
     },

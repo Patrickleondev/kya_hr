@@ -1,0 +1,20 @@
+[
+  {"doctype":"Supplier","name":"Jinko Solar","supplier_name":"Jinko Solar","supplier_group":"Modules PV","supplier_type":"Company","country":"China","mobile_no":"+27(0)747045606","email_id":"megan.johnson@jinkosolar.com"},
+  {"doctype":"Supplier","name":"HITECH","supplier_name":"HITECH","supplier_group":"Batteries & Energie","supplier_type":"Company"},
+  {"doctype":"Supplier","name":"Voltronic Power","supplier_name":"Voltronic Power","supplier_group":"Batteries & Energie","supplier_type":"Company","country":"Taiwan","mobile_no":"+886-2-27918296","email_id":"alicetseng@voltronic.com.tw"},
+  {"doctype":"Supplier","name":"BAE","supplier_name":"BAE","supplier_group":"Batteries & Energie","supplier_type":"Company","country":"Germany","mobile_no":"+49-30-53001-673"},
+  {"doctype":"Supplier","name":"Energie Douce","supplier_name":"Energie Douce","supplier_group":"Batteries & Energie","supplier_type":"Company","country":"France","mobile_no":"+33(0)130259530"},
+  {"doctype":"Supplier","name":"ECO SMART INDUSTRY","supplier_name":"ECO SMART INDUSTRY","supplier_group":"Onduleurs","supplier_type":"Company","country":"Togo","mobile_no":"+228 90 06 30 17"},
+  {"doctype":"Supplier","name":"AHATEFOU TEKO","supplier_name":"AHATEFOU TEKO","supplier_group":"Onduleurs","supplier_type":"Company","country":"Togo","mobile_no":"+228 91 32 31 30"},
+  {"doctype":"Supplier","name":"Entech SE SAS","supplier_name":"Entech SE SAS","supplier_group":"Cables & Electricite","supplier_type":"Company","country":"France","mobile_no":"+02 98 94 44 48"},
+  {"doctype":"Supplier","name":"Ets BOCCOVI","supplier_name":"Ets BOCCOVI","supplier_group":"Pneumatiques","supplier_type":"Company","country":"Togo","mobile_no":"+228 90 12 59 16"},
+  {"doctype":"Supplier","name":"AMERICAIN","supplier_name":"AMERICAIN","supplier_group":"Pneumatiques","supplier_type":"Company","country":"Togo","mobile_no":"+228 90 10 57 56"},
+  {"doctype":"Supplier","name":"ZOUBEYROU","supplier_name":"ZOUBEYROU","supplier_group":"Pneumatiques","supplier_type":"Company","country":"Togo","mobile_no":"+228 92 87 67 02"},
+  {"doctype":"Supplier","name":"CCT","supplier_name":"CCT","supplier_group":"Materiel de Plomberie","supplier_type":"Company","country":"Togo","mobile_no":"+228 22 21 57 63"},
+  {"doctype":"Supplier","name":"PUISSANTE MAIN DE DIEU","supplier_name":"PUISSANTE MAIN DE DIEU","supplier_group":"Materiel de Plomberie","supplier_type":"Company","country":"Togo","mobile_no":"+228 90 10 97 75"},
+  {"doctype":"Supplier","name":"MA.CO.DI","supplier_name":"MA.CO.DI","supplier_group":"Materiel de Plomberie","supplier_type":"Company","country":"Togo","mobile_no":"+228 22 25 24 70"},
+  {"doctype":"Supplier","name":"LES FRERES COUSINS","supplier_name":"LES FRERES COUSINS","supplier_group":"Barres Metalliques","supplier_type":"Company","country":"Togo","mobile_no":"+228 22 22 81 90"},
+  {"doctype":"Supplier","name":"MONICO","supplier_name":"MONICO","supplier_group":"Barres Metalliques","supplier_type":"Company","country":"Togo","mobile_no":"+228 22 21 81 24"},
+  {"doctype":"Supplier","name":"MAFIS","supplier_name":"MAFIS","supplier_group":"Barres Metalliques","supplier_type":"Company","country":"Togo","mobile_no":"+228 90 91 75 19"},
+  {"doctype":"Supplier","name":"DONSEN","supplier_name":"DONSEN","supplier_group":"Barres Metalliques","supplier_type":"Company","country":"Togo","mobile_no":"+228 90 73 68 88"}
+]

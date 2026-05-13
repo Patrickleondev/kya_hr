@@ -1,0 +1,61 @@
+{
+ "name": "Retour Materiel KYA Item",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "istable": 1,
+ "custom": 1,
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "label": "Article",
+   "fieldtype": "Link",
+   "options": "Item",
+   "in_list_view": 1,
+   "columns": 3,
+   "search_index": 1
+  },
+  {
+   "fieldname": "designation",
+   "label": "Désignation",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "columns": 3,
+   "fetch_from": "item_code.item_name",
+   "fetch_if_empty": 1
+  },
+  {
+   "fieldname": "uom",
+   "label": "Unité",
+   "fieldtype": "Link",
+   "options": "UOM",
+   "in_list_view": 1,
+   "columns": 1,
+   "fetch_from": "item_code.stock_uom",
+   "fetch_if_empty": 1
+  },
+  {
+   "fieldname": "qte_retournee",
+   "label": "Qté Retournée",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "columns": 2,
+   "reqd": 1
+  },
+  {
+   "fieldname": "warehouse",
+   "label": "Magasin destination",
+   "fieldtype": "Link",
+   "options": "Warehouse",
+   "in_list_view": 1,
+   "columns": 3
+  },
+  {
+   "fieldname": "observations",
+   "label": "Observations",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "columns": 3
+  }
+ ],
+ "permissions": []
+}
