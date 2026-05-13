@@ -467,6 +467,17 @@
       signature_livreur: ["Brouillon", "En attente Magasin"],
       signature_magasin: ["En attente Magasin"],
       signature_audit: ["En attente Audit"]
+    },
+    "etat-recap": {
+      signature_redacteur: ["Brouillon", "En attente DFC", "En attente DG"],
+      signature_dfc: ["En attente DFC"],
+      signature_dg: ["En attente DG"],
+      signature_dga: ["En attente DGA"]
+    },
+    "brouillard-caisse": {
+      signature_caissiere: ["Brouillon", "En attente Comptable"],
+      signature_comptable: ["En attente Comptable"],
+      signature_dfc: ["En attente DFC"]
     }
   };
 
@@ -755,16 +766,18 @@
       document.querySelector(".frappe-form");
     if (!formBody) return;
 
-    // Si un wrapper KYA existe déjà, vérifier qu'il contient vraiment des champs.
-    // Sinon (rendu trop tôt avant que Frappe ait monté les .frappe-control),
-    // on retire le wrapper vide pour permettre un rebuild propre.
+    // Vérifier si le wrapper existe et contient SUFFISAMMENT de champs attendus.
+    // Un wrapper construit trop tôt peut n'avoir qu'une fraction des champs
+    // (les Link fields et Tables se montent après les Data fields simples).
     var existingWrapper = formBody.querySelector(".kya-sections-wrapper");
     if (existingWrapper) {
-      var hasContent =
-        existingWrapper.querySelector(".kya-section-body .frappe-control") ||
-        existingWrapper.querySelector(".kya-section-body [data-fieldname]");
-      if (hasContent) return; // déjà construit correctement
-      existingWrapper.remove();
+      var _allExp = [];
+      sections.forEach(function(s) { s.fields.forEach(function(f) { _allExp.push(f); }); });
+      var _inWrapper = _allExp.filter(function(fn) {
+        return existingWrapper.querySelector('[data-fieldname="' + fn + '"]');
+      }).length;
+      if (_inWrapper >= Math.max(2, Math.ceil(_allExp.length * 0.55))) return; // OK
+      existingWrapper.remove(); // reconstruit avec plus de champs disponibles
     }
 
     /* cleanup old headers */
@@ -1026,22 +1039,71 @@
   function waitForForm() {
     var route = getRoute();
     if (!FORM_SECTIONS[route] && !FORM_META[route]) return;
-    var formReady = document.querySelector(".frappe-control") || document.querySelector("[data-fieldname]");
-    if (formReady) { restructureForm(); setupEmployeeAutoFill(); setTimeout(normalizeSignaturePads, 700); return; }
-    var obs = new MutationObserver(function (m, observer) {
-      if (document.querySelector(".frappe-control") || document.querySelector("[data-fieldname]")) {
-        observer.disconnect();
-          setTimeout(function () { restructureForm(); setupEmployeeAutoFill(); normalizeSignaturePads(); }, 300);
-      }
+
+    // Construire la liste de tous les champs attendus pour ce formulaire
+    var sections = FORM_SECTIONS[route] || [];
+    var expectedFields = [];
+    sections.forEach(function(sec) {
+      sec.fields.forEach(function(fn) { expectedFields.push(fn); });
     });
-    obs.observe(document.body, { childList: true, subtree: true });
-    setTimeout(function () { if (!document.querySelector(".kya-form-section")) { restructureForm(); setupEmployeeAutoFill(); } }, 2000);
-    setTimeout(function () { obs.disconnect(); if (!document.querySelector(".kya-form-section")) { restructureForm(); setupEmployeeAutoFill(); } }, 5000);
+    // Seuil : 55% des champs présents dans le DOM avant de construire le wrapper
+    var minRequired = Math.max(2, Math.ceil(expectedFields.length * 0.55));
+
+    function countReady() {
+      return expectedFields.filter(function(fn) { return !!findFieldEl(fn); }).length;
+    }
+
+    function alreadyBuiltCorrectly() {
+      var w = document.querySelector(".kya-sections-wrapper");
+      if (!w) return false;
+      var found = expectedFields.filter(function(fn) {
+        return w.querySelector('[data-fieldname="' + fn + '"]');
+      }).length;
+      return found >= Math.max(2, Math.ceil(expectedFields.length * 0.55));
+    }
+
+    function tryBuild() {
+      if (alreadyBuiltCorrectly()) return true;
+      if (countReady() >= minRequired) {
+        restructureForm();
+        setupEmployeeAutoFill();
+        setTimeout(normalizeSignaturePads, 700);
+        return true;
+      }
+      return false;
+    }
+
+    if (tryBuild()) return;
+
+    // Polling toutes les 350ms jusqu'à 10s — couvre les Link fields et Tables
+    // qui se montent après les champs Data simples
+    var attempts = 0;
+    var timer = setInterval(function() {
+      attempts++;
+      if (tryBuild() || attempts >= 28) clearInterval(timer);
+    }, 350);
   }
 
   window.kyaRestructureForm = function () { restructureForm(); setupEmployeeAutoFill(); normalizeSignaturePads(); };
-  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", function() { waitForForm(); setupAdminPreviewButton(); }); }
-  else { waitForForm(); setupAdminPreviewButton(); }
-  if (window.frappe && window.frappe.ready) { frappe.ready(function () { setTimeout(function() { waitForForm(); setupAdminPreviewButton(); }, 300); }); }
-  if (window.frappe && window.frappe.router) { document.addEventListener("page-change", function () { setTimeout(waitForForm, 500); }); }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function() { waitForForm(); setupAdminPreviewButton(); });
+  } else {
+    waitForForm(); setupAdminPreviewButton();
+  }
+  if (window.frappe && window.frappe.ready) {
+    frappe.ready(function () { setTimeout(waitForForm, 200); });
+  }
+  // Ré-initialiser à chaque navigation SPA
+  if (window.frappe && window.frappe.router) {
+    document.addEventListener("page-change", function () { setTimeout(waitForForm, 300); });
+  }
+  // Sécurité : si after_load du web form déclenche après notre polling
+  document.addEventListener("frappe:web_form_loaded", function() { setTimeout(waitForForm, 100); });
+  if (window.frappe && frappe.web_form) {
+    var _origAfterLoad = frappe.web_form.after_load;
+    frappe.web_form.after_load = function() {
+      if (_origAfterLoad) _origAfterLoad.apply(this, arguments);
+      setTimeout(waitForForm, 150);
+    };
+  }
 })();
