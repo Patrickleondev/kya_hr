@@ -118,12 +118,14 @@ def _seed_suppliers():
 
 
 def _add_workspace_shortcuts():
+    """Insère les raccourcis directement via SQL pour éviter les validations
+    de Frappe v16 sur les shortcuts existants potentiellement invalides."""
+    import json as _json
     added = 0
     for sc in STOCK_SHORTCUTS:
         ws_name = sc["workspace"]
         if not frappe.db.exists("Workspace", ws_name):
             continue
-        # Check if shortcut already exists (by label + parent workspace)
         existing = frappe.db.get_value(
             "Workspace Shortcut",
             {"label": sc["label"], "parent": ws_name},
@@ -131,17 +133,27 @@ def _add_workspace_shortcuts():
         )
         if existing:
             continue
-        ws = frappe.get_doc("Workspace", ws_name)
-        ws.append("shortcuts", {
-            "label": sc["label"],
-            "type": sc["type"],
-            "url": sc["url"],
-            "color": sc.get("color", "#333"),
-            "format": sc.get("format", "Icon"),
-        })
-        ws.flags.ignore_links = True
-        ws.save(ignore_permissions=True)
-        added += 1
+        try:
+            name = frappe.generate_hash(length=10)
+            frappe.db.sql("""
+                INSERT INTO `tabWorkspace Shortcut`
+                  (name, parent, parenttype, parentfield, idx, label, type, url, color, `format`, modified, creation, owner, docstatus)
+                VALUES
+                  (%(name)s, %(parent)s, 'Workspace', 'shortcuts',
+                   COALESCE((SELECT MAX(idx)+1 FROM `tabWorkspace Shortcut` ws2 WHERE ws2.parent=%(parent)s), 1),
+                   %(label)s, 'URL', %(url)s, %(color)s, %(format)s,
+                   NOW(), NOW(), 'Administrator', 0)
+            """, {
+                "name": name,
+                "parent": ws_name,
+                "label": sc["label"],
+                "url": sc["url"],
+                "color": sc.get("color", "#333"),
+                "format": sc.get("format", "Icon"),
+            })
+            added += 1
+        except Exception as e:
+            print(f"  [Workspace Shortcuts] Skipped {ws_name}/{sc['label']}: {e}")
     print(f"  [Workspace Shortcuts] {added} raccourci(s) ajouté(s)")
 
 
