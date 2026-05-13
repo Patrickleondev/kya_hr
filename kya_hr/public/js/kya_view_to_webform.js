@@ -66,6 +66,10 @@
     if (!slug || !docname) return null;
     if (RESERVED.has(docname.toLowerCase())) return null;
 
+    if (slug === "leave-application" && docname.toLowerCase() !== "new") {
+      return null;
+    }
+
     const route = WEBFORM_VIEW_MAP[slug];
     if (!route) return null;
 
