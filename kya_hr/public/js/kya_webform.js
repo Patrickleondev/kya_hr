@@ -259,14 +259,14 @@
         }
       },
       {
-        title: "LISTE DU MAT\u00c9RIEL RE\u00c7U",
+        title: "ARTICLES RE\u00c7US",
         icon: "\u{1F4E6}",
         fields: ["items"]
       },
       {
         title: "VALIDATIONS & SIGNATURES",
         icon: "\u270D\uFE0F",
-        fields: ["signature_livreur", "signature_magasin", "signature_comptable", "signature_audit"],
+        fields: ["signature_achats_stock", "signature_comptable", "signature_audit"],
         sigGrid: true
       }
     ],
@@ -405,8 +405,8 @@
     },
     "pv-entree-materiel": {
       title: "PV DE R\u00c9CEPTION DE MAT\u00c9RIELS",
-      subtitle: "Achats et Stock",
-      workflow: "Livreur \u2192 Magasin \u2192 Comptabilit\u00e9 \u2192 Audit Interne"
+      subtitle: "Achats & Stock \u2014 AEA-ENG-32-V01",
+      workflow: "Achats & Stock \u2192 Comptabilit\u00e9 \u2192 Audit Interne"
     },
     "retour-materiel": {
       title: "RETOUR DE MAT\u00c9RIEL AU MAGASIN",
@@ -449,8 +449,7 @@
       signature_dg_la: ["Directeur Général", "System Manager"]
     },
     "pv-entree-materiel": {
-      signature_livreur: null,
-      signature_magasin: ["Stock Manager", "Stock User", "Chargé des Stocks", "System Manager"],
+      signature_achats_stock: ["Stock Manager", "Stock User", "Chargé des Stocks", "Responsable Achats", "Purchase Manager", "System Manager"],
       signature_comptable: ["Responsable Comptable", "Accounts Manager", "Accounts User", "System Manager"],
       signature_audit: ["Auditeur Interne", "System Manager"]
     },
@@ -504,8 +503,7 @@
       signature_dg_la: ["En attente DG"]
     },
     "pv-entree-materiel": {
-      signature_livreur: ["Brouillon", "En attente Magasin"],
-      signature_magasin: ["En attente Magasin"],
+      signature_achats_stock: ["En attente Achats & Stock"],
       signature_comptable: ["En attente Comptable"],
       signature_audit: ["En attente Audit"]
     },

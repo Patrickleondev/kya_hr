@@ -1055,11 +1055,11 @@
     "send_email": 0
    },
    {
-    "state": "En attente Magasin",
+    "state": "En attente Achats & Stock",
     "doc_status": "0",
     "allow_edit": "Chargé des Stocks",
     "update_field": "statut",
-    "update_value": "En attente Magasin",
+    "update_value": "En attente Achats & Stock",
     "is_optional_state": 0,
     "send_email": 1
    },
@@ -1103,30 +1103,46 @@
   "transitions": [
    {
     "state": "Brouillon",
-    "action": "Envoyer au Magasin",
-    "next_state": "En attente Magasin",
+    "action": "Déclarer la Réception",
+    "next_state": "En attente Achats & Stock",
     "allowed": "Employee",
     "allow_self_approval": 1,
     "condition": null
    },
    {
-    "state": "En attente Magasin",
-    "action": "Réceptionner",
+    "state": "En attente Achats & Stock",
+    "action": "Valider Réception Stock",
     "next_state": "En attente Comptable",
     "allowed": "Chargé des Stocks",
     "allow_self_approval": 0,
     "condition": null
    },
    {
-    "state": "En attente Magasin",
-    "action": "Réceptionner",
+    "state": "En attente Achats & Stock",
+    "action": "Valider Réception Stock",
     "next_state": "En attente Comptable",
-    "allowed": "Responsable Stock",
+    "allowed": "Responsable Achats",
     "allow_self_approval": 0,
     "condition": null
    },
    {
-    "state": "En attente Magasin",
+    "state": "En attente Achats & Stock",
+    "action": "Valider Réception Stock",
+    "next_state": "En attente Comptable",
+    "allowed": "Stock Manager",
+    "allow_self_approval": 0,
+    "condition": null
+   },
+   {
+    "state": "En attente Achats & Stock",
+    "action": "Valider Réception Stock",
+    "next_state": "En attente Comptable",
+    "allowed": "System Manager",
+    "allow_self_approval": 0,
+    "condition": null
+   },
+   {
+    "state": "En attente Achats & Stock",
     "action": "Rejeter",
     "next_state": "Rejeté",
     "allowed": "Chargé des Stocks",
@@ -1146,6 +1162,14 @@
     "action": "Valider Comptabilité",
     "next_state": "En attente Audit",
     "allowed": "Accounts Manager",
+    "allow_self_approval": 0,
+    "condition": null
+   },
+   {
+    "state": "En attente Comptable",
+    "action": "Valider Comptabilité",
+    "next_state": "En attente Audit",
+    "allowed": "System Manager",
     "allow_self_approval": 0,
     "condition": null
    },

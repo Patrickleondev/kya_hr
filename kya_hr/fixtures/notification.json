@@ -1471,7 +1471,7 @@
   "attach_files": null,
   "attach_print": 0,
   "channel": "Email",
-  "condition": "doc.workflow_state == 'En attente Magasin'",
+  "condition": "doc.workflow_state == 'En attente Achats & Stock'",
   "condition_type": null,
   "date_changed": null,
   "datetime_changed": null,
@@ -1485,22 +1485,21 @@
   "filters": null,
   "from_attach_field": null,
   "is_standard": 0,
-  "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#009688,#00bcd4);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='{{ frappe.utils.get_url() }}/assets/kya_hr/images/kya_logo.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>PV Entrée Matériel</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><p>Bonjour,</p><p>Le PV d'entrée matériel <b>{{ doc.name }}</b> nécessite la validation du magasin.</p><p><b>Objet :</b> {{ doc.objet }}<br><b>Provenance :</b> {{ doc.fournisseur_libre or doc.fournisseur or '' }}</p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url() }}/pv-entree-materiel/{{ doc.name }}' style='display:inline-block;padding:12px 32px;background:#009688;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>Contrôler et signer</a><br><a href='{{ frappe.utils.get_url_to_form(doc.doctype, doc.name) }}' style='display:inline-block;margin-top:10px;padding:8px 20px;background:#f5f5f5;color:#333;text-decoration:none;border-radius:6px;font-size:13px;border:1px solid #ddd;'>Ouvrir dans le Bureau ERPNext</a></div></div>{{ get_kya_email_footer() }}</div>",
+  "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#009688,#00bcd4);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='{{ frappe.utils.get_url() }}/assets/kya_hr/images/kya_logo.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>PV Entrée Matériel</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><p>Bonjour,</p><p>Le PV d'entrée matériel <b>{{ doc.name }}</b> nécessite la validation Achats &amp; Stock.</p><p><b>Objet :</b> {{ doc.objet }}<br><b>Provenance :</b> {{ doc.fournisseur_libre or doc.fournisseur or '' }}</p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url() }}/pv-entree-materiel/{{ doc.name }}' style='display:inline-block;padding:12px 32px;background:#009688;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>Valider Réception Stock</a><br><a href='{{ frappe.utils.get_url_to_form(doc.doctype, doc.name) }}' style='display:inline-block;margin-top:10px;padding:8px 20px;background:#f5f5f5;color:#333;text-decoration:none;border-radius:6px;font-size:13px;border:1px solid #ddd;'>Ouvrir dans le Bureau ERPNext</a></div></div>{{ get_kya_email_footer() }}</div>",
   "message_type": "Jinja",
   "method": null,
   "minutes_offset": 0,
   "modified": "2026-05-07 00:00:00.000000",
   "module": null,
-  "name": "KYA - PV Entrée Matériel: En attente Magasin",
+  "name": "KYA - PV Réception Matériel: En attente Achats & Stock",
   "print_format": null,
   "property_value": null,
   "recipients": [
    {
-    "bcc": null,
-    "cc": null,
-    "condition": null,
-    "receiver_by_document_field": null,
     "receiver_by_role": "Chargé des Stocks"
+   },
+   {
+    "receiver_by_role": "Responsable Achats"
    }
   ],
   "send_system_notification": 0,
@@ -1509,7 +1508,7 @@
   "sender_email": null,
   "set_property_after_alert": null,
   "slack_webhook_url": null,
-  "subject": "PV Entrée Matériel {{ doc.name }} — Validation magasin requise",
+  "subject": "PV Réception {{ doc.name }} — Validation Achats & Stock requise",
   "value_changed": "workflow_state"
  },
  {
@@ -1536,7 +1535,7 @@
   "minutes_offset": 0,
   "modified": "2026-05-07 00:00:00.000000",
   "module": null,
-  "name": "KYA - PV Entrée Matériel: Approuvé",
+  "name": "KYA - PV Réception Matériel: Approuvé",
   "print_format": null,
   "property_value": null,
   "recipients": [
@@ -1554,7 +1553,7 @@
   "sender_email": null,
   "set_property_after_alert": null,
   "slack_webhook_url": null,
-  "subject": "PV Entrée Matériel {{ doc.name }} approuvé",
+  "subject": "PV Réception {{ doc.name }} — Stock mis à jour ✓",
   "value_changed": "workflow_state"
  },
  {
@@ -1581,7 +1580,7 @@
   "minutes_offset": 0,
   "modified": "2026-05-07 00:00:00.000000",
   "module": null,
-  "name": "KYA - PV Entrée Matériel: Rejeté",
+  "name": "KYA - PV Réception Matériel: Rejeté",
   "print_format": null,
   "property_value": null,
   "recipients": [
@@ -1773,7 +1772,7 @@
   "value_changed": null
  },
  {
-  "name": "KYA - PV Entrée Matériel: En attente Comptable",
+  "name": "KYA - PV Réception Matériel: En attente Comptable",
   "doctype": "Notification",
   "is_standard": 0,
   "enabled": 1,
@@ -1793,7 +1792,7 @@
   "modified": "2026-05-13 00:00:00.000000"
  },
  {
-  "name": "KYA - PV Entrée Matériel: En attente Audit",
+  "name": "KYA - PV Réception Matériel: En attente Audit",
   "doctype": "Notification",
   "is_standard": 0,
   "enabled": 1,
