@@ -45,6 +45,7 @@
 
         'PV Sortie Materiel': 'Espace Stock',
         'PV Entree Materiel': 'Espace Stock',
+        'Retour Materiel KYA': 'Espace Stock',
         'Item': 'Espace Stock',
 
         'Brouillard Caisse': 'Espace Comptabilité',

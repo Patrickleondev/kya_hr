@@ -1,0 +1,108 @@
+[
+  {
+    "doctype": "Supplier", "supplier_name": "Jinko Solar",
+    "supplier_group": "Modules PV", "country": "China",
+    "mobile_no": "+27(0)747045606", "email_id": "megan.johnson@jinkosolar.com",
+    "supplier_details": "Jiangxi Province 334100, China"
+  },
+  {
+    "doctype": "Supplier", "supplier_name": "HITECH",
+    "supplier_group": "Batteries & Energie"
+  },
+  {
+    "doctype": "Supplier", "supplier_name": "Voltronic Power",
+    "supplier_group": "Batteries & Energie", "country": "Taiwan",
+    "mobile_no": "+886-2-27918296 Ext. 3235", "email_id": "alicetseng@voltronic.com.tw",
+    "supplier_details": "No. 406, Xinhu 1st Road, Neihu District, Taipei, Taiwan, R.O.C."
+  },
+  {
+    "doctype": "Supplier", "supplier_name": "BAE",
+    "supplier_group": "Batteries & Energie", "country": "Germany",
+    "mobile_no": "+49-30-53001-673",
+    "supplier_details": "Wihhhelminenhofstrabe 69/70, Germany"
+  },
+  {
+    "doctype": "Supplier", "supplier_name": "Energie Douce",
+    "supplier_group": "Batteries & Energie", "country": "France",
+    "mobile_no": "+33(0)130259530",
+    "supplier_details": "21 Rue Meliès Corneilles en Parisis, France"
+  },
+  {
+    "doctype": "Supplier", "supplier_name": "ECO SMART INDUSTRY",
+    "supplier_group": "Onduleurs", "country": "Togo",
+    "mobile_no": "+228 90 06 30 17",
+    "supplier_details": "Lomé, Togo"
+  },
+  {
+    "doctype": "Supplier", "supplier_name": "AHATEFOU TEKO",
+    "supplier_group": "Onduleurs", "country": "Togo",
+    "mobile_no": "+228 91 32 31 30",
+    "supplier_details": "Lomé, Togo"
+  },
+  {
+    "doctype": "Supplier", "supplier_name": "Entech SE SAS",
+    "supplier_group": "Cables & Electricite", "country": "France",
+    "mobile_no": "+02 98 94 44 48",
+    "supplier_details": "69 avenue des sports, 29000 Quimper, France"
+  },
+  {
+    "doctype": "Supplier", "supplier_name": "Ets BOCCOVI",
+    "supplier_group": "Pneumatiques", "country": "Togo",
+    "mobile_no": "+228 90 12 59 16",
+    "supplier_details": "Zorro Bar, Lomé, Togo"
+  },
+  {
+    "doctype": "Supplier", "supplier_name": "AMERICAIN",
+    "supplier_group": "Pneumatiques", "country": "Togo",
+    "mobile_no": "+228 90 10 57 56",
+    "supplier_details": "TP3, Lomé, Togo"
+  },
+  {
+    "doctype": "Supplier", "supplier_name": "ZOUBEYROU",
+    "supplier_group": "Pneumatiques", "country": "Togo",
+    "mobile_no": "+228 92 87 67 02",
+    "supplier_details": "TP3, Lomé, Togo"
+  },
+  {
+    "doctype": "Supplier", "supplier_name": "CCT",
+    "supplier_group": "Materiel de Plomberie", "country": "Togo",
+    "mobile_no": "+228 22 21 57 63",
+    "supplier_details": "Assivito, Lomé, Togo"
+  },
+  {
+    "doctype": "Supplier", "supplier_name": "PUISSANTE MAIN DE DIEU",
+    "supplier_group": "Materiel de Plomberie", "country": "Togo",
+    "mobile_no": "+228 90 10 97 75",
+    "supplier_details": "Agoè, Lomé, Togo"
+  },
+  {
+    "doctype": "Supplier", "supplier_name": "MA.CO.DI",
+    "supplier_group": "Materiel de Plomberie", "country": "Togo",
+    "mobile_no": "+228 22 25 24 70",
+    "supplier_details": "Rue Mission Tové, Lomé, Togo"
+  },
+  {
+    "doctype": "Supplier", "supplier_name": "LES FRERES COUSINS",
+    "supplier_group": "Barres Metalliques", "country": "Togo",
+    "mobile_no": "+228 22 22 81 90",
+    "supplier_details": "Rue des Planbtains, Assivito, Lomé, Togo"
+  },
+  {
+    "doctype": "Supplier", "supplier_name": "MONICO",
+    "supplier_group": "Barres Metalliques", "country": "Togo",
+    "mobile_no": "+228 22 21 81 24",
+    "supplier_details": "Avenue du 24 janvier, Lomé, Togo"
+  },
+  {
+    "doctype": "Supplier", "supplier_name": "MAFIS",
+    "supplier_group": "Barres Metalliques", "country": "Togo",
+    "mobile_no": "+228 90 91 75 19",
+    "supplier_details": "Hountigomé, Lomé, Togo"
+  },
+  {
+    "doctype": "Supplier", "supplier_name": "DONSEN",
+    "supplier_group": "Barres Metalliques", "country": "Togo",
+    "mobile_no": "+228 90 73 68 88",
+    "supplier_details": "Agoè échangeur, Lomé, Togo"
+  }
+]

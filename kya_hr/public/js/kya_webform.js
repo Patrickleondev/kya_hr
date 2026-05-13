@@ -13,7 +13,8 @@
     "demande-achat", "pv-sortie-materiel",
     "planning-conge", "bilan-fin-de-stage",
     "appel-offre", "bon-commande", "demande-conge",
-    "pv-entree-materiel", "etat-recap", "brouillard-caisse"
+    "pv-entree-materiel", "etat-recap", "brouillard-caisse",
+    "retour-materiel"
   ];
   var path = window.location.pathname.replace(/^\//, "").replace(/\/$/, "");
   if (KYA_WF_ROUTES.indexOf(path) !== -1) {
@@ -247,10 +248,15 @@
     ],
     "pv-entree-materiel": [
       {
-        title: "INFORMATIONS DE L\u2019ENTR\u00c9E",
+        title: "INFORMATIONS DE LA R\u00c9CEPTION",
         icon: "\u{1F4E5}",
-        fields: ["date_entree", "fournisseur", "reference_bl"],
-        grid: { date_entree: "col", fournisseur: "col", reference_bl: "span 2" }
+        fields: ["date_entree", "fournisseur", "fournisseur_libre", "project", "customer", "customer_libre"],
+        grid: {
+          date_entree: "col", fournisseur: "col",
+          fournisseur_libre: "span 2",
+          project: "col", customer: "col",
+          customer_libre: "span 2"
+        }
       },
       {
         title: "LISTE DU MAT\u00c9RIEL RE\u00c7U",
@@ -260,7 +266,31 @@
       {
         title: "VALIDATIONS & SIGNATURES",
         icon: "\u270D\uFE0F",
-        fields: ["signature_livreur", "signature_magasin", "signature_audit"],
+        fields: ["signature_livreur", "signature_magasin", "signature_comptable", "signature_audit"],
+        sigGrid: true
+      }
+    ],
+    "retour-materiel": [
+      {
+        title: "INFORMATIONS DU RETOUR",
+        icon: "\u{1F4E6}",
+        fields: ["pv_sortie_origine", "date_retour", "objet", "project", "customer", "customer_libre"],
+        grid: {
+          pv_sortie_origine: "span 2",
+          date_retour: "col", objet: "span 2",
+          project: "col", customer: "col",
+          customer_libre: "span 2"
+        }
+      },
+      {
+        title: "MAT\u00c9RIELS RETOURN\u00c9S",
+        icon: "\u{1F4CB}",
+        fields: ["items"]
+      },
+      {
+        title: "VALIDATIONS & SIGNATURES",
+        icon: "\u270D\uFE0F",
+        fields: ["signature_retourneur", "signature_magasin"],
         sigGrid: true
       }
     ],
@@ -374,9 +404,14 @@
       workflow: "Caissier \u2192 Comptable \u2192 Responsable Comptable"
     },
     "pv-entree-materiel": {
-      title: "PV D\u2019ENTR\u00c9E DE MAT\u00c9RIEL",
-      subtitle: "Achat et Stock",
-      workflow: "Livreur \u2192 Magasin \u2192 Audit"
+      title: "PV DE R\u00c9CEPTION DE MAT\u00c9RIELS",
+      subtitle: "Achats et Stock",
+      workflow: "Livreur \u2192 Magasin \u2192 Comptabilit\u00e9 \u2192 Audit Interne"
+    },
+    "retour-materiel": {
+      title: "RETOUR DE MAT\u00c9RIEL AU MAGASIN",
+      subtitle: "Achats et Stock",
+      workflow: "Retourneur \u2192 Responsable Magasin"
     }
   };
 
@@ -416,7 +451,12 @@
     "pv-entree-materiel": {
       signature_livreur: null,
       signature_magasin: ["Stock Manager", "Stock User", "Chargé des Stocks", "System Manager"],
-      signature_audit: ["Auditeur Interne", "DGA", "System Manager"]
+      signature_comptable: ["Responsable Comptable", "Accounts Manager", "Accounts User", "System Manager"],
+      signature_audit: ["Auditeur Interne", "System Manager"]
+    },
+    "retour-materiel": {
+      signature_retourneur: null,
+      signature_magasin: ["Stock Manager", "Stock User", "Chargé des Stocks", "System Manager"]
     },
     "etat-recap": {
       signature_redacteur: null,
@@ -466,7 +506,12 @@
     "pv-entree-materiel": {
       signature_livreur: ["Brouillon", "En attente Magasin"],
       signature_magasin: ["En attente Magasin"],
+      signature_comptable: ["En attente Comptable"],
       signature_audit: ["En attente Audit"]
+    },
+    "retour-materiel": {
+      signature_retourneur: ["Brouillon", "En attente Magasin"],
+      signature_magasin: ["En attente Magasin"]
     },
     "etat-recap": {
       signature_redacteur: ["Brouillon", "En attente DFC", "En attente DG"],
