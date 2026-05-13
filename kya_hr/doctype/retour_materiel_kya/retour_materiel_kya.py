@@ -28,21 +28,35 @@ class RetourMaterielKYA(Document):
                     it.designation or it.item_code))
 
     def _set_retourneur_info(self):
-        if not self.retourneur_nom:
-            emp = frappe.db.get_value(
-                "Employee", {"user_id": frappe.session.user}, "employee_name")
-            if emp:
-                self.retourneur_nom = emp
-                self.retourneur_date = frappe.utils.today()
+        """L'employé retourneur = employé qui avait fait la demande de sortie.
+        Si pas de PV Sortie origine, fallback sur l'utilisateur connecté."""
+        if self.retourneur_nom:
+            return
+        # Chercher depuis le PV Sortie d'origine
+        if self.pv_sortie_origine:
+            pv_emp = frappe.db.get_value(
+                "PV Sortie Materiel", self.pv_sortie_origine,
+                ["demandeur_nom", "employee_name"], as_dict=True)
+            if pv_emp:
+                emp_name = pv_emp.demandeur_nom or pv_emp.employee_name
+                if emp_name:
+                    self.retourneur_nom = emp_name
+                    self.retourneur_date = frappe.utils.today()
+                    return
+        # Fallback : utilisateur connecté
+        emp = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "employee_name")
+        if emp:
+            self.retourneur_nom = emp
+            self.retourneur_date = frappe.utils.today()
 
     def _fetch_context_from_sortie(self):
-        """Auto-remplir projet et client depuis le PV Sortie d'origine."""
+        """Auto-remplir projet, client et retourneur depuis le PV Sortie d'origine."""
         if not self.pv_sortie_origine:
             return
         pv = frappe.db.get_value(
             "PV Sortie Materiel",
             self.pv_sortie_origine,
-            ["project", "customer", "customer_manuel"],
+            ["project", "customer", "customer_manuel", "demandeur_nom", "employee_name"],
             as_dict=True,
         )
         if not pv:
@@ -53,6 +67,12 @@ class RetourMaterielKYA(Document):
             self.customer = pv.customer
         if pv.customer_manuel and not self.customer_libre:
             self.customer_libre = pv.customer_manuel
+        # Auto-fill retourneur from original demandeur
+        if not self.retourneur_nom:
+            emp_name = pv.demandeur_nom or pv.employee_name
+            if emp_name:
+                self.retourneur_nom = emp_name
+                self.retourneur_date = frappe.utils.today()
 
     # ------------------------------------------------------------------ #
     def on_update_after_submit(self):
