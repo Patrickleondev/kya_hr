@@ -35,6 +35,7 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.setup_fleet_workspace.run", "Setup fleet workspace"),
     ("kya_hr.setup_fleet_dashboard.run", "Setup fleet dashboard"),
     ("kya_hr.setup_pv_extensions.run", "Setup PV extensions"),
+    ("kya_hr.setup_retour_materiel.run", "Setup Retour Matériel + fournisseurs KYA"),
     ("kya_hr.setup_inventaire_dashboard.run", "Setup inventaire dashboard"),
     ("kya_hr.desktop_icons.execute", "Desktop icons (workaround Frappe v16)"),
     ("kya_hr.coherence_fixes.execute", "Coherence fixes (champs orphelins)"),

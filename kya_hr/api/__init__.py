@@ -113,8 +113,14 @@ def get_kya_quick_links():
         "emoji": "📦",
     })
     links.append({
-        "title": "Demande d\'Achat",
-        "description": "Soumettre une demande d\'achat",
+        "title": "Retour de Matériel",
+        "description": "Déclarer un retour de matériel au magasin",
+        "url": "/retour-materiel/new",
+        "emoji": "↩️",
+    })
+    links.append({
+        "title": "Demande d'Achat",
+        "description": "Soumettre une demande d'achat",
         "url": "/demande-achat/new",
         "emoji": "🛒",
     })
@@ -154,9 +160,13 @@ ALLOWED_DOCTYPES = {
     "Permission Sortie Employe",
     "Leave Application",
     "PV Sortie Materiel",
+    "PV Entree Materiel",
+    "Retour Materiel KYA",
     "Planning Conge",
     "Demande Achat KYA",
     "Bilan Fin de Stage",
+    "Bon Commande KYA",
+    "Appel Offre KYA",
 }
 
 

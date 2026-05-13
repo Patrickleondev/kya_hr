@@ -33,8 +33,14 @@ fixtures = [
     {"dt": "Letter Head"},
     {"dt": "Employment Type", "filters": [["name", "in", ["CDI", "CDD", "Stage", "Prestataire"]]]},
     {"dt": "KYA Contract Template"},
-    # Groupes et fournisseurs KYA (base de données fournisseurs par catégorie)
+    # Groupes fournisseurs KYA (base de données fournisseurs par catégorie)
     {"dt": "Supplier Group", "filters": [["name", "in", [
+        "Modules PV", "Batteries & Energie", "Onduleurs",
+        "Cables & Electricite", "Pneumatiques",
+        "Materiel de Plomberie", "Barres Metalliques", "Divers KYA"
+    ]]]},
+    # Fournisseurs réels KYA (base de données BGD-ENG-03-V01)
+    {"dt": "Supplier", "filters": [["supplier_group", "in", [
         "Modules PV", "Batteries & Energie", "Onduleurs",
         "Cables & Electricite", "Pneumatiques",
         "Materiel de Plomberie", "Barres Metalliques", "Divers KYA"
