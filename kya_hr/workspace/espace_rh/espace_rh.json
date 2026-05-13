@@ -65,8 +65,8 @@
   },
   {
    "label": "Demandes de Congé",
-   "type": "URL",
-   "url": "/demande-conge",
+   "type": "DocType",
+   "link_to": "Leave Application",
    "color": "#388e3c",
    "icon": "calendar"
   },

@@ -28,6 +28,7 @@
     "permission-sortie-stagiaire": "permission-sortie-stagiaire",
     "permission-sortie-employe": "permission-sortie-employe",
     "demande-conge-kya": "demande-conge",
+    "leave-application": "demande-conge",
     "planning-conge": "planning-conge",
     "bilan-fin-de-stage": "bilan-fin-de-stage",
   };
@@ -64,6 +65,10 @@
 
     if (!slug || !docname) return null;
     if (RESERVED.has(docname.toLowerCase())) return null;
+
+    if (slug === "leave-application" && docname.toLowerCase() !== "new") {
+      return null;
+    }
 
     const route = WEBFORM_VIEW_MAP[slug];
     if (!route) return null;
