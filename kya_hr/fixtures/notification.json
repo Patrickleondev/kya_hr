@@ -1771,5 +1771,105 @@
   "send_system_notification": 0,
   "subject": "Bienvenu(e) chez KYA-Energy Group ! Votre espace est pret",
   "value_changed": null
+ },
+ {
+  "name": "KYA - PV Entrée Matériel: En attente Comptable",
+  "doctype": "Notification",
+  "is_standard": 0,
+  "enabled": 1,
+  "document_type": "PV Entree Materiel",
+  "event": "Value Change",
+  "value_changed": "workflow_state",
+  "condition": "doc.workflow_state == 'En attente Comptable'",
+  "channel": "Email",
+  "message_type": "Jinja",
+  "subject": "PV Réception {{ doc.name }} — Validation comptabilité requise",
+  "recipients": [
+   {
+    "receiver_by_role": "Responsable Comptable"
+   }
+  ],
+  "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:#1565c0;padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='{{ frappe.utils.get_url() }}/assets/kya_hr/images/kya_logo.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>PV Réception de Matériels</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><p>Bonjour,</p><p>Le PV de réception <b>{{ doc.name }}</b> a été validé par le magasin et nécessite maintenant votre validation comptable.</p><p><b>Objet :</b> {{ doc.objet }}<br><b>Fournisseur :</b> {{ doc.fournisseur or doc.fournisseur_libre or '—' }}<br><b>Projet :</b> {{ doc.project or '—' }}</p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url() }}/pv-entree-materiel/{{ doc.name }}' style='display:inline-block;padding:12px 32px;background:#1565c0;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>Valider Comptabilité</a></div></div>{{ get_kya_email_footer() }}</div>",
+  "modified": "2026-05-13 00:00:00.000000"
+ },
+ {
+  "name": "KYA - PV Entrée Matériel: En attente Audit",
+  "doctype": "Notification",
+  "is_standard": 0,
+  "enabled": 1,
+  "document_type": "PV Entree Materiel",
+  "event": "Value Change",
+  "value_changed": "workflow_state",
+  "condition": "doc.workflow_state == 'En attente Audit'",
+  "channel": "Email",
+  "message_type": "Jinja",
+  "subject": "PV Réception {{ doc.name }} — Validation audit interne",
+  "recipients": [
+   {
+    "receiver_by_role": "Auditeur Interne"
+   }
+  ],
+  "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:#4a148c;padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='{{ frappe.utils.get_url() }}/assets/kya_hr/images/kya_logo.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>PV Réception de Matériels</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><p>Bonjour,</p><p>Le PV de réception <b>{{ doc.name }}</b> a été validé par la comptabilité et est en attente de votre approbation audit.</p><p><b>Objet :</b> {{ doc.objet }}<br><b>Fournisseur :</b> {{ doc.fournisseur or doc.fournisseur_libre or '—' }}<br><b>Projet :</b> {{ doc.project or '—' }}</p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url() }}/pv-entree-materiel/{{ doc.name }}' style='display:inline-block;padding:12px 32px;background:#4a148c;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>Approuver (Audit)</a></div></div>{{ get_kya_email_footer() }}</div>",
+  "modified": "2026-05-13 00:00:00.000000"
+ },
+ {
+  "name": "KYA - Retour Matériel: En attente Magasin",
+  "doctype": "Notification",
+  "is_standard": 0,
+  "enabled": 1,
+  "document_type": "Retour Materiel KYA",
+  "event": "Value Change",
+  "value_changed": "workflow_state",
+  "condition": "doc.workflow_state == 'En attente Magasin'",
+  "channel": "Email",
+  "message_type": "Jinja",
+  "subject": "Retour Matériel {{ doc.name }} — Réception magasin requise",
+  "recipients": [
+   {
+    "receiver_by_role": "Chargé des Stocks"
+   }
+  ],
+  "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:#e65100;padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='{{ frappe.utils.get_url() }}/assets/kya_hr/images/kya_logo.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>Retour de Matériel au Magasin</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><p>Bonjour,</p><p>Un retour de matériel <b>{{ doc.name }}</b> a été déclaré et nécessite votre confirmation de réception.</p><p><b>Motif :</b> {{ doc.objet }}<br><b>Projet :</b> {{ doc.project or '—' }}<br><b>Client :</b> {{ doc.customer or doc.customer_libre or '—' }}<br><b>PV Sortie origine :</b> {{ doc.pv_sortie_origine or '—' }}</p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url() }}/retour-materiel/{{ doc.name }}' style='display:inline-block;padding:12px 32px;background:#e65100;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>Réceptionner le Retour</a></div></div>{{ get_kya_email_footer() }}</div>",
+  "modified": "2026-05-13 00:00:00.000000"
+ },
+ {
+  "name": "KYA - Retour Matériel: Approuvé",
+  "doctype": "Notification",
+  "is_standard": 0,
+  "enabled": 1,
+  "document_type": "Retour Materiel KYA",
+  "event": "Value Change",
+  "value_changed": "workflow_state",
+  "condition": "doc.workflow_state == 'Approuvé'",
+  "channel": "Email",
+  "message_type": "Jinja",
+  "subject": "Retour Matériel {{ doc.name }} — Retour réceptionné, stock mis à jour",
+  "recipients": [
+   {
+    "receiver_by_document_field": "owner"
+   }
+  ],
+  "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:#2e7d32;padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='{{ frappe.utils.get_url() }}/assets/kya_hr/images/kya_logo.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>Retour de Matériel — Approuvé</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><p>Bonjour,</p><p>Le retour de matériel <b>{{ doc.name }}</b> a été réceptionné par le magasin. Les articles ont été remis en stock automatiquement.</p><p><b>Motif :</b> {{ doc.objet }}<br><b>Stock Entry généré :</b> {{ doc.stock_entry or 'En cours...' }}</p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url() }}/retour-materiel/{{ doc.name }}' style='display:inline-block;padding:12px 32px;background:#2e7d32;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>Voir le PV de Retour</a></div></div>{{ get_kya_email_footer() }}</div>",
+  "modified": "2026-05-13 00:00:00.000000"
+ },
+ {
+  "name": "KYA - Retour Matériel: Rejeté",
+  "doctype": "Notification",
+  "is_standard": 0,
+  "enabled": 1,
+  "document_type": "Retour Materiel KYA",
+  "event": "Value Change",
+  "value_changed": "workflow_state",
+  "condition": "doc.workflow_state == 'Rejeté'",
+  "channel": "Email",
+  "message_type": "Jinja",
+  "subject": "Retour Matériel {{ doc.name }} — Rejeté par le magasin",
+  "recipients": [
+   {
+    "receiver_by_document_field": "owner"
+   }
+  ],
+  "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:#c62828;padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='{{ frappe.utils.get_url() }}/assets/kya_hr/images/kya_logo.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>Retour de Matériel — Rejeté</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><p>Bonjour,</p><p>Le retour de matériel <b>{{ doc.name }}</b> a été rejeté par le responsable magasin.</p><p><b>Motif déclaré :</b> {{ doc.objet }}<br><b>Veuillez contacter le responsable magasin pour plus d'informations.</b></p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url() }}/retour-materiel/{{ doc.name }}' style='display:inline-block;padding:12px 32px;background:#c62828;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>Voir le PV de Retour</a></div></div>{{ get_kya_email_footer() }}</div>",
+  "modified": "2026-05-13 00:00:00.000000"
  }
 ]
