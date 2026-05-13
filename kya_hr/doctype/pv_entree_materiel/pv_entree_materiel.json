@@ -56,6 +56,29 @@
    "description": "À remplir si le fournisseur n'est pas encore référencé"
   },
   {
+   "fieldname": "project",
+   "label": "Projet / Chantier",
+   "fieldtype": "Link",
+   "options": "Project",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "description": "Projet pour lequel cette réception est effectuée"
+  },
+  {
+   "fieldname": "customer",
+   "label": "Client",
+   "fieldtype": "Link",
+   "options": "Customer",
+   "in_standard_filter": 1,
+   "description": "Client si la réception est liée à une commande client spécifique"
+  },
+  {
+   "fieldname": "customer_libre",
+   "label": "Client (saisie manuelle)",
+   "fieldtype": "Data",
+   "description": "Si le client n'est pas encore enregistré"
+  },
+  {
    "fieldname": "section_link",
    "label": "Lien avec Achat (optionnel)",
    "fieldtype": "Section Break",
@@ -94,7 +117,7 @@
    "fieldname": "section_signatures",
    "label": "Validations & Signatures",
    "fieldtype": "Section Break",
-   "description": "Circuit : Livreur → Responsable Magasin"
+   "description": "Circuit : Livreur → Responsable Magasin → Comptabilité → Audit Interne"
   },
   {
    "fieldname": "col_livreur",
@@ -142,6 +165,52 @@
    "read_only": 1
   },
   {
+   "fieldname": "col_comptable",
+   "fieldtype": "Column Break",
+   "label": "Service Comptabilité"
+  },
+  {
+   "fieldname": "comptable_nom",
+   "label": "Nom Comptable",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "comptable_date",
+   "label": "Date Comptabilité",
+   "fieldtype": "Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "signature_comptable",
+   "label": "Signature Comptabilité",
+   "fieldtype": "Signature",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_audit_ent",
+   "fieldtype": "Column Break",
+   "label": "Audit Interne"
+  },
+  {
+   "fieldname": "audit_nom",
+   "label": "Nom Audit Interne",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "audit_date",
+   "label": "Date Audit",
+   "fieldtype": "Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "signature_audit",
+   "label": "Signature Audit Interne",
+   "fieldtype": "Signature",
+   "read_only": 1
+  },
+  {
    "fieldname": "section_statut",
    "label": "Statut",
    "fieldtype": "Section Break"
@@ -150,7 +219,7 @@
    "fieldname": "statut",
    "label": "Statut",
    "fieldtype": "Select",
-   "options": "Brouillon\nEn attente Magasin\nApprouvé\nRejeté",
+   "options": "Brouillon\nEn attente Magasin\nEn attente Comptable\nEn attente Audit\nApprouvé\nRejeté",
    "default": "Brouillon",
    "in_list_view": 1,
    "in_standard_filter": 1,

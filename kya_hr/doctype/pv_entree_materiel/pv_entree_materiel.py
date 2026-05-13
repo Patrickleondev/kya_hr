@@ -50,11 +50,19 @@ class PVEntreeMateriel(Document):
 
     def _stamp_magasin_signature(self):
         ws = self.workflow_state
+        user = frappe.session.user
+        emp = frappe.db.get_value("Employee", {"user_id": user}, "employee_name")
+        signer = emp or frappe.utils.get_fullname(user)
+        today = frappe.utils.today()
         if ws == "En attente Magasin" and not self.get("magasin_nom"):
-            user = frappe.session.user
-            emp = frappe.db.get_value("Employee", {"user_id": user}, "employee_name")
-            self.db_set("magasin_nom", emp or frappe.utils.get_fullname(user), update_modified=False)
-            self.db_set("magasin_date", frappe.utils.today(), update_modified=False)
+            self.db_set("magasin_nom", signer, update_modified=False)
+            self.db_set("magasin_date", today, update_modified=False)
+        elif ws == "En attente Comptable" and not self.get("comptable_nom"):
+            self.db_set("comptable_nom", signer, update_modified=False)
+            self.db_set("comptable_date", today, update_modified=False)
+        elif ws == "En attente Audit" and not self.get("audit_nom"):
+            self.db_set("audit_nom", signer, update_modified=False)
+            self.db_set("audit_date", today, update_modified=False)
 
     def _create_stock_entry(self):
         rows = [it for it in self.items if it.get("item_code") and it.get("warehouse")]
@@ -70,7 +78,11 @@ class PVEntreeMateriel(Document):
         se.purpose = "Material Receipt"
         se.posting_date = self.date_entree or frappe.utils.today()
         se.company = company
-        se.remarks = _("Auto-créé depuis PV Entrée Matériel {0}").format(self.name)
+        se.project = self.get("project") or None
+        se.remarks = _("Auto-créé depuis PV Entrée Matériel {0} — Fournisseur: {1}").format(
+            self.name,
+            self.get("fournisseur") or self.get("fournisseur_libre") or "—"
+        )
         se.pv_entree_materiel = self.name
 
         for it in rows:
