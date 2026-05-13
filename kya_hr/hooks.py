@@ -33,6 +33,10 @@ fixtures = [
     {"dt": "Letter Head"},
     {"dt": "Employment Type", "filters": [["name", "in", ["CDI", "CDD", "Stage", "Prestataire"]]]},
     {"dt": "KYA Contract Template"},
+    # Supplier Groups/Suppliers KYA are seeded by
+    # kya_hr.setup_retour_materiel.run during after_migrate. Importing them as
+    # fixtures can run before ERPNext creates "All Supplier Groups" on a fresh
+    # install, which breaks NestedSet during sync_fixtures.
 ]
 
 # DocType client scripts
@@ -116,6 +120,14 @@ doc_events = {
     },
     # PV et Bilan : pas de chef_routing (employee_field suffit)
     "PV Sortie Materiel": {
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_update": "kya_hr.email_notifications.send_workflow_update",
+    },
+    "PV Entree Materiel": {
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_update": "kya_hr.email_notifications.send_workflow_update",
+    },
+    "Retour Materiel KYA": {
         "after_insert": "kya_hr.email_notifications.send_submission_recap",
         "on_update": "kya_hr.email_notifications.send_workflow_update",
     },
