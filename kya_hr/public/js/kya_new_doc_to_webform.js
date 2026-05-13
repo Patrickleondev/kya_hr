@@ -25,6 +25,7 @@
 		"Permission Sortie Stagiaire": "/permission-sortie-stagiaire/new",
 		"Permission Sortie Employe": "/permission-sortie-employe/new",
 		"Demande Conge KYA": "/demande-conge/new",
+		"Leave Application": "/demande-conge/new",
 		"Planning Conge": "/planning-conge/new",
 		"Bilan Fin de Stage": "/bilan-fin-de-stage/new",
 	};

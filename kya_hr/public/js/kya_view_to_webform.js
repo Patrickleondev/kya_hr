@@ -28,6 +28,7 @@
     "permission-sortie-stagiaire": "permission-sortie-stagiaire",
     "permission-sortie-employe": "permission-sortie-employe",
     "demande-conge-kya": "demande-conge",
+    "leave-application": "demande-conge",
     "planning-conge": "planning-conge",
     "bilan-fin-de-stage": "bilan-fin-de-stage",
   };
