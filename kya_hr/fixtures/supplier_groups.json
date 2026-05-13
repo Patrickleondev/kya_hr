@@ -1,10 +1,10 @@
 [
-  {"doctype": "Supplier Group", "name": "Modules PV",               "parent_supplier_group": "All Supplier Groups", "is_group": 0},
-  {"doctype": "Supplier Group", "name": "Batteries & Energie",      "parent_supplier_group": "All Supplier Groups", "is_group": 0},
-  {"doctype": "Supplier Group", "name": "Onduleurs",                "parent_supplier_group": "All Supplier Groups", "is_group": 0},
-  {"doctype": "Supplier Group", "name": "Cables & Electricite",     "parent_supplier_group": "All Supplier Groups", "is_group": 0},
-  {"doctype": "Supplier Group", "name": "Pneumatiques",             "parent_supplier_group": "All Supplier Groups", "is_group": 0},
-  {"doctype": "Supplier Group", "name": "Materiel de Plomberie",    "parent_supplier_group": "All Supplier Groups", "is_group": 0},
-  {"doctype": "Supplier Group", "name": "Barres Metalliques",       "parent_supplier_group": "All Supplier Groups", "is_group": 0},
-  {"doctype": "Supplier Group", "name": "Divers KYA",               "parent_supplier_group": "All Supplier Groups", "is_group": 0}
+  {"doctype": "Supplier Group", "name": "Modules PV",            "supplier_group_name": "Modules PV",            "parent_supplier_group": "All Supplier Groups", "is_group": 0},
+  {"doctype": "Supplier Group", "name": "Batteries & Energie",   "supplier_group_name": "Batteries & Energie",   "parent_supplier_group": "All Supplier Groups", "is_group": 0},
+  {"doctype": "Supplier Group", "name": "Onduleurs",             "supplier_group_name": "Onduleurs",             "parent_supplier_group": "All Supplier Groups", "is_group": 0},
+  {"doctype": "Supplier Group", "name": "Cables & Electricite",  "supplier_group_name": "Cables & Electricite",  "parent_supplier_group": "All Supplier Groups", "is_group": 0},
+  {"doctype": "Supplier Group", "name": "Pneumatiques",          "supplier_group_name": "Pneumatiques",          "parent_supplier_group": "All Supplier Groups", "is_group": 0},
+  {"doctype": "Supplier Group", "name": "Materiel de Plomberie", "supplier_group_name": "Materiel de Plomberie", "parent_supplier_group": "All Supplier Groups", "is_group": 0},
+  {"doctype": "Supplier Group", "name": "Barres Metalliques",    "supplier_group_name": "Barres Metalliques",    "parent_supplier_group": "All Supplier Groups", "is_group": 0},
+  {"doctype": "Supplier Group", "name": "Divers KYA",            "supplier_group_name": "Divers KYA",            "parent_supplier_group": "All Supplier Groups", "is_group": 0}
 ]
