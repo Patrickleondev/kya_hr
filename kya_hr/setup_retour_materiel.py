@@ -44,6 +44,8 @@ SUPPLIERS = [
     {"supplier_name": "DONSEN",                  "supplier_group": "Barres Metalliques",  "country": "Togo",   "mobile_no": "+228 90 73 68 88"},
 ]
 
+ROOT_SUPPLIER_GROUP = "All Supplier Groups"
+
 # Workspaces et raccourcis à ajouter
 STOCK_SHORTCUTS = [
     {
@@ -81,14 +83,29 @@ STOCK_SHORTCUTS = [
 ]
 
 
+
+def _ensure_root_supplier_group():
+    """Ensure ERPNext's NestedSet root exists before creating KYA children."""
+    if frappe.db.exists("Supplier Group", ROOT_SUPPLIER_GROUP):
+        return False
+
+    doc = frappe.new_doc("Supplier Group")
+    doc.supplier_group_name = ROOT_SUPPLIER_GROUP
+    doc.is_group = 1
+    doc.flags.ignore_mandatory = True
+    doc.insert(ignore_permissions=True)
+    print(f"  [Supplier Groups] racine creee: {ROOT_SUPPLIER_GROUP}")
+    return True
+
 def _seed_supplier_groups():
+    _ensure_root_supplier_group()
     created = 0
     for grp in SUPPLIER_GROUPS:
         if frappe.db.exists("Supplier Group", grp):
             continue
         doc = frappe.new_doc("Supplier Group")
         doc.supplier_group_name = grp
-        doc.parent_supplier_group = "All Supplier Groups"
+        doc.parent_supplier_group = ROOT_SUPPLIER_GROUP
         doc.insert(ignore_permissions=True)
         created += 1
     print(f"  [Supplier Groups] {created} groupe(s) créé(s)")
@@ -101,7 +118,7 @@ def _seed_suppliers():
         if exists:
             # Update group if not set
             current_group = frappe.db.get_value("Supplier", exists, "supplier_group")
-            if not current_group or current_group in ("", "All Supplier Groups"):
+            if not current_group or current_group in ("", ROOT_SUPPLIER_GROUP):
                 frappe.db.set_value("Supplier", exists, "supplier_group", s["supplier_group"],
                                     update_modified=False)
                 updated += 1
