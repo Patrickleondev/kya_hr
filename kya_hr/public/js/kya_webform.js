@@ -129,7 +129,8 @@
       {
         title: "PLANNING ANNUEL",
         icon: "\u{1F4C5}",
-        fields: ["annee", "periodes"]
+        fields: ["annee", "leave_type_par_defaut", "periodes"],
+        grid: { annee: "col", leave_type_par_defaut: "col" }
       },
       {
         title: "COMMENTAIRE",
@@ -396,7 +397,7 @@
     "etat-recap": {
       title: "\u00c9TAT R\u00c9CAPITULATIF DES CH\u00c8QUES",
       subtitle: "Comptabilit\u00e9 & Tr\u00e9sorerie",
-      workflow: "R\u00e9dacteur (Comptable / DFC) \u2192 DG \u2192 DGA"
+      workflow: "R\u00e9dacteur \u2192 Validation DFC \u2192 Valid\u00e9 DFC"
     },
     "brouillard-caisse": {
       title: "BROUILLARD DE CAISSE",
@@ -472,8 +473,8 @@
 
   var SIGNATURE_STATES = {
     "permission-sortie-stagiaire": {
-      signature_stagiaire: ["Brouillon", "En attente Chef", "En attente Maitre de Stage", "En attente Maître de Stage"],
-      signature_chef: ["En attente Chef", "En attente Maitre de Stage", "En attente Maître de Stage"],
+      signature_stagiaire: ["Brouillon", "En attente Chef"],
+      signature_chef: ["En attente Chef"],
       signature_resp_stagiaires: ["En attente Resp. Stagiaires"],
       signature_dg: ["En attente DG"]
     },
@@ -512,8 +513,8 @@
       signature_magasin: ["En attente Magasin"]
     },
     "etat-recap": {
-      signature_redacteur: ["Brouillon", "En attente DFC", "En attente DG"],
-      signature_dfc: ["En attente DFC"],
+      signature_redacteur: ["Brouillon", "En attente Validation DFC"],
+      signature_dfc: ["En attente Validation DFC"],
       signature_dg: ["En attente DG"],
       signature_dga: ["En attente DGA"]
     },
