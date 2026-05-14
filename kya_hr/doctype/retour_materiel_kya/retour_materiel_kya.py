@@ -139,10 +139,11 @@ class RetourMaterielKYA(Document):
         """Stock Entry Material Receipt pour remettre les articles en stock.
 
         Routage par état :
-          - Bon état  → warehouse choisi par l'utilisateur
-          - Endommagé → warehouse 'Atelier-Reparation' (créé si absent)
-            Le Stock Manager déplacera l'article vers son magasin normal
-            (Material Transfer manuel) une fois la réparation effectuée.
+          - Bon état            → warehouse choisi par l'utilisateur
+          - Endommagé / À réparer → warehouse 'Atelier-Reparation' (créé si absent)
+            Le Responsable Magasin décide ensuite : Material Transfer
+            vers le magasin d'origine si réparé, ou Material Issue vers
+            le rebut s'il est définitivement hors service.
         """
         rows = [it for it in self.items if it.get("item_code")]
         if not rows:
@@ -169,7 +170,7 @@ class RetourMaterielKYA(Document):
                 continue
 
             etat = (it.get("etat_au_retour") or "Bon état").strip()
-            if etat == "Endommagé":
+            if etat in ("Endommagé", "À réparer"):
                 target_wh = repair_wh
             else:
                 target_wh = it.get("warehouse")
