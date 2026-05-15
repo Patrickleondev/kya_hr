@@ -6,7 +6,7 @@
  "custom": 1,
  "autoname": "format:PV-ENT-{YYYY}-{#####}",
  "title_field": "objet",
- "search_fields": "objet, livreur_nom, date_entree, statut",
+ "search_fields": "objet, fournisseur, date_entree, statut",
  "track_changes": 1,
  "fields": [
   {

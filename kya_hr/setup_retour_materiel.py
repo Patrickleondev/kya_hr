@@ -98,40 +98,81 @@ def _ensure_root_supplier_group():
     return True
 
 def _seed_supplier_groups():
+    """Seed les 8 Supplier Groups KYA, avec repair tree en filet de sécurité.
+
+    En CI/preprod, le `setup_wizard` ERPNext peut laisser la table Supplier Group
+    dans un état incohérent (timeout sur create_demo_company). Si on tombe sur
+    NestedSetRecursionError, on tente un rebuild_tree puis on re-essaie une fois.
+    """
     _ensure_root_supplier_group()
-    created = 0
+    created = failed = 0
     for grp in SUPPLIER_GROUPS:
         if frappe.db.exists("Supplier Group", grp):
             continue
-        doc = frappe.new_doc("Supplier Group")
-        doc.supplier_group_name = grp
-        doc.parent_supplier_group = ROOT_SUPPLIER_GROUP
-        doc.insert(ignore_permissions=True)
-        created += 1
-    print(f"  [Supplier Groups] {created} groupe(s) créé(s)")
+        try:
+            _insert_supplier_group(grp)
+            created += 1
+        except Exception as e:
+            # Probable NestedSetRecursionError — repair + retry une fois
+            print(f"  [Supplier Groups] '{grp}' échec ({e}), repair + retry…")
+            try:
+                from kya_hr.patches.v1_0 import repair_supplier_group_tree
+                repair_supplier_group_tree.execute()
+            except Exception as repair_err:
+                print(f"  [Supplier Groups] repair_tree échoué : {repair_err}")
+            try:
+                _insert_supplier_group(grp)
+                created += 1
+            except Exception as e2:
+                failed += 1
+                frappe.log_error(
+                    title=f"setup_retour_materiel — '{grp}' insertion échouée",
+                    message=frappe.get_traceback() + f"\n\nError: {e2}",
+                )
+                print(f"  [Supplier Groups] '{grp}' ABANDONNÉ : {e2}")
+    print(f"  [Supplier Groups] {created} groupe(s) créé(s), {failed} échec(s)")
+
+
+def _insert_supplier_group(grp):
+    doc = frappe.new_doc("Supplier Group")
+    doc.supplier_group_name = grp
+    doc.parent_supplier_group = ROOT_SUPPLIER_GROUP
+    doc.insert(ignore_permissions=True)
 
 
 def _seed_suppliers():
-    created = updated = 0
+    created = updated = failed = 0
     for s in SUPPLIERS:
-        exists = frappe.db.get_value("Supplier", {"supplier_name": s["supplier_name"]}, "name")
-        if exists:
-            # Update group if not set
-            current_group = frappe.db.get_value("Supplier", exists, "supplier_group")
-            if not current_group or current_group in ("", ROOT_SUPPLIER_GROUP):
-                frappe.db.set_value("Supplier", exists, "supplier_group", s["supplier_group"],
-                                    update_modified=False)
-                updated += 1
-            continue
-        doc = frappe.new_doc("Supplier")
-        doc.supplier_name = s["supplier_name"]
-        doc.supplier_group = s["supplier_group"]
-        doc.country = s.get("country")
-        doc.mobile_no = s.get("mobile_no")
-        doc.email_id = s.get("email_id", "")
-        doc.insert(ignore_permissions=True)
-        created += 1
-    print(f"  [Suppliers] {created} créé(s), {updated} groupe mis à jour")
+        try:
+            exists = frappe.db.get_value("Supplier", {"supplier_name": s["supplier_name"]}, "name")
+            if exists:
+                current_group = frappe.db.get_value("Supplier", exists, "supplier_group")
+                if not current_group or current_group in ("", ROOT_SUPPLIER_GROUP):
+                    frappe.db.set_value("Supplier", exists, "supplier_group", s["supplier_group"],
+                                        update_modified=False)
+                    updated += 1
+                continue
+            # Vérifier que le supplier_group cible existe avant d'insérer
+            if not frappe.db.exists("Supplier Group", s["supplier_group"]):
+                print(f"  [Suppliers] '{s['supplier_name']}' ignoré : Supplier Group '{s['supplier_group']}' absent")
+                failed += 1
+                continue
+            doc = frappe.new_doc("Supplier")
+            doc.supplier_name = s["supplier_name"]
+            doc.supplier_group = s["supplier_group"]
+            doc.country = s.get("country")
+            doc.mobile_no = s.get("mobile_no")
+            doc.email_id = s.get("email_id", "")
+            doc.insert(ignore_permissions=True)
+            created += 1
+        except Exception as e:
+            failed += 1
+            frappe.log_error(
+                title=f"setup_retour_materiel — Supplier '{s.get('supplier_name')}' échec",
+                message=frappe.get_traceback() + f"\n\nError: {e}",
+            )
+            print(f"  [Suppliers] '{s.get('supplier_name')}' échec : {e}")
+    print(f"  [Suppliers] {created} créé(s), {updated} mis à jour, {failed} échec(s)")
 
 
 def _add_workspace_shortcuts():
