@@ -191,7 +191,8 @@
       {
         title: "PLANNING ANNUEL",
         icon: "\u{1F4C5}",
-        fields: ["annee", "periodes"]
+        fields: ["annee", "leave_type_par_defaut", "periodes"],
+        grid: { annee: "col", leave_type_par_defaut: "col" }
       },
       {
         title: "COMMENTAIRE",
@@ -458,7 +459,7 @@
     "etat-recap": {
       title: "\u00c9TAT R\u00c9CAPITULATIF DES CH\u00c8QUES",
       subtitle: "Comptabilit\u00e9 & Tr\u00e9sorerie",
-      workflow: "R\u00e9dacteur (Comptable / DFC) \u2192 DG \u2192 DGA"
+      workflow: "R\u00e9dacteur \u2192 Validation DFC \u2192 Valid\u00e9 DFC"
     },
     "brouillard-caisse": {
       title: "BROUILLARD DE CAISSE",
@@ -534,8 +535,8 @@
 
   var SIGNATURE_STATES = {
     "permission-sortie-stagiaire": {
-      signature_stagiaire: ["Brouillon", "En attente Chef", "En attente Maitre de Stage", "En attente Maître de Stage"],
-      signature_chef: ["En attente Chef", "En attente Maitre de Stage", "En attente Maître de Stage"],
+      signature_stagiaire: ["Brouillon", "En attente Chef"],
+      signature_chef: ["En attente Chef"],
       signature_resp_stagiaires: ["En attente Resp. Stagiaires"],
       signature_dg: ["En attente DG"]
     },
@@ -574,8 +575,8 @@
       signature_magasin: ["En attente Magasin"]
     },
     "etat-recap": {
-      signature_redacteur: ["Brouillon", "En attente DFC", "En attente DG"],
-      signature_dfc: ["En attente DFC"],
+      signature_redacteur: ["Brouillon", "En attente Validation DFC"],
+      signature_dfc: ["En attente Validation DFC"],
       signature_dg: ["En attente DG"],
       signature_dga: ["En attente DGA"]
     },
@@ -856,6 +857,110 @@
     document.body.appendChild(bar);
   }
 
+  /* === FORMS qui basculent en mode DÉCORATIF SIMPLE =====
+   * Les forms ayant des Tables (DataTable Frappe v16) re-render leur DOM
+   * APRÈS notre construction du wrapper, ce qui orpheline notre wrapper en
+   * haut (avec sections vides) et affiche le form Desk natif en dessous.
+   *
+   * Pour ces forms, on bascule en mode "décoratif simple" :
+   *  - Header KYA (logo, titre officiel, RCCM, etc.) en haut
+   *  - Bandeau circuit d'approbation
+   *  - PAS de sections-containers (donc rien à remplir, rien à casser)
+   *  - Les champs Frappe restent à leur place naturelle
+   *  - Footer KYA en bas
+   *
+   * Les utilisateurs voient le design KYA + le formulaire fonctionnel.
+   */
+  // IMPORTANT : ne PAS toucher aux forms qui marchent déjà.
+  // Seuls les forms confirmés en bug entrent ici.
+  var DECORATIVE_ONLY_FORMS = {
+    "etat-recap": 1,
+    "brouillard-caisse": 1
+  };
+
+  function buildDecorativeShell(route, meta, formBody) {
+    // Si déjà construit, no-op
+    if (formBody.querySelector(".kya-deco-header")) return;
+
+    /* HEADER décoratif (logo + titre officiel KYA) */
+    var docName = "";
+    if (window.frappe && frappe.web_form_doc) {
+      docName = frappe.web_form_doc.doc_name || frappe.web_form_doc.name || "";
+    }
+    if (docName && (docName === route || docName.toLowerCase() === route.toLowerCase())) {
+      docName = "";
+    }
+    var docDisplay = docName || "PROVISOIRE";
+
+    var header = document.createElement("div");
+    header.className = "kya-deco-header kya-wf-header";
+    header.innerHTML =
+      '<div class="kya-header-row">' +
+        '<div class="kya-header-left">' +
+          '<img class="kya-logo" src="/assets/kya_hr/images/logo_kya.png" ' +
+          'alt="KYA-Energy Group" onerror="this.src=\'/files/vrai.png\'">' +
+        '</div>' +
+        '<div class="kya-header-right">' +
+          '<h3 class="kya-title">' + meta.title + '</h3>' +
+          '<span class="kya-slogan">Move beyond the sky!</span>' +
+          '<div class="kya-company-details">' +
+            'info@kya-energy.com<br>' +
+            'N° RCCM : TG-LOM 2015 B 975<br>' +
+            'NIF : 1000430317 | CNSS : 48863' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="kya-header-divider"></div>' +
+      '<div class="kya-doc-number">N° <span class="kya-doc-name">' + docDisplay + '</span>' +
+        (meta.ref ? ' &mdash; <span class="kya-doc-ref-inline">' + meta.ref + '</span>' : '') +
+      '</div>';
+
+    /* Toolbar Imprimer / PDF */
+    var toolbar = document.createElement("div");
+    toolbar.className = "kya-wf-toolbar";
+    toolbar.innerHTML =
+      '<button type="button" class="kya-btn-print" title="Imprimer">\u{1F5A8}️ Imprimer</button>' +
+      '<button type="button" class="kya-btn-pdf" title="PDF">\u{1F4E5} PDF</button>';
+    setTimeout(function () {
+      var bp = toolbar.querySelector(".kya-btn-print");
+      var bd = toolbar.querySelector(".kya-btn-pdf");
+      if (bp) bp.addEventListener("click", printForm);
+      if (bd) bd.addEventListener("click", printForm);
+    }, 0);
+
+    /* Bandeau circuit d'approbation */
+    var info = document.createElement("div");
+    info.className = "kya-wf-info";
+    info.innerHTML =
+      (meta.subtitle ? '<b>' + meta.subtitle + '</b> &mdash; ' : '') +
+      'Circuit d’approbation : <b>' + meta.workflow + '</b>';
+
+    /* Footer */
+    var footer = document.createElement("div");
+    footer.className = "kya-deco-footer kya-wf-footer";
+    footer.innerHTML =
+      '<strong class="kya-footer-brand">KYA-Energy Group</strong>' +
+      ' | LOMÉ - TOGO | Tél. : +228 70 45 34 81' +
+      '<span class="kya-footer-slogan">Move beyond the sky!</span>';
+
+    /* Insertion : header + toolbar + info en haut, footer en bas */
+    var anchor = formBody.firstChild;
+    formBody.insertBefore(header, anchor);
+    formBody.insertBefore(toolbar, anchor);
+    formBody.insertBefore(info, anchor);
+    formBody.appendChild(footer);
+
+    formBody.classList.add("kya-decorated");
+
+    /* Hide default Frappe header/intro */
+    var defaultHead = document.querySelector(".web-form-head");
+    if (defaultHead) defaultHead.classList.add("kya-hidden");
+    var defaultIntro = document.querySelector(".web-form-introduction");
+    if (defaultIntro) defaultIntro.style.display = "none";
+
+    console.log("[KYA] Mode décoratif simple appliqué pour " + route);
+  }
+
   /* ===== MAIN RESTRUCTURE ============================= */
   function restructureForm() {
     var route = getRoute();
@@ -870,6 +975,18 @@
       document.querySelector("form.web-form") ||
       document.querySelector(".frappe-form");
     if (!formBody) return;
+
+    /* Mode DÉCORATIF SIMPLE pour les forms avec Table (cf. note plus haut) */
+    if (DECORATIVE_ONLY_FORMS[route]) {
+      buildDecorativeShell(route, meta, formBody);
+      setupEmployeeAutoFill();
+      setTimeout(function () {
+        normalizeSignaturePads();
+        setupSignaturePermissions(route);
+        setupFieldEditPermissions(route);
+      }, 600);
+      return;
+    }
 
     // Vérifier si le wrapper existe et contient SUFFISAMMENT de champs attendus.
     // Un wrapper construit trop tôt peut n'avoir qu'une fraction des champs
@@ -1141,9 +1258,208 @@
     lockEmployeeInputForSelfService();
   }
 
+  /**
+   * Fallback INLINE : quand `restructureForm` n'arrive pas à déplacer
+   * les `.frappe-control` dans les sections (cas etat-recap, brouillard
+   * où Frappe v16 re-monte les contrôles après notre appendChild), on
+   * démolit le wrapper container et on bascule en mode "titres inline" :
+   * - Le header KYA reste en haut du form
+   * - Les titres de section sont insérés AVANT le premier champ de chaque section
+   * - Les champs Frappe restent à leur position originale (= ne sont JAMAIS déplacés)
+   * - Le footer reste en bas
+   *
+   * Pas de risque de "re-mount" Frappe car on ne touche plus aux .frappe-control.
+   */
+  function switchToInlineMode(wrapper, sections) {
+    if (!wrapper || !sections) return;
+    if (wrapper.dataset.kyaInlineSwitched === "1") return;
+
+    var header = wrapper.querySelector(".kya-wf-header");
+    var toolbar = wrapper.querySelector(".kya-wf-toolbar");
+    var info = wrapper.querySelector(".kya-wf-info");
+    var footer = wrapper.querySelector(".kya-wf-footer");
+
+    var formBody = wrapper.parentNode;
+    if (!formBody) return;
+
+    // Détache les composants décoratifs du wrapper avant de le détruire
+    [header, toolbar, info, footer].forEach(function (n) {
+      if (n && n.parentNode === wrapper) wrapper.removeChild(n);
+    });
+
+    // Insère header + toolbar + info au TOP du formBody (avant tout le reste)
+    var anchor = formBody.firstChild;
+    [header, toolbar, info].forEach(function (n) {
+      if (!n) return;
+      formBody.insertBefore(n, anchor);
+    });
+
+    // Pour chaque section, insère un titre décoratif AVANT son 1er champ existant
+    sections.forEach(function (sec, idx) {
+      if (!sec.fields || !sec.fields.length) return;
+      var firstFieldEl = null;
+      for (var i = 0; i < sec.fields.length; i++) {
+        firstFieldEl = findFieldEl(sec.fields[i]);
+        if (firstFieldEl) break;
+      }
+      if (!firstFieldEl) return;
+
+      var existing = document.querySelector(
+        '.kya-inline-section[data-section-idx="' + idx + '"]'
+      );
+      if (existing) return; // déjà inséré
+
+      var title = document.createElement("div");
+      title.className = "kya-section-title kya-inline-section";
+      title.setAttribute("data-section-idx", String(idx));
+      title.innerHTML =
+        '<span class="kya-section-icon">' + (sec.icon || "") + '</span> ' +
+        (idx + 1) + ". " + sec.title;
+
+      firstFieldEl.parentNode.insertBefore(title, firstFieldEl);
+    });
+
+    // Footer en bas
+    if (footer) formBody.appendChild(footer);
+
+    // Marque + supprime le wrapper container vide
+    wrapper.dataset.kyaInlineSwitched = "1";
+    if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
+
+    document.body.classList.add("kya-inline-mode");
+    console.log("[KYA] Inline mode activé pour " + getRoute() + " (wrapper démoli)");
+  }
+
+  /**
+   * Détecte si <30% des champs attendus sont dans le wrapper après build.
+   * Si oui, bascule en mode INLINE (fallback robuste contre le re-mount Frappe v16).
+   */
+  function maybeFallbackToInlineMode() {
+    var route = getRoute();
+    var sections = FORM_SECTIONS[route];
+    if (!sections) return false;
+
+    var wrapper = document.querySelector(".kya-sections-wrapper");
+    if (!wrapper) return false;
+
+    var expected = [];
+    sections.forEach(function (sec) {
+      sec.fields.forEach(function (fn) { expected.push(fn); });
+    });
+    if (!expected.length) return false;
+
+    var inWrapper = expected.filter(function (fn) {
+      return wrapper.querySelector('[data-fieldname="' + fn + '"]');
+    }).length;
+
+    var ratio = inWrapper / expected.length;
+    if (ratio < 0.30) {
+      switchToInlineMode(wrapper, sections);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Déplace dans leurs sections les champs Frappe qui ont été montés
+   * APRÈS la construction initiale du wrapper KYA (Table, Signatures,
+   * Link fields lourds). Ne reconstruit PAS le wrapper, déplace juste
+   * les `.frappe-control[data-fieldname=...]` orphelins.
+   *
+   * @returns {number} Nombre de champs déplacés (0 = rien à faire / tout déjà dans le wrapper).
+   */
+  function moveOrphanFieldsToSections() {
+    var route = getRoute();
+    var sections = FORM_SECTIONS[route];
+    if (!sections) return 0;
+
+    var wrapper = document.querySelector(".kya-sections-wrapper");
+    if (!wrapper) return 0;
+
+    // Récupère les body DOM des sections (dans l'ordre des sections)
+    var sectionBodies = wrapper.querySelectorAll(".kya-section-body");
+    if (!sectionBodies.length) return 0;
+
+    // Build : fieldname -> { sectionIdx, gridClass }
+    var fieldRouting = {};
+    sections.forEach(function (sec, idx) {
+      sec.fields.forEach(function (fn) {
+        var gridClass = null;
+        if (sec.grid && sec.grid[fn] === "span 2") gridClass = "kya-grid-span-2";
+        else if (sec.grid && sec.grid[fn] === "col") gridClass = "kya-grid-col";
+        fieldRouting[fn] = { sectionIdx: idx, gridClass: gridClass };
+      });
+    });
+
+    var moved = 0;
+    Object.keys(fieldRouting).forEach(function (fn) {
+      var el = findFieldEl(fn);
+      if (!el) return; // pas encore monté dans le DOM
+      if (wrapper.contains(el)) return; // déjà dans le wrapper
+
+      var routing = fieldRouting[fn];
+      var body = sectionBodies[routing.sectionIdx];
+      if (!body) return;
+
+      if (routing.gridClass) el.classList.add(routing.gridClass);
+      body.appendChild(el); // déplace (appendChild sur DOM existant = move)
+      moved++;
+    });
+
+    return moved;
+  }
+
+  /**
+   * Détecte si toutes les Tables (DataTable Frappe v16) du formulaire
+   * sont entièrement montées dans le DOM. Frappe v16 a un comportement
+   * particulier : monter une Table déclenche un re-render du form parent,
+   * ce qui orpheline tout wrapper que l'on aurait construit avant.
+   *
+   * → On NE BUILD le wrapper QUE quand toutes les Tables sont stables.
+   */
+  function getExpectedTableFields(sections) {
+    // Heuristique : fieldnames typiques de Tables KYA
+    var tableNames = ["lignes", "items", "articles", "periodes", "presences"];
+    var found = [];
+    sections.forEach(function (sec) {
+      sec.fields.forEach(function (fn) {
+        if (tableNames.indexOf(fn) !== -1) found.push(fn);
+      });
+    });
+    return found;
+  }
+
+  function allTablesMounted(tableFieldnames) {
+    if (!tableFieldnames || tableFieldnames.length === 0) return true;
+    return tableFieldnames.every(function (fn) {
+      var el = findFieldEl(fn);
+      if (!el) return false;
+      // Une Table Frappe v16 monte : .frappe-control-table OU .grid-body OU table.table
+      return !!el.querySelector(
+        ".frappe-control-table, .grid-body, .form-grid, table.table"
+      );
+    });
+  }
+
   function waitForForm() {
     var route = getRoute();
     if (!FORM_SECTIONS[route] && !FORM_META[route]) return;
+
+    // Mode DÉCORATIF SIMPLE : ne touche pas aux champs Frappe, juste header + footer
+    // Suffit d'un seul appel quand le formBody est dans le DOM
+    if (DECORATIVE_ONLY_FORMS[route]) {
+      var attempts0 = 0;
+      var timer0 = setInterval(function () {
+        var fb = document.querySelector(".web-form-wrapper") ||
+                 document.querySelector(".web-form-body");
+        if (fb || attempts0 >= 30) {
+          clearInterval(timer0);
+          if (fb) restructureForm();
+        }
+        attempts0++;
+      }, 250);
+      return;
+    }
 
     // Construire la liste de tous les champs attendus pour ce formulaire
     var sections = FORM_SECTIONS[route] || [];
@@ -1151,6 +1467,8 @@
     sections.forEach(function(sec) {
       sec.fields.forEach(function(fn) { expectedFields.push(fn); });
     });
+    var expectedTables = getExpectedTableFields(sections);
+
     // Seuil : 55% des champs présents dans le DOM avant de construire le wrapper
     var minRequired = Math.max(2, Math.ceil(expectedFields.length * 0.55));
 
@@ -1158,43 +1476,174 @@
       return expectedFields.filter(function(fn) { return !!findFieldEl(fn); }).length;
     }
 
-    function alreadyBuiltCorrectly() {
+    function countInWrapper() {
       var w = document.querySelector(".kya-sections-wrapper");
-      if (!w) return false;
-      var found = expectedFields.filter(function(fn) {
+      if (!w) return 0;
+      return expectedFields.filter(function(fn) {
         return w.querySelector('[data-fieldname="' + fn + '"]');
       }).length;
-      return found >= Math.max(2, Math.ceil(expectedFields.length * 0.55));
+    }
+
+    function wrapperHasAllExpected() {
+      return countInWrapper() >= expectedFields.length;
     }
 
     function tryBuild() {
-      if (alreadyBuiltCorrectly()) return true;
-      if (countReady() >= minRequired) {
-        restructureForm();
-        setupEmployeeAutoFill();
-        setTimeout(normalizeSignaturePads, 700);
-        return true;
+      var hasWrapper = !!document.querySelector(".kya-sections-wrapper");
+      if (!hasWrapper) {
+        // Conditions pour build :
+        //  1. ≥55% des champs montés
+        //  2. TOUTES les Tables Frappe sont montées (sinon Frappe va re-render
+        //     juste après notre build et orpheliner notre wrapper en haut,
+        //     puis afficher son form natif en dessous → bug visuel du
+        //     "wrapper en haut + form Desk en bas")
+        if (countReady() >= minRequired && allTablesMounted(expectedTables)) {
+          restructureForm();
+          setupEmployeeAutoFill();
+          setTimeout(normalizeSignaturePads, 700);
+        }
+      } else {
+        // Wrapper déjà là : on déplace les champs orphelins (Signatures, Link
+        // fields montés tardivement par Frappe v16) sans reconstruire.
+        moveOrphanFieldsToSections();
       }
-      return false;
+      // On garde le polling actif tant que tous les champs ne sont pas placés.
+      return wrapperHasAllExpected();
     }
 
-    if (tryBuild()) return;
+    if (tryBuild()) {
+      installPostBuildObserver(expectedFields);
+      return;
+    }
 
-    // Polling toutes les 350ms jusqu'à 10s — couvre les Link fields et Tables
-    // qui se montent après les champs Data simples
+    // Polling toutes les 350ms jusqu'à ~21s — couvre les Link fields et Tables
+    // qui se montent après les champs Data simples (Frappe v16 mount async).
+    // Le fallback INLINE n'est plus systématique (cf. directive user :
+    // les autres web forms marchent en mode wrapper, ne pas forcer inline).
     var attempts = 0;
     var timer = setInterval(function() {
       attempts++;
-      if (tryBuild() || attempts >= 28) clearInterval(timer);
+      var done = tryBuild();
+      if (done || attempts >= 60) {
+        clearInterval(timer);
+        installPostBuildObserver(expectedFields);
+        // Au bout de 21s sans wrapper construit (Tables jamais montées?),
+        // on tente quand même le build forcé + fallback inline si <30%
+        if (!document.querySelector(".kya-sections-wrapper")) {
+          console.warn("[KYA] Tables non montées après 21s, build forcé");
+          if (countReady() >= 1) {
+            restructureForm();
+            setupEmployeeAutoFill();
+            setTimeout(normalizeSignaturePads, 700);
+            setTimeout(function () {
+              try { maybeFallbackToInlineMode(); } catch (e) {}
+            }, 2000);
+          }
+        }
+      }
     }, 350);
   }
 
+  /**
+   * Planifie un check à 2.5s : si moins de 30% des champs ont été placés dans
+   * les sections du wrapper, on bascule en mode INLINE (fallback robuste pour
+   * les forms qui ont des Table / Signatures lourdes que Frappe v16 re-mount).
+   */
+  function scheduleInlineFallback() {
+    setTimeout(function () {
+      try { maybeFallbackToInlineMode(); } catch (e) { console.warn("[KYA] inline fallback failed", e); }
+    }, 2500);
+    // 2e tentative à 5s pour les forms très lents (Link fields multiples)
+    setTimeout(function () {
+      try { maybeFallbackToInlineMode(); } catch (e) {}
+    }, 5000);
+    // 3e ronde — masquage JS des sections vides (filet ultime indépendant de CSS :has())
+    [1500, 3000, 5500, 9000].forEach(function (delay) {
+      setTimeout(hideEmptyKyaSections, delay);
+    });
+  }
+
+  /**
+   * Filet de sécurité ultime : parcourt toutes les sections KYA construites
+   * et cache (display:none) celles qui ne contiennent AUCUN champ Frappe.
+   * Indépendant des règles CSS :has() qui peuvent ne pas s'appliquer.
+   *
+   * Cas couvert : etat-recap (et autres forms avec Table) où le wrapper est
+   * construit mais les .frappe-control restent à leur place originale.
+   */
+  function hideEmptyKyaSections() {
+    var sections = document.querySelectorAll(".kya-form-section");
+    if (!sections.length) return;
+    var hidden = 0;
+    sections.forEach(function (sec) {
+      // Considère "non vide" si la section contient au moins un de ces éléments :
+      var hasContent = sec.querySelector(
+        ".frappe-control, input.form-control, canvas, textarea, select, .grid-body, table.table"
+      );
+      if (!hasContent) {
+        sec.style.display = "none";
+        hidden++;
+      } else {
+        // Au cas où on avait masqué et que des champs sont apparus depuis
+        if (sec.style.display === "none") sec.style.display = "";
+      }
+    });
+    if (hidden > 0) {
+      console.log("[KYA] " + hidden + " section(s) vide(s) masquée(s)");
+    }
+  }
+
+  /**
+   * Après le build initial, installe un MutationObserver sur le body :
+   * dès qu'un `.frappe-control[data-fieldname]` apparaît hors du wrapper,
+   * on le déplace dans sa section. Filet de sécurité pour Frappe v16 qui
+   * re-monte parfois les champs après notre build.
+   */
+  function installPostBuildObserver(expectedFields) {
+    if (window._kyaPostBuildObserver) return; // déjà installé
+    var body = document.body;
+    if (!body) return;
+
+    var debounce = null;
+    window._kyaPostBuildObserver = new MutationObserver(function () {
+      if (debounce) clearTimeout(debounce);
+      debounce = setTimeout(function () {
+        var moved = moveOrphanFieldsToSections();
+        if (moved > 0) {
+          // Re-applique les permissions/visibilité après déplacement
+          var route = getRoute();
+          setupSignaturePermissions(route);
+          setupFieldEditPermissions(route);
+          normalizeSignaturePads();
+        }
+      }, 120);
+    });
+    window._kyaPostBuildObserver.observe(body, {
+      childList: true,
+      subtree: true,
+    });
+
+    // Stop l'observer après 30s (les champs lourds sont montés bien avant)
+    setTimeout(function () {
+      if (window._kyaPostBuildObserver) {
+        window._kyaPostBuildObserver.disconnect();
+        window._kyaPostBuildObserver = null;
+      }
+    }, 30000);
+  }
+
   window.kyaRestructureForm = function () { restructureForm(); setupEmployeeAutoFill(); normalizeSignaturePads(); };
+  window.kyaHideEmptySections = hideEmptyKyaSections; // exposé pour debug user
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", function() { waitForForm(); setupAdminPreviewButton(); });
   } else {
     waitForForm(); setupAdminPreviewButton();
   }
+
+  /* hideEmptyKyaSections retiré sur demande utilisateur (15/05/2026) :
+   * "il faut faire les mêmes choses comme pour brouillard de caisse, pourquoi cacher ?"
+   * → on garde la fonction exposée via window.kyaHideEmptySections() pour debug
+   *   manuel, mais elle n'est plus appelée automatiquement. */
   if (window.frappe && window.frappe.ready) {
     frappe.ready(function () { setTimeout(waitForForm, 200); });
   }
