@@ -1141,6 +1141,55 @@
     lockEmployeeInputForSelfService();
   }
 
+  /**
+   * Déplace dans leurs sections les champs Frappe qui ont été montés
+   * APRÈS la construction initiale du wrapper KYA (Table, Signatures,
+   * Link fields lourds). Ne reconstruit PAS le wrapper, déplace juste
+   * les `.frappe-control[data-fieldname=...]` orphelins.
+   *
+   * @returns {number} Nombre de champs déplacés (0 = rien à faire / tout déjà dans le wrapper).
+   */
+  function moveOrphanFieldsToSections() {
+    var route = getRoute();
+    var sections = FORM_SECTIONS[route];
+    if (!sections) return 0;
+
+    var wrapper = document.querySelector(".kya-sections-wrapper");
+    if (!wrapper) return 0;
+
+    // Récupère les body DOM des sections (dans l'ordre des sections)
+    var sectionBodies = wrapper.querySelectorAll(".kya-section-body");
+    if (!sectionBodies.length) return 0;
+
+    // Build : fieldname -> { sectionIdx, gridClass }
+    var fieldRouting = {};
+    sections.forEach(function (sec, idx) {
+      sec.fields.forEach(function (fn) {
+        var gridClass = null;
+        if (sec.grid && sec.grid[fn] === "span 2") gridClass = "kya-grid-span-2";
+        else if (sec.grid && sec.grid[fn] === "col") gridClass = "kya-grid-col";
+        fieldRouting[fn] = { sectionIdx: idx, gridClass: gridClass };
+      });
+    });
+
+    var moved = 0;
+    Object.keys(fieldRouting).forEach(function (fn) {
+      var el = findFieldEl(fn);
+      if (!el) return; // pas encore monté dans le DOM
+      if (wrapper.contains(el)) return; // déjà dans le wrapper
+
+      var routing = fieldRouting[fn];
+      var body = sectionBodies[routing.sectionIdx];
+      if (!body) return;
+
+      if (routing.gridClass) el.classList.add(routing.gridClass);
+      body.appendChild(el); // déplace (appendChild sur DOM existant = move)
+      moved++;
+    });
+
+    return moved;
+  }
+
   function waitForForm() {
     var route = getRoute();
     if (!FORM_SECTIONS[route] && !FORM_META[route]) return;
@@ -1158,35 +1207,91 @@
       return expectedFields.filter(function(fn) { return !!findFieldEl(fn); }).length;
     }
 
-    function alreadyBuiltCorrectly() {
+    function countInWrapper() {
       var w = document.querySelector(".kya-sections-wrapper");
-      if (!w) return false;
-      var found = expectedFields.filter(function(fn) {
+      if (!w) return 0;
+      return expectedFields.filter(function(fn) {
         return w.querySelector('[data-fieldname="' + fn + '"]');
       }).length;
-      return found >= Math.max(2, Math.ceil(expectedFields.length * 0.55));
+    }
+
+    function wrapperHasAllExpected() {
+      return countInWrapper() >= expectedFields.length;
     }
 
     function tryBuild() {
-      if (alreadyBuiltCorrectly()) return true;
-      if (countReady() >= minRequired) {
-        restructureForm();
-        setupEmployeeAutoFill();
-        setTimeout(normalizeSignaturePads, 700);
-        return true;
+      var hasWrapper = !!document.querySelector(".kya-sections-wrapper");
+      if (!hasWrapper) {
+        // Pas de wrapper encore : on construit dès que ≥55% des champs sont là
+        if (countReady() >= minRequired) {
+          restructureForm();
+          setupEmployeeAutoFill();
+          setTimeout(normalizeSignaturePads, 700);
+        }
+      } else {
+        // Wrapper déjà là : on déplace les champs orphelins (Table, Signatures,
+        // Link fields montés tardivement par Frappe v16) sans reconstruire.
+        moveOrphanFieldsToSections();
       }
-      return false;
+      // On garde le polling actif tant que tous les champs ne sont pas placés.
+      return wrapperHasAllExpected();
     }
 
-    if (tryBuild()) return;
+    if (tryBuild()) {
+      installPostBuildObserver(expectedFields);
+      return;
+    }
 
-    // Polling toutes les 350ms jusqu'à 10s — couvre les Link fields et Tables
-    // qui se montent après les champs Data simples
+    // Polling toutes les 350ms jusqu'à ~21s — couvre les Link fields et Tables
+    // qui se montent après les champs Data simples (Frappe v16 mount async).
     var attempts = 0;
     var timer = setInterval(function() {
       attempts++;
-      if (tryBuild() || attempts >= 28) clearInterval(timer);
+      var done = tryBuild();
+      if (done || attempts >= 60) {
+        clearInterval(timer);
+        installPostBuildObserver(expectedFields);
+      }
     }, 350);
+  }
+
+  /**
+   * Après le build initial, installe un MutationObserver sur le body :
+   * dès qu'un `.frappe-control[data-fieldname]` apparaît hors du wrapper,
+   * on le déplace dans sa section. Filet de sécurité pour Frappe v16 qui
+   * re-monte parfois les champs après notre build.
+   */
+  function installPostBuildObserver(expectedFields) {
+    if (window._kyaPostBuildObserver) return; // déjà installé
+    var body = document.body;
+    if (!body) return;
+
+    var debounce = null;
+    window._kyaPostBuildObserver = new MutationObserver(function () {
+      if (debounce) clearTimeout(debounce);
+      debounce = setTimeout(function () {
+        var moved = moveOrphanFieldsToSections();
+        if (moved > 0) {
+          // Re-applique les permissions/visibilité après déplacement
+          var route = getRoute();
+          setupSignaturePermissions(route);
+          setupFieldEditPermissions(route);
+          normalizeSignaturePads();
+        }
+      }, 120);
+    });
+    window._kyaPostBuildObserver.observe(body, {
+      childList: true,
+      subtree: true,
+    });
+
+    // Stop l'observer après 30s (les champs lourds sont montés bien avant)
+    setTimeout(function () {
+      if (window._kyaPostBuildObserver) {
+        window._kyaPostBuildObserver.disconnect();
+        window._kyaPostBuildObserver = null;
+      }
+    }, 30000);
   }
 
   window.kyaRestructureForm = function () { restructureForm(); setupEmployeeAutoFill(); normalizeSignaturePads(); };
