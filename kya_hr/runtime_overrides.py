@@ -71,6 +71,50 @@ def disable_erpnext_demo_setup(*_args, **_kwargs):
 
 
 # --------------------------------------------------------------------------- #
+# 1b. Frappe v16 bug : `Workspace.onboarding_list` non initialisé si `content`
+#     est vide → AttributeError au build du workspace.
+# --------------------------------------------------------------------------- #
+def patch_workspace_onboarding_list_bug(*_args, **_kwargs):
+    """Bug Frappe v16.4.1 dans `frappe/desk/desktop.py:Workspace.__init__` :
+
+      ```
+      if not minimal:
+          if self.doc.content:
+              self.onboarding_list = [...]   # initialisé conditionnellement
+          self.onboardings = []
+      ```
+
+    Mais `self.onboarding_list` est ensuite utilisé inconditionnellement
+    aux lignes 115 et 320 (`if not self.onboarding_list`, `if self.onboarding_list`).
+    Si `doc.content` est vide/null (typique d'un workspace fraîchement créé
+    sans contenu de page builder, ex: `Inventaire Sorties Materiel`) →
+    `AttributeError: 'Workspace' object has no attribute 'onboarding_list'`
+    qui crashe complètement le build du workspace côté API.
+
+    On monkey-patch `Workspace.__init__` pour TOUJOURS garantir l'attribut
+    `onboarding_list = []` après l'init originale. Idempotent.
+    """
+    try:
+        from frappe.desk.desktop import Workspace
+    except Exception:
+        return
+
+    if getattr(Workspace, "_kya_onboarding_list_patched", False):
+        return
+
+    original_init = Workspace.__init__
+
+    def patched_init(self, *args, **kwargs):
+        original_init(self, *args, **kwargs)
+        # Garantit l'attribut quel que soit le contenu du workspace
+        if not hasattr(self, "onboarding_list"):
+            self.onboarding_list = []
+
+    Workspace.__init__ = patched_init
+    Workspace._kya_onboarding_list_patched = True
+
+
+# --------------------------------------------------------------------------- #
 # 2. Gunicorn worker timeout → 120s dans common_site_config.json
 # --------------------------------------------------------------------------- #
 def ensure_runtime_config():
@@ -140,15 +184,18 @@ def execute():
 
     - Monkey-patch setup_demo (déclencheur principal du bug NestedSet)
     - Persiste la config runtime (timeout gunicorn + disable_demo_setup)
+    - Patch Workspace.onboarding_list (crash desktop_page Frappe v16)
     """
     disable_erpnext_demo_setup()
+    patch_workspace_onboarding_list_bug()
     ensure_runtime_config()
 
 
 def boot_session(bootinfo=None):  # signature attendue par Frappe
     """Hook `boot_session` : monkey-patch à chaque création de session.
 
-    Garantit que même si le worker gunicorn redémarre, le patch est
-    réappliqué avant tout traitement de la requête HTTP `setup_complete`.
+    Garantit que même si le worker gunicorn redémarre, les patches sont
+    réappliqués avant tout traitement HTTP.
     """
     disable_erpnext_demo_setup()
+    patch_workspace_onboarding_list_bug()
