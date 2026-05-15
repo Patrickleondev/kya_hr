@@ -1556,6 +1556,40 @@
     setTimeout(function () {
       try { maybeFallbackToInlineMode(); } catch (e) {}
     }, 5000);
+    // 3e ronde — masquage JS des sections vides (filet ultime indépendant de CSS :has())
+    [1500, 3000, 5500, 9000].forEach(function (delay) {
+      setTimeout(hideEmptyKyaSections, delay);
+    });
+  }
+
+  /**
+   * Filet de sécurité ultime : parcourt toutes les sections KYA construites
+   * et cache (display:none) celles qui ne contiennent AUCUN champ Frappe.
+   * Indépendant des règles CSS :has() qui peuvent ne pas s'appliquer.
+   *
+   * Cas couvert : etat-recap (et autres forms avec Table) où le wrapper est
+   * construit mais les .frappe-control restent à leur place originale.
+   */
+  function hideEmptyKyaSections() {
+    var sections = document.querySelectorAll(".kya-form-section");
+    if (!sections.length) return;
+    var hidden = 0;
+    sections.forEach(function (sec) {
+      // Considère "non vide" si la section contient au moins un de ces éléments :
+      var hasContent = sec.querySelector(
+        ".frappe-control, input.form-control, canvas, textarea, select, .grid-body, table.table"
+      );
+      if (!hasContent) {
+        sec.style.display = "none";
+        hidden++;
+      } else {
+        // Au cas où on avait masqué et que des champs sont apparus depuis
+        if (sec.style.display === "none") sec.style.display = "";
+      }
+    });
+    if (hidden > 0) {
+      console.log("[KYA] " + hidden + " section(s) vide(s) masquée(s)");
+    }
   }
 
   /**
@@ -1598,11 +1632,21 @@
   }
 
   window.kyaRestructureForm = function () { restructureForm(); setupEmployeeAutoFill(); normalizeSignaturePads(); };
+  window.kyaHideEmptySections = hideEmptyKyaSections; // exposé pour debug user
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", function() { waitForForm(); setupAdminPreviewButton(); });
   } else {
     waitForForm(); setupAdminPreviewButton();
   }
+
+  /* Filet ULTIME : balaye toutes les 2s pendant 15s pour cacher les sections
+   * vides quel que soit le form et le timing de Frappe. Marche pour tous les
+   * forms qui ont ce bug (etat-recap, brouillard, etc.) */
+  [2000, 4000, 6000, 9000, 12000, 15000].forEach(function (delay) {
+    setTimeout(function () {
+      try { hideEmptyKyaSections(); } catch (e) {}
+    }, delay);
+  });
   if (window.frappe && window.frappe.ready) {
     frappe.ready(function () { setTimeout(waitForForm, 200); });
   }
