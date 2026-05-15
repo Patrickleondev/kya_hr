@@ -175,6 +175,10 @@ scheduler_events = {
 #    bench --site <site> execute kya_hr.safe_migrations.retry_failed
 after_migrate = "kya_hr.safe_migrations.after_migrate"
 
+# Boot session : monkey-patch ERPNext setup_demo (timeout CI/preprod).
+# Cf. kya_hr/runtime_overrides.py pour le contexte complet.
+boot_session = "kya_hr.runtime_overrides.boot_session"
+
 # Post-install : idem, géré par safe_migrations.after_install.
 # (Frappe v16 core bug "'list' object is not callable" dans
 # create_desktop_icons_from_workspace + block_module / for_user / parent_page

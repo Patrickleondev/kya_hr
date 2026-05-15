@@ -33,23 +33,40 @@ KYA_WEB_FORMS_UNPUBLISH = []
 
 
 def execute():
-    """Force publication/dépublication des webforms KYA."""
+    """Force publication/dépublication des webforms KYA + reload des fields.
+
+    Frappe v16 ne re-sync pas automatiquement les `Web Form Field` enfants
+    lorsqu'on modifie le JSON source — `bench migrate` ignore les changements
+    de child tables sur les fixtures `is_standard:1`. On force donc un
+    `reload_doc` explicite pour chaque web form KYA, ce qui réimporte
+    le JSON et reconstruit la table `Web Form Field`.
+    """
     if not frappe.db.has_table("Web Form"):
         return
 
     published = []
     unpublished = []
     not_found = []
+    reloaded = []
+    reload_errors = []
+
+    # Mapping route (= name BDD avec tirets) → nom de dossier (underscores)
+    # Pour la majorité, c'est juste route.replace('-', '_')
+    for route in KYA_WEB_FORMS:
+        folder_name = route.replace("-", "_")
+        try:
+            frappe.reload_doc("kya_hr", "web_form", folder_name)
+            reloaded.append(route)
+        except Exception as exc:  # pylint: disable=broad-except
+            reload_errors.append((route, str(exc)))
 
     for route in KYA_WEB_FORMS:
-        # Webform name == route in our fixtures
         names = frappe.db.get_all(
             "Web Form",
             filters={"route": route},
             fields=["name", "published"],
         )
         if not names:
-            # Try by name match
             if frappe.db.exists("Web Form", route):
                 names = [{"name": route, "published": frappe.db.get_value("Web Form", route, "published")}]
         if not names:
@@ -74,6 +91,9 @@ def execute():
     frappe.db.commit()
     frappe.clear_cache()
 
+    print(f"[kya_hr.force_publish_webforms] Reloaded: {len(reloaded)} web forms")
+    if reload_errors:
+        print(f"[kya_hr.force_publish_webforms] ⚠️ Reload errors: {reload_errors}")
     print(f"[kya_hr.force_publish_webforms] Publiés: {len(published)} - {published}")
     if unpublished:
         print(f"[kya_hr.force_publish_webforms] Dépubliés: {unpublished}")

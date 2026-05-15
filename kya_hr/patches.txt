@@ -5,6 +5,7 @@ kya_hr.patches.v1_0.fix_workflow_encoding
 kya_hr.patches.v1_0.ensure_webforms_published
 kya_hr.patches.v1_0.rename_caissiere_role
 kya_hr.patches.v1_0.mirror_hr_manager_to_responsable_rh
+kya_hr.patches.v1_0.fix_conge_shortcut_type
 
 [post_model_sync]
 kya_hr.patches.v1_0.setup_kya_contrat
