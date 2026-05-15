@@ -1292,6 +1292,38 @@
     return moved;
   }
 
+  /**
+   * Détecte si toutes les Tables (DataTable Frappe v16) du formulaire
+   * sont entièrement montées dans le DOM. Frappe v16 a un comportement
+   * particulier : monter une Table déclenche un re-render du form parent,
+   * ce qui orpheline tout wrapper que l'on aurait construit avant.
+   *
+   * → On NE BUILD le wrapper QUE quand toutes les Tables sont stables.
+   */
+  function getExpectedTableFields(sections) {
+    // Heuristique : fieldnames typiques de Tables KYA
+    var tableNames = ["lignes", "items", "articles", "periodes", "presences"];
+    var found = [];
+    sections.forEach(function (sec) {
+      sec.fields.forEach(function (fn) {
+        if (tableNames.indexOf(fn) !== -1) found.push(fn);
+      });
+    });
+    return found;
+  }
+
+  function allTablesMounted(tableFieldnames) {
+    if (!tableFieldnames || tableFieldnames.length === 0) return true;
+    return tableFieldnames.every(function (fn) {
+      var el = findFieldEl(fn);
+      if (!el) return false;
+      // Une Table Frappe v16 monte : .frappe-control-table OU .grid-body OU table.table
+      return !!el.querySelector(
+        ".frappe-control-table, .grid-body, .form-grid, table.table"
+      );
+    });
+  }
+
   function waitForForm() {
     var route = getRoute();
     if (!FORM_SECTIONS[route] && !FORM_META[route]) return;
@@ -1302,6 +1334,8 @@
     sections.forEach(function(sec) {
       sec.fields.forEach(function(fn) { expectedFields.push(fn); });
     });
+    var expectedTables = getExpectedTableFields(sections);
+
     // Seuil : 55% des champs présents dans le DOM avant de construire le wrapper
     var minRequired = Math.max(2, Math.ceil(expectedFields.length * 0.55));
 
@@ -1324,15 +1358,20 @@
     function tryBuild() {
       var hasWrapper = !!document.querySelector(".kya-sections-wrapper");
       if (!hasWrapper) {
-        // Pas de wrapper encore : on construit dès que ≥55% des champs sont là
-        if (countReady() >= minRequired) {
+        // Conditions pour build :
+        //  1. ≥55% des champs montés
+        //  2. TOUTES les Tables Frappe sont montées (sinon Frappe va re-render
+        //     juste après notre build et orpheliner notre wrapper en haut,
+        //     puis afficher son form natif en dessous → bug visuel du
+        //     "wrapper en haut + form Desk en bas")
+        if (countReady() >= minRequired && allTablesMounted(expectedTables)) {
           restructureForm();
           setupEmployeeAutoFill();
           setTimeout(normalizeSignaturePads, 700);
         }
       } else {
-        // Wrapper déjà là : on déplace les champs orphelins (Table, Signatures,
-        // Link fields montés tardivement par Frappe v16) sans reconstruire.
+        // Wrapper déjà là : on déplace les champs orphelins (Signatures, Link
+        // fields montés tardivement par Frappe v16) sans reconstruire.
         moveOrphanFieldsToSections();
       }
       // On garde le polling actif tant que tous les champs ne sont pas placés.
@@ -1341,12 +1380,13 @@
 
     if (tryBuild()) {
       installPostBuildObserver(expectedFields);
-      scheduleInlineFallback();
       return;
     }
 
     // Polling toutes les 350ms jusqu'à ~21s — couvre les Link fields et Tables
     // qui se montent après les champs Data simples (Frappe v16 mount async).
+    // Le fallback INLINE n'est plus systématique (cf. directive user :
+    // les autres web forms marchent en mode wrapper, ne pas forcer inline).
     var attempts = 0;
     var timer = setInterval(function() {
       attempts++;
@@ -1354,7 +1394,19 @@
       if (done || attempts >= 60) {
         clearInterval(timer);
         installPostBuildObserver(expectedFields);
-        scheduleInlineFallback();
+        // Au bout de 21s sans wrapper construit (Tables jamais montées?),
+        // on tente quand même le build forcé + fallback inline si <30%
+        if (!document.querySelector(".kya-sections-wrapper")) {
+          console.warn("[KYA] Tables non montées après 21s, build forcé");
+          if (countReady() >= 1) {
+            restructureForm();
+            setupEmployeeAutoFill();
+            setTimeout(normalizeSignaturePads, 700);
+            setTimeout(function () {
+              try { maybeFallbackToInlineMode(); } catch (e) {}
+            }, 2000);
+          }
+        }
       }
     }, 350);
   }
