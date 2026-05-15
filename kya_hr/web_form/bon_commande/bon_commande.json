@@ -56,14 +56,14 @@
   {
    "fieldname": "fournisseur",
    "fieldtype": "Link",
-   "label": "Destinataire / Client (référence ERPNext)",
-   "options": "Customer",
-   "description": "Optionnel — sélectionnez si le destinataire est un client enregistré dans ERPNext"
+   "label": "Fournisseur (référence)",
+   "options": "Supplier",
+   "description": "Sélectionnez le fournisseur depuis la base. Les informations seront pré-remplies."
   },
   {
    "fieldname": "fournisseur_nom",
    "fieldtype": "Data",
-   "label": "Nom / Raison Sociale du Client",
+   "label": "Nom du Fournisseur",
    "reqd": 1
   },
   {
@@ -159,6 +159,12 @@
    "fieldname": "signature_dg",
    "fieldtype": "Signature",
    "label": "Signature DG"
+  },
+  {
+   "fieldname": "signature_dga",
+   "fieldtype": "Signature",
+   "label": "Signature DGA",
+   "description": "Signature alternative si le DG est indisponible"
   },
   {
    "fieldname": "date_autorisation",

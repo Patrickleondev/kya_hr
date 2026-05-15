@@ -62,26 +62,31 @@
   },
   {
    "fieldname": "section_fournisseur",
-   "label": "Client (destinataire du Bon de Commande)",
+   "label": "Fournisseur (destinataire du Bon de Commande)",
    "fieldtype": "Section Break"
   },
   {
    "fieldname": "fournisseur",
-   "label": "Client (référence)",
+   "label": "Fournisseur (référence)",
    "fieldtype": "Link",
-   "options": "Customer"
+   "options": "Supplier",
+   "description": "Sélectionnez le fournisseur depuis la base. Les informations seront pré-remplies."
   },
   {
    "fieldname": "fournisseur_nom",
-   "label": "Nom / Raison Sociale du Client",
+   "label": "Nom du Fournisseur",
    "fieldtype": "Data",
+   "fetch_from": "fournisseur.supplier_name",
+   "fetch_if_empty": 1,
    "reqd": 1,
    "in_list_view": 1
   },
   {
    "fieldname": "fournisseur_entreprise",
    "label": "Entreprise",
-   "fieldtype": "Data"
+   "fieldtype": "Data",
+   "fetch_from": "fournisseur.supplier_name",
+   "fetch_if_empty": 1
   },
   {
    "fieldname": "fournisseur_adresse",
@@ -101,12 +106,16 @@
   {
    "fieldname": "fournisseur_telephone",
    "label": "Téléphone",
-   "fieldtype": "Data"
+   "fieldtype": "Data",
+   "fetch_from": "fournisseur.mobile_no",
+   "fetch_if_empty": 1
   },
   {
    "fieldname": "fournisseur_email",
    "label": "Email",
-   "fieldtype": "Data"
+   "fieldtype": "Data",
+   "fetch_from": "fournisseur.email_id",
+   "fetch_if_empty": 1
   },
   {
    "fieldname": "section_articles",
@@ -208,8 +217,9 @@
   },
   {
    "fieldname": "section_signatures",
-   "label": "Autorisation",
-   "fieldtype": "Section Break"
+   "label": "Autorisation (DG ou DGA)",
+   "fieldtype": "Section Break",
+   "description": "Le BC est autorisé par le DG OU le DGA. Une seule des deux signatures suffit."
   },
   {
    "fieldname": "autorise_par_nom",
@@ -219,8 +229,9 @@
   {
    "fieldname": "autorise_par_fonction",
    "label": "Fonction",
-   "fieldtype": "Data",
-   "default": null
+   "fieldtype": "Select",
+   "options": "\nDirecteur Général\nDirecteur Général Adjoint",
+   "default": "Directeur Général"
   },
   {
    "fieldname": "signature_dg",
@@ -230,6 +241,12 @@
   {
    "fieldname": "col_sig",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "signature_dga",
+   "label": "Signature DGA",
+   "fieldtype": "Signature",
+   "description": "Signature alternative si le DG est indisponible"
   },
   {
    "fieldname": "date_autorisation",
