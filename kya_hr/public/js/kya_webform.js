@@ -1639,14 +1639,10 @@
     waitForForm(); setupAdminPreviewButton();
   }
 
-  /* Filet ULTIME : balaye toutes les 2s pendant 15s pour cacher les sections
-   * vides quel que soit le form et le timing de Frappe. Marche pour tous les
-   * forms qui ont ce bug (etat-recap, brouillard, etc.) */
-  [2000, 4000, 6000, 9000, 12000, 15000].forEach(function (delay) {
-    setTimeout(function () {
-      try { hideEmptyKyaSections(); } catch (e) {}
-    }, delay);
-  });
+  /* hideEmptyKyaSections retiré sur demande utilisateur (15/05/2026) :
+   * "il faut faire les mêmes choses comme pour brouillard de caisse, pourquoi cacher ?"
+   * → on garde la fonction exposée via window.kyaHideEmptySections() pour debug
+   *   manuel, mais elle n'est plus appelée automatiquement. */
   if (window.frappe && window.frappe.ready) {
     frappe.ready(function () { setTimeout(waitForForm, 200); });
   }
