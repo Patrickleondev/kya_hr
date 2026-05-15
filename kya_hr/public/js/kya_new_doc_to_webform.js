@@ -40,7 +40,11 @@
 	function webform_route_from_href(href) {
 		if (!href) return null;
 		const normalized = href.toLowerCase();
-		const match = normalized.match(/(?:#|\/app\/)form\/([^/?#]+)\/new|\/app\/([^/?#]+)\/new/);
+		// Frappe v16 : `/app/<slug>/new` (URL directe) ou `/app/<slug>/new-<slug>-<hash>`
+		// (depuis list view "+ Add"). Les 2 patterns doivent être matchés.
+		const match = normalized.match(
+			/(?:#|\/app\/)form\/([^/?#]+)\/new(?:-[^/?#]*)?(?:[/?#]|$)|\/app\/([^/?#]+)\/new(?:-[^/?#]*)?(?:[/?#]|$)/
+		);
 		const route_key = match && (match[1] || match[2]);
 		return route_key ? ROUTE_MAP[route_key] : null;
 	}

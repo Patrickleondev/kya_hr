@@ -40,7 +40,11 @@
     if (!route || route.length < 3) return;
     var routeType = route[0];
     if (routeType !== "Form" && routeType !== "form") return;
-    if (route[2] !== "new") return;
+    // Frappe v16 utilise soit "new" exact (URL directe `/app/<slug>/new`), soit
+    // "new-<doctype-slug>-<hash>" pour les documents pas encore sauvegardés
+    // (clic "+ Add" depuis list view). Les 2 doivent être interceptés.
+    var thirdSeg = route[2] || "";
+    if (thirdSeg !== "new" && thirdSeg.indexOf("new-") !== 0) return;
     if (bypassRequested()) return;
 
     // Le route[1] est le doctype slug (en kebab-case). Frappe garde aussi
