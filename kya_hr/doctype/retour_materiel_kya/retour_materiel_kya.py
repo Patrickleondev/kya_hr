@@ -12,6 +12,38 @@ from frappe import _
 from frappe.model.document import Document
 
 
+REPAIR_WAREHOUSE_NAME = "Atelier-Reparation"
+
+
+def _get_or_create_repair_warehouse(company):
+    """Retourne le nom complet du warehouse Atelier-Réparation.
+    Crée le warehouse à la volée s'il n'existe pas pour la company.
+    Les articles endommagés y sont stockés en attendant réparation."""
+    if not company:
+        return None
+
+    abbr = frappe.db.get_value("Company", company, "abbr")
+    full_name = f"{REPAIR_WAREHOUSE_NAME} - {abbr}" if abbr else REPAIR_WAREHOUSE_NAME
+
+    if frappe.db.exists("Warehouse", full_name):
+        return full_name
+
+    try:
+        wh = frappe.new_doc("Warehouse")
+        wh.warehouse_name = REPAIR_WAREHOUSE_NAME
+        wh.company = company
+        wh.is_group = 0
+        wh.warehouse_type = None
+        wh.insert(ignore_permissions=True)
+        return wh.name
+    except Exception:
+        frappe.log_error(
+            title="Retour Matériel — création warehouse Atelier-Réparation échouée",
+            message=frappe.get_traceback(),
+        )
+        return None
+
+
 class RetourMaterielKYA(Document):
 
     def validate(self):
@@ -104,13 +136,23 @@ class RetourMaterielKYA(Document):
 
     # ------------------------------------------------------------------ #
     def _create_stock_entry(self):
-        """Stock Entry de type Material Receipt pour remettre les articles en stock."""
-        rows = [it for it in self.items if it.get("item_code") and it.get("warehouse")]
+        """Stock Entry Material Receipt pour remettre les articles en stock.
+
+        Routage par état :
+          - Bon état            → warehouse choisi par l'utilisateur
+          - Endommagé / À réparer → warehouse 'Atelier-Reparation' (créé si absent)
+            Le Responsable Magasin décide ensuite : Material Transfer
+            vers le magasin d'origine si réparé, ou Material Issue vers
+            le rebut s'il est définitivement hors service.
+        """
+        rows = [it for it in self.items if it.get("item_code")]
         if not rows:
             return
 
         company = frappe.defaults.get_user_default("Company") \
             or frappe.db.get_single_value("Global Defaults", "default_company")
+
+        repair_wh = _get_or_create_repair_warehouse(company)
 
         se = frappe.new_doc("Stock Entry")
         se.stock_entry_type = "Material Receipt"
@@ -126,11 +168,20 @@ class RetourMaterielKYA(Document):
             qty = it.qte_retournee or 0
             if qty <= 0:
                 continue
+
+            etat = (it.get("etat_au_retour") or "Bon état").strip()
+            if etat in ("Endommagé", "À réparer"):
+                target_wh = repair_wh
+            else:
+                target_wh = it.get("warehouse")
+            if not target_wh:
+                continue
+
             se.append("items", {
                 "item_code": it.item_code,
                 "qty": qty,
                 "uom": it.uom or frappe.db.get_value("Item", it.item_code, "stock_uom"),
-                "t_warehouse": it.warehouse,
+                "t_warehouse": target_wh,
                 "basic_rate": frappe.db.get_value("Item", it.item_code, "last_purchase_rate") or 0,
             })
 
