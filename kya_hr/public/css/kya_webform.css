@@ -232,6 +232,23 @@ body {
 
 .kya-section-body { padding: 18px 22px; }
 
+/* === FILET DE SÉCURITÉ : MASQUER SECTIONS VIDES ===========
+ * Si pour une raison quelconque le restructureForm n'arrive pas à
+ * déplacer les .frappe-control dans une section (cas Frappe v16
+ * re-mount des Tables), on masque la section vide via CSS pour
+ * éviter le rendu "sections vides en haut + form Desk en bas".
+ *
+ * `:has()` est supporté Chrome 105+ / Firefox 121+ / Safari 15.4+
+ * — disponibilité largement suffisante pour ERPNext v16.
+ */
+.kya-form-section:not(:has(.frappe-control)):not(:has(input.form-control)):not(:has(canvas)):not(:has(textarea)):not(:has(select)) {
+  display: none !important;
+}
+.kya-section-body:empty,
+.kya-section-body:not(:has(*)) {
+  display: none !important;
+}
+
 /* === MODE INLINE FALLBACK ====================================
  * Quand restructureForm n'arrive pas à déplacer les .frappe-control
  * dans le wrapper (Frappe v16 re-mount agressif), on bascule sur
