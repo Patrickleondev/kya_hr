@@ -1142,6 +1142,108 @@
   }
 
   /**
+   * Fallback INLINE : quand `restructureForm` n'arrive pas à déplacer
+   * les `.frappe-control` dans les sections (cas etat-recap, brouillard
+   * où Frappe v16 re-monte les contrôles après notre appendChild), on
+   * démolit le wrapper container et on bascule en mode "titres inline" :
+   * - Le header KYA reste en haut du form
+   * - Les titres de section sont insérés AVANT le premier champ de chaque section
+   * - Les champs Frappe restent à leur position originale (= ne sont JAMAIS déplacés)
+   * - Le footer reste en bas
+   *
+   * Pas de risque de "re-mount" Frappe car on ne touche plus aux .frappe-control.
+   */
+  function switchToInlineMode(wrapper, sections) {
+    if (!wrapper || !sections) return;
+    if (wrapper.dataset.kyaInlineSwitched === "1") return;
+
+    var header = wrapper.querySelector(".kya-wf-header");
+    var toolbar = wrapper.querySelector(".kya-wf-toolbar");
+    var info = wrapper.querySelector(".kya-wf-info");
+    var footer = wrapper.querySelector(".kya-wf-footer");
+
+    var formBody = wrapper.parentNode;
+    if (!formBody) return;
+
+    // Détache les composants décoratifs du wrapper avant de le détruire
+    [header, toolbar, info, footer].forEach(function (n) {
+      if (n && n.parentNode === wrapper) wrapper.removeChild(n);
+    });
+
+    // Insère header + toolbar + info au TOP du formBody (avant tout le reste)
+    var anchor = formBody.firstChild;
+    [header, toolbar, info].forEach(function (n) {
+      if (!n) return;
+      formBody.insertBefore(n, anchor);
+    });
+
+    // Pour chaque section, insère un titre décoratif AVANT son 1er champ existant
+    sections.forEach(function (sec, idx) {
+      if (!sec.fields || !sec.fields.length) return;
+      var firstFieldEl = null;
+      for (var i = 0; i < sec.fields.length; i++) {
+        firstFieldEl = findFieldEl(sec.fields[i]);
+        if (firstFieldEl) break;
+      }
+      if (!firstFieldEl) return;
+
+      var existing = document.querySelector(
+        '.kya-inline-section[data-section-idx="' + idx + '"]'
+      );
+      if (existing) return; // déjà inséré
+
+      var title = document.createElement("div");
+      title.className = "kya-section-title kya-inline-section";
+      title.setAttribute("data-section-idx", String(idx));
+      title.innerHTML =
+        '<span class="kya-section-icon">' + (sec.icon || "") + '</span> ' +
+        (idx + 1) + ". " + sec.title;
+
+      firstFieldEl.parentNode.insertBefore(title, firstFieldEl);
+    });
+
+    // Footer en bas
+    if (footer) formBody.appendChild(footer);
+
+    // Marque + supprime le wrapper container vide
+    wrapper.dataset.kyaInlineSwitched = "1";
+    if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
+
+    document.body.classList.add("kya-inline-mode");
+    console.log("[KYA] Inline mode activé pour " + getRoute() + " (wrapper démoli)");
+  }
+
+  /**
+   * Détecte si <30% des champs attendus sont dans le wrapper après build.
+   * Si oui, bascule en mode INLINE (fallback robuste contre le re-mount Frappe v16).
+   */
+  function maybeFallbackToInlineMode() {
+    var route = getRoute();
+    var sections = FORM_SECTIONS[route];
+    if (!sections) return false;
+
+    var wrapper = document.querySelector(".kya-sections-wrapper");
+    if (!wrapper) return false;
+
+    var expected = [];
+    sections.forEach(function (sec) {
+      sec.fields.forEach(function (fn) { expected.push(fn); });
+    });
+    if (!expected.length) return false;
+
+    var inWrapper = expected.filter(function (fn) {
+      return wrapper.querySelector('[data-fieldname="' + fn + '"]');
+    }).length;
+
+    var ratio = inWrapper / expected.length;
+    if (ratio < 0.30) {
+      switchToInlineMode(wrapper, sections);
+      return true;
+    }
+    return false;
+  }
+
+  /**
    * Déplace dans leurs sections les champs Frappe qui ont été montés
    * APRÈS la construction initiale du wrapper KYA (Table, Signatures,
    * Link fields lourds). Ne reconstruit PAS le wrapper, déplace juste
@@ -1239,6 +1341,7 @@
 
     if (tryBuild()) {
       installPostBuildObserver(expectedFields);
+      scheduleInlineFallback();
       return;
     }
 
@@ -1251,8 +1354,24 @@
       if (done || attempts >= 60) {
         clearInterval(timer);
         installPostBuildObserver(expectedFields);
+        scheduleInlineFallback();
       }
     }, 350);
+  }
+
+  /**
+   * Planifie un check à 2.5s : si moins de 30% des champs ont été placés dans
+   * les sections du wrapper, on bascule en mode INLINE (fallback robuste pour
+   * les forms qui ont des Table / Signatures lourdes que Frappe v16 re-mount).
+   */
+  function scheduleInlineFallback() {
+    setTimeout(function () {
+      try { maybeFallbackToInlineMode(); } catch (e) { console.warn("[KYA] inline fallback failed", e); }
+    }, 2500);
+    // 2e tentative à 5s pour les forms très lents (Link fields multiples)
+    setTimeout(function () {
+      try { maybeFallbackToInlineMode(); } catch (e) {}
+    }, 5000);
   }
 
   /**
