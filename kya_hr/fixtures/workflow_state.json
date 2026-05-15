@@ -239,5 +239,32 @@
   "icon": "question-sign",
   "style": "Warning",
   "workflow_state_name": "En attente Chef de Service"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-05-14 00:00:00",
+  "name": "Validé DFC",
+  "style": "Success",
+  "workflow_state_name": "Validé DFC"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-05-14 00:00:00",
+  "name": "En attente Maître de Stage",
+  "style": "Warning",
+  "workflow_state_name": "En attente Maître de Stage"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-05-14 00:00:00",
+  "name": "En attente Achats & Stock",
+  "style": "Warning",
+  "workflow_state_name": "En attente Achats & Stock"
  }
 ]

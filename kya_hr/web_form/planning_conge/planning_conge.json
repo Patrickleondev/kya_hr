@@ -90,12 +90,20 @@
             "label": "Périodes de Congé Souhaitées"
         },
         {
+            "fieldname": "leave_type_par_defaut",
+            "fieldtype": "Link",
+            "label": "Type de Congé",
+            "options": "Leave Type",
+            "reqd": 1,
+            "description": "Type de congé principal — sera automatiquement appliqué à chaque période"
+        },
+        {
             "fieldname": "periodes",
             "fieldtype": "Table",
             "label": "Périodes",
             "options": "Planning Conge Periode",
             "reqd": 1,
-            "description": "Ajoutez les périodes de congé prévues pour l'année (jusqu'à 4 départs)"
+            "description": "Ajoutez vos périodes. Le type de congé est auto-rempli depuis le champ ci-dessus."
         },
         {
             "fieldname": "section_monetisation",

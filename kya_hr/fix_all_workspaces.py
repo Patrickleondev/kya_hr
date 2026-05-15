@@ -50,6 +50,9 @@ def fix_missing_workflow_states():
         ("En attente Comptable", "Warning"),
         ("En attente DFC", "Warning"),
         ("En attente Validation DFC", "Warning"),
+        ("Validé DFC", "Success"),
+        ("En attente Maître de Stage", "Warning"),
+        ("En attente Achats & Stock", "Warning"),
         ("Approuvé", "Success"),
         ("Rejeté", "Danger"),
     ]
