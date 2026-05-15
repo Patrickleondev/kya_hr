@@ -856,6 +856,110 @@
     document.body.appendChild(bar);
   }
 
+  /* === FORMS qui basculent en mode DÉCORATIF SIMPLE =====
+   * Les forms ayant des Tables (DataTable Frappe v16) re-render leur DOM
+   * APRÈS notre construction du wrapper, ce qui orpheline notre wrapper en
+   * haut (avec sections vides) et affiche le form Desk natif en dessous.
+   *
+   * Pour ces forms, on bascule en mode "décoratif simple" :
+   *  - Header KYA (logo, titre officiel, RCCM, etc.) en haut
+   *  - Bandeau circuit d'approbation
+   *  - PAS de sections-containers (donc rien à remplir, rien à casser)
+   *  - Les champs Frappe restent à leur place naturelle
+   *  - Footer KYA en bas
+   *
+   * Les utilisateurs voient le design KYA + le formulaire fonctionnel.
+   */
+  // IMPORTANT : ne PAS toucher aux forms qui marchent déjà.
+  // Seuls les forms confirmés en bug entrent ici.
+  var DECORATIVE_ONLY_FORMS = {
+    "etat-recap": 1,
+    "brouillard-caisse": 1
+  };
+
+  function buildDecorativeShell(route, meta, formBody) {
+    // Si déjà construit, no-op
+    if (formBody.querySelector(".kya-deco-header")) return;
+
+    /* HEADER décoratif (logo + titre officiel KYA) */
+    var docName = "";
+    if (window.frappe && frappe.web_form_doc) {
+      docName = frappe.web_form_doc.doc_name || frappe.web_form_doc.name || "";
+    }
+    if (docName && (docName === route || docName.toLowerCase() === route.toLowerCase())) {
+      docName = "";
+    }
+    var docDisplay = docName || "PROVISOIRE";
+
+    var header = document.createElement("div");
+    header.className = "kya-deco-header kya-wf-header";
+    header.innerHTML =
+      '<div class="kya-header-row">' +
+        '<div class="kya-header-left">' +
+          '<img class="kya-logo" src="/assets/kya_hr/images/logo_kya.png" ' +
+          'alt="KYA-Energy Group" onerror="this.src=\'/files/vrai.png\'">' +
+        '</div>' +
+        '<div class="kya-header-right">' +
+          '<h3 class="kya-title">' + meta.title + '</h3>' +
+          '<span class="kya-slogan">Move beyond the sky!</span>' +
+          '<div class="kya-company-details">' +
+            'info@kya-energy.com<br>' +
+            'N° RCCM : TG-LOM 2015 B 975<br>' +
+            'NIF : 1000430317 | CNSS : 48863' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="kya-header-divider"></div>' +
+      '<div class="kya-doc-number">N° <span class="kya-doc-name">' + docDisplay + '</span>' +
+        (meta.ref ? ' &mdash; <span class="kya-doc-ref-inline">' + meta.ref + '</span>' : '') +
+      '</div>';
+
+    /* Toolbar Imprimer / PDF */
+    var toolbar = document.createElement("div");
+    toolbar.className = "kya-wf-toolbar";
+    toolbar.innerHTML =
+      '<button type="button" class="kya-btn-print" title="Imprimer">\u{1F5A8}️ Imprimer</button>' +
+      '<button type="button" class="kya-btn-pdf" title="PDF">\u{1F4E5} PDF</button>';
+    setTimeout(function () {
+      var bp = toolbar.querySelector(".kya-btn-print");
+      var bd = toolbar.querySelector(".kya-btn-pdf");
+      if (bp) bp.addEventListener("click", printForm);
+      if (bd) bd.addEventListener("click", printForm);
+    }, 0);
+
+    /* Bandeau circuit d'approbation */
+    var info = document.createElement("div");
+    info.className = "kya-wf-info";
+    info.innerHTML =
+      (meta.subtitle ? '<b>' + meta.subtitle + '</b> &mdash; ' : '') +
+      'Circuit d’approbation : <b>' + meta.workflow + '</b>';
+
+    /* Footer */
+    var footer = document.createElement("div");
+    footer.className = "kya-deco-footer kya-wf-footer";
+    footer.innerHTML =
+      '<strong class="kya-footer-brand">KYA-Energy Group</strong>' +
+      ' | LOMÉ - TOGO | Tél. : +228 70 45 34 81' +
+      '<span class="kya-footer-slogan">Move beyond the sky!</span>';
+
+    /* Insertion : header + toolbar + info en haut, footer en bas */
+    var anchor = formBody.firstChild;
+    formBody.insertBefore(header, anchor);
+    formBody.insertBefore(toolbar, anchor);
+    formBody.insertBefore(info, anchor);
+    formBody.appendChild(footer);
+
+    formBody.classList.add("kya-decorated");
+
+    /* Hide default Frappe header/intro */
+    var defaultHead = document.querySelector(".web-form-head");
+    if (defaultHead) defaultHead.classList.add("kya-hidden");
+    var defaultIntro = document.querySelector(".web-form-introduction");
+    if (defaultIntro) defaultIntro.style.display = "none";
+
+    console.log("[KYA] Mode décoratif simple appliqué pour " + route);
+  }
+
   /* ===== MAIN RESTRUCTURE ============================= */
   function restructureForm() {
     var route = getRoute();
@@ -870,6 +974,18 @@
       document.querySelector("form.web-form") ||
       document.querySelector(".frappe-form");
     if (!formBody) return;
+
+    /* Mode DÉCORATIF SIMPLE pour les forms avec Table (cf. note plus haut) */
+    if (DECORATIVE_ONLY_FORMS[route]) {
+      buildDecorativeShell(route, meta, formBody);
+      setupEmployeeAutoFill();
+      setTimeout(function () {
+        normalizeSignaturePads();
+        setupSignaturePermissions(route);
+        setupFieldEditPermissions(route);
+      }, 600);
+      return;
+    }
 
     // Vérifier si le wrapper existe et contient SUFFISAMMENT de champs attendus.
     // Un wrapper construit trop tôt peut n'avoir qu'une fraction des champs
@@ -1327,6 +1443,22 @@
   function waitForForm() {
     var route = getRoute();
     if (!FORM_SECTIONS[route] && !FORM_META[route]) return;
+
+    // Mode DÉCORATIF SIMPLE : ne touche pas aux champs Frappe, juste header + footer
+    // Suffit d'un seul appel quand le formBody est dans le DOM
+    if (DECORATIVE_ONLY_FORMS[route]) {
+      var attempts0 = 0;
+      var timer0 = setInterval(function () {
+        var fb = document.querySelector(".web-form-wrapper") ||
+                 document.querySelector(".web-form-body");
+        if (fb || attempts0 >= 30) {
+          clearInterval(timer0);
+          if (fb) restructureForm();
+        }
+        attempts0++;
+      }, 250);
+      return;
+    }
 
     // Construire la liste de tous les champs attendus pour ce formulaire
     var sections = FORM_SECTIONS[route] || [];
