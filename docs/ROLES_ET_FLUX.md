@@ -103,11 +103,31 @@ Palier auto-calculé sur `montant_total` (cf. `auto_calc_logic.compute_demande_a
 ### 4.5 Bon de Commande
 1. `Responsable Achats` **(S)** (depuis une Demande d'Achat approuvée)
 2. `Responsable Comptable` **(V)**
-3. `Directeur Général` **(V)**
+3. `Directeur Général` **OU** `DGA` **(V)** (autorisation par signature — l'un OU l'autre suffit)
 
-### 4.6 PV de Sortie / Entrée Matériel
-- Sortie : Demandeur **(S)** → `Chef Service` **(V)** → `Auditeur` **(V)** → `Direction` **(V)** → `Chargé des Stocks` **(V)** (remise effective)
-- Entrée : `Livreur/Demandeur` **(S)** → `Chargé des Stocks` **(V)** → `Auditeur` **(V)**
+> **Champ `fournisseur`** : Link vers `Supplier` (et non `Customer`). La sélection auto-remplit nom, téléphone, email depuis la base fournisseur. Cf. [BASE FOURNISSEURS](#9-base-fournisseurs--supplier-groups).
+
+### 4.6 PV de Réception (Entrée) Matériel — réf. AEA-ENG-32-V01
+1. Demandeur (acheteur / chargé stock) **(S)** — saisit fournisseur, articles avec `qte_commandee` + `qte_recue` + `observations`
+2. `Chargé des Stocks` (rôle Stock User/Manager) **(V)** — section *Achats & Stock*
+3. `Responsable Comptable` ou comptable **(V)** — section *Service Comptabilité*
+4. `Auditeur Interne` **(V)** — section *Audit Interne*
+
+> **Pas de Livreur** sur ce flux : le fournisseur fait sa propre signature sur le bordereau papier qu'il garde. Les 3 signatures internes ci-dessus sont les seules requises sur la fiche Frappe.
+> Au workflow `Approuvé`, un **Stock Entry Material Receipt** est généré automatiquement (incrément des magasins).
+
+### 4.6 bis PV de Sortie Matériel
+- Demandeur **(S)** → `Chef Service` **(V)** → `Auditeur` **(V)** → `Direction` (DG/DGA) **(V)** → `Chargé des Stocks` **(V)** (remise effective)
+
+### 4.6 ter Retour de Matériel
+1. Employé retourneur (celui qui avait la sortie d'origine) **(S)** — saisit chaque article + `etat_au_retour` (**Bon état** / **Endommagé** / **À réparer**)
+2. `Chargé des Stocks` / Stock Manager **(V)** — section *Responsable Magasin*
+3. Au workflow `Approuvé` :
+   - Articles `Bon état` → Stock Entry Material Receipt dans le magasin choisi par l'utilisateur
+   - Articles `Endommagé` ou `À réparer` → Stock Entry Material Receipt dans le magasin **`Atelier-Reparation - <abbr>`** (créé à la volée)
+4. Après réparation effective, le Stock Manager fait un **Material Transfer** manuel depuis `Atelier-Reparation` vers le magasin d'origine.
+
+> **Pourquoi un magasin dédié** : tracer en temps réel ce qui est en cours de réparation vs. utilisable. Dashboard "Inventaire & Sorties Matériel" → Number Card *Articles en Atelier-Réparation* + Chart *Retours par État*.
 
 ### 4.7 Bilan de Fin de Stage
 1. Stagiaire **(S)**
@@ -189,3 +209,37 @@ Centralisées dans :
 - À chaque ajout d'un nouveau rôle métier : l'ajouter dans `GLOBAL_ROLES` (`kya_hr/permissions.py`) **uniquement** s'il doit voir tout le périmètre. Sinon, l'ajouter dans la liste blanche du flux concerné.
 - Lors d'un renommage de rôle, lancer `kya_hr.maintenance.role_merge.run` (script de migration des `Has Role` + `DocPerm` + `Workflow Transition` + `Notification Recipient`).
 - Après toute modification, lancer `bench --site <site> migrate` puis vider le cache (`bench clear-cache`) — sinon les nouveaux filtres de permission ne s'appliquent pas.
+
+## 9. Base Fournisseurs & Supplier Groups
+
+Seedés au `after_migrate` via `kya_hr/setup_retour_materiel.py`. Racine NestedSet = `All Supplier Groups`.
+
+### Supplier Groups KYA
+
+`Modules PV`, `Batteries & Energie`, `Onduleurs`, `Cables & Electricite`, `Pneumatiques`, `Materiel de Plomberie`, `Barres Metalliques`, `Divers KYA`.
+
+### Suppliers de référence (18, base de données fournisseurs KYA)
+
+Pré-seedés : Jinko Solar, HITECH, Voltronic Power, BAE, Energie Douce, ECO SMART INDUSTRY, AHATEFOU TEKO, Entech SE SAS, Ets BOCCOVI, AMERICAIN, ZOUBEYROU, CCT, PUISSANTE MAIN DE DIEU, MA.CO.DI, LES FRERES COUSINS, MONICO, MAFIS, DONSEN.
+
+### Robustesse migration
+
+Si le `setup_wizard` ERPNext laisse l'arbre Supplier Group dans un état corrompu (cas du timeout CI/preprod sur `setup_demo` → `create_demo_company`), le patch `kya_hr.patches.v1_0.repair_supplier_group_tree` recrée la racine + détache les parents invalides + rebuild_tree, **avant** tout autre code touchant les Suppliers. Idempotent.
+
+### Ajouter un fournisseur depuis Desk
+
+`/app/supplier/new` → renseigner `Supplier Name`, choisir un `Supplier Group` KYA, ajouter `Country`, `Mobile No`, `Email Id`. Disponible immédiatement comme cible Link sur Bon de Commande, Appel d'Offre, PV Réception.
+
+## 10. Workflows ESPACE PAR ESPACE — checklist post-migration
+
+À chaque déploiement, vérifier dans Desk `/app/workflow` qu'aucun workflow n'est en état "Inactive" ou avec des Transitions cassées (rôle inexistant) :
+
+| Espace | DocTypes avec Workflow | Vérifier |
+|---|---|---|
+| Espace RH | Permission Sortie Employe, Permission Sortie Stagiaire, Planning Conge, Leave Application | Rôles `Chef Service`, `Responsable RH`, `DG`, `DGA`, `Maître de Stage`, `Responsable des Stagiaires` actifs |
+| Espace Achats | Demande Achat KYA, Bon Commande KYA, Appel Offre KYA | Rôles `Responsable Achats`, `Responsable Comptable`, `DG`, `DGA`, `Auditeur Interne` actifs |
+| Espace Stock | PV Sortie Materiel, PV Entree Materiel, Retour Materiel KYA, Inventaire KYA | Rôles `Chargé des Stocks`, `Stock User/Manager`, `Auditeur Interne`, `Responsable Comptable` actifs |
+| Espace Comptabilité | Brouillard Caisse, Etat Recap Cheques | Rôles `Accounts User`, `Responsable Comptable`, `DG`, `DGA` actifs |
+| Stagiaires | Bilan Fin de Stage, Demande Conge Stagiaire | Rôles `Maître de Stage`, `Responsable des Stagiaires`, `Responsable RH`, `DG` actifs |
+
+> Pour le détail des transitions par DocType, ouvrir `/app/workflow/<Workflow Name>` dans Desk. Tout est éditable depuis l'UI sans toucher au code — cf. [MODIF_DEPUIS_DESK.md](MODIF_DEPUIS_DESK.md).

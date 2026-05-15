@@ -7,3 +7,6 @@ node_modules/
 .DS_Store
 
 *.terabox.uploading.cfg
+
+# Documentation interne (jamais publiée sur GitHub)
+docs-internal/
