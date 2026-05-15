@@ -33,6 +33,14 @@
             "columns": 1
         },
         {
+            "fieldname": "qte_commandee",
+            "label": "Qte Commandée",
+            "fieldtype": "Float",
+            "in_list_view": 1,
+            "columns": 1,
+            "description": "Quantité initialement commandée (depuis le BC)"
+        },
+        {
             "fieldname": "qte_recue",
             "label": "Qte Reçue",
             "fieldtype": "Float",
@@ -41,10 +49,17 @@
             "columns": 1
         },
         {
+            "fieldname": "observations",
+            "label": "Observations",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "columns": 2,
+            "description": "État, écart vs commande, remarques"
+        },
+        {
             "fieldname": "prix_unitaire",
             "label": "Prix Unitaire",
             "fieldtype": "Currency",
-            "in_list_view": 1,
             "columns": 1
         },
         {
