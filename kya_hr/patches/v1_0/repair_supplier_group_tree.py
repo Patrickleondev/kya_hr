@@ -88,10 +88,28 @@ def _detach_invalid_parents():
 
 
 def _rebuild_tree():
+    """rebuild_tree dans Frappe v16 prend uniquement le doctype
+    (le parent_field est récupéré automatiquement depuis le DocType).
+    Compat ascendante : on retombe sur l'ancienne signature si besoin."""
     try:
         from frappe.utils.nestedset import rebuild_tree
-        rebuild_tree("Supplier Group", "parent_supplier_group")
+    except Exception as e:
+        print(f"[repair_supplier_group_tree] rebuild_tree introuvable : {e}")
+        return
+    try:
+        rebuild_tree("Supplier Group")
         print("[repair_supplier_group_tree] rebuild_tree OK")
+    except TypeError:
+        # Ancienne signature Frappe < v16 : (doctype, parent_field)
+        try:
+            rebuild_tree("Supplier Group", "parent_supplier_group")
+            print("[repair_supplier_group_tree] rebuild_tree OK (legacy sig)")
+        except Exception as e2:
+            frappe.log_error(
+                title="repair_supplier_group_tree — rebuild_tree legacy échec",
+                message=frappe.get_traceback() + f"\n\nError: {e2}",
+            )
+            print(f"[repair_supplier_group_tree] rebuild_tree (legacy) échoué : {e2}")
     except Exception as e:
         frappe.log_error(
             title="repair_supplier_group_tree — rebuild_tree échec",
