@@ -69,6 +69,52 @@
 		return true;
 	}
 
+	/**
+	 * Frappe v16 : le bouton "+ Add" des list views appelle souvent
+	 * `frappe.set_route("Form", "<slug>", "new-<slug>-<hash>")` DIRECTEMENT,
+	 * ce qui contourne `frappe.new_doc` et `router.on('change')` (timing).
+	 *
+	 * On monkey-patch `frappe.set_route` pour intercepter ces appels et
+	 * rediriger vers le web form correspondant.
+	 */
+	function patch_set_route() {
+		if (!window.frappe || !frappe.set_route || frappe._kya_set_route_patched) {
+			return Boolean(window.frappe && frappe._kya_set_route_patched);
+		}
+
+		const original_set_route = frappe.set_route.bind(frappe);
+
+		frappe.set_route = function () {
+			const args = Array.prototype.slice.call(arguments);
+			// Frappe set_route accepte 2 formes :
+			//  - frappe.set_route("Form", "leave-application", "new-leave-application-xxx")
+			//  - frappe.set_route(["Form", "leave-application", "new"])
+			let route_array = args;
+			if (args.length === 1 && Array.isArray(args[0])) {
+				route_array = args[0];
+			}
+			if (route_array.length >= 3) {
+				const route_type = String(route_array[0] || "").toLowerCase();
+				if (route_type === "form") {
+					const slug = String(route_array[1] || "").toLowerCase();
+					const third = String(route_array[2] || "");
+					if (third === "new" || third.indexOf("new-") === 0) {
+						const target = ROUTE_MAP[slug];
+						if (target) {
+							console.log("[KYA] frappe.set_route intercepted: " + slug + " -> " + target);
+							window.location.href = target;
+							return Promise.resolve();
+						}
+					}
+				}
+			}
+			return original_set_route.apply(frappe, args);
+		};
+
+		frappe._kya_set_route_patched = true;
+		return true;
+	}
+
 	document.addEventListener("click", function (event) {
 		if (event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) {
 			return;
@@ -83,10 +129,13 @@
 	}, true);
 
 	patch_new_doc();
+	patch_set_route();
 	let attempts = 0;
 	const interval = window.setInterval(function () {
 		attempts += 1;
-		if (patch_new_doc() || attempts >= 40) {
+		const p1 = patch_new_doc();
+		const p2 = patch_set_route();
+		if ((p1 && p2) || attempts >= 40) {
 			window.clearInterval(interval);
 		}
 	}, 250);

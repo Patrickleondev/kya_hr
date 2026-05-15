@@ -4,7 +4,7 @@ import frappe
 from frappe.desk.doctype.desktop_icon.desktop_icon import clear_desktop_icons_cache
 
 WORKSPACE_ICONS = [
-    {"label": "Direction Générale", "link_to": "Espace Direction", "sidebar": "Espace Direction", "icon": "🏛️", "app": "kya_hr", "idx": 10},
+    {"label": "Direction Générale", "link_to": "Direction Generale", "sidebar": "Direction Generale", "icon": "🏛️", "app": "kya_hr", "idx": 10},
     {"label": "Espace RH", "link_to": "Espace RH", "icon": "👥", "app": "kya_hr", "idx": 11},
     {"label": "Espace Achats", "link_to": "Espace Achats", "icon": "🛒", "app": "kya_hr", "idx": 12},
     {"label": "Espace Stock", "link_to": "Espace Stock", "icon": "📦", "app": "kya_hr", "idx": 13},

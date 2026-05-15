@@ -232,6 +232,53 @@ body {
 
 .kya-section-body { padding: 18px 22px; }
 
+/* === FILET DE SÉCURITÉ : MASQUER SECTIONS VIDES ===========
+ * Si pour une raison quelconque le restructureForm n'arrive pas à
+ * déplacer les .frappe-control dans une section (cas Frappe v16
+ * re-mount des Tables), on masque la section vide via CSS pour
+ * éviter le rendu "sections vides en haut + form Desk en bas".
+ *
+ * `:has()` est supporté Chrome 105+ / Firefox 121+ / Safari 15.4+
+ * — disponibilité largement suffisante pour ERPNext v16.
+ */
+.kya-form-section:not(:has(.frappe-control)):not(:has(input.form-control)):not(:has(canvas)):not(:has(textarea)):not(:has(select)) {
+  display: none !important;
+}
+.kya-section-body:empty,
+.kya-section-body:not(:has(*)) {
+  display: none !important;
+}
+
+/* === MODE INLINE FALLBACK ====================================
+ * Quand restructureForm n'arrive pas à déplacer les .frappe-control
+ * dans le wrapper (Frappe v16 re-mount agressif), on bascule sur
+ * des titres inline insérés AVANT les groupes de champs.
+ * Les champs Frappe restent à leur place originale.
+ */
+.kya-inline-section {
+  margin: 24px 0 8px !important;
+  border-radius: var(--kya-r-sm) !important;
+}
+body.kya-inline-mode .web-form-body > .kya-wf-header,
+body.kya-inline-mode .web-form-body > .kya-wf-toolbar,
+body.kya-inline-mode .web-form-body > .kya-wf-info,
+body.kya-inline-mode .web-form-body > .kya-wf-footer {
+  margin-left: 0;
+  margin-right: 0;
+}
+/* Groupement horizontal des signatures en mode inline : 4 signatures côte à côte */
+body.kya-inline-mode .frappe-control[data-fieldname^="signature_"] {
+  display: inline-block;
+  vertical-align: top;
+  width: calc(50% - 12px);
+  margin: 6px;
+}
+@media (min-width: 1100px) {
+  body.kya-inline-mode .frappe-control[data-fieldname^="signature_"] {
+    width: calc(25% - 12px);
+  }
+}
+
 .kya-section-body.kya-grid {
   display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px;
 }

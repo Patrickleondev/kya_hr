@@ -32,7 +32,7 @@ KYA_WORKSPACES = [
     "Espace Stock",
     "Espace RH",
     "Espace Comptabilité",
-    "Espace Direction",
+    "Direction Generale",
     "Logistique",
     "Inventaire & Sorties Matériel",
 ]
@@ -90,11 +90,11 @@ KYA_AUTO_SIDEBARS = [
         ],
     },
     {
-        "title": "Espace Direction",
+        "title": "Direction Generale",
         "icon": "🏛️",
         "module": "KYA HR",
         "app": "kya_hr",
-        "workspace": "Espace Direction",
+        "workspace": "Direction Generale",
         "items": [
             {"label": "Tableau de Bord Global", "url": "/kya-tableau-de-bord", "link_type": "URL", "icon": "chart-column"},
             {"label": "Demandes d'Achat", "link_to": "Demande Achat KYA", "link_type": "DocType", "icon": "shopping-cart"},
@@ -420,7 +420,7 @@ KYA_WORKSPACE_ICONS = {
     "Espace Achats": "🛒",
     "Espace Comptabilité": "💰",
     "Espace Comptabilite": "💰",
-    "Espace Direction": "🏛️",
+    "Direction Generale": "🏛️",
     "Espace Employés": "👤",
     "Espace Employes": "👤",
     "Espace RH": "👥",
@@ -674,7 +674,7 @@ def execute():
     _link_desktop_icon_to_sidebar("KYA Services", ["KYA Services"], "📋", app="kya_services")
     _link_desktop_icon_to_sidebar("Gestion Équipe", ["Gestion Équipe", "Gestion Equipe"], "👥", app="kya_services")
     _link_desktop_icon_to_sidebar("Gestion Equipe", ["Gestion Équipe", "Gestion Equipe"], "👥", app="kya_services")
-    _link_desktop_icon_to_sidebar("Direction Générale", ["Espace Direction"], "🏛️")
+    _link_desktop_icon_to_sidebar("Direction Générale", ["Direction Generale"], "🏛️")
     _link_desktop_icon_to_sidebar("Espace Employes", ["Espace Employes", "Espace Employés"], "👤")
     _link_desktop_icon_to_sidebar("Espace Employés", ["Espace Employes", "Espace Employés"], "👤")
     _link_desktop_icon_to_sidebar("Espace Stagiaires", ["Espace Stagiaires"], "🎓")
