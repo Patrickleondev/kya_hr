@@ -47,14 +47,26 @@
    "fieldtype": "Link",
    "options": "Warehouse",
    "in_list_view": 1,
-   "columns": 3
+   "columns": 2,
+   "description": "Magasin où l'article sera replacé s'il est en bon état"
+  },
+  {
+   "fieldname": "etat_au_retour",
+   "label": "État au retour",
+   "fieldtype": "Select",
+   "options": "Bon état\nEndommagé\nÀ réparer",
+   "default": "Bon état",
+   "in_list_view": 1,
+   "columns": 2,
+   "reqd": 1,
+   "description": "Bon état → magasin choisi. Endommagé / À réparer → magasin Atelier-Réparation (le Responsable Magasin décidera de la suite)."
   },
   {
    "fieldname": "observations",
    "label": "Observations",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "columns": 3
+   "columns": 2
   }
  ],
  "permissions": []

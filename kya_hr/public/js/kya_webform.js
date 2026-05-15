@@ -24,6 +24,68 @@
   }
 })();
 
+/* === Redirect Desk /app/<slug>/new -> KYA web form (sauf System Manager) ===
+   Empêche les boutons "+ Add" des listes Desk d'ouvrir le form Desk pour
+   les DocTypes ayant un web form custom. Les System Managers gardent
+   l'accès Desk pour debug/admin. */
+(function () {
+  var DOCTYPE_TO_WEBFORM = {
+    "permission-sortie-stagiaire": "/permission-sortie-stagiaire/new",
+    "permission-sortie-employe":  "/permission-sortie-employe/new",
+    "demande-achat-kya":          "/demande-achat/new",
+    "pv-sortie-materiel":         "/pv-sortie-materiel/new",
+    "pv-entree-materiel":         "/pv-entree-materiel/new",
+    "planning-conge":             "/planning-conge/new",
+    "leave-application":          "/demande-conge/new",
+    "bilan-fin-de-stage":         "/bilan-fin-de-stage/new",
+    "appel-offre-kya":            "/appel-offre/new",
+    "bon-commande-kya":           "/bon-commande/new",
+    "etat-recap-cheques":         "/etat-recap/new",
+    "brouillard-caisse":          "/brouillard-caisse/new",
+    "retour-materiel-kya":        "/retour-materiel/new"
+  };
+
+  function targetForCurrentRoute() {
+    var path = window.location.pathname;
+    // Frappe SPA hash route fallback (#... -> /app/...)
+    if (window.location.hash && window.location.hash.charAt(0) === "#") {
+      var hp = window.location.hash.replace(/^#/, "");
+      if (hp.charAt(0) === "/") path = hp;
+    }
+    var m = path.match(/^\/app\/([^\/\?]+)\/new(\?.*)?$/);
+    if (!m) return null;
+    return DOCTYPE_TO_WEBFORM[m[1].toLowerCase()] || null;
+  }
+
+  function isSystemManager() {
+    var roles = (window.frappe && frappe.boot && frappe.boot.user && frappe.boot.user.roles) ? frappe.boot.user.roles : [];
+    return roles.indexOf("System Manager") !== -1;
+  }
+
+  function tryRedirect() {
+    var target = targetForCurrentRoute();
+    if (!target) return;
+    if (isSystemManager()) return; // exemption admin
+    console.log("[KYA] Desk /new -> web form redirect: " + target);
+    window.location.replace(target);
+  }
+
+  // Attend frappe.boot.user (jusqu'à ~5s), puis redirige + hooke router.
+  var attempts = 0;
+  var iv = setInterval(function () {
+    attempts++;
+    if (window.frappe && frappe.boot && frappe.boot.user) {
+      clearInterval(iv);
+      tryRedirect();
+      if (frappe.router && frappe.router.on) {
+        frappe.router.on("change", tryRedirect);
+      }
+    } else if (attempts >= 50) {
+      clearInterval(iv);
+    }
+  }, 100);
+})();
+
 (function () {
   "use strict";
 

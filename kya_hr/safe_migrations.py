@@ -24,10 +24,12 @@ import frappe
 # Ordre exact des migrations historiques (cf. hooks.py:after_migrate).
 # Une entrée = (chemin d'attribut, label humain pour le log).
 AFTER_MIGRATE: list[tuple[str, str]] = [
+    ("kya_hr.runtime_overrides.execute", "Runtime overrides (timeout gunicorn + disable demo setup)"),
     ("kya_hr.setup_locale.execute", "Setup locale (timezone, fuseau)"),
     ("kya_hr.setup_leave_types.execute", "Setup leave types HRMS"),
     ("kya_hr.force_sync_workspaces.execute", "Force sync workspaces"),
     ("kya_hr.force_publish_webforms.execute", "Force publish web forms"),
+    ("kya_hr.force_resync_webform_fields.execute", "Force resync web form fields (Frappe v16 bug workaround)"),
     ("kya_hr.notification_fixes.execute", "Notification fixes"),
     ("kya_hr.setup_branding.execute", "Branding KYA (logos, couleurs)"),
     ("kya_hr.fix_all_workspaces.execute", "Fix all workspaces"),
@@ -37,12 +39,14 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.setup_pv_extensions.run", "Setup PV extensions"),
     ("kya_hr.setup_retour_materiel.run", "Setup Retour Matériel + fournisseurs KYA"),
     ("kya_hr.setup_inventaire_dashboard.run", "Setup inventaire dashboard"),
+    ("kya_hr.setup_rh_dashboard.run", "Setup dashboard RH"),
     ("kya_hr.desktop_icons.execute", "Desktop icons (workaround Frappe v16)"),
     ("kya_hr.coherence_fixes.execute", "Coherence fixes (champs orphelins)"),
     ("kya_hr.ensure_visibility.execute", "Ensure workspaces visibility"),
 ]
 
 AFTER_INSTALL: list[tuple[str, str]] = [
+    ("kya_hr.runtime_overrides.execute", "Runtime overrides (timeout gunicorn + disable demo setup)"),
     ("kya_hr.desktop_icons.execute", "Desktop icons (install)"),
     ("kya_hr.coherence_fixes.execute", "Coherence fixes (install)"),
     ("kya_hr.ensure_visibility.execute", "Ensure visibility (install)"),

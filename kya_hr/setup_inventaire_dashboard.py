@@ -118,6 +118,32 @@ DASHBOARD_CHARTS = [
         "color": "#e83e8c",
         "filters_json": '[["disabled","=",0]]',
     },
+    # ─── RETOURS & ATELIER-RÉPARATION ───
+    {
+        "name": "Retours Matériel par État",
+        "chart_type": "Group By",
+        "type": "Donut",
+        "document_type": "Retour Materiel KYA Item",
+        "parent_document_type": "Retour Materiel KYA",
+        "group_by_based_on": "etat_au_retour",
+        "group_by_type": "Sum",
+        "aggregate_function_based_on": "qte_retournee",
+        "number_of_groups": 5,
+        "color": "#e91e63",
+        "filters_json": "[]",
+    },
+    {
+        "name": "Retours Matériel par Mois",
+        "chart_type": "Count",
+        "type": "Line",
+        "document_type": "Retour Materiel KYA",
+        "based_on": "date_retour",
+        "time_interval": "Monthly",
+        "timespan": "Last Year",
+        "timeseries": 1,
+        "color": "#ad1457",
+        "filters_json": '[["docstatus","=",1]]',
+    },
 ]
 
 
@@ -188,6 +214,21 @@ NUMBER_CARDS = [
         "color": "#e83e8c",
         "filters_json": '[["client","is","set"],["date_sortie","Timespan","this year"]]',
     },
+    {
+        "label": "Articles en Atelier-Réparation",
+        "document_type": "Bin",
+        "function": "Sum",
+        "aggregate_function_based_on": "actual_qty",
+        "color": "#e91e63",
+        "filters_json": '[["warehouse","like","%Atelier-Reparation%"],["actual_qty",">",0]]',
+    },
+    {
+        "label": "Retours Matériel cette année",
+        "document_type": "Retour Materiel KYA",
+        "function": "Count",
+        "color": "#ad1457",
+        "filters_json": '[["date_retour","Timespan","this year"],["docstatus","=",1]]',
+    },
 ]
 
 
@@ -207,11 +248,15 @@ DASHBOARD = {
         {"chart": "Entrées Matériel par Mois", "width": "Half"},
         {"chart": "Stock Entries par Type", "width": "Half"},
         {"chart": "Articles par Groupe", "width": "Half"},
+        {"chart": "Retours Matériel par État", "width": "Half"},
+        {"chart": "Retours Matériel par Mois", "width": "Half"},
     ],
     "cards": [
         {"card": "Valeur Stock Total (XOF)"},
         {"card": "Articles en Stock"},
         {"card": "Articles Rupture"},
+        {"card": "Articles en Atelier-Réparation"},
+        {"card": "Retours Matériel cette année"},
         {"card": "Sorties Matériel cette année"},
         {"card": "Entrées Matériel cette année"},
         {"card": "Valeur Sorties cette année (XOF)"},

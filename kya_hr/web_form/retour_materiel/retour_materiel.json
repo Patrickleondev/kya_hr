@@ -12,7 +12,7 @@
  "docstatus": 0,
  "doctype": "Web Form",
  "idx": 0,
- "introduction_text": "<p>Déclarez le retour de matériels au magasin depuis un chantier ou un client. Indiquez le PV de Sortie d'origine pour assurer la traçabilité complète. Le responsable magasin validera la réception et les stocks seront réincrémentés automatiquement.</p>",
+ "introduction_text": "<p>Déclarez le retour de matériels au magasin depuis un chantier ou un client. Indiquez le PV de Sortie d'origine pour assurer la traçabilité complète. Le responsable magasin validera la réception et les stocks seront réincrémentés automatiquement.</p><p><strong>État au retour :</strong> pour chaque article, précisez <em>Bon état</em> (replacé directement dans le magasin choisi), <em>Endommagé</em> ou <em>À réparer</em> (acheminé au magasin <em>Atelier-Réparation</em> ; le Responsable Magasin décidera ensuite : déplacement vers le magasin d'origine après réparation, ou sortie vers le rebut).</p>",
  "is_standard": 1,
  "login_required": 1,
  "modified": "2026-05-13 00:00:00.000000",
