@@ -19,7 +19,7 @@ ICON_REPLACEMENTS = {
 }
 
 SIDEBAR_FIXES = {
-    "Espace Direction": {"workspace": "Espace Direction", "icon": "🏛️", "module": "KYA HR", "app": "kya_hr"},
+    "Direction Generale": {"workspace": "Direction Generale", "icon": "🏛️", "module": "KYA HR", "app": "kya_hr"},
     "Espace Achats": {"workspace": "Espace Achats", "icon": "🛒", "module": "KYA HR", "app": "kya_hr"},
     "Espace Stock": {"workspace": "Espace Stock", "icon": "📦", "module": "KYA HR", "app": "kya_hr"},
     "Espace RH": {"workspace": "Espace RH", "icon": "👥", "module": "KYA HR", "app": "kya_hr"},
@@ -34,7 +34,7 @@ SIDEBAR_FIXES = {
 }
 
 DESKTOP_ICON_FIXES = {
-    "Direction Générale": {"sidebar": "Espace Direction", "icon": "🏛️", "app": "kya_hr"},
+    "Direction Générale": {"sidebar": "Direction Generale", "icon": "🏛️", "app": "kya_hr"},
     "Espace Achats": {"sidebar": "Espace Achats", "icon": "🛒", "app": "kya_hr"},
     "Espace Stock": {"sidebar": "Espace Stock", "icon": "📦", "app": "kya_hr"},
     "Espace RH": {"sidebar": "Espace RH", "icon": "👥", "app": "kya_hr"},
@@ -46,7 +46,7 @@ DESKTOP_ICON_FIXES = {
     "KYA Services": {"sidebar": "KYA Services", "icon": "📋", "app": "kya_services"},
 }
 
-OBSOLETE_DESKTOP_LABELS = {"Espace Direction", "Inventaire Sorties Materiel"}
+OBSOLETE_DESKTOP_LABELS = {"Inventaire Sorties Materiel"}
 
 
 def _safe_icon(icon):
