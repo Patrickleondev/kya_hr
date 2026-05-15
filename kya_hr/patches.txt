@@ -1,4 +1,5 @@
 [pre_model_sync]
+kya_hr.patches.v1_0.repair_supplier_group_tree
 kya_hr.patches.v1_0.fix_report_roles_employee
 kya_hr.patches.v1_0.fix_workflow_encoding
 kya_hr.patches.v1_0.ensure_webforms_published
