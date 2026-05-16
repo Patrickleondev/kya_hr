@@ -16,9 +16,72 @@ from frappe.utils import add_months, getdate, now_datetime
 class KYAContrat(Document):
     # ----- LIFECYCLE -----
     def validate(self):
+        self._autofill_from_employee()
         self._select_template()
         self._compute_date_fin()
         self._validate_signatures()
+
+    # ----- AUTO-FILL DEPUIS EMPLOYEE -----
+    def _autofill_from_employee(self):
+        """Pré-remplit les champs du contrat depuis la fiche Employee.
+
+        Seuls les champs VIDES sont remplis (n'écrase pas une saisie manuelle
+        de la RH). Le mapping Employee -> KYA Contrat couvre les infos
+        nécessaires au PDF de référence (CONTRAT2.pdf) :
+          - telephone, employee_email, date_naissance, sexe, domicile
+
+        Filiation père/mère ne sont pas sur Employee standard ; saisis par
+        le signataire dans le portail /kya-contrat lors de la signature.
+        """
+        if not self.employee:
+            return
+        # Seuls les champs qui EXISTENT sur Employee HRMS sont demandés (sinon SQL error).
+        # personal_phone, place_of_birth, number_of_children sont absents en HRMS v16.
+        emp = frappe.db.get_value(
+            "Employee",
+            self.employee,
+            [
+                "employee_name", "personal_email", "company_email", "user_id",
+                "cell_number",
+                "date_of_birth", "gender",
+                "current_address", "permanent_address",
+                "marital_status",
+                "person_to_be_contacted",
+                "department", "designation",
+            ],
+            as_dict=True,
+        )
+        if not emp:
+            return
+
+        if not self.employee_name:
+            self.employee_name = emp.get("employee_name") or ""
+        if not self.employee_email:
+            self.employee_email = (
+                emp.get("personal_email") or emp.get("company_email") or emp.get("user_id") or ""
+            )
+        if not self.telephone:
+            self.telephone = emp.get("cell_number") or ""
+        if not self.date_naissance and emp.get("date_of_birth"):
+            self.date_naissance = emp.get("date_of_birth")
+        if not self.sexe and emp.get("gender"):
+            gender_map = {"Male": "Masculin", "Female": "Féminin", "Other": "Autre"}
+            self.sexe = gender_map.get(emp.get("gender"), emp.get("gender"))
+        if not self.domicile:
+            self.domicile = emp.get("current_address") or emp.get("permanent_address") or ""
+
+        # Nouveaux champs CDI/CDD — lieu_naissance et nb_enfants restent saisis
+        # manuellement par la RH (pas sur Employee HRMS standard)
+        if not self.situation_famille and emp.get("marital_status"):
+            ms_map = {"Single": "Célibataire", "Married": "Marié(e)",
+                      "Divorced": "Divorcé(e)", "Widowed": "Veuf/Veuve"}
+            self.situation_famille = ms_map.get(emp.get("marital_status"), emp.get("marital_status"))
+        if not self.personne_a_prevenir and emp.get("person_to_be_contacted"):
+            self.personne_a_prevenir = emp.get("person_to_be_contacted")
+        if not self.poste and emp.get("designation"):
+            self.poste = emp.get("designation")
+        if not self.departement and emp.get("department"):
+            self.departement = emp.get("department")
 
     def before_submit(self):
         # On submit only when workflow has reached Validé (after DG signature) or via direct submit by HR

@@ -12,3 +12,4 @@ kya_hr.patches.v1_0.setup_kya_contrat
 kya_hr.patches.v1_0.restore_accounting_workspace_links
 kya_hr.patches.v1_0.restore_accounting_shortcuts_links
 kya_hr.patches.v1_0.rename_espace_direction
+kya_hr.patches.v1_0.ensure_contract_templates_active

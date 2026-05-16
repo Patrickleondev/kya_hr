@@ -1,0 +1,235 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Tableau de Bord Direction Générale KYA{% endblock %}
+
+{% block page_content %}
+<style>
+.kya-dg-page { max-width: 1180px; margin: 18px auto 32px; padding: 0 16px; font-family: Arial, sans-serif; color: #18212f; }
+.kya-letterhead { border: 1px solid #d9dee7; border-radius: 6px; overflow: hidden; background: #fff; }
+.kya-letterhead-top { display: grid; grid-template-columns: 120px 1fr 180px; gap: 18px; align-items: center; padding: 18px 22px; border-bottom: 4px solid #d92d20; }
+.kya-logo { width: 84px; height: 84px; object-fit: contain; }
+.kya-company h1 { margin: 0; font-size: 22px; color: #0f3d68; letter-spacing: 0; }
+.kya-company p { margin: 4px 0 0; font-size: 12px; color: #5c6573; line-height: 1.45; }
+.kya-doc-meta { text-align: right; font-size: 12px; color: #4b5563; }
+.kya-title-band { background: #0f3d68; color: #fff; padding: 14px 22px; display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+.kya-title-band h2 { margin: 0; font-size: 20px; letter-spacing: 0; }
+.kya-title-band span { font-size: 13px; opacity: .92; }
+.kya-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0; }
+.kya-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 9px 14px; border-radius: 6px; border: 1px solid #d8dee8; background: #fff; color: #0f3d68; text-decoration: none; font-weight: 700; font-size: 13px; }
+.kya-btn.primary { background: #d92d20; border-color: #b42318; color: #fff; }
+.kya-btn.dark { background: #0f3d68; border-color: #0f3d68; color: #fff; }
+.kya-btn.warning { background: #f59e0b; border-color: #d97706; color: #fff; }
+.kya-btn:hover { text-decoration: none; filter: brightness(.97); }
+.kya-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 14px 0 20px; }
+.kya-kpi { border: 1px solid #d9dee7; border-radius: 6px; background: #fff; padding: 14px; position: relative; }
+.kya-kpi .label { color: #667085; font-size: 12px; text-transform: uppercase; }
+.kya-kpi .value { font-size: 22px; color: #101828; font-weight: 800; margin-top: 5px; }
+.kya-kpi.alert { border-left: 4px solid #d92d20; }
+.kya-kpi.warning { border-left: 4px solid #f59e0b; }
+.kya-kpi.info { border-left: 4px solid #2e90fa; }
+.kya-section { margin-top: 18px; border: 1px solid #d9dee7; border-radius: 6px; background: #fff; overflow: hidden; }
+.kya-section h3 { margin: 0; padding: 13px 16px; background: #f7f8fa; border-bottom: 1px solid #d9dee7; font-size: 15px; color: #0f3d68; }
+.kya-table-wrap { overflow-x: auto; }
+table.kya-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.kya-table th, .kya-table td { padding: 10px 12px; border-bottom: 1px solid #edf0f5; text-align: left; vertical-align: top; }
+.kya-table th { background: #fafbfc; color: #344054; font-weight: 700; }
+.kya-table td.num, .kya-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.kya-badge { display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #eef2f7; color: #344054; }
+.kya-badge.ok { background: #d1fadf; color: #027a48; }
+.kya-badge.err { background: #fee4e2; color: #b42318; }
+.kya-badge.wait { background: #fef0c7; color: #b54708; }
+.kya-help { padding: 14px 18px; color: #5c6573; font-size: 13px; }
+.kya-summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 16px; }
+.kya-summary-card { border: 1px solid #e5e7eb; border-radius: 6px; padding: 14px; background: #fafbfc; }
+.kya-summary-card h4 { margin: 0 0 8px; font-size: 13px; color: #344054; text-transform: uppercase; letter-spacing: .03em; }
+.kya-summary-card .v { font-size: 18px; font-weight: 800; color: #0f3d68; }
+@media (max-width: 860px) {
+  .kya-letterhead-top { grid-template-columns: 80px 1fr; }
+  .kya-doc-meta { grid-column: 1 / -1; text-align: left; }
+  .kya-grid, .kya-summary-grid { grid-template-columns: 1fr; }
+  .kya-title-band { display: block; }
+}
+@media print {
+  .navbar, header, .web-footer, .kya-actions { display: none !important; }
+  .kya-dg-page { margin: 0; max-width: none; }
+}
+</style>
+
+<div class="kya-dg-page">
+  <div class="kya-letterhead">
+    <div class="kya-letterhead-top">
+      <img class="kya-logo" src="/assets/kya_hr/images/kya_logo.png" alt="KYA-Energy Group">
+      <div class="kya-company">
+        <h1>KYA-ENERGY GROUP</h1>
+        <p>Solutions solaires • Services techniques • Gestion administrative et financière</p>
+        <p>Agoè-Logopé, Lomé - Togo</p>
+      </div>
+      <div class="kya-doc-meta">
+        <b>Direction Générale</b><br>
+        Vue consolidée — Approbations, Caisse, RH<br>
+        Mise à jour temps réel
+      </div>
+    </div>
+    <div class="kya-title-band">
+      <h2>Tableau de bord Direction Générale</h2>
+      <span>Approbations • Caisse • RH • Achats stratégiques</span>
+    </div>
+  </div>
+
+  <div class="kya-actions">
+    <a class="kya-btn primary" href="/app/demande-achat-kya?workflow_state=En%20attente%20DG">Mes approbations</a>
+    <a class="kya-btn warning" href="/recap-brouillards">Récap Caisse Hebdo</a>
+    <a class="kya-btn" href="/comptabilite-dashboard">Tableau Compta</a>
+    <a class="kya-btn" href="/achats-dashboard">Tableau Achats</a>
+    <a class="kya-btn dark" href="/app/dashboard/Tableau de Bord RH">Dashboard RH</a>
+    <button class="kya-btn" onclick="window.print()">Imprimer</button>
+  </div>
+
+  <div class="kya-grid">
+    <div class="kya-kpi alert">
+      <div class="label">Demandes ≥ 2M à valider</div>
+      <div class="value">{{ stats.demandes_dg }}</div>
+      <div style="font-size:11px;color:#667085;margin-top:4px;">{{ "{:,.0f}".format(stats.montant_demandes_dg).replace(",", " ") }} XOF</div>
+    </div>
+    <div class="kya-kpi warning">
+      <div class="label">Brouillards (7 derniers jours)</div>
+      <div class="value">{{ stats.brouillards_semaine }}</div>
+    </div>
+    <div class="kya-kpi info">
+      <div class="label">Plannings congé en attente</div>
+      <div class="value">{{ stats.plannings_attente }}</div>
+    </div>
+    <div class="kya-kpi">
+      <div class="label">Effectif actif</div>
+      <div class="value">{{ stats.effectif_actif }}</div>
+    </div>
+  </div>
+
+  {% if demandes_dg %}
+  <div class="kya-section">
+    <h3>Demandes d'achat à valider Directeur Général</h3>
+    <div class="kya-table-wrap">
+      <table class="kya-table">
+        <thead>
+          <tr>
+            <th>Référence</th>
+            <th>Demandeur</th>
+            <th>Objet</th>
+            <th class="num">Montant XOF</th>
+            <th>État</th>
+            <th>Reçu le</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in demandes_dg %}
+          <tr>
+            <td><a href="/app/demande-achat-kya/{{ d.name }}">{{ d.name }}</a></td>
+            <td>{{ d.demandeur_nom or "" }}</td>
+            <td>{{ d.objet or "" }}</td>
+            <td class="num">{{ "{:,.0f}".format(d.montant_total or 0).replace(",", " ") }}</td>
+            <td><span class="kya-badge wait">{{ d.workflow_state }}</span></td>
+            <td>{{ d.date_label }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="kya-section">
+    <h3>Brouillards Caisse — 7 derniers jours</h3>
+    {% if brouillards %}
+    <div class="kya-table-wrap">
+      <table class="kya-table">
+        <thead>
+          <tr>
+            <th>Référence</th>
+            <th>Date</th>
+            <th>Caissière</th>
+            <th class="num">Entrées</th>
+            <th class="num">Sorties</th>
+            <th class="num">Solde Final</th>
+            <th>État</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in brouillards %}
+          <tr>
+            <td><a href="/app/brouillard-caisse/{{ b.name }}">{{ b.name }}</a></td>
+            <td>{{ b.date_label }}</td>
+            <td>{{ b.caissiere or "" }}</td>
+            <td class="num">{{ "{:,.0f}".format(b.total_entrees or 0).replace(",", " ") }}</td>
+            <td class="num">{{ "{:,.0f}".format(b.total_sorties or 0).replace(",", " ") }}</td>
+            <td class="num"><b>{{ "{:,.0f}".format(b.solde_final or 0).replace(",", " ") }}</b></td>
+            <td><span class="kya-badge {% if b.workflow_state == 'Approuvé' %}ok{% endif %}">{{ b.workflow_state }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="kya-help">Aucun brouillard enregistré cette semaine.</div>
+    {% endif %}
+  </div>
+
+  {% if plannings_attente %}
+  <div class="kya-section">
+    <h3>Plannings congé à valider</h3>
+    <div class="kya-table-wrap">
+      <table class="kya-table">
+        <thead>
+          <tr>
+            <th>Référence</th>
+            <th>Employé</th>
+            <th>Début</th>
+            <th>Fin</th>
+            <th class="num">Jours</th>
+            <th>État</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in plannings_attente %}
+          <tr>
+            <td><a href="/app/planning-conge/{{ p.name }}">{{ p.name }}</a></td>
+            <td>{{ p.employee_name or "" }}</td>
+            <td>{{ p.date_label }}</td>
+            <td>{{ p.date_fin or "" }}</td>
+            <td class="num">{{ p.nb_jours or 0 }}</td>
+            <td><span class="kya-badge wait">{{ p.workflow_state }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="kya-section">
+    <h3>Accès rapides</h3>
+    <div class="kya-summary-grid">
+      <div class="kya-summary-card">
+        <h4>Demandes d'achat</h4>
+        <div><a href="/app/demande-achat-kya">Liste complète</a> &nbsp;|&nbsp;
+             <a href="/app/demande-achat-kya?workflow_state=En%20attente%20DG">En attente DG</a></div>
+      </div>
+      <div class="kya-summary-card">
+        <h4>Brouillards Caisse</h4>
+        <div><a href="/app/brouillard-caisse">Liste complète</a> &nbsp;|&nbsp;
+             <a href="/recap-brouillards">Récap hebdo</a></div>
+      </div>
+      <div class="kya-summary-card">
+        <h4>Congés &amp; Présences</h4>
+        <div><a href="/app/planning-conge">Plannings</a> &nbsp;|&nbsp;
+             <a href="/app/leave-application">Demandes congé HRMS</a></div>
+      </div>
+      <div class="kya-summary-card">
+        <h4>Stock &amp; Inventaires</h4>
+        <div><a href="/app/inventaire-kya">Inventaires</a> &nbsp;|&nbsp;
+             <a href="/app/pv-sortie-materiel">PV Sorties</a></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

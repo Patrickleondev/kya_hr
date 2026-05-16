@@ -62,6 +62,7 @@ doctype_js = {
 jinja = {
     "methods": [
         "kya_hr.utils.get_kya_email_footer",
+        "kya_hr.utils.nombre_en_lettres",
     ],
 }
 
