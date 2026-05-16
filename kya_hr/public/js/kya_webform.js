@@ -872,10 +872,11 @@
    */
   // IMPORTANT : ne PAS toucher aux forms qui marchent déjà.
   // Seuls les forms confirmés en bug entrent ici.
-  var DECORATIVE_ONLY_FORMS = {
-    "etat-recap": 1,
-    "brouillard-caisse": 1
-  };
+  // TEST 2026-05-16 : on désactive le mode décoratif pour etat-recap +
+  // brouillard-caisse afin de vérifier si les fixes Table/MutationObserver
+  // post-bb8b0c8 résolvent le bug Frappe v16 sans cette régression UI.
+  // Si le bug Table revient, remettre les 2 entrées.
+  var DECORATIVE_ONLY_FORMS = {};
 
   function buildDecorativeShell(route, meta, formBody) {
     // Si déjà construit, no-op
