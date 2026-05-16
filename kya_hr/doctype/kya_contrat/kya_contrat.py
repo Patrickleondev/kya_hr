@@ -43,6 +43,9 @@ class KYAContrat(Document):
                 "cell_number", "personal_phone",
                 "date_of_birth", "gender",
                 "current_address", "permanent_address",
+                "place_of_birth", "marital_status", "number_of_children",
+                "person_to_be_contacted",
+                "department", "designation",
             ],
             as_dict=True,
         )
@@ -64,6 +67,23 @@ class KYAContrat(Document):
             self.sexe = gender_map.get(emp.get("gender"), emp.get("gender"))
         if not self.domicile:
             self.domicile = emp.get("current_address") or emp.get("permanent_address") or ""
+
+        # Nouveaux champs CDI/CDD
+        if not self.lieu_naissance and emp.get("place_of_birth"):
+            self.lieu_naissance = emp.get("place_of_birth")
+        if not self.situation_famille and emp.get("marital_status"):
+            ms_map = {"Single": "Célibataire", "Married": "Marié(e)",
+                      "Divorced": "Divorcé(e)", "Widowed": "Veuf/Veuve"}
+            self.situation_famille = ms_map.get(emp.get("marital_status"), emp.get("marital_status"))
+        if self.nb_enfants is None or self.nb_enfants == 0:
+            if emp.get("number_of_children"):
+                self.nb_enfants = emp.get("number_of_children")
+        if not self.personne_a_prevenir and emp.get("person_to_be_contacted"):
+            self.personne_a_prevenir = emp.get("person_to_be_contacted")
+        if not self.poste and emp.get("designation"):
+            self.poste = emp.get("designation")
+        if not self.departement and emp.get("department"):
+            self.departement = emp.get("department")
 
     def before_submit(self):
         # On submit only when workflow has reached Validé (after DG signature) or via direct submit by HR
