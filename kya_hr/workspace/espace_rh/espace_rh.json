@@ -64,6 +64,34 @@
    "icon": "download"
   },
   {
+   "label": "📤 Modèle Solde Congés",
+   "type": "URL",
+   "url": "/api/method/kya_hr.api.rh_imports.download_template?type_import=Solde Conges",
+   "color": "#00838f",
+   "icon": "download"
+  },
+  {
+   "label": "📤 Modèle Planning Congés",
+   "type": "URL",
+   "url": "/api/method/kya_hr.api.rh_imports.download_template?type_import=Planning Conges",
+   "color": "#00838f",
+   "icon": "download"
+  },
+  {
+   "label": "📤 Modèle Fiche Gestion",
+   "type": "URL",
+   "url": "/api/method/kya_hr.api.rh_imports.download_template?type_import=Fiche Gestion Conges",
+   "color": "#00838f",
+   "icon": "download"
+  },
+  {
+   "label": "📤 Modèle Gestion Équipe",
+   "type": "URL",
+   "url": "/api/method/kya_hr.api.rh_imports.download_template?type_import=Gestion Equipe",
+   "color": "#00838f",
+   "icon": "download"
+  },
+  {
    "label": "Permissions Sortie Employé",
    "type": "URL",
    "url": "/permission-sortie-employe",
