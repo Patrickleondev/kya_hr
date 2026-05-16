@@ -1,7 +1,7 @@
 {
  "app": "kya_hr",
  "charts": [],
- "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Stock'>📦 Espace Stock & Logistique Matériel</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"sub\", \"type\": \"paragraph\", \"data\": {\"text\": \"<i>Mouvements matériel → audit réel (Stock Entry ERPNext) → inventaires</i>\", \"col\": 12}}, {\"id\": \"sp0\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_act\", \"type\": \"header\", \"data\": {\"text\": \"<b>⚡ Opérations courantes</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"PV Sortie Matériel\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"PV Entrée Matériel\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"À valider (mes approbations)\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Inventaires\", \"col\": 3}}, {\"id\": \"sp1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_erpnext\", \"type\": \"header\", \"data\": {\"text\": \"<b>📊 Audit ERPNext (stock réel)</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Stock Entries\", \"col\": 3}}, {\"id\": \"s6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Articles\", \"col\": 3}}, {\"id\": \"s7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Entrepôts\", \"col\": 3}}, {\"id\": \"s8\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Bilan Stock\", \"col\": 3}}]",
+ "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Stock'>📦 Espace Stock & Logistique Matériel</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"sub\", \"type\": \"paragraph\", \"data\": {\"text\": \"<i>Mouvements matériel → audit réel (Stock Entry ERPNext) → inventaires</i>\", \"col\": 12}}, {\"id\": \"sp0\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_act\", \"type\": \"header\", \"data\": {\"text\": \"<b>⚡ Opérations courantes</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"PV Sortie Matériel\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"PV Entrée Matériel\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"À valider (mes approbations)\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Inventaires\", \"col\": 3}}, {\"id\": \"sp_ret\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_ret\", \"type\": \"header\", \"data\": {\"text\": \"<b>🔄 Retours Matériel & traçabilité</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s_ret_new\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"🔄 Nouveau Retour (Web)\", \"col\": 3}}, {\"id\": \"s_ret_list\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Retours Matériel\", \"col\": 3}}, {\"id\": \"s_ret_pending\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Retours \\u00e0 valider (Magasin)\", \"col\": 3}}, {\"id\": \"sp1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_erpnext\", \"type\": \"header\", \"data\": {\"text\": \"<b>📊 Audit ERPNext (stock réel)</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Stock Entries\", \"col\": 3}}, {\"id\": \"s6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Articles\", \"col\": 3}}, {\"id\": \"s7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Entrepôts\", \"col\": 3}}, {\"id\": \"s8\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Bilan Stock\", \"col\": 3}}]",
  "creation": "2026-01-01 00:00:00.000000",
  "custom_blocks": [],
  "docstatus": 0,
@@ -95,6 +95,27 @@
    "icon": "clipboard"
   },
   {
+   "label": "🔄 Nouveau Retour (Web)",
+   "type": "URL",
+   "url": "/retour-materiel/new",
+   "color": "#880e4f",
+   "icon": "rotate-ccw"
+  },
+  {
+   "label": "Retours Matériel",
+   "type": "DocType",
+   "link_to": "Retour Materiel KYA",
+   "color": "#880e4f",
+   "icon": "rotate-ccw"
+  },
+  {
+   "label": "Retours à valider (Magasin)",
+   "type": "URL",
+   "url": "/app/retour-materiel-kya?workflow_state=En%20attente%20Magasin",
+   "color": "#e65100",
+   "icon": "check-circle"
+  },
+  {
    "label": "Stock Entries",
    "type": "DocType",
    "link_to": "Stock Entry",
@@ -157,6 +178,16 @@
    "type": "Link",
    "label": "Inventaires KYA",
    "link_to": "Inventaire KYA",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 1
+  },
+  {
+   "type": "Link",
+   "label": "Retours Matériel",
+   "link_to": "Retour Materiel KYA",
    "link_type": "DocType",
    "hidden": 0,
    "is_query_report": 0,

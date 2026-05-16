@@ -31,6 +31,13 @@
  ],
  "shortcuts": [
   {
+   "label": "🏛️ Tableau de bord Direction",
+   "type": "URL",
+   "url": "/direction-dashboard",
+   "color": "#d92d20",
+   "icon": "bar-chart"
+  },
+  {
    "label": "Tableau de Bord Global",
    "type": "URL",
    "url": "/kya-tableau-de-bord",

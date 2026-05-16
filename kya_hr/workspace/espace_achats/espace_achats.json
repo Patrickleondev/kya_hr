@@ -46,6 +46,13 @@
  ],
  "shortcuts": [
   {
+   "label": "📊 Tableau de bord Achats",
+   "type": "URL",
+   "url": "/achats-dashboard",
+   "color": "#0f3d68",
+   "icon": "bar-chart"
+  },
+  {
    "label": "➕ Nouvelle Demande d'Achat (Web)",
    "type": "URL",
    "url": "/demande-achat/new",

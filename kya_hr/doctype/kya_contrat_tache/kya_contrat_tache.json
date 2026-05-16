@@ -1,0 +1,20 @@
+{
+ "actions": [],
+ "creation": "2026-05-16 09:30:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "istable": 1,
+ "field_order": ["description"],
+ "fields": [
+  {"fieldname": "description", "fieldtype": "Small Text", "label": "Description de la tâche", "in_list_view": 1, "columns": 10, "reqd": 1}
+ ],
+ "links": [],
+ "modified": "2026-05-16 09:30:00",
+ "modified_by": "Administrator",
+ "module": "KYA HR",
+ "name": "KYA Contrat Tache",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
