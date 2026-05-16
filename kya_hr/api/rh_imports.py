@@ -203,6 +203,303 @@ def _parse_presence_ventilation(file_path):
     return rows, errors
 
 
+# ─── PARSER SOLDE CONGES ─────────────────────────────────────────────────────
+
+def _parse_solde_conges(file_path):
+    """Parse 'SOLDE CONGES PERSONNEL 2025XXX.xlsx'.
+
+    Layout :
+      - Row 1 : titre 'ETAT DU SOLDE DE...'
+      - Row 2 : headers principaux (N° Ord, Nom & Prénoms, Date embauche,
+        Date référence, Ancienneté, Total jours, Jours pris, Solde initial,
+        Périodes de jouissance)
+      - Row 3 : sub-headers (2023, 2024, CONGE ANTICIPE C, CONGE INDIVIDUEL)
+      - Row 4+ : data
+    """
+    try:
+        from openpyxl import load_workbook
+    except ImportError:
+        frappe.throw(_("openpyxl non installé."))
+
+    wb = load_workbook(file_path, data_only=True, read_only=True)
+    ws = wb[wb.sheetnames[0]]
+
+    rows = []
+    errors = []
+    # Data starts after the 3 header rows
+    for r in range(4, ws.max_row + 1):
+        n_ord = ws.cell(row=r, column=1).value
+        nom_prenoms = ws.cell(row=r, column=2).value
+        if not n_ord and not nom_prenoms:
+            continue
+        try:
+            n_ord_i = int(n_ord) if n_ord is not None else None
+        except (TypeError, ValueError):
+            continue
+
+        date_embauche = ws.cell(row=r, column=3).value
+        date_ref = ws.cell(row=r, column=4).value
+        anciennete = ws.cell(row=r, column=5).value
+        total_jours = ws.cell(row=r, column=6).value
+        jours_pris = ws.cell(row=r, column=7).value
+        solde_initial = ws.cell(row=r, column=8).value
+
+        # Lookup employee (by name only — matricule pas dans la 1re colonne)
+        name = str(nom_prenoms or "").strip()
+        emp = None
+        if name:
+            parts = name.split()
+            if parts:
+                emp = frappe.db.get_value("Employee", {"employee_name": ["like", f"%{parts[0]}%"], "status": "Active"}, "name")
+
+        rows.append({
+            "n_ordre": n_ord_i,
+            "nom_prenoms": name,
+            "employee": emp,
+            "date_embauche": _date_iso(date_embauche),
+            "date_reference": _date_iso(date_ref),
+            "anciennete_mois": _safe_float(anciennete),
+            "total_jours_acquis": _safe_float(total_jours),
+            "jours_pris": _safe_float(jours_pris),
+            "solde_initial": _safe_float(solde_initial),
+            "jouissance_2023": _safe_float(ws.cell(row=r, column=9).value),
+            "jouissance_2024": _safe_float(ws.cell(row=r, column=10).value),
+            "conge_anticipe": _safe_float(ws.cell(row=r, column=11).value),
+            "conge_individuel": _safe_float(ws.cell(row=r, column=12).value),
+        })
+        if not emp and name:
+            errors.append(f"L{r} : Employé '{name}' introuvable (lookup par prénom)")
+
+    return rows, errors
+
+
+# ─── PARSER PLANNING CONGES ──────────────────────────────────────────────────
+
+def _parse_planning_conges(file_path):
+    """Parse 'PLANNING DES CONGÉS ANNUELS 2025XXXX.xlsx'.
+
+    Layout (sheet 'PLANNING GLOBAL') :
+      - Rows 1-13 : letterhead KYA (logo, RH-ENG-21-V01, signatures Rédigé/Vérifié/Validé)
+      - Row 14 : headers (NOM, PRENOMS, FONCTION, PROPOSITIONS VALIDÉES, Dates, NBRE JOURS)
+      - Row 15+ : data
+    """
+    try:
+        from openpyxl import load_workbook
+    except ImportError:
+        frappe.throw(_("openpyxl non installé."))
+
+    wb = load_workbook(file_path, data_only=True, read_only=True)
+    # Cherche la sheet PLANNING GLOBAL ou la première
+    sheet_name = None
+    for sn in wb.sheetnames:
+        if "planning" in sn.lower():
+            sheet_name = sn
+            break
+    if not sheet_name:
+        sheet_name = wb.sheetnames[0]
+    ws = wb[sheet_name]
+
+    # Détecte la ligne d'en-tête : cherche 'NOM' en col 1 entre R10 et R20
+    header_row = None
+    for r in range(10, min(25, ws.max_row + 1)):
+        v = ws.cell(row=r, column=1).value
+        if v and "nom" in str(v).lower():
+            header_row = r
+            break
+    if not header_row:
+        return [], ["Aucune ligne d'en-tête (cherché 'NOM' en col 1 entre R10-R24)"]
+
+    rows = []
+    errors = []
+    for r in range(header_row + 1, ws.max_row + 1):
+        nom = ws.cell(row=r, column=1).value
+        if not nom:
+            continue
+        prenoms = ws.cell(row=r, column=2).value
+        fonction = ws.cell(row=r, column=3).value
+        propositions = ws.cell(row=r, column=4).value
+        dates = ws.cell(row=r, column=5).value
+        nbre_jours = ws.cell(row=r, column=6).value
+
+        name = f"{str(nom).strip()} {str(prenoms or '').strip()}".strip()
+        emp = frappe.db.get_value("Employee", {"employee_name": ["like", f"%{str(nom).strip()}%"], "status": "Active"}, "name")
+
+        rows.append({
+            "nom": str(nom).strip(),
+            "prenoms": str(prenoms or "").strip(),
+            "employee_name_recherche": name,
+            "employee": emp,
+            "fonction": str(fonction or "").strip(),
+            "propositions": str(propositions or "").strip(),
+            "dates": str(dates or "").strip(),
+            "nbre_jours": _safe_float(nbre_jours),
+        })
+        if not emp:
+            errors.append(f"L{r} : Employé '{name}' introuvable")
+
+    return rows, errors
+
+
+# ─── PARSER FICHE GESTION CONGES ─────────────────────────────────────────────
+
+def _parse_fiche_gestion_conges(file_path):
+    """Parse 'FICHE DE GESTION DES CONGES ANNUELS 2026.xlsx'.
+
+    Layout :
+      - Row 2 : titre 'FICHE DE GESTION...'
+      - Row 3 : headers ligne 1 (Nbre Jours Acquis, Congés anticipés, ...)
+      - Row 4 : headers ligne 2 (N° Ord, Nom, Prénoms, Date départ 1, ...)
+      - Row 5+ : data, plusieurs dates de départ possibles par employé
+    """
+    try:
+        from openpyxl import load_workbook
+    except ImportError:
+        frappe.throw(_("openpyxl non installé."))
+
+    wb = load_workbook(file_path, data_only=True, read_only=True)
+    ws = wb[wb.sheetnames[0]]
+
+    rows = []
+    errors = []
+    for r in range(5, ws.max_row + 1):
+        n_ord = ws.cell(row=r, column=1).value
+        nom = ws.cell(row=r, column=2).value
+        prenoms = ws.cell(row=r, column=3).value
+        if not nom and not n_ord:
+            continue
+        try:
+            n_ord_i = int(n_ord) if n_ord is not None else None
+        except (TypeError, ValueError):
+            continue
+
+        name = f"{str(nom or '').strip()} {str(prenoms or '').strip()}".strip()
+        emp = frappe.db.get_value("Employee", {"employee_name": ["like", f"%{str(nom or '').strip()}%"], "status": "Active"}, "name")
+
+        # Champs depart 1 (cols 9-11) + depart 2 (cols 12-14)
+        depart_1 = {
+            "date_depart": _date_iso(ws.cell(row=r, column=9).value),
+            "date_reprise": _date_iso(ws.cell(row=r, column=10).value),
+            "nb_jours": _safe_float(ws.cell(row=r, column=11).value),
+        }
+        depart_2 = {
+            "date_depart": _date_iso(ws.cell(row=r, column=13).value),
+            "date_reprise": _date_iso(ws.cell(row=r, column=14).value),
+            "nb_jours": _safe_float(ws.cell(row=r, column=15).value),
+        }
+
+        rows.append({
+            "n_ordre": n_ord_i,
+            "nom": str(nom or "").strip(),
+            "prenoms": str(prenoms or "").strip(),
+            "employee": emp,
+            "nbre_jours_acquis": _safe_float(ws.cell(row=r, column=4).value),
+            "conges_anticipes": _safe_float(ws.cell(row=r, column=5).value),
+            "nbre_jours_restants": _safe_float(ws.cell(row=r, column=6).value),
+            "duree_conge_general": _safe_float(ws.cell(row=r, column=7).value),
+            "solde_fin_janvier": _safe_float(ws.cell(row=r, column=8).value),
+            "departs": [d for d in (depart_1, depart_2) if d["date_depart"]],
+        })
+        if not emp and nom:
+            errors.append(f"L{r} : Employé '{name}' introuvable")
+
+    return rows, errors
+
+
+# ─── PARSER GESTION EQUIPE ───────────────────────────────────────────────────
+
+def _parse_gestion_equipe(file_path):
+    """Parse template Gestion Équipe (format défini par KYA — pas de fichier source).
+
+    Layout attendu :
+      - Sheet 'Equipes' : nom_equipe, chef_matricule, description, date_creation
+      - Sheet 'Membres' : nom_equipe, matricule_membre, role
+      - Sheet 'Taches' : nom_equipe, titre, description, date_debut, date_fin, taux_effectif
+    """
+    try:
+        from openpyxl import load_workbook
+    except ImportError:
+        frappe.throw(_("openpyxl non installé."))
+
+    wb = load_workbook(file_path, data_only=True, read_only=True)
+    rows = []
+    errors = []
+
+    # Sheet Equipes
+    if "Equipes" in wb.sheetnames:
+        ws = wb["Equipes"]
+        for r in range(2, ws.max_row + 1):
+            nom = ws.cell(row=r, column=1).value
+            if not nom:
+                continue
+            chef_mat = ws.cell(row=r, column=2).value
+            chef_emp = _find_employee_by_matricule(chef_mat) if chef_mat else None
+            rows.append({
+                "type": "equipe",
+                "nom_equipe": str(nom).strip(),
+                "chef_matricule": str(chef_mat).strip() if chef_mat else "",
+                "chef_employee": chef_emp,
+                "description": str(ws.cell(row=r, column=3).value or "").strip(),
+                "date_creation": _date_iso(ws.cell(row=r, column=4).value),
+            })
+            if chef_mat and not chef_emp:
+                errors.append(f"Equipes L{r} : chef matricule={chef_mat} introuvable")
+
+    # Sheet Membres
+    if "Membres" in wb.sheetnames:
+        ws = wb["Membres"]
+        for r in range(2, ws.max_row + 1):
+            equipe = ws.cell(row=r, column=1).value
+            matricule = ws.cell(row=r, column=2).value
+            if not equipe or matricule is None:
+                continue
+            emp = _find_employee_by_matricule(matricule)
+            rows.append({
+                "type": "membre",
+                "nom_equipe": str(equipe).strip(),
+                "matricule": str(matricule).strip(),
+                "employee": emp,
+                "role": str(ws.cell(row=r, column=3).value or "").strip(),
+            })
+            if not emp:
+                errors.append(f"Membres L{r} : employé matricule={matricule} introuvable")
+
+    # Sheet Taches
+    if "Taches" in wb.sheetnames:
+        ws = wb["Taches"]
+        for r in range(2, ws.max_row + 1):
+            equipe = ws.cell(row=r, column=1).value
+            titre = ws.cell(row=r, column=2).value
+            if not equipe or not titre:
+                continue
+            rows.append({
+                "type": "tache",
+                "nom_equipe": str(equipe).strip(),
+                "titre": str(titre).strip(),
+                "description": str(ws.cell(row=r, column=3).value or "").strip(),
+                "date_debut": _date_iso(ws.cell(row=r, column=4).value),
+                "date_fin": _date_iso(ws.cell(row=r, column=5).value),
+                "taux_effectif": _safe_float(ws.cell(row=r, column=6).value),
+            })
+
+    return rows, errors
+
+
+# ─── HELPERS ──────────────────────────────────────────────────────────────────
+
+def _safe_float(v):
+    if v is None or v == "" or str(v).strip() in ("#REF!", "#N/A", "#DIV/0!"):
+        return None
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def _date_iso(v):
+    d = _parse_date(v)
+    return d.isoformat() if d else None
+
+
 # ─── ENDPOINTS PUBLICS ───────────────────────────────────────────────────────
 
 @frappe.whitelist()
@@ -225,9 +522,16 @@ def upload_and_parse(file_url, type_import, periode):
 
     if type_import == "Presence":
         rows, errors = _parse_presence_ventilation(path)
+    elif type_import == "Solde Conges":
+        rows, errors = _parse_solde_conges(path)
+    elif type_import == "Planning Conges":
+        rows, errors = _parse_planning_conges(path)
+    elif type_import == "Fiche Gestion Conges":
+        rows, errors = _parse_fiche_gestion_conges(path)
+    elif type_import == "Gestion Equipe":
+        rows, errors = _parse_gestion_equipe(path)
     else:
-        # 4 autres types — à implémenter
-        frappe.throw(_("Type d'import non encore implémenté : {0}. Voir ROADMAP_IMPORTS_RH.md").format(type_import))
+        frappe.throw(_("Type d'import inconnu : {0}").format(type_import))
 
     # Créer le doc KYA Import RH
     doc = frappe.new_doc("KYA Import RH")
@@ -306,6 +610,163 @@ def commit_import(name):
             except Exception as e:
                 extra_errors.append(f"{r.get('employee_name','?')} {r.get('date','?')} : {e}")
                 skipped += 1
+    elif doc.type_import == "Solde Conges":
+        # Ecrit dans Leave Allocation (HRMS) si employee trouvé
+        leave_type = frappe.db.get_value("Leave Type", {"name": ["like", "%Congé Annuel%"]}, "name") \
+                     or frappe.db.get_value("Leave Type", {"name": ["like", "%Annual%"]}, "name") \
+                     or "Annual Leave"
+        for r in rows:
+            try:
+                emp = r.get("employee")
+                if not emp:
+                    skipped += 1
+                    continue
+                total = r.get("total_jours_acquis") or r.get("solde_initial") or 0
+                if not total:
+                    skipped += 1
+                    continue
+                existing = frappe.db.get_value("Leave Allocation",
+                    {"employee": emp, "leave_type": leave_type,
+                     "from_date": ["like", "2025%"], "docstatus": ["<", 2]}, "name")
+                if existing:
+                    a = frappe.get_doc("Leave Allocation", existing)
+                    a.new_leaves_allocated = total
+                    a.save(ignore_permissions=True)
+                    updated += 1
+                else:
+                    a = frappe.new_doc("Leave Allocation")
+                    a.employee = emp
+                    a.leave_type = leave_type
+                    a.from_date = "2025-01-01"
+                    a.to_date = "2025-12-31"
+                    a.new_leaves_allocated = total
+                    a.insert(ignore_permissions=True)
+                    try: a.submit()
+                    except Exception: pass
+                    inserted += 1
+            except Exception as e:
+                extra_errors.append(f"{r.get('nom_prenoms','?')} : {e}")
+                skipped += 1
+
+    elif doc.type_import == "Planning Conges":
+        # Ecrit dans Planning Conge (custom KYA existant)
+        for r in rows:
+            try:
+                emp = r.get("employee")
+                if not emp:
+                    skipped += 1
+                    continue
+                pc = frappe.new_doc("Planning Conge")
+                pc.employee = emp
+                pc.nb_jours = r.get("nbre_jours") or 0
+                pc.objet = f"Import planning - {r.get('dates','')}"
+                # workflow_state = Validé (planning officiel)
+                if hasattr(pc, "workflow_state"):
+                    pc.workflow_state = "Validé"
+                pc.insert(ignore_permissions=True)
+                inserted += 1
+            except Exception as e:
+                extra_errors.append(f"{r.get('nom','?')} : {e}")
+                skipped += 1
+
+    elif doc.type_import == "Fiche Gestion Conges":
+        # Pour chaque employé, créer 1 Leave Allocation + N Leave Application par départ
+        leave_type = frappe.db.get_value("Leave Type", {"name": ["like", "%Congé Annuel%"]}, "name") \
+                     or frappe.db.get_value("Leave Type", {"name": ["like", "%Annual%"]}, "name") \
+                     or "Annual Leave"
+        for r in rows:
+            try:
+                emp = r.get("employee")
+                if not emp:
+                    skipped += 1
+                    continue
+                # Leave Allocation pour l'année
+                total = r.get("nbre_jours_acquis") or 0
+                if total:
+                    a = frappe.new_doc("Leave Allocation")
+                    a.employee = emp
+                    a.leave_type = leave_type
+                    a.from_date = "2026-01-01"
+                    a.to_date = "2026-12-31"
+                    a.new_leaves_allocated = total
+                    a.insert(ignore_permissions=True)
+                    try: a.submit()
+                    except Exception: pass
+                    inserted += 1
+                # Leave Applications pour chaque départ
+                for dep in (r.get("departs") or []):
+                    if not dep.get("date_depart"):
+                        continue
+                    la = frappe.new_doc("Leave Application")
+                    la.employee = emp
+                    la.leave_type = leave_type
+                    la.from_date = dep["date_depart"]
+                    la.to_date = dep["date_reprise"] or dep["date_depart"]
+                    la.total_leave_days = dep.get("nb_jours") or 0
+                    la.description = "Import Fiche Gestion Congés 2026"
+                    la.status = "Approved"
+                    la.insert(ignore_permissions=True)
+                    inserted += 1
+            except Exception as e:
+                extra_errors.append(f"{r.get('nom','?')} : {e}")
+                skipped += 1
+
+    elif doc.type_import == "Gestion Equipe":
+        # Ecrit dans Equipe KYA + Tache Equipe
+        equipes_by_name = {}
+        # 1. Créer les équipes
+        for r in [x for x in rows if x.get("type") == "equipe"]:
+            try:
+                if not frappe.db.exists("Equipe KYA", r["nom_equipe"]):
+                    eq = frappe.new_doc("Equipe KYA")
+                    eq.nom_equipe = r["nom_equipe"]
+                    if r.get("chef_employee"):
+                        eq.chef_equipe = r["chef_employee"]
+                    if r.get("description"):
+                        eq.description = r["description"]
+                    eq.insert(ignore_permissions=True)
+                    inserted += 1
+                    equipes_by_name[r["nom_equipe"]] = eq.name
+                else:
+                    equipes_by_name[r["nom_equipe"]] = r["nom_equipe"]
+                    updated += 1
+            except Exception as e:
+                extra_errors.append(f"Equipe {r.get('nom_equipe')} : {e}")
+                skipped += 1
+        # 2. Ajouter membres (table child sur Equipe KYA)
+        for r in [x for x in rows if x.get("type") == "membre"]:
+            try:
+                eq_name = equipes_by_name.get(r["nom_equipe"]) or r["nom_equipe"]
+                if not r.get("employee") or not frappe.db.exists("Equipe KYA", eq_name):
+                    skipped += 1
+                    continue
+                eq = frappe.get_doc("Equipe KYA", eq_name)
+                eq.append("membres", {"employee": r["employee"], "role": r.get("role") or "Membre"})
+                eq.save(ignore_permissions=True)
+                inserted += 1
+            except Exception as e:
+                extra_errors.append(f"Membre {r.get('matricule')} : {e}")
+                skipped += 1
+        # 3. Créer les tâches
+        for r in [x for x in rows if x.get("type") == "tache"]:
+            try:
+                eq_name = equipes_by_name.get(r["nom_equipe"]) or r["nom_equipe"]
+                if not frappe.db.exists("Equipe KYA", eq_name):
+                    skipped += 1
+                    continue
+                t = frappe.new_doc("Tache Equipe")
+                t.equipe = eq_name
+                t.titre = r["titre"]
+                t.description = r.get("description") or ""
+                if r.get("date_debut"): t.date_debut = r["date_debut"]
+                if r.get("date_fin"): t.date_fin = r["date_fin"]
+                if r.get("taux_effectif") is not None: t.taux_effectif = r["taux_effectif"]
+                t.insert(ignore_permissions=True)
+                inserted += 1
+            except Exception as e:
+                extra_errors.append(f"Tache {r.get('titre')} : {e}")
+                skipped += 1
+
     else:
         frappe.throw(_("Commit non implémenté pour type : {0}").format(doc.type_import))
 
@@ -339,8 +800,16 @@ def download_template(type_import):
     """
     if type_import == "Presence":
         return _build_template_presence()
+    elif type_import == "Solde Conges":
+        return _build_template_solde_conges()
+    elif type_import == "Planning Conges":
+        return _build_template_planning_conges()
+    elif type_import == "Fiche Gestion Conges":
+        return _build_template_fiche_gestion_conges()
+    elif type_import == "Gestion Equipe":
+        return _build_template_gestion_equipe()
     else:
-        frappe.throw(_("Template non implémenté pour : {0}").format(type_import))
+        frappe.throw(_("Type d'import inconnu : {0}").format(type_import))
 
 
 def _build_template_presence():
@@ -430,6 +899,207 @@ def _build_template_presence():
     buf.seek(0)
     return {
         "filename": f"modele_import_presence_{today.year}_{today.month:02d}.xlsx",
+        "data": base64.b64encode(buf.read()).decode(),
+        "mime": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    }
+
+
+# ─── HELPER pour construire un template Excel simple ────────────────────────
+
+def _build_simple_template(sheet_name, headers, examples, aide_lines, filename):
+    """Génère un xlsx avec :
+      - Sheet `sheet_name` : 1 ligne d'en-tête KYA, 1 ligne vide, headers en bleu, examples
+      - Sheet 'Aide' : explications colonne par colonne
+    Retourne le dict {filename, data, mime}.
+    """
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = sheet_name
+
+    head_fill = PatternFill("solid", fgColor="1F4E78")
+    head_font = Font(color="FFFFFF", bold=True)
+
+    # Letterhead minimal
+    ws.cell(row=1, column=1, value=f"KYA-Energy Group — {sheet_name}").font = Font(bold=True, size=14, color="1F4E78")
+    ws.cell(row=2, column=1, value="Renseigner les données à partir de la ligne 5. Voir 'Aide' pour les colonnes.").font = Font(italic=True, size=9)
+
+    # Headers row 4
+    for i, h in enumerate(headers, 1):
+        c = ws.cell(row=4, column=i, value=h)
+        c.fill = head_fill
+        c.font = head_font
+        c.alignment = Alignment(horizontal="center")
+        ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = max(14, len(h) + 2)
+
+    # Examples
+    for ri, row in enumerate(examples, 5):
+        for ci, val in enumerate(row, 1):
+            ws.cell(row=ri, column=ci, value=val)
+
+    # Aide
+    aide = wb.create_sheet("Aide")
+    aide.append(["Colonne", "Explication"])
+    for c in aide[1]:
+        c.fill = head_fill
+        c.font = head_font
+    for line in aide_lines:
+        aide.append(line)
+    aide.column_dimensions["A"].width = 24
+    aide.column_dimensions["B"].width = 70
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return {
+        "filename": filename,
+        "data": base64.b64encode(buf.read()).decode(),
+        "mime": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    }
+
+
+def _build_template_solde_conges():
+    headers = ["N° Ord", "Nom & Prénoms", "Date d'embauche", "Date de référence",
+               "Ancienneté (mois)", "Total jours acquis", "Jours pris", "Solde initial",
+               "Jouissance 2023", "Jouissance 2024", "Congé Anticipé", "Congé Individuel"]
+    examples = [
+        [1, "AZOUMAH Yao Ketowoglo", "2016-01-02", "2025-12-31", 118, 295, 237.5, 57.5, 7, 15, 7, 0],
+        [2, "LAWSON Avla Kossi", "2016-05-02", "2025-12-31", 114, 285, 190, 95, 22, 30, 7, 15],
+    ]
+    aide = [
+        ["N° Ord", "Numéro d'ordre"],
+        ["Nom & Prénoms", "Nom complet de l'employé (utilisé pour lookup en DB)"],
+        ["Date d'embauche", "Format YYYY-MM-DD ou DD/MM/YYYY"],
+        ["Ancienneté", "En mois (calculée à la date de référence)"],
+        ["Total jours acquis", "Calculé selon ancienneté (ex: 2.5 jours/mois)"],
+        ["Solde initial", "Jours non utilisés au 1er janvier"],
+        ["Jouissance 2023/2024", "Jours pris ces années-là (pour historique)"],
+        ["Congé Anticipé", "Jours pris en avance sur l'année courante"],
+        ["Congé Individuel", "Jours hors congé annuel standard"],
+        ["", ""],
+        ["Note", "Les 3 premières lignes (1-3) sont réservées au letterhead. Les headers sont en ligne 4. Données à partir de la ligne 5."],
+    ]
+    return _build_simple_template("Solde Congés", headers, examples, aide, "modele_import_solde_conges.xlsx")
+
+
+def _build_template_planning_conges():
+    headers = ["NOM", "PRENOMS", "FONCTION", "PROPOSITIONS VALIDÉES", "DATES", "NBRE JOURS"]
+    examples = [
+        ["AZOUMAH", "Yao Ketowoglo", "DIRECTEUR GENERAL", "Du 07/05 au 20/05", "13", 13],
+        ["LAWSON", "Avla Kossi", "DAF", "Du 20/04 au 27/04", "7", 7],
+    ]
+    aide = [
+        ["NOM", "Nom de famille (lookup employé)"],
+        ["PRENOMS", "Prénoms"],
+        ["FONCTION", "Poste actuel"],
+        ["PROPOSITIONS VALIDÉES", "Texte libre décrivant la période"],
+        ["DATES", "Détail des dates (texte libre)"],
+        ["NBRE JOURS", "Nombre de jours de congé"],
+        ["", ""],
+        ["Note", "À l'import : skip lignes 1-13 (letterhead), headers ligne 14, données à partir ligne 15. Ce template simplifié les met en ligne 4."],
+    ]
+    return _build_simple_template("PLANNING GLOBAL", headers, examples, aide, "modele_import_planning_conges.xlsx")
+
+
+def _build_template_fiche_gestion_conges():
+    headers = ["N° Ord", "Nom", "Prénoms", "Nbre Jours Acquis", "Congés anticipés",
+               "Nbre Jours Restants", "Durée congé général", "Solde fin janvier",
+               "Date départ 1", "Date reprise 1", "Nb jours départ 1",
+               "Solde 1",
+               "Date départ 2", "Date reprise 2", "Nb jours départ 2"]
+    examples = [
+        [1, "AZOUMAH", "Yao Ketowoglo", 30, 7, 23, 0, 23, "2026-05-07", "2026-05-20", 13, 10, "", "", ""],
+        [2, "ZATO", "Yamine", 43, 7, 36, 16, 20, "2026-02-23", "2026-03-02", 7, 29, "2026-07-15", "2026-07-25", 10],
+    ]
+    aide = [
+        ["N° Ord", "Numéro d'ordre"],
+        ["Nom + Prénoms", "Nom complet (lookup employé)"],
+        ["Nbre Jours Acquis", "Total jours de congé acquis pour l'année"],
+        ["Congés anticipés", "Jours pris en avance"],
+        ["Nbre Jours Restants", "= Acquis - Anticipés"],
+        ["Date départ 1/2", "Format YYYY-MM-DD (pour générer Leave Application)"],
+        ["Nb jours", "Calculé entre date départ et reprise"],
+        ["", ""],
+        ["Note", "Jusqu'à 2 départs par employé dans ce template. Si plus, dupliquer la ligne."],
+    ]
+    return _build_simple_template("Fiche Gestion Congés", headers, examples, aide, "modele_import_fiche_gestion_conges.xlsx")
+
+
+def _build_template_gestion_equipe():
+    """Template Gestion Equipe : 3 sheets (Equipes, Membres, Taches)."""
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment
+
+    wb = openpyxl.Workbook()
+    head_fill = PatternFill("solid", fgColor="1F4E78")
+    head_font = Font(color="FFFFFF", bold=True)
+
+    # Sheet 1 : Equipes
+    ws = wb.active
+    ws.title = "Equipes"
+    headers = ["nom_equipe", "chef_matricule", "description", "date_creation"]
+    for i, h in enumerate(headers, 1):
+        c = ws.cell(row=1, column=i, value=h)
+        c.fill = head_fill
+        c.font = head_font
+        ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = 24
+    ws.append(["Équipe IT", "1", "Équipe développement & support informatique", "2026-01-01"])
+    ws.append(["Équipe Maintenance", "5", "Équipe maintenance préventive et curative", "2026-01-01"])
+
+    # Sheet 2 : Membres
+    ws = wb.create_sheet("Membres")
+    headers = ["nom_equipe", "matricule_membre", "role"]
+    for i, h in enumerate(headers, 1):
+        c = ws.cell(row=1, column=i, value=h)
+        c.fill = head_fill
+        c.font = head_font
+        ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = 22
+    ws.append(["Équipe IT", "1", "Chef d'équipe"])
+    ws.append(["Équipe IT", "10", "Développeur"])
+    ws.append(["Équipe IT", "12", "Support"])
+
+    # Sheet 3 : Taches
+    ws = wb.create_sheet("Taches")
+    headers = ["nom_equipe", "titre", "description", "date_debut", "date_fin", "taux_effectif"]
+    for i, h in enumerate(headers, 1):
+        c = ws.cell(row=1, column=i, value=h)
+        c.fill = head_fill
+        c.font = head_font
+        ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = 22
+    ws.append(["Équipe IT", "Migration ERPNext v16", "Upgrade des modules custom", "2026-06-01", "2026-08-31", 0.6])
+    ws.append(["Équipe Maintenance", "Audit annuel sites clients", "Visite préventive Q3", "2026-07-01", "2026-09-30", 0.4])
+
+    # Sheet Aide
+    aide = wb.create_sheet("Aide")
+    aide.append(["Sheet", "Colonne", "Explication"])
+    for c in aide[1]:
+        c.fill = head_fill
+        c.font = head_font
+    rows_aide = [
+        ["Equipes", "nom_equipe", "Nom unique de l'équipe (clé primaire)"],
+        ["Equipes", "chef_matricule", "Matricule de l'employé chef d'équipe (employee_number)"],
+        ["Equipes", "description", "Description libre"],
+        ["Equipes", "date_creation", "YYYY-MM-DD"],
+        ["Membres", "nom_equipe", "Doit correspondre à une équipe de la sheet 'Equipes'"],
+        ["Membres", "matricule_membre", "Matricule employé membre"],
+        ["Membres", "role", "Ex: 'Chef d'équipe', 'Développeur', 'Support', 'Membre'"],
+        ["Taches", "nom_equipe", "Équipe assignée"],
+        ["Taches", "titre", "Titre court de la tâche"],
+        ["Taches", "date_debut/fin", "YYYY-MM-DD"],
+        ["Taches", "taux_effectif", "Pourcentage temps consacré (0.0 à 1.0)"],
+    ]
+    for r in rows_aide:
+        aide.append(r)
+    for col, w in (("A", 14), ("B", 22), ("C", 60)):
+        aide.column_dimensions[col].width = w
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return {
+        "filename": "modele_import_gestion_equipe.xlsx",
         "data": base64.b64encode(buf.read()).decode(),
         "mime": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     }
