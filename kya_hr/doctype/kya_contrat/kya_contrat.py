@@ -35,15 +35,17 @@ class KYAContrat(Document):
         """
         if not self.employee:
             return
+        # Seuls les champs qui EXISTENT sur Employee HRMS sont demandés (sinon SQL error).
+        # personal_phone, place_of_birth, number_of_children sont absents en HRMS v16.
         emp = frappe.db.get_value(
             "Employee",
             self.employee,
             [
                 "employee_name", "personal_email", "company_email", "user_id",
-                "cell_number", "personal_phone",
+                "cell_number",
                 "date_of_birth", "gender",
                 "current_address", "permanent_address",
-                "place_of_birth", "marital_status", "number_of_children",
+                "marital_status",
                 "person_to_be_contacted",
                 "department", "designation",
             ],
@@ -59,7 +61,7 @@ class KYAContrat(Document):
                 emp.get("personal_email") or emp.get("company_email") or emp.get("user_id") or ""
             )
         if not self.telephone:
-            self.telephone = emp.get("cell_number") or emp.get("personal_phone") or ""
+            self.telephone = emp.get("cell_number") or ""
         if not self.date_naissance and emp.get("date_of_birth"):
             self.date_naissance = emp.get("date_of_birth")
         if not self.sexe and emp.get("gender"):
@@ -68,16 +70,12 @@ class KYAContrat(Document):
         if not self.domicile:
             self.domicile = emp.get("current_address") or emp.get("permanent_address") or ""
 
-        # Nouveaux champs CDI/CDD
-        if not self.lieu_naissance and emp.get("place_of_birth"):
-            self.lieu_naissance = emp.get("place_of_birth")
+        # Nouveaux champs CDI/CDD — lieu_naissance et nb_enfants restent saisis
+        # manuellement par la RH (pas sur Employee HRMS standard)
         if not self.situation_famille and emp.get("marital_status"):
             ms_map = {"Single": "Célibataire", "Married": "Marié(e)",
                       "Divorced": "Divorcé(e)", "Widowed": "Veuf/Veuve"}
             self.situation_famille = ms_map.get(emp.get("marital_status"), emp.get("marital_status"))
-        if self.nb_enfants is None or self.nb_enfants == 0:
-            if emp.get("number_of_children"):
-                self.nb_enfants = emp.get("number_of_children")
         if not self.personne_a_prevenir and emp.get("person_to_be_contacted"):
             self.personne_a_prevenir = emp.get("person_to_be_contacted")
         if not self.poste and emp.get("designation"):
