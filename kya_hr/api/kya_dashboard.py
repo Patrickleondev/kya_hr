@@ -674,7 +674,22 @@ def reset_dashboard_config():
 
 
 def _can_manage_dashboard():
-    return bool(set(frappe.get_roles()).intersection({"System Manager", "Dashboard Manager", "Administrator"}))
+    """Rôles autorisés à synchroniser le tableau de bord depuis les Web Forms.
+
+    Why: la page /kya-tableau-de-bord autorise DG / Directeur Général à ouvrir
+    le tableau, donc on doit leur permettre le bouton "Synchroniser Web Forms"
+    sinon ils voient le bouton mais ne peuvent pas l'utiliser (rejet PermissionError).
+    On élargit aussi aux managers de modules (HR Manager, DAAF, DFC) pour
+    rendre la sync modulaire — chacun synchronise les Web Forms de son module.
+    """
+    allowed = {
+        "System Manager", "Dashboard Manager", "Administrator",
+        "DG", "Directeur Général", "DGA",
+        "DAAF", "DFC",
+        "HR Manager", "Responsable RH",
+        "Auditeur Interne",
+    }
+    return bool(set(frappe.get_roles()).intersection(allowed))
 
 
 def _pick_field(doctype, candidates, fallback="creation"):
@@ -799,11 +814,17 @@ def register_web_form_route(route, module_key=None, module_label=None, service_l
 
 
 @frappe.whitelist()
-def sync_dashboard_entries_from_web_forms(published_only=1, include_core=0):
+def sync_dashboard_entries_from_web_forms(published_only=1, include_core=0, module=None):
     """Synchronise le registre DG depuis les Web Forms publiées.
 
     Les statistiques restent calculées en temps réel depuis les DocTypes ; cette méthode ne crée
     que la cartographie contrôlée entre route Web Form, DocType, service et Print Format.
+
+    Args:
+        published_only: si truthy, ne synchronise que les Web Forms `published=1`.
+        include_core: si truthy, inclut les modules core Frappe (sinon ignorés).
+        module: si renseigné, ne synchronise que les Web Forms de ce module
+                (ex. "KYA HR", "KYA Services") — permet une sync modulaire par équipe.
     """
     if not _can_manage_dashboard():
         frappe.throw(_("Réservé aux gestionnaires du tableau de bord."), frappe.PermissionError)
@@ -811,6 +832,8 @@ def sync_dashboard_entries_from_web_forms(published_only=1, include_core=0):
     filters = {}
     if cint(published_only):
         filters["published"] = 1
+    if module:
+        filters["module"] = module
     web_forms = frappe.get_all(
         "Web Form",
         filters=filters,

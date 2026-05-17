@@ -170,7 +170,8 @@ body { background: var(--kya-bg); font-family: 'Segoe UI', sans-serif; margin: 0
   </div>
   <div class="kya-header-actions">
     <button class="btn-kya-outline" onclick="refreshData()"><i class="bi bi-arrow-clockwise"></i> Rafraîchir</button>
-    <button class="btn-kya-outline" onclick="syncWebForms()"><i class="bi bi-diagram-3"></i> Synchroniser Web Forms</button>
+    <button class="btn-kya-outline" onclick="syncWebForms()" title="Synchroniser tous les modules"><i class="bi bi-diagram-3"></i> Synchroniser Web Forms</button>
+    <button class="btn-kya-outline" onclick="openModuleSyncDialog()" title="Synchroniser un module précis"><i class="bi bi-funnel"></i> Sync par module</button>
     <button class="btn-kya-success" onclick="exportExcel()"><i class="bi bi-file-earmark-excel"></i> Exporter le module</button>
     <a href="/app" class="btn-kya-outline"><i class="bi bi-house"></i> Bureau</a>
   </div>
@@ -526,25 +527,69 @@ async function refreshData() {
   }
 }
 
-async function syncWebForms() {
+async function syncWebForms(module) {
   showLoader(true);
   try {
+    const args = { published_only: 1, include_core: 0 };
+    if (module) args.module = module;
     const res = await new Promise((resolve, reject) => {
       frappe.call({
         method: 'kya_hr.api.kya_dashboard.sync_dashboard_entries_from_web_forms',
-        args: { published_only: 1, include_core: 0 },
+        args,
         callback: r => resolve(r.message || {}),
         error: reject,
       });
     });
-    frappe.show_alert({ message: `Synchronisation terminée : ${res.created || 0} créé(s), ${res.updated || 0} mis à jour`, indicator: 'green' });
+    const scope = module ? `module "${module}"` : 'tous modules';
+    frappe.show_alert({
+      message: `Sync ${scope} : ${res.created || 0} créé(s), ${res.updated || 0} mis à jour, ${(res.skipped||[]).length} ignoré(s)`,
+      indicator: 'green',
+    });
     await refreshData();
   } catch (err) {
     console.error('Sync error:', err);
-    frappe.show_alert({ message: 'Synchronisation impossible avec vos droits actuels.', indicator: 'red' });
+    const msg = (err && err._server_messages)
+      ? 'Synchronisation refusée — droits insuffisants. Contactez l\'administrateur.'
+      : 'Synchronisation échouée. Voir console.';
+    frappe.show_alert({ message: msg, indicator: 'red' });
   } finally {
     showLoader(false);
   }
+}
+
+function openModuleSyncDialog() {
+  // Récupère la liste des modules Frappe ayant des Web Forms
+  frappe.call({
+    method: 'frappe.client.get_list',
+    args: {
+      doctype: 'Web Form',
+      filters: { published: 1 },
+      fields: ['module'],
+      limit_page_length: 0,
+    },
+    callback: function(r) {
+      const modules = Array.from(new Set((r.message || [])
+        .map(x => x.module).filter(Boolean))).sort();
+      if (!modules.length) {
+        frappe.show_alert({ message: 'Aucun Web Form publié trouvé.', indicator: 'orange' });
+        return;
+      }
+      const dlg = new frappe.ui.Dialog({
+        title: 'Synchroniser un module',
+        fields: [{
+          fieldname: 'module', fieldtype: 'Select',
+          label: 'Module', reqd: 1,
+          options: modules.join('\n'),
+        }],
+        primary_action_label: 'Synchroniser',
+        primary_action(values) {
+          dlg.hide();
+          syncWebForms(values.module);
+        },
+      });
+      dlg.show();
+    },
+  });
 }
 
 /* ─── Init ────────────────────────────────────────────────────── */
