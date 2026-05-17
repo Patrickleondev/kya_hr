@@ -237,15 +237,15 @@ const KYA_CSRF = "{{ csrf_token or '' }}";
 
 async function kyaApiCall(method, args, isWrite) {
   const url = '/api/method/' + method;
-  const headers = { 'Accept': 'application/json' };
+  const headers = { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
+  // CSRF systematique (GET + POST) pour les sessions Frappe v16
+  if (KYA_CSRF) headers['X-Frappe-CSRF-Token'] = KYA_CSRF;
   let body = null;
   let fetchUrl = url;
   if (isWrite) {
     headers['Content-Type'] = 'application/x-www-form-urlencoded';
-    if (KYA_CSRF) headers['X-Frappe-CSRF-Token'] = KYA_CSRF;
     body = new URLSearchParams(args || {}).toString();
   } else {
-    // GET avec query string
     const qs = new URLSearchParams(args || {}).toString();
     if (qs) fetchUrl = url + '?' + qs;
   }
@@ -253,11 +253,22 @@ async function kyaApiCall(method, args, isWrite) {
     method: isWrite ? 'POST' : 'GET',
     headers,
     body,
-    credentials: 'include',
+    credentials: 'same-origin',  // envoie le cookie sid de Frappe
   });
   if (!resp.ok) {
-    const txt = await resp.text();
-    throw new Error('HTTP ' + resp.status + ' : ' + txt.slice(0, 200));
+    let detail = '';
+    try {
+      const txt = await resp.text();
+      const j = JSON.parse(txt);
+      detail = (j.exception || j._error_message || '').toString();
+      if (!detail && j._server_messages) {
+        try {
+          const msgs = JSON.parse(j._server_messages);
+          detail = msgs.map(m => { try { return JSON.parse(m).message; } catch (_) { return m; } }).join(' | ');
+        } catch (_) { detail = j._server_messages; }
+      }
+    } catch (_) { /* keep empty */ }
+    throw new Error('HTTP ' + resp.status + (detail ? ' : ' + detail.slice(0, 250) : ''));
   }
   const data = await resp.json();
   return data.message;
@@ -584,15 +595,10 @@ async function syncWebForms(module) {
 }
 
 async function openModuleSyncDialog() {
-  // Liste des modules Frappe ayant des Web Forms (via fetch GET sur frappe.client.get_list)
+  // Liste des modules Frappe ayant des Web Forms (endpoint custom whitelisted)
   try {
-    const rows = await kyaApiCall('frappe.client.get_list', {
-      doctype: 'Web Form',
-      filters: JSON.stringify({ published: 1 }),
-      fields: JSON.stringify(['module']),
-      limit_page_length: 0,
-    }, false) || [];
-    const modules = Array.from(new Set(rows.map(x => x.module).filter(Boolean))).sort();
+    const res = await kyaApiCall('kya_hr.api.kya_dashboard.get_syncable_modules', {}, false) || {};
+    const modules = res.modules || [];
     if (!modules.length) {
       kyaAlert('Aucun Web Form publié trouvé.', 'error');
       return;
@@ -646,9 +652,25 @@ function kyaAlert(msg, type) {
 
 /* ─── Init ──────────────────────────────────────────────────────
    Pas de dependance frappe global : on appelle fetch() direct.
-   refreshData() declenche le 1er appel ; les fetch() sont resilients
-   meme si frappe.js n'est pas charge sur cette page web publique. */
-function kyaInitDashboard() {
+   Check session/role au demarrage pour diagnostiquer rapidement. */
+async function kyaInitDashboard() {
+  // Diagnostic session (silencieux si OK, alert si Guest)
+  try {
+    const who = await kyaApiCall('kya_hr.api.kya_dashboard.whoami_dashboard', {}, false);
+    if (who) {
+      console.log('[KYA Dashboard] Session :', who);
+      if (who.is_guest) {
+        kyaAlert("Session expiree — veuillez vous reconnecter.", 'error');
+        return;
+      }
+      if (!who.can_manage_dashboard) {
+        console.warn('[KYA Dashboard] User connecte mais sans role manager. Roles :', who.roles);
+        kyaAlert(`Connecte comme ${who.user} mais role manager manquant. Roles : ${(who.roles || []).join(', ')}`, 'error');
+      }
+    }
+  } catch (err) {
+    console.warn('[KYA Dashboard] whoami a echoue (pas bloquant) :', err.message);
+  }
   refreshData();
 }
 

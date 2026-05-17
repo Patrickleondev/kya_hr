@@ -673,6 +673,37 @@ def reset_dashboard_config():
     return seed_dashboard_config()
 
 
+@frappe.whitelist()
+def get_syncable_modules():
+    """Retourne la liste des modules Frappe qui ont au moins un Web Form publié.
+
+    Why: appeler frappe.client.get_list via fetch() peut etre rejete par Frappe
+    selon la configuration. Cet endpoint custom whitelisted est plus propre
+    pour alimenter le dialog "Sync par module".
+    """
+    if not _can_manage_dashboard():
+        frappe.throw(_("Réservé aux gestionnaires du tableau de bord."), frappe.PermissionError)
+    rows = frappe.get_all("Web Form", filters={"published": 1}, fields=["module"], limit_page_length=0)
+    modules = sorted({(r.get("module") or "").strip() for r in rows if r.get("module")})
+    return {"modules": modules}
+
+
+@frappe.whitelist()
+def whoami_dashboard():
+    """Endpoint de diagnostic : retourne user + roles + can_manage.
+
+    Permet au frontend de comprendre pourquoi un 403 arrive (Guest vs role manquant).
+    """
+    user = frappe.session.user
+    roles = frappe.get_roles(user) if user != "Guest" else []
+    return {
+        "user": user,
+        "is_guest": user == "Guest",
+        "roles": roles,
+        "can_manage_dashboard": _can_manage_dashboard(),
+    }
+
+
 def _can_manage_dashboard():
     """Rôles autorisés à synchroniser le tableau de bord depuis les Web Forms.
 
