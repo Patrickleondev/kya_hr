@@ -31,6 +31,10 @@ def get_context(context):
     context.recent_demandes = sync.get("requests") or []
     context.sync_notifications = sync.get("notifications") or []
     context.form_notifications = sync.get("form_notifications") or []
+    context.form_progress = sync.get("form_progress") or {
+        "pending": [], "completed": [], "total": 0, "done": 0,
+        "remaining": 0, "progress_pct": 100, "next_url": "", "next_label": "",
+    }
     context.pending_actions = sync.get("pending_actions") or []
     context.notification_count = sync.get("notification_count") or 0
 

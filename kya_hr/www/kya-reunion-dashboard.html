@@ -1,0 +1,227 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Dashboard KYA-Reunion centralisé{% endblock %}
+
+{% block page_content %}
+<style>
+.kya-reunion-page { max-width: 1280px; margin: 18px auto 32px; padding: 0 16px; font-family: Arial, sans-serif; color: #18212f; }
+.kya-letterhead { border: 1px solid #d9dee7; border-radius: 6px; overflow: hidden; background: #fff; }
+.kya-letterhead-top { display: grid; grid-template-columns: 120px 1fr 220px; gap: 18px; align-items: center; padding: 18px 22px; border-bottom: 4px solid #f59e0b; }
+.kya-logo { width: 84px; height: 84px; object-fit: contain; }
+.kya-company h1 { margin: 0; font-size: 22px; color: #0f3d68; }
+.kya-company p { margin: 4px 0 0; font-size: 12px; color: #5c6573; line-height: 1.45; }
+.kya-doc-meta { text-align: right; font-size: 12px; color: #4b5563; }
+.kya-live-badge { display: inline-block; padding: 4px 10px; border-radius: 999px; background: #dcfce7; color: #15803d; font-weight: 700; font-size: 11px; margin-top: 4px; }
+.kya-live-badge.disconnected { background: #fee2e2; color: #b91c1c; }
+.kya-live-badge .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #22c55e; margin-right: 5px; animation: pulse 2s infinite; }
+.kya-live-badge.disconnected .dot { background: #ef4444; animation: none; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+.kya-title-band { background: #0f3d68; color: #fff; padding: 14px 22px; display: flex; justify-content: space-between; align-items: center; }
+.kya-title-band h2 { margin: 0; font-size: 20px; }
+.kya-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 14px 0 20px; }
+.kya-kpi { border: 1px solid #d9dee7; border-radius: 6px; background: #fff; padding: 14px; position: relative; }
+.kya-kpi .label { color: #667085; font-size: 12px; text-transform: uppercase; }
+.kya-kpi .value { font-size: 26px; color: #101828; font-weight: 800; margin-top: 5px; }
+.kya-kpi.alert { border-left: 4px solid #d92d20; }
+.kya-kpi.success { border-left: 4px solid #22c55e; }
+.kya-kpi.info { border-left: 4px solid #2e90fa; }
+.kya-section { margin-top: 18px; border: 1px solid #d9dee7; border-radius: 6px; background: #fff; overflow: hidden; }
+.kya-section h3 { margin: 0; padding: 13px 16px; background: #f7f8fa; border-bottom: 1px solid #d9dee7; font-size: 15px; color: #0f3d68; }
+.kya-table-wrap { overflow-x: auto; }
+table.kya-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.kya-table th, .kya-table td { padding: 10px 12px; border-bottom: 1px solid #edf0f5; text-align: left; vertical-align: top; }
+.kya-table th { background: #fafbfc; color: #344054; font-weight: 700; }
+.kya-table td.num, .kya-table th.num { text-align: right; }
+.kya-badge { display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+.kya-badge.actif { background: #d1fadf; color: #027a48; }
+.kya-badge.cloture { background: #eef2f7; color: #344054; }
+.kya-badge.expire { background: #fee4e2; color: #b42318; }
+.kya-badge.supprime { background: #fee4e2; color: #6b7280; text-decoration: line-through; }
+.kya-badge.success { background: #d1fadf; color: #027a48; }
+.kya-badge.error { background: #fee4e2; color: #b42318; }
+.kya-types-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; padding: 14px; }
+.kya-type-card { border: 1px solid #e5e7eb; border-radius: 6px; padding: 10px 12px; background: #fafbfc; }
+.kya-type-card .count { font-size: 20px; font-weight: 800; color: #0f3d68; }
+.kya-type-card .label { font-size: 11px; color: #667085; text-transform: uppercase; margin-top: 2px; }
+.kya-help { padding: 14px 18px; color: #5c6573; font-size: 13px; }
+.kya-recent-row { animation: highlight 3s ease-out; }
+@keyframes highlight { 0% { background: #fef3c7; } 100% { background: transparent; } }
+.kya-period-selector { padding: 6px 12px; }
+.kya-period-selector a { margin-left: 8px; color: #0f3d68; text-decoration: none; padding: 4px 8px; border-radius: 4px; }
+.kya-period-selector a.active { background: #0f3d68; color: #fff; }
+.kya-period-selector a:hover { background: #e0e7ff; }
+@media (max-width: 860px) { .kya-letterhead-top { grid-template-columns: 80px 1fr; } .kya-grid { grid-template-columns: 1fr 1fr; } .kya-title-band { display: block; } }
+@media print { .navbar, header, .web-footer, .kya-live-badge { display: none !important; } }
+</style>
+
+<div class="kya-reunion-page">
+  <div class="kya-letterhead">
+    <div class="kya-letterhead-top">
+      <img class="kya-logo" src="/assets/kya_hr/images/kya_logo.png" alt="KYA-Energy Group">
+      <div class="kya-company">
+        <h1>KYA-ENERGY GROUP</h1>
+        <p>Solutions solaires • Services techniques • Gestion administrative</p>
+        <p>Agoè-Logopé, Lomé - Togo</p>
+      </div>
+      <div class="kya-doc-meta">
+        <b>Dashboard Réunions centralisé</b><br>
+        Synchronisé depuis KYA-Digi-Presence<br>
+        <span class="kya-live-badge" id="live-badge"><span class="dot"></span>EN DIRECT</span>
+      </div>
+    </div>
+    <div class="kya-title-band">
+      <h2>Réunions &amp; Émargements — Vue Direction</h2>
+      <div class="kya-period-selector">
+        Période :
+        <a href="?period=7" class="{% if period == 7 %}active{% endif %}">7 jours</a>
+        <a href="?period=30" class="{% if period == 30 %}active{% endif %}">30 jours</a>
+        <a href="?period=90" class="{% if period == 90 %}active{% endif %}">90 jours</a>
+        <a href="?period=365" class="{% if period == 365 %}active{% endif %}">1 an</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="kya-grid">
+    <div class="kya-kpi info">
+      <div class="label">Réunions ({{ period }}j)</div>
+      <div class="value" id="kpi-total">{{ stats.total }}</div>
+    </div>
+    <div class="kya-kpi success">
+      <div class="label">Présences totales</div>
+      <div class="value" id="kpi-presences">{{ stats.total_presences }}</div>
+    </div>
+    <div class="kya-kpi alert">
+      <div class="label">Réunions actives</div>
+      <div class="value" id="kpi-actifs">{{ stats.actifs }}</div>
+    </div>
+    <div class="kya-kpi">
+      <div class="label">Réunions clôturées</div>
+      <div class="value" id="kpi-clotures">{{ stats.clotures }}</div>
+    </div>
+  </div>
+
+  <div class="kya-section">
+    <h3>Répartition par type</h3>
+    <div class="kya-types-grid">
+      {% for type_name, count in by_type.items() %}
+      <div class="kya-type-card">
+        <div class="count">{{ count }}</div>
+        <div class="label">{{ type_name }}</div>
+      </div>
+      {% else %}
+      <div class="kya-help">Aucune réunion sur cette période.</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="kya-section">
+    <h3>Réunions récentes ({{ meetings|length }})</h3>
+    {% if meetings %}
+    <div class="kya-table-wrap">
+      <table class="kya-table" id="meetings-table">
+        <thead>
+          <tr>
+            <th>Token</th>
+            <th>Titre</th>
+            <th>Type</th>
+            <th>Lieu</th>
+            <th>Date</th>
+            <th class="num">Présences</th>
+            <th>État</th>
+            <th>Sync</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in meetings %}
+          <tr data-token="{{ m.external_token }}">
+            <td><a href="/app/kya-reunion-meeting/{{ m.name }}">{{ m.external_token[:14] }}…</a></td>
+            <td><b>{{ m.title }}</b></td>
+            <td>{{ m.meeting_type or '' }}</td>
+            <td>{{ m.location or '' }}</td>
+            <td>{{ m.start_at_label }}</td>
+            <td class="num"><b>{{ m.presence_count or 0 }}</b></td>
+            <td>
+              {% set cls = m.status|lower|replace('é','e')|replace('ô','o') %}
+              <span class="kya-badge {{ cls }}">{{ m.status }}</span>
+            </td>
+            <td>{{ m.last_sync_label }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="kya-help">Aucune réunion synchronisée sur cette période. Vérifier la connexion avec KYA-Digi-Presence.</div>
+    {% endif %}
+  </div>
+
+  <div class="kya-section">
+    <h3>Logs de synchronisation récents</h3>
+    {% if sync_logs %}
+    <div class="kya-table-wrap">
+      <table class="kya-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Token</th>
+            <th>Action</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in sync_logs %}
+          <tr>
+            <td>{{ log.received_at_label }}</td>
+            <td>{{ log.external_token[:14] if log.external_token else '' }}…</td>
+            <td>{{ log.action or '' }}</td>
+            <td>
+              <span class="kya-badge {{ 'success' if log.status == 'Succès' else 'error' }}">{{ log.status }}</span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="kya-help">Aucun log de synchronisation pour le moment.</div>
+    {% endif %}
+  </div>
+
+  <div class="kya-section">
+    <h3>À propos</h3>
+    <div class="kya-help">
+      Ce dashboard centralise les réunions et émargements provenant du système KYA-Digi-Presence.
+      Mise à jour temps réel via socket Frappe. Les données sont en lecture seule depuis cette page —
+      pour gérer les détails, ouvrir une réunion dans <a href="/app/kya-reunion-meeting">la liste KYA Reunion Meeting</a>.
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  if (typeof frappe === "undefined" || !frappe.realtime) {
+    document.getElementById("live-badge").className = "kya-live-badge disconnected";
+    document.getElementById("live-badge").innerHTML = '<span class="dot"></span>HORS LIGNE';
+    return;
+  }
+  frappe.realtime.on("kya_reunion_meeting_synced", function (data) {
+    // Highlight + reload après 1.5s pour intégrer la mise à jour
+    const row = document.querySelector('tr[data-token="' + (data.external_token || "") + '"]');
+    if (row) {
+      row.classList.add("kya-recent-row");
+      const cell = row.querySelector("td.num b");
+      if (cell && typeof data.presence_count !== "undefined") cell.textContent = data.presence_count;
+    }
+    // Reload léger après 2s pour mettre à jour les KPIs
+    setTimeout(function () {
+      window.location.reload();
+    }, 2000);
+  });
+
+  // Auto-refresh fallback toutes les 60s (si realtime échoue silencieusement)
+  setTimeout(function () {
+    window.location.reload();
+  }, 60000);
+})();
+</script>
+{% endblock %}

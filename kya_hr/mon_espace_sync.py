@@ -266,6 +266,7 @@ def _collect_form_notifications(employee):
                 LEFT JOIN `tabKYA Form` kf ON kf.name = kfr.formulaire
                 WHERE kfr.employe = %s
                   AND (kfr.soumis_le IS NULL OR kfr.soumis_le = '')
+                  AND kf.statut = 'Actif'
                 ORDER BY COALESCE(kf.date_limite, kfr.creation) ASC
                 LIMIT 10
                 """,
@@ -395,6 +396,99 @@ def _available_forms(category):
     return [form.copy() for form in FORM_SPECS if category in form["audience"]]
 
 
+def _collect_form_progress(employee):
+    """Retourne progression complète des formulaires KYA + évaluations pour l'employé.
+
+    Structure :
+      {
+        "pending": [...],         # forms/évals à remplir (premier = prochain à faire)
+        "completed": [...],       # forms/évals déjà soumis (cette période)
+        "total": int, "done": int, "remaining": int,
+        "progress_pct": float,    # 0-100
+        "next_url": str,          # URL du prochain à faire (vide si tout fait)
+        "next_label": str,
+      }
+    """
+    out = {"pending": [], "completed": [], "total": 0, "done": 0,
+           "remaining": 0, "progress_pct": 100, "next_url": "", "next_label": ""}
+    if not employee:
+        return out
+
+    # KYA Form Response : invitations envoyées à cet employé
+    if frappe.db.exists("DocType", "KYA Form Response") and frappe.db.exists("DocType", "KYA Form"):
+        try:
+            rows = frappe.db.sql(
+                """
+                SELECT kfr.name, kfr.token, kfr.soumis_le, kf.titre, kf.type_formulaire,
+                       kf.date_limite, kf.statut
+                FROM `tabKYA Form Response` kfr
+                INNER JOIN `tabKYA Form` kf ON kf.name = kfr.formulaire
+                WHERE kfr.employe = %s
+                  AND kf.statut IN ('Actif', 'Fermé')
+                ORDER BY kf.date_limite ASC, kfr.creation ASC
+                """,
+                (employee.name,), as_dict=True,
+            )
+            for r in rows:
+                item = {
+                    "kind": "form",
+                    "title": r.titre or "Formulaire KYA",
+                    "type": r.type_formulaire or "",
+                    "url": f"/kya-survey?token={r.token}" if r.token else "",
+                    "date_limite": r.date_limite,
+                    "submitted": bool(r.soumis_le),
+                    "active": r.statut == "Actif",
+                }
+                if r.soumis_le:
+                    out["completed"].append(item)
+                elif r.statut == "Actif":
+                    out["pending"].append(item)
+                # Si Fermé non soumis : ne compte pas (échéance dépassée)
+        except Exception:
+            pass
+
+    # KYA Evaluation : évaluations à faire par cet employé
+    if frappe.db.exists("DocType", "KYA Evaluation"):
+        try:
+            evals = frappe.get_all(
+                "KYA Evaluation",
+                filters={"evaluateur": employee.name},
+                fields=_existing_fields("KYA Evaluation",
+                    ["name", "token", "type_evaluation", "evalue_name",
+                     "trimestre", "annee", "soumis_le"]),
+                order_by="creation asc",
+                limit_page_length=20,
+            )
+            for ev in evals:
+                item = {
+                    "kind": "evaluation",
+                    "title": f"Éval. {ev.get('type_evaluation', '')} — {ev.get('evalue_name', '')}",
+                    "type": ev.get("type_evaluation", ""),
+                    "url": f"/kya-eval?token={ev['token']}" if ev.get("token") else "",
+                    "date_limite": f"{ev.get('trimestre', '')} {ev.get('annee', '')}".strip(),
+                    "submitted": bool(ev.get("soumis_le")),
+                    "active": True,
+                }
+                if ev.get("soumis_le"):
+                    out["completed"].append(item)
+                else:
+                    out["pending"].append(item)
+        except Exception:
+            pass
+
+    out["total"] = len(out["pending"]) + len(out["completed"])
+    out["done"] = len(out["completed"])
+    out["remaining"] = len(out["pending"])
+    out["progress_pct"] = round((out["done"] / out["total"]) * 100, 1) if out["total"] else 100
+
+    if out["pending"]:
+        nxt = out["pending"][0]
+        out["next_url"] = nxt["url"]
+        out["next_label"] = nxt["title"]
+
+    return out
+
+
 def build_mon_espace_context(user=None):
     user = user or frappe.session.user
     employee = _get_employee(user)
@@ -403,6 +497,7 @@ def build_mon_espace_context(user=None):
     form_notifications = _collect_form_notifications(employee)
     system_notifications = _collect_system_notifications(user)
     pending_actions = _collect_pending_actions(user)
+    form_progress = _collect_form_progress(employee)
 
     notifications = (form_notifications + system_notifications + pending_actions)[:20]
     return {
@@ -413,6 +508,7 @@ def build_mon_espace_context(user=None):
         "requests": requests,
         "stats": stats,
         "form_notifications": form_notifications,
+        "form_progress": form_progress,
         "system_notifications": system_notifications,
         "pending_actions": pending_actions,
         "notifications": notifications,

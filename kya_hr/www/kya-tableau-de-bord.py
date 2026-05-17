@@ -15,3 +15,9 @@ def get_context(context):
     context.no_cache = 1
     context.title = "Tableau de Bord Global KYA"
     context.show_sidebar = False
+    # CSRF token pour les fetch() POST cote frontend (sync_dashboard_entries_from_web_forms)
+    try:
+        from frappe.sessions import get_csrf_token
+        context.csrf_token = get_csrf_token()
+    except Exception:
+        context.csrf_token = ""

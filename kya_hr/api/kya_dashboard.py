@@ -673,8 +673,66 @@ def reset_dashboard_config():
     return seed_dashboard_config()
 
 
+@frappe.whitelist()
+def get_syncable_modules():
+    """Retourne la liste des modules Frappe qui ont au moins un Web Form publié.
+
+    Why: appeler frappe.client.get_list via fetch() peut etre rejete par Frappe
+    selon la configuration. Cet endpoint custom whitelisted est plus propre
+    pour alimenter le dialog "Sync par module".
+    """
+    if not _can_manage_dashboard():
+        frappe.throw(_("Réservé aux gestionnaires du tableau de bord."), frappe.PermissionError)
+    rows = frappe.get_all("Web Form", filters={"published": 1}, fields=["module"], limit_page_length=0)
+    modules = sorted({(r.get("module") or "").strip() for r in rows if r.get("module")})
+    return {"modules": modules}
+
+
+@frappe.whitelist()
+def get_fresh_csrf():
+    """Retourne un CSRF token frais pour la session courante.
+
+    Why: le token injecte dans le HTML via {{ csrf_token }} peut etre invalide
+    apres un changement de session ou un certain delai. Recuperer un token
+    frais avant chaque POST evite les erreurs CSRFTokenError / Invalid Request.
+    """
+    from frappe.sessions import get_csrf_token
+    return {"csrf_token": get_csrf_token()}
+
+
+@frappe.whitelist()
+def whoami_dashboard():
+    """Endpoint de diagnostic : retourne user + roles + can_manage.
+
+    Permet au frontend de comprendre pourquoi un 403 arrive (Guest vs role manquant).
+    """
+    user = frappe.session.user
+    roles = frappe.get_roles(user) if user != "Guest" else []
+    return {
+        "user": user,
+        "is_guest": user == "Guest",
+        "roles": roles,
+        "can_manage_dashboard": _can_manage_dashboard(),
+    }
+
+
 def _can_manage_dashboard():
-    return bool(set(frappe.get_roles()).intersection({"System Manager", "Dashboard Manager", "Administrator"}))
+    """Rôles autorisés à synchroniser le tableau de bord depuis les Web Forms.
+
+    Why: la page /kya-tableau-de-bord autorise DG / Directeur Général à ouvrir
+    le tableau, donc on doit leur permettre le bouton "Synchroniser Web Forms"
+    sinon ils voient le bouton mais ne peuvent pas l'utiliser (rejet PermissionError).
+    On élargit aussi aux managers de modules (HR Manager, DAAF, DFC) pour
+    rendre la sync modulaire — chacun synchronise les Web Forms de son module.
+    """
+    allowed = {
+        "System Manager", "Dashboard Manager", "Administrator",
+        "DG", "Directeur Général", "DGA",
+        "DAAF", "DFC",
+        "HR Manager", "Responsable RH",
+        "Auditeur Interne",
+    }
+    return bool(set(frappe.get_roles()).intersection(allowed))
 
 
 def _pick_field(doctype, candidates, fallback="creation"):
@@ -799,11 +857,17 @@ def register_web_form_route(route, module_key=None, module_label=None, service_l
 
 
 @frappe.whitelist()
-def sync_dashboard_entries_from_web_forms(published_only=1, include_core=0):
+def sync_dashboard_entries_from_web_forms(published_only=1, include_core=0, module=None):
     """Synchronise le registre DG depuis les Web Forms publiées.
 
     Les statistiques restent calculées en temps réel depuis les DocTypes ; cette méthode ne crée
     que la cartographie contrôlée entre route Web Form, DocType, service et Print Format.
+
+    Args:
+        published_only: si truthy, ne synchronise que les Web Forms `published=1`.
+        include_core: si truthy, inclut les modules core Frappe (sinon ignorés).
+        module: si renseigné, ne synchronise que les Web Forms de ce module
+                (ex. "KYA HR", "KYA Services") — permet une sync modulaire par équipe.
     """
     if not _can_manage_dashboard():
         frappe.throw(_("Réservé aux gestionnaires du tableau de bord."), frappe.PermissionError)
@@ -811,6 +875,8 @@ def sync_dashboard_entries_from_web_forms(published_only=1, include_core=0):
     filters = {}
     if cint(published_only):
         filters["published"] = 1
+    if module:
+        filters["module"] = module
     web_forms = frappe.get_all(
         "Web Form",
         filters=filters,
