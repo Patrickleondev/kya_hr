@@ -157,6 +157,25 @@ def sync_meeting(payload=None, secret=None):
         frappe.db.commit()
 
         response = {"ok": True, "meeting": doc.name, "action": action, "presence_count": doc.presence_count}
+
+        # Publication realtime via Frappe socket.io pour le dashboard live
+        try:
+            frappe.publish_realtime(
+                event="kya_reunion_meeting_synced",
+                message={
+                    "meeting": doc.name,
+                    "external_token": external_token,
+                    "title": doc.title,
+                    "meeting_type": doc.meeting_type,
+                    "status": doc.status,
+                    "presence_count": doc.presence_count,
+                    "action": action,
+                    "last_sync": str(doc.last_sync),
+                },
+                user="*",  # broadcast à tous les users connectés
+            )
+        except Exception:
+            pass  # le sync reussit meme si la publication realtime echoue
         _log_sync(external_token, action, "Succès", data, response, doc.name)
         return response
     except Exception as exc:

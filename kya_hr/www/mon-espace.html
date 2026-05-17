@@ -209,24 +209,93 @@
 </div>
 {% endif %}
 
-<!-- ═══ Section : Formulaires / Enquêtes ═══ -->
+<!-- ═══ Section : Formulaires / Enquêtes (enrichie : progression + nav) ═══ -->
 {% if show_forms %}
 <div class="me-section" id="sec-forms-pending">
-  <h2>📊 Formulaires & enquêtes</h2>
-  {% if form_notifications %}
+  <h2>📊 Formulaires & enquêtes
+    {% if form_progress.total %}
+      <small style="font-size:.75rem;color:#666;font-weight:500;margin-left:8px;">
+        {{ form_progress.done }} / {{ form_progress.total }} complétés
+      </small>
+    {% endif %}
+  </h2>
+
+  {% if form_progress.total %}
+  <!-- Barre de progression -->
+  <div style="background:#eef2f7;border-radius:999px;height:10px;overflow:hidden;margin-bottom:14px;">
+    <div style="height:100%;background:linear-gradient(90deg,#F58220,#8DC63F);width:{{ form_progress.progress_pct }}%;transition:width .6s ease;"></div>
+  </div>
+
+  {% if form_progress.pending %}
+    <!-- Bouton "Continuer" : prochain à remplir -->
+    <div style="background:linear-gradient(135deg,#0d7377,#0e9196);color:white;border-radius:12px;padding:18px 22px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="font-size:.78rem;opacity:.85;text-transform:uppercase;letter-spacing:.05em;font-weight:700;">Prochain à remplir</div>
+        <div style="font-size:1.05rem;font-weight:700;margin-top:4px;">{{ form_progress.next_label }}</div>
+        {% if form_progress.remaining > 1 %}
+        <div style="font-size:.78rem;opacity:.85;margin-top:2px;">
+          + {{ form_progress.remaining - 1 }} autre(s) en attente
+        </div>
+        {% endif %}
+      </div>
+      <a href="{{ form_progress.next_url }}" style="background:#F58220;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;white-space:nowrap;">
+        ➜ Continuer
+      </a>
+    </div>
+
+    <!-- Liste à faire -->
+    <h3 style="font-size:.95rem;color:#b91c1c;margin:14px 0 8px;">⏳ À remplir ({{ form_progress.remaining }})</h3>
     <div class="me-panel">
       <div class="me-list">
-        {% for n in form_notifications[:6] %}
-        <a href="{{ n.url or '#' }}" class="me-row">
+        {% for f in form_progress.pending %}
+        <a href="{{ f.url or '#' }}" class="me-row">
           <div>
-            <div class="me-row-title">{{ n.title }}</div>
-            <div class="me-row-sub">{{ n.text }}{% if n.date %} · {{ n.date }}{% endif %}</div>
+            <div class="me-row-title">
+              {% if f.kind == 'evaluation' %}⭐{% else %}📋{% endif %}
+              {{ f.title }}
+            </div>
+            <div class="me-row-sub">
+              {{ f.type }}{% if f.date_limite %} · échéance : <b style="color:#d97706;">{{ f.date_limite }}</b>{% endif %}
+            </div>
           </div>
           <span class="me-status encours">À remplir</span>
         </a>
         {% endfor %}
       </div>
     </div>
+  {% endif %}
+
+  {% if form_progress.completed %}
+    <!-- Liste complétés -->
+    <h3 style="font-size:.95rem;color:#15803d;margin:18px 0 8px;">✅ Déjà complétés ({{ form_progress.done }})</h3>
+    <div class="me-panel">
+      <div class="me-list">
+        {% for f in form_progress.completed[:8] %}
+        <div class="me-row" style="opacity:.7;cursor:default;">
+          <div>
+            <div class="me-row-title">
+              {% if f.kind == 'evaluation' %}⭐{% else %}📋{% endif %}
+              {{ f.title }}
+            </div>
+            <div class="me-row-sub">{{ f.type }}</div>
+          </div>
+          <span class="me-status" style="background:#dcfce7;color:#15803d;">Complété</span>
+        </div>
+        {% endfor %}
+        {% if form_progress.completed|length > 8 %}
+        <div style="text-align:center;padding:8px;font-size:.85rem;color:#6b7280;">
+          + {{ form_progress.completed|length - 8 }} autre(s) complété(s)
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+
+  {% if not form_progress.pending and form_progress.completed %}
+    <div style="margin-top:14px;padding:14px;background:linear-gradient(135deg,#dcfce7,#f0fdf4);border-radius:10px;text-align:center;color:#15803d;font-weight:700;">
+      🎉 Tous vos formulaires sont complétés. Bravo !
+    </div>
+  {% endif %}
   {% else %}
     <p style="color:#666; font-size:.9rem;">Aucun formulaire en attente. Les enquêtes et évaluations apparaîtront ici dès qu'elles seront assignées à votre fiche employé.</p>
   {% endif %}
