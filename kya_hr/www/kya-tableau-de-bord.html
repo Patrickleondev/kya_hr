@@ -232,16 +232,45 @@ function showLoader(v) {
   document.getElementById('kya-loader').style.display = v ? '' : 'none';
 }
 
-/* ─── API call (via Frappe) ──────────────────────────────────── */
-async function fetchStats(period, mod) {
-  return new Promise((resolve, reject) => {
-    frappe.call({
-      method: 'kya_hr.api.kya_dashboard.get_global_stats',
-      args: { period, module: mod || '' },
-      callback: r => { if (r && r.message) resolve(r.message); else reject(r); },
-      error: reject,
-    });
+/* ─── API call (via fetch direct, robuste meme sans frappe.js) ─── */
+const KYA_CSRF = "{{ csrf_token or '' }}";
+
+async function kyaApiCall(method, args, isWrite) {
+  const url = '/api/method/' + method;
+  const headers = { 'Accept': 'application/json' };
+  let body = null;
+  let fetchUrl = url;
+  if (isWrite) {
+    headers['Content-Type'] = 'application/x-www-form-urlencoded';
+    if (KYA_CSRF) headers['X-Frappe-CSRF-Token'] = KYA_CSRF;
+    body = new URLSearchParams(args || {}).toString();
+  } else {
+    // GET avec query string
+    const qs = new URLSearchParams(args || {}).toString();
+    if (qs) fetchUrl = url + '?' + qs;
+  }
+  const resp = await fetch(fetchUrl, {
+    method: isWrite ? 'POST' : 'GET',
+    headers,
+    body,
+    credentials: 'include',
   });
+  if (!resp.ok) {
+    const txt = await resp.text();
+    throw new Error('HTTP ' + resp.status + ' : ' + txt.slice(0, 200));
+  }
+  const data = await resp.json();
+  return data.message;
+}
+
+async function fetchStats(period, mod) {
+  const message = await kyaApiCall(
+    'kya_hr.api.kya_dashboard.get_global_stats',
+    { period, module: mod || '' },
+    false
+  );
+  if (!message) throw new Error('Reponse vide de get_global_stats');
+  return message;
 }
 
 /* ─── Render KPIs ────────────────────────────────────────────── */
@@ -532,61 +561,70 @@ async function syncWebForms(module) {
   try {
     const args = { published_only: 1, include_core: 0 };
     if (module) args.module = module;
-    const res = await new Promise((resolve, reject) => {
-      frappe.call({
-        method: 'kya_hr.api.kya_dashboard.sync_dashboard_entries_from_web_forms',
-        args,
-        callback: r => resolve(r.message || {}),
-        error: reject,
-      });
-    });
+    const res = await kyaApiCall(
+      'kya_hr.api.kya_dashboard.sync_dashboard_entries_from_web_forms',
+      args, true
+    ) || {};
     const scope = module ? `module "${module}"` : 'tous modules';
-    kyaAlert(`Sync ${scope} OK : ${res.created || 0} créé(s), ${res.updated || 0} mis à jour, ${(res.skipped||[]).length} ignoré(s) sur ${res.total_scanned || 0} scannés.`, 'success');
+    kyaAlert(
+      `Sync ${scope} OK : ${res.created || 0} créé(s), ${res.updated || 0} mis à jour, `
+      + `${(res.skipped || []).length} ignoré(s) sur ${res.total_scanned || 0} scannés.`,
+      'success'
+    );
     await refreshData();
   } catch (err) {
     console.error('Sync error:', err);
-    const msg = (err && err._server_messages)
+    const msg = (err && err.message && err.message.includes('403'))
       ? 'Synchronisation refusée — droits insuffisants. Contactez l\'administrateur.'
-      : 'Synchronisation échouée. Voir console développeur (F12).';
+      : 'Synchronisation échouée : ' + (err.message || err);
     kyaAlert(msg, 'error');
   } finally {
     showLoader(false);
   }
 }
 
-function openModuleSyncDialog() {
-  // Récupère la liste des modules Frappe ayant des Web Forms
-  frappe.call({
-    method: 'frappe.client.get_list',
-    args: {
+async function openModuleSyncDialog() {
+  // Liste des modules Frappe ayant des Web Forms (via fetch GET sur frappe.client.get_list)
+  try {
+    const rows = await kyaApiCall('frappe.client.get_list', {
       doctype: 'Web Form',
-      filters: { published: 1 },
-      fields: ['module'],
+      filters: JSON.stringify({ published: 1 }),
+      fields: JSON.stringify(['module']),
       limit_page_length: 0,
-    },
-    callback: function(r) {
-      const modules = Array.from(new Set((r.message || [])
-        .map(x => x.module).filter(Boolean))).sort();
-      if (!modules.length) {
-        kyaAlert('Aucun Web Form publié trouvé.', 'error');
-        return;
-      }
-      const dlg = new frappe.ui.Dialog({
-        title: 'Synchroniser un module',
-        fields: [{
-          fieldname: 'module', fieldtype: 'Select',
-          label: 'Module', reqd: 1,
-          options: modules.join('\n'),
-        }],
-        primary_action_label: 'Synchroniser',
-        primary_action(values) {
-          dlg.hide();
-          syncWebForms(values.module);
-        },
-      });
-      dlg.show();
-    },
-  });
+    }, false) || [];
+    const modules = Array.from(new Set(rows.map(x => x.module).filter(Boolean))).sort();
+    if (!modules.length) {
+      kyaAlert('Aucun Web Form publié trouvé.', 'error');
+      return;
+    }
+    // Dialog HTML natif (pas de dependance frappe.ui)
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998;display:flex;align-items:center;justify-content:center;';
+    const dlg = document.createElement('div');
+    dlg.style.cssText = 'background:white;padding:24px;border-radius:12px;min-width:340px;max-width:90vw;box-shadow:0 8px 32px rgba(0,0,0,.25);';
+    dlg.innerHTML = `
+      <h3 style="margin:0 0 16px;color:#0054A6;">Synchroniser un module</h3>
+      <label style="display:block;font-size:.85rem;color:#666;margin-bottom:6px;">Module :</label>
+      <select id="kya-sync-module" style="width:100%;padding:8px;border-radius:6px;border:1px solid #ccc;font-size:.9rem;">
+        ${modules.map(m => `<option value="${m}">${m}</option>`).join('')}
+      </select>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:18px;">
+        <button id="kya-sync-cancel" style="padding:8px 18px;border:1px solid #ccc;background:white;border-radius:6px;cursor:pointer;">Annuler</button>
+        <button id="kya-sync-ok" style="padding:8px 18px;background:#0054A6;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:600;">Synchroniser</button>
+      </div>
+    `;
+    overlay.appendChild(dlg);
+    document.body.appendChild(overlay);
+    document.getElementById('kya-sync-cancel').onclick = () => overlay.remove();
+    document.getElementById('kya-sync-ok').onclick = () => {
+      const mod = document.getElementById('kya-sync-module').value;
+      overlay.remove();
+      syncWebForms(mod);
+    };
+  } catch (err) {
+    console.error(err);
+    kyaAlert('Impossible de lister les modules : ' + (err.message || err), 'error');
+  }
 }
 
 /* ─── Helpers UI (fallback si frappe.show_alert indisponible) ──── */
@@ -606,21 +644,12 @@ function kyaAlert(msg, type) {
   }
 }
 
-/* ─── Init ────────────────────────────────────────────────────── */
+/* ─── Init ──────────────────────────────────────────────────────
+   Pas de dependance frappe global : on appelle fetch() direct.
+   refreshData() declenche le 1er appel ; les fetch() sont resilients
+   meme si frappe.js n'est pas charge sur cette page web publique. */
 function kyaInitDashboard() {
-  // S'assurer que frappe.call est dispo (sinon attendre 200ms et réessayer, max 10x)
-  let tries = 0;
-  function tryStart() {
-    tries++;
-    if (window.frappe && frappe.call) {
-      refreshData();
-    } else if (tries < 10) {
-      setTimeout(tryStart, 200);
-    } else {
-      kyaAlert("Frappe non disponible — rechargez la page.", 'error');
-    }
-  }
-  tryStart();
+  refreshData();
 }
 
 if (document.readyState === 'loading') {
