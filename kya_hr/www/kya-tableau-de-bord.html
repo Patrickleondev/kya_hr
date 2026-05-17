@@ -541,17 +541,14 @@ async function syncWebForms(module) {
       });
     });
     const scope = module ? `module "${module}"` : 'tous modules';
-    frappe.show_alert({
-      message: `Sync ${scope} : ${res.created || 0} créé(s), ${res.updated || 0} mis à jour, ${(res.skipped||[]).length} ignoré(s)`,
-      indicator: 'green',
-    });
+    kyaAlert(`Sync ${scope} OK : ${res.created || 0} créé(s), ${res.updated || 0} mis à jour, ${(res.skipped||[]).length} ignoré(s) sur ${res.total_scanned || 0} scannés.`, 'success');
     await refreshData();
   } catch (err) {
     console.error('Sync error:', err);
     const msg = (err && err._server_messages)
       ? 'Synchronisation refusée — droits insuffisants. Contactez l\'administrateur.'
-      : 'Synchronisation échouée. Voir console.';
-    frappe.show_alert({ message: msg, indicator: 'red' });
+      : 'Synchronisation échouée. Voir console développeur (F12).';
+    kyaAlert(msg, 'error');
   } finally {
     showLoader(false);
   }
@@ -571,7 +568,7 @@ function openModuleSyncDialog() {
       const modules = Array.from(new Set((r.message || [])
         .map(x => x.module).filter(Boolean))).sort();
       if (!modules.length) {
-        frappe.show_alert({ message: 'Aucun Web Form publié trouvé.', indicator: 'orange' });
+        kyaAlert('Aucun Web Form publié trouvé.', 'error');
         return;
       }
       const dlg = new frappe.ui.Dialog({
@@ -592,15 +589,45 @@ function openModuleSyncDialog() {
   });
 }
 
-/* ─── Init ────────────────────────────────────────────────────── */
-document.addEventListener('DOMContentLoaded', function() {
-  // Attendre que frappe soit prêt
-  if (window.frappe && frappe.ready) {
-    frappe.ready(refreshData);
+/* ─── Helpers UI (fallback si frappe.show_alert indisponible) ──── */
+function kyaAlert(msg, type) {
+  type = type || 'info';
+  if (window.frappe && frappe.show_alert) {
+    frappe.show_alert({ message: msg, indicator: type === 'error' ? 'red' : type === 'success' ? 'green' : 'blue' });
   } else {
-    setTimeout(refreshData, 800);
+    // Fallback : toast minimal injecté dans la page
+    const t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = 'position:fixed;bottom:20px;right:20px;background:'
+      + (type === 'error' ? '#dc2626' : type === 'success' ? '#16a34a' : '#2563eb')
+      + ';color:white;padding:12px 20px;border-radius:8px;z-index:9999;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.2);';
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 4000);
   }
-});
+}
+
+/* ─── Init ────────────────────────────────────────────────────── */
+function kyaInitDashboard() {
+  // S'assurer que frappe.call est dispo (sinon attendre 200ms et réessayer, max 10x)
+  let tries = 0;
+  function tryStart() {
+    tries++;
+    if (window.frappe && frappe.call) {
+      refreshData();
+    } else if (tries < 10) {
+      setTimeout(tryStart, 200);
+    } else {
+      kyaAlert("Frappe non disponible — rechargez la page.", 'error');
+    }
+  }
+  tryStart();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', kyaInitDashboard);
+} else {
+  kyaInitDashboard();
+}
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
