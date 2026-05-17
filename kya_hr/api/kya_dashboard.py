@@ -689,6 +689,18 @@ def get_syncable_modules():
 
 
 @frappe.whitelist()
+def get_fresh_csrf():
+    """Retourne un CSRF token frais pour la session courante.
+
+    Why: le token injecte dans le HTML via {{ csrf_token }} peut etre invalide
+    apres un changement de session ou un certain delai. Recuperer un token
+    frais avant chaque POST evite les erreurs CSRFTokenError / Invalid Request.
+    """
+    from frappe.sessions import get_csrf_token
+    return {"csrf_token": get_csrf_token()}
+
+
+@frappe.whitelist()
 def whoami_dashboard():
     """Endpoint de diagnostic : retourne user + roles + can_manage.
 

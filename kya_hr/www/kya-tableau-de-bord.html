@@ -233,12 +233,29 @@ function showLoader(v) {
 }
 
 /* ─── API call (via fetch direct, robuste meme sans frappe.js) ─── */
-const KYA_CSRF = "{{ csrf_token or '' }}";
+let KYA_CSRF = "{{ csrf_token or '' }}";
+
+async function refreshCsrfToken() {
+  try {
+    const r = await fetch('/api/method/kya_hr.api.kya_dashboard.get_fresh_csrf', {
+      method: 'GET',
+      credentials: 'same-origin',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+    });
+    if (!r.ok) return;
+    const data = await r.json();
+    if (data.message && data.message.csrf_token) {
+      KYA_CSRF = data.message.csrf_token;
+    }
+  } catch (_) {}
+}
 
 async function kyaApiCall(method, args, isWrite) {
+  // Pour les POST, toujours recuperer un CSRF frais (le token de la page peut expirer)
+  if (isWrite) await refreshCsrfToken();
+
   const url = '/api/method/' + method;
   const headers = { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
-  // CSRF systematique (GET + POST) pour les sessions Frappe v16
   if (KYA_CSRF) headers['X-Frappe-CSRF-Token'] = KYA_CSRF;
   let body = null;
   let fetchUrl = url;
