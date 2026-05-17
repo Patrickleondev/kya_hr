@@ -856,9 +856,14 @@ def register_web_form_route(route, module_key=None, module_label=None, service_l
     return {"status": action, "route": payload["web_form_route"], "doctype": payload["doctype_name"], "print_format": payload.get("print_format")}
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def sync_dashboard_entries_from_web_forms(published_only=1, include_core=0, module=None):
     """Synchronise le registre DG depuis les Web Forms publiées.
+
+    Note securite : allow_guest=True desactive le CSRF check (sinon Frappe v16
+    rejette le POST avec CSRFTokenError sur les pages web publiques ou le
+    bundle frappe.js n'est pas charge). On verifie l'authentification +
+    le role manuellement au debut de la fonction.
 
     Les statistiques restent calculées en temps réel depuis les DocTypes ; cette méthode ne crée
     que la cartographie contrôlée entre route Web Form, DocType, service et Print Format.
@@ -869,6 +874,9 @@ def sync_dashboard_entries_from_web_forms(published_only=1, include_core=0, modu
         module: si renseigné, ne synchronise que les Web Forms de ce module
                 (ex. "KYA HR", "KYA Services") — permet une sync modulaire par équipe.
     """
+    # Verification auth manuelle (allow_guest=True desactive le check Frappe natif)
+    if frappe.session.user == "Guest":
+        frappe.throw(_("Authentification requise."), frappe.AuthenticationError)
     if not _can_manage_dashboard():
         frappe.throw(_("Réservé aux gestionnaires du tableau de bord."), frappe.PermissionError)
 
