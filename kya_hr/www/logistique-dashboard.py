@@ -1,10 +1,15 @@
-"""Dashboard Logistique — agrégation stock + achats + mouvements + véhicules.
+"""Dashboard Logistique — flotte de véhicules KYA uniquement.
 
-Accessible aux rôles : Stock Manager, Stock User, Chargé des Stocks, Responsable
-Logistique, Responsable Achats, Purchase Manager, DAAF, DGA, DG, System Manager.
+Centré sur :
+- Vehicle (ERPNext) : véhicules + assurance + conducteur
+- Document Vehicule (KYA) : carte grise, vignette, visite, etc. + alertes expiration
+- Vehicle Log (ERPNext) : km parcourus + consommation carburant + entretien
+
+Accessible : Fleet Manager, Gestionnaire de Flotte, Responsable Logistique,
+DAAF, DGA, DG, System Manager.
 """
 import frappe
-from frappe.utils import add_days, flt, today, cint
+from frappe.utils import add_days, flt, today, cint, getdate
 
 
 no_cache = 1
@@ -12,11 +17,9 @@ no_cache = 1
 
 _ALLOWED_ROLES = {
     "System Manager", "Administrator",
-    "Stock Manager", "Stock User", "Chargé des Stocks", "Responsable Stock",
-    "Purchase Manager", "Purchase User", "Responsable Achats",
     "Fleet Manager", "Gestionnaire de Flotte",
+    "DST - Responsable Logistique", "Responsable Logistique",
     "DAAF", "DGA", "Directeur Général", "DG",
-    "DST - Responsable Logistique",
 }
 
 
@@ -27,187 +30,217 @@ def get_context(context):
 
     user_roles = set(frappe.get_roles(frappe.session.user))
     if not (_ALLOWED_ROLES & user_roles):
-        frappe.throw("Accès réservé à la logistique / direction.", frappe.PermissionError)
+        frappe.throw("Accès réservé à la gestion de flotte / direction.", frappe.PermissionError)
 
     period = cint(frappe.form_dict.get("period") or 30)
-    date_from = add_days(today(), -period)
 
-    context.title = "Dashboard Logistique"
+    context.title = "Dashboard Logistique — Flotte"
     context.no_breadcrumbs = True
     context.period = period
-    context.date_from = date_from
-    context.date_to = today()
+    context.today_label = today()
 
-    # ─── STOCK GLOBAL (ERPNext Item + Bin) ──────────────────────────────
-    stock_kpis = _stock_kpis()
-    context.stock = stock_kpis
+    # ─── KPIs FLOTTE GLOBALE ─────────────────────────────────────────────
+    context.flotte = _flotte_kpis()
 
-    # ─── ACHATS (Demandes + Bons de Commande) ───────────────────────────
-    context.achats = _achats_kpis(date_from)
+    # ─── DOCUMENTS (carte grise / assurance / visite / vignette) ────────
+    context.documents = _documents_kpis(period)
 
-    # ─── MOUVEMENTS STOCK (Stock Entry) ─────────────────────────────────
-    context.mouvements = _mouvements_kpis(date_from)
+    # ─── VEHICULES par etat (assurance, expiration) ──────────────────────
+    context.vehicules = _vehicules_list()
 
-    # ─── INVENTAIRES KYA ─────────────────────────────────────────────────
-    context.inventaires = _inventaires_kpis(date_from)
+    # ─── ALERTES (top 10 documents urgents a renouveler) ────────────────
+    context.alertes = _alertes_urgentes()
 
-    # ─── VEHICULES + DOCUMENTS (si DocType present) ─────────────────────
-    context.vehicules = _vehicules_kpis()
+    # ─── REPARTITION (marque / carburant / conducteur) ──────────────────
+    context.repartition = _repartition()
 
-    # ─── TOP ITEMS PAR VALEUR ───────────────────────────────────────────
-    context.top_items = _top_items_by_value()
-
-    # ─── ACTIVITE PAR WAREHOUSE ─────────────────────────────────────────
-    context.par_warehouse = _par_warehouse()
+    # ─── KILOMETRAGE + ENTRETIEN (Vehicle Log si dispo) ─────────────────
+    context.activite = _activite_vehicles(period)
 
 
-def _stock_kpis():
-    items_total = frappe.db.count("Item", {"is_stock_item": 1, "disabled": 0})
-    bins_stock = frappe.db.sql(
-        "SELECT COALESCE(SUM(actual_qty), 0), COALESCE(SUM(actual_qty * valuation_rate), 0) "
-        "FROM `tabBin` WHERE actual_qty > 0",
-        as_dict=False,
-    )
-    total_qty = flt(bins_stock[0][0]) if bins_stock else 0
-    total_value = flt(bins_stock[0][1]) if bins_stock else 0
-    warehouses = frappe.db.count("Warehouse", {"disabled": 0, "is_group": 0})
-    items_with_stock = frappe.db.sql(
-        "SELECT COUNT(DISTINCT item_code) FROM `tabBin` WHERE actual_qty > 0"
-    )[0][0]
-    items_rupture = items_total - items_with_stock if items_total > items_with_stock else 0
-    return {
-        "items_total": items_total,
-        "items_with_stock": items_with_stock,
-        "items_rupture": items_rupture,
-        "warehouses": warehouses,
-        "total_qty": round(total_qty, 0),
-        "total_value": round(total_value, 0),
-    }
-
-
-def _achats_kpis(date_from):
-    # Demandes d'Achat KYA
-    da_total = 0
-    da_approved = 0
-    da_amount = 0
-    if frappe.db.exists("DocType", "Demande Achat KYA"):
-        rows = frappe.get_all(
-            "Demande Achat KYA",
-            filters={"creation": [">=", date_from]},
-            fields=["name", "workflow_state", "montant_total"],
-            limit_page_length=0,
-        )
-        da_total = len(rows)
-        for r in rows:
-            if (r.workflow_state or "").startswith("Approuv"):
-                da_approved += 1
-                da_amount += flt(r.montant_total or 0)
-    # Bons de Commande KYA (statut + total_ttc)
-    bc_total = 0
-    bc_amount = 0
-    if frappe.db.exists("DocType", "Bon Commande KYA"):
-        rows = frappe.get_all(
-            "Bon Commande KYA",
-            filters={"creation": [">=", date_from]},
-            fields=["name", "statut", "total_ttc"],
-            limit_page_length=0,
-        )
-        bc_total = len(rows)
-        bc_amount = sum(flt(r.total_ttc or 0) for r in rows)
-    return {
-        "da_total": da_total,
-        "da_approved": da_approved,
-        "da_amount": da_amount,
-        "bc_total": bc_total,
-        "bc_amount": bc_amount,
-    }
-
-
-def _mouvements_kpis(date_from):
-    rows = frappe.db.sql(
-        """
-        SELECT stock_entry_type, COUNT(*) AS nb, COALESCE(SUM(total_outgoing_value), 0) AS val
-        FROM `tabStock Entry`
-        WHERE docstatus = 1 AND posting_date >= %s
-        GROUP BY stock_entry_type
-        """,
-        (date_from,), as_dict=True,
-    )
-    total_mvt = sum(r.nb for r in rows)
-    total_value = sum(flt(r.val) for r in rows)
-    by_type = {r.stock_entry_type: {"nb": r.nb, "val": flt(r.val)} for r in rows}
-    return {
-        "total_mouvements": total_mvt,
-        "total_value": round(total_value, 0),
-        "by_type": by_type,
-    }
-
-
-def _inventaires_kpis(date_from):
-    if not frappe.db.exists("DocType", "Inventaire KYA"):
-        return {"total": 0, "approved": 0, "pending": 0, "valeur_ecart": 0}
-    rows = frappe.get_all(
-        "Inventaire KYA",
-        filters={"date_inventaire": [">=", date_from]},
-        fields=["name", "statut", "valeur_ecart_total"],
-    )
-    return {
-        "total": len(rows),
-        "approved": sum(1 for r in rows if r.statut == "Approuvé"),
-        "pending": sum(1 for r in rows if (r.statut or "").startswith("En attente")),
-        "valeur_ecart": round(sum(flt(r.valeur_ecart_total or 0) for r in rows), 0),
-    }
-
-
-def _vehicules_kpis():
+def _flotte_kpis():
+    """KPIs globaux : nombre, valeur, conducteurs."""
     if not frappe.db.exists("DocType", "Vehicle"):
-        return {"total": 0, "docs_expires": 0}
-    total = frappe.db.count("Vehicle")
-    docs_expires = 0
-    if frappe.db.exists("DocType", "Document Vehicule"):
-        docs_expires = frappe.db.sql(
-            "SELECT COUNT(*) FROM `tabDocument Vehicule` "
-            "WHERE date_expiration IS NOT NULL AND date_expiration < CURDATE()"
-        )[0][0]
-    return {"total": total, "docs_expires": docs_expires}
+        return {"total": 0, "valeur_totale": 0, "avec_conducteur": 0, "sans_conducteur": 0}
+    rows = frappe.get_all(
+        "Vehicle",
+        fields=["name", "license_plate", "vehicle_value", "employee", "end_date"],
+        limit_page_length=0,
+    )
+    total = len(rows)
+    valeur = sum(flt(r.vehicle_value or 0) for r in rows)
+    avec_cond = sum(1 for r in rows if r.employee)
+    today_d = getdate()
+    assurance_expiree = sum(1 for r in rows if r.end_date and getdate(r.end_date) < today_d)
+    assurance_30j = sum(
+        1 for r in rows
+        if r.end_date and 0 <= (getdate(r.end_date) - today_d).days <= 30
+    )
+    return {
+        "total": total,
+        "valeur_totale": round(valeur, 0),
+        "avec_conducteur": avec_cond,
+        "sans_conducteur": total - avec_cond,
+        "assurance_expiree": assurance_expiree,
+        "assurance_30j": assurance_30j,
+    }
 
 
-def _top_items_by_value():
+def _documents_kpis(period):
+    """Stats Document Vehicule : expirations, coûts."""
+    if not frappe.db.exists("DocType", "Document Vehicule"):
+        return {"total": 0, "expires": 0, "expire_30j": 0, "expire_60j": 0, "cout_total": 0, "par_type": {}}
+
+    today_d = getdate()
+    rows = frappe.get_all(
+        "Document Vehicule",
+        fields=["name", "vehicle", "type_document", "date_expiration", "cout_xof"],
+        limit_page_length=0,
+    )
+    total = len(rows)
+    expires = 0
+    expire_30j = 0
+    expire_60j = 0
+    cout_total = 0
+    par_type = {}
+    for r in rows:
+        cout_total += flt(r.cout_xof or 0)
+        t = r.type_document or "Non défini"
+        par_type[t] = par_type.get(t, 0) + 1
+        if not r.date_expiration:
+            continue
+        delta = (getdate(r.date_expiration) - today_d).days
+        if delta < 0:
+            expires += 1
+        elif delta <= 30:
+            expire_30j += 1
+        elif delta <= 60:
+            expire_60j += 1
+    return {
+        "total": total,
+        "expires": expires,
+        "expire_30j": expire_30j,
+        "expire_60j": expire_60j,
+        "cout_total": round(cout_total, 0),
+        "par_type": par_type,
+    }
+
+
+def _vehicules_list():
+    """Liste détaillée des véhicules avec leur état."""
+    if not frappe.db.exists("DocType", "Vehicle"):
+        return []
+    rows = frappe.get_all(
+        "Vehicle",
+        fields=["name", "license_plate", "make", "model", "vehicle_value",
+                "employee", "last_odometer", "end_date", "fuel_type", "carbon_check_date"],
+        order_by="license_plate asc",
+        limit_page_length=50,
+    )
+    today_d = getdate()
+    for r in rows:
+        r["conducteur_name"] = ""
+        if r.employee:
+            r["conducteur_name"] = frappe.db.get_value("Employee", r.employee, "employee_name") or r.employee
+        # État assurance
+        if r.end_date:
+            delta = (getdate(r.end_date) - today_d).days
+            if delta < 0:
+                r["assurance_etat"] = "expired"
+                r["assurance_label"] = f"Expirée depuis {-delta}j"
+            elif delta <= 30:
+                r["assurance_etat"] = "warning"
+                r["assurance_label"] = f"Expire dans {delta}j"
+            else:
+                r["assurance_etat"] = "ok"
+                r["assurance_label"] = f"OK ({delta}j restants)"
+        else:
+            r["assurance_etat"] = "missing"
+            r["assurance_label"] = "Non renseignée"
+    return rows
+
+
+def _alertes_urgentes():
+    """Top 10 documents véhicule urgents à renouveler (expirés ou < 30j)."""
+    if not frappe.db.exists("DocType", "Document Vehicule"):
+        return []
+    today_d = getdate()
+    in_30j = add_days(today_d, 30)
     rows = frappe.db.sql(
         """
-        SELECT b.item_code, i.item_name,
-               SUM(b.actual_qty) AS qty,
-               SUM(b.actual_qty * b.valuation_rate) AS value
-        FROM `tabBin` b
-        INNER JOIN `tabItem` i ON i.name = b.item_code
-        WHERE b.actual_qty > 0
-        GROUP BY b.item_code, i.item_name
-        ORDER BY value DESC
+        SELECT dv.name, dv.vehicle, dv.type_document, dv.numero,
+               dv.date_expiration, dv.cout_xof, v.license_plate, v.make, v.model
+        FROM `tabDocument Vehicule` dv
+        LEFT JOIN `tabVehicle` v ON v.name = dv.vehicle
+        WHERE dv.date_expiration IS NOT NULL AND dv.date_expiration <= %s
+        ORDER BY dv.date_expiration ASC
+        LIMIT 10
+        """,
+        (in_30j,), as_dict=True,
+    )
+    for r in rows:
+        if r.date_expiration:
+            delta = (getdate(r.date_expiration) - today_d).days
+            r["delta_jours"] = delta
+            r["urgence"] = "expired" if delta < 0 else ("warning" if delta <= 30 else "ok")
+            r["label"] = f"Expiré depuis {-delta}j" if delta < 0 else f"Expire dans {delta}j"
+    return rows
+
+
+def _repartition():
+    """Répartition par marque, type carburant, conducteur."""
+    if not frappe.db.exists("DocType", "Vehicle"):
+        return {"par_marque": [], "par_carburant": [], "par_conducteur": []}
+
+    par_marque = frappe.db.sql(
+        "SELECT COALESCE(make, 'Non renseigné') AS k, COUNT(*) AS n FROM `tabVehicle` GROUP BY make ORDER BY n DESC",
+        as_dict=True,
+    )
+    par_carburant = frappe.db.sql(
+        "SELECT COALESCE(fuel_type, 'Non renseigné') AS k, COUNT(*) AS n FROM `tabVehicle` GROUP BY fuel_type ORDER BY n DESC",
+        as_dict=True,
+    )
+    par_conducteur = frappe.db.sql(
+        """
+        SELECT COALESCE(e.employee_name, 'Sans conducteur assigné') AS k, COUNT(v.name) AS n
+        FROM `tabVehicle` v
+        LEFT JOIN `tabEmployee` e ON e.name = v.employee
+        GROUP BY v.employee
+        ORDER BY n DESC
         LIMIT 10
         """,
         as_dict=True,
     )
-    for r in rows:
-        r["qty"] = round(flt(r.qty), 0)
-        r["value"] = round(flt(r.value), 0)
-    return rows
+    return {
+        "par_marque": par_marque,
+        "par_carburant": par_carburant,
+        "par_conducteur": par_conducteur,
+    }
 
 
-def _par_warehouse():
-    rows = frappe.db.sql(
-        """
-        SELECT b.warehouse,
-               COUNT(DISTINCT b.item_code) AS items,
-               SUM(b.actual_qty) AS qty,
-               SUM(b.actual_qty * b.valuation_rate) AS value
-        FROM `tabBin` b
-        WHERE b.actual_qty > 0
-        GROUP BY b.warehouse
-        ORDER BY value DESC
-        """,
-        as_dict=True,
-    )
+def _activite_vehicles(period):
+    """Kilométrage + entretiens depuis Vehicle Log (si dispo)."""
+    if not frappe.db.exists("DocType", "Vehicle Log"):
+        return {"total_logs": 0, "km_total": 0, "carburant_total": 0, "depenses": 0, "recents": []}
+    date_from = add_days(today(), -period)
+    # Recupere seulement les champs garantis (varie selon ERPNext/HRMS version)
+    try:
+        rows = frappe.get_all(
+            "Vehicle Log",
+            filters={"date": [">=", date_from]},
+            fields=["name", "license_plate", "date", "odometer", "fuel_qty", "price"],
+            order_by="date desc",
+            limit_page_length=20,
+        )
+    except Exception:
+        rows = []
     for r in rows:
-        r["qty"] = round(flt(r.qty), 0)
-        r["value"] = round(flt(r.value), 0)
-    return rows
+        r["vehicle"] = r.license_plate
+        r["service_detail"] = ""
+    return {
+        "total_logs": len(rows),
+        "km_total": sum(flt(r.odometer or 0) for r in rows),
+        "carburant_total": sum(flt(r.fuel_qty or 0) for r in rows),
+        "depenses": sum(flt(r.price or 0) for r in rows),
+        "recents": rows[:10],
+    }
