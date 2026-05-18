@@ -1220,13 +1220,17 @@ def get_dashboard_employes(annee=None):
     approuve_states = {"Approuvé", "Approuvée", "Validé"}
     rejete_states = {"Rejeté", "Rejetée", "Annulé"}
 
-    # Employés (hors stagiaires)
+    # Employés (hors stagiaires) — inclut employment_type NULL/vide
+    # (filter Frappe !=Stage exclut les NULL, donc on raw-SQL pour les inclure)
     try:
-        emp_filters = [["employment_type", "!=", "Stage"], ["status", "=", "Active"]]
-        stats["employes_actifs"] = frappe.db.count("Employee", emp_filters)
-        stats["employes_total"] = frappe.db.count(
-            "Employee", [["employment_type", "!=", "Stage"]]
-        )
+        stats["employes_actifs"] = frappe.db.sql(
+            "SELECT COUNT(*) FROM `tabEmployee` WHERE status='Active' "
+            "AND (employment_type IS NULL OR employment_type != 'Stage')"
+        )[0][0]
+        stats["employes_total"] = frappe.db.sql(
+            "SELECT COUNT(*) FROM `tabEmployee` "
+            "WHERE (employment_type IS NULL OR employment_type != 'Stage')"
+        )[0][0]
     except Exception:
         pass
 
