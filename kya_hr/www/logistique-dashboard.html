@@ -1,0 +1,272 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Dashboard Logistique — Flotte KYA{% endblock %}
+
+{% block page_content %}
+<style>
+  :root {
+    --kya-primary: #0054A6;
+    --kya-orange: #F58220;
+    --kya-green: #22c55e;
+    --kya-red: #ef4444;
+    --kya-amber: #f59e0b;
+    --kya-text: #1e293b;
+    --kya-muted: #64748b;
+    --kya-border: #e2e8f0;
+  }
+  body { background: #f1f5f9 !important; }
+  .logi { max-width: 1400px; margin: 18px auto 32px; padding: 0 16px; font-family: Arial, sans-serif; color: var(--kya-text); }
+  .logi-header {
+    background: linear-gradient(135deg, var(--kya-primary) 0%, #003d7a 100%);
+    color: white; border-radius: 16px; padding: 1.6rem 2rem;
+    margin-bottom: 1.5rem; display: flex; align-items: center;
+    justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+  }
+  .logi-header h1 { margin: 0; font-size: 1.5rem; }
+  .logi-header p { margin: 4px 0 0; opacity: .85; font-size: .85rem; }
+  .logi-period a { background: rgba(255,255,255,.15); color: white; padding: 6px 14px; border-radius: 8px; text-decoration: none; margin-left: 6px; font-size: .85rem; font-weight: 600; }
+  .logi-period a.active, .logi-period a:hover { background: var(--kya-orange); }
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 18px; }
+  .kpi { background: white; border-radius: 10px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06); border-left: 4px solid var(--kya-primary); }
+  .kpi .label { font-size: 11px; color: var(--kya-muted); text-transform: uppercase; font-weight: 700; letter-spacing: .5px; }
+  .kpi .value { font-size: 26px; font-weight: 800; margin-top: 4px; color: var(--kya-primary); }
+  .kpi.orange { border-color: var(--kya-orange); }
+  .kpi.orange .value { color: var(--kya-orange); }
+  .kpi.green { border-color: var(--kya-green); }
+  .kpi.green .value { color: var(--kya-green); }
+  .kpi.red { border-color: var(--kya-red); }
+  .kpi.red .value { color: var(--kya-red); }
+  .kpi.amber { border-color: var(--kya-amber); }
+  .kpi.amber .value { color: var(--kya-amber); }
+  .section { background: white; border-radius: 10px; padding: 18px 20px; margin-bottom: 18px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .section h2 { margin: 0 0 14px; font-size: 16px; color: var(--kya-primary); border-bottom: 2px solid #f0f4fa; padding-bottom: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--kya-border); vertical-align: top; }
+  th { background: #f7f8fa; font-weight: 700; color: #344054; }
+  td.num { text-align: right; font-weight: 600; }
+  .pill { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+  .pill.ok { background: #dcfce7; color: #15803d; }
+  .pill.warning { background: #fef3c7; color: #d97706; }
+  .pill.expired { background: #fee2e2; color: #b91c1c; }
+  .pill.missing { background: #e0e7ff; color: #4338ca; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+  @media (max-width: 900px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+  .empty { color: var(--kya-muted); padding: 12px; text-align: center; font-size: 13px; }
+  .badge-conducteur { background: #ddd6fe; color: #5b21b6; padding: 2px 8px; border-radius: 8px; font-size: 11px; }
+  .badge-libre { background: #f1f5f9; color: #64748b; padding: 2px 8px; border-radius: 8px; font-size: 11px; }
+</style>
+
+<div class="logi">
+  <div class="logi-header">
+    <div>
+      <h1>🚚 Dashboard Logistique — Flotte de véhicules</h1>
+      <p>Véhicules · Documents · Assurances · Kilométrage — Aujourd'hui : {{ today_label }}</p>
+    </div>
+    <div class="logi-period">
+      Période :
+      <a href="?period=7" class="{% if period == 7 %}active{% endif %}">7j</a>
+      <a href="?period=30" class="{% if period == 30 %}active{% endif %}">30j</a>
+      <a href="?period=90" class="{% if period == 90 %}active{% endif %}">90j</a>
+      <a href="?period=365" class="{% if period == 365 %}active{% endif %}">1 an</a>
+    </div>
+  </div>
+
+  <!-- ── KPIs FLOTTE GLOBALE ──────────────────────────────────── -->
+  <h2 style="font-size:18px; color:var(--kya-primary); margin:10px 0 12px;">🚗 Flotte globale</h2>
+  <div class="kpi-row">
+    <div class="kpi"><div class="label">Total véhicules</div><div class="value">{{ flotte.total }}</div></div>
+    <div class="kpi green"><div class="label">Avec conducteur assigné</div><div class="value">{{ flotte.avec_conducteur }}</div></div>
+    <div class="kpi amber"><div class="label">Sans conducteur</div><div class="value">{{ flotte.sans_conducteur }}</div></div>
+    <div class="kpi orange"><div class="label">Valeur totale (XOF)</div><div class="value">{{ "{:,.0f}".format(flotte.valeur_totale).replace(",", " ") }}</div></div>
+    <div class="kpi red"><div class="label">Assurance expirée</div><div class="value">{{ flotte.assurance_expiree }}</div></div>
+    <div class="kpi amber"><div class="label">Assurance &lt; 30j</div><div class="value">{{ flotte.assurance_30j }}</div></div>
+  </div>
+
+  <!-- ── DOCUMENTS ──────────────────────────────────────────────── -->
+  <h2 style="font-size:18px; color:var(--kya-primary); margin:18px 0 12px;">📑 Documents véhicules</h2>
+  <div class="kpi-row">
+    <div class="kpi"><div class="label">Documents totaux</div><div class="value">{{ documents.total }}</div></div>
+    <div class="kpi red"><div class="label">Expirés</div><div class="value">{{ documents.expires }}</div></div>
+    <div class="kpi amber"><div class="label">Expire &lt; 30j</div><div class="value">{{ documents.expire_30j }}</div></div>
+    <div class="kpi orange"><div class="label">Expire 30-60j</div><div class="value">{{ documents.expire_60j }}</div></div>
+    <div class="kpi green"><div class="label">Coût total (XOF)</div><div class="value">{{ "{:,.0f}".format(documents.cout_total).replace(",", " ") }}</div></div>
+  </div>
+
+  <!-- ── ALERTES URGENTES + VEHICULES PROBLEMATIQUES ──────────── -->
+  <div class="grid2">
+    <div class="section">
+      <h2>⚠️ Alertes — top 10 documents à renouveler</h2>
+      {% if alertes %}
+      <table>
+        <thead><tr><th>Document</th><th>Véhicule</th><th>Échéance</th><th>État</th></tr></thead>
+        <tbody>
+          {% for a in alertes %}
+          <tr>
+            <td><b>{{ a.type_document }}</b><br><small style="color:var(--kya-muted);">{{ a.numero or "—" }}</small></td>
+            <td><b>{{ a.license_plate or "?" }}</b><br><small style="color:var(--kya-muted);">{{ a.make or "" }} {{ a.model or "" }}</small></td>
+            <td>{{ a.date_expiration }}</td>
+            <td><span class="pill {{ a.urgence }}">{{ a.label }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty">✅ Aucun document urgent à renouveler.</div>
+      {% endif %}
+    </div>
+
+    <div class="section">
+      <h2>📋 Documents par type</h2>
+      {% if documents.par_type %}
+      <table>
+        <thead><tr><th>Type</th><th class="num">Nombre</th></tr></thead>
+        <tbody>
+          {% for typ, n in documents.par_type.items() %}
+          <tr><td>{{ typ }}</td><td class="num">{{ n }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty">Aucun document enregistré.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ── LISTE VEHICULES ──────────────────────────────────────── -->
+  <div class="section">
+    <h2>🚙 Liste détaillée des véhicules ({{ vehicules|length }})</h2>
+    {% if vehicules %}
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Immatriculation</th>
+            <th>Marque / Modèle</th>
+            <th>Conducteur</th>
+            <th class="num">Kilométrage</th>
+            <th>Carburant</th>
+            <th>Assurance</th>
+            <th class="num">Valeur</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for v in vehicules %}
+          <tr>
+            <td><b>{{ v.license_plate or v.name }}</b></td>
+            <td>{{ v.make or "—" }}<br><small style="color:var(--kya-muted);">{{ v.model or "" }}</small></td>
+            <td>
+              {% if v.conducteur_name %}
+              <span class="badge-conducteur">{{ v.conducteur_name }}</span>
+              {% else %}
+              <span class="badge-libre">Libre</span>
+              {% endif %}
+            </td>
+            <td class="num">{% if v.last_odometer %}{{ "{:,.0f}".format(v.last_odometer).replace(",", " ") }} km{% else %}—{% endif %}</td>
+            <td>{{ v.fuel_type or "—" }}</td>
+            <td><span class="pill {{ v.assurance_etat }}">{{ v.assurance_label }}</span></td>
+            <td class="num">{% if v.vehicle_value %}{{ "{:,.0f}".format(v.vehicle_value).replace(",", " ") }}{% else %}—{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty">Aucun véhicule enregistré. Ajoutez-en via <a href="/app/vehicle">/app/vehicle</a>.</div>
+    {% endif %}
+  </div>
+
+  <!-- ── REPARTITION (marque / carburant / conducteur) ───────── -->
+  <div class="grid3">
+    <div class="section">
+      <h2>🏷️ Par marque</h2>
+      {% if repartition.par_marque %}
+      <table>
+        <thead><tr><th>Marque</th><th class="num">Nb</th></tr></thead>
+        <tbody>
+          {% for r in repartition.par_marque %}
+          <tr><td>{{ r.k }}</td><td class="num">{{ r.n }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty">—</div>
+      {% endif %}
+    </div>
+
+    <div class="section">
+      <h2>⛽ Par carburant</h2>
+      {% if repartition.par_carburant %}
+      <table>
+        <thead><tr><th>Carburant</th><th class="num">Nb</th></tr></thead>
+        <tbody>
+          {% for r in repartition.par_carburant %}
+          <tr><td>{{ r.k }}</td><td class="num">{{ r.n }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty">—</div>
+      {% endif %}
+    </div>
+
+    <div class="section">
+      <h2>👤 Top conducteurs</h2>
+      {% if repartition.par_conducteur %}
+      <table>
+        <thead><tr><th>Conducteur</th><th class="num">Véhicules</th></tr></thead>
+        <tbody>
+          {% for r in repartition.par_conducteur %}
+          <tr><td>{{ r.k }}</td><td class="num">{{ r.n }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty">—</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ── ACTIVITE VEHICLE LOG (km, carburant, entretien) ──────── -->
+  <h2 style="font-size:18px; color:var(--kya-primary); margin:18px 0 12px;">📈 Activité ({{ period }}j) — kilométrage & entretiens</h2>
+  <div class="kpi-row">
+    <div class="kpi"><div class="label">Logs total</div><div class="value">{{ activite.total_logs }}</div></div>
+    <div class="kpi orange"><div class="label">Carburant (L)</div><div class="value">{{ "{:,.0f}".format(activite.carburant_total).replace(",", " ") }}</div></div>
+    <div class="kpi red"><div class="label">Dépenses (XOF)</div><div class="value">{{ "{:,.0f}".format(activite.depenses).replace(",", " ") }}</div></div>
+  </div>
+
+  {% if activite.recents %}
+  <div class="section">
+    <h2>Derniers logs véhicule</h2>
+    <table>
+      <thead><tr><th>Date</th><th>Véhicule</th><th class="num">Odomètre</th><th class="num">Carburant</th><th class="num">Coût</th><th>Détail</th></tr></thead>
+      <tbody>
+        {% for l in activite.recents %}
+        <tr>
+          <td>{{ l.date }}</td>
+          <td><b>{{ l.license_plate or l.vehicle }}</b></td>
+          <td class="num">{% if l.odometer %}{{ "{:,.0f}".format(l.odometer).replace(",", " ") }}{% else %}—{% endif %}</td>
+          <td class="num">{% if l.fuel_qty %}{{ l.fuel_qty }} L{% else %}—{% endif %}</td>
+          <td class="num">{% if l.price %}{{ "{:,.0f}".format(l.price).replace(",", " ") }}{% else %}—{% endif %}</td>
+          <td><small style="color:var(--kya-muted);">{{ (l.service_detail or l.description or "—")[:60] }}</small></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <!-- ── LIENS RAPIDES ─────────────────────────────────────────── -->
+  <div class="section">
+    <h2>🔗 Accès rapides flotte</h2>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:10px;">
+      <a href="/app/vehicle" style="background:#f7fbff;padding:12px;border-radius:8px;text-decoration:none;color:var(--kya-primary);font-weight:600;">🚗 Tous les véhicules</a>
+      <a href="/app/vehicle/new" style="background:#fff7ed;padding:12px;border-radius:8px;text-decoration:none;color:var(--kya-orange);font-weight:600;">➕ Ajouter un véhicule</a>
+      <a href="/app/document-vehicule" style="background:#fef2f2;padding:12px;border-radius:8px;text-decoration:none;color:var(--kya-red);font-weight:600;">📑 Documents véhicules</a>
+      <a href="/app/document-vehicule/new" style="background:#fffbeb;padding:12px;border-radius:8px;text-decoration:none;color:var(--kya-amber);font-weight:600;">➕ Nouveau document</a>
+      <a href="/app/vehicle-log" style="background:#f5f3ff;padding:12px;border-radius:8px;text-decoration:none;color:#7c3aed;font-weight:600;">📊 Logs (km + entretiens)</a>
+      <a href="/app/vehicle-log/new" style="background:#f0fdf4;padding:12px;border-radius:8px;text-decoration:none;color:var(--kya-green);font-weight:600;">➕ Saisir un log</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
