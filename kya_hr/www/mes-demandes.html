@@ -1,0 +1,369 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Mes Demandes{% endblock %}
+
+{% block page_content %}
+<style>
+  .kya-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .kya-stat-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1rem 1.2rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,.1);
+    text-align: center;
+  }
+  .kya-stat-card .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .kya-stat-card .stat-label {
+    font-size: 0.78rem;
+    color: #6c757d;
+    margin-top: 4px;
+  }
+  .kya-stat-card.total  .stat-value { color: #009688; }
+  .kya-stat-card.encours .stat-value { color: #1976d2; }
+  .kya-stat-card.approuve .stat-value { color: #388e3c; }
+  .kya-stat-card.rejete .stat-value { color: #e53935; }
+  .kya-stat-card.brouillon .stat-value { color: #ff9800; }
+
+  .kya-filters {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+    align-items: center;
+  }
+  .kya-filters select, .kya-filters input {
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: .35rem .6rem;
+    font-size: 0.875rem;
+  }
+  .kya-btn-filter {
+    background: #009688;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: .4rem .9rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+  }
+  .kya-btn-filter:hover { background: #00796b; }
+
+  .kya-table-wrap { overflow-x: auto; }
+  .kya-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+  .kya-table th {
+    background: #f5f7fa;
+    text-align: left;
+    padding: .55rem .75rem;
+    white-space: nowrap;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+  }
+  .kya-table td {
+    padding: .55rem .75rem;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+  }
+  .kya-table tr:hover td { background: #f9fbfc; }
+
+  .badge-statut {
+    display: inline-block;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge-green  { background: #e8f5e9; color: #388e3c; }
+  .badge-blue   { background: #e3f2fd; color: #1565c0; }
+  .badge-orange { background: #fff3e0; color: #e65100; }
+  .badge-red    { background: #ffebee; color: #c62828; }
+  .badge-gray   { background: #f5f5f5; color: #757575; }
+
+  .badge-type-pv { background: #e0f2f1; color: #00695c; }
+  .badge-type-da { background: #e8eaf6; color: #283593; }
+
+  .kya-pagination {
+    display: flex;
+    gap: .5rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
+    align-items: center;
+    font-size: 0.875rem;
+  }
+  .kya-pagination button {
+    border: 1px solid #dee2e6;
+    background: #fff;
+    border-radius: 4px;
+    padding: .3rem .7rem;
+    cursor: pointer;
+  }
+  .kya-pagination button:disabled { opacity: .4; cursor: default; }
+  .kya-pagination button.active { background: #009688; color: #fff; border-color: #009688; }
+
+  #kya-loading {
+    text-align: center;
+    padding: 2rem;
+    color: #009688;
+    font-size: 1rem;
+  }
+  #kya-empty {
+    text-align: center;
+    padding: 2.5rem;
+    color: #aaa;
+    display: none;
+  }
+</style>
+
+<div class="container" style="padding-top: 1.5rem; padding-bottom: 3rem; max-width: 960px;">
+  <h2 style="color:#009688; margin-bottom:1.5rem;">
+    <i class="fa fa-list-alt" style="margin-right:8px;"></i>Mes Demandes
+  </h2>
+
+  <!-- Stats -->
+  <div class="kya-stats-grid" id="kya-stats-grid">
+    <div class="kya-stat-card total">
+      <div class="stat-value" id="stat-total">–</div>
+      <div class="stat-label">Total</div>
+    </div>
+    <div class="kya-stat-card encours">
+      <div class="stat-value" id="stat-encours">–</div>
+      <div class="stat-label">En cours</div>
+    </div>
+    <div class="kya-stat-card approuve">
+      <div class="stat-value" id="stat-approuve">–</div>
+      <div class="stat-label">Approuvés</div>
+    </div>
+    <div class="kya-stat-card rejete">
+      <div class="stat-value" id="stat-rejete">–</div>
+      <div class="stat-label">Rejetés</div>
+    </div>
+    <div class="kya-stat-card brouillon">
+      <div class="stat-value" id="stat-brouillon">–</div>
+      <div class="stat-label">Brouillon</div>
+    </div>
+    <div class="kya-stat-card" style="--c:#009688;">
+      <div class="stat-value" id="stat-pv" style="color:#009688;">–</div>
+      <div class="stat-label">PV Matériel</div>
+    </div>
+    <div class="kya-stat-card" style="">
+      <div class="stat-value" id="stat-da" style="color:#5c6bc0;">–</div>
+      <div class="stat-label">Demandes Achat</div>
+    </div>
+    <div class="kya-stat-card" style="--c:#e65100;">
+      <div class="stat-value" id="stat-pse" style="color:#e65100;">–</div>
+      <div class="stat-label">Perm. Sortie Emp.</div>
+    </div>
+    <div class="kya-stat-card" style="--c:#6a1b9a;">
+      <div class="stat-value" id="stat-pss" style="color:#6a1b9a;">–</div>
+      <div class="stat-label">Perm. Stagiaire</div>
+    </div>
+    <div class="kya-stat-card" style="--c:#0277bd;">
+      <div class="stat-value" id="stat-pc" style="color:#0277bd;">–</div>
+      <div class="stat-label">Planning Congé</div>
+    </div>
+    <div class="kya-stat-card" style="--c:#2e7d32;">
+      <div class="stat-value" id="stat-dc" style="color:#2e7d32;">–</div>
+      <div class="stat-label">Dem. Congé</div>
+    </div>
+    <div class="kya-stat-card" style="--c:#558b2f;">
+      <div class="stat-value" id="stat-bs" style="color:#558b2f;">–</div>
+      <div class="stat-label">Bilan de Stage</div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="kya-filters">
+    <label style="font-size:.85rem; font-weight:600;">Filtrer :</label>
+    <select id="filter-type">
+      <option value="">Tous les types</option>
+      <option value="pv">PV Sortie Matériel</option>
+      <option value="da">Demande d'Achat</option>
+      <option value="pse">Permission Sortie Employé</option>
+      <option value="pss">Permission Sortie Stagiaire</option>
+      <option value="pc">Planning Congé</option>
+      <option value="dc">Demande de Congé</option>
+      <option value="bs">Bilan de Stage</option>
+    </select>
+    <select id="filter-statut">
+      <option value="">Tous les statuts</option>
+      <option value="Brouillon">Brouillon</option>
+      <option value="En attente Chef">En attente Chef</option>
+      <option value="En attente Chef Service">En attente Chef Service</option>
+      <option value="En attente RH">En attente RH</option>
+      <option value="En attente Resp. Stagiaires">En attente Resp. Stagiaires</option>
+      <option value="En attente DAAF">En attente DAAF</option>
+      <option value="En attente Audit">En attente Audit</option>
+      <option value="En attente Approbation">En attente Approbation</option>
+      <option value="En attente Direction">En attente Direction</option>
+      <option value="En attente DGA">En attente DGA</option>
+      <option value="En attente DG">En attente DG</option>
+      <option value="En attente Magasin">En attente Magasin</option>
+      <option value="En attente du Supérieur Immédiat">En attente Supérieur Immédiat</option>
+      <option value="Approuvé">Approuvé</option>
+      <option value="Rejeté">Rejeté</option>
+    </select>
+    <button class="kya-btn-filter" onclick="loadData(0)">Appliquer</button>
+    <button class="kya-btn-filter" style="background:#6c757d;" onclick="resetFilters()">Réinitialiser</button>
+  </div>
+
+  <!-- Table -->
+  <div class="kya-table-wrap">
+    <div id="kya-loading"><i class="fa fa-spinner fa-spin"></i> Chargement…</div>
+    <div id="kya-empty"><i class="fa fa-inbox" style="font-size:2rem;display:block;margin-bottom:.5rem;"></i>Aucune demande trouvée.</div>
+    <table class="kya-table" id="kya-table" style="display:none;">
+      <thead>
+        <tr>
+          <th>N°</th>
+          <th>Type</th>
+          <th>Objet</th>
+          <th>Date</th>
+          <th>Statut</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="kya-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="kya-pagination" id="kya-pagination"></div>
+</div>
+
+<script>
+(function () {
+  var PAGE_SIZE = 20;
+  var _total = 0;
+  var _current_offset = 0;
+
+  var COLOR_MAP = {
+    green: "badge-green",
+    blue: "badge-blue",
+    orange: "badge-orange",
+    red: "badge-red",
+    gray: "badge-gray",
+    yellow: "badge-orange",
+  };
+
+  function loadStats() {
+    frappe.call({
+      method: "kya_hr.api.get_demandes_stats",
+      callback: function (r) {
+        if (!r.exc && r.message) {
+          var s = r.message;
+          document.getElementById("stat-total").textContent = s.total || 0;
+          document.getElementById("stat-encours").textContent = s.en_cours || 0;
+          document.getElementById("stat-approuve").textContent = s.approuve || 0;
+          document.getElementById("stat-rejete").textContent = s.rejete || 0;
+          document.getElementById("stat-brouillon").textContent = s.brouillon || 0;
+          document.getElementById("stat-pv").textContent = s.pv_total || 0;
+          document.getElementById("stat-da").textContent = s.da_total || 0;
+          document.getElementById("stat-pse").textContent = s.pse_total || 0;
+          document.getElementById("stat-pss").textContent = s.pss_total || 0;
+          document.getElementById("stat-pc").textContent = s.pc_total || 0;
+          document.getElementById("stat-dc").textContent = s.dc_total || 0;
+          document.getElementById("stat-bs").textContent = s.bs_total || 0;
+        }
+      },
+    });
+  }
+
+  function loadData(offset) {
+    _current_offset = offset || 0;
+    var typeFilter = document.getElementById("filter-type").value;
+    var statutFilter = document.getElementById("filter-statut").value;
+
+    document.getElementById("kya-loading").style.display = "block";
+    document.getElementById("kya-table").style.display = "none";
+    document.getElementById("kya-empty").style.display = "none";
+
+    frappe.call({
+      method: "kya_hr.api.get_demandes_combined",
+      args: {
+        limit: PAGE_SIZE,
+        offset: _current_offset,
+        type_filter: typeFilter || null,
+        statut_filter: statutFilter || null,
+      },
+      callback: function (r) {
+        document.getElementById("kya-loading").style.display = "none";
+        if (r.exc || !r.message) return;
+        var data = r.message.data || [];
+        _total = r.message.total || 0;
+
+        if (!data.length) {
+          document.getElementById("kya-empty").style.display = "block";
+          document.getElementById("kya-pagination").innerHTML = "";
+          return;
+        }
+
+        var tbody = document.getElementById("kya-tbody");
+        tbody.innerHTML = "";
+        data.forEach(function (row) {
+          var colorClass = COLOR_MAP[row.color] || "badge-gray";
+          var typeClass = row.type_code === "pv" ? "badge-type-pv" : "badge-type-da";
+          var montantCell = row.montant
+            ? ("<br><small style='color:#888;'>" +
+               Number(row.montant).toLocaleString("fr-FR") + " XOF</small>")
+            : "";
+          tbody.innerHTML +=
+            "<tr>" +
+            "<td style='font-size:.8rem;color:#999;'>" + row.name + "</td>" +
+            "<td><span class='badge-statut " + typeClass + "'>" + row.type + "</span></td>" +
+            "<td>" + (row.objet || "—") + montantCell + "</td>" +
+            "<td style='white-space:nowrap;'>" + (row.date || "—") + "</td>" +
+            "<td><span class='badge-statut " + colorClass + "'>" + row.statut + "</span></td>" +
+            "<td><a href='" + row.url + "' class='btn btn-xs btn-default'>Ouvrir</a></td>" +
+            "</tr>";
+        });
+
+        document.getElementById("kya-table").style.display = "table";
+        renderPagination();
+      },
+    });
+  }
+
+  function renderPagination() {
+    var container = document.getElementById("kya-pagination");
+    var pages = Math.ceil(_total / PAGE_SIZE);
+    var current = Math.floor(_current_offset / PAGE_SIZE);
+    var html = "<span style='color:#6c757d;'>Total : " + _total + "</span>";
+    html += "<button onclick='window._kya_page(" + (current - 1) + ")' " + (current === 0 ? "disabled" : "") + ">&laquo;</button>";
+    for (var i = 0; i < pages && i < 10; i++) {
+      html += "<button onclick='window._kya_page(" + i + ")'" + (i === current ? " class='active'" : "") + ">" + (i + 1) + "</button>";
+    }
+    html += "<button onclick='window._kya_page(" + (current + 1) + ")' " + (current >= pages - 1 ? "disabled" : "") + ">&raquo;</button>";
+    container.innerHTML = html;
+  }
+
+  window._kya_page = function (page) {
+    if (page < 0) return;
+    loadData(page * PAGE_SIZE);
+  };
+
+  function resetFilters() {
+    document.getElementById("filter-type").value = "";
+    document.getElementById("filter-statut").value = "";
+    loadData(0);
+  }
+  window.resetFilters = resetFilters;
+  window.loadData = loadData;
+
+  // Init
+  loadStats();
+  loadData(0);
+})();
+</script>
+{% endblock %}
