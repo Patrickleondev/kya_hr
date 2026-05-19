@@ -74,6 +74,12 @@ override_whitelisted_methods = {
 doc_events = {
     "Employee": {
         "before_save": "kya_hr.grille_indiciaire.calculer_indice_employee",
+        "after_insert": "kya_hr.dashboard_realtime.notify_dashboard_change",
+        "on_update": "kya_hr.dashboard_realtime.notify_dashboard_change",
+    },
+    "Attendance": {
+        "after_insert": "kya_hr.dashboard_realtime.notify_dashboard_change",
+        "on_update": "kya_hr.dashboard_realtime.notify_dashboard_change",
     },
     # Tache Equipe : notification des attributaires (creation + ajout d'un membre)
     "Tache Equipe": {
@@ -84,22 +90,40 @@ doc_events = {
     "Demande Achat KYA": {
         "before_save": "kya_hr.chef_routing.populate_chef",
         "validate": "kya_hr.auto_calc_logic.compute_demande_achat",
-        "after_insert": "kya_hr.email_notifications.send_submission_recap",
-        "on_update": "kya_hr.email_notifications.send_workflow_update",
+        "after_insert": [
+            "kya_hr.email_notifications.send_submission_recap",
+            "kya_hr.dashboard_realtime.notify_dashboard_change",
+        ],
+        "on_update": [
+            "kya_hr.email_notifications.send_workflow_update",
+            "kya_hr.dashboard_realtime.notify_dashboard_change",
+        ],
     },
     "Bon Commande KYA": {
         "validate": "kya_hr.auto_calc_logic.compute_bon_commande",
     },
     "Permission Sortie Employe": {
         "before_save": "kya_hr.chef_routing.populate_chef",
-        "after_insert": "kya_hr.email_notifications.send_submission_recap",
-        "on_update": "kya_hr.email_notifications.send_workflow_update",
+        "after_insert": [
+            "kya_hr.email_notifications.send_submission_recap",
+            "kya_hr.dashboard_realtime.notify_dashboard_change",
+        ],
+        "on_update": [
+            "kya_hr.email_notifications.send_workflow_update",
+            "kya_hr.dashboard_realtime.notify_dashboard_change",
+        ],
     },
     "Permission Sortie Stagiaire": {
         "before_save": "kya_hr.chef_routing.populate_chef",
         "validate": "kya_hr.auto_calc_logic.compute_permission_sortie_stagiaire",
-        "after_insert": "kya_hr.email_notifications.send_submission_recap",
-        "on_update": "kya_hr.email_notifications.send_workflow_update",
+        "after_insert": [
+            "kya_hr.email_notifications.send_submission_recap",
+            "kya_hr.dashboard_realtime.notify_dashboard_change",
+        ],
+        "on_update": [
+            "kya_hr.email_notifications.send_workflow_update",
+            "kya_hr.dashboard_realtime.notify_dashboard_change",
+        ],
     },
     "Planning Conge": {
         "before_save": [
@@ -121,8 +145,14 @@ doc_events = {
     },
     # PV et Bilan : pas de chef_routing (employee_field suffit)
     "PV Sortie Materiel": {
-        "after_insert": "kya_hr.email_notifications.send_submission_recap",
-        "on_update": "kya_hr.email_notifications.send_workflow_update",
+        "after_insert": [
+            "kya_hr.email_notifications.send_submission_recap",
+            "kya_hr.dashboard_realtime.notify_dashboard_change",
+        ],
+        "on_update": [
+            "kya_hr.email_notifications.send_workflow_update",
+            "kya_hr.dashboard_realtime.notify_dashboard_change",
+        ],
     },
     "PV Entree Materiel": {
         "after_insert": "kya_hr.email_notifications.send_submission_recap",

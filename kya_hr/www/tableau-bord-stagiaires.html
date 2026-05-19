@@ -417,9 +417,22 @@
 
   // Load on ready
   if (typeof frappe !== "undefined" && frappe.ready) {
-    frappe.ready(function() { loadDashboard(); });
+    frappe.ready(function() { loadDashboard(); subscribeRealtime(); });
   } else {
-    document.addEventListener("DOMContentLoaded", function() { loadDashboard(); });
+    document.addEventListener("DOMContentLoaded", function() { loadDashboard(); subscribeRealtime(); });
+  }
+
+  // Souscription realtime (debounce 1.5s)
+  let _realtimeRefreshTimer = null;
+  function subscribeRealtime() {
+    if (typeof frappe === "undefined" || !frappe.realtime || !frappe.realtime.on) return;
+    frappe.realtime.on("kya_dashboard_updated", function() {
+      if (_realtimeRefreshTimer) clearTimeout(_realtimeRefreshTimer);
+      _realtimeRefreshTimer = setTimeout(function() {
+        loadDashboard();
+        _realtimeRefreshTimer = null;
+      }, 1500);
+    });
   }
 })();
 </script>
