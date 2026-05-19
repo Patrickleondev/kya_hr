@@ -37,6 +37,23 @@ STANDARD_APPS_TO_FIX = ("hrms", "erpnext", "frappe")
 # Users that must always see everything.
 ADMIN_USERS = ("Administrator",)
 
+# Workspaces standard ERPNext/HRMS qui doivent IMPERATIVEMENT etre publics
+# et accessibles a System Manager. Liste explicite pour eviter qu'ils
+# disparaissent du desk apres un deploy/bench migrate.
+# (Bug observe en prod : icone Comptabilite + sous-icones Frappe HR
+# disparues apres reconstruction du container.)
+CRITICAL_STANDARD_WORKSPACES = (
+    # ERPNext core
+    "Accounting", "Stock", "Buying", "Selling", "Manufacturing",
+    "Projects", "Quality", "Subcontracting", "ERPNext Settings",
+    # HRMS
+    "HR", "Frappe HR", "Attendance", "Leaves", "Payroll",
+    "Performance", "Recruitment", "Onboarding", "Shift & Attendance",
+    "Loans", "Employee Lifecycle",
+    # Frappe core
+    "Build", "Tools",
+)
+
 
 def _safe_log(label: str, payload):
     try:
@@ -198,6 +215,63 @@ def _normalize_workspace_visibility():
     return fixed
 
 
+def _force_critical_workspaces_visible():
+    """Force public=1, hide_custom=0, restrict_to_domain=NULL, parent_page=NULL
+    sur les workspaces standard critiques. C'est la defense de derniere ligne
+    contre 'l'icone Comptabilite a disparu apres deploy'.
+
+    Note: on n'efface PAS .roles ici - on ajoute juste System Manager si
+    absent, pour que l'admin voie toujours le module.
+    """
+    fixed = []
+    for ws_name in CRITICAL_STANDARD_WORKSPACES:
+        if not frappe.db.exists("Workspace", ws_name):
+            continue
+        try:
+            updates = {}
+            row = frappe.db.get_value(
+                "Workspace", ws_name,
+                ["public", "hide_custom", "restrict_to_domain", "parent_page", "for_user"],
+                as_dict=True,
+            ) or {}
+            if not row.get("public"):
+                updates["public"] = 1
+            if row.get("hide_custom"):
+                updates["hide_custom"] = 0
+            if row.get("restrict_to_domain"):
+                updates["restrict_to_domain"] = None
+            if row.get("for_user"):
+                updates["for_user"] = None
+            parent = row.get("parent_page")
+            if parent and not frappe.db.exists("Workspace", parent):
+                updates["parent_page"] = None
+            if updates:
+                for k, v in updates.items():
+                    frappe.db.set_value("Workspace", ws_name, k, v, update_modified=False)
+                fixed.append(ws_name)
+
+            # Garantir que System Manager peut voir ce workspace.
+            has_sysmgr = frappe.db.exists(
+                "Has Role",
+                {"parent": ws_name, "parenttype": "Workspace", "role": "System Manager"},
+            )
+            if not has_sysmgr:
+                try:
+                    frappe.get_doc({
+                        "doctype": "Has Role",
+                        "parent": ws_name,
+                        "parenttype": "Workspace",
+                        "parentfield": "roles",
+                        "role": "System Manager",
+                    }).insert(ignore_permissions=True, ignore_if_duplicate=True)
+                except Exception as exc:
+                    if "Duplicate" not in str(exc):
+                        _safe_log(f"add SysMgr role on {ws_name} error", str(exc))
+        except Exception as exc:
+            _safe_log(f"force visible {ws_name} error", str(exc))
+    return fixed
+
+
 def _ensure_admin_has_all_roles():
     """Grant Administrator every enabled role so it can see every module."""
     granted = 0
@@ -287,6 +361,10 @@ def execute():
         result["workspaces_fixed"] = _normalize_workspace_visibility()
     except Exception as exc:
         result["errors"].append(("normalize_workspaces", str(exc)))
+    try:
+        result["critical_workspaces_forced"] = _force_critical_workspaces_visible()
+    except Exception as exc:
+        result["errors"].append(("force_critical_workspaces", str(exc)))
     try:
         result["roles_granted"] = _ensure_admin_has_all_roles()
     except Exception as exc:
