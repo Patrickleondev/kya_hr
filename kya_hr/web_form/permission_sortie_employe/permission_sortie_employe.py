@@ -9,8 +9,18 @@ def get_context(context):
     roles = frappe.get_roles(user)
     context.user_roles = roles
 
-    employee = frappe.db.get_value("Employee", {"user_id": user, "status": "Active"}, "name")
-    context.current_employee = employee
+    employee = frappe.db.get_value(
+        "Employee",
+        {"user_id": user, "status": "Active"},
+        ["name", "employment_type"],
+        as_dict=True,
+    )
+
+    if employee and employee.employment_type == "Stage" and not context.doc:
+        frappe.local.flags.redirect_location = "/permission-sortie-stagiaire/new"
+        raise frappe.Redirect
+
+    context.current_employee = employee.name if employee else None
 
     context.can_sign_employe = True
     context.can_sign_chef = False

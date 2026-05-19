@@ -4,48 +4,66 @@
 
 {% block page_content %}
 <style>
-.kya-compta-page { max-width: 1180px; margin: 18px auto 32px; padding: 0 16px; font-family: Arial, sans-serif; color: #18212f; }
-.kya-letterhead { border: 1px solid #d9dee7; border-radius: 6px; overflow: hidden; background: #fff; }
-.kya-letterhead-top { display: grid; grid-template-columns: 120px 1fr 180px; gap: 18px; align-items: center; padding: 18px 22px; border-bottom: 4px solid #f59e0b; }
+:root {
+  --kya-navy:  #0f3d68;
+  --kya-blue:  #1565c0;
+  --kya-teal:  #009688;
+  --kya-amber: #f59e0b;
+  --kya-amber-dark: #d97706;
+  --kya-green: #2e7d32;
+  --kya-red:   #c62828;
+  --kya-bg:    #f0f4f8;
+  --kya-card-shadow: 0 2px 8px rgba(15,61,104,.08);
+}
+.kya-compta-page { max-width: 1180px; margin: 18px auto 32px; padding: 0 16px; font-family: 'Segoe UI', Arial, sans-serif; color: #18212f; background: var(--kya-bg); }
+.kya-letterhead { border-radius: 12px; overflow: hidden; box-shadow: var(--kya-card-shadow); }
+.kya-letterhead-top { display: grid; grid-template-columns: 120px 1fr 180px; gap: 18px; align-items: center; padding: 18px 22px; background: #fff; border-bottom: 0; }
 .kya-logo { width: 84px; height: 84px; object-fit: contain; }
-.kya-company h1 { margin: 0; font-size: 22px; color: #0f3d68; letter-spacing: 0; }
+.kya-company h1 { margin: 0; font-size: 22px; color: var(--kya-navy); letter-spacing: 0; font-weight: 700; }
 .kya-company p { margin: 4px 0 0; font-size: 12px; color: #5c6573; line-height: 1.45; }
 .kya-doc-meta { text-align: right; font-size: 12px; color: #4b5563; }
-.kya-title-band { background: #0f3d68; color: #fff; padding: 14px 22px; display: flex; justify-content: space-between; gap: 16px; align-items: center; }
-.kya-title-band h2 { margin: 0; font-size: 20px; letter-spacing: 0; }
+.kya-title-band { background: linear-gradient(135deg, var(--kya-navy) 0%, var(--kya-blue) 100%); color: #fff; padding: 18px 22px; display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+.kya-title-band h2 { margin: 0; font-size: 20px; letter-spacing: 0; font-weight: 700; }
 .kya-title-band span { font-size: 13px; opacity: .92; }
 .kya-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0; }
-.kya-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 9px 14px; border-radius: 6px; border: 1px solid #d8dee8; background: #fff; color: #0f3d68; text-decoration: none; font-weight: 700; font-size: 13px; }
-.kya-btn.primary { background: #f59e0b; border-color: #d97706; color: #fff; }
-.kya-btn.dark { background: #0f3d68; border-color: #0f3d68; color: #fff; }
-.kya-btn:hover { text-decoration: none; filter: brightness(.97); }
-.kya-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 14px 0 20px; }
-.kya-kpi { border: 1px solid #d9dee7; border-radius: 6px; background: #fff; padding: 14px; }
-.kya-kpi .label { color: #667085; font-size: 12px; text-transform: uppercase; }
-.kya-kpi .value { font-size: 20px; color: #101828; font-weight: 800; margin-top: 5px; }
-.kya-section { margin-top: 18px; border: 1px solid #d9dee7; border-radius: 6px; background: #fff; overflow: hidden; }
-.kya-section h3 { margin: 0; padding: 13px 16px; background: #f7f8fa; border-bottom: 1px solid #d9dee7; font-size: 15px; color: #0f3d68; }
+.kya-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 10px 16px; border-radius: 8px; border: 1px solid #d8dee8; background: #fff; color: var(--kya-navy); text-decoration: none; font-weight: 700; font-size: 13px; transition: all .15s; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+.kya-btn:hover { text-decoration: none; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.1); }
+.kya-btn.primary { background: var(--kya-amber); border-color: var(--kya-amber-dark); color: #fff; }
+.kya-btn.dark { background: var(--kya-navy); border-color: var(--kya-navy); color: #fff; }
+.kya-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 14px 0 20px; }
+.kya-kpi { background: #fff; border-radius: 12px; padding: 18px 20px; box-shadow: var(--kya-card-shadow); border-left: 4px solid var(--kya-blue); transition: transform .15s; }
+.kya-kpi:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(15,61,104,.12); }
+.kya-kpi:nth-child(1) { border-left-color: var(--kya-blue); }
+.kya-kpi:nth-child(2) { border-left-color: var(--kya-teal); }
+.kya-kpi:nth-child(3) { border-left-color: var(--kya-green); }
+.kya-kpi:nth-child(4) { border-left-color: var(--kya-amber); }
+.kya-kpi .label { color: #667085; font-size: 11px; text-transform: uppercase; font-weight: 600; letter-spacing: .5px; }
+.kya-kpi .value { font-size: 22px; color: #101828; font-weight: 800; margin-top: 6px; line-height: 1.2; }
+.kya-section { margin-top: 18px; border-radius: 12px; background: #fff; overflow: hidden; box-shadow: var(--kya-card-shadow); }
+.kya-section h3 { margin: 0; padding: 14px 18px; background: linear-gradient(180deg, #fbfcfe 0%, #f4f7fb 100%); border-bottom: 1px solid #e6ebf2; font-size: 15px; color: var(--kya-navy); font-weight: 700; }
 .kya-table-wrap { overflow-x: auto; }
 table.kya-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.kya-table th, .kya-table td { padding: 10px 12px; border-bottom: 1px solid #edf0f5; text-align: left; vertical-align: top; }
-.kya-table th { background: #fbfcfe; color: #475467; font-size: 12px; text-transform: uppercase; }
-.kya-table td.num { text-align: right; white-space: nowrap; }
-.kya-badge { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #eef6ff; color: #175cd3; }
+.kya-table th, .kya-table td { padding: 11px 14px; border-bottom: 1px solid #edf0f5; text-align: left; vertical-align: top; }
+.kya-table tr:hover td { background: #f8fbff; }
+.kya-table th { background: #fbfcfe; color: #475467; font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: .3px; }
+.kya-table td.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.kya-badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #eef6ff; color: #175cd3; }
 .kya-badge.ok { background: #ecfdf3; color: #067647; }
 .kya-badge.err { background: #fef3f2; color: #b42318; }
-.kya-help { padding: 14px 16px; color: #475467; font-size: 13px; line-height: 1.5; }
-.kya-models { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 14px 16px; }
-.kya-model { border: 1px solid #edf0f5; border-radius: 6px; padding: 12px; }
-.kya-model b { display: block; color: #0f3d68; margin-bottom: 5px; }
+.kya-help { padding: 16px 18px; color: #475467; font-size: 13px; line-height: 1.5; }
+.kya-models { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; padding: 16px 18px; }
+.kya-model { border: 1px solid #e6ebf2; border-radius: 10px; padding: 14px; background: #fbfcfe; transition: all .15s; }
+.kya-model:hover { background: #fff; border-color: var(--kya-blue); box-shadow: 0 4px 12px rgba(21,101,192,.08); }
+.kya-model b { display: block; color: var(--kya-navy); margin-bottom: 6px; font-size: 14px; }
 @media (max-width: 860px) {
   .kya-letterhead-top { grid-template-columns: 80px 1fr; }
   .kya-doc-meta { grid-column: 1 / -1; text-align: left; }
-  .kya-grid, .kya-models { grid-template-columns: 1fr; }
   .kya-title-band { display: block; }
 }
 @media print {
   .navbar, header, .web-footer, .kya-actions { display: none !important; }
-  .kya-compta-page { margin: 0; max-width: none; }
+  .kya-compta-page { margin: 0; max-width: none; background: #fff; }
+  .kya-kpi, .kya-section { box-shadow: none; border: 1px solid #d9dee7; }
 }
 </style>
 

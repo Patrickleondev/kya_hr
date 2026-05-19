@@ -21,6 +21,12 @@
  "sequence_id": 11,
  "roles": [
   {
+   "role": "Employee"
+  },
+  {
+   "role": "Stagiaire"
+  },
+  {
    "role": "Chef Service"
   },
   {
