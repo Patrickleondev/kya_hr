@@ -131,16 +131,23 @@ function _control_pse_signatures(frm) {
     frm.set_df_property("signataire_employe", "read_only", 1);
     frm.set_df_property("date_signature_employe", "read_only", 1);
 
-    // Signature Chef : modifiable à "En attente Chef" pour HR User
-    var peut_signer_chef = ws === "En attente Chef" && roles.includes("HR User");
+    // Signature Chef : modifiable à "En attente Chef" pour Chef Service OU
+    // Supérieur Immédiat (chef de sous-équipe). HR Manager/HR User peuvent
+    // aussi signer ce palier en cas d'absence ou d'escalade.
+    var peut_signer_chef = ws === "En attente Chef" && (
+        roles.includes("Chef Service")
+        || roles.includes("Supérieur Immédiat")
+        || roles.includes("HR Manager")
+        || roles.includes("HR User")
+    );
     frm.set_df_property("signature_chef", "read_only", peut_signer_chef ? 0 : 1);
     frm.set_df_property("signataire_chef", "read_only", 1);
     frm.set_df_property("date_signature_chef", "read_only", 1);
 
-    // Signature RH : modifiable à "En attente RH" pour HR Manager
+    // Signature RH : modifiable à "En attente RH" pour Responsable RH / HR Manager
     // OU à "En attente Chef" si bypass (absence Chef → passe directement à En attente RH)
     var peut_signer_rh = (ws === "En attente RH" || ws === "En attente Chef")
-        && roles.includes("HR Manager");
+        && (roles.includes("HR Manager") || roles.includes("Responsable RH"));
     frm.set_df_property("signature_rh", "read_only", peut_signer_rh ? 0 : 1);
     frm.set_df_property("signataire_rh", "read_only", 1);
     frm.set_df_property("date_signature_rh", "read_only", 1);

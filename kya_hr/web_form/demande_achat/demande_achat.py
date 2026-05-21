@@ -27,7 +27,14 @@ def get_context(context):
     montant = doc.get("montant_total") or 0
 
     context.can_sign_demandeur = state == "Brouillon"
-    context.can_sign_chef = (state == "En attente Chef") and ("Chef Service" in roles or is_admin)
+    # Palier Chef: accepte Chef Service OU Supérieur Immédiat (rôle plus large
+    # pour les chefs de sous-équipes qui n'ont pas le rôle 'Chef Service' explicite).
+    context.can_sign_chef = (state == "En attente Chef") and (
+        "Chef Service" in roles
+        or "Supérieur Immédiat" in roles
+        or "HR Manager" in roles
+        or is_admin
+    )
     context.can_sign_daaf = (state == "En attente DAAF") and ("DAAF" in roles or is_admin)
     context.can_sign_dg = (state == "En attente DG") and ("Directeur Général" in roles or is_admin)
 

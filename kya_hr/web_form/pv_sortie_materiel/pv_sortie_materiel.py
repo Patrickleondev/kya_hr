@@ -29,7 +29,12 @@ def get_context(context):
     is_admin = "System Manager" in roles
 
     context.can_sign_demandeur = state == "Brouillon"
-    context.can_sign_chef    = (state == "En attente Chef")      and ("Chef Service"       in roles or is_admin)
+    # Palier Chef: accepte Chef Service OU Supérieur Immédiat.
+    context.can_sign_chef    = (state == "En attente Chef") and (
+        "Chef Service" in roles
+        or "Supérieur Immédiat" in roles
+        or is_admin
+    )
     context.can_sign_audit   = (state == "En attente Audit")     and ("Auditeur Interne"   in roles or is_admin)
-    context.can_sign_dga     = (state == "En attente Direction") and ("Directeur Général"  in roles or is_admin)
-    context.can_sign_magasin = (state == "En attente Magasin")   and ("Chargé des Stocks"  in roles or is_admin)
+    context.can_sign_dga     = (state == "En attente Direction") and ("Directeur Général"  in roles or "DGA" in roles or is_admin)
+    context.can_sign_magasin = (state == "En attente Magasin")   and ("Chargé des Stocks"  in roles or "Responsable Stock" in roles or is_admin)

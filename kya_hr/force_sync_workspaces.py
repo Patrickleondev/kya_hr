@@ -573,6 +573,7 @@ def execute():
     _restrict_workspace_roles(
         "Espace Stagiaires",
         [
+            "Stagiaire",
             "Maître de Stage",
             "Responsable des Stagiaires",
             "Responsable RH",
@@ -644,18 +645,26 @@ def execute():
         _restrict_workspace_roles(
             espace_ws,
             [
+                # Tout employe (CDI/CDD/Stage/Prestataire) lie a un User actif
+                # doit voir l'icone Mon Espace. Sinon les profils sans role
+                # metier (ex: GANDONOU, stagiaire pur) ne voient rien du desk.
+                "Employee",
+                "Stagiaire",
                 "Chef Service",
                 "Supérieur Immédiat",
+                "Chef Equipe",
                 "Responsable RH",
                 "HR User",
                 "HR Manager",
                 "Directeur Général",
+                "DGA",
                 "DAAF",
                 "Auditeur Interne",
                 "Stock User",
                 "Purchase User",
                 "Responsable Achats",
                 "Chargé des Stocks",
+                "Responsable Comptable",
                 "KYA Destinataire Notif",
                 "System Manager",
             ],

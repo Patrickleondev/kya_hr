@@ -43,6 +43,7 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.desktop_icons.execute", "Desktop icons (workaround Frappe v16)"),
     ("kya_hr.coherence_fixes.execute", "Coherence fixes (champs orphelins)"),
     ("kya_hr.ensure_visibility.execute", "Ensure workspaces visibility"),
+    ("kya_hr.ensure_employee_roles.execute", "Ensure Employee/Stagiaire roles on linked Users"),
 ]
 
 AFTER_INSTALL: list[tuple[str, str]] = [

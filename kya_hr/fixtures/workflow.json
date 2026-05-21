@@ -388,9 +388,25 @@
     "state": "Brouillon"
    },
    {
+    "action": "Soumettre",
+    "allow_self_approval": 0,
+    "allowed": "Stagiaire",
+    "condition": null,
+    "next_state": "En attente Chef",
+    "state": "Brouillon"
+   },
+   {
     "action": "Approuver",
     "allow_self_approval": 0,
     "allowed": "Maître de Stage",
+    "condition": null,
+    "next_state": "En attente Resp. Stagiaires",
+    "state": "En attente Chef"
+   },
+   {
+    "action": "Approuver",
+    "allow_self_approval": 0,
+    "allowed": "Supérieur Immédiat",
     "condition": null,
     "next_state": "En attente Resp. Stagiaires",
     "state": "En attente Chef"
@@ -537,9 +553,25 @@
    },
    {
     "state": "En attente Chef",
+    "action": "Approuver",
+    "next_state": "En attente Audit",
+    "allowed": "Supérieur Immédiat",
+    "allow_self_approval": 0,
+    "condition": null
+   },
+   {
+    "state": "En attente Chef",
     "action": "Rejeter",
     "next_state": "Rejeté",
     "allowed": "Chef Service",
+    "allow_self_approval": 0,
+    "condition": null
+   },
+   {
+    "state": "En attente Chef",
+    "action": "Rejeter",
+    "next_state": "Rejeté",
+    "allowed": "Supérieur Immédiat",
     "allow_self_approval": 0,
     "condition": null
    },
@@ -703,6 +735,14 @@
     "state": "En attente Chef"
    },
    {
+    "action": "Approuver",
+    "allow_self_approval": 0,
+    "allowed": "Supérieur Immédiat",
+    "condition": null,
+    "next_state": "En attente RH",
+    "state": "En attente Chef"
+   },
+   {
     "action": "Rejeter",
     "allow_self_approval": 0,
     "allowed": "Chef Service",
@@ -711,9 +751,25 @@
     "state": "En attente Chef"
    },
    {
+    "action": "Rejeter",
+    "allow_self_approval": 0,
+    "allowed": "Supérieur Immédiat",
+    "condition": null,
+    "next_state": "Rejeté",
+    "state": "En attente Chef"
+   },
+   {
     "action": "Valider (Absence Chef)",
     "allow_self_approval": 0,
     "allowed": "Chef Service",
+    "condition": null,
+    "next_state": "En attente RH",
+    "state": "En attente Chef"
+   },
+   {
+    "action": "Valider (Absence Chef)",
+    "allow_self_approval": 0,
+    "allowed": "Supérieur Immédiat",
     "condition": null,
     "next_state": "En attente RH",
     "state": "En attente Chef"

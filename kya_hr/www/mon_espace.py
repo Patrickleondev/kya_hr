@@ -56,7 +56,12 @@ def get_context(context):
     direction_roles = {"Directeur Général", "DAAF", "System Manager"}
     context.show_direction = bool(direction_roles.intersection(set(roles)))
 
-    context.is_stagiaire = bool(emp) and emp.get("employment_type") == "Stage"
+    # is_stagiaire = vrai si Employee.employment_type=Stage OU role Stagiaire.
+    # Voir kya_services/www/mon_espace.py pour le commentaire detaille.
+    context.is_stagiaire = bool(emp) and (
+        emp.get("employment_type") == "Stage"
+        or "Stagiaire" in roles
+    )
     stagiaire_mgmt_roles = {"Responsable des Stagiaires", "Maître de Stage", "HR Manager", "System Manager"}
     context.show_stagiaires_mgmt = bool(stagiaire_mgmt_roles.intersection(set(roles)))
 
