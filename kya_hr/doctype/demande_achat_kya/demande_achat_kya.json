@@ -182,7 +182,7 @@
    "fieldname": "signature_chef",
    "label": "Signature du Chef Service",
    "fieldtype": "Signature",
-   "read_only": 1,
+   "read_only_depends_on": "eval:!(doc.workflow_state==='En attente Chef' && (frappe.user_roles.includes('Chef Service') || frappe.user_roles.includes('Supérieur Immédiat') || frappe.user_roles.includes('HR Manager')))",
    "description": "Le Chef Service signe ici"
   },
   {
@@ -206,7 +206,7 @@
    "fieldname": "signature_dga",
    "label": "Signature DAAF / Responsable Achats",
    "fieldtype": "Signature",
-   "read_only": 1,
+   "read_only_depends_on": "eval:!(doc.workflow_state==='En attente DAAF' && (frappe.user_roles.includes('DAAF') || frappe.user_roles.includes('Responsable Achats') || frappe.user_roles.includes('Responsable Comptable')))",
    "description": "Visa obligatoire pour tous les paliers (procédure AEA-PRO-01-V01)"
   },
   {
@@ -231,7 +231,7 @@
    "fieldname": "signature_dg",
    "label": "Signature du DG",
    "fieldtype": "Signature",
-   "read_only": 1,
+   "read_only_depends_on": "eval:!(doc.workflow_state==='En attente DG' && (frappe.user_roles.includes('Directeur Général') || frappe.user_roles.includes('DGA')))",
    "depends_on": "eval:doc.montant_total > 100000 || (doc.urgence && doc.urgence !== 'Normal')",
    "description": "Approbation DG : achats > 100 000 XOF, ou demandes urgentes (procédure AEA-PRO-01-V01)"
   },
@@ -260,7 +260,7 @@
    "fieldname": "signature_audit",
    "label": "Visa Audit Interne",
    "fieldtype": "Signature",
-   "read_only": 1
+   "read_only_depends_on": "eval:!(frappe.user_roles.includes('Auditeur Interne') || frappe.user_roles.includes('HR Manager'))"
   },
   {
    "fieldname": "signataire_audit",
