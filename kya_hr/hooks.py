@@ -74,8 +74,14 @@ override_whitelisted_methods = {
 doc_events = {
     "Employee": {
         "before_save": "kya_hr.grille_indiciaire.calculer_indice_employee",
-        "after_insert": "kya_hr.dashboard_realtime.notify_dashboard_change",
-        "on_update": "kya_hr.dashboard_realtime.notify_dashboard_change",
+        "after_insert": [
+            "kya_hr.dashboard_realtime.notify_dashboard_change",
+            "kya_hr.role_sync.sync_employee_role",
+        ],
+        "on_update": [
+            "kya_hr.dashboard_realtime.notify_dashboard_change",
+            "kya_hr.role_sync.sync_employee_role",
+        ],
     },
     "Attendance": {
         "after_insert": "kya_hr.dashboard_realtime.notify_dashboard_change",
