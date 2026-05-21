@@ -93,6 +93,9 @@ RESTRICTED_LAYOUT_ROLES = {
         "System Manager",
     ],
     "Espace Stagiaires": [
+        # Stagiaire lui-meme doit voir son icone (son espace) sur le desk
+        # legacy /desk. Sur /app c'est gere via le workspace.roles.
+        "Stagiaire",
         "Maître de Stage",
         "Responsable des Stagiaires",
         "Responsable RH",
