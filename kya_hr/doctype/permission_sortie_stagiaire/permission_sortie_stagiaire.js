@@ -129,14 +129,25 @@ function _control_pss_signatures(frm) {
     frm.set_df_property("signataire_stagiaire", "read_only", 1);
     frm.set_df_property("date_signature_stagiaire", "read_only", 1);
 
-    // Signature Chef : modifiable à "En attente Chef" pour HR User
-    var peut_signer_chef = ws === "En attente Chef" && roles.includes("HR User");
+    // Signature Chef : modifiable à "En attente Chef" pour Maître de Stage
+    // OU Supérieur Immédiat (Chef Service de l'équipe d'accueil).
+    var peut_signer_chef = ws === "En attente Chef" && (
+        roles.includes("Maître de Stage")
+        || roles.includes("Supérieur Immédiat")
+        || roles.includes("HR Manager")
+        || roles.includes("HR User")
+    );
     frm.set_df_property("signature_chef", "read_only", peut_signer_chef ? 0 : 1);
     frm.set_df_property("signataire_chef", "read_only", 1);
     frm.set_df_property("date_signature_chef", "read_only", 1);
 
-    // Signature Resp. Stagiaires : modifiable à "En attente Resp. Stagiaires" pour HR User
-    var peut_signer_resp = ws === "En attente Resp. Stagiaires" && roles.includes("HR User");
+    // Signature Resp. Stagiaires : modifiable à "En attente Resp. Stagiaires"
+    // pour Responsable des Stagiaires / HR Manager.
+    var peut_signer_resp = ws === "En attente Resp. Stagiaires" && (
+        roles.includes("Responsable des Stagiaires")
+        || roles.includes("HR Manager")
+        || roles.includes("HR User")
+    );
     frm.set_df_property("signature_resp_stagiaires", "read_only", peut_signer_resp ? 0 : 1);
     frm.set_df_property("signataire_resp", "read_only", 1);
     frm.set_df_property("date_signature_resp", "read_only", 1);

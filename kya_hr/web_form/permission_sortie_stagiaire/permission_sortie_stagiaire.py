@@ -26,6 +26,15 @@ def get_context(context):
     is_admin = "System Manager" in roles
 
     context.can_sign_stagiaire        = state == "Brouillon"
-    context.can_sign_chef             = (state == "En attente Chef")             and ("Maître de Stage" in roles or is_admin)
-    context.can_sign_resp_stagiaires  = (state == "En attente Resp. Stagiaires") and ("Responsable des Stagiaires" in roles or is_admin)
+    # Palier 'Chef' stagiaire = Maître de Stage. Accepte aussi Supérieur
+    # Immédiat (Chef Service où le stagiaire est rattaché) pour cohérence
+    # avec le workflow Permission Sortie Employe.
+    context.can_sign_chef             = (state == "En attente Chef") and (
+        "Maître de Stage" in roles
+        or "Supérieur Immédiat" in roles
+        or is_admin
+    )
+    context.can_sign_resp_stagiaires  = (state == "En attente Resp. Stagiaires") and (
+        "Responsable des Stagiaires" in roles or "HR Manager" in roles or is_admin
+    )
     context.can_sign_dg               = (state == "En attente DG")               and ("Directeur Général" in roles or is_admin)
