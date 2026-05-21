@@ -177,7 +177,7 @@
    "fieldname": "signature_chef",
    "label": "Signature Chef",
    "fieldtype": "Signature",
-   "read_only": 1
+   "read_only_depends_on": "eval:!(doc.workflow_state==='En attente Chef' && (frappe.user_roles.includes('Maître de Stage') || frappe.user_roles.includes('Supérieur Immédiat') || frappe.user_roles.includes('Chef Service') || frappe.user_roles.includes('HR Manager') || frappe.user_roles.includes('HR User')))"
   },
   {
    "fieldname": "signataire_chef",
@@ -204,7 +204,7 @@
    "fieldname": "signature_resp_stagiaires",
    "label": "Signature Resp. Stagiaires",
    "fieldtype": "Signature",
-   "read_only": 1
+   "read_only_depends_on": "eval:!(doc.workflow_state==='En attente Resp. Stagiaires' && (frappe.user_roles.includes('Responsable des Stagiaires') || frappe.user_roles.includes('HR Manager') || frappe.user_roles.includes('HR User')))"
   },
   {
    "fieldname": "signataire_resp",
@@ -227,7 +227,7 @@
    "fieldname": "signature_dg",
    "label": "Signature DG",
    "fieldtype": "Signature",
-   "read_only": 1
+   "read_only_depends_on": "eval:!(doc.workflow_state==='En attente DG' && (frappe.user_roles.includes('Directeur Général') || frappe.user_roles.includes('DGA') || frappe.user_roles.includes('HR Manager')))"
   },
   {
    "fieldname": "signataire_dg",

@@ -70,6 +70,15 @@ override_whitelisted_methods = {
     "frappe.utils.print_format.download_pdf": "kya_hr.api.print_format.download_pdf",
 }
 
+# Redirects pour les routes Frappe legacy (v13/v14) qui 404 en v16.
+# - /desk/people : ancien lien Frappe HR ; en v16 c'est /app/hr
+# - /desk/hrms   : tentative SPA HRMS ; redirige vers le workspace HR
+website_redirects = [
+    {"source": r"/desk/people", "target": "/app/hr", "redirect_http_status": 301},
+    {"source": r"/desk/hrms", "target": "/app/hr", "redirect_http_status": 301},
+    {"source": r"/desk/people/(.*)", "target": "/app/hr", "redirect_http_status": 301, "match_with_query_string": False},
+]
+
 # Grille indiciaire : calcul automatique de la valeur indiciaire (Employee)
 doc_events = {
     "Employee": {

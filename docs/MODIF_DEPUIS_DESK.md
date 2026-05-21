@@ -231,6 +231,33 @@ Le bouton "+ Add" sur la liste Desk d'un DocType web-form-isé (ex : Bon Command
 
 ---
 
+## 9 bis. Notifications email — RH/Chef/DG n'a pas reçu son mail
+
+> 📘 **Guide complet dédié à la racine du projet** : `GUIDE_NOTIFICATIONS_EMAIL.md`
+>
+> Procédure de diagnostic en 5 minutes + 7 causes typiques avec réparation depuis Desk uniquement.
+
+Résumé express :
+
+| Symptôme | Section du guide à lire | Endroit Desk |
+|---|---|---|
+| **Personne** ne reçoit rien | §1 Email Account | `/app/email-account` → Send Test Email |
+| **Une personne** ne reçoit pas (RH par ex.) | §2 champ destinataire vide | Ouvrir le doc → champ `notif_rh_email` rempli ? |
+| Un **type de mail** manque | §3 Notification désactivée | `/app/notification` → `Enabled` ? |
+| Notif `Enabled` mais ne se déclenche jamais | §4 condition Jinja | Notification → Condition |
+| Un **rôle entier** ignoré | §5 rôle mal orthographié | Notification → Receiver By Role |
+| Email Queue bloquée en `Not Sent` | §7 worker arrêté | `docker restart queue-short-8086` |
+
+Tests rapides :
+
+- `/app/email-queue` → si le mail est `Sent` → c'est parti côté Frappe (regarder les spams)
+- `/app/email-queue` → `Error` → cliquer pour voir le message SMTP exact
+- Sur le doc → champs `notif_*_email` doivent être remplis automatiquement après soumission
+
+Pour la liste exhaustive des 13 notifications KYA et leurs destinataires : voir §10 du `GUIDE_NOTIFICATIONS_EMAIL.md`.
+
+---
+
 ## 10. Tableau récapitulatif "où modifier quoi"
 
 | Je veux changer… | Aller dans Desk | Ou modifier le fichier… |
@@ -273,9 +300,6 @@ Si tu modifies un fichier depuis Desk et que tu veux que **les autres environnem
 - **Custom Permission** : `bench export-fixtures` exporte vers `kya_hr/fixtures/custom_docperm.json`.
 
 Sans ces étapes, le changement reste **local au site** où il a été fait et sera perdu à la prochaine `bench migrate` d'une fresh install.
-
----
-
 ## 13. Pages `/www/...` cassées (`'X' is undefined`) — fix sans toucher au code
 
 ### Symptôme

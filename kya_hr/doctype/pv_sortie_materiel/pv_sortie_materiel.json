@@ -206,7 +206,7 @@
    "fieldname": "signature_magasin",
    "label": "Signature Magasin",
    "fieldtype": "Signature",
-   "read_only": 1
+   "read_only_depends_on": "eval:!(doc.workflow_state==='En attente Magasin' && (frappe.user_roles.includes('Chargé des Stocks') || frappe.user_roles.includes('Responsable Stock') || frappe.user_roles.includes('Stock Manager')))"
   },
   {
    "fieldname": "section_signatures_2",
@@ -233,7 +233,7 @@
    "fieldname": "signature_audit",
    "label": "Signature Audit",
    "fieldtype": "Signature",
-   "read_only": 1
+   "read_only_depends_on": "eval:!(doc.workflow_state==='En attente Audit' && (frappe.user_roles.includes('Auditeur Interne') || frappe.user_roles.includes('HR Manager')))"
   },
   {
    "fieldname": "col_dga",
@@ -256,7 +256,7 @@
    "fieldname": "signature_dga",
    "label": "Signature DG / DGA",
    "fieldtype": "Signature",
-   "read_only": 1
+   "read_only_depends_on": "eval:!(doc.workflow_state==='En attente Direction' && (frappe.user_roles.includes('Directeur Général') || frappe.user_roles.includes('DGA') || frappe.user_roles.includes('HR Manager')))"
   },
   {
    "fieldname": "section_statut",
