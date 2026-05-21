@@ -231,6 +231,33 @@ Le bouton "+ Add" sur la liste Desk d'un DocType web-form-isé (ex : Bon Command
 
 ---
 
+## 9 bis. Notifications email — RH/Chef/DG n'a pas reçu son mail
+
+> 📘 **Guide complet dédié à la racine du projet** : `GUIDE_NOTIFICATIONS_EMAIL.md`
+>
+> Procédure de diagnostic en 5 minutes + 7 causes typiques avec réparation depuis Desk uniquement.
+
+Résumé express :
+
+| Symptôme | Section du guide à lire | Endroit Desk |
+|---|---|---|
+| **Personne** ne reçoit rien | §1 Email Account | `/app/email-account` → Send Test Email |
+| **Une personne** ne reçoit pas (RH par ex.) | §2 champ destinataire vide | Ouvrir le doc → champ `notif_rh_email` rempli ? |
+| Un **type de mail** manque | §3 Notification désactivée | `/app/notification` → `Enabled` ? |
+| Notif `Enabled` mais ne se déclenche jamais | §4 condition Jinja | Notification → Condition |
+| Un **rôle entier** ignoré | §5 rôle mal orthographié | Notification → Receiver By Role |
+| Email Queue bloquée en `Not Sent` | §7 worker arrêté | `docker restart queue-short-8086` |
+
+Tests rapides :
+
+- `/app/email-queue` → si le mail est `Sent` → c'est parti côté Frappe (regarder les spams)
+- `/app/email-queue` → `Error` → cliquer pour voir le message SMTP exact
+- Sur le doc → champs `notif_*_email` doivent être remplis automatiquement après soumission
+
+Pour la liste exhaustive des 13 notifications KYA et leurs destinataires : voir §10 du `GUIDE_NOTIFICATIONS_EMAIL.md`.
+
+---
+
 ## 10. Tableau récapitulatif "où modifier quoi"
 
 | Je veux changer… | Aller dans Desk | Ou modifier le fichier… |
@@ -273,307 +300,3 @@ Si tu modifies un fichier depuis Desk et que tu veux que **les autres environnem
 - **Custom Permission** : `bench export-fixtures` exporte vers `kya_hr/fixtures/custom_docperm.json`.
 
 Sans ces étapes, le changement reste **local au site** où il a été fait et sera perdu à la prochaine `bench migrate` d'une fresh install.
-
----
-
-## 13. Pages `/www/...` cassées (`'X' is undefined`) — fix sans toucher au code
-
-### Symptôme
-Tu ouvres une page custom comme `/kya-reunion-dashboard`, `/logistique-dashboard`, `/tableau-bord-employes`… et tu vois un **Traceback Jinja** :
-```
-File "apps/kya_hr/kya_hr/www/<page>.html", line X
-    {{ stats.total }} ou {{ flotte.total }}
-jinja2.exceptions.UndefinedError: 'stats' is undefined
-```
-
-### Cause
-Frappe v15+ remplace les `-` par des `_` pour trouver le module Python d'une page web (cf [`frappe/website/page_renderers/template_page.py:131`](https://github.com/frappe/frappe/blob/develop/frappe/website/page_renderers/template_page.py#L131)).
-
-→ Pour `kya-reunion-dashboard.html`, Frappe cherche **`kya_reunion_dashboard.py`** (underscores).
-→ Si le fichier `.py` est en `kya-reunion-dashboard.py` (dashes), Frappe ne le trouve **JAMAIS**, donc `get_context()` n'est pas appelé, donc les variables sont undefined côté Jinja.
-
-### Fix immédiat depuis le serveur (sans toucher au repo) — 30 secondes
-```bash
-# 1. Trouver le container backend
-docker ps | grep backend
-# Ex : kya-preprod-8085-backend-1
-
-# 2. Renommer le fichier dash → underscore DANS le container
-docker exec <nom-container> mv \
-  /home/frappe/frappe-bench/apps/kya_hr/kya_hr/www/kya-reunion-dashboard.py \
-  /home/frappe/frappe-bench/apps/kya_hr/kya_hr/www/kya_reunion_dashboard.py
-
-# 3. Vider le cache pour que Frappe recharge
-docker exec <nom-container> bench --site <site> clear-cache
-docker exec <nom-container> bench --site <site> clear-website-cache
-
-# 4. Tester
-curl -I http://localhost:<port>/kya-reunion-dashboard
-# → HTTP 200 attendu
-```
-
-⚠️ **Volatile** : ce fix saute au prochain `docker compose pull` ou rebuild de l'image. Pour le rendre permanent, il faut renommer dans le repo Git (cf §16) ou attendre le merge de la PR qui contient le fix.
-
-### Fix alternatif via UI Desk (durable, mais nouvelle URL)
-Si tu ne peux pas / ne veux pas exec dans le container, créer une **Web Page** Frappe qui remplace la page cassée :
-
-1. `/app/web-page/new`
-2. Champs :
-   - **Title** : `Dashboard Réunions KYA`
-   - **Route** : `kya-reunion-dashboard-v2` ⬅️ nouvelle route (la cassée reste cassée)
-   - **Content type** : `HTML`
-   - **Module** : `KYA HR`
-   - **Published** : ✅
-   - **Content** : copier le HTML de la page d'origine, **remplacer toutes les variables Jinja** `{{ stats.total }}`, `{{ stats.actifs }}`, etc. par un placeholder `<span id="kpi-total">…</span>` + un script à la fin qui fetch les données en JS :
-     ```html
-     <script>
-     fetch('/api/method/kya_hr.api.kya_reunion.get_dashboard_stats')
-       .then(r => r.json()).then(r => {
-         document.getElementById('kpi-total').textContent = r.message.total;
-         document.getElementById('kpi-actifs').textContent = r.message.actifs;
-         // ...
-       });
-     </script>
-     ```
-3. Save → la page `/kya-reunion-dashboard-v2` est immédiatement accessible.
-4. **Mettre à jour les workspaces** (`Espace RH`, etc.) pour que les shortcuts pointent vers la nouvelle route.
-
-### Comment savoir si une autre page www a le même problème
-Liste tous les `.py` de `www/` qui ont des dashes (potentiellement cassés) :
-```bash
-docker exec <backend-container> bash -c \
-  "ls /home/frappe/frappe-bench/apps/*/*/www/*.py | grep -- '-' | grep -v __init__"
-```
-Chaque fichier listé est candidat au même bug. Renomme-les tous avec la commande `mv` du paragraphe précédent.
-
----
-
-## 14. CSS / design des Web Forms sans toucher au code
-
-Le design KYA des Web Forms (en-tête bleu/orange, sections numérotées, signatures) vient de **2 fichiers source** :
-- `kya_hr/public/js/kya_webform.js` — construit la mise en page
-- `kya_hr/public/css/kya_webform.css` — couleurs/typo
-
-Tu **ne peux pas** modifier ces fichiers depuis Desk. **MAIS** tu peux :
-
-### Option A — Surcharger via le Client Script du Web Form lui-même (recommandé)
-
-`/app/web-form/<route>` → champ **Client Script** :
-
-```javascript
-frappe.web_form.after_load = function() {
-  // 1. Cacher la signature DG si pas encore au bon état workflow
-  if (frappe.web_form.doc.workflow_state !== 'En attente DG') {
-    const sigDg = document.querySelector('[data-fieldname="signature_dg"]');
-    if (sigDg) sigDg.style.display = 'none';
-  }
-
-  // 2. Ajouter une banderole d'info en haut
-  const banner = document.createElement('div');
-  banner.innerHTML = `
-    <div style="padding:14px 20px; background:#fef3c7; border-left:4px solid #f59e0b;
-                color:#92400e; font-weight:600; margin-bottom:16px; border-radius:6px;">
-      ⚠️ Document confidentiel — diffusion restreinte à la Direction.
-    </div>`;
-  const wrapper = document.querySelector('.web-form-wrapper') || document.querySelector('.container');
-  if (wrapper) wrapper.prepend(banner.firstElementChild);
-
-  // 3. Forcer une couleur custom sur un champ
-  const field = document.querySelector('[data-fieldname="montant_total"]');
-  if (field) field.style.cssText = 'color:#c2410c; font-size:1.4rem; font-weight:800;';
-};
-```
-
-→ Pas de redéploiement, prend effet au prochain reload de la page web form.
-
-### Option B — Injecter du CSS via Client Script
-
-Même endroit (Client Script du Web Form) :
-
-```javascript
-frappe.web_form.after_load = function() {
-  const style = document.createElement('style');
-  style.textContent = `
-    .web-form-wrapper { max-width: 900px !important; }
-    .web-form-wrapper input[type="text"]:focus,
-    .web-form-wrapper select:focus,
-    .web-form-wrapper textarea:focus {
-      border-color: #F58220 !important;
-      box-shadow: 0 0 0 3px rgba(245,130,32,.15) !important;
-    }
-    .web-form-wrapper label.control-label {
-      font-weight: 600 !important;
-      color: #0054A6 !important;
-    }
-    /* Cacher la sidebar pour ce form-ci uniquement */
-    .web-form-sidebar { display: none !important; }
-  `;
-  document.head.appendChild(style);
-};
-```
-
-→ CSS appliqué uniquement à ce Web Form, sans toucher au `kya_webform.css` global.
-
-### Option C — Surcharge globale via Website Settings
-
-`/app/website-settings` → champ **Body HTML** (s'insère sur toutes les pages publiques) :
-```html
-<style>
-/* CSS qui s'applique à toutes les pages web (web forms inclus) */
-body { font-family: 'Plus Jakarta Sans', sans-serif !important; }
-.web-form-wrapper .btn-primary {
-  background: #F58220 !important;
-  border-color: #F58220 !important;
-}
-</style>
-```
-
-⚠️ Affecte **toutes** les pages publiques. À utiliser uniquement pour des changements globaux (police, couleurs primaires).
-
-### Cas typique : changer la couleur primaire des web forms
-1. `/app/website-settings` → Body HTML → coller :
-   ```html
-   <style>
-   :root { --primary-color: #00A651; }
-   .btn-primary { background: var(--primary-color) !important; }
-   .web-form-wrapper a { color: var(--primary-color); }
-   </style>
-   ```
-2. Save → reload n'importe quel web form → ✅ couleur changée.
-
-### Ce qu'il faut quand même toucher au code
-- **Restructurer la mise en page** (ordre des sections, en-tête KYA, signatures côte à côte) → ces structures viennent du JS `kya_webform.js`. Pour les modifier, il faut éditer ce fichier (et redéployer). Pas faisable depuis Desk.
-- **Ajouter un nouveau bouton dans toutes les pages web** → idem, modifier le JS global.
-
----
-
-## 15. Remplacer une page www cassée par une Web Page Desk (durable, sans code)
-
-Si une page `/www/...` est cassée et que tu **ne peux pas** :
-- Renommer le fichier dans le container (cf §13)
-- Attendre le merge d'une PR qui fixe ça
-
-Alors **crée une Web Page** Desk qui remplit le même rôle. Pattern :
-
-### Étape 1 — Créer la Web Page
-`/app/web-page/new` :
-- **Title** : `Mon Dashboard X` (clair pour l'utilisateur final)
-- **Route** : `<route-de-remplacement>` (ex : `kya-reunion` au lieu de `kya-reunion-dashboard`)
-- **Content type** : `HTML`
-- **Published** : ✅
-- **Show Title** : à toi de voir
-- **Content** : voir Étape 2
-
-### Étape 2 — Contenu HTML qui appelle une API en JS
-
-Au lieu de variables Jinja serveur (qui ne marchent pas dans Web Page comme dans une page www `.py`+`.html`), utilise `fetch()` côté navigateur :
-
-```html
-<style>
-.kya-kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 20px 0; }
-.kya-kpi { background: white; padding: 18px; border-radius: 10px; border-left: 4px solid #0054A6; }
-.kya-kpi .label { font-size: 11px; color: #6b7280; text-transform: uppercase; font-weight: 700; }
-.kya-kpi .value { font-size: 26px; font-weight: 800; color: #0054A6; margin-top: 4px; }
-.kya-loader { text-align: center; padding: 40px; color: #6b7280; }
-</style>
-
-<h1>🚗 Dashboard Réunions KYA</h1>
-
-<div id="loader" class="kya-loader">Chargement…</div>
-
-<div id="content" style="display:none;">
-  <div class="kya-kpi-row">
-    <div class="kya-kpi">
-      <div class="label">Total réunions</div>
-      <div class="value" id="kpi-total">—</div>
-    </div>
-    <div class="kya-kpi">
-      <div class="label">Actives</div>
-      <div class="value" id="kpi-actifs">—</div>
-    </div>
-    <div class="kya-kpi">
-      <div class="label">Clôturées</div>
-      <div class="value" id="kpi-clotures">—</div>
-    </div>
-    <div class="kya-kpi">
-      <div class="label">Présences</div>
-      <div class="value" id="kpi-presences">—</div>
-    </div>
-  </div>
-
-  <h3>Réunions récentes</h3>
-  <div id="meetings-list"></div>
-</div>
-
-<script>
-fetch('/api/method/kya_hr.api.kya_reunion.get_dashboard_stats?period=30', {
-  credentials: 'same-origin',
-  headers: { 'X-Requested-With': 'XMLHttpRequest' }
-})
-.then(r => r.json())
-.then(data => {
-  const d = data.message || {};
-  document.getElementById('kpi-total').textContent = d.total || 0;
-  document.getElementById('kpi-actifs').textContent = d.active || 0;
-  document.getElementById('kpi-clotures').textContent = d.closed || 0;
-  document.getElementById('kpi-presences').textContent = d.participants || 0;
-
-  const list = document.getElementById('meetings-list');
-  (d.recent || []).forEach(m => {
-    const div = document.createElement('div');
-    div.style.cssText = 'padding:10px; border-bottom:1px solid #eee;';
-    div.innerHTML = `<b>${m.title}</b> — ${m.start_at || ''} (${m.status})`;
-    list.appendChild(div);
-  });
-
-  document.getElementById('loader').style.display = 'none';
-  document.getElementById('content').style.display = 'block';
-})
-.catch(err => {
-  document.getElementById('loader').textContent = '❌ Erreur : ' + err.message;
-});
-</script>
-```
-
-### Étape 3 — Mettre à jour les workspaces
-
-`/app/workspace/<workspace-cible>` → Edit → trouver le Shortcut qui pointe vers l'ancienne route cassée → modifier l'URL pour pointer vers la nouvelle Web Page.
-
-### Quand utiliser cette approche
-- ✅ Tu n'as pas accès SSH au serveur (pas de `docker exec` possible)
-- ✅ Tu veux que la fix soit **durable** (survit aux redeploy)
-- ✅ Page simple à reproduire (KPIs + listes — pas de logique métier complexe)
-
-### Limitations
-- ❌ Pas de filtres de permissions Frappe natifs (à reproduire à la main en JS via l'API `frappe.session.user`).
-- ❌ Si l'API backend est elle aussi cassée, ça ne marche pas (mais ici les API `kya_hr.api.*` marchent — c'était juste la page Jinja qui était cassée).
-
----
-
-## 16. Récap "fix sans code" pour les 4 cas les plus fréquents
-
-| Problème | Fix UI Desk (durable) | Fix container (volatile, 30s) |
-|---|---|---|
-| Page www `/foo` → `'X is undefined'` | Créer Web Page `/foo-v2` + JS API (§15) | `mv foo.py foo_py_with_underscores.py` (§13) |
-| Web Form sans le bon design (CSS) | Client Script avec injection CSS (§14) | — |
-| Dashboard chart obsolète | `/app/dashboard-chart/<nom>` (§8) | — |
-| Notification email à modifier | `/app/notification/<nom>` (§2) | — |
-| Permission rôle à ajuster | `/app/role-permissions-manager` (§6) | — |
-| Workflow step à insérer | `/app/workflow/<nom>` (§1) | — |
-| Print Format à modifier | `/app/print-format/<nom>` (§4) | — |
-| Champ DocType custom à ajouter | Customize Form (§5) | — |
-| Workspace shortcut à éditer | Workspace Edit (§7) | — |
-
-**Règle générale** : si le fix demande de **toucher à du Python avec de la logique** (calculs, hooks, server-side validation), il faut passer par le code. Tout le reste (config, UI, contenu, permissions) → Desk.
-
----
-
-## 17. Quand contacter le dev / faire une PR
-
-Si tu as fait un fix volatile via `docker exec` (cf §13) ou via Web Page Desk (§15) et que tu veux que **toutes les futures installations** en bénéficient, ouvrir un ticket / PR avec :
-
-1. **Description** : symptôme exact + URL + screenshot du traceback si applicable
-2. **Fix appliqué** : ce que tu as fait dans le container ou en UI
-3. **Branche** : la dev fera la modif source (rename du fichier, etc.) + push sur une branche `fix/<scope>` à merger sur `dev` puis `main`.
-
-Le merge déclenche un rebuild de l'image `:dev` puis `:prod` (CI GitLab). Après le `docker compose pull` + restart, le fix est permanent et tu peux supprimer la Web Page de remplacement ou défaire le rename in-container.
