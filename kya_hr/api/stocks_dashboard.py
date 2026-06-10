@@ -30,9 +30,36 @@ def _check_role():
         frappe.throw("Acces refuse - role Stock requis", frappe.PermissionError)
 
 
+def _get_default_currency() -> str:
+    """Retourne la devise de la company par defaut (XOF, EUR, USD, etc.).
+
+    Cherche la devise dans cet ordre :
+    1. User default 'Company' -> Company.default_currency
+    2. Global Defaults 'default_company' -> Company.default_currency
+    3. Premiere company trouvee
+    Fallback : 'XOF' (devise KYA-Energy Group).
+    """
+    company = (frappe.defaults.get_user_default("Company")
+               or frappe.db.get_single_value("Global Defaults", "default_company"))
+    if not company:
+        first = frappe.db.get_all("Company", fields=["name"], limit=1)
+        company = first[0].name if first else None
+    if company:
+        return frappe.db.get_value("Company", company, "default_currency") or "XOF"
+    return "XOF"
+
+
 @frappe.whitelist()
 def get_dashboard_overview() -> dict:
-    """KPIs globaux : nb articles, valeur stock totale, ruptures, mouvements 30j."""
+    """KPIs globaux : nb articles, valeur stock totale, ruptures, mouvements 30j.
+
+    Note importante sur les valeurs monetaires :
+    Le 'stock_value' est calcule par SUM(actual_qty * valuation_rate) depuis
+    la table tabBin. valuation_rate est rempli automatiquement par ERPNext
+    a chaque mouvement (Purchase Invoice, Stock Entry, etc.). La devise est
+    la default_currency de la Company - retournee dans le champ 'currency'
+    pour que le front affiche le bon symbole.
+    """
     _check_role()
 
     # Nombre d'articles actifs (non disabled)
@@ -75,6 +102,7 @@ def get_dashboard_overview() -> dict:
         "rupture_count": rupture,
         "movements_30d": movements,
         "as_of": today(),
+        "currency": _get_default_currency(),
     }
 
 

@@ -1615,5 +1615,77 @@ footer .web-footer-menu { display: none !important; }
     overflow: visible !important;
     max-width: 100% !important;
   }
+  /* Tables enfants : colonnes auto, pas de min-width tronquant */
+  .web-form-container .grid-body,
+  .web-form-container .grid-static-col,
+  .web-form-container .grid-row {
+    overflow: visible !important;
+    page-break-inside: avoid;
+  }
+  .web-form-container table { table-layout: auto !important; width: 100% !important; }
+}
+
+/* ===================================================================
+   CHILD TABLE FIX 2026-06 — colonnes tronquees (ex: 'Qte Demal' au lieu
+   de 'Qte Demandee'). Cause : grid-static-col avec overflow:hidden +
+   largeur fixe trop petite. Fix : permettre l'expansion du header + scroll
+   horizontal global sur le grid-body uniquement.
+   =================================================================== */
+
+/* En-tetes colonnes : ne pas tronquer, wrap si besoin */
+.web-form-container .grid-heading-row .grid-static-col,
+.web-form-container .grid-row .grid-static-col {
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+  word-break: break-word;
+  hyphens: auto;
+  min-width: 80px;
+}
+
+/* Cellules : permettre le wrap multi-ligne (inputs restent 1 ligne) */
+.web-form-container .grid-row .grid-static-col {
+  padding: 4px 6px !important;
+  line-height: 1.3;
+}
+
+/* Scroll horizontal sur le conteneur entier (pas seulement grid-body) */
+.web-form-container .frappe-control[data-fieldtype="Table"] .form-grid,
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid-body,
+.web-form-container .form-grid-container {
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100% !important;
+}
+
+/* La grille a une largeur minimale qui force le scroll plutot que de
+   tronquer les headers */
+.web-form-container .form-grid > .grid-body {
+  min-width: max-content !important;
+}
+
+/* Affichage qty + numerics : aligne droit, taille lisible */
+.web-form-container .grid-static-col[data-fieldtype="Float"],
+.web-form-container .grid-static-col[data-fieldtype="Int"],
+.web-form-container .grid-static-col[data-fieldtype="Currency"] {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Bouton 'Ajouter une ligne' KYA orange : contraste accessibility */
+.web-form-container .grid-add-row,
+.web-form-container .btn-add-grid-row {
+  background: #F58220 !important;
+  color: #fff !important;
+  border: none !important;
+  font-weight: 600;
+  padding: .5rem 1rem;
+  border-radius: 6px;
+}
+.web-form-container .grid-add-row:hover,
+.web-form-container .btn-add-grid-row:hover {
+  background: #d36a10 !important;
+  color: #fff !important;
 }
 
