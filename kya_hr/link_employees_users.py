@@ -51,6 +51,54 @@ def _find_user_by_email(emails: list[str]) -> str | None:
     return None
 
 
+def on_session_creation(login_manager=None) -> None:
+    """Hook on_session_creation : auto-lie l'utilisateur qui se connecte.
+
+    A chaque login, si l'utilisateur a une fiche Employee dont l'email
+    correspond mais sans user_id renseigne, on fait le lien automatiquement.
+    Resultat : le systeme s'auto-repare. Plus besoin de saisie manuelle
+    du user_id par la RH -> 'Nom du Demandeur' se remplit, acces coherents.
+
+    Silencieux et defensif : ne leve jamais (ne doit JAMAIS bloquer un login).
+    """
+    try:
+        user = frappe.session.user
+        if not user or user in ("Guest", "Administrator"):
+            return
+
+        # Deja lie a une fiche Employee ? -> rien a faire
+        already = frappe.db.get_value("Employee", {"user_id": user}, "name")
+        if already:
+            return
+
+        # Chercher une fiche Employee active dont un email == user (ou son email)
+        user_email = (frappe.db.get_value("User", user, "email") or user).strip().lower()
+        candidates = frappe.db.sql(
+            """
+            SELECT name FROM `tabEmployee`
+            WHERE status = 'Active'
+              AND (user_id IS NULL OR user_id = '')
+              AND (
+                LOWER(company_email) = %(e)s
+                OR LOWER(personal_email) = %(e)s
+                OR LOWER(prefered_email) = %(e)s
+              )
+            LIMIT 1
+            """,
+            {"e": user_email},
+        )
+        if candidates:
+            frappe.db.set_value("Employee", candidates[0][0], "user_id", user,
+                                update_modified=False)
+            frappe.db.commit()
+    except Exception:
+        # Ne jamais bloquer le login
+        try:
+            frappe.log_error(frappe.get_traceback(), "link_employees_users.on_session_creation")
+        except Exception:
+            pass
+
+
 @frappe.whitelist()
 def audit() -> dict:
     """Rapport lecture seule sur la sante du linkage Employee <-> User."""

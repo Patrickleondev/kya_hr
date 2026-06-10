@@ -79,6 +79,11 @@ website_redirects = [
     {"source": r"/desk/people/(.*)", "target": "/app/hr", "redirect_http_status": 301, "match_with_query_string": False},
 ]
 
+# Auto-lien Employee <-> User a chaque connexion (self-healing du user_id).
+# Evite que la RH doive saisir manuellement le 'ID Utilisateur' sur chaque
+# fiche Employee. Voir kya_hr.link_employees_users.on_session_creation.
+on_session_creation = "kya_hr.link_employees_users.on_session_creation"
+
 # Grille indiciaire : calcul automatique de la valeur indiciaire (Employee)
 doc_events = {
     "Employee": {
