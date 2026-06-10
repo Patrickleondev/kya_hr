@@ -34,6 +34,7 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.setup_native_workspaces.execute", "Restaure workspaces natifs vides (HR/Accounting/Stock/Buying/Selling/Payroll)"),
     ("kya_hr.force_publish_webforms.execute", "Force publish web forms"),
     ("kya_hr.ensure_webform_perms.execute", "Ensure DocPerm Employee+Stagiaire sur DocTypes des Web Forms KYA"),
+    ("kya_hr.ensure_workflow_perms.execute", "Ensure perms approbateurs workflow (write sans if_owner: Chef/Audit/DG/RH...)"),
     ("kya_hr.force_resync_webform_fields.execute", "Force resync web form fields (Frappe v16 bug workaround)"),
     ("kya_hr.notification_fixes.execute", "Notification fixes"),
     ("kya_hr.setup_branding.execute", "Branding KYA (logos, couleurs)"),
