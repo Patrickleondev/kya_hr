@@ -52,7 +52,12 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.fix_sidebar_equipe_kya.execute", "Fix sidebar : Equipe KYA -> Espace Stagiaires (mauvais link_to)"),
     ("kya_hr.fix_mes_approbations_scope.execute", "Purge 'Mes Approbations' des espaces metier mutualises"),
     ("kya_hr.ensure_visibility.execute", "Ensure workspaces visibility"),
+    ("kya_hr.link_employees_users.link_by_email", "Lie Employees aux Users par email (racine 'Nom du Demandeur vide')"),
     ("kya_hr.ensure_employee_roles.execute", "Ensure Employee/Stagiaire roles on linked Users"),
+    ("kya_hr.setup_native_parents.execute", "Cree workspaces parents Frappe HR + Comptabilite (groupent natifs v16)"),
+    ("kya_hr.fix_duplicate_desktop_icons.execute", "Purge icones/links dupliques (Direction Generale x3, etc.)"),
+    ("kya_hr.fix_workspace_labels_fr.execute", "Labels FR avec accents (Comptabilite, Employes, Generale)"),
+    ("kya_hr.setup_kya_redirects.execute", "Website redirects /desk/people, /desk/hrms, etc."),
 ]
 
 AFTER_INSTALL: list[tuple[str, str]] = [
