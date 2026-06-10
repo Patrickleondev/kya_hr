@@ -31,10 +31,16 @@ NATIVE_WORKSPACES: list[tuple[str, str, str, str]] = [
 ]
 
 
-def _is_workspace_empty(ws_name: str) -> bool:
-    """Renvoie True si le workspace existe en BD mais est sans contenu."""
+def _needs_reload(ws_name: str) -> bool:
+    """Renvoie True si le workspace DOIT etre charge depuis le JSON natif.
+
+    Vrai si :
+    - workspace ABSENT en BD (il faut le creer depuis le JSON)
+    - workspace EXISTE mais sans content + sans links + sans shortcuts
+      (il a ete vide par un sync foireux, il faut le restaurer)
+    """
     if not frappe.db.exists("Workspace", ws_name):
-        return False
+        return True  # absent -> creer
     content = frappe.db.get_value("Workspace", ws_name, "content")
     has_content = bool(content) and len(content) > 100
     n_links = frappe.db.count("Workspace Link", {"parent": ws_name})
@@ -60,8 +66,15 @@ def _reload_workspace(app: str, module: str, dn: str) -> bool:
 
 
 def execute() -> dict:
-    """Idempotent : restaure les workspaces vides parmi NATIVE_WORKSPACES."""
-    summary = {"restored": [], "already_ok": [], "missing_in_db": [], "failed": []}
+    """Idempotent : recree/restaure les workspaces parmi NATIVE_WORKSPACES.
+
+    Cas couverts :
+    - Workspace ABSENT en BD : reload_doc le cree depuis le JSON natif
+    - Workspace EXISTE mais vide : reload_doc force=True le restaure
+    - Workspace EXISTE avec contenu : on ne touche pas (preserve les
+      personnalisations du user)
+    """
+    summary = {"restored": [], "already_ok": [], "created": [], "failed": []}
 
     for ws_name, app, module, dn in NATIVE_WORKSPACES:
         # App pas installee -> on saute silencieusement
@@ -70,17 +83,18 @@ def execute() -> dict:
         except Exception:
             continue
 
-        if not frappe.db.exists("Workspace", ws_name):
-            summary["missing_in_db"].append(ws_name)
-            continue
+        absent_before = not frappe.db.exists("Workspace", ws_name)
 
-        if not _is_workspace_empty(ws_name):
+        if not _needs_reload(ws_name):
             summary["already_ok"].append(ws_name)
             continue
 
         ok = _reload_workspace(app, module, dn)
         if ok:
-            summary["restored"].append(ws_name)
+            if absent_before:
+                summary["created"].append(ws_name)
+            else:
+                summary["restored"].append(ws_name)
         else:
             summary["failed"].append(ws_name)
 
