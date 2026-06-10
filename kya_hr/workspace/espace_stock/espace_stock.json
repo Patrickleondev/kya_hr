@@ -81,13 +81,6 @@
    "icon": "download"
   },
   {
-   "label": "À valider (mes approbations)",
-   "type": "URL",
-   "url": "/app/pv-sortie-materiel?workflow_state=En%20attente%20Chef%20Service",
-   "color": "#d84315",
-   "icon": "check-circle"
-  },
-  {
    "label": "Inventaires",
    "type": "DocType",
    "link_to": "Inventaire KYA",

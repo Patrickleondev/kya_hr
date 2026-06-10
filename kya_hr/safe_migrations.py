@@ -47,6 +47,7 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.desktop_icons.execute", "Desktop icons (workaround Frappe v16)"),
     ("kya_hr.coherence_fixes.execute", "Coherence fixes (champs orphelins)"),
     ("kya_hr.fix_sidebar_equipe_kya.execute", "Fix sidebar : Equipe KYA -> Espace Stagiaires (mauvais link_to)"),
+    ("kya_hr.fix_mes_approbations_scope.execute", "Purge 'Mes Approbations' des espaces metier mutualises"),
     ("kya_hr.ensure_visibility.execute", "Ensure workspaces visibility"),
     ("kya_hr.ensure_employee_roles.execute", "Ensure Employee/Stagiaire roles on linked Users"),
 ]
