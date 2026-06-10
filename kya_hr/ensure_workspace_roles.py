@@ -48,7 +48,8 @@ WORKSPACE_ROLES: dict[str, list[str]] = {
                       "Purchase User", "Chef Service"],
     "Espace Comptabilite": ["Comptable", "Caissier", "Accounts Manager",
                             "Accounts User", "DFC", "DAAF"],
-    "Logistique": ["Responsable Logistique", "Logisticien", "Chef Service"],
+    "Logistique": ["Gestionnaire de Flotte", "DST - Responsable Logistique",
+                   "Chef Service"],
 
     # --- Direction : voit tout ---
     "Direction Generale": ["Directeur Général", "DG", "DGA", "DAAF"],
