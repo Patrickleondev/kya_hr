@@ -97,10 +97,80 @@ table.kya-table { width: 100%; border-collapse: collapse; font-size: 13px; }
   </div>
 
   <div class="kya-grid">
-    <div class="kya-kpi"><div class="label">Imports</div><div class="value">{{ stats.imports }}</div></div>
-    <div class="kya-kpi"><div class="label">Lignes</div><div class="value">{{ stats.lignes|int }}</div></div>
-    <div class="kya-kpi"><div class="label">Net salaires</div><div class="value">{{ "{:,.0f}".format(stats.salaires).replace(",", " ") }} XOF</div></div>
-    <div class="kya-kpi"><div class="label">Factures</div><div class="value">{{ "{:,.0f}".format(stats.factures).replace(",", " ") }} XOF</div></div>
+    <div class="kya-kpi"><div class="label">Solde caisse actuel</div><div class="value">{{ "{:,.0f}".format(caisse.solde_actuel).replace(",", " ") }} XOF</div></div>
+    <div class="kya-kpi"><div class="label">Brouillards (à viser)</div><div class="value">{{ caisse.nb }} <span style="font-size:13px;color:#d97706;font-weight:700">· {{ caisse.en_attente }} en attente</span></div></div>
+    <div class="kya-kpi"><div class="label">Chèques (total)</div><div class="value">{{ "{:,.0f}".format(cheques.total_montant).replace(",", " ") }} XOF</div></div>
+    <div class="kya-kpi"><div class="label">Nb chèques · états</div><div class="value">{{ cheques.nombre }} <span style="font-size:13px;color:#667085;font-weight:700">· {{ cheques.nb }} états</span></div></div>
+  </div>
+
+  <div class="kya-section">
+    <h3>Brouillards de Caisse — derniers mouvements de trésorerie</h3>
+    {% if brouillards %}
+    <div class="kya-table-wrap">
+      <table class="kya-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Caissier(ère)</th>
+            <th class="num">Entrées</th>
+            <th class="num">Sorties</th>
+            <th class="num">Solde final</th>
+            <th class="num">Réel caisse</th>
+            <th>État</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in brouillards %}
+          <tr>
+            <td><a href="/app/brouillard-caisse/{{ b.name }}">{{ b.date_label or b.name }}</a></td>
+            <td>{{ b.caissiere_name or "" }}</td>
+            <td class="num">{{ "{:,.0f}".format(b.total_entrees or 0).replace(",", " ") }}</td>
+            <td class="num">{{ "{:,.0f}".format(b.total_sorties or 0).replace(",", " ") }}</td>
+            <td class="num">{{ "{:,.0f}".format(b.solde_final or 0).replace(",", " ") }}</td>
+            <td class="num">{{ "{:,.0f}".format(b.total_reel_caisse or 0).replace(",", " ") }}</td>
+            <td><span class="kya-badge {% if 'Approuvé' in b.etat_label or 'Validé' in b.etat_label %}ok{% elif 'Rejeté' in b.etat_label %}err{% endif %}">{{ b.etat_label }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="kya-help">Aucun brouillard de caisse enregistré. Utilisez <b>Nouveau brouillard</b> pour démarrer la journée de caisse.</div>
+    {% endif %}
+  </div>
+
+  <div class="kya-section">
+    <h3>États Récapitulatifs des Chèques — suivi hebdomadaire</h3>
+    {% if recaps %}
+    <div class="kya-table-wrap">
+      <table class="kya-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Rédacteur</th>
+            <th>Période</th>
+            <th class="num">Nb chèques</th>
+            <th class="num">Montant total</th>
+            <th>État</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in recaps %}
+          <tr>
+            <td><a href="/app/etat-recap-cheques/{{ r.name }}">{{ r.date_label or r.name }}</a></td>
+            <td>{{ r.redacteur_name or "" }}</td>
+            <td>{{ r.libelle_periode or "" }}</td>
+            <td class="num">{{ r.nombre_cheques or 0 }}</td>
+            <td class="num">{{ "{:,.0f}".format(r.total_montant or 0).replace(",", " ") }}</td>
+            <td><span class="kya-badge {% if 'Validé' in r.etat_label or 'Approuvé' in r.etat_label %}ok{% elif 'Rejeté' in r.etat_label %}err{% endif %}">{{ r.etat_label }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="kya-help">Aucun état récapitulatif de chèques. Utilisez <b>Nouvel état chèques</b> pour le suivi hebdomadaire.</div>
+    {% endif %}
   </div>
 
   <div class="kya-section">
