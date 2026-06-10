@@ -101,6 +101,20 @@ body { background: var(--kya-bg) !important; }
   <div class="kya-hero">
     <h1><i class="bi bi-box-seam"></i> Dashboard Stocks KYA</h1>
     <p>Vue d'ensemble des articles, entrepôts, mouvements et alertes — temps réel</p>
+    <div class="mt-3 d-flex gap-2 flex-wrap">
+      <button class="btn btn-sm btn-light" onclick="downloadTemplate()">
+        <i class="bi bi-download"></i> Template d'import
+      </button>
+      <label class="btn btn-sm btn-light mb-0">
+        <i class="bi bi-upload"></i> Importer CSV
+        <input type="file" accept=".csv" onchange="importCsv(this)" hidden>
+      </label>
+      <button class="btn btn-sm btn-light" onclick="exportCsv()">
+        <i class="bi bi-file-earmark-spreadsheet"></i> Exporter (état stock)
+      </button>
+      <a class="btn btn-sm btn-light" href="/app/item/new"><i class="bi bi-plus-circle"></i> Nouvel article</a>
+    </div>
+    <div id="action-result" class="mt-2 small" style="opacity:.9;"></div>
   </div>
 
   <!-- KPIs globaux -->
@@ -346,6 +360,63 @@ async function loadMovements() {
   } catch (e) {
     tbody.innerHTML = `<tr><td colspan="5" class="kya-loader text-danger">Erreur: ${e.message}</td></tr>`;
   }
+}
+
+function b64ToBlob(b64, type) {
+  const byteCharacters = atob(b64);
+  const byteArray = new Uint8Array(byteCharacters.length);
+  for (let i = 0; i < byteCharacters.length; i++) byteArray[i] = byteCharacters.charCodeAt(i);
+  return new Blob([byteArray], { type });
+}
+function triggerDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; document.body.appendChild(a);
+  a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+function setResult(html, color) {
+  const el = document.getElementById('action-result');
+  el.innerHTML = html;
+  el.style.color = color || 'inherit';
+}
+
+async function downloadTemplate() {
+  try {
+    const r = await callApi('kya_hr.api.stocks_import.download_template');
+    triggerDownload(b64ToBlob(r.content_base64, 'text/csv'), r.filename);
+    setResult('<i class="bi bi-check-circle"></i> Template téléchargé.');
+  } catch (e) { setResult('Erreur: ' + e.message, '#fef3c7'); }
+}
+
+async function importCsv(input) {
+  const file = input.files[0];
+  if (!file) return;
+  setResult('<i class="bi bi-arrow-clockwise"></i> Import en cours…');
+  try {
+    const buf = await file.arrayBuffer();
+    const b64 = btoa(new Uint8Array(buf).reduce((d, b) => d + String.fromCharCode(b), ''));
+    const res = await fetch('/api/method/kya_hr.api.stocks_import.import_items', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Frappe-CSRF-Token': frappe.csrf_token || '' },
+      credentials: 'same-origin',
+      body: 'content_base64=' + encodeURIComponent(b64),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || res.status);
+    const s = data.message;
+    setResult(`<i class="bi bi-check-circle"></i> Import OK : ${s.created} créés, ${s.updated} mis à jour, ${s.unchanged} inchangés, ${s.errors.length} erreurs.`);
+    loadOverview(); loadWarehouses(); loadGroups();
+  } catch (e) { setResult('Erreur import: ' + e.message, '#fef3c7'); }
+  input.value = '';
+}
+
+async function exportCsv() {
+  setResult('<i class="bi bi-arrow-clockwise"></i> Export en cours…');
+  try {
+    const r = await callApi('kya_hr.api.stocks_import.export_items');
+    triggerDownload(b64ToBlob(r.content_base64, 'text/csv'), r.filename);
+    setResult(`<i class="bi bi-check-circle"></i> ${r.rows_exported} lignes exportées.`);
+  } catch (e) { setResult('Erreur export: ' + e.message, '#fef3c7'); }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
