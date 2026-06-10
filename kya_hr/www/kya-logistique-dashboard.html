@@ -50,16 +50,17 @@ body { background: var(--kya-bg) !important; }
 .kya-panel-head h3 { font-size: .95rem; font-weight: 700; margin: 0; }
 
 .kya-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
-.kya-table th { background: #f8fafc; padding: .7rem .9rem; font-weight: 700; font-size: .68rem; text-transform: uppercase; letter-spacing: .5px; color: var(--kya-muted); border-bottom: 2px solid var(--kya-border); text-align: left; }
+.kya-table th { background: #f8fafc; padding: .7rem .9rem; font-weight: 700; font-size: .68rem; text-transform: uppercase; letter-spacing: .5px; color: var(--kya-muted); border-bottom: 2px solid var(--kya-border); text-align: left; white-space: nowrap; }
 .kya-table td { padding: .65rem .9rem; border-bottom: 1px solid var(--kya-border); }
 .kya-table tbody tr:hover { background: #f8fafc; }
 .kya-loader { text-align: center; padding: 2.5rem; color: var(--kya-muted); font-size: .85rem; }
 
 .badge-statut { padding: .15rem .55rem; border-radius: 12px; font-size: .7rem; font-weight: 700; }
+.b-ok { background: #dcfce7; color: #166534; }
 .b-mission { background: #fef3c7; color: #92400e; }
-.b-back { background: #dcfce7; color: #166534; }
 .b-pending { background: #dbeafe; color: #1e40af; }
-.b-cancelled { background: #fee2e2; color: #991b1b; }
+.b-warning { background: #fed7aa; color: #9a3412; }
+.b-danger { background: #fee2e2; color: #991b1b; }
 
 @media (max-width: 768px) {
   .kya-kpi-grid { grid-template-columns: repeat(2, 1fr); }
@@ -74,10 +75,9 @@ body { background: var(--kya-bg) !important; }
     <h1><i class="bi bi-truck"></i> Dashboard Logistique KYA</h1>
     <p>Flotte, sorties, carburant, entretien — temps réel pour DG/DGA</p>
     <div class="mt-3 d-flex gap-2 flex-wrap">
-      <a class="btn btn-sm btn-light" href="/app/sortie-vehicule/new"><i class="bi bi-plus-circle"></i> Nouvelle Sortie Véhicule</a>
+      <a class="btn btn-sm btn-light" href="/app/sortie-vehicule/new"><i class="bi bi-plus-circle"></i> Nouvelle Sortie</a>
       <a class="btn btn-sm btn-light" href="/app/vehicle/new"><i class="bi bi-car-front"></i> Ajouter Véhicule</a>
       <a class="btn btn-sm btn-light" href="/app/vehicle-log/new"><i class="bi bi-fuel-pump"></i> Plein Carburant</a>
-      <a class="btn btn-sm btn-light" href="/app/vehicle-service/new"><i class="bi bi-tools"></i> Entretien</a>
     </div>
   </div>
 
@@ -106,13 +106,26 @@ body { background: var(--kya-bg) !important; }
     <div class="kya-kpi">
       <div class="kya-kpi-icon" style="color: var(--kya-red);"><i class="bi bi-fuel-pump"></i></div>
       <div class="kya-kpi-value" id="kpi-fuel">—</div>
-      <div class="kya-kpi-label" id="kpi-fuel-label">Carburant 30j</div>
+      <div class="kya-kpi-label">Pleins 30j</div>
     </div>
     <div class="kya-kpi">
-      <div class="kya-kpi-icon" style="color: var(--kya-orange);"><i class="bi bi-tools"></i></div>
-      <div class="kya-kpi-value" id="kpi-services">—</div>
-      <div class="kya-kpi-label">Entretiens 45j</div>
+      <div class="kya-kpi-icon" style="color: var(--kya-red);"><i class="bi bi-shield-exclamation"></i></div>
+      <div class="kya-kpi-value" id="kpi-alertes">—</div>
+      <div class="kya-kpi-label">Alertes docs</div>
     </div>
+  </div>
+
+  <!-- Alertes documents -->
+  <div class="kya-panel" id="panel-alertes">
+    <div class="kya-panel-head"><h3><i class="bi bi-shield-exclamation text-danger"></i> Documents véhicules expirants ou expirés</h3></div>
+    <table class="kya-table">
+      <thead><tr>
+        <th>Véhicule</th><th>Marque/Modèle</th><th>Chauffeur</th>
+        <th>Assurance</th><th>Statut Ass.</th>
+        <th>Visite technique</th><th>Statut V.T.</th>
+      </tr></thead>
+      <tbody id="tbl-alertes"><tr><td colspan="7" class="kya-loader">Chargement…</td></tr></tbody>
+    </table>
   </div>
 
   <!-- Flotte -->
@@ -120,8 +133,9 @@ body { background: var(--kya-bg) !important; }
     <div class="kya-panel-head"><h3><i class="bi bi-car-front"></i> Parc véhicules</h3></div>
     <table class="kya-table">
       <thead><tr>
-        <th>Véhicule</th><th>Marque</th><th>Plaque</th><th class="text-end">Km</th>
-        <th>Dernier service</th><th class="text-end">Carburant YTD</th><th class="text-end">Sorties actives</th>
+        <th>Véhicule</th><th>Marque/Modèle</th><th>Carburant</th>
+        <th class="text-end">Km</th><th>Statut</th><th>Chauffeur</th>
+        <th class="text-end">Sorties actives</th>
       </tr></thead>
       <tbody id="tbl-fleet"><tr><td colspan="7" class="kya-loader">Chargement…</td></tr></tbody>
     </table>
@@ -133,46 +147,53 @@ body { background: var(--kya-bg) !important; }
     <div style="max-height: 450px; overflow-y: auto;">
       <table class="kya-table">
         <thead><tr>
-          <th>N°</th><th>Véhicule</th><th>Chauffeur</th><th>Destination</th>
-          <th>Départ</th><th>Retour</th><th>Statut</th>
+          <th>N°</th><th>Véhicule</th><th>Chauffeur</th><th>Destination</th><th>Motif</th>
+          <th>Départ</th><th>Retour prévu</th><th class="text-end">Km</th><th>Statut</th>
         </tr></thead>
-        <tbody id="tbl-sorties"><tr><td colspan="7" class="kya-loader">Chargement…</td></tr></tbody>
+        <tbody id="tbl-sorties"><tr><td colspan="9" class="kya-loader">Chargement…</td></tr></tbody>
       </table>
     </div>
   </div>
 
-  <!-- Entretiens -->
+  <!-- Pleins carburant -->
   <div class="kya-panel">
-    <div class="kya-panel-head"><h3><i class="bi bi-tools"></i> Entretiens récents</h3></div>
+    <div class="kya-panel-head"><h3><i class="bi bi-fuel-pump"></i> Pleins carburant récents</h3></div>
     <table class="kya-table">
       <thead><tr>
-        <th>N°</th><th>Date</th><th>Type</th><th>Fréquence</th>
+        <th>Date</th><th>Plaque</th><th>Employé</th><th class="text-end">Odomètre</th><th class="text-end">Qté (L)</th><th>Fournisseur</th>
       </tr></thead>
-      <tbody id="tbl-services"><tr><td colspan="4" class="kya-loader">Chargement…</td></tr></tbody>
+      <tbody id="tbl-fuel"><tr><td colspan="6" class="kya-loader">Chargement…</td></tr></tbody>
     </table>
   </div>
 
-  <!-- Carburant par mois -->
+  <!-- Carburant par mois (quantité seulement) -->
   <div class="kya-panel">
-    <div class="kya-panel-head"><h3><i class="bi bi-fuel-pump"></i> Carburant par mois (12 mois)</h3></div>
+    <div class="kya-panel-head"><h3><i class="bi bi-bar-chart"></i> Quantité carburant par mois (12 mois)</h3></div>
     <div style="padding: 1rem;"><canvas id="chart-fuel" height="80"></canvas></div>
   </div>
 
 </div>
 
 <script>
-let CURRENCY = '';
-
 function fmtN(n) { if (n == null) return '—'; return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(n); }
-function fmtMoney(n) { if (n == null) return '—'; const v = fmtN(n); return CURRENCY ? `${v} ${CURRENCY}` : v; }
+function fmtQty(n) { if (n == null) return '—'; return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 }).format(n); }
+
 function badgeStatut(s) {
   if (!s) return '';
   const k = s.toLowerCase();
+  if (k.includes('dispo')) return `<span class="badge-statut b-ok">${s}</span>`;
   if (k.includes('mission')) return `<span class="badge-statut b-mission">${s}</span>`;
-  if (k.includes('retour') || k.includes('clos')) return `<span class="badge-statut b-back">${s}</span>`;
-  if (k.includes('approuv') || k.includes('attente')) return `<span class="badge-statut b-pending">${s}</span>`;
-  if (k.includes('annul') || k.includes('refus')) return `<span class="badge-statut b-cancelled">${s}</span>`;
+  if (k.includes('attente') || k.includes('approuv')) return `<span class="badge-statut b-pending">${s}</span>`;
+  if (k.includes('maintenance')) return `<span class="badge-statut b-warning">${s}</span>`;
+  if (k.includes('hors') || k.includes('annul')) return `<span class="badge-statut b-danger">${s}</span>`;
   return `<span class="badge-statut">${s}</span>`;
+}
+
+function badgeDoc(s) {
+  if (!s) return '';
+  if (s === 'EXPIRE') return '<span class="badge-statut b-danger">Expirée</span>';
+  if (s === 'BIENTOT') return '<span class="badge-statut b-warning">Expire bientôt</span>';
+  return '<span class="badge-statut b-ok">OK</span>';
 }
 
 async function callApi(method, args) {
@@ -188,15 +209,35 @@ async function callApi(method, args) {
 async function loadOverview() {
   try {
     const o = await callApi('kya_hr.api.logistique_dashboard.get_dashboard_overview');
-    CURRENCY = o.currency || '';
     document.getElementById('kpi-total').textContent = fmtN(o.total_vehicles);
     document.getElementById('kpi-avail').textContent = fmtN(o.available);
     document.getElementById('kpi-mission').textContent = fmtN(o.in_mission);
     document.getElementById('kpi-sorties').textContent = fmtN(o.sorties_30d);
-    document.getElementById('kpi-fuel').textContent = fmtMoney(o.fuel_30d_amount);
-    document.getElementById('kpi-fuel-label').textContent = `Carburant 30j (${CURRENCY})`;
-    document.getElementById('kpi-services').textContent = fmtN(o.service_due_30d);
+    document.getElementById('kpi-fuel').textContent = fmtN(o.fuel_30d_count);
+    document.getElementById('kpi-alertes').textContent = fmtN((o.alertes_assurance || 0) + (o.alertes_visite || 0));
   } catch (e) { console.error(e); }
+}
+
+async function loadAlertes() {
+  const tbody = document.getElementById('tbl-alertes');
+  try {
+    const rows = await callApi('kya_hr.api.logistique_dashboard.get_alertes_documents');
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="kya-loader">Aucune alerte — tous les documents sont à jour</td></tr>';
+      return;
+    }
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td><a href="/app/vehicle/${encodeURIComponent(r.name)}"><strong>${r.name}</strong></a></td>
+        <td>${(r.make || '') + ' ' + (r.model || '')}</td>
+        <td>${r.chauffeur || '—'}</td>
+        <td>${r.assurance_exp || '—'}</td>
+        <td>${badgeDoc(r.statut_assurance)}</td>
+        <td>${r.visite_exp || '—'}</td>
+        <td>${badgeDoc(r.statut_visite)}</td>
+      </tr>
+    `).join('');
+  } catch (e) { tbody.innerHTML = `<tr><td colspan="7" class="kya-loader text-danger">Erreur: ${e.message}</td></tr>`; }
 }
 
 async function loadFleet() {
@@ -208,11 +249,11 @@ async function loadFleet() {
       <tr>
         <td><a href="/app/vehicle/${encodeURIComponent(r.name)}"><strong>${r.name || ''}</strong></a></td>
         <td>${(r.make || '') + ' ' + (r.model || '')}</td>
-        <td>${r.license_plate || '—'}</td>
+        <td>${r.fuel_type || '—'}</td>
         <td class="text-end">${fmtN(r.last_odometer)}</td>
-        <td>${r.last_service || '—'}</td>
-        <td class="text-end">${fmtMoney(r.fuel_ytd)}</td>
-        <td class="text-end">${r.active_sorties || 0}</td>
+        <td>${badgeStatut(r.statut)}</td>
+        <td>${r.chauffeur || '—'}</td>
+        <td class="text-end">${r.sorties_actives || 0}</td>
       </tr>
     `).join('');
   } catch (e) { tbody.innerHTML = `<tr><td colspan="7" class="kya-loader text-danger">Erreur: ${e.message}</td></tr>`; }
@@ -222,35 +263,39 @@ async function loadSorties() {
   const tbody = document.getElementById('tbl-sorties');
   try {
     const rows = await callApi('kya_hr.api.logistique_dashboard.get_recent_sorties', { limit: 30 });
-    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" class="kya-loader">Aucune sortie</td></tr>'; return; }
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="9" class="kya-loader">Aucune sortie</td></tr>'; return; }
     tbody.innerHTML = rows.map(r => `
       <tr>
         <td><a href="/app/sortie-vehicule/${encodeURIComponent(r.name)}">${r.name}</a></td>
-        <td>${r.vehicule || '—'}</td>
+        <td>${r.vehicle || r.license_plate || '—'}</td>
         <td>${r.chauffeur || '—'}</td>
         <td>${r.destination || '—'}</td>
+        <td>${(r.motif || '').substring(0, 40)}</td>
         <td>${r.date_depart || '—'}</td>
-        <td>${r.date_retour_effective || r.date_retour_prevue || '—'}</td>
+        <td>${r.date_retour_prevue || '—'}</td>
+        <td class="text-end">${r.km_parcourus || 0}</td>
         <td>${badgeStatut(r.statut)}</td>
       </tr>
     `).join('');
-  } catch (e) { tbody.innerHTML = `<tr><td colspan="7" class="kya-loader text-danger">Erreur: ${e.message}</td></tr>`; }
+  } catch (e) { tbody.innerHTML = `<tr><td colspan="9" class="kya-loader text-danger">Erreur: ${e.message}</td></tr>`; }
 }
 
-async function loadServices() {
-  const tbody = document.getElementById('tbl-services');
+async function loadFuel() {
+  const tbody = document.getElementById('tbl-fuel');
   try {
-    const rows = await callApi('kya_hr.api.logistique_dashboard.get_recent_services');
-    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="4" class="kya-loader">Aucun entretien</td></tr>'; return; }
+    const rows = await callApi('kya_hr.api.logistique_dashboard.get_recent_fuel_logs', { limit: 30 });
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="6" class="kya-loader">Aucun plein</td></tr>'; return; }
     tbody.innerHTML = rows.map(r => `
       <tr>
-        <td><a href="/app/vehicle-service/${encodeURIComponent(r.name)}">${r.name}</a></td>
-        <td>${r.service_date || '—'}</td>
-        <td>${r.type || '—'}</td>
-        <td>${r.frequency || '—'}</td>
+        <td>${r.date || '—'}</td>
+        <td>${r.license_plate || '—'}</td>
+        <td>${r.employee || '—'}</td>
+        <td class="text-end">${fmtN(r.odometer)}</td>
+        <td class="text-end">${fmtQty(r.fuel_qty)}</td>
+        <td>${r.supplier || '—'}</td>
       </tr>
     `).join('');
-  } catch (e) { tbody.innerHTML = `<tr><td colspan="4" class="kya-loader text-danger">Erreur: ${e.message}</td></tr>`; }
+  } catch (e) { tbody.innerHTML = `<tr><td colspan="6" class="kya-loader text-danger">Erreur: ${e.message}</td></tr>`; }
 }
 
 async function loadFuelChart() {
@@ -261,8 +306,8 @@ async function loadFuelChart() {
       data: {
         labels: rows.map(r => r.month),
         datasets: [{
-          label: 'Coût carburant',
-          data: rows.map(r => r.total_amount),
+          label: 'Litres',
+          data: rows.map(r => r.total_qty),
           backgroundColor: '#8b5cf6',
         }],
       },
@@ -272,7 +317,7 @@ async function loadFuelChart() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  loadOverview(); loadFleet(); loadSorties(); loadServices(); loadFuelChart();
+  loadOverview(); loadAlertes(); loadFleet(); loadSorties(); loadFuel(); loadFuelChart();
 });
 </script>
 

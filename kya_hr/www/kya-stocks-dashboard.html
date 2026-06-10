@@ -130,9 +130,9 @@ body { background: var(--kya-bg) !important; }
       <div class="kya-kpi-label">En stock</div>
     </div>
     <div class="kya-kpi">
-      <div class="kya-kpi-icon" style="color: var(--kya-orange);"><i class="bi bi-currency-exchange"></i></div>
-      <div class="kya-kpi-value" id="kpi-value">—</div>
-      <div class="kya-kpi-label">Valeur stock</div>
+      <div class="kya-kpi-icon" style="color: var(--kya-orange);"><i class="bi bi-stack"></i></div>
+      <div class="kya-kpi-value" id="kpi-qty">—</div>
+      <div class="kya-kpi-label">Quantité totale</div>
     </div>
     <div class="kya-kpi">
       <div class="kya-kpi-icon" style="color: var(--kya-red);"><i class="bi bi-exclamation-triangle"></i></div>
@@ -158,7 +158,6 @@ body { background: var(--kya-bg) !important; }
             <th>Entrepôt</th>
             <th>Articles</th>
             <th class="text-end">Qté totale</th>
-            <th class="text-end">Valeur</th>
             <th>Dernier mouvement</th>
           </tr>
         </thead>
@@ -181,7 +180,6 @@ body { background: var(--kya-bg) !important; }
             <th>Groupe</th>
             <th class="text-end">Articles</th>
             <th class="text-end">Qté</th>
-            <th class="text-end">Valeur</th>
           </tr>
         </thead>
         <tbody id="tbl-groups">
@@ -266,14 +264,9 @@ async function callApi(method, args) {
 async function loadOverview() {
   try {
     const o = await callApi('kya_hr.api.stocks_dashboard.get_dashboard_overview');
-    KYA_CURRENCY = o.currency || '';
-    // Mise a jour des labels XOF -> devise reelle
-    document.querySelectorAll('.kya-kpi-label').forEach(el => {
-      if (el.textContent.trim() === 'Valeur stock') el.textContent = `Valeur stock (${KYA_CURRENCY})`;
-    });
     document.getElementById('kpi-items').textContent = fmtQty(o.total_items);
+    document.getElementById('kpi-qty').textContent = fmtQty(o.total_qty);
     document.getElementById('kpi-instock').textContent = fmtQty(o.items_in_stock);
-    document.getElementById('kpi-value').textContent = fmtXof(o.stock_value);
     document.getElementById('kpi-rupture').textContent = fmtQty(o.rupture_count);
     document.getElementById('kpi-mov').textContent = fmtQty(o.movements_30d ? o.movements_30d.total_entries : 0);
   } catch (e) {
@@ -294,7 +287,6 @@ async function loadWarehouses() {
         <td><strong>${frappe.utils.escape_html(r.warehouse)}</strong></td>
         <td>${r.items_in_stock || 0}</td>
         <td class="text-end">${fmtQty(r.total_qty)}</td>
-        <td class="text-end">${fmtXof(r.stock_value)}</td>
         <td>${r.last_movement || '—'}</td>
       </tr>
     `).join('');
@@ -316,7 +308,6 @@ async function loadGroups() {
         <td><strong>${frappe.utils.escape_html(r.item_group)}</strong></td>
         <td class="text-end">${r.items_count}</td>
         <td class="text-end">${fmtQty(r.total_qty)}</td>
-        <td class="text-end">${fmtXof(r.stock_value)}</td>
       </tr>
     `).join('');
   } catch (e) {
