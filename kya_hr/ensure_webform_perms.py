@@ -51,53 +51,99 @@ def _list_kya_webforms() -> list[dict]:
     )
 
 
-def _ensure_role_docperm(doctype: str, role: str) -> str:
-    """Verifie/ajoute une DocPerm role + if_owner=1 sur le DocType cible.
+def _repair_invalid_perms(doctype: str) -> int:
+    """Repare les DocPerm incoherentes qui bloquent toute modif de perms.
 
-    Retourne 'created' / 'updated' / 'unchanged' / 'role_missing'.
+    Frappe valide TOUTES les lignes de permission a chaque modification.
+    Si une ligne a submit/cancel/amend sans write (ou write sans read),
+    la validation echoue : 'Vous ne pouvez pas choisir Valider, Annuler,
+    Nouv. version sans Ecrire'. Cela bloque l'ajout de nos perms.
+
+    Ce helper detecte ces lignes (standard ET custom) et ajoute les
+    droits manquants (write si submit/cancel/amend ; read si write).
+    Retourne le nombre de lignes reparees.
+    """
+    repaired = 0
+    for table in ("DocPerm", "Custom DocPerm"):
+        rows = frappe.db.get_all(
+            table,
+            filters={"parent": doctype},
+            fields=["name", "role", "read", "write", "submit", "cancel", "amend"],
+        )
+        for r in rows:
+            needs_write = (r.submit or r.cancel or r.amend) and not r.write
+            needs_read = (r.write or needs_write) and not r.read
+            updates = {}
+            if needs_write:
+                updates["write"] = 1
+            if needs_read:
+                updates["read"] = 1
+            if updates:
+                try:
+                    frappe.db.set_value(table, r.name, updates, update_modified=False)
+                    repaired += 1
+                except Exception:
+                    pass
+    if repaired:
+        frappe.db.commit()
+        frappe.clear_cache(doctype=doctype)
+    return repaired
+
+
+def _ensure_role_docperm(doctype: str, role: str) -> str:
+    """Garantit que `role` a read+create+write+if_owner sur `doctype`.
+
+    Utilise l'API officielle frappe.permissions :
+    - add_permission() cree une Custom DocPerm (ne touche PAS la DocType
+      standard, donc pas besoin du mode developpeur). C'est LA bonne
+      methode pour les DocTypes natifs (Leave Application, etc.).
+    - update_permission_property() pose chaque droit (read/create/write/
+      if_owner).
+
+    Retourne 'created' / 'updated' / 'unchanged' / 'role_missing' / 'error'.
     """
     if not frappe.db.exists("Role", role):
         return "role_missing"
 
-    # Cherche une DocPerm existante pour ce role + permlevel=0
-    existing = frappe.db.get_all(
+    from frappe.permissions import add_permission, update_permission_property
+
+    # Etat actuel : la DocPerm (standard ou custom) existe-t-elle deja
+    # avec les bons droits ? On lit la permission effective.
+    existing = frappe.db.get_value(
+        "Custom DocPerm",
+        {"parent": doctype, "role": role, "permlevel": 0},
+        ["name", "read", "create", "write", "if_owner"],
+        as_dict=True,
+    )
+    std = frappe.db.get_value(
         "DocPerm",
-        filters={"parent": doctype, "role": role, "permlevel": 0},
-        fields=["name", "read", "create", "write", "if_owner"],
-        limit=10,
+        {"parent": doctype, "role": role, "permlevel": 0},
+        ["read", "create", "write", "if_owner"],
+        as_dict=True,
     )
 
-    # Si une DocPerm existe deja avec les bons droits -> unchanged
-    for row in existing:
-        if (row.read == 1 and row.create == 1 and row.write == 1
-                and (row.if_owner == 1 or row.if_owner is None)):
-            return "unchanged"
+    # Si une perm standard donne deja tous les droits -> rien a faire
+    if std and std.read and std.create and std.write:
+        return "unchanged"
+    if (existing and existing.read and existing.create
+            and existing.write and existing.if_owner):
+        return "unchanged"
 
-    # Si une DocPerm existe mais incomplete -> on l'update (premier match)
-    if existing:
-        try:
-            frappe.db.set_value("DocPerm", existing[0].name, {
-                "read": 1, "create": 1, "write": 1, "if_owner": 1,
-            }, update_modified=False)
-            return "updated"
-        except Exception:
-            try:
-                frappe.log_error(frappe.get_traceback(), f"ensure_webform_perms: update {doctype}/{role}")
-            except Exception:
-                pass
-            return "error"
-
-    # Sinon, on cree une nouvelle DocPerm
     try:
-        dt_doc = frappe.get_doc("DocType", doctype)
-        dt_doc.append("permissions", {
-            "role": role, **BASE_EMPLOYEE_PERMS,
-        })
-        dt_doc.save(ignore_permissions=True)
-        return "created"
+        had_custom = bool(existing)
+        if not had_custom:
+            # add_permission cree la ligne Custom DocPerm (permlevel 0)
+            add_permission(doctype, role, 0)
+
+        # Poser chaque droit. update_permission_property attend des str.
+        for ptype in ("read", "create", "write", "if_owner"):
+            update_permission_property(doctype, role, 0, ptype, "1")
+
+        return "updated" if had_custom else "created"
     except Exception:
         try:
-            frappe.log_error(frappe.get_traceback(), f"ensure_webform_perms: create {doctype}/{role}")
+            frappe.log_error(frappe.get_traceback(),
+                             f"ensure_webform_perms: {doctype}/{role}")
         except Exception:
             pass
         return "error"
@@ -128,6 +174,12 @@ def execute() -> dict:
 
         seen_doctypes.add(doctype)
         summary["doctypes_touched"].append(doctype)
+
+        # Repare d'abord les perms incoherentes (submit sans write) qui
+        # bloqueraient l'ajout de nos perms.
+        repaired = _repair_invalid_perms(doctype)
+        if repaired:
+            summary["perms_repaired"] = summary.get("perms_repaired", 0) + repaired
 
         for role in DEFAULT_ROLES:
             action = _ensure_role_docperm(doctype, role)
