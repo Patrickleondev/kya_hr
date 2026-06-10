@@ -1479,3 +1479,141 @@ footer .web-footer-menu { display: none !important; }
 .kya-form-section .frappe-control[data-fieldname="urgence"] select option[value="Urgent"] { color: #e65100; font-weight: 700; }
 .kya-form-section .frappe-control[data-fieldname="urgence"] select option[value="Très Urgent"] { color: #c62828; font-weight: 700; }
 
+/* ===================================================================
+   RESPONSIVE POLISH 2026-06 — adaptabilite largeur + mobile-first
+   Bug fixe : sur certains ecrans (tablette portrait, mobile paysage,
+   ecrans tres larges), des champs/tables debordaient ou se faisaient
+   ecraser. Ce bloc applique des regles defensives pour eviter ca.
+   =================================================================== */
+
+/* 1. Box-sizing universel : padding inclus dans width -> pas de depassement */
+.web-form-container,
+.web-form-container *,
+.kya-form-section,
+.kya-form-section *,
+.frappe-form,
+.frappe-form * {
+  box-sizing: border-box;
+}
+
+/* 2. Container racine : pas plus large que viewport, pas de scroll horizontal */
+.web-form-container,
+.frappe-form,
+.kya-form-section {
+  max-width: 100% !important;
+  width: 100% !important;
+  overflow-x: hidden;
+}
+
+/* 3. Tables (child tables Frappe + Multi-Select) : scroll horizontal au lieu de deborder */
+.web-form-container .frappe-control[data-fieldtype="Table"] .grid,
+.web-form-container .frappe-control[data-fieldtype="Table MultiSelect"] .grid,
+.web-form-container .form-grid-container {
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 4. Boutons d'action : wrap au lieu de deborder */
+.web-form-actions,
+.kya-form-section .form-actions,
+.kya-wf-actions {
+  flex-wrap: wrap;
+  gap: 8px;
+  row-gap: 12px;
+}
+
+/* 5. Inputs et selects : largeur max 100% (evite que des longs textes les fassent gonfler) */
+.web-form-container input,
+.web-form-container select,
+.web-form-container textarea,
+.web-form-container .input-with-feedback,
+.kya-form-section input,
+.kya-form-section select,
+.kya-form-section textarea {
+  max-width: 100% !important;
+  min-width: 0;
+}
+
+/* 6. Labels longs : wrap proprement au lieu d'etre ecrases */
+.web-form-container label,
+.kya-form-section label,
+.kya-form-section .control-label {
+  white-space: normal !important;
+  word-wrap: break-word;
+  hyphens: auto;
+}
+
+/* 7. Tablette portrait : entre 600 et 900px */
+@media (max-width: 900px) {
+  .web-form-container,
+  .frappe-form {
+    padding: 12px 8px !important;
+  }
+  /* Tables : forcer scroll horizontal a partir de 680px */
+  .web-form-container .form-grid-container,
+  .web-form-container .grid-body {
+    min-width: 0;
+    overflow-x: auto;
+  }
+  /* 2 colonnes -> 1 colonne sur tablette portrait */
+  .kya-form-section .form-column {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+  }
+}
+
+/* 8. Mobile : <600px - mise en page une colonne, boutons tactiles */
+@media (max-width: 600px) {
+  /* Tous les form-column en pleine largeur */
+  .web-form-container .form-column,
+  .kya-form-section .form-column {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+  }
+  /* Boutons : taille minimum tactile 44x44 + pleine largeur */
+  .web-form-actions button,
+  .kya-wf-actions button,
+  .kya-form-section .btn {
+    min-height: 44px;
+    width: 100%;
+    margin-bottom: 6px;
+  }
+  /* Headers KYA : taille reduite mais lisible */
+  .kya-wf-header .kya-title {
+    font-size: clamp(1.1rem, 5vw, 1.6rem) !important;
+  }
+  .kya-doc-number {
+    font-size: clamp(0.75rem, 3.5vw, 0.9rem) !important;
+  }
+  /* Sections : padding reduit */
+  .kya-form-section .form-section {
+    padding: 12px 10px !important;
+  }
+  /* Signatures : empilees au lieu de cote-a-cote */
+  .kya-signature-block,
+  .signature-section {
+    flex-direction: column !important;
+    gap: 12px;
+  }
+}
+
+/* 9. Ecrans tres larges (>1600px) : recentrage propre */
+@media (min-width: 1600px) {
+  .web-form-container,
+  .frappe-form {
+    max-width: 1400px !important;
+    margin: 0 auto !important;
+  }
+}
+
+/* 10. Print : pas de scroll horizontal, pleine largeur papier */
+@media print {
+  .web-form-container,
+  .web-form-container * {
+    overflow: visible !important;
+    max-width: 100% !important;
+  }
+}
+
