@@ -64,7 +64,61 @@ class PVEntreeMateriel(Document):
             self.db_set("audit_date", today, update_modified=False)
 
     # ------------------------------------------------------------------ #
+    def _ensure_item_for_row(self, it):
+        """Si la ligne n'a qu'une designation (pas d'item_code), cree l'Item.
+
+        Permet a l'utilisateur de receptionner un article jamais reference
+        sans devoir aller le creer manuellement dans /app/item. L'Item cree
+        herite de la designation + UOM saisies. Idempotent : si un Item au
+        meme nom existe deja, on reutilise son code.
+        """
+        if it.get("item_code"):
+            return
+        designation = (it.get("designation") or "").strip()
+        if not designation:
+            return
+
+        # Recherche par item_name exact (case-insensitive via collation MySQL)
+        existing = frappe.db.get_value("Item", {"item_name": designation}, "name")
+        if existing:
+            it.item_code = existing
+            return
+
+        # Choix du groupe : si fournisseur est lie a une categorie connue,
+        # on pourrait raffiner. Pour l'instant on prend "Articles divers - KYA"
+        # comme fourre-tout, ou "All Item Groups" en fallback.
+        item_group = "Articles divers - KYA"
+        if not frappe.db.exists("Item Group", item_group):
+            item_group = "All Item Groups"
+
+        new_code = f"KYA-AUTO-{frappe.generate_hash(length=6).upper()}"
+        try:
+            doc = frappe.new_doc("Item")
+            doc.item_code = new_code
+            doc.item_name = designation
+            doc.item_group = item_group
+            doc.stock_uom = it.get("uom") or "Nos"
+            doc.is_stock_item = 1
+            doc.is_purchase_item = 1
+            doc.is_sales_item = 1
+            doc.insert(ignore_permissions=True)
+            it.item_code = new_code
+            frappe.msgprint(
+                _("Article cree automatiquement : {0} (code: {1})").format(designation, new_code),
+                indicator="blue", alert=True,
+            )
+        except Exception:
+            frappe.log_error(
+                frappe.get_traceback(),
+                f"PV Reception {self.name} - auto-creation Item '{designation}'",
+            )
+
     def _create_stock_entry(self):
+        # Etape 1 : creer les Items a la volee pour les lignes sans item_code
+        for it in self.items:
+            self._ensure_item_for_row(it)
+
+        # Etape 2 : ne garder que les lignes qui ont maintenant un item_code + warehouse
         rows = [it for it in self.items if it.get("item_code") and it.get("warehouse")]
         if not rows:
             return
