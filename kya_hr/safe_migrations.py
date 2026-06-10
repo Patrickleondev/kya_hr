@@ -26,6 +26,8 @@ import frappe
 AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.runtime_overrides.execute", "Runtime overrides (timeout gunicorn + disable demo setup)"),
     ("kya_hr.setup_locale.execute", "Setup locale (timezone, fuseau)"),
+    ("kya_hr.setup_translations.execute", "Override traductions KYA (Type d'emploi: Stage/Intern/etc.)"),
+    ("kya_hr.setup_employment_types.execute", "Normalise Employment Types (FR: Stage/CDD/CDI/Prestataire/Apprentissage)"),
     ("kya_hr.setup_leave_types.execute", "Setup leave types HRMS"),
     ("kya_hr.force_sync_workspaces.execute", "Force sync workspaces"),
     ("kya_hr.force_publish_webforms.execute", "Force publish web forms"),
