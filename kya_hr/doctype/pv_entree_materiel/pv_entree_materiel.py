@@ -172,3 +172,32 @@ class PVEntreeMateriel(Document):
                 _("⚠️ Impossible de créer le Stock Entry automatique : {0}.").format(str(e)),
                 indicator="orange",
             )
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# Entrypoints doc_events (cf. hooks.py)
+# ───────────────────────────────────────────────────────────────────────────
+# Ce DocType est `custom: 1` : Frappe NE charge PAS la classe ci-dessus comme
+# controller (il instancie frappe.model.document.Document). Conséquence : ni
+# validate() ni on_update_after_submit() ne s'exécutaient -> le Material Receipt
+# n'était jamais créé et le stock n'augmentait pas à la réception.
+# On recâble donc le cycle de vie via doc_events. _bind() re-caste le Document
+# de base vers notre classe pour réutiliser TOUT le code métier ci-dessus sans
+# le dupliquer (la classe n'ajoute ni __slots__ ni __init__, le re-cast est sûr).
+
+def _bind(doc):
+    if doc.__class__ is not PVEntreeMateriel:
+        doc.__class__ = PVEntreeMateriel
+    return doc
+
+
+def validate(doc, method=None):
+    _bind(doc).validate()
+
+
+def on_update_after_submit(doc, method=None):
+    _bind(doc).on_update_after_submit()
+
+
+def on_cancel(doc, method=None):
+    _bind(doc).on_cancel()

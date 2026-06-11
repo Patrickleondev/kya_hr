@@ -208,3 +208,28 @@ class RetourMaterielKYA(Document):
                   "Le retour est approuvé mais la mise à jour du stock doit être faite manuellement.").format(str(e)),
                 indicator="orange",
             )
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# Entrypoints doc_events (cf. hooks.py)
+# ───────────────────────────────────────────────────────────────────────────
+# `custom: 1` -> la classe ci-dessus n'est pas chargée comme controller. Sans
+# ces entrypoints, le retour matériel ne remettait jamais les articles en stock.
+# _bind() re-caste le Document de base vers la classe pour réutiliser son code.
+
+def _bind(doc):
+    if doc.__class__ is not RetourMaterielKYA:
+        doc.__class__ = RetourMaterielKYA
+    return doc
+
+
+def validate(doc, method=None):
+    _bind(doc).validate()
+
+
+def on_update_after_submit(doc, method=None):
+    _bind(doc).on_update_after_submit()
+
+
+def on_cancel(doc, method=None):
+    _bind(doc).on_cancel()
