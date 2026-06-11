@@ -91,10 +91,12 @@ doc_events = {
         "after_insert": [
             "kya_hr.dashboard_realtime.notify_dashboard_change",
             "kya_hr.role_sync.sync_employee_role",
+            "kya_hr.equipe_member_sync.sync_on_employee_change",
         ],
         "on_update": [
             "kya_hr.dashboard_realtime.notify_dashboard_change",
             "kya_hr.role_sync.sync_employee_role",
+            "kya_hr.equipe_member_sync.sync_on_employee_change",
         ],
     },
     "Attendance": {

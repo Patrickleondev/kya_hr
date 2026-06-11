@@ -120,6 +120,37 @@ def get_context(context):
     except Exception:
         frappe.log_error(frappe.get_traceback(), "direction-dashboard: departements")
 
+    # ── 5.1 Synthèse par ÉQUIPE (Employee.custom_kya_equipe -> Equipe KYA) ──
+    # En prod, chaque employé est rattaché à une équipe : cette vue se peuple
+    # automatiquement. Sur une instance sans équipes, la liste reste vide.
+    equipes = []
+    try:
+        rows = frappe.db.sql(
+            """
+            SELECT
+                eq.name AS equipe,
+                eq.nom_equipe AS nom,
+                eq.departement AS departement,
+                eq.chef_equipe_name AS chef,
+                COUNT(DISTINCT e.name) AS effectif,
+                SUM(CASE WHEN a.status='Present' THEN 1 ELSE 0 END) AS presents,
+                SUM(CASE WHEN a.late_entry=1 THEN 1 ELSE 0 END) AS retards,
+                SUM(CASE WHEN a.status='Absent' THEN 1 ELSE 0 END) AS absents
+            FROM `tabEquipe KYA` eq
+            LEFT JOIN `tabEmployee` e
+                ON e.custom_kya_equipe = eq.name AND e.status='Active'
+            LEFT JOIN `tabAttendance` a
+                ON a.employee = e.name AND a.attendance_date = CURDATE()
+            GROUP BY eq.name, eq.nom_equipe, eq.departement, eq.chef_equipe_name
+            HAVING effectif > 0
+            ORDER BY effectif DESC
+            """,
+            as_dict=True,
+        )
+        equipes = rows
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "direction-dashboard: equipes")
+
     # ── 5.1 Bandeau MULTI-MODULES : tout ce qui est "en attente" partout ──
     def _count_waiting(doctype, states):
         try:
@@ -151,6 +182,7 @@ def get_context(context):
     context.brouillards = brouillards
     context.plannings_attente = plannings_attente
     context.departements = departements
+    context.equipes = equipes
     context.modules = modules
     context.modules_total = modules_total
     context.no_breadcrumbs = True

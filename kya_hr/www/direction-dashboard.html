@@ -118,6 +118,44 @@ table.kya-table { width: 100%; border-collapse: collapse; font-size: 13px; }
     </div>
   </div>
 
+  {# ── 5.1 Synthèse par ÉQUIPE (se peuple en prod) ── #}
+  {% if equipes %}
+  <div class="kya-section">
+    <h3>Synthèse par équipe — présences du jour</h3>
+    <div class="kya-table-wrap">
+      <table class="kya-table">
+        <thead>
+          <tr>
+            <th>Équipe</th>
+            <th>Département</th>
+            <th>Chef d'équipe</th>
+            <th class="num">Effectif</th>
+            <th class="num">Présents</th>
+            <th class="num">Retards</th>
+            <th class="num">Absents</th>
+            <th class="num">Taux</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in equipes %}
+          {% set taux = ((e.presents or 0) * 100 // (e.effectif or 1)) %}
+          <tr>
+            <td><a href="/app/equipe-kya/{{ e.equipe }}"><b>{{ e.nom or e.equipe }}</b></a></td>
+            <td>{{ e.departement or "—" }}</td>
+            <td>{{ e.chef or "—" }}</td>
+            <td class="num">{{ e.effectif or 0 }}</td>
+            <td class="num">{{ e.presents or 0 }}</td>
+            <td class="num">{% if (e.retards or 0) > 0 %}<span class="kya-badge wait">{{ e.retards }}</span>{% else %}0{% endif %}</td>
+            <td class="num">{% if (e.absents or 0) > 0 %}<span class="kya-badge err">{{ e.absents }}</span>{% else %}0{% endif %}</td>
+            <td class="num"><span class="kya-badge {% if taux >= 80 %}ok{% elif taux >= 50 %}wait{% else %}err{% endif %}">{{ taux }}%</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
   {# ── 5.1 Synthèse par département : toutes les équipes en un écran ── #}
   <div class="kya-section">
     <h3>Synthèse par département — présences du jour</h3>

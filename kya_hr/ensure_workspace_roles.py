@@ -94,6 +94,7 @@ DG_DASHBOARD_SHORTCUTS = [
     ("👥 Dashboard RH", "/kya-rh-dashboard"),
     ("📦 Dashboard Stocks", "/kya-stocks-dashboard"),
     ("🚚 Dashboard Logistique", "/kya-logistique-dashboard"),
+    ("🏗️ Projets & Clients (DGA)", "/dga-projets-clients"),
     ("🛒 Dashboard Achats", "/achats-dashboard"),
     ("🏦 Dashboard Comptabilité", "/comptabilite-dashboard"),
     ("📋 Inventaire & Sorties", "/inventaire-dashboard"),

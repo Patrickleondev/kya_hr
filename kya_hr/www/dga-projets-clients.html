@@ -1,0 +1,137 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Projets & Clients — Direction Générale Adjointe{% endblock %}
+
+{% block page_content %}
+<style>
+.kya-dga-page { max-width: 1180px; margin: 18px auto 32px; padding: 0 16px; font-family: Arial, sans-serif; color: #18212f; }
+.kya-letterhead { border: 1px solid #d9dee7; border-radius: 6px; overflow: hidden; background: #fff; }
+.kya-letterhead-top { display: grid; grid-template-columns: 120px 1fr 200px; gap: 18px; align-items: center; padding: 18px 22px; border-bottom: 4px solid #009688; }
+.kya-logo { width: 84px; height: 84px; object-fit: contain; }
+.kya-company h1 { margin: 0; font-size: 22px; color: #0f3d68; }
+.kya-company p { margin: 4px 0 0; font-size: 12px; color: #5c6573; line-height: 1.45; }
+.kya-doc-meta { text-align: right; font-size: 12px; color: #4b5563; }
+.kya-title-band { background: #009688; color: #fff; padding: 14px 22px; display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+.kya-title-band h2 { margin: 0; font-size: 20px; }
+.kya-title-band span { font-size: 13px; opacity: .92; }
+.kya-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 18px 0; }
+.kya-kpi { border: 1px solid #d9dee7; border-radius: 6px; background: #fff; padding: 14px; border-left: 4px solid #009688; }
+.kya-kpi .label { color: #667085; font-size: 12px; text-transform: uppercase; }
+.kya-kpi .value { font-size: 26px; color: #101828; font-weight: 800; margin-top: 5px; }
+.kya-section { margin-top: 18px; border: 1px solid #d9dee7; border-radius: 6px; background: #fff; overflow: hidden; }
+.kya-section h3 { margin: 0; padding: 13px 16px; background: #f7f8fa; border-bottom: 1px solid #d9dee7; font-size: 15px; color: #0f3d68; }
+.kya-table-wrap { overflow-x: auto; }
+table.kya-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.kya-table th, .kya-table td { padding: 10px 12px; border-bottom: 1px solid #edf0f5; text-align: left; vertical-align: middle; }
+.kya-table th { background: #fafbfc; color: #344054; font-weight: 700; }
+.kya-table td.num, .kya-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.kya-badge { display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #eef2f7; color: #344054; }
+.kya-badge.open { background: #cff4fc; color: #055160; }
+.kya-badge.done { background: #d1fadf; color: #027a48; }
+.kya-progress { background: #eef2f7; border-radius: 999px; height: 8px; width: 90px; overflow: hidden; display: inline-block; vertical-align: middle; }
+.kya-progress > span { display: block; height: 100%; background: #009688; }
+.kya-help { padding: 14px 18px; color: #5c6573; font-size: 13px; }
+@media (max-width: 860px) {
+  .kya-letterhead-top { grid-template-columns: 80px 1fr; }
+  .kya-doc-meta { grid-column: 1 / -1; text-align: left; }
+  .kya-grid { grid-template-columns: 1fr 1fr; }
+  .kya-title-band { display: block; }
+}
+@media print { .navbar, header, .web-footer { display: none !important; } }
+</style>
+
+<div class="kya-dga-page">
+  <div class="kya-letterhead">
+    <div class="kya-letterhead-top">
+      <img class="kya-logo" src="/assets/kya_hr/images/kya_logo.png" alt="KYA-Energy Group">
+      <div class="kya-company">
+        <h1>KYA-ENERGY GROUP</h1>
+        <p>Solutions solaires • Services techniques • Gestion administrative et financière</p>
+        <p>Agoè-Logopé, Lomé - Togo</p>
+      </div>
+      <div class="kya-doc-meta">
+        <b>Direction Générale Adjointe</b><br>
+        Portefeuille Projets &amp; Clients<br>
+        Matériel livré par chantier
+      </div>
+    </div>
+    <div class="kya-title-band">
+      <h2>Projets &amp; Clients</h2>
+      <span>Installations • Centrales • Maintenance • SAV</span>
+    </div>
+  </div>
+
+  <div class="kya-grid">
+    <div class="kya-kpi"><div class="label">Projets</div><div class="value">{{ stats.projets }}</div></div>
+    <div class="kya-kpi"><div class="label">Projets ouverts</div><div class="value">{{ stats.ouverts }}</div></div>
+    <div class="kya-kpi"><div class="label">Clients</div><div class="value">{{ stats.clients }}</div></div>
+    <div class="kya-kpi"><div class="label">PV matériel liés</div><div class="value">{{ stats.pv_lies }}</div></div>
+  </div>
+
+  <div class="kya-section">
+    <h3>Portefeuille de projets</h3>
+    {% if projets %}
+    <div class="kya-table-wrap">
+      <table class="kya-table">
+        <thead>
+          <tr>
+            <th>Projet</th>
+            <th>Client</th>
+            <th>Statut</th>
+            <th>Avancement</th>
+            <th class="num">PV matériel</th>
+            <th>Début</th>
+            <th>Fin prévue</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in projets %}
+          <tr>
+            <td><a href="/app/project/{{ p.name }}"><b>{{ p.project_name or p.name }}</b></a></td>
+            <td>{{ p.client_nom or "—" }}</td>
+            <td><span class="kya-badge {% if p.status == 'Open' %}open{% elif p.status == 'Completed' %}done{% endif %}">{{ p.status or "—" }}</span></td>
+            <td><span class="kya-progress"><span style="width:{{ p.avancement }}%;"></span></span> {{ p.avancement }}%</td>
+            <td class="num">{% if p.nb_pv > 0 %}<a href="/app/pv-sortie-materiel?project={{ p.name }}">{{ p.nb_pv }}</a>{% else %}0{% endif %}</td>
+            <td>{{ p.debut }}</td>
+            <td>{{ p.fin }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="kya-help">Aucun projet enregistré. Créez un projet pour suivre les installations et le matériel livré par chantier.</div>
+    {% endif %}
+  </div>
+
+  <div class="kya-section">
+    <h3>Clients</h3>
+    {% if clients %}
+    <div class="kya-table-wrap">
+      <table class="kya-table">
+        <thead>
+          <tr>
+            <th>Client</th>
+            <th>Groupe</th>
+            <th>Territoire</th>
+            <th class="num">Projets</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in clients %}
+          <tr>
+            <td><a href="/app/customer/{{ c.name }}"><b>{{ c.customer_name or c.name }}</b></a></td>
+            <td>{{ c.customer_group or "—" }}</td>
+            <td>{{ c.territory or "—" }}</td>
+            <td class="num">{{ c.nb_projets or 0 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="kya-help">Aucun client enregistré.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
