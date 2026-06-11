@@ -97,7 +97,32 @@ class KYAContrat(Document):
         # Détecte transition vers Validé (DG vient de signer) puis génère PDF + emails finaux.
         # Détecte aussi 'En attente DG' pour notifier le DG via lien magique.
         self._maybe_generate_pdf()
+        self._maybe_notify_signataire()
         self._maybe_notify_dg()
+
+    def _maybe_notify_signataire(self):
+        """Quand le contrat ENTRE dans 'En attente Signature Salarié' (par
+        l'action workflow 'Envoyer au Salarié' OU le bouton RH), envoie au
+        signataire l'email avec le lien magique.
+
+        C'était la cause du 'mail jamais reçu par le signataire' : seul le
+        bouton RH envoyait le mail ; l'action workflow changeait l'état sans
+        rien envoyer. On envoie maintenant UNE fois, à l'entrée dans l'état.
+        """
+        if self.workflow_state != "En attente Signature Salarié":
+            return
+        # Anti double-envoi : le bouton RH a déjà envoyé.
+        if self.flags.get("signataire_email_sent"):
+            return
+        # N'envoyer qu'à la TRANSITION (pas à chaque save tant qu'on reste dans l'état).
+        before = self.get_doc_before_save()
+        if before and before.workflow_state == "En attente Signature Salarié":
+            return
+        try:
+            from kya_hr.api.kya_contracts import send_signataire_email
+            send_signataire_email(self)
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), "KYA Contrat — Notification signataire")
 
     # ----- HELPERS -----
     def _select_template(self):
