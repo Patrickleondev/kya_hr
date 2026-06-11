@@ -315,6 +315,53 @@ def mark_absent(employee: str, motif: str = "", date: str | None = None) -> dict
 
 
 @frappe.whitelist()
+def mark_status(employee: str, status: str = "Present", date: str | None = None) -> dict:
+    """Marque directement le statut du jour (boutons Présent/Retard/Absent).
+
+    Mapping simple pour le marquage manuel RH depuis l'UI de présence :
+    - 'Present' / 'Présent' -> status Present, late_entry 0
+    - 'Retard'  / 'Late'    -> status Present, late_entry 1 (présent mais en retard)
+    - 'Absent'              -> status Absent
+
+    Réutilise _get_or_create_attendance + trace marked_by/marked_at.
+    """
+    _check_rh_role()
+    if not employee:
+        frappe.throw(_("employee est requis"))
+
+    att_date = date or today()
+    s = (status or "").strip().lower()
+    att = _get_or_create_attendance(employee, att_date)
+
+    if s in ("absent",):
+        att.status = "Absent"
+        att.late_entry = 0
+    elif s in ("retard", "late"):
+        att.status = "Present"
+        att.late_entry = 1
+    else:  # present / présent / défaut
+        att.status = "Present"
+        att.late_entry = 0
+
+    att.kya_marked_by = frappe.session.user
+    att.kya_marked_at = now_datetime()
+    att.save(ignore_permissions=True)
+    frappe.db.commit()
+
+    try:
+        frappe.publish_realtime(
+            event="kya_dashboard_updated",
+            message={"doctype": "Attendance", "name": att.name},
+            after_commit=True,
+        )
+    except Exception:
+        pass
+
+    return {"ok": True, "attendance": att.name,
+            "status": att.status, "late_entry": cint(att.late_entry)}
+
+
+@frappe.whitelist()
 def mark_team_bulk(team: str, status: str = "Present", date: str | None = None) -> dict:
     """Marque toute une equipe en une fois. Exclut auto les employes en conge."""
     _check_rh_role()
