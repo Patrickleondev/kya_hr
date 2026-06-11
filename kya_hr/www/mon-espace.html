@@ -376,9 +376,9 @@
       <div class="card-icon">✈️</div>
       <div class="card-title">Congés à valider</div>
     </a>
-    <a href="/app/attendance" class="me-card">
+    <a href="/presence-rh" class="me-card">
       <div class="card-icon">📅</div>
-      <div class="card-title">Présences</div>
+      <div class="card-title">Marquer présences</div>
     </a>
     <a href="/tableau-bord-employes" class="me-card">
       <div class="card-icon">📊</div>
@@ -417,6 +417,77 @@
     <a href="/app/purchase-order" class="me-card">
       <div class="card-icon">🛒</div>
       <div class="card-title">Bons de commande</div>
+    </a>
+  </div>
+</div>
+{% endif %}
+
+<!-- ═══ Section Comptabilité ═══ -->
+{% if show_compta %}
+<div class="me-section" id="sec-compta">
+  <h2>🏦 Espace Comptabilité</h2>
+  <div class="me-grid">
+    <a href="/app/brouillard-caisse" class="me-card">
+      <div class="card-icon">💵</div>
+      <div class="card-title">Brouillards de caisse</div>
+    </a>
+    <a href="/app/etat-recap-cheques" class="me-card">
+      <div class="card-icon">🧾</div>
+      <div class="card-title">États récap chèques</div>
+    </a>
+    <a href="/comptabilite-dashboard" class="me-card">
+      <div class="card-icon">📊</div>
+      <div class="card-title">Tableau de bord Compta</div>
+    </a>
+    <a href="/recap-brouillards" class="me-card">
+      <div class="card-icon">📅</div>
+      <div class="card-title">Récap caisse hebdo</div>
+    </a>
+  </div>
+</div>
+{% endif %}
+
+<!-- ═══ Section Logistique ═══ -->
+{% if show_logistique %}
+<div class="me-section" id="sec-logistique">
+  <h2>🚚 Espace Logistique</h2>
+  <div class="me-grid">
+    <a href="/app/vehicle" class="me-card">
+      <div class="card-icon">🚗</div>
+      <div class="card-title">Véhicules</div>
+    </a>
+    <a href="/app/sortie-vehicule" class="me-card">
+      <div class="card-icon">🛣️</div>
+      <div class="card-title">Sorties véhicule</div>
+    </a>
+    <a href="/kya-logistique-dashboard" class="me-card">
+      <div class="card-icon">📊</div>
+      <div class="card-title">Tableau de bord Logistique</div>
+    </a>
+  </div>
+</div>
+{% endif %}
+
+<!-- ═══ Section Direction (DG/DGA) ═══ -->
+{% if show_direction %}
+<div class="me-section" id="sec-direction">
+  <h2>🏛️ Direction Générale</h2>
+  <div class="me-grid">
+    <a href="/direction-dashboard" class="me-card">
+      <div class="card-icon">🧭</div>
+      <div class="card-title">Synthèse Direction</div>
+    </a>
+    <a href="/dga-projets-clients" class="me-card">
+      <div class="card-icon">🏗️</div>
+      <div class="card-title">Projets &amp; Clients (DGA)</div>
+    </a>
+    <a href="/kya-tableau-de-bord" class="me-card">
+      <div class="card-icon">📊</div>
+      <div class="card-title">Tableau de bord global</div>
+    </a>
+    <a href="/app/demande-achat-kya?workflow_state=En attente DG" class="me-card">
+      <div class="card-icon">✅</div>
+      <div class="card-title">À valider (DG)</div>
     </a>
   </div>
 </div>

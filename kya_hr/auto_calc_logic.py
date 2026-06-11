@@ -94,6 +94,16 @@ def compute_bon_commande(doc, method=None):
             "Supplier", doc.fournisseur, "supplier_name"
         )
 
+    # Date d'autorisation : posée UNIQUEMENT au moment où une signature est
+    # apposée (DG ou DGA), jamais avant. Si aucune signature -> pas de date.
+    # (Demande métier : "que si le user signe, ça récupère la date courante".)
+    if (doc.get("signature_dg") or doc.get("signature_dga")):
+        if not doc.get("date_autorisation"):
+            doc.date_autorisation = today()
+    else:
+        # Aucune signature : on ne laisse pas une date d'autorisation fantôme.
+        doc.date_autorisation = None
+
 
 # ════════════════════════════════════════════════════════════════════
 #  Tache Equipe

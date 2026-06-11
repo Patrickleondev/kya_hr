@@ -11,7 +11,7 @@
    "fieldtype": "Link",
    "options": "Item",
    "in_list_view": 1,
-   "columns": 3,
+   "columns": 2,
    "search_index": 1
   },
   {
@@ -28,7 +28,7 @@
    "label": "Unité",
    "fieldtype": "Link",
    "options": "UOM",
-   "in_list_view": 1,
+   "in_list_view": 0,
    "columns": 1,
    "fetch_from": "item_code.stock_uom",
    "fetch_if_empty": 1
@@ -38,7 +38,7 @@
    "label": "Qté Retournée",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "columns": 2,
+   "columns": 1,
    "reqd": 1
   },
   {
@@ -65,7 +65,7 @@
    "fieldname": "observations",
    "label": "Observations",
    "fieldtype": "Data",
-   "in_list_view": 1,
+   "in_list_view": 0,
    "columns": 2
   }
  ],

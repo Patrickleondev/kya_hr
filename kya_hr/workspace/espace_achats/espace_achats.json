@@ -74,13 +74,6 @@
    "icon": "megaphone"
   },
   {
-   "label": "À valider (mes approbations)",
-   "type": "URL",
-   "url": "/app/demande-achat-kya?workflow_state=En%20attente%20Chef%20Service",
-   "color": "#d84315",
-   "icon": "check-circle"
-  },
-  {
    "label": "En attente DG",
    "type": "URL",
    "url": "/app/demande-achat-kya?workflow_state=En%20attente%20DG",

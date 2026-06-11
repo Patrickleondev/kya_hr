@@ -98,22 +98,30 @@ def _sanitize_contract_pdf_html(html):
 
 # ─── 1. RH envoie le contrat au signataire ───────────────────────────────────
 
-@frappe.whitelist()
-def send_to_signataire(contract_id):
-    if not any(r in frappe.get_roles() for r in ("HR Manager", "System Manager", "Responsable RH")):
-        frappe.throw(_("Permission refusée"), frappe.PermissionError)
+def send_signataire_email(doc):
+    """Envoie au signataire l'email avec le lien magique de signature.
 
-    doc = frappe.get_doc("KYA Contrat", contract_id)
+    Centralise la construction + l'envoi pour qu'il y ait UNE seule source de
+    vérité, appelée par :
+      - le bouton RH `send_to_signataire` (action explicite), ET
+      - le handler controller `_maybe_notify_signataire` qui se déclenche
+        quand le contrat ENTRE dans l'état 'En attente Signature Salarié'
+        par l'action workflow 'Envoyer au Salarié' (cas où le bouton n'est
+        pas utilisé — c'était la cause du 'mail jamais reçu par le signataire').
+
+    Retourne l'URL du portail, ou None si l'email du signataire manque
+    (ne lève jamais : ne doit pas bloquer le workflow).
+    """
     if not doc.employee_email:
-        frappe.throw(_("L'email du signataire est requis avant l'envoi."))
-    if not doc.telephone:
-        frappe.throw(_("Le numéro de téléphone du signataire est requis avant l'envoi."))
-
+        return None
+    # Token : généré et PERSISTÉ (db_set fonctionne avant comme après save).
     if not doc.access_token_signataire:
-        doc.access_token_signataire = _generate_token()
-    sender = frappe.session.user
-    if sender and sender != "Guest" and "@" in sender:
-        doc.rh_sender_email = sender
+        token = _generate_token()
+        doc.access_token_signataire = token
+        try:
+            doc.db_set("access_token_signataire", token, update_modified=False)
+        except Exception:
+            pass
 
     site = frappe.utils.get_url()
     portail_url = f"{site}/kya-contrat?name={doc.name}&token={doc.access_token_signataire}"
@@ -165,7 +173,33 @@ def send_to_signataire(contract_id):
         message=message,
         now=False,
     )
+    return portail_url
 
+
+@frappe.whitelist()
+def send_to_signataire(contract_id):
+    """Bouton RH : envoie le contrat au signataire + passe l'état.
+
+    L'envoi du mail est délégué à send_signataire_email (source unique).
+    On pose un flag pour que le handler on_update ne renvoie pas un 2e mail.
+    """
+    if not any(r in frappe.get_roles() for r in ("HR Manager", "System Manager", "Responsable RH")):
+        frappe.throw(_("Permission refusée"), frappe.PermissionError)
+
+    doc = frappe.get_doc("KYA Contrat", contract_id)
+    if not doc.employee_email:
+        frappe.throw(_("L'email du signataire est requis avant l'envoi."))
+    if not doc.telephone:
+        frappe.throw(_("Le numéro de téléphone du signataire est requis avant l'envoi."))
+
+    sender = frappe.session.user
+    if sender and sender != "Guest" and "@" in sender:
+        doc.rh_sender_email = sender
+
+    portail_url = send_signataire_email(doc)
+
+    # Empêche le double-envoi : le handler on_update verra ce flag.
+    doc.flags.signataire_email_sent = True
     doc.workflow_state = "En attente Signature Salarié"
     doc.flags.ignore_permissions = True
     doc.save()

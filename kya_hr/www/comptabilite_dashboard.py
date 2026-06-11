@@ -50,7 +50,67 @@ def get_context(context):
     except Exception:
         frappe.log_error(frappe.get_traceback(), "comptabilite-dashboard: erreur chargement")
 
+    # --- Brouillards de Caisse (vrais flux quotidiens de trésorerie) ---
+    brouillards = []
+    caisse = {"nb": 0, "en_attente": 0, "solde_actuel": 0,
+              "total_entrees": 0, "total_sorties": 0}
+    try:
+        brouillards = frappe.get_all(
+            "Brouillard Caisse",
+            fields=[
+                "name", "date_brouillard", "caissiere_name", "total_entrees",
+                "total_sorties", "solde_final", "total_reel_caisse",
+                "workflow_state", "statut", "modified",
+            ],
+            order_by="date_brouillard desc, modified desc",
+            limit_page_length=15,
+        )
+        caisse["nb"] = frappe.db.count("Brouillard Caisse")
+        caisse["en_attente"] = sum(
+            1 for b in brouillards if "En attente" in (b.workflow_state or ""))
+        caisse["total_entrees"] = sum(flt(b.total_entrees) for b in brouillards)
+        caisse["total_sorties"] = sum(flt(b.total_sorties) for b in brouillards)
+        if brouillards:
+            # Solde le plus récent (1re ligne car tri date desc)
+            caisse["solde_actuel"] = flt(brouillards[0].solde_final)
+        for b in brouillards:
+            b.date_label = formatdate(b.date_brouillard) if b.date_brouillard else ""
+            b.etat_label = b.workflow_state or b.statut or ""
+    except Exception:
+        frappe.log_error(frappe.get_traceback(),
+                         "comptabilite-dashboard: erreur brouillards")
+
+    # --- Etats Récap Chèques (suivi hebdomadaire des chèques) ---
+    recaps = []
+    cheques = {"nb": 0, "en_attente": 0, "total_montant": 0, "nombre": 0}
+    try:
+        recaps = frappe.get_all(
+            "Etat Recap Cheques",
+            fields=[
+                "name", "date_etat", "redacteur_name", "libelle_periode",
+                "total_montant", "nombre_cheques", "workflow_state",
+                "statut", "modified",
+            ],
+            order_by="date_etat desc, modified desc",
+            limit_page_length=15,
+        )
+        cheques["nb"] = frappe.db.count("Etat Recap Cheques")
+        cheques["en_attente"] = sum(
+            1 for r in recaps if "En attente" in (r.workflow_state or ""))
+        cheques["total_montant"] = sum(flt(r.total_montant) for r in recaps)
+        cheques["nombre"] = sum(int(r.nombre_cheques or 0) for r in recaps)
+        for r in recaps:
+            r.date_label = formatdate(r.date_etat) if r.date_etat else ""
+            r.etat_label = r.workflow_state or r.statut or ""
+    except Exception:
+        frappe.log_error(frappe.get_traceback(),
+                         "comptabilite-dashboard: erreur recap cheques")
+
     context.imports = imports
     context.stats = stats
     context.type_counts = type_counts
+    context.brouillards = brouillards
+    context.caisse = caisse
+    context.recaps = recaps
+    context.cheques = cheques
     context.no_breadcrumbs = True

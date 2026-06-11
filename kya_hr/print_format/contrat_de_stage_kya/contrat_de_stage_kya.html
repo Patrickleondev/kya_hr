@@ -26,21 +26,27 @@
   .ctr-header td { vertical-align: top; padding: 0; }
   .ctr-addr { font-size: 9.5pt; line-height: 1.25; }
   .ctr-meta { text-align: right; font-size: 9pt; line-height: 1.3; }
-  .ctr-title-bar { width: 100%; border-collapse: collapse; margin: 4mm 0 6mm 0; }
+  .ctr-title-bar { width: 100%; border-collapse: collapse; margin: 3mm 0 6mm 0; }
   .ctr-title-bar td { padding: 0; vertical-align: middle; }
     .ctr-title-bar { table-layout: fixed; }
-    .ctr-logo-cell { width: 42mm; padding: 4px 8px; border: 1px solid #ccc; text-align: center; }
-   .ctr-logo-img { max-width: 36mm; max-height: 18mm; object-fit: contain; }
+    .ctr-logo-cell { width: 46mm; padding: 2mm; border: 1px solid #ccc; text-align: center; vertical-align: middle; }
+   .ctr-logo-img { width: 42mm; max-width: 42mm; max-height: 26mm; object-fit: contain; }
   .ctr-title-cell {
     background: #F58220;
-      color: #fff; font-weight: bold; font-size: 15pt;
-    text-align: center; padding: 6mm 4mm; letter-spacing: 1.5px;
-      border: 1px solid #ccc;
+      color: #fff; font-weight: bold; font-size: 19pt;
+    text-align: center; padding: 9mm 4mm; letter-spacing: 2px;
+      border: 1px solid #ccc; vertical-align: middle; line-height: 1.1;
   }
   .ctr-ref-cell {
-         width: 42mm; background: #fff; border: 1px solid #ccc;
-    text-align: center; font-size: 9.5pt; padding: 0; vertical-align: top;
+         width: 46mm; background: #fff; border: 1px solid #ccc;
+    text-align: center; font-size: 9.5pt; padding: 0; vertical-align: middle;
   }
+  /* En-tête compact pour les pages de continuation (parties II, III, IV) */
+  .ctr-cont-header {
+    width: 100%; border-collapse: collapse; margin: 0 0 5mm 0;
+    border-bottom: 1pt solid #bbb;
+  }
+  .ctr-cont-header td { padding: 0 0 1.5mm 0; font-size: 8pt; color: #555; vertical-align: bottom; }
   .ctr-ref-tagline {
     font-style: italic; font-weight: bold; font-size: 10pt;
     padding: 4px 4px 2px; border-bottom: 1px solid #ccc; display: block;
@@ -60,8 +66,8 @@
     text-decoration: underline; border-left: 3pt solid #555; padding-left: 4mm;
   }
   p { text-align: justify; margin: 0 0 3mm 0; }
-  .sig-block { margin-top: 12mm; width: 100%; border-collapse: collapse; }
-  .sig-block td { width: 50%; vertical-align: top; padding: 0 4mm; }
+  .sig-block { margin-top: 7mm; width: 100%; border-collapse: collapse; }
+  .sig-block td { width: 50%; vertical-align: top; padding: 4mm 4mm 0; border: 1px solid #ddd; }
   .sig-img { max-height: 22mm; max-width: 55mm; display: block; margin-top: 3mm; }
    .mention-img { max-height: 18mm; max-width: 62mm; display: block; margin-top: 3mm; }
    .mention-text { margin-top: 3mm; font-style: italic; font-weight: bold; }
@@ -70,7 +76,7 @@
   /* Signature manuelle (impression) */
   .sig-hand-label { font-style: italic; font-size: 9.5pt; margin-top: 4mm; margin-bottom: 1mm; }
   .sig-hand-write-line { border-bottom: 1px solid #555; min-height: 8mm; margin-bottom: 4mm; }
-  .sig-hand-space { min-height: 28mm; border-bottom: 1px solid #000; margin: 6mm 0 2mm 0; }
+  .sig-hand-space { min-height: 16mm; border-bottom: 1px solid #000; margin: 4mm 0 2mm 0; }
   .sig-hand-name { font-size: 9.5pt; font-weight: bold; margin-top: 1mm; }
   .sig-hand-date { font-size: 8.5pt; color: #555; margin-top: 1mm; font-style: italic; }
    .ctr-foot { margin-top: 8mm; text-align: center; font-size: 9pt; color: #555; border-top: 1px solid #ccc; padding-top: 2mm; }
@@ -185,14 +191,6 @@
   <p>{{ Le_La }} stagiaire exercera, sous l'autorité et le contrôle de ses Tuteurs (Maîtres de stage), des tâches
      entrant dans le cadre strict du programme défini par la société.</p>
 
-   <div class="page-break"></div>
-   <table class="ctr-header">
-      <tr>
-         <td class="ctr-addr" style="width:55%;">08 BP 81101 AGOENYIVE,<br>LOGOPE<br>Tél. : +228 70 45 34 81 / 91 50 21 49</td>
-         <td class="ctr-meta" style="width:45%;">N° CFE : 6254PM2015/2015<br>N° RCCM : TG-LOM 2015 B 975<br>NIF N° 1000430317</td>
-      </tr>
-   </table>
-
   <h3 class="art">Article 5 : Indemnités de stage</h3>
   {%- if doc.contract_type == "Stage Académique" -%}
   <p>Dans le cadre de ce stage académique, aucune indemnité n'est due {{ au_a_la }} stagiaire.</p>
@@ -232,10 +230,10 @@
 
   {# ────────────────────────────────────────────────────────────── #}
    <div class="page-break"></div>
-   <table class="ctr-header">
+   <table class="ctr-cont-header">
       <tr>
-         <td class="ctr-addr" style="width:55%;">08 BP 81101 AGOENYIVE,<br>LOGOPE<br>Tél. : +228 70 45 34 81 / 91 50 21 49</td>
-         <td class="ctr-meta" style="width:45%;">N° CFE : 6254PM2015/2015<br>N° RCCM : TG-LOM 2015 B 975<br>NIF N° 1000430317</td>
+         <td style="text-align:left;">KYA-Energy Group · 08 BP 81101 AGOENYIVE, Logopé · Lomé-Togo</td>
+         <td style="text-align:right;">NIF N° 1000430317 · CONTRAT DE STAGE (RH-ENG-07-V01)</td>
       </tr>
    </table>
   <div class="ctr-part-title">Deuxième Partie : Engagement de Confidentialité</div>
@@ -296,10 +294,10 @@
 
   {# ────────────────────────────────────────────────────────────── #}
    <div class="page-break"></div>
-   <table class="ctr-header">
+   <table class="ctr-cont-header">
       <tr>
-         <td class="ctr-addr" style="width:55%;">08 BP 81101 AGOENYIVE,<br>LOGOPE<br>Tél. : +228 70 45 34 81 / 91 50 21 49</td>
-         <td class="ctr-meta" style="width:45%;">N° CFE : 6254PM2015/2015<br>N° RCCM : TG-LOM 2015 B 975<br>NIF N° 1000430317</td>
+         <td style="text-align:left;">KYA-Energy Group · 08 BP 81101 AGOENYIVE, Logopé · Lomé-Togo</td>
+         <td style="text-align:right;">NIF N° 1000430317 · CONTRAT DE STAGE (RH-ENG-07-V01)</td>
       </tr>
    </table>
   <div class="ctr-part-title">Troisième Partie : Cession d'Images</div>
@@ -340,10 +338,10 @@
 
   {# ────────────────────────────────────────────────────────────── #}
    <div class="page-break"></div>
-   <table class="ctr-header">
+   <table class="ctr-cont-header">
       <tr>
-         <td class="ctr-addr" style="width:55%;">08 BP 81101 AGOENYIVE,<br>LOGOPE<br>Tél. : +228 70 45 34 81 / 91 50 21 49</td>
-         <td class="ctr-meta" style="width:45%;">N° CFE : 6254PM2015/2015<br>N° RCCM : TG-LOM 2015 B 975<br>NIF N° 1000430317</td>
+         <td style="text-align:left;">KYA-Energy Group · 08 BP 81101 AGOENYIVE, Logopé · Lomé-Togo</td>
+         <td style="text-align:right;">NIF N° 1000430317 · CONTRAT DE STAGE (RH-ENG-07-V01)</td>
       </tr>
    </table>
   <div class="ctr-part-title">Quatrième Partie : Dispositions Finales Communes</div>

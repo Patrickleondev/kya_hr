@@ -43,6 +43,9 @@ table.kya-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .kya-summary-card { border: 1px solid #e5e7eb; border-radius: 6px; padding: 14px; background: #fafbfc; }
 .kya-summary-card h4 { margin: 0 0 8px; font-size: 13px; color: #344054; text-transform: uppercase; letter-spacing: .03em; }
 .kya-summary-card .v { font-size: 18px; font-weight: 800; color: #0f3d68; }
+.kya-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px; }
+.kya-chart-card { margin-top: 0; }
+@media (max-width: 860px) { .kya-charts { grid-template-columns: 1fr; } }
 @media (max-width: 860px) {
   .kya-letterhead-top { grid-template-columns: 80px 1fr; }
   .kya-doc-meta { grid-column: 1 / -1; text-align: left; }
@@ -103,6 +106,111 @@ table.kya-table { width: 100%; border-collapse: collapse; font-size: 13px; }
       <div class="label">Effectif actif</div>
       <div class="value">{{ stats.effectif_actif }}</div>
     </div>
+  </div>
+
+  {# ── 5.1 Bandeau multi-modules : tout ce qui attend, partout ── #}
+  <div class="kya-section">
+    <h3>Synthèse des validations en attente — tous modules ({{ modules_total }})</h3>
+    <div class="kya-summary-grid" style="grid-template-columns:repeat(4,1fr);">
+      {% for label, n in modules.items() %}
+      <div class="kya-summary-card" style="text-align:center; {% if n > 0 %}border-left:4px solid #f59e0b;{% endif %}">
+        <h4>{{ label }}</h4>
+        <div class="v" style="font-size:26px; {% if n > 0 %}color:#b54708;{% else %}color:#98a2b3;{% endif %}">{{ n }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {# ── Graphes (Chart.js) : présence, workflows, caisse ── #}
+  <div class="kya-charts">
+    <div class="kya-section kya-chart-card">
+      <h3>Présence par département</h3>
+      <div style="padding:14px;"><canvas id="chartPresence" height="160"></canvas></div>
+    </div>
+    <div class="kya-section kya-chart-card">
+      <h3>Workflows par statut</h3>
+      <div style="padding:14px;"><canvas id="chartWorkflows" height="160"></canvas></div>
+    </div>
+  </div>
+  <div class="kya-section">
+    <h3>Évolution de la caisse (6 derniers mois)</h3>
+    <div style="padding:14px;"><canvas id="chartCaisse" height="90"></canvas></div>
+  </div>
+
+  {# ── 5.1 Synthèse par ÉQUIPE (se peuple en prod) ── #}
+  {% if equipes %}
+  <div class="kya-section">
+    <h3>Synthèse par équipe — présences du jour</h3>
+    <div class="kya-table-wrap">
+      <table class="kya-table">
+        <thead>
+          <tr>
+            <th>Équipe</th>
+            <th>Département</th>
+            <th>Chef d'équipe</th>
+            <th class="num">Effectif</th>
+            <th class="num">Présents</th>
+            <th class="num">Retards</th>
+            <th class="num">Absents</th>
+            <th class="num">Taux</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in equipes %}
+          {% set taux = ((e.presents or 0) * 100 // (e.effectif or 1)) %}
+          <tr>
+            <td><a href="/app/equipe-kya/{{ e.equipe }}"><b>{{ e.nom or e.equipe }}</b></a></td>
+            <td>{{ e.departement or "—" }}</td>
+            <td>{{ e.chef or "—" }}</td>
+            <td class="num">{{ e.effectif or 0 }}</td>
+            <td class="num">{{ e.presents or 0 }}</td>
+            <td class="num">{% if (e.retards or 0) > 0 %}<span class="kya-badge wait">{{ e.retards }}</span>{% else %}0{% endif %}</td>
+            <td class="num">{% if (e.absents or 0) > 0 %}<span class="kya-badge err">{{ e.absents }}</span>{% else %}0{% endif %}</td>
+            <td class="num"><span class="kya-badge {% if taux >= 80 %}ok{% elif taux >= 50 %}wait{% else %}err{% endif %}">{{ taux }}%</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  {# ── 5.1 Synthèse par département : toutes les équipes en un écran ── #}
+  <div class="kya-section">
+    <h3>Synthèse par département — présences du jour</h3>
+    {% if departements %}
+    <div class="kya-table-wrap">
+      <table class="kya-table">
+        <thead>
+          <tr>
+            <th>Département / Équipe</th>
+            <th class="num">Effectif</th>
+            <th class="num">Présents</th>
+            <th class="num">Retards</th>
+            <th class="num">Congés</th>
+            <th class="num">Absents</th>
+            <th class="num">Taux présence</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in departements %}
+          {% set taux = ((d.presents or 0) * 100 // (d.effectif or 1)) %}
+          <tr>
+            <td><b>{{ d.dept }}</b></td>
+            <td class="num">{{ d.effectif or 0 }}</td>
+            <td class="num">{{ d.presents or 0 }}</td>
+            <td class="num">{% if (d.retards or 0) > 0 %}<span class="kya-badge wait">{{ d.retards }}</span>{% else %}0{% endif %}</td>
+            <td class="num">{{ d.conges or 0 }}</td>
+            <td class="num">{% if (d.absents or 0) > 0 %}<span class="kya-badge err">{{ d.absents }}</span>{% else %}0{% endif %}</td>
+            <td class="num"><span class="kya-badge {% if taux >= 80 %}ok{% elif taux >= 50 %}wait{% else %}err{% endif %}">{{ taux }}%</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="kya-help">Aucun département avec effectif actif.</div>
+    {% endif %}
   </div>
 
   {% if demandes_dg %}
@@ -232,4 +340,50 @@ table.kya-table { width: 100%; border-collapse: collapse; font-size: 13px; }
   </div>
 
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+  var presence = {{ presence_chart_json | safe }};
+  var wf = {{ wf_chart_json | safe }};
+  var caisse = {{ caisse_chart_json | safe }};
+
+  function fmt(n){ return new Intl.NumberFormat('fr-FR').format(n); }
+
+  if (window.Chart && document.getElementById('chartPresence')) {
+    new Chart(document.getElementById('chartPresence'), {
+      type: 'bar',
+      data: { labels: presence.labels, datasets: [
+        { label: 'Présents', data: presence.presents, backgroundColor: '#12b76a' },
+        { label: 'Congés',   data: presence.conges,   backgroundColor: '#f59e0b' },
+        { label: 'Absents',  data: presence.absents,  backgroundColor: '#f04438' },
+      ]},
+      options: { responsive: true, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
+                 plugins: { legend: { position: 'bottom' } } }
+    });
+  }
+
+  if (window.Chart && document.getElementById('chartWorkflows')) {
+    new Chart(document.getElementById('chartWorkflows'), {
+      type: 'doughnut',
+      data: { labels: Object.keys(wf), datasets: [{ data: Object.values(wf),
+        backgroundColor: ['#f59e0b', '#12b76a', '#f04438', '#98a2b3'] }] },
+      options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    });
+  }
+
+  if (window.Chart && document.getElementById('chartCaisse')) {
+    new Chart(document.getElementById('chartCaisse'), {
+      type: 'line',
+      data: { labels: caisse.labels, datasets: [
+        { label: 'Entrées (XOF)', data: caisse.entrees, borderColor: '#0054a6', backgroundColor: 'rgba(0,84,166,.08)', fill: true, tension: .3 },
+        { label: 'Sorties (XOF)', data: caisse.sorties, borderColor: '#f04438', backgroundColor: 'rgba(240,68,56,.06)', fill: true, tension: .3 },
+      ]},
+      options: { responsive: true, plugins: { legend: { position: 'bottom' },
+        tooltip: { callbacks: { label: function(c){ return c.dataset.label + ': ' + fmt(c.parsed.y) + ' XOF'; } } } },
+        scales: { y: { beginAtZero: true, ticks: { callback: function(v){ return fmt(v); } } } } }
+    });
+  }
+})();
+</script>
 {% endblock %}

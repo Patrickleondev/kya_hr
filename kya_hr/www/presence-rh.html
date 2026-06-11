@@ -1,0 +1,136 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Présences du jour — RH{% endblock %}
+
+{% block page_content %}
+<style>
+.kya-pres-page { max-width: 1080px; margin: 18px auto 32px; padding: 0 16px; font-family: Arial, sans-serif; color: #18212f; }
+.kya-letterhead { border: 1px solid #d9dee7; border-radius: 6px; overflow: hidden; background: #fff; }
+.kya-title-band { background: #0f3d68; color: #fff; padding: 16px 22px; display: flex; justify-content: space-between; gap: 16px; align-items: center; flex-wrap: wrap; }
+.kya-title-band h2 { margin: 0; font-size: 20px; }
+.kya-title-band span { font-size: 13px; opacity: .92; }
+.kya-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 18px 0; }
+.kya-kpi { border: 1px solid #d9dee7; border-radius: 6px; background: #fff; padding: 12px 14px; text-align: center; }
+.kya-kpi .label { color: #667085; font-size: 11px; text-transform: uppercase; }
+.kya-kpi .value { font-size: 24px; font-weight: 800; margin-top: 4px; }
+.kya-kpi.p .value { color: #027a48; } .kya-kpi.r .value { color: #b54708; }
+.kya-kpi.a .value { color: #b42318; } .kya-kpi.n .value { color: #98a2b3; }
+.kya-section { margin-top: 8px; border: 1px solid #d9dee7; border-radius: 6px; background: #fff; overflow: hidden; }
+.kya-table-wrap { overflow-x: auto; }
+table.kya-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.kya-table th, .kya-table td { padding: 10px 12px; border-bottom: 1px solid #edf0f5; text-align: left; vertical-align: middle; }
+.kya-table th { background: #fafbfc; color: #344054; font-weight: 700; position: sticky; top: 0; }
+.kya-badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #eef2f7; color: #667085; }
+.kya-badge.p { background: #d1fadf; color: #027a48; } .kya-badge.r { background: #fef0c7; color: #b54708; }
+.kya-badge.a { background: #fee4e2; color: #b42318; }
+.kya-acts { display: flex; gap: 6px; }
+.kya-pbtn { border: 1px solid #d8dee8; background: #fff; border-radius: 6px; padding: 6px 12px; font-weight: 700; font-size: 12px; cursor: pointer; transition: all .12s; }
+.kya-pbtn:hover { filter: brightness(.96); }
+.kya-pbtn.p { color: #027a48; border-color: #a6f4c5; } .kya-pbtn.p.on { background: #027a48; color: #fff; }
+.kya-pbtn.r { color: #b54708; border-color: #fec84b; } .kya-pbtn.r.on { background: #b54708; color: #fff; }
+.kya-pbtn.a { color: #b42318; border-color: #fda29b; } .kya-pbtn.a.on { background: #b42318; color: #fff; }
+.kya-pbtn:disabled { opacity: .5; cursor: wait; }
+.kya-team-row td { background: #f2f6fb; font-weight: 700; color: #0f3d68; }
+@media (max-width: 760px) { .kya-grid { grid-template-columns: 1fr 1fr; } .kya-title-band { display:block; } }
+@media print { .kya-acts, .navbar, header, .web-footer { display: none !important; } }
+</style>
+
+<div class="kya-pres-page">
+  <div class="kya-letterhead">
+    <div class="kya-title-band">
+      <div><h2>Présences du jour</h2><span>{{ att_date_label }} — marquage RH (remplace le cahier papier)</span></div>
+      <button class="kya-pbtn" onclick="window.print()">Imprimer la feuille</button>
+    </div>
+  </div>
+
+  <div class="kya-grid">
+    <div class="kya-kpi"><div class="label">Effectif</div><div class="value">{{ stats.total }}</div></div>
+    <div class="kya-kpi p"><div class="label">Présents</div><div class="value" id="k-pres">{{ stats.presents }}</div></div>
+    <div class="kya-kpi r"><div class="label">Retards</div><div class="value" id="k-ret">{{ stats.retards }}</div></div>
+    <div class="kya-kpi a"><div class="label">Absents</div><div class="value" id="k-abs">{{ stats.absents }}</div></div>
+    <div class="kya-kpi n"><div class="label">Non marqués</div><div class="value" id="k-non">{{ stats.non_marques }}</div></div>
+  </div>
+
+  <div class="kya-section">
+    <div class="kya-table-wrap">
+      <table class="kya-table">
+        <thead>
+          <tr><th>Employé</th><th>Équipe</th><th>Département</th><th>Statut</th><th>Marquer</th></tr>
+        </thead>
+        <tbody>
+          {% set ns = namespace(team='__init__') %}
+          {% for e in employes %}
+          {% if e.equipe != ns.team %}
+            {% set ns.team = e.equipe %}
+            <tr class="kya-team-row"><td colspan="5">{{ e.equipe or "Sans équipe" }}</td></tr>
+          {% endif %}
+          <tr data-emp="{{ e.name }}">
+            <td><b>{{ e.employee_name }}</b></td>
+            <td>{{ e.equipe or "—" }}</td>
+            <td>{{ e.departement or "—" }}</td>
+            <td class="cell-status">
+              {% if e.etat == "Présent" %}<span class="kya-badge p">Présent</span>
+              {% elif e.etat == "Retard" %}<span class="kya-badge r">Retard</span>
+              {% elif e.etat == "Absent" %}<span class="kya-badge a">Absent</span>
+              {% else %}<span class="kya-badge">—</span>{% endif %}
+            </td>
+            <td>
+              <div class="kya-acts">
+                <button class="kya-pbtn p {% if e.etat=='Présent' %}on{% endif %}" data-s="Present">Présent</button>
+                <button class="kya-pbtn r {% if e.etat=='Retard' %}on{% endif %}" data-s="Retard">Retard</button>
+                <button class="kya-pbtn a {% if e.etat=='Absent' %}on{% endif %}" data-s="Absent">Absent</button>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <p style="color:#667085;font-size:12px;margin-top:10px;">Le marquage est tracé (qui, quand). Présent/Retard = présence ; Retard signale une arrivée tardive.</p>
+</div>
+
+<script>
+(function() {
+  const DATE = "{{ att_date }}";
+  function recount() {
+    let p=0,r=0,a=0,n=0;
+    document.querySelectorAll('tr[data-emp] .cell-status .kya-badge').forEach(function(b){
+      const t=b.textContent.trim();
+      if(t==='Présent')p++; else if(t==='Retard')r++; else if(t==='Absent')a++; else n++;
+    });
+    document.getElementById('k-pres').textContent=p;
+    document.getElementById('k-ret').textContent=r;
+    document.getElementById('k-abs').textContent=a;
+    document.getElementById('k-non').textContent=n;
+  }
+  document.querySelectorAll('tr[data-emp] .kya-pbtn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      const row = btn.closest('tr[data-emp]');
+      const emp = row.getAttribute('data-emp');
+      const status = btn.getAttribute('data-s');
+      const group = row.querySelectorAll('.kya-pbtn');
+      group.forEach(function(b){ b.disabled = true; });
+      frappe.call({
+        method: 'kya_hr.api.attendance.mark_status',
+        args: { employee: emp, status: status, date: DATE },
+        callback: function(res) {
+          group.forEach(function(b){ b.disabled = false; b.classList.remove('on'); });
+          btn.classList.add('on');
+          const cls = status==='Present'?'p':(status==='Retard'?'r':'a');
+          const lbl = status==='Present'?'Présent':status;
+          row.querySelector('.cell-status').innerHTML =
+            '<span class="kya-badge '+cls+'">'+lbl+'</span>';
+          recount();
+          frappe.show_alert({message: row.querySelector('b').textContent+' : '+lbl, indicator:'green'}, 3);
+        },
+        error: function() {
+          group.forEach(function(b){ b.disabled = false; });
+          frappe.show_alert({message:'Erreur — droit RH requis pour marquer', indicator:'red'}, 5);
+        }
+      });
+    });
+  });
+})();
+</script>
+{% endblock %}

@@ -79,6 +79,11 @@ website_redirects = [
     {"source": r"/desk/people/(.*)", "target": "/app/hr", "redirect_http_status": 301, "match_with_query_string": False},
 ]
 
+# Auto-lien Employee <-> User a chaque connexion (self-healing du user_id).
+# Evite que la RH doive saisir manuellement le 'ID Utilisateur' sur chaque
+# fiche Employee. Voir kya_hr.link_employees_users.on_session_creation.
+on_session_creation = "kya_hr.link_employees_users.on_session_creation"
+
 # Grille indiciaire : calcul automatique de la valeur indiciaire (Employee)
 doc_events = {
     "Employee": {
@@ -86,10 +91,12 @@ doc_events = {
         "after_insert": [
             "kya_hr.dashboard_realtime.notify_dashboard_change",
             "kya_hr.role_sync.sync_employee_role",
+            "kya_hr.equipe_member_sync.sync_on_employee_change",
         ],
         "on_update": [
             "kya_hr.dashboard_realtime.notify_dashboard_change",
             "kya_hr.role_sync.sync_employee_role",
+            "kya_hr.equipe_member_sync.sync_on_employee_change",
         ],
     },
     "Attendance": {
@@ -169,13 +176,30 @@ doc_events = {
             "kya_hr.dashboard_realtime.notify_dashboard_change",
         ],
     },
+    # PV Entree / Retour / Inventaire : DocTypes `custom:1` -> Frappe ne charge
+    # PAS leur classe controller. On recâble validate + cycle de vie stock via
+    # doc_events, sinon le Material Receipt / Stock Reconciliation n'est jamais
+    # créé (réception et inventaire n'impactaient pas le stock réel).
     "PV Entree Materiel": {
+        "validate": "kya_hr.kya_hr.doctype.pv_entree_materiel.pv_entree_materiel.validate",
         "after_insert": "kya_hr.email_notifications.send_submission_recap",
         "on_update": "kya_hr.email_notifications.send_workflow_update",
+        "on_update_after_submit": "kya_hr.kya_hr.doctype.pv_entree_materiel.pv_entree_materiel.on_update_after_submit",
+        "on_cancel": "kya_hr.kya_hr.doctype.pv_entree_materiel.pv_entree_materiel.on_cancel",
     },
     "Retour Materiel KYA": {
+        "validate": "kya_hr.kya_hr.doctype.retour_materiel_kya.retour_materiel_kya.validate",
         "after_insert": "kya_hr.email_notifications.send_submission_recap",
         "on_update": "kya_hr.email_notifications.send_workflow_update",
+        "on_update_after_submit": "kya_hr.kya_hr.doctype.retour_materiel_kya.retour_materiel_kya.on_update_after_submit",
+        "on_cancel": "kya_hr.kya_hr.doctype.retour_materiel_kya.retour_materiel_kya.on_cancel",
+    },
+    "Inventaire KYA": {
+        "validate": "kya_hr.kya_hr.doctype.inventaire_kya.inventaire_kya.validate",
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_update": "kya_hr.email_notifications.send_workflow_update",
+        "on_update_after_submit": "kya_hr.kya_hr.doctype.inventaire_kya.inventaire_kya.on_update_after_submit",
+        "on_cancel": "kya_hr.kya_hr.doctype.inventaire_kya.inventaire_kya.on_cancel",
     },
     "Bilan Fin de Stage": {
         "after_insert": "kya_hr.email_notifications.send_submission_recap",

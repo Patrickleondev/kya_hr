@@ -76,6 +76,42 @@ class PVSortieMateriel(Document):
     # ------------------------------------------------------------------
     # ERPNext Stock integration — Material Issue
     # ------------------------------------------------------------------
+    def _check_stock_availability(self, rows):
+        """Bloque la sortie si la quantite demandee depasse le stock disponible.
+
+        Verifie pour chaque ligne (item_code, warehouse) que la qty
+        reellement sortie (ou demandee a defaut) est <= au actual_qty du Bin.
+        Throw une erreur listant TOUTES les anomalies a la fois (pas une
+        par une) pour aider l'utilisateur a corriger en un seul passage.
+        """
+        anomalies = []
+        for it in rows:
+            qty = it.qte_reellement_sortie or it.qte_demandee or 0
+            if qty <= 0:
+                continue
+            available = frappe.db.get_value(
+                "Bin",
+                {"item_code": it.item_code, "warehouse": it.warehouse},
+                "actual_qty",
+            ) or 0
+            if qty > available:
+                anomalies.append(
+                    _("{0} dans {1} : demande {2}, disponible {3}").format(
+                        it.designation or it.item_code,
+                        it.warehouse, qty, available,
+                    )
+                )
+
+        if anomalies:
+            frappe.throw(
+                _("Sortie impossible — stock insuffisant pour {0} article(s) :<br><br>{1}<br><br>"
+                  "Corrigez les quantites ou l'entrepot source, ou faites un PV de Reception au prealable.").format(
+                    len(anomalies),
+                    "<br>".join(f"&bull; {a}" for a in anomalies),
+                ),
+                title=_("Stock insuffisant"),
+            )
+
     def _create_stock_entry(self):
         """
         Create a Stock Entry (Material Issue) that decrements stock for all items
@@ -86,6 +122,9 @@ class PVSortieMateriel(Document):
         if not rows:
             # No ERPNext-linked articles → nothing to decrement, pure paper PV
             return
+
+        # Bloque l'approbation si stock insuffisant - throw avant le submit
+        self._check_stock_availability(rows)
 
         default_wh = frappe.db.get_single_value("Stock Settings", "default_warehouse") or None
         company = self.get("company") or frappe.defaults.get_user_default("Company") \

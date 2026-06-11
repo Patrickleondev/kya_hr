@@ -115,6 +115,32 @@ class InventaireKYA(Document):
             )
 
 
+# ───────────────────────────────────────────────────────────────────────────
+# Entrypoints doc_events (cf. hooks.py)
+# ───────────────────────────────────────────────────────────────────────────
+# `custom: 1` -> la classe ci-dessus n'est pas chargée comme controller. Sans
+# ces entrypoints, l'inventaire ne générait jamais la Stock Reconciliation
+# (les écarts comptés n'étaient pas répercutés sur le stock réel).
+# _bind() re-caste le Document de base vers la classe pour réutiliser son code.
+
+def _bind(doc):
+    if doc.__class__ is not InventaireKYA:
+        doc.__class__ = InventaireKYA
+    return doc
+
+
+def validate(doc, method=None):
+    _bind(doc).validate()
+
+
+def on_update_after_submit(doc, method=None):
+    _bind(doc).on_update_after_submit()
+
+
+def on_cancel(doc, method=None):
+    _bind(doc).on_cancel()
+
+
 # ----------------------------------------------------------------------
 # Whitelisted — loader utilisé par le bouton "Charger Articles"
 # ----------------------------------------------------------------------

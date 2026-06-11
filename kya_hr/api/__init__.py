@@ -535,6 +535,7 @@ def get_department_attendance_stats(from_date=None, to_date=None):
         JOIN `tabEmployee` e ON e.name = a.employee
         WHERE a.attendance_date BETWEEN %(from_date)s AND %(to_date)s
           AND a.docstatus = 1
+          AND e.status = 'Active'
           AND e.department IS NOT NULL
         GROUP BY e.department, a.status
         ORDER BY e.department
@@ -1107,7 +1108,7 @@ def get_dashboard_stagiaires(annee=None):
         )
         stats["stagiaires_actifs"] = len(stagiaires)
         stats["stagiaires_total"] = frappe.db.count(
-            "Employee", {"employment_type": "Stage"}
+            "Employee", {"employment_type": "Stage", "status": "Active"}
         )
     except Exception:
         pass
@@ -1229,7 +1230,7 @@ def get_dashboard_employes(annee=None):
         )[0][0]
         stats["employes_total"] = frappe.db.sql(
             "SELECT COUNT(*) FROM `tabEmployee` "
-            "WHERE (employment_type IS NULL OR employment_type != 'Stage')"
+            "WHERE status='Active' AND (employment_type IS NULL OR employment_type != 'Stage')"
         )[0][0]
     except Exception:
         pass
