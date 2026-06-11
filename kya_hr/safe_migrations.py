@@ -36,6 +36,7 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.ensure_webform_perms.execute", "Ensure DocPerm Employee+Stagiaire sur DocTypes des Web Forms KYA"),
     ("kya_hr.ensure_webform_print_formats.execute", "Associe chaque Web Form a son Print Format officiel (impression complete avec lignes de table)"),
     ("kya_hr.fix_phantom_workflow_roles.execute", "Remap rôles fantômes des transitions (Responsable Comptable -> Comptable)"),
+    ("kya_hr.ensure_workflow_states.execute", "Cree tout Workflow State manquant (fix 'État introuvable' : En attente Validation DFC, En attente Maitre de Stage...)"),
     ("kya_hr.ensure_workflow_perms.execute", "Ensure perms approbateurs workflow (write sans if_owner: Chef/Audit/DG/RH...)"),
     ("kya_hr.force_resync_webform_fields.execute", "Force resync web form fields (Frappe v16 bug workaround)"),
     ("kya_hr.notification_fixes.execute", "Notification fixes"),
