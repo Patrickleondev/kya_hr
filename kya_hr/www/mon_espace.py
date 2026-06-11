@@ -47,13 +47,24 @@ def get_context(context):
     rh_roles = {"HR Manager", "HR User", "Responsable RH", "System Manager"}
     context.show_rh = bool(rh_roles.intersection(set(roles)))
 
-    stock_roles = {"Stock Manager", "Stock User", "Chargé des Stocks", "System Manager"}
+    stock_roles = {"Stock Manager", "Stock User", "Chargé des Stocks",
+                   "Responsable Stock", "Magasinier", "System Manager"}
     context.show_stock = bool(stock_roles.intersection(set(roles)))
 
     achat_roles = {"Purchase Manager", "Purchase User", "Responsable Achats", "DAAF", "System Manager"}
     context.show_achats = bool(achat_roles.intersection(set(roles)))
 
-    direction_roles = {"Directeur Général", "DAAF", "System Manager"}
+    # Comptabilité : comptable, caissier, DFC, DAAF...
+    compta_roles = {"Comptable", "Caissier", "DFC", "DAAF",
+                    "Accounts Manager", "Accounts User", "System Manager"}
+    context.show_compta = bool(compta_roles.intersection(set(roles)))
+
+    # Logistique / flotte
+    logistique_roles = {"Gestionnaire de Flotte", "DST - Responsable Logistique",
+                        "Responsable Logistique", "Chef Service", "System Manager"}
+    context.show_logistique = bool(logistique_roles.intersection(set(roles)))
+
+    direction_roles = {"Directeur Général", "DG", "DGA", "DAAF", "System Manager"}
     context.show_direction = bool(direction_roles.intersection(set(roles)))
 
     # is_stagiaire = vrai si Employee.employment_type=Stage OU role Stagiaire.
