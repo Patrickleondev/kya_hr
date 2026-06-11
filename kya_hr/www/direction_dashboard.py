@@ -177,6 +177,61 @@ def get_context(context):
     }
     modules_total = sum(modules.values())
 
+    # ── Graphes Chart.js (toutes données réelles) ──
+    import json as _json
+
+    # 1. Présence par département (barres empilées)
+    presence_chart = {
+        "labels": [d.get("dept") or "—" for d in departements],
+        "presents": [int(d.get("presents") or 0) for d in departements],
+        "absents": [int(d.get("absents") or 0) for d in departements],
+        "conges": [int(d.get("conges") or 0) for d in departements],
+    }
+
+    # 2. Workflows par statut (camembert) : agrège les états sur les doctypes clés
+    wf_doctypes = ["Demande Achat KYA", "Permission Sortie Employe",
+                   "Permission Sortie Stagiaire", "Planning Conge",
+                   "PV Sortie Materiel", "PV Entree Materiel", "Inventaire KYA",
+                   "Brouillard Caisse", "Leave Application", "KYA Contrat"]
+    wf_counts = {"En attente": 0, "Approuvé": 0, "Rejeté": 0, "Brouillon": 0}
+    for dt in wf_doctypes:
+        if not frappe.db.exists("DocType", dt):
+            continue
+        try:
+            rows = frappe.db.sql(
+                f"SELECT workflow_state, COUNT(*) n FROM `tab{dt}` GROUP BY workflow_state",
+                as_dict=True)
+            for r in rows:
+                st = (r.workflow_state or "").lower()
+                if "attente" in st:
+                    wf_counts["En attente"] += r.n
+                elif "approuv" in st or "valid" in st or "archiv" in st:
+                    wf_counts["Approuvé"] += r.n
+                elif "rejet" in st or "annul" in st:
+                    wf_counts["Rejeté"] += r.n
+                else:
+                    wf_counts["Brouillon"] += r.n
+        except Exception:
+            pass
+
+    # 3. Évolution caisse 6 derniers mois (entrées vs sorties) — réel
+    caisse_chart = {"labels": [], "entrees": [], "sorties": []}
+    try:
+        rows = frappe.db.sql(
+            """
+            SELECT CONCAT(YEAR(date_brouillard), '-', LPAD(MONTH(date_brouillard), 2, '0')) AS mois,
+                   SUM(total_entrees) AS ent, SUM(total_sorties) AS sor
+            FROM `tabBrouillard Caisse`
+            WHERE date_brouillard >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+            GROUP BY mois ORDER BY mois
+            """, as_dict=True)
+        for r in rows:
+            caisse_chart["labels"].append(r.mois or "")
+            caisse_chart["entrees"].append(float(r.ent or 0))
+            caisse_chart["sorties"].append(float(r.sor or 0))
+    except Exception:
+        pass
+
     context.stats = stats
     context.demandes_dg = demandes_dg
     context.brouillards = brouillards
@@ -185,4 +240,7 @@ def get_context(context):
     context.equipes = equipes
     context.modules = modules
     context.modules_total = modules_total
+    context.presence_chart_json = _json.dumps(presence_chart)
+    context.wf_chart_json = _json.dumps(wf_counts)
+    context.caisse_chart_json = _json.dumps(caisse_chart)
     context.no_breadcrumbs = True

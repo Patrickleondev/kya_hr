@@ -43,6 +43,9 @@ table.kya-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .kya-summary-card { border: 1px solid #e5e7eb; border-radius: 6px; padding: 14px; background: #fafbfc; }
 .kya-summary-card h4 { margin: 0 0 8px; font-size: 13px; color: #344054; text-transform: uppercase; letter-spacing: .03em; }
 .kya-summary-card .v { font-size: 18px; font-weight: 800; color: #0f3d68; }
+.kya-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px; }
+.kya-chart-card { margin-top: 0; }
+@media (max-width: 860px) { .kya-charts { grid-template-columns: 1fr; } }
 @media (max-width: 860px) {
   .kya-letterhead-top { grid-template-columns: 80px 1fr; }
   .kya-doc-meta { grid-column: 1 / -1; text-align: left; }
@@ -116,6 +119,22 @@ table.kya-table { width: 100%; border-collapse: collapse; font-size: 13px; }
       </div>
       {% endfor %}
     </div>
+  </div>
+
+  {# ── Graphes (Chart.js) : présence, workflows, caisse ── #}
+  <div class="kya-charts">
+    <div class="kya-section kya-chart-card">
+      <h3>Présence par département</h3>
+      <div style="padding:14px;"><canvas id="chartPresence" height="160"></canvas></div>
+    </div>
+    <div class="kya-section kya-chart-card">
+      <h3>Workflows par statut</h3>
+      <div style="padding:14px;"><canvas id="chartWorkflows" height="160"></canvas></div>
+    </div>
+  </div>
+  <div class="kya-section">
+    <h3>Évolution de la caisse (6 derniers mois)</h3>
+    <div style="padding:14px;"><canvas id="chartCaisse" height="90"></canvas></div>
   </div>
 
   {# ── 5.1 Synthèse par ÉQUIPE (se peuple en prod) ── #}
@@ -321,4 +340,50 @@ table.kya-table { width: 100%; border-collapse: collapse; font-size: 13px; }
   </div>
 
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+  var presence = {{ presence_chart_json | safe }};
+  var wf = {{ wf_chart_json | safe }};
+  var caisse = {{ caisse_chart_json | safe }};
+
+  function fmt(n){ return new Intl.NumberFormat('fr-FR').format(n); }
+
+  if (window.Chart && document.getElementById('chartPresence')) {
+    new Chart(document.getElementById('chartPresence'), {
+      type: 'bar',
+      data: { labels: presence.labels, datasets: [
+        { label: 'Présents', data: presence.presents, backgroundColor: '#12b76a' },
+        { label: 'Congés',   data: presence.conges,   backgroundColor: '#f59e0b' },
+        { label: 'Absents',  data: presence.absents,  backgroundColor: '#f04438' },
+      ]},
+      options: { responsive: true, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
+                 plugins: { legend: { position: 'bottom' } } }
+    });
+  }
+
+  if (window.Chart && document.getElementById('chartWorkflows')) {
+    new Chart(document.getElementById('chartWorkflows'), {
+      type: 'doughnut',
+      data: { labels: Object.keys(wf), datasets: [{ data: Object.values(wf),
+        backgroundColor: ['#f59e0b', '#12b76a', '#f04438', '#98a2b3'] }] },
+      options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    });
+  }
+
+  if (window.Chart && document.getElementById('chartCaisse')) {
+    new Chart(document.getElementById('chartCaisse'), {
+      type: 'line',
+      data: { labels: caisse.labels, datasets: [
+        { label: 'Entrées (XOF)', data: caisse.entrees, borderColor: '#0054a6', backgroundColor: 'rgba(0,84,166,.08)', fill: true, tension: .3 },
+        { label: 'Sorties (XOF)', data: caisse.sorties, borderColor: '#f04438', backgroundColor: 'rgba(240,68,56,.06)', fill: true, tension: .3 },
+      ]},
+      options: { responsive: true, plugins: { legend: { position: 'bottom' },
+        tooltip: { callbacks: { label: function(c){ return c.dataset.label + ': ' + fmt(c.parsed.y) + ' XOF'; } } } },
+        scales: { y: { beginAtZero: true, ticks: { callback: function(v){ return fmt(v); } } } } }
+    });
+  }
+})();
+</script>
 {% endblock %}
