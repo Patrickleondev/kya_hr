@@ -462,6 +462,10 @@ body.kya-inline-mode .frappe-control[data-fieldname^="signature_"] {
   border-bottom: 1px solid var(--kya-border) !important;
 }
 
+/* Grille fluide : on laisse Frappe répartir les colonnes sur 100% de la
+   largeur du formulaire (la somme des `columns` des child doctypes est tenue
+   <= 10 pour éviter tout débordement). Plus de min-width fixe qui forçait le
+   scroll horizontal. */
 .web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row,
 .kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row,
 .web-form-container .frappe-control[data-fieldtype="Table"] .grid-body,
@@ -470,15 +474,16 @@ body.kya-inline-mode .frappe-control[data-fieldname^="signature_"] {
 .kya-form-section .frappe-control[data-fieldtype="Table"] .rows,
 .web-form-container .frappe-control[data-fieldtype="Table"] .grid-row,
 .kya-form-section .frappe-control[data-fieldtype="Table"] .grid-row {
-  min-width: 820px;
+  min-width: 0;
+  width: 100%;
 }
 
 .web-form-container .frappe-control[data-fieldtype="Table"] .grid-heading-row .grid-row,
 .kya-form-section .frappe-control[data-fieldtype="Table"] .grid-heading-row .grid-row,
 .web-form-container .frappe-control[data-fieldtype="Table"] .grid-row .data-row,
 .kya-form-section .frappe-control[data-fieldtype="Table"] .grid-row .data-row {
-  min-width: 820px;
-  width: max-content;
+  min-width: 0;
+  width: 100%;
 }
 
 .web-form-container .frappe-control[data-fieldtype="Table"] input,
@@ -487,7 +492,8 @@ body.kya-inline-mode .frappe-control[data-fieldname^="signature_"] {
 .kya-form-section .frappe-control[data-fieldtype="Table"] select,
 .web-form-container .frappe-control[data-fieldtype="Table"] textarea,
 .kya-form-section .frappe-control[data-fieldtype="Table"] textarea {
-  min-width: 120px;
+  min-width: 0;
+  width: 100%;
   max-width: 100%;
   box-sizing: border-box;
 }

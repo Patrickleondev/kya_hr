@@ -52,7 +52,7 @@
             "fieldname": "observations",
             "label": "Observations",
             "fieldtype": "Data",
-            "in_list_view": 1,
+            "in_list_view": 0,
             "columns": 2,
             "description": "État, écart vs commande, remarques"
         },
