@@ -57,6 +57,7 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.ensure_workspace_roles.execute", "Visibilite workspaces par role (Espace Employes<-Employee, Stagiaires<-Stagiaire, etc.)"),
     ("kya_hr.setup_logistique_access.execute", "Sortie Vehicule visible Direction (DG/DGA) + roles logistiques sur espace Logistique"),
     ("kya_hr.equipe_member_sync.recompute_all", "Recalcule nombre_membres des Equipes KYA (corrige compteurs perimes apres assignation employes)"),
+    ("kya_hr.ensure_chef_capabilities.execute", "Aligne capacites chef (Chef Service=Chef Equipe=Chef d'Equipe : approbation + assignation taches)"),
     ("kya_hr.link_employees_users.link_by_email", "Lie Employees aux Users par email (racine 'Nom du Demandeur vide')"),
     ("kya_hr.ensure_employee_roles.execute", "Ensure Employee/Stagiaire roles on linked Users"),
     ("kya_hr.setup_native_parents.execute", "Cree workspaces parents Frappe HR + Comptabilite (groupent natifs v16)"),
