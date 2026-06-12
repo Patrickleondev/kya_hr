@@ -1750,3 +1750,325 @@
     };
   }
 })();
+
+/* ===================================================================
+   KYA-Energy — Tableaux HYBRIDES (rendu HTML fidèle aux fiches papier)
+   -------------------------------------------------------------------
+   Problème : le grid natif Frappe (DataTable JS) ne s'imprime pas,
+   déborde horizontalement et ne ressemble pas aux fiches officielles
+   ni aux web forms du collègue (vrai <table> HTML).
+
+   Solution HYBRIDE : on GARDE la child table native (source de vérité
+   pour stock / compta / impression serveur) mais on MASQUE son grid et
+   on rend un vrai <table> HTML par-dessus. Chaque cellule écrit
+   directement dans le modèle (grid.df.data === doc[field]), donc au
+   submit les lignes persistent normalement → stock & compta intacts.
+   =================================================================== */
+(function () {
+  "use strict";
+
+  function num(v) {
+    var n = parseFloat(v);
+    return isNaN(n) ? 0 : n;
+  }
+  function fmtMoney(v) {
+    var n = num(v);
+    try {
+      return n.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    } catch (e) {
+      return String(Math.round(n));
+    }
+  }
+  function escapeHtml(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function getRoute() {
+    var route = "";
+    try { route = (window.frappe && frappe.web_form && frappe.web_form.route) || ""; } catch (e) {}
+    if (!route) {
+      var parts = (window.location.pathname || "").split("/").filter(Boolean);
+      route = parts.length ? parts[0] : "";
+    }
+    return route;
+  }
+
+  /* --- Registre des tableaux fidèles aux fiches ------------------- */
+  /* Chaque colonne : fn (fieldname child), label, type (date|text|num),
+     w (largeur fixe) ou grow (prend l'espace restant), ro (lecture seule,
+     ex. colonnes calculées), align. `recompute` met à jour les colonnes
+     calculées + les totaux parents. */
+  var KYA_DOC_TABLES = {
+    "brouillard-caisse": {
+      field: "lignes",
+      title: "MOUVEMENTS DE CAISSE DU JOUR",
+      addLabel: "+ Ajouter une opération",
+      columns: [
+        { fn: "date_ligne",  label: "Date",        type: "date", w: "14%" },
+        { fn: "designation", label: "Désignation", type: "text", grow: true },
+        { fn: "entree",      label: "Entrée (FCFA)", type: "num", w: "16%", align: "right" },
+        { fn: "sortie",      label: "Sortie (FCFA)", type: "num", w: "16%", align: "right" },
+        { fn: "solde",       label: "Solde (FCFA)",  type: "num", w: "17%", align: "right", ro: true }
+      ],
+      recompute: function (data, setParent) {
+        var soldePrec = 0;
+        try { soldePrec = num(frappe.web_form.doc.solde_precedent); } catch (e) {}
+        var te = 0, ts = 0, run = soldePrec;
+        data.forEach(function (row) {
+          var e = num(row.entree), s = num(row.sortie);
+          te += e; ts += s; run += e - s;
+          row.solde = run;
+        });
+        setParent("total_entrees", te);
+        setParent("total_sorties", ts);
+        setParent("solde_final", soldePrec + te - ts);
+      }
+    }
+  };
+
+  /* --- Accès au modèle de la child table native ------------------ */
+  function getGrid(field) {
+    try {
+      var f = frappe.web_form.fields_dict && frappe.web_form.fields_dict[field];
+      return f && f.grid ? f.grid : null;
+    } catch (e) { return null; }
+  }
+  /* IMPORTANT : dans les web forms v16, grid.df.data et doc[field] peuvent
+     être DEUX tableaux différents (le grid initialise df.data = [] quand
+     doc[field] est vide). Le web form sérialise depuis doc[field] au submit.
+     On force donc une RÉFÉRENCE UNIQUE partagée entre les deux, sinon les
+     lignes saisies via notre <table> HTML ne seraient pas enregistrées. */
+  function getData(field) {
+    var g = getGrid(field);
+    var doc = null;
+    try { doc = frappe.web_form && frappe.web_form.doc; } catch (e) {}
+    if (g && g.df) {
+      if (!Array.isArray(g.df.data)) g.df.data = [];
+      if (doc) {
+        if (Array.isArray(doc[field]) && doc[field] !== g.df.data) {
+          // garder le tableau qui a déjà des lignes, sinon aligner sur le grid
+          if (doc[field].length && !g.df.data.length) { g.df.data = doc[field]; }
+          else { doc[field] = g.df.data; }
+        } else if (!Array.isArray(doc[field])) {
+          doc[field] = g.df.data;
+        }
+      }
+      return g.df.data;
+    }
+    if (doc) {
+      if (!Array.isArray(doc[field])) doc[field] = [];
+      return doc[field];
+    }
+    return [];
+  }
+  function setParent(fieldname, value) {
+    try { frappe.web_form.set_value(fieldname, value); } catch (e) {}
+  }
+  /* Marquer le web form comme modifié : sinon, si l'utilisateur ne touche
+     QUE notre tableau HTML (aucun champ natif Frappe), le bouton Soumettre
+     considère le form non modifié et n'enregistre pas. */
+  function markDirty() {
+    try {
+      if (frappe.web_form && typeof frappe.web_form.make_form_dirty === "function") {
+        frappe.web_form.make_form_dirty();
+      } else if (frappe.web_form && frappe.web_form.doc) {
+        frappe.web_form.doc.__unsaved = 1;
+      }
+    } catch (e) {}
+  }
+
+  /* --- Construction du <table> HTML ------------------------------ */
+  function buildTable(schema) {
+    var data = getData(schema.field);
+
+    var thead = "<thead><tr>";
+    schema.columns.forEach(function (c) {
+      var style = c.w ? ' style="width:' + c.w + '"' : "";
+      thead += "<th" + style + ">" + escapeHtml(c.label) + "</th>";
+    });
+    thead += '<th class="kya-dt-actcol"></th></tr></thead>';
+
+    var tbody = '<tbody data-fieldname="' + escapeHtml(schema.field) + '">';
+    if (!data.length) {
+      tbody += '<tr class="kya-dt-empty"><td colspan="' + (schema.columns.length + 1) +
+        '">Aucune ligne — cliquez sur « ' + escapeHtml(schema.addLabel || "+ Ajouter") +
+        ' » pour commencer.</td></tr>';
+    } else {
+      data.forEach(function (row, i) {
+        tbody += renderRow(schema, row, i);
+      });
+    }
+    tbody += "</tbody>";
+
+    return '<table class="kya-doc-table">' + thead + tbody + "</table>";
+  }
+
+  function renderRow(schema, row, i) {
+    var tds = "";
+    schema.columns.forEach(function (c) {
+      var val = row[c.fn];
+      var align = c.align ? ' style="text-align:' + c.align + '"' : "";
+      if (c.ro) {
+        var disp = c.type === "num" ? fmtMoney(val) : escapeHtml(val);
+        tds += '<td class="kya-dt-ro"' + align + ' data-ro="' + c.fn + '" data-r="' + i + '">' + disp + "</td>";
+      } else if (c.type === "date") {
+        tds += "<td" + align + '><input type="date" class="kya-dt-in" data-r="' + i +
+          '" data-c="' + c.fn + '" value="' + escapeHtml(val) + '"></td>';
+      } else if (c.type === "num") {
+        tds += "<td" + align + '><input type="number" step="any" class="kya-dt-in kya-dt-num" data-r="' + i +
+          '" data-c="' + c.fn + '" value="' + (val == null || val === "" ? "" : num(val)) + '"></td>';
+      } else {
+        tds += "<td" + align + '><textarea rows="1" class="kya-dt-in kya-dt-text" data-r="' + i +
+          '" data-c="' + c.fn + '">' + escapeHtml(val) + "</textarea></td>";
+      }
+    });
+    tds += '<td class="kya-dt-actcol"><button type="button" class="kya-dt-del" data-r="' + i +
+      '" title="Supprimer la ligne">&times;</button></td>';
+    return '<tr data-r="' + i + '">' + tds + "</tr>";
+  }
+
+  /* --- Recalcul + mise à jour des cellules calculées ------------- */
+  function recompute(schema, host) {
+    var data = getData(schema.field);
+    if (typeof schema.recompute === "function") {
+      schema.recompute(data, setParent);
+    }
+    // Met à jour les cellules read-only (ex. solde courant) sans re-render
+    if (host) {
+      host.querySelectorAll("[data-ro]").forEach(function (td) {
+        var fn = td.getAttribute("data-ro");
+        var r = parseInt(td.getAttribute("data-r"), 10);
+        var col = null;
+        schema.columns.forEach(function (c) { if (c.fn === fn) col = c; });
+        if (data[r] && col) {
+          td.textContent = col.type === "num" ? fmtMoney(data[r][fn]) : (data[r][fn] || "");
+        }
+      });
+    }
+  }
+
+  /* --- Auto-grandir les textarea (désignation peut dépasser) ----- */
+  function autoGrow(el) {
+    el.style.height = "auto";
+    el.style.height = (el.scrollHeight) + "px";
+  }
+
+  /* --- Rendu complet + câblage ----------------------------------- */
+  function mount(ctrl, schema) {
+    // Masquer le grid natif (mais le garder dans le DOM = source de vérité)
+    var nativeGrid = ctrl.querySelector(".form-grid") || ctrl.querySelector(".grid-body");
+    if (nativeGrid) nativeGrid.style.display = "none";
+    var gridButtons = ctrl.querySelectorAll(".grid-footer, .grid-buttons");
+    gridButtons.forEach(function (b) { b.style.display = "none"; });
+
+    var host = ctrl.querySelector(".kya-doc-table-host");
+    if (!host) {
+      host = document.createElement("div");
+      host.className = "kya-doc-table-host";
+      ctrl.appendChild(host);
+    }
+
+    host.innerHTML =
+      (schema.title ? '<div class="kya-doc-table-title">' + escapeHtml(schema.title) + "</div>" : "") +
+      buildTable(schema) +
+      '<button type="button" class="kya-dt-add">' + escapeHtml(schema.addLabel || "+ Ajouter une ligne") + "</button>";
+
+    // textarea auto-grow initial
+    host.querySelectorAll("textarea.kya-dt-text").forEach(autoGrow);
+    recompute(schema, host);
+
+    if (host._kyaWired) return;
+    host._kyaWired = true;
+
+    // Saisie cellule (sans perdre le focus → pas de re-render complet)
+    host.addEventListener("input", function (e) {
+      var t = e.target;
+      if (!t.classList || !t.classList.contains("kya-dt-in")) return;
+      var r = parseInt(t.getAttribute("data-r"), 10);
+      var c = t.getAttribute("data-c");
+      var data = getData(schema.field);
+      if (!data[r]) return;
+      var col = null;
+      schema.columns.forEach(function (cc) { if (cc.fn === c) col = cc; });
+      data[r][c] = col && col.type === "num" ? num(t.value) : t.value;
+      if (t.classList.contains("kya-dt-text")) autoGrow(t);
+      recompute(schema, host);
+      markDirty();
+    });
+
+    // Boutons + / suppression (changement structurel → re-render)
+    host.addEventListener("click", function (e) {
+      var t = e.target;
+      if (t.classList && t.classList.contains("kya-dt-add")) {
+        e.preventDefault();
+        var g = getGrid(schema.field);
+        if (g && g.add_new_row) { g.add_new_row(); }
+        else { getData(schema.field).push({}); }
+        markDirty();
+        mount(ctrl, schema);
+        // focus 1re cellule de la nouvelle ligne
+        var rows = host.querySelectorAll("tbody tr");
+        var last = rows[rows.length - 1];
+        if (last) { var inp = last.querySelector(".kya-dt-in"); if (inp) inp.focus(); }
+      } else if (t.classList && t.classList.contains("kya-dt-del")) {
+        e.preventDefault();
+        var ri = parseInt(t.getAttribute("data-r"), 10);
+        var g2 = getGrid(schema.field);
+        if (g2 && g2.grid_rows && g2.grid_rows[ri]) { g2.grid_rows[ri].remove(); }
+        else { getData(schema.field).splice(ri, 1); }
+        markDirty();
+        mount(ctrl, schema);
+      }
+    });
+  }
+
+  function ensureMounted() {
+    var route = getRoute();
+    var schema = KYA_DOC_TABLES[route];
+    if (!schema) return false;
+    var ctrl = document.querySelector('.frappe-control[data-fieldname="' + schema.field + '"]');
+    if (!ctrl) return false;
+    // grid natif monté ?
+    var mounted = ctrl.querySelector(".form-grid, .grid-body, table.table");
+    if (!mounted && !(getGrid(schema.field))) return false;
+    // (re)monter si absent ou si le host a été effacé par un re-render Frappe
+    if (!ctrl.querySelector(".kya-doc-table-host") ||
+        !ctrl.querySelector(".kya-doc-table-host .kya-doc-table")) {
+      mount(ctrl, schema);
+    } else {
+      // garder le grid natif masqué si Frappe l'a ré-affiché
+      var ng = ctrl.querySelector(".form-grid");
+      if (ng && ng.style.display !== "none") { ng.style.display = "none"; recompute(schema, ctrl.querySelector(".kya-doc-table-host")); }
+    }
+    return true;
+  }
+
+  function poll() {
+    if (!KYA_DOC_TABLES[getRoute()]) return;
+    var n = 0;
+    var t = setInterval(function () {
+      n++;
+      ensureMounted();
+      if (n >= 60) clearInterval(t); // ~21s
+    }, 350);
+  }
+
+  window.kyaRenderDocTables = function () { ensureMounted(); };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", poll);
+  } else {
+    poll();
+  }
+  document.addEventListener("page-change", function () { setTimeout(poll, 400); });
+  document.addEventListener("frappe:web_form_loaded", function () { setTimeout(poll, 200); });
+  if (window.frappe && frappe.web_form) {
+    var _orig2 = frappe.web_form.after_load;
+    frappe.web_form.after_load = function () {
+      if (_orig2) _orig2.apply(this, arguments);
+      setTimeout(ensureMounted, 250);
+    };
+  }
+})();
