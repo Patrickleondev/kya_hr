@@ -621,7 +621,70 @@
     return { section: section, body: body };
   }
 
-  function printForm() { window.print(); }
+  // Mapping route web form -> Print Format officiel (miroir de
+  // kya_hr/ensure_webform_print_formats.py). Le print format est rendu
+  // CÔTÉ SERVEUR : il itère la child table en vrai HTML, donc l'impression
+  // affiche bien toutes les lignes du tableau (ce que window.print() du DOM
+  // ne faisait pas : le grid Frappe est un widget JS qui ne s'imprime pas).
+  var KYA_PRINT_FORMATS = {
+    "bon-commande": "Bon Commande KYA Officiel",
+    "brouillard-caisse": "Brouillard Caisse KYA Officiel",
+    "demande-achat": "Demande Achat KYA Officiel",
+    "bilan-fin-de-stage": "Bilan de Stage KYA",
+    "inventaire-kya": "Fiche Inventaire KYA",
+    "permission-sortie-employe": "Ticket Sortie Employe",
+    "permission-sortie-stagiaire": "Ticket Sortie Stagiaire",
+    "planning-conge": "Demande Conge KYA",
+    "pv-entree-materiel": "Ticket Entrée Matériel KYA",
+    "pv-sortie-materiel": "PV Sortie Matériel Officiel"
+  };
+
+  function _kyaDocRef() {
+    var d = (window.frappe && frappe.web_form && frappe.web_form.doc) ? frappe.web_form.doc : null;
+    if (!d || !d.doctype || !d.name) return null;
+    var nm = String(d.name);
+    if (nm.indexOf("new-") === 0 || d.__islocal) return null; // pas encore enregistré
+    return d;
+  }
+  function _kyaPrintFormat() {
+    try {
+      if (frappe.web_form && frappe.web_form.print_format) return frappe.web_form.print_format;
+    } catch (e) {}
+    var route = "";
+    try { route = (frappe.web_form && frappe.web_form.route) || ""; } catch (e) {}
+    if (!route) {
+      var parts = (window.location.pathname || "").split("/").filter(Boolean);
+      route = parts.length ? parts[0] : "";
+    }
+    return KYA_PRINT_FORMATS[route] || "";
+  }
+  function _kyaNeedSave() {
+    if (window.frappe && frappe.msgprint) {
+      frappe.msgprint(__("Veuillez d’abord enregistrer le document, puis cliquez à nouveau sur Imprimer / PDF."));
+    } else {
+      alert("Enregistrez d’abord le document avant d’imprimer.");
+    }
+  }
+  function printForm() {
+    var d = _kyaDocRef();
+    if (!d) return _kyaNeedSave();
+    var fmt = _kyaPrintFormat();
+    var url = "/printview?doctype=" + encodeURIComponent(d.doctype) +
+              "&name=" + encodeURIComponent(d.name) +
+              (fmt ? "&format=" + encodeURIComponent(fmt) : "") +
+              "&trigger_print=1&_lang=fr";
+    window.open(url, "_blank");
+  }
+  function printPDF() {
+    var d = _kyaDocRef();
+    if (!d) return _kyaNeedSave();
+    var fmt = _kyaPrintFormat();
+    var url = "/api/method/frappe.utils.print_format.download_pdf?doctype=" + encodeURIComponent(d.doctype) +
+              "&name=" + encodeURIComponent(d.name) +
+              (fmt ? "&format=" + encodeURIComponent(fmt) : "") +
+              "&_lang=fr";
+    window.open(url, "_blank");
+  }
 
   function userHasRole(r) {
     return window.frappe && frappe.user_roles && frappe.user_roles.indexOf(r) !== -1;
@@ -925,7 +988,7 @@
       var bp = toolbar.querySelector(".kya-btn-print");
       var bd = toolbar.querySelector(".kya-btn-pdf");
       if (bp) bp.addEventListener("click", printForm);
-      if (bd) bd.addEventListener("click", printForm);
+      if (bd) bd.addEventListener("click", printPDF);
     }, 0);
 
     /* Bandeau circuit d'approbation */
@@ -1069,7 +1132,7 @@
       var bp = toolbar.querySelector(".kya-btn-print");
       var bd = toolbar.querySelector(".kya-btn-pdf");
       if (bp) bp.addEventListener("click", printForm);
-      if (bd) bd.addEventListener("click", printForm);
+      if (bd) bd.addEventListener("click", printPDF);
     }, 0);
 
     /* Info box */
@@ -1256,6 +1319,32 @@
     obs.observe(empInput, { attributes: true });
     empInput.addEventListener("change", function () { fetchEmployeeData(empInput.value); });
     lockEmployeeInputForSelfService();
+  }
+
+  /**
+   * Verrouille le champ Employé pour le mode self-service : un employé qui
+   * remplit sa propre demande ne doit pas pouvoir saisir l'ID d'un autre.
+   * La règle métier est DÉJÀ imposée côté serveur (validation du scope du
+   * demandeur) ; ici c'est uniquement du confort UI.
+   *
+   * IMPORTANT : cette fonction était APPELÉE (l.~1258) mais jamais définie ->
+   * ReferenceError qui faisait planter tout le client_script du web form, ce
+   * qui laissait TOUS les champs désactivés pour les utilisateurs non-admin
+   * (les System Manager n'étaient pas affectés). On la définit donc, en
+   * version sûre (try/catch, no-op si pas d'input).
+   */
+  function lockEmployeeInputForSelfService() {
+    try {
+      var input = document.querySelector('[data-fieldname="employee"] input')
+               || document.querySelector('[data-fieldname="demandeur"] input');
+      if (!input) return;
+      // On ne verrouille que si une valeur a déjà été résolue pour l'utilisateur
+      // courant (auto-fill). Sinon on laisse la recherche fuzzy disponible.
+      if (input.value && input.value.trim()) {
+        input.setAttribute("readonly", "readonly");
+        input.style.background = "#eef3f8";
+      }
+    } catch (e) { /* jamais bloquer le rendu du formulaire */ }
   }
 
   /**
