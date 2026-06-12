@@ -84,7 +84,10 @@ body {
 }
 
 .web-form-container {
-  max-width: 800px !important;
+  /* Largeur elargie pour que les fiches a table (BC, PV, Inventaire...)
+     affichent toutes leurs colonnes sans scroll horizontal. Les fiches KYA
+     sont des documents : une largeur confortable les sert mieux. */
+  max-width: 920px !important;
   margin: 0 auto;
   padding: 20px 16px 60px;
   font-family: var(--kya-font);
@@ -92,6 +95,24 @@ body {
 
 .web-form-container .web-form {
   border-radius: 0; box-shadow: none; border: none; overflow: visible;
+}
+
+/* Elargir la zone de contenu : le shell website de Frappe bride .page_content
+   a 800px et met 80px de padding lateral sur main.container -> le formulaire
+   tombe a ~670px et la grille Frappe (largeur intrinseque ~820px pour 10
+   colonnes) deborde. On reduit le padding et on releve le plafond pour que
+   toutes les colonnes tiennent sans scroll horizontal. kya_webform.css n'est
+   inclus que sur les pages portail KYA (web forms + mon-espace), donc l'impact
+   est limite a notre interface. */
+.page_content {
+  max-width: 1120px !important;
+}
+main.container {
+  padding-left: 24px !important;
+  padding-right: 24px !important;
+}
+.web-form-container {
+  max-width: 1080px !important;
 }
 
 .kya-restructured ~ .web-form-header,
@@ -1638,7 +1659,9 @@ footer .web-footer-menu { display: none !important; }
    horizontal global sur le grid-body uniquement.
    =================================================================== */
 
-/* En-tetes colonnes : ne pas tronquer, wrap si besoin */
+/* En-tetes colonnes : ne pas tronquer, wrap si besoin. Les colonnes sont
+   maintenant <= 10 au total (cf. ensure_webform_table_columns) donc elles
+   tiennent dans la largeur du formulaire : pas de min-width qui force le scroll. */
 .web-form-container .grid-heading-row .grid-static-col,
 .web-form-container .grid-row .grid-static-col {
   overflow: visible !important;
@@ -1646,7 +1669,7 @@ footer .web-footer-menu { display: none !important; }
   white-space: normal !important;
   word-break: break-word;
   hyphens: auto;
-  min-width: 80px;
+  min-width: 0;
 }
 
 /* Cellules : permettre le wrap multi-ligne (inputs restent 1 ligne) */
@@ -1665,10 +1688,11 @@ footer .web-footer-menu { display: none !important; }
   max-width: 100% !important;
 }
 
-/* La grille a une largeur minimale qui force le scroll plutot que de
-   tronquer les headers */
+/* Grille fluide : la largeur suit le formulaire (100%), plus de max-content
+   qui forcait le scroll horizontal. Les colonnes <= 10 tiennent dans la largeur. */
 .web-form-container .form-grid > .grid-body {
-  min-width: max-content !important;
+  min-width: 0 !important;
+  width: 100% !important;
 }
 
 /* Affichage qty + numerics : aligne droit, taille lisible */
