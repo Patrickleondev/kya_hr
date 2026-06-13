@@ -686,13 +686,43 @@
     window.open(url, "_blank");
   }
 
+  /* Rôles réels du user. Sur les pages portal/web form, frappe.user_roles et
+     frappe.boot.user.roles sont VIDES → on s'appuie en priorité sur le
+     contexte chargé via kya_hr.api.get_session_context (window._kyaCtx). */
+  function kyaRoles() {
+    if (window._kyaCtx && window._kyaCtx.roles && window._kyaCtx.roles.length) return window._kyaCtx.roles;
+    if (window.frappe && frappe.user_roles && frappe.user_roles.length) return frappe.user_roles;
+    if (window.frappe && frappe.boot && frappe.boot.user && frappe.boot.user.roles && frappe.boot.user.roles.length) return frappe.boot.user.roles;
+    return [];
+  }
+  function rolesKnown() {
+    return !!(window._kyaCtx && Array.isArray(window._kyaCtx.roles)) ||
+      (window.frappe && ((frappe.user_roles && frappe.user_roles.length) ||
+        (frappe.boot && frappe.boot.user && frappe.boot.user.roles && frappe.boot.user.roles.length)));
+  }
   function userHasRole(r) {
-    return window.frappe && frappe.user_roles && frappe.user_roles.indexOf(r) !== -1;
+    return kyaRoles().indexOf(r) !== -1;
   }
   function userHasAnyRole(roles) {
     if (!roles || !roles.length) return false;
     for (var i = 0; i < roles.length; i++) { if (userHasRole(roles[i])) return true; }
     return false;
+  }
+
+  /* Charge une fois les rôles réels + l'Employee lié, puis ré-applique les
+     permissions de champ et de signature (qui étaient fausses tant que les
+     rôles n'étaient pas connus). */
+  function loadSessionContext(cb) {
+    if (window._kyaCtx) { if (cb) cb(); return; }
+    if (!(window.frappe && frappe.call)) { if (cb) cb(); return; }
+    frappe.call({
+      method: "kya_hr.api.get_session_context",
+      callback: function (r) {
+        window._kyaCtx = (r && r.message) || { roles: [] };
+        if (cb) cb();
+      },
+      error: function () { window._kyaCtx = { roles: [] }; if (cb) cb(); }
+    });
   }
 
   function canSelectAnyEmployee() {
@@ -775,6 +805,15 @@
   }
 
   function setupFieldEditPermissions(route) {
+    // NEUTRALISE (13/06/2026) : ce verrouillage custom grisait a tort les
+    // champs pour les utilisateurs metier legitimes (Caissier, Comptable,
+    // DFC...). Deux bugs : isDocOwner() lisait le proprietaire de la
+    // DEFINITION du Web Form (Administrator) au lieu du document, et
+    // EDITOR_ROLES ne listait pas les roles metier. Or Frappe applique deja
+    // correctement l'editabilite via apply_document_permissions (permissions
+    // serveur reelles + workflow allow_edit). On laisse donc Frappe gerer.
+    return;
+    /* eslint-disable no-unreachable */
     var isEditor = userHasAnyRole(EDITOR_ROLES);
     var owner = isDocOwner();
     if (isEditor || owner) return;
@@ -1533,6 +1572,14 @@
   function waitForForm() {
     var route = getRoute();
     if (!FORM_SECTIONS[route] && !FORM_META[route]) return;
+
+    // Charger une fois les roles reels (vides sur portal) puis re-appliquer
+    // les permissions de champ/signature qui en dependent.
+    loadSessionContext(function () {
+      var rt = getRoute();
+      try { setupFieldEditPermissions(rt); } catch (e) {}
+      try { setupSignaturePermissions(rt); } catch (e) {}
+    });
 
     // Mode DÉCORATIF SIMPLE : ne touche pas aux champs Frappe, juste header + footer
     // Suffit d'un seul appel quand le formBody est dans le DOM

@@ -221,6 +221,39 @@ def _is_requester_self_approval(doc, action=None):
 
 
 @frappe.whitelist()
+def get_session_context():
+    """Contexte du user connecté pour les web forms (pages portal).
+
+    Sur les pages portal/web form, `frappe.user_roles` et
+    `frappe.boot.user.roles` sont VIDES côté client : toute la logique de
+    permission/signature basée sur les rôles devient inopérante (champs
+    grisés à tort, signatures jamais déverrouillées). On renvoie donc ici
+    les rôles RÉELS + l'Employee lié, à charger une fois au démarrage du
+    formulaire et à utiliser pour le gating côté client.
+    """
+    user = frappe.session.user
+    roles = frappe.get_roles(user) if user and user != "Guest" else []
+    emp = None
+    emp_name = None
+    if user and user != "Guest":
+        row = frappe.db.get_value(
+            "Employee",
+            {"user_id": user, "status": "Active"},
+            ["name", "employee_name"],
+            as_dict=True,
+        )
+        if row:
+            emp = row.get("name")
+            emp_name = row.get("employee_name")
+    return {
+        "user": user,
+        "roles": roles,
+        "employee": emp,
+        "employee_name": emp_name,
+    }
+
+
+@frappe.whitelist()
 def get_kya_workflow_actions(doctype, docname):
     """Get available workflow actions for the current user on a document.
     Returns current workflow_state and list of possible actions.
