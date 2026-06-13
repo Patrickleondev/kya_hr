@@ -1825,6 +1825,123 @@
         setParent("total_sorties", ts);
         setParent("solde_final", soldePrec + te - ts);
       }
+    },
+
+    "demande-achat": {
+      field: "items",
+      title: "ARTICLES DEMANDÉS",
+      addLabel: "+ Ajouter un article",
+      columns: [
+        { fn: "description",    label: "Description",     type: "text",  grow: true },
+        { fn: "quantite",       label: "Qté",             type: "float", w: "11%", align: "right" },
+        { fn: "unite",          label: "Unité",           type: "text",  w: "12%" },
+        { fn: "prix_unitaire",  label: "P.U. (XOF)",      type: "num",   w: "18%", align: "right" },
+        { fn: "montant",        label: "Montant (XOF)",   type: "num",   w: "18%", align: "right", ro: true,
+          formula: function (r) { return num(r.quantite) * num(r.prix_unitaire); } }
+      ],
+      recompute: function (data, setParent) {
+        var tot = 0;
+        data.forEach(function (r) { tot += num(r.montant); });
+        setParent("montant_total", tot);
+      }
+    },
+
+    "bon-commande": {
+      field: "articles",
+      title: "ARTICLES COMMANDÉS",
+      addLabel: "+ Ajouter un article",
+      columns: [
+        { fn: "item_code",     label: "Article",     type: "link", link: "Item", w: "16%",
+          fetch: { description: "item_name" } },
+        { fn: "description",   label: "Description",  type: "text",  grow: true },
+        { fn: "unite",         label: "Unité",        type: "text",  w: "9%" },
+        { fn: "quantite",      label: "Qté",          type: "float", w: "9%",  align: "right" },
+        { fn: "prix_unitaire", label: "Prix (FCFA)",  type: "num",   w: "15%", align: "right" },
+        { fn: "total",         label: "Total (FCFA)", type: "num",   w: "16%", align: "right", ro: true,
+          formula: function (r) { return num(r.quantite) * num(r.prix_unitaire); } }
+      ]
+    },
+
+    "etat-recap": {
+      field: "lignes",
+      title: "CHÈQUES ÉMIS",
+      addLabel: "+ Ajouter un chèque",
+      columns: [
+        { fn: "num_cheque",   label: "N° Chèque",    type: "text", w: "12%" },
+        { fn: "banque",       label: "Banque",       type: "text", w: "14%" },
+        { fn: "beneficiaire", label: "Bénéficiaire", type: "text", grow: true },
+        { fn: "libelle",      label: "Libellé",      type: "text", w: "22%" },
+        { fn: "montant",      label: "Montant (FCFA)", type: "num", w: "16%", align: "right" },
+        { fn: "observation",  label: "Observation",  type: "text", w: "14%" }
+      ],
+      recompute: function (data, setParent) {
+        var tot = 0;
+        data.forEach(function (r) { tot += num(r.montant); });
+        setParent("nombre_cheques", data.length);
+        setParent("total_montant", tot);
+      }
+    },
+
+    "pv-entree-materiel": {
+      field: "items",
+      title: "ARTICLES REÇUS",
+      addLabel: "+ Ajouter un article",
+      columns: [
+        { fn: "item_code",     label: "Article",      type: "link", link: "Item", w: "14%",
+          fetch: { designation: "item_name", uom: "stock_uom" } },
+        { fn: "designation",   label: "Désignation",  type: "text", grow: true },
+        { fn: "uom",           label: "Unité",        type: "link", link: "UOM", w: "10%" },
+        { fn: "qte_commandee", label: "Qté Cmd",      type: "float", w: "9%", align: "right" },
+        { fn: "qte_recue",     label: "Qté Reçue",    type: "float", w: "9%", align: "right" },
+        { fn: "prix_unitaire", label: "P.U. (FCFA)",  type: "num",   w: "12%", align: "right" },
+        { fn: "warehouse",     label: "Magasin",      type: "link", link: "Warehouse", w: "16%" }
+      ]
+    },
+
+    "pv-sortie-materiel": {
+      field: "items",
+      title: "LISTE DU MATÉRIEL",
+      addLabel: "+ Ajouter un article",
+      columns: [
+        { fn: "item_code",             label: "Article",       type: "link", link: "Item", w: "16%",
+          fetch: { designation: "item_name", uom: "stock_uom" } },
+        { fn: "designation",           label: "Désignation",   type: "text", grow: true },
+        { fn: "uom",                   label: "Unité",         type: "link", link: "UOM", w: "10%" },
+        { fn: "qte_demandee",          label: "Qté Demandée",  type: "float", w: "12%", align: "right" },
+        { fn: "qte_reellement_sortie", label: "Qté Sortie",    type: "float", w: "12%", align: "right" },
+        { fn: "warehouse",             label: "Magasin source", type: "link", link: "Warehouse", w: "16%" }
+      ]
+    },
+
+    "retour-materiel": {
+      field: "items",
+      title: "ARTICLES RETOURNÉS",
+      addLabel: "+ Ajouter un article",
+      columns: [
+        { fn: "item_code",      label: "Article",     type: "link", link: "Item", w: "15%",
+          fetch: { designation: "item_name", uom: "stock_uom" } },
+        { fn: "designation",    label: "Désignation", type: "text", grow: true },
+        { fn: "qte_retournee",  label: "Qté Retournée", type: "float", w: "11%", align: "right" },
+        { fn: "warehouse",      label: "Magasin dest.", type: "link", link: "Warehouse", w: "16%" },
+        { fn: "etat_au_retour", label: "État au retour", type: "select", w: "16%",
+          opts: ["Bon état", "Endommagé", "À réparer"] }
+      ]
+    },
+
+    "inventaire-kya": {
+      field: "items",
+      title: "LIGNES D'INVENTAIRE",
+      addLabel: "+ Ajouter un article",
+      columns: [
+        { fn: "item_code",     label: "Article",       type: "link", link: "Item", w: "15%",
+          fetch: { designation: "item_name", uom: "stock_uom" } },
+        { fn: "designation",   label: "Désignation",   type: "text", grow: true, ro: true },
+        { fn: "warehouse",     label: "Magasin",       type: "link", link: "Warehouse", w: "16%" },
+        { fn: "qte_theorique", label: "Qté Théorique", type: "float", w: "12%", align: "right", ro: true },
+        { fn: "qte_comptee",   label: "Qté Comptée",   type: "float", w: "12%", align: "right" },
+        { fn: "ecart",         label: "Écart",         type: "float", w: "11%", align: "right", ro: true,
+          formula: function (r) { return num(r.qte_comptee) - num(r.qte_theorique); } }
+      ]
     }
   };
 
@@ -1905,23 +2022,50 @@
     return '<table class="kya-doc-table">' + thead + tbody + "</table>";
   }
 
+  function roDisplay(c, val) {
+    if (c.type === "num") return fmtMoney(val);
+    if (c.type === "float") return (val == null || val === "") ? "" : String(num(val));
+    return escapeHtml(val);
+  }
+
+  function cellInput(c, i, val) {
+    if (c.type === "date") {
+      return '<input type="date" class="kya-dt-in" data-r="' + i + '" data-c="' + c.fn +
+        '" value="' + escapeHtml(val) + '">';
+    }
+    if (c.type === "num" || c.type === "float") {
+      return '<input type="number" step="any" class="kya-dt-in kya-dt-num" data-r="' + i +
+        '" data-c="' + c.fn + '" value="' + (val == null || val === "" ? "" : num(val)) + '">';
+    }
+    if (c.type === "select") {
+      var opts = '<option value=""></option>';
+      (c.opts || []).forEach(function (o) {
+        opts += '<option value="' + escapeHtml(o) + '"' +
+          (String(val) === String(o) ? " selected" : "") + ">" + escapeHtml(o) + "</option>";
+      });
+      return '<select class="kya-dt-in kya-dt-select" data-r="' + i + '" data-c="' + c.fn + '">' + opts + "</select>";
+    }
+    if (c.type === "link") {
+      var lid = "dl_" + c.fn + "_" + i;
+      return '<input class="kya-dt-in kya-dt-link" list="' + lid + '" autocomplete="off" data-r="' + i +
+        '" data-c="' + c.fn + '" data-link="' + escapeHtml(c.link || "") + '" value="' + escapeHtml(val) +
+        '"><datalist id="' + lid + '"></datalist>';
+    }
+    // text (par défaut) — textarea qui wrap et grandit
+    return '<textarea rows="1" class="kya-dt-in kya-dt-text" data-r="' + i + '" data-c="' + c.fn +
+      '">' + escapeHtml(val) + "</textarea>";
+  }
+
   function renderRow(schema, row, i) {
     var tds = "";
     schema.columns.forEach(function (c) {
       var val = row[c.fn];
       var align = c.align ? ' style="text-align:' + c.align + '"' : "";
       if (c.ro) {
-        var disp = c.type === "num" ? fmtMoney(val) : escapeHtml(val);
-        tds += '<td class="kya-dt-ro"' + align + ' data-ro="' + c.fn + '" data-r="' + i + '">' + disp + "</td>";
-      } else if (c.type === "date") {
-        tds += "<td" + align + '><input type="date" class="kya-dt-in" data-r="' + i +
-          '" data-c="' + c.fn + '" value="' + escapeHtml(val) + '"></td>';
-      } else if (c.type === "num") {
-        tds += "<td" + align + '><input type="number" step="any" class="kya-dt-in kya-dt-num" data-r="' + i +
-          '" data-c="' + c.fn + '" value="' + (val == null || val === "" ? "" : num(val)) + '"></td>';
+        tds += '<td class="kya-dt-ro"' + align + ' data-ro="' + c.fn + '" data-r="' + i + '">' +
+          roDisplay(c, val) + "</td>";
       } else {
-        tds += "<td" + align + '><textarea rows="1" class="kya-dt-in kya-dt-text" data-r="' + i +
-          '" data-c="' + c.fn + '">' + escapeHtml(val) + "</textarea></td>";
+        tds += "<td" + align + ">" + cellInput(c, i, val) + "</td>";
       }
     });
     tds += '<td class="kya-dt-actcol"><button type="button" class="kya-dt-del" data-r="' + i +
@@ -1932,21 +2076,52 @@
   /* --- Recalcul + mise à jour des cellules calculées ------------- */
   function recompute(schema, host) {
     var data = getData(schema.field);
+    // 1) colonnes calculées par ligne (ex. total = qté × PU, écart = compté − théorique)
+    data.forEach(function (row) {
+      schema.columns.forEach(function (c) {
+        if (typeof c.formula === "function") row[c.fn] = c.formula(row);
+      });
+    });
+    // 2) recalcul global (totaux parents)
     if (typeof schema.recompute === "function") {
       schema.recompute(data, setParent);
     }
-    // Met à jour les cellules read-only (ex. solde courant) sans re-render
+    // 3) rafraîchir les cellules read-only sans re-render (préserve le focus)
     if (host) {
       host.querySelectorAll("[data-ro]").forEach(function (td) {
         var fn = td.getAttribute("data-ro");
         var r = parseInt(td.getAttribute("data-r"), 10);
         var col = null;
         schema.columns.forEach(function (c) { if (c.fn === fn) col = c; });
-        if (data[r] && col) {
-          td.textContent = col.type === "num" ? fmtMoney(data[r][fn]) : (data[r][fn] || "");
-        }
+        if (data[r] && col) td.textContent = roDisplay(col, data[r][fn]);
       });
     }
+  }
+
+  /* --- Autocomplete Link : remplir la datalist d'une cellule ------ */
+  var _kyaLinkTimer = null;
+  function fillDatalist(input) {
+    var dt = input.getAttribute("data-link");
+    if (!dt || !window.frappe || !frappe.call) return;
+    var q = input.value || "";
+    var nameField = dt === "Item" ? "item_name" : "name";
+    var filters = [];
+    if (q) filters.push([dt, nameField, "like", "%" + q + "%"]);
+    frappe.call({
+      method: "frappe.client.get_list",
+      args: {
+        doctype: dt,
+        filters: q ? [[nameField, "like", "%" + q + "%"]] : [],
+        fields: dt === "Item" ? ["name", "item_name"] : ["name"],
+        limit_page_length: 12
+      }
+    }).then(function (r) {
+      var dl = document.getElementById(input.getAttribute("list"));
+      if (!dl) return;
+      dl.innerHTML = (r.message || []).map(function (it) {
+        return '<option value="' + escapeHtml(it.name) + '">' + escapeHtml(it.item_name || it.name) + "</option>";
+      }).join("");
+    }).catch(function () {});
   }
 
   /* --- Auto-grandir les textarea (désignation peut dépasser) ----- */
@@ -1982,20 +2157,67 @@
     if (host._kyaWired) return;
     host._kyaWired = true;
 
+    function colOf(c) {
+      var col = null;
+      schema.columns.forEach(function (cc) { if (cc.fn === c) col = cc; });
+      return col;
+    }
+
+    function writeCell(t) {
+      var r = parseInt(t.getAttribute("data-r"), 10);
+      var c = t.getAttribute("data-c");
+      var data = getData(schema.field);
+      if (!data[r]) return null;
+      var col = colOf(c);
+      var isNum = col && (col.type === "num" || col.type === "float");
+      data[r][c] = isNum ? num(t.value) : t.value;
+      return { r: r, c: c, col: col, data: data };
+    }
+
     // Saisie cellule (sans perdre le focus → pas de re-render complet)
     host.addEventListener("input", function (e) {
       var t = e.target;
       if (!t.classList || !t.classList.contains("kya-dt-in")) return;
-      var r = parseInt(t.getAttribute("data-r"), 10);
-      var c = t.getAttribute("data-c");
-      var data = getData(schema.field);
-      if (!data[r]) return;
-      var col = null;
-      schema.columns.forEach(function (cc) { if (cc.fn === c) col = cc; });
-      data[r][c] = col && col.type === "num" ? num(t.value) : t.value;
+      var w = writeCell(t);
+      if (!w) return;
       if (t.classList.contains("kya-dt-text")) autoGrow(t);
+      // autocomplete Link (débattu)
+      if (t.classList.contains("kya-dt-link")) {
+        if (_kyaLinkTimer) clearTimeout(_kyaLinkTimer);
+        _kyaLinkTimer = setTimeout(function () { fillDatalist(t); }, 250);
+      }
       recompute(schema, host);
       markDirty();
+    });
+
+    // Commit (select choisi, Link validé) → fetch des colonnes liées
+    host.addEventListener("change", function (e) {
+      var t = e.target;
+      if (!t.classList || !t.classList.contains("kya-dt-in")) return;
+      var w = writeCell(t);
+      if (!w) return;
+      markDirty();
+      // Link avec fetch : remplir les colonnes sœurs (designation, uom, qte_theorique…)
+      // NB : on passe par frappe.call('frappe.client.get_value') car frappe.db
+      // n'existe pas sur les pages portal/web form.
+      if (t.classList.contains("kya-dt-link") && w.col && w.col.fetch && t.value && window.frappe && frappe.call) {
+        var dt = w.col.link;
+        var srcFields = Object.keys(w.col.fetch).map(function (k) { return w.col.fetch[k]; });
+        frappe.call({
+          method: "frappe.client.get_value",
+          args: { doctype: dt, filters: { name: t.value }, fieldname: srcFields }
+        }).then(function (res) {
+          var m = (res && res.message) || {};
+          Object.keys(w.col.fetch).forEach(function (sib) {
+            var src = w.col.fetch[sib];
+            if (m[src] != null && m[src] !== "") w.data[w.r][sib] = m[src];
+          });
+          recompute(schema, host);
+          mount(ctrl, schema); // re-render pour afficher les colonnes remplies
+        }).catch(function () {});
+      } else {
+        recompute(schema, host);
+      }
     });
 
     // Boutons + / suppression (changement structurel → re-render)
