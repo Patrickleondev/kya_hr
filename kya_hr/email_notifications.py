@@ -54,6 +54,22 @@ DOCTYPE_CONFIG = {
 }
 
 
+def _official_print_format(config):
+    """Print format OFFICIEL d'un doctype, lu depuis son Web Form (source de
+    verite : c'est le meme format que le bouton Imprimer). Retourne None si
+    aucun n'est configure (Frappe retombe alors sur le format auto)."""
+    route = config.get("route")
+    if not route:
+        return None
+    try:
+        pf = frappe.db.get_value("Web Form", route, "print_format")
+        if pf and frappe.db.exists("Print Format", pf):
+            return pf
+    except Exception:
+        pass
+    return None
+
+
 def _get_employee_email(doc, config):
     """Retourne l'email de l'employé lié au document."""
     emp_id = getattr(doc, config.get("employee_field", "employee"), None)
@@ -170,13 +186,19 @@ def send_submission_recap(doc, method=None):
 
     body = _build_recap_body(doc, config, emp_name, is_update=False)
 
-    # Générer le PDF si possible
+    # Générer le PDF avec le print format OFFICIEL (fiche KYA), pas le format
+    # auto generique. Le DG/DGA exigent que le PDF ressemble exactement a la
+    # fiche. On prend le format configure sur le Web Form (source de verite),
+    # et on rend SANS Letter Head : la fiche officielle est auto-suffisante
+    # (sinon le Letter Head par defaut, avec ses placeholders XXXX, pollue le bas).
     attachments = []
     try:
+        official_pf = _official_print_format(config)
         pdf_content = frappe.get_print(
             dt, doc.name,
-            print_format=None,  # utilise le format par défaut
+            print_format=official_pf,  # fiche officielle (ex: Ticket Sortie Stagiaire)
             as_pdf=True,
+            no_letterhead=1,
         )
         if pdf_content:
             filename = "{}-{}.pdf".format(
