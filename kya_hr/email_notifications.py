@@ -54,6 +54,26 @@ DOCTYPE_CONFIG = {
 }
 
 
+def _logo_inline_attachment():
+    """Logo KYA en pièce jointe INLINE (CID) pour les emails.
+
+    Les <img src="http://.../logo.png"> cassent souvent dans les clients mail
+    (Gmail/Outlook) : l'URL dépend de get_url()/host_name et n'est pas toujours
+    publique (le site interne s'appelle 'frontend' -> http://frontend/...).
+    Un logo embarqué via Content-ID (cid:) s'affiche TOUJOURS, sans dépendre
+    d'un fetch externe. Référencer ensuite <img src="cid:kyalogo">.
+    """
+    for fname in ("kya_logo.png", "logo_kya.png"):
+        try:
+            path = frappe.get_app_path("kya_hr", "public", "images", fname)
+            with open(path, "rb") as f:
+                content = f.read()
+            return {"fname": "kya_logo.png", "fcontent": content, "content_id": "kyalogo"}
+        except Exception:
+            continue
+    return None
+
+
 def _official_print_format(config):
     """Print format OFFICIEL d'un doctype, lu depuis son Web Form (source de
     verite : c'est le meme format que le bouton Imprimer). Retourne None si
@@ -103,7 +123,7 @@ def _build_recap_body(doc, config, emp_name, is_update=False):
     return """
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background: linear-gradient(135deg,#f7a800 0%,#e07b00 100%); padding: 24px; border-radius: 12px 12px 0 0; text-align:center;">
-        <img src="{logo_url}"
+        <img src="cid:kyalogo"
              alt="KYA-Energy Group" width="60" height="60" border="0" style="margin-bottom:8px;display:block;margin:0 auto;">
         <h2 style="color:white; margin:0;">{icon} {label}</h2>
         <p style="color:rgba(255,255,255,0.8); margin:4px 0 0;">{title}</p>
@@ -211,6 +231,11 @@ def send_submission_recap(doc, method=None):
             })
     except Exception:
         pass  # pas de print format disponible, on envoie sans PDF
+
+    # Logo inline (cid:kyalogo) — affichage fiable du logo dans l'email
+    logo = _logo_inline_attachment()
+    if logo:
+        attachments.append(logo)
 
     frappe.sendmail(
         recipients=[email],
