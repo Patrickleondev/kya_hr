@@ -636,7 +636,9 @@
     "permission-sortie-stagiaire": "Ticket Sortie Stagiaire",
     "planning-conge": "Demande Conge KYA",
     "pv-entree-materiel": "Ticket Entrée Matériel KYA",
-    "pv-sortie-materiel": "PV Sortie Matériel Officiel"
+    "pv-sortie-materiel": "PV Sortie Matériel Officiel",
+    "etat-recap": "Etat Recap Cheques Officiel",
+    "retour-materiel": "Retour Materiel KYA Officiel"
   };
 
   function _kyaDocRef() {

@@ -29,6 +29,8 @@ WEBFORM_PRINT_FORMATS = {
     "planning-conge": "Demande Conge KYA",
     "pv-entree-materiel": "Ticket Entrée Matériel KYA",
     "pv-sortie-materiel": "PV Sortie Matériel Officiel",
+    "etat-recap": "Etat Recap Cheques Officiel",
+    "retour-materiel": "Retour Materiel KYA Officiel",
 }
 
 

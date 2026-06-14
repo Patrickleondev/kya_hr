@@ -1,0 +1,121 @@
+<style>
+    @page { size: A4; margin: 15mm; }
+    body { font-family: Arial, "DejaVu Sans", "Liberation Sans", sans-serif; font-size: 11px; color: #333; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    img { max-width: 100%; height: auto; }
+    .kya-doc { max-width: 100%; margin: 0 auto; }
+    .kya-sec-body { page-break-inside: avoid; }
+    .kya-doc-header { display: table; width: 100%; padding: 10px 0 0; border-collapse: collapse; }
+    .kya-doc-header > div { display: table-cell; vertical-align: top; }
+    .kya-doc-logo { width: 120px; padding-right: 24px; }
+    .kya-doc-logo img { max-height: 80px; max-width: 100px; height: auto; }
+    .kya-doc-info { text-align: right; }
+    .kya-doc-title { font-size: 22px; font-weight: 800; color: #1a5276; text-transform: uppercase; margin: 0 0 4px; letter-spacing: 0.02em; }
+    .kya-doc-slogan { font-style: italic; color: #F58220; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    .kya-doc-company { font-size: 10px; color: #666; line-height: 1.6; }
+    .kya-doc-line { height: 3px; background: #1a5276; margin: 14px 0 10px; }
+    .kya-doc-ref { text-align: center; font-size: 15px; font-weight: 800; color: #1a5276; margin: 10px 0 18px; }
+    .kya-sec-header { background: #1a5276; color: #fff; padding: 8px 16px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; margin: 14px 0 0; }
+    .kya-sec-body { padding: 12px 16px; border: 1px solid #dee2e6; border-top: none; }
+    .kya-row { display: table; width: 100%; table-layout: fixed; margin-bottom: 8px; border-collapse: collapse; }
+    .kya-col { display: table-cell; vertical-align: top; padding-right: 16px; }
+    .kya-col:last-child { padding-right: 0; }
+    .kya-lbl { font-weight: 700; color: #1a5276; font-size: 10px; text-transform: uppercase; margin-bottom: 2px; }
+    .kya-val { font-size: 12px; padding: 4px 0; min-height: 18px; color: #333; }
+    .kya-items { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 8px 0; }
+    .kya-items th { background: #1a5276; color: #fff; padding: 7px 10px; text-align: left; word-break: break-word; overflow-wrap: break-word; font-size: 10px; text-transform: uppercase; }
+    .kya-items td { padding: 5px 10px; border-bottom: 1px solid #eee; word-break: break-word; overflow-wrap: break-word; font-size: 11px; color: #333; }
+    .kya-items .num { text-align: right; }
+    .kya-etat { display: inline-block; padding: 2px 8px; border-radius: 8px; font-size: 9px; font-weight: 700; }
+    .etat-ok { background: #e8f5e9; color: #2e7d32; }
+    .etat-warn { background: #fff3e0; color: #e65100; }
+    .etat-bad { background: #ffebee; color: #c62828; }
+    .kya-status { text-align: center; margin: 12px 0; }
+    .kya-badge { display: inline-block; padding: 5px 20px; border-radius: 16px; font-weight: 700; font-size: 12px; text-transform: uppercase; }
+    .kya-badge-ok { background: #e8f5e9; color: #2e7d32; border: 2px solid #4caf50; }
+    .kya-badge-wait { background: #fff3e0; color: #e65100; border: 2px solid #ff9800; }
+    .kya-badge-no { background: #ffebee; color: #c62828; border: 2px solid #ef5350; }
+    .kya-sigs { display: table; width: 100%; table-layout: fixed; margin-top: 10px; border-collapse: separate; border-spacing: 10px 0; page-break-inside: avoid; }
+    .kya-sig { display: table-cell; text-align: center; vertical-align: top; }
+    .kya-sig img { max-height: 50px; display: block; margin: 0 auto 4px; }
+    .kya-sig .sig-line { border-top: 1px solid #333; margin-top: 28px; padding-top: 4px; font-size: 9px; font-weight: 600; color: #333; }
+    .kya-sig .sig-date { font-size: 8px; color: #888; }
+    .kya-doc-footer { text-align: center; padding: 12px 0 0; margin-top: 16px; border-top: 2px solid #1a5276; font-size: 9px; color: #999; }
+</style>
+<div class="kya-doc">
+  <div class="kya-doc-header">
+    <div class="kya-doc-logo">
+      <img src="/assets/kya_hr/images/logo_kya.png" alt="KYA" style="max-height:80px;"
+           onerror="this.src='/files/vrai.png'">
+    </div>
+    <div class="kya-doc-info">
+      <div class="kya-doc-title">Bon de Retour de Matériel</div>
+      <div class="kya-doc-slogan">Move beyond the sky!</div>
+      <div class="kya-doc-company">
+        info@kya-energy.com<br>
+        N° RCCM : TG-LOM 2015 B 975<br>
+        NIF : 1000430317 | CNSS : 48863
+      </div>
+    </div>
+  </div>
+  <div class="kya-doc-line"></div>
+  <div class="kya-doc-ref">N° {{ doc.name }}</div>
+
+  <div class="kya-sec-header">1. Informations du Retour</div>
+  <div class="kya-sec-body">
+    <div class="kya-row">
+      <div class="kya-col"><div class="kya-lbl">PV de Sortie d'origine</div><div class="kya-val">{{ doc.pv_sortie_origine or '—' }}</div></div>
+      <div class="kya-col"><div class="kya-lbl">Date du retour</div><div class="kya-val">{{ frappe.utils.format_date(doc.date_retour) if doc.date_retour else '—' }}</div></div>
+    </div>
+    <div class="kya-row">
+      <div class="kya-col"><div class="kya-lbl">Projet / Chantier</div><div class="kya-val">{{ doc.get('project') or '—' }}</div></div>
+      <div class="kya-col"><div class="kya-lbl">Client</div><div class="kya-val">{{ doc.customer or doc.customer_libre or '—' }}</div></div>
+    </div>
+    <div class="kya-row">
+      <div class="kya-col"><div class="kya-lbl">Motif du retour</div><div class="kya-val">{{ doc.objet or '' }}</div></div>
+    </div>
+  </div>
+
+  <div class="kya-sec-header">2. Articles Retournés</div>
+  <div class="kya-sec-body">
+    <table class="kya-items">
+      <thead><tr><th style="width:6%">#</th><th style="width:16%">Article</th><th>Désignation</th><th class="num" style="width:12%">Qté</th><th style="width:18%">Magasin dest.</th><th style="width:16%">État</th></tr></thead>
+      <tbody>
+        {% for row in doc.items %}
+        <tr>
+          <td>{{ row.idx }}</td>
+          <td>{{ row.item_code or '' }}</td>
+          <td>{{ row.designation or '' }}{% if row.observations %}<br><span style="color:#888;font-size:9px">{{ row.observations }}</span>{% endif %}</td>
+          <td class="num">{{ row.qte_retournee }}{% if row.uom %} {{ row.uom }}{% endif %}</td>
+          <td>{{ row.warehouse or '' }}</td>
+          <td>
+            {% set e = row.etat_au_retour or '' %}
+            {% if 'Bon' in e %}<span class="kya-etat etat-ok">{{ e }}</span>
+            {% elif 'pare' in e or 'parer' in e %}<span class="kya-etat etat-warn">{{ e }}</span>
+            {% elif 'Endomma' in e %}<span class="kya-etat etat-bad">{{ e }}</span>
+            {% else %}{{ e }}{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="kya-status">
+    {% set st = doc.workflow_state or doc.get('statut') or 'En attente' %}
+    {% if 'pprou' in st or 'alid' in st or 'ermin' in st %}<span class="kya-badge kya-badge-ok">{{ st }}</span>
+    {% elif 'ejet' in st or 'efus' in st %}<span class="kya-badge kya-badge-no">{{ st }}</span>
+    {% else %}<span class="kya-badge kya-badge-wait">{{ st }}</span>{% endif %}
+  </div>
+
+  <div class="kya-sec-header">3. Signatures</div>
+  <div class="kya-sec-body">
+    <div class="kya-sigs">
+      <div class="kya-sig">{% if doc.signature_retourneur %}<img src="{{ doc.signature_retourneur }}">{% endif %}<div class="sig-line">{{ doc.retourneur_nom or 'Employé Retourneur' }}</div>{% if doc.retourneur_date %}<div class="sig-date">{{ frappe.utils.format_date(doc.retourneur_date) }}</div>{% endif %}</div>
+      <div class="kya-sig">{% if doc.signature_magasin %}<img src="{{ doc.signature_magasin }}">{% endif %}<div class="sig-line">{{ doc.magasin_nom or 'Responsable Magasin' }}</div>{% if doc.magasin_date %}<div class="sig-date">{{ frappe.utils.format_date(doc.magasin_date) }}</div>{% endif %}</div>
+    </div>
+  </div>
+
+  <div class="kya-doc-footer">
+    Généré le {{ frappe.utils.now_datetime().strftime('%d/%m/%Y à %H:%M') }} — KYA-Energy Group, Lomé, Togo
+  </div>
+</div>

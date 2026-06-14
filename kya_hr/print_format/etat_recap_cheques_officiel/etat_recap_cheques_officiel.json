@@ -1,0 +1,10 @@
+{
+    "name": "Etat Recap Cheques Officiel",
+    "doctype": "Print Format",
+    "doc_type": "Etat Recap Cheques",
+    "module": "KYA HR",
+    "print_format_type": "Jinja",
+    "standard": "Yes",
+    "default_print_language": "fr",
+    "custom_format": 1
+}
