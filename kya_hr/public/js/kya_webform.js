@@ -2200,53 +2200,68 @@
     // textarea auto-grow initial
     host.querySelectorAll("textarea.kya-dt-text").forEach(autoGrow);
     recompute(schema, host);
+  }
 
-    if (host._kyaWired) return;
-    host._kyaWired = true;
+  /* --- Gestion des événements : DÉLÉGATION au niveau document ------
+     IMPORTANT : Frappe v16 re-monte parfois le contrôle Table entre deux
+     interactions (ex. après un add). Des listeners attachés au host avec
+     des closures sur ctrl/host deviennent alors PÉRIMÉS (ils rendent dans
+     un host détaché → les lignes tapées n'apparaissent plus). On délègue
+     donc sur `document` et on re-résout le ctrl/host/schema VIVANTS à
+     chaque événement. */
+  function schemaColOf(schema, fn) {
+    var col = null;
+    schema.columns.forEach(function (cc) { if (cc.fn === fn) col = cc; });
+    return col;
+  }
+  function liveCtx(t) {
+    if (!t || !t.closest) return null;
+    var host = t.closest(".kya-doc-table-host");
+    if (!host) return null;
+    var ctrl = t.closest(".frappe-control");
+    var schema = KYA_DOC_TABLES[getRoute()];
+    if (!schema) return null;
+    return { host: host, ctrl: ctrl, schema: schema };
+  }
+  function writeCell(schema, t) {
+    var r = parseInt(t.getAttribute("data-r"), 10);
+    var c = t.getAttribute("data-c");
+    var data = getData(schema.field);
+    if (!data[r]) return null;
+    var col = schemaColOf(schema, c);
+    var isNum = col && (col.type === "num" || col.type === "float");
+    data[r][c] = isNum ? num(t.value) : t.value;
+    return { r: r, c: c, col: col, data: data };
+  }
 
-    function colOf(c) {
-      var col = null;
-      schema.columns.forEach(function (cc) { if (cc.fn === c) col = cc; });
-      return col;
-    }
+  function setupDocTableListeners() {
+    if (window._kyaDTListeners) return;
+    window._kyaDTListeners = true;
 
-    function writeCell(t) {
-      var r = parseInt(t.getAttribute("data-r"), 10);
-      var c = t.getAttribute("data-c");
-      var data = getData(schema.field);
-      if (!data[r]) return null;
-      var col = colOf(c);
-      var isNum = col && (col.type === "num" || col.type === "float");
-      data[r][c] = isNum ? num(t.value) : t.value;
-      return { r: r, c: c, col: col, data: data };
-    }
-
-    // Saisie cellule (sans perdre le focus → pas de re-render complet)
-    host.addEventListener("input", function (e) {
+    document.addEventListener("input", function (e) {
       var t = e.target;
       if (!t.classList || !t.classList.contains("kya-dt-in")) return;
-      var w = writeCell(t);
+      var cx = liveCtx(t);
+      if (!cx) return;
+      var w = writeCell(cx.schema, t);
       if (!w) return;
       if (t.classList.contains("kya-dt-text")) autoGrow(t);
-      // autocomplete Link (débattu)
       if (t.classList.contains("kya-dt-link")) {
         if (_kyaLinkTimer) clearTimeout(_kyaLinkTimer);
         _kyaLinkTimer = setTimeout(function () { fillDatalist(t); }, 250);
       }
-      recompute(schema, host);
+      recompute(cx.schema, cx.host);
       markDirty();
     });
 
-    // Commit (select choisi, Link validé) → fetch des colonnes liées
-    host.addEventListener("change", function (e) {
+    document.addEventListener("change", function (e) {
       var t = e.target;
       if (!t.classList || !t.classList.contains("kya-dt-in")) return;
-      var w = writeCell(t);
+      var cx = liveCtx(t);
+      if (!cx) return;
+      var w = writeCell(cx.schema, t);
       if (!w) return;
       markDirty();
-      // Link avec fetch : remplir les colonnes sœurs (designation, uom, qte_theorique…)
-      // NB : on passe par frappe.call('frappe.client.get_value') car frappe.db
-      // n'existe pas sur les pages portal/web form.
       if (t.classList.contains("kya-dt-link") && w.col && w.col.fetch && t.value && window.frappe && frappe.call) {
         var dt = w.col.link;
         var srcFields = Object.keys(w.col.fetch).map(function (k) { return w.col.fetch[k]; });
@@ -2259,36 +2274,46 @@
             var src = w.col.fetch[sib];
             if (m[src] != null && m[src] !== "") w.data[w.r][sib] = m[src];
           });
-          recompute(schema, host);
-          mount(ctrl, schema); // re-render pour afficher les colonnes remplies
+          var cx2 = liveCtx(t) || cx;
+          recompute(cx2.schema, cx2.host);
+          if (cx2.ctrl) mount(cx2.ctrl, cx2.schema);
         }).catch(function () {});
       } else {
-        recompute(schema, host);
+        recompute(cx.schema, cx.host);
       }
     });
 
-    // Boutons + / suppression (changement structurel → re-render)
-    host.addEventListener("click", function (e) {
+    document.addEventListener("click", function (e) {
       var t = e.target;
-      if (t.classList && t.classList.contains("kya-dt-add")) {
-        e.preventDefault();
-        var g = getGrid(schema.field);
+      if (!t.classList) return;
+      var isAdd = t.classList.contains("kya-dt-add");
+      var isDel = t.classList.contains("kya-dt-del");
+      if (!isAdd && !isDel) return;
+      var cx = liveCtx(t);
+      if (!cx) return;
+      e.preventDefault();
+      if (isAdd) {
+        var g = getGrid(cx.schema.field);
         if (g && g.add_new_row) { g.add_new_row(); }
-        else { getData(schema.field).push({}); }
+        else { getData(cx.schema.field).push({}); }
         markDirty();
-        mount(ctrl, schema);
-        // focus 1re cellule de la nouvelle ligne
-        var rows = host.querySelectorAll("tbody tr");
-        var last = rows[rows.length - 1];
-        if (last) { var inp = last.querySelector(".kya-dt-in"); if (inp) inp.focus(); }
-      } else if (t.classList && t.classList.contains("kya-dt-del")) {
-        e.preventDefault();
+        // re-résoudre le ctrl VIVANT (Frappe a pu re-monter le contrôle)
+        var liveCtrl = document.querySelector('.frappe-control[data-fieldname="' + cx.schema.field + '"]') || cx.ctrl;
+        mount(liveCtrl, cx.schema);
+        var host2 = liveCtrl.querySelector(".kya-doc-table-host");
+        if (host2) {
+          var rows = host2.querySelectorAll("tbody tr[data-r]");
+          var last = rows[rows.length - 1];
+          if (last) { var inp = last.querySelector(".kya-dt-in"); if (inp) inp.focus(); }
+        }
+      } else {
         var ri = parseInt(t.getAttribute("data-r"), 10);
-        var g2 = getGrid(schema.field);
+        var g2 = getGrid(cx.schema.field);
         if (g2 && g2.grid_rows && g2.grid_rows[ri]) { g2.grid_rows[ri].remove(); }
-        else { getData(schema.field).splice(ri, 1); }
+        else { getData(cx.schema.field).splice(ri, 1); }
         markDirty();
-        mount(ctrl, schema);
+        var liveCtrl2 = document.querySelector('.frappe-control[data-fieldname="' + cx.schema.field + '"]') || cx.ctrl;
+        mount(liveCtrl2, cx.schema);
       }
     });
   }
@@ -2302,14 +2327,19 @@
     // grid natif monté ?
     var mounted = ctrl.querySelector(".form-grid, .grid-body, table.table");
     if (!mounted && !(getGrid(schema.field))) return false;
-    // (re)monter si absent ou si le host a été effacé par un re-render Frappe
-    if (!ctrl.querySelector(".kya-doc-table-host") ||
-        !ctrl.querySelector(".kya-doc-table-host .kya-doc-table")) {
+    var host = ctrl.querySelector(".kya-doc-table-host");
+    var tbl = host && host.querySelector(".kya-doc-table");
+    // Nombre de lignes affichées vs modèle : si Frappe a re-monté / si le
+    // modèle a changé, on re-rend pour que TOUT ce qui est saisi s'affiche.
+    var domRows = tbl ? tbl.querySelectorAll("tbody tr[data-r]").length : -1;
+    var modelRows = getData(schema.field).length;
+    if (!host || !tbl || domRows !== modelRows) {
       mount(ctrl, schema);
     } else {
       // garder le grid natif masqué si Frappe l'a ré-affiché
       var ng = ctrl.querySelector(".form-grid");
-      if (ng && ng.style.display !== "none") { ng.style.display = "none"; recompute(schema, ctrl.querySelector(".kya-doc-table-host")); }
+      if (ng && ng.style.display !== "none") { ng.style.display = "none"; }
+      recompute(schema, host);
     }
     return true;
   }
@@ -2326,6 +2356,7 @@
 
   window.kyaRenderDocTables = function () { ensureMounted(); };
 
+  setupDocTableListeners();
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", poll);
   } else {
