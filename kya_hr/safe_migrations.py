@@ -76,6 +76,7 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.maintenance.setup_supplier_mail_buttons.execute", "Boutons desk « Envoyer au fournisseur » sur Bon Commande KYA + Appel Offre KYA (revue avant envoi, PDF joint, gestion sans email)"),
     ("kya_hr.maintenance.fix_formation_equipe.execute", "Besoin de Formation : champ équipe = Equipe KYA (pas Département) ; département + chef déduits de l'équipe"),
     ("kya_hr.maintenance.ensure_formation_v2.execute", "Formation v2 : réconcilie coût total ligne (direct+accessoire) + compteurs bénéficiaires (suivi par employé) sur plans existants"),
+    ("kya_hr.maintenance.fix_workspace_anomalies.execute", "Workspaces : parent_page NULL->'' (icônes qui plantent au clic) + Gestion Équipe accent/emoji"),
 ]
 
 AFTER_INSTALL: list[tuple[str, str]] = [
