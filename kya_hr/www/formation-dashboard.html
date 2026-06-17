@@ -38,9 +38,30 @@ body { background: var(--kya-bg) !important; }
     <p>Besoins des équipes, plan de formation, sélection DG, chiffrage et suivi</p>
     <div class="mt-3 d-flex gap-2 flex-wrap">
       <a class="btn btn-sm btn-light" href="/besoin-formation/new"><i class="bi bi-plus-circle"></i> Nouveau besoin (chef)</a>
-      <button class="btn btn-sm btn-warning" onclick="copierLienChef()"><i class="bi bi-link-45deg"></i> Copier le lien chef</button>
+      <button class="btn btn-sm btn-warning" onclick="ouvrirEnvoiChefs()"><i class="bi bi-send"></i> Envoyer le lien aux chefs</button>
       <button class="btn btn-sm btn-success" onclick="compilerAnnee()"><i class="bi bi-magic"></i> Compiler les besoins retenus</button>
-      <a class="btn btn-sm btn-light" href="/app/besoin-de-formation"><i class="bi bi-list-check"></i> Tous les besoins</a>
+      <button class="btn btn-sm btn-light" onclick="exportFormation('soumis')"><i class="bi bi-file-earmark-excel"></i> Export besoins soumis</button>
+      <button class="btn btn-sm btn-light" onclick="exportFormation('selectionnes')"><i class="bi bi-file-earmark-check"></i> Export sélectionnés</button>
+      <button class="btn btn-sm btn-light" onclick="toggleGuide()"><i class="bi bi-question-circle"></i> Guide RH</button>
+    </div>
+    <div id="action-result" class="small mt-2" style="min-height:1em;"></div>
+  </div>
+
+  <!-- Guide RH formation -->
+  <div class="kya-panel" id="guide-rh" style="display:none;border-left:4px solid var(--kya-blue);">
+    <div class="kya-panel-head"><h3><i class="bi bi-info-circle text-primary"></i> Comment ça marche — Formation (RH)</h3>
+      <button class="btn btn-sm btn-light" onclick="toggleGuide()">Fermer</button></div>
+    <div class="p-3" style="font-size:.85rem;line-height:1.6;">
+      <ol class="mb-2">
+        <li><b>Envoyer le lien aux chefs</b> : la RH envoie le formulaire d'expression de besoin aux chefs d'équipe (mail à tous, ou liste d'adresses saisie).</li>
+        <li><b>Le chef remplit</b> par <b>équipe</b> (l'équipe appartient à un département, déduit automatiquement) et soumet à la RH.</li>
+        <li><b>La RH revoit</b> les besoins (table « Besoins de formation ») et marque les lignes <b>Retenu</b>.</li>
+        <li><b>Compiler les besoins retenus</b> : crée le <b>Plan de Formation</b> de l'année à partir des lignes retenues.</li>
+        <li><b>Le DG sélectionne</b> les formations à financer (panneau « Sélection DG »).</li>
+        <li><b>La RH chiffre puis suit</b> les formations retenues (table « Suivi ») jusqu'à clôture.</li>
+        <li><b>Exports</b> : « besoins soumis » (tout ce qui est remonté) et « sélectionnés » (retenu par le DG) en Excel/CSV.</li>
+      </ol>
+      <div class="text-muted">Rôles : RH (Responsable RH / HR Manager) pour revue & compilation ; Direction (DG/DGA) pour la sélection.</div>
     </div>
   </div>
 
@@ -149,12 +170,72 @@ async function loadSuivi(){
     tb.innerHTML=rows.map(r=>'<tr><td><a href="/app/plan-de-formation/'+encodeURIComponent(r.plan)+'">'+r.plan+'</a></td><td>'+(r.equipe||'—')+'</td><td>'+(r.intitule||'—')+'</td><td>'+(r.organisme||'—')+'</td><td class="text-end">'+fmtN(r.cout)+'</td><td>'+(r.date_debut||'—')+'</td><td>'+(r.date_fin||'—')+'</td><td>'+badge(r.statut_suivi)+'</td></tr>').join('');
   }catch(e){ tb.innerHTML='<tr><td colspan="8" class="kya-loader text-danger">Erreur: '+e.message+'</td></tr>'; }
 }
-function copierLienChef(){
-  const url = window.location.origin + '/besoin-formation/new';
-  const done = ()=>alert('Lien à partager aux chefs d’équipe copié :\n'+url);
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(url).then(done).catch(()=>window.prompt('Copiez ce lien :', url));
-  } else { window.prompt('Copiez ce lien :', url); }
+function setResult(html, ok){
+  const el=document.getElementById('action-result');
+  if(el){ el.innerHTML=html; el.style.color = ok===false ? '#b91c1c' : '#15803d'; }
+}
+function toggleGuide(){
+  const g=document.getElementById('guide-rh');
+  g.style.display = g.style.display==='none' ? '' : 'none';
+}
+function _downloadB64(b64, name, mime){
+  const bin=atob(b64); const arr=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+  const url=URL.createObjectURL(new Blob([arr],{type:mime||'text/csv'}));
+  const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+async function exportFormation(scope){
+  setResult('<i class="bi bi-arrow-repeat"></i> Export en cours…');
+  try{
+    const r=await callApi('kya_hr.api.formation_dashboard.export_besoins', {scope});
+    if(!r.rows){ setResult('Aucune donnée à exporter pour ce périmètre.', false); return; }
+    _downloadB64(r.content_base64, r.filename, 'text/csv');
+    setResult('<i class="bi bi-check-circle"></i> '+r.rows+' ligne(s) exportée(s) — '+r.filename);
+  }catch(e){ setResult('Erreur export : '+e.message, false); }
+}
+// ---- Envoi du lien d'expression de besoin aux chefs (2 modes) ----
+async function ouvrirEnvoiChefs(){
+  let data;
+  try{ data = await callApi('kya_hr.api.formation_dashboard.get_chefs_for_links'); }
+  catch(e){ setResult('Erreur : '+e.message, false); return; }
+  const chefs = data.chefs||[];
+  const avecMail = chefs.filter(c=>c.has_email).length;
+  const sansMail = chefs.filter(c=>!c.has_email);
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998;display:flex;align-items:center;justify-content:center;';
+  overlay.innerHTML=`
+    <div style="background:#fff;border-radius:12px;max-width:560px;width:92%;padding:22px;box-shadow:0 8px 32px rgba(0,0,0,.25);">
+      <h3 style="margin:0 0 8px;color:#0054A6;">Envoyer le lien aux chefs d'équipe</h3>
+      <p style="font-size:.82rem;color:#555;margin:0 0 6px;">Lien : <code>${data.link}</code>
+        <button class="btn btn-sm btn-light" onclick="navigator.clipboard&&navigator.clipboard.writeText('${data.link}');this.textContent='Copié';">Copier</button></p>
+      <div class="form-check"><input class="form-check-input" type="radio" name="fmode" id="m-all" value="all" checked>
+        <label class="form-check-label" for="m-all">Mailer <b>tous les chefs</b> (${avecMail} avec email${sansMail.length?`, ${sansMail.length} sans email seront ignorés`:''})</label></div>
+      <div class="form-check"><input class="form-check-input" type="radio" name="fmode" id="m-list" value="list">
+        <label class="form-check-label" for="m-list">Saisir les adresses de destination</label></div>
+      <textarea id="f-emails" class="form-control form-control-sm mt-1" rows="3" placeholder="email1@ex.com, email2@ex.com" style="display:none;"></textarea>
+      ${sansMail.length?`<div class="small text-muted mt-2">Sans email : ${sansMail.map(c=>c.equipe).join(', ')}</div>`:''}
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">
+        <button class="btn btn-sm btn-light" id="f-cancel">Annuler</button>
+        <button class="btn btn-sm btn-primary" id="f-send">Envoyer</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('#m-list').onchange=overlay.querySelector('#m-all').onchange=function(){
+    overlay.querySelector('#f-emails').style.display = overlay.querySelector('#m-list').checked ? '' : 'none';
+  };
+  overlay.querySelector('#f-cancel').onclick=()=>overlay.remove();
+  overlay.querySelector('#f-send').onclick=async function(){
+    const mode=overlay.querySelector('input[name=fmode]:checked').value;
+    const emails=overlay.querySelector('#f-emails').value;
+    if(mode==='list' && !emails.trim()){ alert('Saisissez au moins une adresse.'); return; }
+    this.disabled=true; this.textContent='Envoi…';
+    try{
+      const r=await callApiPost('kya_hr.api.formation_dashboard.send_besoin_links', {mode, emails});
+      overlay.remove();
+      setResult('<i class="bi bi-check-circle"></i> Lien envoyé à '+r.count_sent+' chef(s)'+(r.count_skipped?(' · '+r.count_skipped+' sans email'):''));
+    }catch(e){ overlay.remove(); setResult('Erreur envoi : '+e.message, false); }
+  };
 }
 async function compilerAnnee(){
   const annee = new Date().getFullYear();

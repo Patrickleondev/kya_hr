@@ -242,3 +242,140 @@ def get_suivi(limit: int = 100) -> list[dict]:
            ORDER BY FIELD(i.statut_suivi,'En cours','Planifiée','À planifier','Terminée','Annulée'),
                     i.date_debut ASC
            LIMIT %(l)s""", {"l": int(limit)}, as_dict=True) or []
+
+
+# ───────────────────────────────────────────────────────────────────────────
+#  EXPORT (besoins soumis / formations sélectionnées) — Excel-compatible CSV
+# ───────────────────────────────────────────────────────────────────────────
+
+def _csv_b64(headers, rows):
+    import csv, io, base64
+    out = io.StringIO()
+    w = csv.writer(out, quoting=csv.QUOTE_ALL)
+    w.writerow(headers)
+    for r in rows:
+        w.writerow(r)
+    txt = out.getvalue()
+    return base64.b64encode(("﻿" + txt).encode("utf-8")).decode("ascii")
+
+
+@frappe.whitelist()
+def export_besoins(scope="soumis", annee=None):
+    """Exporte en CSV soit les besoins SOUMIS, soit les formations SÉLECTIONNÉES.
+
+    scope = 'soumis'        -> toutes les lignes de besoin soumises (par équipe)
+            'selectionnes'  -> les formations retenues par le DG (retenu_dg=1)
+    """
+    _check_role()
+    from frappe.utils import cint, flt as _flt
+
+    if scope == "selectionnes":
+        cond = "i.retenu_dg = 1"
+        params = {}
+        if annee:
+            cond += " AND p.annee = %(a)s"
+            params["a"] = cint(annee)
+        rows = frappe.db.sql(
+            f"""SELECT i.equipe, i.intitule, i.organisme, i.cout, i.priorite,
+                       i.nb_participants, i.statut_suivi, p.annee, p.name AS plan
+                FROM `tabPlan Formation Item` i
+                JOIN `tabPlan de Formation` p ON p.name = i.parent
+                WHERE {cond}
+                ORDER BY i.equipe, i.intitule""", params, as_dict=True) or []
+        headers = ["Équipe", "Intitulé", "Organisme", "Coût (XOF)", "Priorité",
+                   "Nb participants", "Statut suivi", "Année", "Plan"]
+        data = [[r.equipe, r.intitule, r.organisme or "", int(_flt(r.cout)), r.priorite or "",
+                 r.nb_participants or "", r.statut_suivi or "", r.annee, r.plan] for r in rows]
+        fname = "formations-selectionnees"
+    else:
+        cond = "b.statut IN ('Soumis à la RH', 'En revue RH', 'Traité')"
+        params = {}
+        if annee:
+            cond += " AND b.annee = %(a)s"
+            params["a"] = cint(annee)
+        rows = frappe.db.sql(
+            f"""SELECT b.equipe, b.chef_equipe_name, b.annee, b.trimestre, b.statut,
+                       i.intitule, i.competence, i.priorite, i.nb_participants, i.statut_rh
+                FROM `tabBesoin Formation Item` i
+                JOIN `tabBesoin de Formation` b ON b.name = i.parent
+                WHERE {cond}
+                ORDER BY b.equipe, i.idx""", params, as_dict=True) or []
+        headers = ["Équipe", "Chef", "Année", "Trimestre", "Statut besoin",
+                   "Intitulé", "Compétence", "Priorité", "Nb participants", "Statut RH"]
+        data = [[r.equipe, r.chef_equipe_name or "", r.annee, r.trimestre or "", r.statut,
+                 r.intitule, r.competence or "", r.priorite or "", r.nb_participants or "",
+                 r.statut_rh or ""] for r in rows]
+        fname = "besoins-formation-soumis"
+
+    return {
+        "filename": f"{fname}-{frappe.utils.today()}.csv",
+        "content_base64": _csv_b64(headers, data),
+        "rows": len(data),
+    }
+
+
+# ───────────────────────────────────────────────────────────────────────────
+#  GÉNÉRATION / ENVOI DU LIEN D'EXPRESSION DE BESOIN AUX CHEFS D'ÉQUIPE
+# ───────────────────────────────────────────────────────────────────────────
+
+@frappe.whitelist()
+def get_chefs_for_links():
+    """Liste des équipes + chef + email, pour l'envoi du lien d'expression de
+    besoin. has_email indique si on peut mailer automatiquement."""
+    _check_role()
+    if not _exists("Equipe KYA"):
+        return {"link": frappe.utils.get_url("/besoin-formation"), "chefs": []}
+    chefs = []
+    for q in frappe.get_all("Equipe KYA", fields=["name", "nom_equipe", "chef_equipe", "chef_equipe_name", "departement"]):
+        email = ""
+        if q.chef_equipe:
+            uid = frappe.db.get_value("Employee", q.chef_equipe, "user_id")
+            email = (frappe.db.get_value("Employee", q.chef_equipe, "personal_email") or uid or "")
+        chefs.append({
+            "equipe": q.nom_equipe or q.name, "departement": q.departement or "",
+            "chef": q.chef_equipe_name or "", "email": email, "has_email": bool(email),
+        })
+    return {"link": frappe.utils.get_url("/besoin-formation"), "chefs": chefs}
+
+
+@frappe.whitelist()
+def send_besoin_links(mode="all", emails=None, annee=None):
+    """Envoie le lien du formulaire d'expression de besoin aux chefs d'équipe.
+
+    mode = 'all'  -> tous les chefs d'équipe ayant un email
+           'list' -> uniquement les adresses fournies (emails = liste/CSV)
+    Retour : {sent, skipped} ; skipped = équipes sans email (mode all).
+    """
+    _check_role()
+    link = frappe.utils.get_url("/besoin-formation")
+    annee = annee or frappe.utils.now_datetime().year
+    subject = f"Expression des besoins de formation {annee} — KYA-Energy Group"
+
+    def _body(chef_name=""):
+        return (
+            f"Bonjour {chef_name or ''},\n\n"
+            f"Dans le cadre du plan de formation {annee}, merci d'exprimer les "
+            f"besoins de formation de votre équipe via le formulaire ci-dessous :\n"
+            f"{link}\n\n"
+            f"Indiquez votre équipe, les formations souhaitées et leur priorité, "
+            f"puis soumettez à la RH.\n\nMerci,\nRessources Humaines — KYA-Energy Group"
+        )
+
+    sent, skipped = [], []
+    if mode == "list":
+        if isinstance(emails, str):
+            emails = [e.strip() for e in emails.replace(";", ",").replace("\n", ",").split(",") if e.strip()]
+        for em in (emails or []):
+            frappe.sendmail(recipients=[em], subject=subject, message=_body().replace("\n", "<br>"))
+            sent.append(em)
+    else:  # all
+        data = get_chefs_for_links()
+        for c in data["chefs"]:
+            if c["email"]:
+                frappe.sendmail(recipients=[c["email"]], subject=subject,
+                                message=_body(c["chef"]).replace("\n", "<br>"))
+                sent.append(c["email"])
+            else:
+                skipped.append(c["equipe"])
+    return {"sent": sent, "skipped": skipped, "count_sent": len(sent),
+            "count_skipped": len(skipped), "link": link}
