@@ -6,7 +6,9 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "besoin_exprime",
   "intitule",
+  "objectif",
   "competence",
   "priorite",
   "employes_concernes",
@@ -16,11 +18,13 @@
   "motif_rh"
  ],
  "fields": [
-  {"fieldname": "intitule", "fieldtype": "Data", "in_list_view": 1, "label": "Intitulé de la formation", "reqd": 1, "columns": 2},
-  {"fieldname": "competence", "fieldtype": "Data", "label": "Compétence visée", "in_list_view": 1, "columns": 2},
+  {"fieldname": "besoin_exprime", "fieldtype": "Small Text", "label": "Besoin exprimé"},
+  {"fieldname": "intitule", "fieldtype": "Data", "in_list_view": 1, "label": "Action de formation proposée", "reqd": 1, "columns": 3},
+  {"fieldname": "objectif", "fieldtype": "Small Text", "label": "Objectif de la formation"},
+  {"fieldname": "competence", "fieldtype": "Data", "label": "Compétence attendue", "in_list_view": 1, "columns": 2},
   {"fieldname": "priorite", "fieldtype": "Select", "label": "Priorité", "options": "Haute\nMoyenne\nBasse", "default": "Moyenne", "in_list_view": 1, "columns": 1},
-  {"fieldname": "employes_concernes", "fieldtype": "Small Text", "label": "Employés concernés (ou toute l'équipe)"},
-  {"fieldname": "nb_participants", "fieldtype": "Int", "label": "Nombre de participants"},
+  {"fieldname": "employes_concernes", "fieldtype": "Small Text", "label": "Bénéficiaires (employés concernés)", "in_list_view": 1, "columns": 2},
+  {"fieldname": "nb_participants", "fieldtype": "Int", "label": "Nombre de participants", "in_list_view": 1, "columns": 1},
   {"fieldname": "justification", "fieldtype": "Small Text", "label": "Pourquoi / Justification", "reqd": 1},
   {"fieldname": "statut_rh", "fieldtype": "Select", "label": "Décision RH", "options": "En attente\nRetenu\nÉcarté", "default": "En attente"},
   {"fieldname": "motif_rh", "fieldtype": "Small Text", "label": "Motif RH (si écarté)"}

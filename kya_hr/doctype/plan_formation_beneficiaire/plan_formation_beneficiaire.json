@@ -1,0 +1,38 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "creation": "2026-06-17 18:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "formation_ref",
+  "equipe",
+  "employee",
+  "employee_name",
+  "statut",
+  "date_realisation",
+  "attestation",
+  "note"
+ ],
+ "fields": [
+  {"fieldname": "formation_ref", "fieldtype": "Data", "label": "Action de formation", "in_list_view": 1, "columns": 3, "reqd": 1},
+  {"fieldname": "equipe", "fieldtype": "Link", "label": "Équipe", "options": "Equipe KYA", "in_list_view": 1, "columns": 2},
+  {"fieldname": "employee", "fieldtype": "Link", "label": "Employé bénéficiaire", "options": "Employee", "in_list_view": 1, "columns": 2, "reqd": 1},
+  {"fieldname": "employee_name", "fieldtype": "Data", "label": "Nom", "fetch_from": "employee.employee_name", "read_only": 1},
+  {"fieldname": "statut", "fieldtype": "Select", "label": "Suivi", "options": "À planifier\nConvoqué\nEn cours\nTerminé\nAnnulé", "default": "À planifier", "in_list_view": 1, "columns": 1},
+  {"fieldname": "date_realisation", "fieldtype": "Date", "label": "Date de réalisation"},
+  {"fieldname": "attestation", "fieldtype": "Attach", "label": "Attestation"},
+  {"fieldname": "note", "fieldtype": "Small Text", "label": "Note"}
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-06-17 18:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "KYA HR",
+ "name": "Plan Formation Beneficiaire",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "idx",
+ "sort_order": "ASC"
+}

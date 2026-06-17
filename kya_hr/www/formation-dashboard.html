@@ -109,6 +109,25 @@ body { background: var(--kya-bg) !important; }
       </table>
     </div>
   </div>
+
+  <!-- SUIVI PAR EMPLOYÉ BÉNÉFICIAIRE -->
+  <div class="kya-panel" id="panel-benef">
+    <div class="kya-panel-head" style="flex-wrap:wrap; gap:.5rem;">
+      <h3><i class="bi bi-people text-success"></i> Suivi par employé bénéficiaire</h3>
+      <div class="d-flex gap-2 align-items-center flex-wrap">
+        <select id="benef-plan-select" class="form-select form-select-sm" style="max-width:320px;" onchange="loadBeneficiaires()"></select>
+        <button class="btn btn-sm btn-light" onclick="ouvrirAjoutBenef()"><i class="bi bi-person-plus"></i> Ajouter bénéficiaire</button>
+        <button class="btn btn-sm btn-light" onclick="exportBeneficiaires()"><i class="bi bi-file-earmark-excel"></i> Export suivi</button>
+      </div>
+    </div>
+    <div id="benef-summary" class="px-3 pt-2 small text-muted"></div>
+    <div style="max-height:480px; overflow-y:auto;">
+      <table class="kya-table">
+        <thead><tr><th>Action de formation</th><th>Équipe</th><th>Employé</th><th>Suivi</th><th>Date réalisation</th><th></th></tr></thead>
+        <tbody id="tbl-benef"><tr><td colspan="6" class="kya-loader">Sélectionnez un plan…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -323,6 +342,104 @@ async function validateDgSelection(){
     loadOverview(); loadPlans(); loadPlansForDg();
   }catch(e){ alert('Erreur de validation : '+e.message); }
 }
-document.addEventListener('DOMContentLoaded', ()=>{ loadOverview(); loadBesoins(); loadPlans(); loadPlansForDg(); loadSuivi(); });
+/* ─── Suivi par employé bénéficiaire ─── */
+const BENEF_STATUTS=['À planifier','Convoqué','En cours','Terminé','Annulé'];
+async function loadBenefPlans(){
+  const sel=document.getElementById('benef-plan-select');
+  try{
+    const rows=await callApi('kya_hr.api.formation_dashboard.get_plans');
+    if(!rows||!rows.length){ sel.innerHTML='<option value="">Aucun plan</option>'; return; }
+    sel.innerHTML='<option value="">— Choisir un plan —</option>'+rows.map(r=>'<option value="'+r.name+'">'+r.name+' · '+(r.titre||'')+' ('+r.statut+')</option>').join('');
+  }catch(e){ sel.innerHTML='<option value="">Erreur</option>'; }
+}
+async function loadBeneficiaires(){
+  const plan=document.getElementById('benef-plan-select').value;
+  const tb=document.getElementById('tbl-benef'), sm=document.getElementById('benef-summary');
+  if(!plan){ tb.innerHTML='<tr><td colspan="6" class="kya-loader">Sélectionnez un plan…</td></tr>'; sm.textContent=''; return; }
+  tb.innerHTML='<tr><td colspan="6" class="kya-loader">Chargement…</td></tr>';
+  try{
+    const d=await callApi('kya_hr.api.formation_dashboard.get_beneficiaires', {plan});
+    sm.innerHTML='<b>'+d.nb+'</b> bénéficiaire(s) · <b class="text-success">'+d.nb_termines+'</b> formé(s)';
+    if(!d.beneficiaires.length){ tb.innerHTML='<tr><td colspan="6" class="kya-loader">Aucun bénéficiaire. Compilez un plan (sème depuis les besoins) ou ajoutez-en.</td></tr>'; return; }
+    tb.innerHTML=d.beneficiaires.map(b=>{
+      const opts=BENEF_STATUTS.map(s=>'<option'+(s===b.statut?' selected':'')+'>'+s+'</option>').join('');
+      return '<tr data-row="'+b.row+'">'
+        +'<td>'+(b.formation_ref||'—')+'</td><td>'+(b.equipe||'—')+'</td>'
+        +'<td>'+(b.employee_name||b.employee||'—')+'</td>'
+        +'<td><select class="form-select form-select-sm bf-statut" style="min-width:130px;">'+opts+'</select></td>'
+        +'<td><input type="date" class="form-control form-control-sm bf-date" value="'+(b.date_realisation||'')+'" style="min-width:140px;"></td>'
+        +'<td class="text-nowrap">'
+        +'<button class="btn btn-sm btn-success" title="Enregistrer le suivi" onclick="saveBenef(this)"><i class="bi bi-check-lg"></i></button> '
+        +'<button class="btn btn-sm btn-outline-danger" title="Retirer" onclick="removeBenef(this)"><i class="bi bi-x-lg"></i></button>'
+        +'</td></tr>';
+    }).join('');
+  }catch(e){ tb.innerHTML='<tr><td colspan="6" class="kya-loader text-danger">Erreur: '+e.message+'</td></tr>'; }
+}
+async function saveBenef(btn){
+  const plan=document.getElementById('benef-plan-select').value;
+  const tr=btn.closest('tr'), row=tr.dataset.row;
+  const statut=tr.querySelector('.bf-statut').value, date=tr.querySelector('.bf-date').value;
+  btn.disabled=true;
+  try{
+    const r=await callApiPost('kya_hr.api.formation_dashboard.set_beneficiaire_statut', {plan, row, statut, date_realisation:date});
+    document.getElementById('benef-summary').innerHTML='<b>'+r.nb+'</b> bénéficiaire(s) · <b class="text-success">'+r.nb_termines+'</b> formé(s)';
+    setResult('<i class="bi bi-check-circle"></i> Suivi mis à jour.'); loadOverview();
+  }catch(e){ setResult('Erreur : '+e.message, false); }
+  btn.disabled=false;
+}
+async function removeBenef(btn){
+  const plan=document.getElementById('benef-plan-select').value, row=btn.closest('tr').dataset.row;
+  if(!confirm('Retirer ce bénéficiaire du suivi ?')) return;
+  try{ await callApiPost('kya_hr.api.formation_dashboard.remove_beneficiaire', {plan, row}); loadBeneficiaires(); }
+  catch(e){ setResult('Erreur : '+e.message, false); }
+}
+async function ouvrirAjoutBenef(){
+  const plan=document.getElementById('benef-plan-select').value;
+  if(!plan){ setResult('Choisissez d’abord un plan.', false); return; }
+  let formations=[];
+  try{ formations=await callApi('kya_hr.api.formation_dashboard.get_plan_formations', {plan}); }
+  catch(e){ setResult('Erreur : '+e.message, false); return; }
+  if(!formations.length){ setResult('Ce plan n’a pas encore d’action de formation.', false); return; }
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:2000;display:flex;align-items:center;justify-content:center;';
+  overlay.innerHTML='<div style="background:#fff;border-radius:12px;max-width:460px;width:92%;padding:1.3rem;">'
+    +'<h5 class="mb-3"><i class="bi bi-person-plus"></i> Ajouter un bénéficiaire</h5>'
+    +'<label class="form-label small fw-bold">Action de formation</label>'
+    +'<select id="ab-form" class="form-select form-select-sm mb-2">'+formations.map(f=>'<option value="'+encodeURIComponent(f.intitule)+'" data-eq="'+(f.equipe||'')+'">'+f.intitule+(f.equipe?(' · '+f.equipe):'')+'</option>').join('')+'</select>'
+    +'<label class="form-label small fw-bold">Employé</label>'
+    +'<select id="ab-emp" class="form-select form-select-sm mb-3"><option>Chargement…</option></select>'
+    +'<div class="d-flex justify-content-end gap-2"><button class="btn btn-sm btn-light" id="ab-cancel">Annuler</button><button class="btn btn-sm btn-success" id="ab-ok">Ajouter</button></div></div>';
+  document.body.appendChild(overlay);
+  async function loadEmps(){
+    const o=document.getElementById('ab-form').selectedOptions[0];
+    const eq=o?o.dataset.eq:'';
+    const emp=document.getElementById('ab-emp');
+    try{ const list=await callApi('kya_hr.api.formation_dashboard.get_team_employees', eq?{equipe:eq}:{});
+      emp.innerHTML=(list||[]).map(e=>'<option value="'+e.name+'">'+(e.employee_name||e.name)+(e.designation?(' — '+e.designation):'')+'</option>').join('')||'<option value="">Aucun employé</option>';
+    }catch(e){ emp.innerHTML='<option value="">Erreur</option>'; }
+  }
+  document.getElementById('ab-form').onchange=loadEmps; loadEmps();
+  document.getElementById('ab-cancel').onclick=()=>overlay.remove();
+  document.getElementById('ab-ok').onclick=async()=>{
+    const formation_ref=decodeURIComponent(document.getElementById('ab-form').value);
+    const eq=document.getElementById('ab-form').selectedOptions[0].dataset.eq;
+    const employee=document.getElementById('ab-emp').value;
+    if(!employee){ return; }
+    try{ const r=await callApiPost('kya_hr.api.formation_dashboard.add_beneficiaire', {plan, formation_ref, employee, equipe:eq});
+      overlay.remove(); if(r.ok){ setResult('<i class="bi bi-check-circle"></i> Bénéficiaire ajouté.'); } else { setResult(r.msg, false); } loadBeneficiaires();
+    }catch(e){ overlay.remove(); setResult('Erreur : '+e.message, false); }
+  };
+}
+async function exportBeneficiaires(){
+  const plan=document.getElementById('benef-plan-select').value;
+  setResult('<i class="bi bi-arrow-repeat"></i> Export en cours…');
+  try{
+    const r=await callApi('kya_hr.api.formation_dashboard.export_beneficiaires', plan?{plan}:{});
+    if(!r.rows){ setResult('Aucun bénéficiaire à exporter.', false); return; }
+    _downloadB64(r.content_base64, r.filename, 'text/csv');
+    setResult('<i class="bi bi-check-circle"></i> '+r.rows+' ligne(s) exportée(s) — '+r.filename);
+  }catch(e){ setResult('Erreur export : '+e.message, false); }
+}
+document.addEventListener('DOMContentLoaded', ()=>{ loadOverview(); loadBesoins(); loadPlans(); loadPlansForDg(); loadSuivi(); loadBenefPlans(); });
 </script>
 {%- endblock -%}

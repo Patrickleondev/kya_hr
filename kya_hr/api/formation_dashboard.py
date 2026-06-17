@@ -276,16 +276,30 @@ def export_besoins(scope="soumis", annee=None):
             cond += " AND p.annee = %(a)s"
             params["a"] = cint(annee)
         rows = frappe.db.sql(
-            f"""SELECT i.equipe, i.intitule, i.organisme, i.cout, i.priorite,
-                       i.nb_participants, i.statut_suivi, p.annee, p.name AS plan
+            f"""SELECT i.equipe, i.intitule, i.nature_action, i.objectifs_vises,
+                       i.resultats_attendus, i.source_deploiement, i.organisme,
+                       i.date_debut, i.date_fin, i.modalite,
+                       i.cout_direct, i.cout_accessoire, i.cout,
+                       i.priorite, i.nb_participants, i.statut_suivi, p.annee, p.name AS plan
                 FROM `tabPlan Formation Item` i
                 JOIN `tabPlan de Formation` p ON p.name = i.parent
                 WHERE {cond}
                 ORDER BY i.equipe, i.intitule""", params, as_dict=True) or []
-        headers = ["Équipe", "Intitulé", "Organisme", "Coût (XOF)", "Priorité",
-                   "Nb participants", "Statut suivi", "Année", "Plan"]
-        data = [[r.equipe, r.intitule, r.organisme or "", int(_flt(r.cout)), r.priorite or "",
-                 r.nb_participants or "", r.statut_suivi or "", r.annee, r.plan] for r in rows]
+        # Colonnes alignées sur le fichier RH compilé (PROPOSITIONS_FORMATIONS REVU)
+        headers = ["ORD", "Bénéficiaires (Équipe)", "Action de formation",
+                   "Nature de l'action", "Objectifs visés", "Résultats attendus",
+                   "Source de déploiement", "Formateur", "Période",
+                   "Modalité pédagogique", "Coût direct (XOF)", "Coût accessoire (XOF)",
+                   "Coût total (XOF)", "Année", "Plan"]
+        data = []
+        for n, r in enumerate(rows, 1):
+            periode = " → ".join([str(x) for x in (r.date_debut, r.date_fin) if x])
+            data.append([n, r.equipe, r.intitule, r.nature_action or "",
+                         r.objectifs_vises or "", r.resultats_attendus or "",
+                         r.source_deploiement or "", r.organisme or "", periode,
+                         r.modalite or "", int(_flt(r.cout_direct)),
+                         int(_flt(r.cout_accessoire)), int(_flt(r.cout)),
+                         r.annee, r.plan])
         fname = "formations-selectionnees"
     else:
         cond = "b.statut IN ('Soumis à la RH', 'En revue RH', 'Traité')"
@@ -295,15 +309,20 @@ def export_besoins(scope="soumis", annee=None):
             params["a"] = cint(annee)
         rows = frappe.db.sql(
             f"""SELECT b.equipe, b.chef_equipe_name, b.annee, b.trimestre, b.statut,
-                       i.intitule, i.competence, i.priorite, i.nb_participants, i.statut_rh
+                       i.besoin_exprime, i.intitule, i.objectif, i.competence,
+                       i.employes_concernes, i.priorite, i.nb_participants, i.statut_rh
                 FROM `tabBesoin Formation Item` i
                 JOIN `tabBesoin de Formation` b ON b.name = i.parent
                 WHERE {cond}
                 ORDER BY b.equipe, i.idx""", params, as_dict=True) or []
+        # Colonnes alignées sur le fichier RH envoyé aux chefs (FORMATIONS PRÉVUES)
         headers = ["Équipe", "Chef", "Année", "Trimestre", "Statut besoin",
-                   "Intitulé", "Compétence", "Priorité", "Nb participants", "Statut RH"]
+                   "Besoin exprimé", "Action proposée", "Objectif",
+                   "Compétence attendue", "Bénéficiaires", "Priorité",
+                   "Nb participants", "Décision RH"]
         data = [[r.equipe, r.chef_equipe_name or "", r.annee, r.trimestre or "", r.statut,
-                 r.intitule, r.competence or "", r.priorite or "", r.nb_participants or "",
+                 r.besoin_exprime or "", r.intitule, r.objectif or "", r.competence or "",
+                 r.employes_concernes or "", r.priorite or "", r.nb_participants or "",
                  r.statut_rh or ""] for r in rows]
         fname = "besoins-formation-soumis"
 
@@ -379,3 +398,133 @@ def send_besoin_links(mode="all", emails=None, annee=None):
                 skipped.append(c["equipe"])
     return {"sent": sent, "skipped": skipped, "count_sent": len(sent),
             "count_skipped": len(skipped), "link": link}
+
+
+# ───────────────────────────────────────────────────────────────────────────
+#  SUIVI PAR EMPLOYÉ BÉNÉFICIAIRE
+#  La RH gère, par action de formation retenue, la liste des employés
+#  bénéficiaires et marque « Terminé » individuellement (suivi post-formation).
+# ───────────────────────────────────────────────────────────────────────────
+
+@frappe.whitelist()
+def get_plan_formations(plan: str) -> list[dict]:
+    """Actions de formation retenues d'un plan (pour alimenter les sélecteurs)."""
+    _check_role()
+    doc = frappe.get_doc("Plan de Formation", plan)
+    return [{"idx": l.idx, "intitule": l.intitule, "equipe": l.equipe,
+             "retenu_dg": int(l.retenu_dg or 0)} for l in (doc.lignes or [])]
+
+
+@frappe.whitelist()
+def get_team_employees(equipe: str = None) -> list[dict]:
+    """Employés actifs (d'une équipe si fournie) pour ajouter un bénéficiaire."""
+    _check_role()
+    filters = {"status": "Active"}
+    if equipe:
+        filters["custom_kya_equipe"] = equipe
+    return frappe.get_all("Employee", filters=filters,
+                          fields=["name", "employee_name", "designation"],
+                          order_by="employee_name asc") or []
+
+
+@frappe.whitelist()
+def get_beneficiaires(plan: str) -> dict:
+    """Liste des bénéficiaires d'un plan, regroupables par action de formation."""
+    _check_role()
+    doc = frappe.get_doc("Plan de Formation", plan)
+    benes = [{
+        "row": b.name, "formation_ref": b.formation_ref, "equipe": b.equipe,
+        "employee": b.employee, "employee_name": b.employee_name,
+        "statut": b.statut, "date_realisation": str(b.date_realisation or ""),
+        "note": b.note or "",
+    } for b in (doc.beneficiaires or [])]
+    return {"plan": plan, "statut": doc.statut,
+            "nb": doc.nb_beneficiaires, "nb_termines": doc.nb_beneficiaires_termines,
+            "beneficiaires": benes}
+
+
+@frappe.whitelist()
+def add_beneficiaire(plan: str, formation_ref: str, employee: str, equipe: str = None) -> dict:
+    """Ajoute un employé bénéficiaire à une action de formation du plan (RH)."""
+    _check_role()
+    doc = frappe.get_doc("Plan de Formation", plan)
+    for b in (doc.beneficiaires or []):
+        if b.formation_ref == formation_ref and b.employee == employee:
+            return {"ok": False, "msg": "Bénéficiaire déjà présent.", "nb": doc.nb_beneficiaires}
+    doc.append("beneficiaires", {
+        "formation_ref": formation_ref, "employee": employee,
+        "equipe": equipe, "statut": "À planifier",
+    })
+    doc.save(ignore_permissions=True)
+    frappe.db.commit()
+    return {"ok": True, "nb": doc.nb_beneficiaires}
+
+
+@frappe.whitelist()
+def set_beneficiaire_statut(plan: str, row: str, statut: str,
+                            date_realisation: str = None, note: str = None) -> dict:
+    """Met à jour le suivi d'un bénéficiaire (ex. marquer « Terminé »)."""
+    _check_role()
+    doc = frappe.get_doc("Plan de Formation", plan)
+    found = False
+    for b in (doc.beneficiaires or []):
+        if b.name == row:
+            b.statut = statut
+            if date_realisation is not None:
+                b.date_realisation = date_realisation or None
+            if note is not None:
+                b.note = note
+            if statut == "Terminé" and not b.date_realisation:
+                b.date_realisation = frappe.utils.today()
+            found = True
+            break
+    if not found:
+        frappe.throw("Bénéficiaire introuvable.")
+    doc.save(ignore_permissions=True)
+    frappe.db.commit()
+    return {"ok": True, "nb_termines": doc.nb_beneficiaires_termines,
+            "nb": doc.nb_beneficiaires}
+
+
+@frappe.whitelist()
+def remove_beneficiaire(plan: str, row: str) -> dict:
+    """Retire un bénéficiaire du plan (RH)."""
+    _check_role()
+    doc = frappe.get_doc("Plan de Formation", plan)
+    doc.beneficiaires = [b for b in (doc.beneficiaires or []) if b.name != row]
+    doc.save(ignore_permissions=True)
+    frappe.db.commit()
+    return {"ok": True, "nb": doc.nb_beneficiaires}
+
+
+@frappe.whitelist()
+def export_beneficiaires(plan: str = None, annee=None) -> dict:
+    """Exporte le suivi par employé (CSV) — tableau de bord post-formation RH."""
+    _check_role()
+    from frappe.utils import cint
+    cond = "1=1"
+    params = {}
+    if plan:
+        cond += " AND b.parent = %(p)s"
+        params["p"] = plan
+    if annee:
+        cond += " AND p.annee = %(a)s"
+        params["a"] = cint(annee)
+    rows = frappe.db.sql(
+        f"""SELECT p.name AS plan, p.annee, b.equipe, b.formation_ref,
+                   b.employee_name, b.statut, b.date_realisation
+            FROM `tabPlan Formation Beneficiaire` b
+            JOIN `tabPlan de Formation` p ON p.name = b.parent
+            WHERE {cond}
+            ORDER BY b.equipe, b.formation_ref, b.employee_name""",
+        params, as_dict=True) or []
+    headers = ["Plan", "Année", "Équipe", "Action de formation", "Employé",
+               "Suivi", "Date de réalisation"]
+    data = [[r.plan, r.annee, r.equipe or "", r.formation_ref or "",
+             r.employee_name or "", r.statut or "", str(r.date_realisation or "")]
+            for r in rows]
+    return {
+        "filename": f"suivi-formation-employes-{frappe.utils.today()}.csv",
+        "content_base64": _csv_b64(headers, data),
+        "rows": len(data),
+    }
