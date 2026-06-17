@@ -104,6 +104,16 @@ LAYOUTS: dict[str, dict[str, tuple[int, int]]] = {
         "employee_name": (1, 3),
         "fonction": (1, 3),
     },
+    # 3+2+2+1+1 = 9 (le chef saisit aussi concernés + nb ; justification via crayon)
+    "Besoin Formation Item": {
+        "intitule": (1, 3),
+        "competence": (1, 2),
+        "employes_concernes": (1, 2),
+        "nb_participants": (1, 1),
+        "priorite": (1, 1),
+        "justification": (0, 3),
+        "statut_rh": (0, 1),
+    },
     # 2+2+1+2+3 = 10 (colonnes etaient toutes a 0)
     "Planning Conge Periode": {
         "date_debut": (1, 2),
