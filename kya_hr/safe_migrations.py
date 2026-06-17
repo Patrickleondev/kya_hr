@@ -74,6 +74,7 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.maintenance.fix_leave_workflow_conditions.execute", "Conditions workflow congés safe-eval (frappe.get_roles indisponible → crash 'Congé pris' ; remplacé par frappe.db.get_list Has Role)"),
     ("kya_hr.maintenance.ensure_link_shortcuts.execute", "Chaque lien d'espace a un raccourci (Department/Designation/Formation/Equipe/Templates… + dashboards RH/Stocks/Achats) ; enchaîne sync_workspace_shortcuts"),
     ("kya_hr.maintenance.setup_supplier_mail_buttons.execute", "Boutons desk « Envoyer au fournisseur » sur Bon Commande KYA + Appel Offre KYA (revue avant envoi, PDF joint, gestion sans email)"),
+    ("kya_hr.maintenance.fix_formation_equipe.execute", "Besoin de Formation : champ équipe = Equipe KYA (pas Département) ; département + chef déduits de l'équipe"),
 ]
 
 AFTER_INSTALL: list[tuple[str, str]] = [
