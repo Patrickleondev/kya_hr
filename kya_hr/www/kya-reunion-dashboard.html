@@ -64,13 +64,13 @@ table.kya-table { width: 100%; border-collapse: collapse; font-size: 13px; }
         <p>Agoè-Logopé, Lomé - Togo</p>
       </div>
       <div class="kya-doc-meta">
-        <b>Dashboard Réunions centralisé</b><br>
+        <b>Dashboard Réunions &amp; Visites</b><br>
         Synchronisé depuis KYA-Digi-Presence<br>
         <span class="kya-live-badge" id="live-badge"><span class="dot"></span>EN DIRECT</span>
       </div>
     </div>
     <div class="kya-title-band">
-      <h2>Réunions &amp; Émargements — Vue Direction</h2>
+      <h2>Réunions, Émargements &amp; Visites — Vue Direction</h2>
       <div class="kya-period-selector">
         Période :
         <a href="?period=7" class="{% if period == 7 %}active{% endif %}">7 jours</a>
@@ -184,6 +184,60 @@ table.kya-table { width: 100%; border-collapse: collapse; font-size: 13px; }
     </div>
     {% else %}
     <div class="kya-help">Aucun log de synchronisation pour le moment.</div>
+    {% endif %}
+  </div>
+
+  <div class="kya-section">
+    <h3>Visites des invités — accueil ({{ visits|length }})</h3>
+    <div class="kya-grid" style="margin: 14px;">
+      <div class="kya-kpi info">
+        <div class="label">Visites ({{ period }}j)</div>
+        <div class="value">{{ stats.visits_total }}</div>
+      </div>
+      <div class="kya-kpi success">
+        <div class="label">Présents (sans départ)</div>
+        <div class="value">{{ stats.visits_presents }}</div>
+      </div>
+    </div>
+    {% if visits %}
+    <div class="kya-table-wrap">
+      <table class="kya-table">
+        <thead>
+          <tr>
+            <th>Visiteur</th>
+            <th>Profession</th>
+            <th>Service visité</th>
+            <th>Personne visitée</th>
+            <th>Motif</th>
+            <th>Arrivée</th>
+            <th>Départ</th>
+            <th>État</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for v in visits %}
+          <tr>
+            <td><a href="/app/kya-guest-visit/{{ v.name }}"><b>{{ v.nom_complet }}</b></a></td>
+            <td>{{ v.profession or '' }}</td>
+            <td>{{ v.service_id or '' }}</td>
+            <td>{{ v.personne_visitee or '' }}</td>
+            <td>{{ v.motif or '' }}</td>
+            <td>{{ v.check_in_label }}</td>
+            <td>{{ v.check_out_label }}</td>
+            <td>
+              {% if v.present %}
+              <span class="kya-badge actif">Présent</span>
+              {% else %}
+              <span class="kya-badge cloture">{{ v.statut or 'Sorti' }}</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="kya-help">Aucune visite enregistrée sur cette période.</div>
     {% endif %}
   </div>
 

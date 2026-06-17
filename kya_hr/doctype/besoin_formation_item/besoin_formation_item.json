@@ -1,0 +1,38 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "creation": "2026-06-16 12:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "intitule",
+  "competence",
+  "priorite",
+  "employes_concernes",
+  "nb_participants",
+  "justification",
+  "statut_rh",
+  "motif_rh"
+ ],
+ "fields": [
+  {"fieldname": "intitule", "fieldtype": "Data", "in_list_view": 1, "label": "Intitulé de la formation", "reqd": 1, "columns": 2},
+  {"fieldname": "competence", "fieldtype": "Data", "label": "Compétence visée", "in_list_view": 1, "columns": 2},
+  {"fieldname": "priorite", "fieldtype": "Select", "label": "Priorité", "options": "Haute\nMoyenne\nBasse", "default": "Moyenne", "in_list_view": 1, "columns": 1},
+  {"fieldname": "employes_concernes", "fieldtype": "Small Text", "label": "Employés concernés (ou toute l'équipe)"},
+  {"fieldname": "nb_participants", "fieldtype": "Int", "label": "Nombre de participants"},
+  {"fieldname": "justification", "fieldtype": "Small Text", "label": "Pourquoi / Justification", "reqd": 1},
+  {"fieldname": "statut_rh", "fieldtype": "Select", "label": "Décision RH", "options": "En attente\nRetenu\nÉcarté", "default": "En attente"},
+  {"fieldname": "motif_rh", "fieldtype": "Small Text", "label": "Motif RH (si écarté)"}
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-06-16 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "KYA HR",
+ "name": "Besoin Formation Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "idx",
+ "sort_order": "ASC"
+}

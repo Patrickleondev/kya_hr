@@ -186,6 +186,36 @@ def _route_for(spec, name):
     return f"{spec['route']}/{name}"
 
 
+# DocType -> route portal (employé). Construit depuis REQUEST_SPECS pour
+# rester cohérent avec les fiches digitalisées. Permet de transformer un
+# lien de notification "/app/..." (desk, inaccessible aux employés) en lien
+# portal cliquable depuis /mon-espace.
+_PORTAL_ROUTE_BY_DOCTYPE = {
+    spec["doctype"]: spec["route"].lstrip("/") for spec in REQUEST_SPECS
+}
+# Cas particuliers (pas dans REQUEST_SPECS) : redirection vers une section
+# de /mon-espace plutôt qu'une fiche dédiée.
+_PORTAL_SECTION_BY_DOCTYPE = {
+    "Tache Equipe": "/mon-espace#sec-tasks",
+    "Tache Equipe Attribution": "/mon-espace#sec-tasks",
+    "KYA Evaluation": "/mon-espace#sec-forms-pending",
+    "KYA Form Response": "/mon-espace#sec-forms-pending",
+}
+
+
+def _portal_url(doctype, docname, fallback="/mon-espace"):
+    """URL portal cliquable pour une notification/action.
+
+    Priorité : route de fiche portal (/route/name) > section mon-espace >
+    desk (/app/...) si l'utilisateur a accès au desk, sinon /mon-espace.
+    """
+    if doctype and doctype in _PORTAL_ROUTE_BY_DOCTYPE and docname:
+        return f"/{_PORTAL_ROUTE_BY_DOCTYPE[doctype]}/{docname}"
+    if doctype in _PORTAL_SECTION_BY_DOCTYPE:
+        return _PORTAL_SECTION_BY_DOCTYPE[doctype]
+    return fallback
+
+
 def _get_employee(user):
     if user == "Guest":
         return None
@@ -299,7 +329,7 @@ def _collect_form_notifications(employee):
                     "type": "evaluation",
                     "title": row.get("type_evaluation") or "Évaluation KYA",
                     "text": row.get("evalue_name") or "Évaluation à compléter",
-                    "url": f"/kya-eval?token={row.token}" if row.get("token") else f"/app/kya-evaluation/{row.name}",
+                    "url": f"/kya-eval?token={row.token}" if row.get("token") else "/mon-espace#sec-forms-pending",
                     "date": f"{row.get('trimestre') or ''} {row.get('annee') or ''}".strip(),
                     "state_class": "encours",
                 })
@@ -328,7 +358,7 @@ def _collect_system_notifications(user):
                     "type": "notification",
                     "title": row.get("subject") or "Notification",
                     "text": doctype or "Notification système",
-                    "url": f"/app/{frappe.scrub(doctype).replace('_', '-')}/{docname}" if doctype and docname else "/app/notification-log",
+                    "url": _portal_url(doctype, docname),
                     "date": row.get("creation"),
                     "state_class": "encours",
                 })
@@ -355,7 +385,7 @@ def _collect_pending_actions(user):
                     "type": "todo",
                     "title": row.get("description") or "Action à faire",
                     "status": row.get("priority") or "Ouvert",
-                    "url": f"/app/{frappe.scrub(ref_type).replace('_', '-')}/{ref_name}" if ref_type and ref_name else f"/app/todo/{row.name}",
+                    "url": _portal_url(ref_type, ref_name),
                     "date": row.get("date") or row.get("creation"),
                     "state_class": "encours",
                 })
@@ -382,7 +412,7 @@ def _collect_pending_actions(user):
                     "type": "workflow",
                     "title": ref_type or "Validation workflow",
                     "status": row.get("workflow_state") or row.get("status") or "À traiter",
-                    "url": f"/app/{frappe.scrub(ref_type).replace('_', '-')}/{ref_name}" if ref_type and ref_name else "/app/workflow-action",
+                    "url": _portal_url(ref_type, ref_name),
                     "date": row.get("creation"),
                     "state_class": "encours",
                 })

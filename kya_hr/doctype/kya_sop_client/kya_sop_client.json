@@ -62,7 +62,7 @@
    "fieldname": "mode_paiement",
    "fieldtype": "Select",
    "label": "Mode de Paiement",
-   "options": "Cash\nTransche\nLocation",
+   "options": "Cash\nTranche\nLocation",
    "reqd": 1,
    "in_list_view": 1
   },
@@ -145,14 +145,14 @@
    "fieldname": "section_echeancier",
    "fieldtype": "Section Break",
    "label": "Échéancier (Paiement par Tranche)",
-   "depends_on": "eval:doc.mode_paiement === 'Transhe' || doc.mode_paiement === 'Tranche'"
+   "depends_on": "eval:doc.mode_paiement === 'Tranche'"
   },
   {
    "fieldname": "echeancier",
    "fieldtype": "Table",
    "label": "Échéancier des Paiements",
    "options": "KYA SoP Echeancier Ligne",
-   "depends_on": "eval:doc.mode_paiement === 'Transhe' || doc.mode_paiement === 'Tranche'"
+   "depends_on": "eval:doc.mode_paiement === 'Tranche'"
   },
   {
    "fieldname": "section_location",

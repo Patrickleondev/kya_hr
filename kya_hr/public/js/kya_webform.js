@@ -401,6 +401,133 @@
         fields: ["signature_caissiere", "signature_comptable", "signature_dfc"],
         sigGrid: true
       }
+    ],
+    "sortie-vehicule": [
+      {
+        title: "VÉHICULE & CHAUFFEUR",
+        icon: "\u{1F697}",
+        fields: ["vehicle", "license_plate", "chauffeur", "demandeur"],
+        grid: { vehicle: "span 2", license_plate: "col", chauffeur: "col", demandeur: "span 2" }
+      },
+      {
+        title: "MISSION",
+        icon: "\u{1F4CD}",
+        fields: ["motif_mission", "destination", "date_depart", "date_retour_prevue"],
+        grid: { motif_mission: "span 2", destination: "span 2", date_depart: "col", date_retour_prevue: "col" }
+      },
+      {
+        title: "PASSAGERS",
+        icon: "\u{1F465}",
+        fields: ["passagers"]
+      },
+      {
+        title: "DÉPART / RETOUR (KM & CARBURANT)",
+        icon: "\u26FD",
+        fields: ["km_depart", "carburant_depart_pourcent", "km_retour", "carburant_retour_pourcent", "observations"],
+        grid: { km_depart: "col", carburant_depart_pourcent: "col", km_retour: "col", carburant_retour_pourcent: "col", observations: "span 2" }
+      }
+    ],
+    "plein-carburant": [
+      {
+        title: "VÉHICULE",
+        icon: "\u26FD",
+        fields: ["vehicle", "license_plate", "date_plein", "chauffeur", "km_actuel"],
+        grid: { vehicle: "span 2", license_plate: "col", date_plein: "col", chauffeur: "col", km_actuel: "col" }
+      },
+      {
+        title: "DÉTAILS DU PLEIN",
+        icon: "\u{1F9FE}",
+        fields: ["litres", "montant", "prix_litre", "plein_complet", "station", "paye_par", "observations"],
+        grid: { litres: "col", montant: "col", prix_litre: "col", plein_complet: "col", station: "col", paye_par: "col", observations: "span 2" }
+      }
+    ],
+    "entretien-vehicule": [
+      {
+        title: "VÉHICULE",
+        icon: "\u{1F527}",
+        fields: ["vehicle", "license_plate", "date_entretien", "statut"],
+        grid: { vehicle: "span 2", license_plate: "col", date_entretien: "col", statut: "span 2" }
+      },
+      {
+        title: "TRAVAUX",
+        icon: "\u{1F6E0}\uFE0F",
+        fields: ["type_entretien", "description", "km_actuel", "cout", "garage"],
+        grid: { type_entretien: "span 2", description: "span 2", km_actuel: "col", cout: "col", garage: "span 2" }
+      },
+      {
+        title: "PROCHAINE ÉCHÉANCE",
+        icon: "\u{1F4C5}",
+        fields: ["prochaine_echeance_date", "prochaine_echeance_km", "observations"],
+        grid: { prochaine_echeance_date: "col", prochaine_echeance_km: "col", observations: "span 2" }
+      }
+    ],
+    "inventaire-kya": [
+      {
+        title: "INFORMATIONS DE L’INVENTAIRE",
+        icon: "\u{1F4E6}",
+        fields: ["objet", "date_inventaire", "type_inventaire", "warehouse_filter", "responsable_nom", "statut"],
+        grid: { objet: "span 2", date_inventaire: "col", type_inventaire: "col", warehouse_filter: "span 2", responsable_nom: "col", statut: "col" }
+      },
+      {
+        title: "LIGNES D’INVENTAIRE",
+        icon: "\u{1F4DD}",
+        fields: ["items"]
+      },
+      {
+        title: "VALIDATIONS & SIGNATURES",
+        icon: "\u270D\uFE0F",
+        fields: ["signature_responsable", "signature_magasin"],
+        sigGrid: true
+      }
+    ],
+    "besoin-formation": [
+      {
+        title: "ÉQUIPE & PÉRIODE",
+        icon: "\u{1F465}",
+        fields: ["equipe", "chef_equipe", "annee", "trimestre"],
+        grid: { equipe: "col", chef_equipe: "col", annee: "col", trimestre: "col" }
+      },
+      {
+        title: "FORMATIONS SOUHAITÉES",
+        icon: "\u{1F393}",
+        fields: ["lignes"]
+      }
+    ],
+    "marche-kya": [
+      { title: "IDENTIFICATION DU MARCHÉ", icon: "\u{1F3E2}",
+        fields: ["nom_marche", "type_marche", "statut", "numero_marche", "client_beneficiaire", "objet_marche"],
+        grid: { nom_marche: "span 2", type_marche: "col", statut: "col", numero_marche: "col", client_beneficiaire: "col", objet_marche: "span 2" } },
+      { title: "PÉRIODE & TECHNIQUE", icon: "\u{1F4C5}",
+        fields: ["date_debut", "date_fin", "duree_jours", "puissance_kwc"],
+        grid: { date_debut: "col", date_fin: "col", duree_jours: "col", puissance_kwc: "col" } },
+      { title: "FACTURATION & BUDGET", icon: "\u{1F4B0}",
+        fields: ["montant_total_facture", "montant_avance_demarrage", "budget_previsionnel"],
+        grid: { montant_total_facture: "col", montant_avance_demarrage: "col", budget_previsionnel: "col" } },
+      { title: "COÛTS DE RÉALISATION", icon: "\u{1F6D2}",
+        fields: ["cout_supports_pv", "cout_supports_batteries", "cout_modules_pv", "cout_batteries", "cout_onduleurs", "cout_cables", "cout_terre", "cout_protection", "cout_accessoires_cablage", "cout_gestionnaire"],
+        grid: { cout_supports_pv: "col", cout_supports_batteries: "col", cout_modules_pv: "col", cout_batteries: "col", cout_onduleurs: "col", cout_cables: "col", cout_terre: "col", cout_protection: "col", cout_accessoires_cablage: "col", cout_gestionnaire: "col" } },
+      { title: "FRAIS DE MISSION", icon: "\u{1F69A}",
+        fields: ["frais_carburant", "frais_location_camion", "frais_perdiems", "frais_hebergement", "frais_autres"],
+        grid: { frais_carburant: "col", frais_location_camion: "col", frais_perdiems: "col", frais_hebergement: "col", frais_autres: "col" } },
+      { title: "SYNTHÈSE FINANCIÈRE", icon: "\u{1F4CA}",
+        fields: ["cout_total_realisation", "ecart_avance", "ecart_budget_previsionnel", "marge_brute", "taxes", "marge_nette", "commentaires"],
+        grid: { cout_total_realisation: "col", ecart_avance: "col", ecart_budget_previsionnel: "col", marge_brute: "col", taxes: "col", marge_nette: "col", commentaires: "span 2" } }
+    ],
+    "sop-client": [
+      { title: "INFORMATIONS CLIENT", icon: "\u{1F464}",
+        fields: ["nom_client", "type_client", "mode_paiement", "statut"],
+        grid: { nom_client: "span 2", type_client: "col", mode_paiement: "col", statut: "col" } },
+      { title: "INSTALLATION", icon: "\u2600\uFE0F",
+        fields: ["date_installation", "puissance_kw", "montant_total", "montant_avance"],
+        grid: { date_installation: "col", puissance_kw: "col", montant_total: "col", montant_avance: "col" } },
+      { title: "SUIVI DU SOLDE", icon: "\u{1F4B3}",
+        fields: ["solde_du", "date_prevue_solde", "statut_paiement", "observations"],
+        grid: { solde_du: "col", date_prevue_solde: "col", statut_paiement: "col", observations: "span 2" } },
+      { title: "ÉCHÉANCIER (PAIEMENT PAR TRANCHE)", icon: "\u{1F4C5}",
+        fields: ["echeancier"] },
+      { title: "CONTRAT DE LOCATION", icon: "\u{1F511}",
+        fields: ["montant_mensuel", "date_fin_location", "etat_paiement_location"],
+        grid: { montant_mensuel: "col", date_fin_location: "col" } }
     ]
   };
 
@@ -474,6 +601,41 @@
       title: "RETOUR DE MAT\u00c9RIEL AU MAGASIN",
       subtitle: "Achats et Stock",
       workflow: "Retourneur \u2192 Responsable Magasin"
+    },
+    "sortie-vehicule": {
+      title: "SORTIE / MISSION V\u00c9HICULE",
+      subtitle: "Logistique & Flotte",
+      workflow: "Saisie directe (Gestionnaire de Flotte / RH)"
+    },
+    "plein-carburant": {
+      title: "PLEIN DE CARBURANT",
+      subtitle: "Logistique & Flotte",
+      workflow: "Saisie directe (Gestionnaire de Flotte / RH)"
+    },
+    "entretien-vehicule": {
+      title: "ENTRETIEN / R\u00c9PARATION V\u00c9HICULE",
+      subtitle: "Logistique & Flotte",
+      workflow: "Saisie directe (Gestionnaire de Flotte / RH)"
+    },
+    "inventaire-kya": {
+      title: "FICHE D\u2019INVENTAIRE",
+      subtitle: "Stock & Inventaire",
+      workflow: "Responsable Inventaire \u2192 Responsable Magasin"
+    },
+    "besoin-formation": {
+      title: "EXPRESSION DE BESOINS DE FORMATION",
+      subtitle: "Ressources Humaines \u2014 Formation",
+      workflow: "Chef d\u2019\u00e9quipe \u2192 RH \u2192 Direction G\u00e9n\u00e9rale"
+    },
+    "marche-kya": {
+      title: "FICHE DE SUIVI DE MARCH\u00c9",
+      subtitle: "Comptabilit\u00e9 & Direction",
+      workflow: "Saisie & suivi (Comptable / DFC / Direction)"
+    },
+    "sop-client": {
+      title: "FICHE CLIENT SoP",
+      subtitle: "Portefeuille Clients \u2014 Comptabilit\u00e9",
+      workflow: "Saisie & suivi (Comptable / DFC)"
     }
   };
 
@@ -529,6 +691,10 @@
       signature_caissiere: null,
       signature_comptable: ["Accounts User", "Accounts Manager", "System Manager"],
       signature_dfc: ["Responsable Comptable", "System Manager"]
+    },
+    "inventaire-kya": {
+      signature_responsable: null,
+      signature_magasin: ["Stock Manager", "Stock User", "Chargé des Stocks", "System Manager"]
     }
   };
 

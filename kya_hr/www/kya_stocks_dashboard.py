@@ -8,9 +8,11 @@ import frappe
 
 
 STOCK_ACCESS_ROLES = {
+    "Chargé des Stocks", "Responsable Stock", "Magasinier",
     "Stock User", "Stock Manager", "System Manager",
-    "Directeur General", "DG", "DGA",
-    "Responsable RH", "Chef Service Achats", "Auditeur",
+    "Directeur Général", "Directeur General", "DG", "DGA",
+    "Responsable RH", "Chef Service", "Chef Service Achats",
+    "Responsable Achats", "Auditeur Interne", "Auditeur",
 }
 
 

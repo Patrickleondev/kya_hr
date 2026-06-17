@@ -68,6 +68,50 @@ LAYOUTS: dict[str, dict[str, tuple[int, int]]] = {
         "prix_unitaire": (1, 2),
         "montant": (1, 2),
     },
+    # 4+2+2+2 = 10 (item_code + specifications hors liste)
+    "Appel Offre KYA Item": {
+        "item_code": (0, 1),
+        "description": (1, 4),
+        "quantite": (1, 2),
+        "udm": (1, 2),
+        "date_requise": (1, 2),
+        "specifications": (0, 2),
+    },
+    # 4+3+2+1 = 10 (le reste hors liste, accessible via le crayon)
+    "Appel Offre KYA Fournisseur": {
+        "fournisseur": (0, 1),
+        "fournisseur_nom": (1, 4),
+        "contact": (0, 1),
+        "email": (1, 3),
+        "telephone": (1, 2),
+        "adresse": (0, 2),
+        "montant_propose": (1, 1),
+        "reponse_recue": (0, 1),
+        "retenu": (0, 1),
+        "commentaires": (0, 2),
+    },
+    # 1+3+2+2+2 = 10 (etait 12 -> debordait sur le brouillard de caisse)
+    "Brouillard Caisse Ligne": {
+        "date_ligne": (1, 1),
+        "designation": (1, 3),
+        "entree": (1, 2),
+        "sortie": (1, 2),
+        "solde": (1, 2),
+    },
+    # 4+3+3 = 10 (colonnes etaient toutes a 0 -> le champ Link Employe debordait)
+    "Sortie Vehicule Passager": {
+        "employee": (1, 4),
+        "employee_name": (1, 3),
+        "fonction": (1, 3),
+    },
+    # 2+2+1+2+3 = 10 (colonnes etaient toutes a 0)
+    "Planning Conge Periode": {
+        "date_debut": (1, 2),
+        "date_fin": (1, 2),
+        "nb_jours": (1, 1),
+        "type_conge": (1, 2),
+        "remarque": (1, 3),
+    },
 }
 
 

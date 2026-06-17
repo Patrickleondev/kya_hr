@@ -181,6 +181,143 @@ def import_items(content_base64: str) -> dict:
     return stats
 
 
+# ─── ENTRÉE DE STOCK (quantités → Stock Entry Material Receipt) ───────────────
+
+STOCK_HEADERS = [
+    "Code de l'Article",
+    "Nom de l'article",
+    "Groupe d'Article",
+    "Unite de Mesure",
+    "Entrepot cible",
+    "Quantite",
+    "Valeur unitaire (XOF)",
+]
+
+STOCK_EXAMPLE_ROWS = [
+    ["MOD-PV-455", "Module PV 455Wc", "Modules PV - KYA", "Nos", "", "10", "85000"],
+    ["lum/Finis3", "Luminaire all in one TYPE 3", "luminaires/Finis", "Unit", "", "5", "0"],
+]
+
+
+@frappe.whitelist(allow_guest=False)
+def download_stock_template() -> dict:
+    """Template CSV pour l'IMPORT D'ENTRÉE DE STOCK (quantités par entrepôt)."""
+    _check_role("download_stock_template")
+    out = io.StringIO()
+    writer = csv.writer(out, quoting=csv.QUOTE_ALL)
+    writer.writerow(STOCK_HEADERS)
+    for row in STOCK_EXAMPLE_ROWS:
+        writer.writerow(row)
+    csv_text = out.getvalue()
+    return {
+        "filename": "template-entree-stock-kya.csv",
+        "content_base64": base64.b64encode(csv_text.encode("utf-8")).decode("ascii"),
+        "size": len(csv_text),
+    }
+
+
+@frappe.whitelist(allow_guest=False)
+def import_opening_stock(content_base64: str, default_warehouse: str = "", submit: int = 0) -> dict:
+    """Crée une Entrée de Stock (Stock Entry / Material Receipt) à partir d'un CSV.
+
+    - Chaque ligne : article + quantité + entrepôt cible (+ valeur unitaire).
+    - L'article est créé automatiquement s'il n'existe pas encore.
+    - Par défaut le document est laissé en BROUILLON pour relecture (le stock
+      n'est impacté qu'à la validation). Passer submit=1 pour valider directement.
+    """
+    from frappe.utils import cint
+    _check_role("import_opening_stock")
+
+    if not content_base64:
+        frappe.throw("Aucun contenu fourni")
+    try:
+        raw = base64.b64decode(content_base64).decode("utf-8-sig")
+    except Exception as exc:
+        frappe.throw(f"Decodage base64/UTF-8 echoue : {exc}")
+
+    reader = csv.DictReader(io.StringIO(raw))
+    stats = {"stock_entry": None, "submitted": False, "lines": 0,
+             "items_created": 0, "skipped": 0, "errors": []}
+
+    def _col(row, *keys):
+        for k in keys:
+            if row.get(k) not in (None, ""):
+                return cstr(row.get(k)).strip()
+        return ""
+
+    items_payload = []
+    company = None
+    for idx, row in enumerate(reader, start=2):
+        code = _col(row, STOCK_HEADERS[0], "item_code", "Code de l'Article")
+        if not code:
+            stats["skipped"] += 1
+            continue
+        qty = flt(_col(row, STOCK_HEADERS[5], "Quantite", "qty", "Qte Totale Prevue"))
+        if qty <= 0:
+            stats["skipped"] += 1
+            continue
+        wh = _col(row, STOCK_HEADERS[4], "Entrepot cible", "warehouse") or (default_warehouse or "").strip()
+        if not wh or not frappe.db.exists("Warehouse", wh):
+            stats["errors"].append({"line": idx, "code": code,
+                                    "error": f"Entrepôt cible introuvable : '{wh or '(vide)'}'"})
+            continue
+        if company is None:
+            company = frappe.db.get_value("Warehouse", wh, "company")
+        rate = flt(_col(row, STOCK_HEADERS[6], "Valeur unitaire (XOF)", "valuation_rate", "rate"))
+
+        # créer l'article si nécessaire
+        if not frappe.db.exists("Item", code):
+            try:
+                grp = _ensure_item_group(_col(row, STOCK_HEADERS[2], "item_group"))
+                uom = _col(row, STOCK_HEADERS[3], "stock_uom") or "Nos"
+                it = frappe.new_doc("Item")
+                it.item_code = code
+                it.item_name = _col(row, STOCK_HEADERS[1], "item_name") or code
+                it.item_group = grp
+                it.stock_uom = uom
+                it.is_stock_item = 1
+                it.insert(ignore_permissions=True)
+                stats["items_created"] += 1
+            except Exception as exc:
+                stats["errors"].append({"line": idx, "code": code, "error": f"Création article : {exc}"})
+                continue
+
+        items_payload.append({
+            "item_code": code, "qty": qty, "t_warehouse": wh,
+            "basic_rate": rate or 0,
+            "allow_zero_valuation_rate": 0 if rate else 1,
+        })
+
+    if not items_payload:
+        frappe.throw("Aucune ligne d'entrée de stock valide (vérifiez les quantités et les entrepôts).")
+
+    try:
+        se = frappe.new_doc("Stock Entry")
+        se.stock_entry_type = "Material Receipt"
+        se.purpose = "Material Receipt"
+        if company:
+            se.company = company
+        se.to_warehouse = items_payload[0]["t_warehouse"]
+        for p in items_payload:
+            se.append("items", p)
+        se.insert(ignore_permissions=True)
+        stats["lines"] = len(items_payload)
+        stats["stock_entry"] = se.name
+        if cint(submit):
+            se.submit()
+            stats["submitted"] = True
+        frappe.db.commit()
+    except Exception as exc:
+        frappe.db.rollback()
+        try:
+            frappe.log_error(frappe.get_traceback(), "stocks_import.import_opening_stock")
+        except Exception:
+            pass
+        frappe.throw(f"Création de l'entrée de stock échouée : {exc}")
+
+    return stats
+
+
 @frappe.whitelist(allow_guest=False)
 def export_items(item_group: str = "", warehouse: str = "") -> dict:
     """Exporte les Items + qty/valeur par entrepot dans un CSV base64.

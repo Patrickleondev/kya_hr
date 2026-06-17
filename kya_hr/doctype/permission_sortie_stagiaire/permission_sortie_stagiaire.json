@@ -135,6 +135,18 @@
    "reqd": 1
   },
   {
+   "fieldname": "chef_absent",
+   "fieldtype": "Check",
+   "label": "Chef de service absent (traiter directement par la RH)",
+   "default": "0"
+  },
+  {
+   "fieldname": "chef_absent_note",
+   "fieldtype": "Small Text",
+   "label": "Nom du chef intérimaire / précision (si chef absent)",
+   "depends_on": "chef_absent"
+  },
+  {
    "fieldname": "justificatif",
    "label": "Pièce Justificative",
    "fieldtype": "Attach",
@@ -316,5 +328,51 @@
    "create": 1,
    "if_owner": 1
   }
+ ],
+ "field_order": [
+  "section_stagiaire",
+  "employee",
+  "employee_name",
+  "report_to",
+  "col_dept",
+  "department",
+  "equipe",
+  "company",
+  "section_sortie",
+  "date_sortie",
+  "date_fin",
+  "nombre_jours",
+  "heure_depart",
+  "col_retour",
+  "heure_retour",
+  "duree",
+  "section_motif",
+  "motif",
+  "chef_absent",
+  "chef_absent_note",
+  "justificatif",
+  "section_signatures",
+  "col_sig_stagiaire",
+  "signature_stagiaire",
+  "signataire_stagiaire",
+  "date_signature_stagiaire",
+  "col_sig_chef",
+  "signature_chef",
+  "signataire_chef",
+  "date_signature_chef",
+  "section_signatures_2",
+  "col_sig_resp",
+  "signature_resp_stagiaires",
+  "signataire_resp",
+  "date_signature_resp",
+  "col_sig_dg",
+  "signature_dg",
+  "signataire_dg",
+  "date_signature_dg",
+  "section_workflow",
+  "statut",
+  "col_approbation",
+  "workflow_state",
+  "amended_from"
  ]
 }

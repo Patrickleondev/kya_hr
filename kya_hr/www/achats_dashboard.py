@@ -5,8 +5,9 @@ from frappe.utils import flt, formatdate, getdate, add_months, today
 no_cache = 1
 
 _ALLOWED_ROLES = {
+    "Responsable Achats", "Purchase Manager", "Purchase User",
     "Chef Service", "DAAF", "DFC", "Auditeur Interne",
-    "Directeur Général", "DGA", "Responsable RH",
+    "Directeur Général", "DG", "DGA", "Responsable RH",
     "Comptable", "Accounts Manager", "System Manager",
 }
 

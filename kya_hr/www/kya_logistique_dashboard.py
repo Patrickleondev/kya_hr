@@ -5,9 +5,12 @@ import frappe
 
 
 ACCESS_ROLES = {
-    "System Manager", "Directeur General", "DG", "DGA",
+    "System Manager", "Directeur General", "Directeur Général", "DG", "DGA",
     "Responsable Logistique", "Logisticien", "Chef Service",
     "Chef Service Achats", "Auditeur",
+    # Gestion de flotte + RH (la RH tient la logistique sur tablette)
+    "Gestionnaire de Flotte", "Fleet Manager",
+    "Responsable RH", "HR Manager",
 }
 
 

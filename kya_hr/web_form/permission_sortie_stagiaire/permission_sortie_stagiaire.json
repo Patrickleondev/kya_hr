@@ -93,6 +93,17 @@
    "description": "Indiquez le motif détaillé de votre demande de sortie"
   },
   {
+   "fieldname": "chef_absent",
+   "fieldtype": "Check",
+   "label": "Mon chef de service est absent (traiter directement par la RH)"
+  },
+  {
+   "fieldname": "chef_absent_note",
+   "fieldtype": "Small Text",
+   "label": "Nom du chef intérimaire / précision",
+   "depends_on": "chef_absent"
+  },
+  {
    "fieldname": "justificatif",
    "fieldtype": "Attach",
    "label": "Pièce Justificative",

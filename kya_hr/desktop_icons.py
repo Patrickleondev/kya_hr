@@ -17,7 +17,7 @@ WORKSPACE_ICONS = [
 ]
 
 RESTRICTED_LAYOUT_ROLES = {
-    "Direction Générale": ["Directeur Général", "DGA", "System Manager"],
+    "Direction Générale": ["Directeur Général", "DG", "DGA", "DAAF", "System Manager", "Administrator"],
     "Espace RH": ["HR Manager", "HR User", "Responsable RH", "Directeur Général", "System Manager"],
     "Espace Achats": [
         "Purchase Manager",
@@ -25,6 +25,7 @@ RESTRICTED_LAYOUT_ROLES = {
         "Responsable Achats",
         "Responsable Comptable",
         "Directeur Général",
+        "DG",
         "DGA",
         "Auditeur Interne",
         "System Manager",
@@ -36,6 +37,7 @@ RESTRICTED_LAYOUT_ROLES = {
         "Responsable Comptable",
         "Auditeur Interne",
         "Directeur Général",
+        "DG",
         "DGA",
         "System Manager",
     ],
@@ -45,6 +47,7 @@ RESTRICTED_LAYOUT_ROLES = {
         "Responsable Comptable",
         "Auditeur Interne",
         "Directeur Général",
+        "DG",
         "DGA",
         "System Manager",
     ],
@@ -54,6 +57,7 @@ RESTRICTED_LAYOUT_ROLES = {
         "Driver",
         "Responsable Comptable",
         "Directeur Général",
+        "DG",
         "DGA",
         "System Manager",
     ],
@@ -65,6 +69,7 @@ RESTRICTED_LAYOUT_ROLES = {
         "Auditeur Interne",
         "Responsable Comptable",
         "Directeur Général",
+        "DG",
         "DGA",
         "System Manager",
     ],
@@ -82,6 +87,7 @@ RESTRICTED_LAYOUT_ROLES = {
         "HR User",
         "HR Manager",
         "Directeur Général",
+        "DG",
         "DGA",
         "Responsable Comptable",
         "Auditeur Interne",
@@ -102,6 +108,7 @@ RESTRICTED_LAYOUT_ROLES = {
         "HR User",
         "HR Manager",
         "Directeur Général",
+        "DG",
         "System Manager",
     ],
     "KYA Services": ["KYA Survey Admin", "System Manager"],
@@ -398,7 +405,11 @@ def execute():
             errors.append(f"{config['label']}: {e}")
 
     try:
-        changed = _sync_administrator_layout() or changed
+        # Re-sync TOUTES les Desktop Layout (pas seulement Administrator) : ajoute
+        # les icônes standard manquantes à chaque utilisateur, PUIS élague par rôle.
+        # Sinon une icône autrefois élaguée (ex. Direction pour un compte "DG")
+        # n'était jamais re-ajoutée après correction des rôles.
+        changed = _sync_all_desktop_layouts() or changed
         changed = _prune_restricted_desktop_layouts() or changed
     except Exception as e:
         errors.append(f"layouts: {e}")

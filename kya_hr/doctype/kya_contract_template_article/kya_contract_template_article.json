@@ -1,0 +1,46 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-06-16 09:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "numero",
+  "titre",
+  "contenu"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "numero",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "N° / Intitulé court",
+   "description": "Ex: Article 1er, Article 2..."
+  },
+  {
+   "columns": 3,
+   "fieldname": "titre",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Titre de l'article"
+  },
+  {
+   "fieldname": "contenu",
+   "fieldtype": "Text Editor",
+   "in_list_view": 1,
+   "label": "Contenu",
+   "description": "Texte libre. Variables : {employe}, {poste}, {date_debut}... Accord M/F : {Le|La}, embauché{|e}."
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-06-16 09:00:00.000000",
+ "module": "KYA HR",
+ "name": "KYA Contract Template Article",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "idx",
+ "sort_order": "ASC"
+}

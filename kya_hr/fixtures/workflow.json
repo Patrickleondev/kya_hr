@@ -100,7 +100,7 @@
     "action": "Soumettre",
     "allow_self_approval": 0,
     "allowed": "Employee",
-    "condition": "'Supérieur Immédiat' not in frappe.get_roles(frappe.db.get_value('Employee', doc.employee, 'user_id') or '')",
+    "condition": "not frappe.db.get_list('Has Role', {'parenttype': 'User', 'parent': frappe.db.get_value('Employee', doc.employee, 'user_id') or '__none__', 'role': 'Supérieur Immédiat'})",
     "next_state": "En attente du Supérieur Immédiat",
     "send_email_to_creator": 0,
     "state": "Brouillon",
@@ -111,7 +111,7 @@
     "action": "Soumettre",
     "allow_self_approval": 0,
     "allowed": "Employee",
-    "condition": "'Supérieur Immédiat' in frappe.get_roles(frappe.db.get_value('Employee', doc.employee, 'user_id') or '')",
+    "condition": "frappe.db.get_list('Has Role', {'parenttype': 'User', 'parent': frappe.db.get_value('Employee', doc.employee, 'user_id') or '__none__', 'role': 'Supérieur Immédiat'})",
     "next_state": "En attente RH",
     "send_email_to_creator": 0,
     "state": "Brouillon",
@@ -383,7 +383,7 @@
     "action": "Soumettre",
     "allow_self_approval": 0,
     "allowed": "Employee",
-    "condition": null,
+    "condition": "not doc.chef_absent",
     "next_state": "En attente Chef",
     "state": "Brouillon"
    },
@@ -391,7 +391,7 @@
     "action": "Soumettre",
     "allow_self_approval": 0,
     "allowed": "Stagiaire",
-    "condition": null,
+    "condition": "not doc.chef_absent",
     "next_state": "En attente Chef",
     "state": "Brouillon"
    },
@@ -450,6 +450,22 @@
     "condition": null,
     "next_state": "Rejeté",
     "state": "En attente DG"
+   },
+   {
+    "action": "Soumettre",
+    "allow_self_approval": 0,
+    "allowed": "Employee",
+    "condition": "doc.chef_absent",
+    "next_state": "En attente Resp. Stagiaires",
+    "state": "Brouillon"
+   },
+   {
+    "action": "Soumettre",
+    "allow_self_approval": 0,
+    "allowed": "Stagiaire",
+    "condition": "doc.chef_absent",
+    "next_state": "En attente Resp. Stagiaires",
+    "state": "Brouillon"
    }
   ],
   "workflow_data": null,
@@ -722,7 +738,7 @@
     "action": "Soumettre",
     "allow_self_approval": 0,
     "allowed": "Employee",
-    "condition": null,
+    "condition": "not doc.chef_absent",
     "next_state": "En attente Chef",
     "state": "Brouillon"
    },
@@ -837,6 +853,14 @@
     "condition": null,
     "next_state": "Approuvé",
     "state": "En attente Direction"
+   },
+   {
+    "action": "Soumettre",
+    "allow_self_approval": 0,
+    "allowed": "Employee",
+    "condition": "doc.chef_absent",
+    "next_state": "En attente RH",
+    "state": "Brouillon"
    }
   ],
   "workflow_data": null,

@@ -75,9 +75,10 @@ body { background: var(--kya-bg) !important; }
     <h1><i class="bi bi-truck"></i> Dashboard Logistique KYA</h1>
     <p>Flotte, sorties, carburant, entretien — temps réel pour DG/DGA</p>
     <div class="mt-3 d-flex gap-2 flex-wrap">
-      <a class="btn btn-sm btn-light" href="/app/sortie-vehicule/new"><i class="bi bi-plus-circle"></i> Nouvelle Sortie</a>
+      <a class="btn btn-sm btn-light" href="/sortie-vehicule/new"><i class="bi bi-plus-circle"></i> Nouvelle Sortie</a>
+      <a class="btn btn-sm btn-light" href="/plein-carburant/new"><i class="bi bi-fuel-pump"></i> Plein Carburant</a>
+      <a class="btn btn-sm btn-light" href="/entretien-vehicule/new"><i class="bi bi-wrench-adjustable"></i> Entretien</a>
       <a class="btn btn-sm btn-light" href="/app/vehicle/new"><i class="bi bi-car-front"></i> Ajouter Véhicule</a>
-      <a class="btn btn-sm btn-light" href="/app/vehicle-log/new"><i class="bi bi-fuel-pump"></i> Plein Carburant</a>
     </div>
   </div>
 
@@ -104,9 +105,14 @@ body { background: var(--kya-bg) !important; }
       <div class="kya-kpi-label">Sorties 30j</div>
     </div>
     <div class="kya-kpi">
-      <div class="kya-kpi-icon" style="color: var(--kya-red);"><i class="bi bi-fuel-pump"></i></div>
-      <div class="kya-kpi-value" id="kpi-fuel">—</div>
-      <div class="kya-kpi-label">Pleins 30j</div>
+      <div class="kya-kpi-icon" style="color: var(--kya-orange);"><i class="bi bi-fuel-pump"></i></div>
+      <div class="kya-kpi-value" id="kpi-fuel-cost">—</div>
+      <div class="kya-kpi-label">Carburant 30j (FCFA)</div>
+    </div>
+    <div class="kya-kpi">
+      <div class="kya-kpi-icon" style="color: var(--kya-blue);"><i class="bi bi-wrench-adjustable"></i></div>
+      <div class="kya-kpi-value" id="kpi-entretien-cost">—</div>
+      <div class="kya-kpi-label">Entretiens 30j (FCFA)</div>
     </div>
     <div class="kya-kpi">
       <div class="kya-kpi-icon" style="color: var(--kya-red);"><i class="bi bi-shield-exclamation"></i></div>
@@ -155,15 +161,41 @@ body { background: var(--kya-bg) !important; }
     </div>
   </div>
 
+  <!-- Entretiens a prevoir -->
+  <div class="kya-panel" id="panel-entretiens-prevoir">
+    <div class="kya-panel-head"><h3><i class="bi bi-bell text-warning"></i> Entretiens à prévoir / en retard</h3></div>
+    <table class="kya-table">
+      <thead><tr>
+        <th>Plaque</th><th>Type</th><th>Prochaine échéance</th><th class="text-end">Km cible</th><th>Urgence</th>
+      </tr></thead>
+      <tbody id="tbl-entretiens-prevoir"><tr><td colspan="5" class="kya-loader">Chargement…</td></tr></tbody>
+    </table>
+  </div>
+
   <!-- Pleins carburant -->
   <div class="kya-panel">
     <div class="kya-panel-head"><h3><i class="bi bi-fuel-pump"></i> Pleins carburant récents</h3></div>
     <table class="kya-table">
       <thead><tr>
-        <th>Date</th><th>Plaque</th><th>Employé</th><th class="text-end">Odomètre</th><th class="text-end">Qté (L)</th><th>Fournisseur</th>
+        <th>Date</th><th>Plaque</th><th>Chauffeur</th><th class="text-end">Km</th>
+        <th class="text-end">Litres</th><th class="text-end">Montant (FCFA)</th><th class="text-end">FCFA/L</th><th>Station</th>
       </tr></thead>
-      <tbody id="tbl-fuel"><tr><td colspan="6" class="kya-loader">Chargement…</td></tr></tbody>
+      <tbody id="tbl-fuel"><tr><td colspan="8" class="kya-loader">Chargement…</td></tr></tbody>
     </table>
+  </div>
+
+  <!-- Entretiens recents -->
+  <div class="kya-panel">
+    <div class="kya-panel-head"><h3><i class="bi bi-wrench-adjustable"></i> Entretiens / réparations récents</h3></div>
+    <div style="max-height: 450px; overflow-y: auto;">
+      <table class="kya-table">
+        <thead><tr>
+          <th>N°</th><th>Date</th><th>Plaque</th><th>Type</th><th>Description</th>
+          <th class="text-end">Coût (FCFA)</th><th>Garage</th><th>Statut</th>
+        </tr></thead>
+        <tbody id="tbl-entretiens"><tr><td colspan="8" class="kya-loader">Chargement…</td></tr></tbody>
+      </table>
+    </div>
   </div>
 
   <!-- Carburant par mois (quantité seulement) -->
@@ -213,7 +245,8 @@ async function loadOverview() {
     document.getElementById('kpi-avail').textContent = fmtN(o.available);
     document.getElementById('kpi-mission').textContent = fmtN(o.in_mission);
     document.getElementById('kpi-sorties').textContent = fmtN(o.sorties_30d);
-    document.getElementById('kpi-fuel').textContent = fmtN(o.fuel_30d_count);
+    document.getElementById('kpi-fuel-cost').textContent = fmtN(o.fuel_30d_cost);
+    document.getElementById('kpi-entretien-cost').textContent = fmtN(o.entretiens_30d_cost);
     document.getElementById('kpi-alertes').textContent = fmtN((o.alertes_assurance || 0) + (o.alertes_visite || 0));
   } catch (e) { console.error(e); }
 }
@@ -284,18 +317,57 @@ async function loadFuel() {
   const tbody = document.getElementById('tbl-fuel');
   try {
     const rows = await callApi('kya_hr.api.logistique_dashboard.get_recent_fuel_logs', { limit: 30 });
-    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="6" class="kya-loader">Aucun plein</td></tr>'; return; }
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="8" class="kya-loader">Aucun plein</td></tr>'; return; }
     tbody.innerHTML = rows.map(r => `
       <tr>
         <td>${r.date || '—'}</td>
         <td>${r.license_plate || '—'}</td>
-        <td>${r.employee || '—'}</td>
+        <td>${r.chauffeur || '—'}</td>
         <td class="text-end">${fmtN(r.odometer)}</td>
-        <td class="text-end">${fmtQty(r.fuel_qty)}</td>
-        <td>${r.supplier || '—'}</td>
+        <td class="text-end">${fmtQty(r.litres)}</td>
+        <td class="text-end">${fmtN(r.montant)}</td>
+        <td class="text-end">${fmtN(r.prix_litre)}</td>
+        <td>${r.station || '—'}</td>
       </tr>
     `).join('');
-  } catch (e) { tbody.innerHTML = `<tr><td colspan="6" class="kya-loader text-danger">Erreur: ${e.message}</td></tr>`; }
+  } catch (e) { tbody.innerHTML = `<tr><td colspan="8" class="kya-loader text-danger">Erreur: ${e.message}</td></tr>`; }
+}
+
+async function loadEntretiens() {
+  const tbody = document.getElementById('tbl-entretiens');
+  try {
+    const rows = await callApi('kya_hr.api.logistique_dashboard.get_recent_entretiens', { limit: 30 });
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="8" class="kya-loader">Aucun entretien</td></tr>'; return; }
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td><a href="/entretien-vehicule/${encodeURIComponent(r.name)}">${r.name}</a></td>
+        <td>${r.date || '—'}</td>
+        <td>${r.license_plate || '—'}</td>
+        <td>${r.type_entretien || '—'}</td>
+        <td>${(r.description || '').substring(0, 40)}</td>
+        <td class="text-end">${fmtN(r.cout)}</td>
+        <td>${r.garage || '—'}</td>
+        <td>${badgeStatut(r.statut)}</td>
+      </tr>
+    `).join('');
+  } catch (e) { tbody.innerHTML = `<tr><td colspan="8" class="kya-loader text-danger">Erreur: ${e.message}</td></tr>`; }
+}
+
+async function loadEntretiensPrevoir() {
+  const tbody = document.getElementById('tbl-entretiens-prevoir');
+  try {
+    const rows = await callApi('kya_hr.api.logistique_dashboard.get_entretiens_a_prevoir', { within_days: 30 });
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="5" class="kya-loader">Aucun entretien à prévoir sous 30 jours</td></tr>'; return; }
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td>${r.license_plate || '—'}</td>
+        <td>${r.type_entretien || '—'}</td>
+        <td>${r.prochaine_echeance_date || '—'}</td>
+        <td class="text-end">${fmtN(r.prochaine_echeance_km)}</td>
+        <td>${r.urgence === 'EN RETARD' ? '<span class="badge-statut b-danger">En retard</span>' : '<span class="badge-statut b-warning">Bientôt</span>'}</td>
+      </tr>
+    `).join('');
+  } catch (e) { tbody.innerHTML = `<tr><td colspan="5" class="kya-loader text-danger">Erreur: ${e.message}</td></tr>`; }
 }
 
 async function loadFuelChart() {
@@ -317,7 +389,8 @@ async function loadFuelChart() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  loadOverview(); loadAlertes(); loadFleet(); loadSorties(); loadFuel(); loadFuelChart();
+  loadOverview(); loadAlertes(); loadEntretiensPrevoir(); loadFleet();
+  loadSorties(); loadFuel(); loadEntretiens(); loadFuelChart();
 });
 </script>
 

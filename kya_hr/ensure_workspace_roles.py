@@ -48,8 +48,9 @@ WORKSPACE_ROLES: dict[str, list[str]] = {
                       "Purchase User", "Chef Service"],
     "Espace Comptabilite": ["Comptable", "Caissier", "Accounts Manager",
                             "Accounts User", "DFC", "DAAF"],
-    "Logistique": ["Gestionnaire de Flotte", "DST - Responsable Logistique",
-                   "Chef Service"],
+    "Logistique": ["Gestionnaire de Flotte", "Fleet Manager",
+                   "DST - Responsable Logistique", "Chef Service",
+                   "Responsable RH", "HR Manager"],
 
     # --- Direction : voit tout ---
     "Direction Generale": ["Directeur Général", "DG", "DGA", "DAAF"],
@@ -57,6 +58,31 @@ WORKSPACE_ROLES: dict[str, list[str]] = {
 
 # Roles qui voient TOUS les espaces (direction + admin).
 GLOBAL_VIEWERS = ["System Manager", "Directeur Général", "DGA"]
+
+# Espaces NATIFS ERPNext/HRMS qui, sans rôle, s'affichent pour TOUT le monde
+# et encombrent la barre latérale. On les restreint (un workspace public AVEC
+# des rôles n'est visible qu'aux porteurs de ces rôles). Réservés aux admins
+# SAUF : CRM (commerciaux) et HR Setup (RH), à la demande.
+# NB : ces espaces ne sont pas dans le code de kya_hr ; on ajoute les Has Role
+# en base, et ce script tourne APRES chaque migrate (donc ré-appliqué).
+NATIVE_WORKSPACE_ROLES: dict[str, list[str]] = {
+    # Purement administration / technique → System Manager seul
+    "Users": ["System Manager"],
+    "Integrations": ["System Manager"],
+    "Website": ["System Manager", "Website Manager"],
+    "Support": ["System Manager", "Support Team"],
+    # RH
+    "HR Setup": ["System Manager", "Responsable RH", "HR Manager"],
+    "Tenure": ["System Manager", "Responsable RH", "HR Manager"],
+    "Tax & Benefits": ["System Manager", "Responsable RH", "HR Manager", "Accounts Manager"],
+    # Finance / comptabilité
+    "Financial Reports": ["System Manager", "Accounts Manager", "DFC", "DAAF", "Comptable"],
+    "Invoicing": ["System Manager", "Accounts Manager", "Accounts User", "Comptable"],
+    "Expenses": ["System Manager", "Accounts Manager", "Accounts User", "Expense Approver"],
+    "Assets": ["System Manager", "Accounts Manager"],
+    # Commercial → CRM ouvert aux commerciaux (demande explicite)
+    "CRM": ["System Manager", "Sales User", "Sales Manager", "Sales Master Manager"],
+}
 
 # Espaces personnels : ne PAS y mettre les global viewers (ils ont le leur).
 PERSONAL_WORKSPACES = {"Espace Employes", "Espace Stagiaires"}
@@ -91,10 +117,12 @@ def _add_role_to_workspace(ws_name: str, role: str) -> bool:
 # (label, url)
 DG_DASHBOARD_SHORTCUTS = [
     ("📊 Tableau de Bord Global", "/kya-tableau-de-bord"),
-    ("👥 Dashboard RH", "/kya-rh-dashboard"),
+    ("🌴 RH — Gestion des congés", "/gestion-conges"),
+    ("🕒 RH — Présences", "/presence-rh"),
     ("📦 Dashboard Stocks", "/kya-stocks-dashboard"),
     ("🚚 Dashboard Logistique", "/kya-logistique-dashboard"),
     ("🏗️ Projets & Clients (DGA)", "/dga-projets-clients"),
+    ("🤝 Réunions & Visites", "/kya-reunion-dashboard"),
     ("🛒 Dashboard Achats", "/achats-dashboard"),
     ("🏦 Dashboard Comptabilité", "/comptabilite-dashboard"),
     ("📋 Inventaire & Sorties", "/inventaire-dashboard"),
@@ -170,6 +198,16 @@ def execute() -> dict:
         for role in wanted:
             if _add_role_to_workspace(ws_name, role):
                 summary["added"].append(f"{ws_name} <- {role}")
+                summary["total_added"] += 1
+
+    # Restreindre les espaces natifs ERPNext qui s'affichaient pour tous
+    summary["native_restricted"] = []
+    for ws_name, roles in NATIVE_WORKSPACE_ROLES.items():
+        if not frappe.db.exists("Workspace", ws_name):
+            continue
+        for role in roles:
+            if _add_role_to_workspace(ws_name, role):
+                summary["native_restricted"].append(f"{ws_name} <- {role}")
                 summary["total_added"] += 1
 
     # Raccourcis dashboards pour le DG (visibilite totale)

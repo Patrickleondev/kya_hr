@@ -106,8 +106,15 @@ body { background: var(--kya-bg) !important; }
         <i class="bi bi-download"></i> Template d'import
       </button>
       <label class="btn btn-sm btn-light mb-0">
-        <i class="bi bi-upload"></i> Importer CSV
+        <i class="bi bi-upload"></i> Importer articles (CSV)
         <input type="file" accept=".csv" onchange="importCsv(this)" hidden>
+      </label>
+      <button class="btn btn-sm btn-light" onclick="downloadStockTemplate()">
+        <i class="bi bi-download"></i> Modèle entrée de stock
+      </button>
+      <label class="btn btn-sm btn-success mb-0">
+        <i class="bi bi-box-arrow-in-down"></i> Importer entrée de stock
+        <input type="file" accept=".csv" onchange="importOpeningStock(this)" hidden>
       </label>
       <button class="btn btn-sm btn-light" onclick="exportCsv()">
         <i class="bi bi-file-earmark-spreadsheet"></i> Exporter (état stock)
@@ -403,6 +410,39 @@ async function importCsv(input) {
     setResult(`<i class="bi bi-check-circle"></i> Import OK : ${s.created} créés, ${s.updated} mis à jour, ${s.unchanged} inchangés, ${s.errors.length} erreurs.`);
     loadOverview(); loadWarehouses(); loadGroups();
   } catch (e) { setResult('Erreur import: ' + e.message, '#fef3c7'); }
+  input.value = '';
+}
+
+async function downloadStockTemplate() {
+  try {
+    const r = await callApi('kya_hr.api.stocks_import.download_stock_template');
+    triggerDownload(b64ToBlob(r.content_base64, 'text/csv'), r.filename);
+    setResult('<i class="bi bi-check-circle"></i> Modèle entrée de stock téléchargé.');
+  } catch (e) { setResult('Erreur: ' + e.message, '#fef3c7'); }
+}
+
+async function importOpeningStock(input) {
+  const file = input.files[0];
+  if (!file) return;
+  setResult('<i class="bi bi-arrow-clockwise"></i> Création de l\'entrée de stock…');
+  try {
+    const buf = await file.arrayBuffer();
+    const b64 = btoa(new Uint8Array(buf).reduce((d, b) => d + String.fromCharCode(b), ''));
+    const res = await fetch('/api/method/kya_hr.api.stocks_import.import_opening_stock', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Frappe-CSRF-Token': frappe.csrf_token || '' },
+      credentials: 'same-origin',
+      body: 'content_base64=' + encodeURIComponent(b64),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error((data && data.message) || res.status);
+    const s = data.message;
+    const link = s.stock_entry
+      ? ` <a href="/app/stock-entry/${encodeURIComponent(s.stock_entry)}" target="_blank" style="text-decoration:underline;">Vérifier et valider (${s.stock_entry})</a>`
+      : '';
+    setResult(`<i class="bi bi-check-circle"></i> Brouillon créé : ${s.lines} ligne(s), ${s.items_created} article(s) créé(s), ${s.errors.length} erreur(s).${link}`);
+    loadOverview(); loadWarehouses(); loadGroups();
+  } catch (e) { setResult('Erreur import entrée de stock: ' + e.message, '#fef3c7'); }
   input.value = '';
 }
 
