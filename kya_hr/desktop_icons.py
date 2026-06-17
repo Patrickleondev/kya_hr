@@ -5,6 +5,7 @@ from frappe.desk.doctype.desktop_icon.desktop_icon import clear_desktop_icons_ca
 
 WORKSPACE_ICONS = [
     {"label": "Direction Générale", "link_to": "Direction Generale", "sidebar": "Direction Generale", "icon": "🏛️", "app": "kya_hr", "idx": 10},
+    {"label": "Gestion Équipe", "link_to": "Gestion Equipe", "sidebar": "Gestion Equipe", "icon": "🤝", "app": "kya_services", "idx": 20},
     {"label": "Espace RH", "link_to": "Espace RH", "icon": "👥", "app": "kya_hr", "idx": 11},
     {"label": "Espace Achats", "link_to": "Espace Achats", "icon": "🛒", "app": "kya_hr", "idx": 12},
     {"label": "Espace Stock", "link_to": "Espace Stock", "icon": "📦", "app": "kya_hr", "idx": 13},
@@ -18,6 +19,10 @@ WORKSPACE_ICONS = [
 
 RESTRICTED_LAYOUT_ROLES = {
     "Direction Générale": ["Directeur Général", "DG", "DGA", "DAAF", "System Manager", "Administrator"],
+    "Gestion Équipe": [
+        "Chef Equipe", "Chef d'Équipe", "Chef Service", "Responsable Equipe",
+        "Supérieur Immédiat", "Directeur Général", "DG", "DGA", "System Manager",
+    ],
     "Espace RH": ["HR Manager", "HR User", "Responsable RH", "Directeur Général", "System Manager"],
     "Espace Achats": [
         "Purchase Manager",
@@ -366,6 +371,61 @@ def _prune_restricted_layout_doc(layout_doc) -> bool:
     return changed
 
 
+def _managed_label_by_target() -> dict:
+    """Cible (sidebar/workspace) -> libellé géré (accentué)."""
+    m = {}
+    for cfg in WORKSPACE_ICONS:
+        m[cfg.get("sidebar") or cfg["link_to"]] = cfg["label"]
+        m[cfg["link_to"]] = cfg["label"]
+    return m
+
+
+def _dedupe_layout_doc(layout_doc) -> bool:
+    """Supprime les icônes en double DANS une Desktop Layout.
+
+    Bug terrain : la même icône (ex. « Direction Generale ») se cumulait des
+    dizaines de fois car la déduplication se faisait par LABEL et les entrées
+    héritées portaient un libellé non accentué (« Direction Generale ») là où
+    l'icône gérée est « Direction Générale ». On déduplique donc par
+    (link_type, link_to) — l'identité stable du workspace — et on normalise au
+    passage le libellé vers la version accentuée gérée.
+    """
+    layout = json.loads(layout_doc.layout or "[]")
+    label_map = _managed_label_by_target()
+    seen = set()
+    out = []
+    changed = False
+    for item in layout:
+        lt = item.get("link_type") or ""
+        target = item.get("link_to") or item.get("label") or ""
+        if lt == "Workspace Sidebar" and target in label_map and item.get("label") != label_map[target]:
+            item["label"] = label_map[target]
+            changed = True
+        key = (lt, target)
+        if key in seen:
+            changed = True  # doublon -> on jette
+            continue
+        seen.add(key)
+        out.append(item)
+    if changed:
+        layout_doc.layout = json.dumps(out, ensure_ascii=False)
+        layout_doc.save(ignore_permissions=True)
+    return changed
+
+
+def _dedupe_all_layouts() -> bool:
+    changed = False
+    for row in frappe.get_all("Desktop Layout", fields=["name"]):
+        try:
+            changed = _dedupe_layout_doc(frappe.get_doc("Desktop Layout", row.name)) or changed
+        except Exception:
+            try:
+                frappe.log_error(frappe.get_traceback(), "desktop_icons: dedupe layout")
+            except Exception:
+                pass
+    return changed
+
+
 def _prune_restricted_desktop_layouts() -> bool:
     changed = False
     for row in frappe.get_all("Desktop Layout", fields=["name"]):
@@ -410,6 +470,7 @@ def execute():
         # Sinon une icône autrefois élaguée (ex. Direction pour un compte "DG")
         # n'était jamais re-ajoutée après correction des rôles.
         changed = _sync_all_desktop_layouts() or changed
+        changed = _dedupe_all_layouts() or changed        # collapse les doublons hérités
         changed = _prune_restricted_desktop_layouts() or changed
     except Exception as e:
         errors.append(f"layouts: {e}")
