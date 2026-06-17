@@ -498,6 +498,123 @@ def remove_beneficiaire(plan: str, row: str) -> dict:
 
 
 @frappe.whitelist()
+def get_workflow_actions(doctype: str, name: str) -> list[str]:
+    """Actions de workflow disponibles pour l'utilisateur courant sur un doc."""
+    _check_role()
+    from frappe.model.workflow import get_transitions
+    doc = frappe.get_doc(doctype, name)
+    return [t.get("action") for t in (get_transitions(doc) or [])]
+
+
+# ── Revue RH des besoins (retenu / écarté) — directement depuis le dashboard ──
+
+@frappe.whitelist()
+def get_besoin_lignes(besoin: str) -> dict:
+    """Lignes d'un besoin pour la revue RH (retenir / écarter par ligne)."""
+    _check_role()
+    d = frappe.get_doc("Besoin de Formation", besoin)
+    lignes = [{
+        "idx": l.idx, "besoin_exprime": l.get("besoin_exprime") or "",
+        "intitule": l.intitule, "objectif": l.get("objectif") or "",
+        "competence": l.competence or "", "employes_concernes": l.get("employes_concernes") or "",
+        "priorite": l.priorite or "", "nb_participants": l.nb_participants or 0,
+        "statut_rh": l.statut_rh or "En attente", "motif_rh": l.motif_rh or "",
+    } for l in (d.lignes or [])]
+    from frappe.model.workflow import get_transitions
+    actions = [t.get("action") for t in (get_transitions(d) or [])]
+    return {"besoin": besoin, "equipe": d.equipe, "statut": d.statut,
+            "lignes": lignes, "actions": actions}
+
+
+@frappe.whitelist()
+def review_besoin(besoin: str, decisions) -> dict:
+    """Applique la décision RH (Retenu/Écarté/En attente + motif) par ligne (idx)."""
+    _check_role()
+    if isinstance(decisions, str):
+        decisions = frappe.parse_json(decisions)
+    by_idx = {int(x["idx"]): x for x in decisions}
+    d = frappe.get_doc("Besoin de Formation", besoin)
+    for l in (d.lignes or []):
+        if l.idx in by_idx:
+            x = by_idx[l.idx]
+            l.statut_rh = x.get("statut_rh") or l.statut_rh
+            l.motif_rh = x.get("motif_rh") or ""
+    d.save(ignore_permissions=True)
+    frappe.db.commit()
+    nb_ret = len([l for l in d.lignes if l.statut_rh == "Retenu"])
+    return {"ok": True, "nb_retenus": nb_ret}
+
+
+# ── Chiffrage RH (coûts + détails) par ligne — depuis le dashboard ──
+
+CHIFFRAGE_FIELDS = ["cout_direct", "cout_accessoire", "organisme", "date_debut",
+                    "date_fin", "nature_action", "source_deploiement", "modalite",
+                    "objectifs_vises", "resultats_attendus"]
+
+
+@frappe.whitelist()
+def get_chiffrage(plan: str) -> dict:
+    """Lignes d'un plan avec tous les champs de chiffrage (édition RH)."""
+    _check_role()
+    d = frappe.get_doc("Plan de Formation", plan)
+    lignes = []
+    for l in (d.lignes or []):
+        row = {"idx": l.idx, "intitule": l.intitule, "equipe": l.equipe,
+               "retenu_dg": int(l.retenu_dg or 0), "cout": float(l.cout or 0),
+               "statut_suivi": l.statut_suivi or ""}
+        for f in CHIFFRAGE_FIELDS:
+            v = l.get(f)
+            row[f] = str(v) if v not in (None, "") else ""
+        lignes.append(row)
+    return {"plan": plan, "statut": d.statut, "cout_total": float(d.cout_total or 0),
+            "lignes": lignes}
+
+
+@frappe.whitelist()
+def save_chiffrage(plan: str, lignes) -> dict:
+    """Enregistre le chiffrage RH (coûts/formateur/dates/nature/modalité…) par idx."""
+    _check_role()
+    if isinstance(lignes, str):
+        lignes = frappe.parse_json(lignes)
+    by_idx = {int(x["idx"]): x for x in lignes}
+    d = frappe.get_doc("Plan de Formation", plan)
+    for l in (d.lignes or []):
+        if l.idx in by_idx:
+            x = by_idx[l.idx]
+            for f in CHIFFRAGE_FIELDS:
+                if f in x:
+                    val = x[f]
+                    if f in ("cout_direct", "cout_accessoire"):
+                        val = flt(val)
+                    l.set(f, val or (0 if f.startswith("cout") else None))
+    d.save(ignore_permissions=True)   # validate() recalcule cout (=direct+accessoire) + cout_total
+    frappe.db.commit()
+    return {"ok": True, "cout_total": float(d.cout_total or 0)}
+
+
+# ── Transitions de workflow (Soumettre au DG / Chiffrage / Valider / Suivi…) ──
+
+@frappe.whitelist()
+def apply_plan_action(plan: str, action: str) -> dict:
+    """Applique une action de workflow sur un Plan de Formation (respecte le circuit)."""
+    _check_role()
+    from frappe.model.workflow import apply_workflow
+    d = frappe.get_doc("Plan de Formation", plan)
+    apply_workflow(d, action)
+    return {"ok": True, "statut": d.get("workflow_state") or d.statut}
+
+
+@frappe.whitelist()
+def apply_besoin_action(besoin: str, action: str) -> dict:
+    """Applique une action de workflow sur un Besoin de Formation."""
+    _check_role()
+    from frappe.model.workflow import apply_workflow
+    d = frappe.get_doc("Besoin de Formation", besoin)
+    apply_workflow(d, action)
+    return {"ok": True, "statut": d.get("workflow_state") or d.statut}
+
+
+@frappe.whitelist()
 def export_beneficiaires(plan: str = None, annee=None) -> dict:
     """Exporte le suivi par employé (CSV) — tableau de bord post-formation RH."""
     _check_role()

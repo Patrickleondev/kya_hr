@@ -128,6 +128,24 @@ body { background: var(--kya-bg) !important; }
       </table>
     </div>
   </div>
+
+  <!-- CHIFFRAGE RH -->
+  <div class="kya-panel" id="panel-chiffrage">
+    <div class="kya-panel-head" style="flex-wrap:wrap; gap:.5rem;">
+      <h3><i class="bi bi-cash-stack text-warning"></i> Chiffrage RH (coûts &amp; détails)</h3>
+      <div class="d-flex gap-2 align-items-center flex-wrap">
+        <select id="chif-plan-select" class="form-select form-select-sm" style="max-width:320px;" onchange="loadChiffrage()"></select>
+        <button class="btn btn-sm btn-primary" onclick="saveChiffrage()"><i class="bi bi-save"></i> Enregistrer le chiffrage</button>
+      </div>
+    </div>
+    <div id="chif-summary" class="px-3 pt-2 small text-muted"></div>
+    <div style="max-height:520px; overflow-x:auto; overflow-y:auto;">
+      <table class="kya-table" style="min-width:1100px;">
+        <thead><tr><th>Action</th><th>Nature</th><th>Source</th><th>Formateur</th><th>Modalité</th><th>Début</th><th>Fin</th><th class="text-end">Coût direct</th><th class="text-end">Coût access.</th></tr></thead>
+        <tbody id="tbl-chif"><tr><td colspan="9" class="kya-loader">Sélectionnez un plan…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -172,15 +190,60 @@ async function loadBesoins(){
   const tb=document.getElementById('tbl-besoins');
   try{ const rows=await callApi('kya_hr.api.formation_dashboard.get_besoins');
     if(!rows.length){ tb.innerHTML='<tr><td colspan="8" class="kya-loader">Aucun besoin</td></tr>'; return; }
-    tb.innerHTML=rows.map(r=>'<tr><td><a href="/app/besoin-de-formation/'+encodeURIComponent(r.name)+'">'+r.name+'</a></td><td>'+(r.equipe||'—')+'</td><td>'+(r.chef||'—')+'</td><td>'+(r.annee||'—')+'</td><td>'+(r.trimestre||'—')+'</td><td class="text-end">'+(r.nb_lignes||0)+'</td><td class="text-end">'+(r.nb_retenus||0)+'</td><td>'+badge(r.statut)+'</td></tr>').join('');
+    tb.innerHTML=rows.map(r=>'<tr><td>'+r.name+'</td><td>'+(r.equipe||'—')+'</td><td>'+(r.chef||'—')+'</td><td>'+(r.annee||'—')+'</td><td>'+(r.trimestre||'—')+'</td><td class="text-end">'+(r.nb_lignes||0)+'</td><td class="text-end">'+(r.nb_retenus||0)+'</td><td>'+badge(r.statut)+' <button class="btn btn-sm btn-outline-primary ms-1" style="font-size:11px;" onclick="ouvrirRevueBesoin(\''+r.name+'\')"><i class="bi bi-pencil-square"></i> Revue</button></td></tr>').join('');
   }catch(e){ tb.innerHTML='<tr><td colspan="8" class="kya-loader text-danger">Erreur: '+e.message+'</td></tr>'; }
 }
 async function loadPlans(){
   const tb=document.getElementById('tbl-plans');
   try{ const rows=await callApi('kya_hr.api.formation_dashboard.get_plans');
     if(!rows.length){ tb.innerHTML='<tr><td colspan="7" class="kya-loader">Aucun plan</td></tr>'; return; }
-    tb.innerHTML=rows.map(r=>'<tr><td><a href="/app/plan-de-formation/'+encodeURIComponent(r.name)+'">'+r.name+'</a></td><td>'+(r.titre||'—')+'</td><td>'+(r.annee||'—')+'</td><td class="text-end">'+(r.nb_formations||0)+'</td><td class="text-end">'+(r.nb_retenues_dg||0)+'</td><td class="text-end">'+fmtN(r.cout_total)+'</td><td>'+badge(r.statut)+'</td></tr>').join('');
+    tb.innerHTML=rows.map(r=>'<tr><td>'+r.name+'</td><td>'+(r.titre||'—')+'</td><td>'+(r.annee||'—')+'</td><td class="text-end">'+(r.nb_formations||0)+'</td><td class="text-end">'+(r.nb_retenues_dg||0)+'</td><td class="text-end">'+fmtN(r.cout_total)+'</td><td>'+badge(r.statut)+' <span id="acts-'+r.name+'"></span></td></tr>').join('');
+    rows.forEach(r=>renderPlanActions(r.name));
   }catch(e){ tb.innerHTML='<tr><td colspan="7" class="kya-loader text-danger">Erreur: '+e.message+'</td></tr>'; }
+}
+async function renderPlanActions(plan){
+  try{
+    const acts=[...new Set(await callApi('kya_hr.api.formation_dashboard.get_workflow_actions', {doctype:'Plan de Formation', name:plan}))];
+    const el=document.getElementById('acts-'+plan); if(!el) return;
+    el.innerHTML=acts.filter(a=>a&&a!=='Valider la sélection').map(a=>'<button class="btn btn-sm btn-outline-success ms-1" style="font-size:11px;" onclick="doPlanAction(\''+plan+'\',\''+a.replace(/'/g,"\\'")+'\')">'+a+'</button>').join('');
+  }catch(e){}
+}
+async function doPlanAction(plan, action){
+  if(!confirm('Action « '+action+' » sur '+plan+' ?')) return;
+  try{ const r=await callApiPost('kya_hr.api.formation_dashboard.apply_plan_action', {plan, action});
+    setResult('<i class="bi bi-check-circle"></i> '+plan+' → '+r.statut); loadOverview(); loadPlans(); loadPlansForDg(); loadChiffragePlans();
+  }catch(e){ setResult('Erreur : '+e.message, false); }
+}
+async function ouvrirRevueBesoin(besoin){
+  let d;
+  try{ d=await callApi('kya_hr.api.formation_dashboard.get_besoin_lignes', {besoin}); }
+  catch(e){ setResult('Erreur : '+e.message, false); return; }
+  const ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;display:flex;align-items:center;justify-content:center;padding:1rem;';
+  const rows=d.lignes.map(l=>'<tr data-idx="'+l.idx+'"><td>'+l.intitule+'<div class="text-muted small">'+(l.competence||'')+(l.employes_concernes?(' · '+l.employes_concernes):'')+'</div></td>'
+    +'<td><select class="form-select form-select-sm rv-st"><option'+(l.statut_rh==='En attente'?' selected':'')+'>En attente</option><option'+(l.statut_rh==='Retenu'?' selected':'')+'>Retenu</option><option'+(l.statut_rh==='Écarté'?' selected':'')+'>Écarté</option></select></td>'
+    +'<td><input class="form-control form-control-sm rv-mo" value="'+(l.motif_rh||'').replace(/"/g,'&quot;')+'" placeholder="motif si écarté"></td></tr>').join('');
+  const acts=[...new Set(d.actions)].filter(a=>a);
+  ov.innerHTML='<div style="background:#fff;border-radius:12px;max-width:720px;width:100%;padding:1.3rem;max-height:90vh;overflow:auto;">'
+    +'<h5 class="mb-1"><i class="bi bi-clipboard-check"></i> Revue RH — '+besoin+'</h5>'
+    +'<div class="text-muted small mb-2">Équipe : '+(d.equipe||'—')+' · Statut : '+d.statut+'</div>'
+    +'<table class="kya-table"><thead><tr><th>Formation souhaitée</th><th>Décision</th><th>Motif</th></tr></thead><tbody>'+rows+'</tbody></table>'
+    +'<div class="d-flex justify-content-between gap-2 mt-3 flex-wrap"><div>'+acts.map(a=>'<button class="btn btn-sm btn-warning" data-act="'+a+'">'+a+'</button>').join(' ')+'</div>'
+    +'<div><button class="btn btn-sm btn-light" id="rv-cancel">Fermer</button> <button class="btn btn-sm btn-primary" id="rv-save"><i class="bi bi-save"></i> Enregistrer la revue</button></div></div></div>';
+  document.body.appendChild(ov);
+  function collect(){ return [...ov.querySelectorAll('tbody tr')].map(tr=>({idx:parseInt(tr.dataset.idx,10), statut_rh:tr.querySelector('.rv-st').value, motif_rh:tr.querySelector('.rv-mo').value})); }
+  ov.querySelector('#rv-cancel').onclick=()=>ov.remove();
+  ov.querySelector('#rv-save').onclick=async()=>{
+    try{ const r=await callApiPost('kya_hr.api.formation_dashboard.review_besoin', {besoin, decisions: collect()});
+      setResult('<i class="bi bi-check-circle"></i> Revue enregistrée — '+r.nb_retenus+' retenu(s).'); loadBesoins(); loadOverview();
+    }catch(e){ setResult('Erreur : '+e.message, false); }
+  };
+  ov.querySelectorAll('[data-act]').forEach(btn=>btn.onclick=async()=>{
+    try{ await callApiPost('kya_hr.api.formation_dashboard.review_besoin', {besoin, decisions: collect()});
+      const r=await callApiPost('kya_hr.api.formation_dashboard.apply_besoin_action', {besoin, action:btn.dataset.act});
+      ov.remove(); setResult('<i class="bi bi-check-circle"></i> '+besoin+' → '+r.statut); loadBesoins(); loadOverview();
+    }catch(e){ setResult('Erreur : '+e.message, false); }
+  });
 }
 async function loadSuivi(){
   const tb=document.getElementById('tbl-suivi');
@@ -440,6 +503,53 @@ async function exportBeneficiaires(){
     setResult('<i class="bi bi-check-circle"></i> '+r.rows+' ligne(s) exportée(s) — '+r.filename);
   }catch(e){ setResult('Erreur export : '+e.message, false); }
 }
-document.addEventListener('DOMContentLoaded', ()=>{ loadOverview(); loadBesoins(); loadPlans(); loadPlansForDg(); loadSuivi(); loadBenefPlans(); });
+/* ─── Chiffrage RH ─── */
+const NATURE_OPTS=['','Développement de compétence','Remise à niveau'];
+const SOURCE_OPTS=['','Interne','Externe'];
+const MODAL_OPTS=['','Présentiel','En ligne','Mixte'];
+function _sel(cls,val,opts){ return '<select class="form-select form-select-sm '+cls+'" style="min-width:120px;">'+opts.map(o=>'<option'+(o===val?' selected':'')+'>'+o+'</option>').join('')+'</select>'; }
+async function loadChiffragePlans(){
+  const sel=document.getElementById('chif-plan-select');
+  try{ const rows=await callApi('kya_hr.api.formation_dashboard.get_plans');
+    sel.innerHTML='<option value="">— Choisir un plan —</option>'+(rows||[]).map(r=>'<option value="'+r.name+'">'+r.name+' · '+(r.titre||'')+' ('+r.statut+')</option>').join('');
+  }catch(e){ sel.innerHTML='<option value="">Erreur</option>'; }
+}
+async function loadChiffrage(){
+  const plan=document.getElementById('chif-plan-select').value;
+  const tb=document.getElementById('tbl-chif'), sm=document.getElementById('chif-summary');
+  if(!plan){ tb.innerHTML='<tr><td colspan="9" class="kya-loader">Sélectionnez un plan…</td></tr>'; sm.textContent=''; return; }
+  tb.innerHTML='<tr><td colspan="9" class="kya-loader">Chargement…</td></tr>';
+  try{
+    const d=await callApi('kya_hr.api.formation_dashboard.get_chiffrage', {plan});
+    sm.innerHTML='Statut : <b>'+d.statut+'</b> · Coût total retenu DG : <b>'+fmtN(d.cout_total)+' FCFA</b>';
+    if(!d.lignes.length){ tb.innerHTML='<tr><td colspan="9" class="kya-loader">Aucune formation. Compilez d’abord un plan.</td></tr>'; return; }
+    tb.innerHTML=d.lignes.map(l=>'<tr data-idx="'+l.idx+'">'
+      +'<td>'+l.intitule+(l.retenu_dg?' <span class="badge-statut b-ok">DG</span>':'')+'<div class="text-muted small">'+(l.equipe||'')+'</div></td>'
+      +'<td>'+_sel('cf-nature',l.nature_action,NATURE_OPTS)+'</td>'
+      +'<td>'+_sel('cf-source',l.source_deploiement,SOURCE_OPTS)+'</td>'
+      +'<td><input class="form-control form-control-sm cf-org" value="'+(l.organisme||'').replace(/"/g,'&quot;')+'" style="min-width:130px;"></td>'
+      +'<td>'+_sel('cf-modal',l.modalite,MODAL_OPTS)+'</td>'
+      +'<td><input type="date" class="form-control form-control-sm cf-deb" value="'+(l.date_debut||'')+'"></td>'
+      +'<td><input type="date" class="form-control form-control-sm cf-fin" value="'+(l.date_fin||'')+'"></td>'
+      +'<td><input type="number" class="form-control form-control-sm cf-cd text-end" value="'+(parseFloat(l.cout_direct)||0)+'" style="min-width:110px;"></td>'
+      +'<td><input type="number" class="form-control form-control-sm cf-ca text-end" value="'+(parseFloat(l.cout_accessoire)||0)+'" style="min-width:110px;"></td>'
+      +'</tr>').join('');
+  }catch(e){ tb.innerHTML='<tr><td colspan="9" class="kya-loader text-danger">Erreur: '+e.message+'</td></tr>'; }
+}
+async function saveChiffrage(){
+  const plan=document.getElementById('chif-plan-select').value;
+  if(!plan){ setResult('Choisissez un plan.', false); return; }
+  const lignes=[...document.querySelectorAll('#tbl-chif tr[data-idx]')].map(tr=>({
+    idx:parseInt(tr.dataset.idx,10),
+    nature_action:tr.querySelector('.cf-nature').value, source_deploiement:tr.querySelector('.cf-source').value,
+    organisme:tr.querySelector('.cf-org').value, modalite:tr.querySelector('.cf-modal').value,
+    date_debut:tr.querySelector('.cf-deb').value||null, date_fin:tr.querySelector('.cf-fin').value||null,
+    cout_direct:tr.querySelector('.cf-cd').value, cout_accessoire:tr.querySelector('.cf-ca').value,
+  }));
+  try{ const r=await callApiPost('kya_hr.api.formation_dashboard.save_chiffrage', {plan, lignes});
+    setResult('<i class="bi bi-check-circle"></i> Chiffrage enregistré · coût total retenu = '+fmtN(r.cout_total)+' FCFA'); loadChiffrage(); loadOverview(); loadPlans();
+  }catch(e){ setResult('Erreur : '+e.message, false); }
+}
+document.addEventListener('DOMContentLoaded', ()=>{ loadOverview(); loadBesoins(); loadPlans(); loadPlansForDg(); loadSuivi(); loadBenefPlans(); loadChiffragePlans(); });
 </script>
 {%- endblock -%}
