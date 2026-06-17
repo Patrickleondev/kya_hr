@@ -1,0 +1,328 @@
+{%- extends "templates/web.html" -%}
+{%- block title %}Dashboard Formation — KYA Energy{%- endblock -%}
+
+{%- block page_content -%}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<style>
+:root { --kya-blue:#0d7377; --kya-orange:#F58220; --kya-green:#22c55e; --kya-red:#ef4444; --kya-purple:#7c3aed; --kya-bg:#f1f5f9; --kya-card:#fff; --kya-border:#e2e8f0; --kya-text:#1e293b; --kya-muted:#94a3b8; }
+body { background: var(--kya-bg) !important; }
+.kya-hero { background: linear-gradient(135deg, var(--kya-purple) 0%, #4c1d95 100%); color:#fff; border-radius:16px; padding:1.5rem 2rem; margin-bottom:1.5rem; }
+.kya-hero h1 { font-size:1.5rem; font-weight:800; margin:0; }
+.kya-hero p { opacity:.85; margin:.3rem 0 0; font-size:.85rem; }
+.kya-kpi-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:1rem; margin-bottom:1.5rem; }
+.kya-kpi { background:var(--kya-card); border-radius:12px; padding:1.2rem 1rem; border:1px solid var(--kya-border); text-align:center; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+.kya-kpi-value { font-size:1.6rem; font-weight:800; line-height:1; color:var(--kya-text); }
+.kya-kpi-label { font-size:.68rem; color:var(--kya-muted); font-weight:700; text-transform:uppercase; letter-spacing:.5px; margin-top:.4rem; }
+.kya-kpi-icon { font-size:1.4rem; margin-bottom:.5rem; }
+.kya-panel { background:var(--kya-card); border-radius:12px; border:1px solid var(--kya-border); box-shadow:0 1px 3px rgba(0,0,0,.06); margin-bottom:1.5rem; overflow:hidden; }
+.kya-panel-head { padding:1rem 1.5rem; background:#f8fafc; border-bottom:1px solid var(--kya-border); display:flex; justify-content:space-between; align-items:center; }
+.kya-panel-head h3 { font-size:.95rem; font-weight:700; margin:0; }
+.kya-table { width:100%; border-collapse:collapse; font-size:.82rem; }
+.kya-table th { background:#f8fafc; padding:.7rem .9rem; font-weight:700; font-size:.68rem; text-transform:uppercase; letter-spacing:.5px; color:var(--kya-muted); border-bottom:2px solid var(--kya-border); text-align:left; white-space:nowrap; }
+.kya-table td { padding:.65rem .9rem; border-bottom:1px solid var(--kya-border); }
+.kya-table tbody tr:hover { background:#f8fafc; }
+.kya-loader { text-align:center; padding:2.5rem; color:var(--kya-muted); font-size:.85rem; }
+.badge-statut { padding:.15rem .55rem; border-radius:12px; font-size:.7rem; font-weight:700; }
+.b-ok { background:#dcfce7; color:#166534; } .b-mission { background:#fef3c7; color:#92400e; }
+.b-pending { background:#dbeafe; color:#1e40af; } .b-warning { background:#fed7aa; color:#9a3412; }
+.b-danger { background:#fee2e2; color:#991b1b; } .b-muted { background:#e2e8f0; color:#475569; }
+.text-purple { color:var(--kya-purple)!important; }
+@media (max-width:768px){ .kya-kpi-grid{grid-template-columns:repeat(2,1fr);} .kya-table{font-size:.72rem;} .kya-table th,.kya-table td{padding:.45rem .5rem;} }
+</style>
+
+<div class="container py-3" style="max-width:1500px;">
+  <div class="kya-hero">
+    <h1><i class="bi bi-mortarboard"></i> Dashboard Formation KYA</h1>
+    <p>Besoins des équipes, plan de formation, sélection DG, chiffrage et suivi</p>
+    <div class="mt-3 d-flex gap-2 flex-wrap">
+      <a class="btn btn-sm btn-light" href="/besoin-formation/new"><i class="bi bi-plus-circle"></i> Nouveau besoin (chef)</a>
+      <button class="btn btn-sm btn-warning" onclick="ouvrirEnvoiChefs()"><i class="bi bi-send"></i> Envoyer le lien aux chefs</button>
+      <button class="btn btn-sm btn-success" onclick="compilerAnnee()"><i class="bi bi-magic"></i> Compiler les besoins retenus</button>
+      <button class="btn btn-sm btn-light" onclick="exportFormation('soumis')"><i class="bi bi-file-earmark-excel"></i> Export besoins soumis</button>
+      <button class="btn btn-sm btn-light" onclick="exportFormation('selectionnes')"><i class="bi bi-file-earmark-check"></i> Export sélectionnés</button>
+      <button class="btn btn-sm btn-light" onclick="toggleGuide()"><i class="bi bi-question-circle"></i> Guide RH</button>
+    </div>
+    <div id="action-result" class="small mt-2" style="min-height:1em;"></div>
+  </div>
+
+  <!-- Guide RH formation -->
+  <div class="kya-panel" id="guide-rh" style="display:none;border-left:4px solid var(--kya-blue);">
+    <div class="kya-panel-head"><h3><i class="bi bi-info-circle text-primary"></i> Comment ça marche — Formation (RH)</h3>
+      <button class="btn btn-sm btn-light" onclick="toggleGuide()">Fermer</button></div>
+    <div class="p-3" style="font-size:.85rem;line-height:1.6;">
+      <ol class="mb-2">
+        <li><b>Envoyer le lien aux chefs</b> : la RH envoie le formulaire d'expression de besoin aux chefs d'équipe (mail à tous, ou liste d'adresses saisie).</li>
+        <li><b>Le chef remplit</b> par <b>équipe</b> (l'équipe appartient à un département, déduit automatiquement) et soumet à la RH.</li>
+        <li><b>La RH revoit</b> les besoins (table « Besoins de formation ») et marque les lignes <b>Retenu</b>.</li>
+        <li><b>Compiler les besoins retenus</b> : crée le <b>Plan de Formation</b> de l'année à partir des lignes retenues.</li>
+        <li><b>Le DG sélectionne</b> les formations à financer (panneau « Sélection DG »).</li>
+        <li><b>La RH chiffre puis suit</b> les formations retenues (table « Suivi ») jusqu'à clôture.</li>
+        <li><b>Exports</b> : « besoins soumis » (tout ce qui est remonté) et « sélectionnés » (retenu par le DG) en Excel/CSV.</li>
+      </ol>
+      <div class="text-muted">Rôles : RH (Responsable RH / HR Manager) pour revue & compilation ; Direction (DG/DGA) pour la sélection.</div>
+    </div>
+  </div>
+
+  <div class="kya-kpi-grid">
+    <div class="kya-kpi"><div class="kya-kpi-icon" style="color:var(--kya-orange);"><i class="bi bi-inbox"></i></div><div class="kya-kpi-value" id="kpi-revoir">—</div><div class="kya-kpi-label">Besoins à revoir</div></div>
+    <div class="kya-kpi"><div class="kya-kpi-icon" style="color:var(--kya-blue);"><i class="bi bi-files"></i></div><div class="kya-kpi-value" id="kpi-besoins">—</div><div class="kya-kpi-label">Besoins (total)</div></div>
+    <div class="kya-kpi"><div class="kya-kpi-icon" style="color:var(--kya-purple);"><i class="bi bi-clipboard-data"></i></div><div class="kya-kpi-value" id="kpi-plans">—</div><div class="kya-kpi-label">Plans en cours</div></div>
+    <div class="kya-kpi"><div class="kya-kpi-icon" style="color:var(--kya-orange);"><i class="bi bi-hourglass-split"></i></div><div class="kya-kpi-value" id="kpi-suivi">—</div><div class="kya-kpi-label">Formations en suivi</div></div>
+    <div class="kya-kpi"><div class="kya-kpi-icon" style="color:var(--kya-green);"><i class="bi bi-check2-all"></i></div><div class="kya-kpi-value" id="kpi-terminees">—</div><div class="kya-kpi-label">Terminées</div></div>
+    <div class="kya-kpi"><div class="kya-kpi-icon" style="color:var(--kya-green);"><i class="bi bi-cash-coin"></i></div><div class="kya-kpi-value" id="kpi-cout">—</div><div class="kya-kpi-label">Coût validé (FCFA)</div></div>
+  </div>
+
+  <div class="kya-panel">
+    <div class="kya-panel-head"><h3><i class="bi bi-inbox text-warning"></i> Besoins de formation (revue RH)</h3></div>
+    <table class="kya-table">
+      <thead><tr><th>N°</th><th>Équipe</th><th>Chef</th><th>Année</th><th>Période</th><th class="text-end">Lignes</th><th class="text-end">Retenus</th><th>Statut</th></tr></thead>
+      <tbody id="tbl-besoins"><tr><td colspan="8" class="kya-loader">Chargement…</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="kya-panel">
+    <div class="kya-panel-head"><h3><i class="bi bi-clipboard-data"></i> Plans de formation</h3></div>
+    <table class="kya-table">
+      <thead><tr><th>N°</th><th>Titre</th><th>Année</th><th class="text-end">Compilées</th><th class="text-end">Retenues DG</th><th class="text-end">Coût total</th><th>Statut</th></tr></thead>
+      <tbody id="tbl-plans"><tr><td colspan="7" class="kya-loader">Chargement…</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="kya-panel" id="panel-dg">
+    <div class="kya-panel-head">
+      <h3><i class="bi bi-check2-square text-purple"></i> Sélection DG — arbitrage des formations</h3>
+      <select id="dg-plan-select" class="form-select form-select-sm" style="max-width:360px;" onchange="loadDgLignes()"></select>
+    </div>
+    <div id="dg-content" class="p-3">
+      <div class="kya-loader">Chargement…</div>
+    </div>
+  </div>
+
+  <div class="kya-panel">
+    <div class="kya-panel-head"><h3><i class="bi bi-hourglass-split"></i> Suivi des formations retenues</h3></div>
+    <div style="max-height:450px; overflow-y:auto;">
+      <table class="kya-table">
+        <thead><tr><th>Plan</th><th>Équipe</th><th>Formation</th><th>Organisme</th><th class="text-end">Coût</th><th>Début</th><th>Fin</th><th>Suivi</th></tr></thead>
+        <tbody id="tbl-suivi"><tr><td colspan="8" class="kya-loader">Chargement…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+function fmtN(n){ if(n==null) return '—'; return new Intl.NumberFormat('fr-FR',{maximumFractionDigits:0}).format(n); }
+function badge(s){
+  if(!s) return '';
+  var k=s.toLowerCase();
+  if(k.indexOf('brouillon')>-1) return '<span class="badge-statut b-muted">'+s+'</span>';
+  if(k.indexOf('soumis')>-1) return '<span class="badge-statut b-pending">'+s+'</span>';
+  if(k.indexOf('revue')>-1||k.indexOf('chiffrage')>-1||k.indexOf('sélection')>-1||k.indexOf('selection')>-1||k.indexOf('cours')>-1) return '<span class="badge-statut b-mission">'+s+'</span>';
+  if(k.indexOf('validé')>-1||k.indexOf('valide')>-1||k.indexOf('traité')>-1||k.indexOf('traite')>-1||k.indexOf('terminée')>-1||k.indexOf('terminee')>-1||k.indexOf('suivi')>-1) return '<span class="badge-statut b-ok">'+s+'</span>';
+  if(k.indexOf('planifiée')>-1||k.indexOf('planifiee')>-1||k.indexOf('planifier')>-1) return '<span class="badge-statut b-warning">'+s+'</span>';
+  if(k.indexOf('annul')>-1||k.indexOf('clôtur')>-1||k.indexOf('clotur')>-1) return '<span class="badge-statut b-danger">'+s+'</span>';
+  return '<span class="badge-statut b-muted">'+s+'</span>';
+}
+async function callApi(method, args){
+  const res = await fetch('/api/method/'+method+(args?'?'+new URLSearchParams(args):''), { headers:{'X-Frappe-CSRF-Token': (window.frappe&&frappe.csrf_token)||''}, credentials:'same-origin' });
+  if(!res.ok) throw new Error(method+' HTTP '+res.status);
+  return (await res.json()).message;
+}
+async function callApiPost(method, args){
+  const res = await fetch('/api/method/'+method, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-Frappe-CSRF-Token':(window.frappe&&frappe.csrf_token)||''},
+    credentials:'same-origin',
+    body: JSON.stringify(args||{})
+  });
+  if(!res.ok){ let m=method+' HTTP '+res.status; try{ const j=await res.json(); if(j._server_messages){ m=JSON.parse(j._server_messages).map(s=>JSON.parse(s).message).join(' '); } }catch(e){} throw new Error(m); }
+  return (await res.json()).message;
+}
+async function loadOverview(){
+  try{ const o=await callApi('kya_hr.api.formation_dashboard.get_overview');
+    document.getElementById('kpi-revoir').textContent=fmtN(o.besoins_a_revoir);
+    document.getElementById('kpi-besoins').textContent=fmtN(o.besoins_total);
+    document.getElementById('kpi-plans').textContent=fmtN(o.plans_en_cours);
+    document.getElementById('kpi-suivi').textContent=fmtN(o.formations_en_suivi);
+    document.getElementById('kpi-terminees').textContent=fmtN(o.formations_terminees);
+    document.getElementById('kpi-cout').textContent=fmtN(o.cout_total_valide);
+  }catch(e){ console.error(e); }
+}
+async function loadBesoins(){
+  const tb=document.getElementById('tbl-besoins');
+  try{ const rows=await callApi('kya_hr.api.formation_dashboard.get_besoins');
+    if(!rows.length){ tb.innerHTML='<tr><td colspan="8" class="kya-loader">Aucun besoin</td></tr>'; return; }
+    tb.innerHTML=rows.map(r=>'<tr><td><a href="/app/besoin-de-formation/'+encodeURIComponent(r.name)+'">'+r.name+'</a></td><td>'+(r.equipe||'—')+'</td><td>'+(r.chef||'—')+'</td><td>'+(r.annee||'—')+'</td><td>'+(r.trimestre||'—')+'</td><td class="text-end">'+(r.nb_lignes||0)+'</td><td class="text-end">'+(r.nb_retenus||0)+'</td><td>'+badge(r.statut)+'</td></tr>').join('');
+  }catch(e){ tb.innerHTML='<tr><td colspan="8" class="kya-loader text-danger">Erreur: '+e.message+'</td></tr>'; }
+}
+async function loadPlans(){
+  const tb=document.getElementById('tbl-plans');
+  try{ const rows=await callApi('kya_hr.api.formation_dashboard.get_plans');
+    if(!rows.length){ tb.innerHTML='<tr><td colspan="7" class="kya-loader">Aucun plan</td></tr>'; return; }
+    tb.innerHTML=rows.map(r=>'<tr><td><a href="/app/plan-de-formation/'+encodeURIComponent(r.name)+'">'+r.name+'</a></td><td>'+(r.titre||'—')+'</td><td>'+(r.annee||'—')+'</td><td class="text-end">'+(r.nb_formations||0)+'</td><td class="text-end">'+(r.nb_retenues_dg||0)+'</td><td class="text-end">'+fmtN(r.cout_total)+'</td><td>'+badge(r.statut)+'</td></tr>').join('');
+  }catch(e){ tb.innerHTML='<tr><td colspan="7" class="kya-loader text-danger">Erreur: '+e.message+'</td></tr>'; }
+}
+async function loadSuivi(){
+  const tb=document.getElementById('tbl-suivi');
+  try{ const rows=await callApi('kya_hr.api.formation_dashboard.get_suivi');
+    if(!rows.length){ tb.innerHTML='<tr><td colspan="8" class="kya-loader">Aucune formation retenue</td></tr>'; return; }
+    tb.innerHTML=rows.map(r=>'<tr><td><a href="/app/plan-de-formation/'+encodeURIComponent(r.plan)+'">'+r.plan+'</a></td><td>'+(r.equipe||'—')+'</td><td>'+(r.intitule||'—')+'</td><td>'+(r.organisme||'—')+'</td><td class="text-end">'+fmtN(r.cout)+'</td><td>'+(r.date_debut||'—')+'</td><td>'+(r.date_fin||'—')+'</td><td>'+badge(r.statut_suivi)+'</td></tr>').join('');
+  }catch(e){ tb.innerHTML='<tr><td colspan="8" class="kya-loader text-danger">Erreur: '+e.message+'</td></tr>'; }
+}
+function setResult(html, ok){
+  const el=document.getElementById('action-result');
+  if(el){ el.innerHTML=html; el.style.color = ok===false ? '#b91c1c' : '#15803d'; }
+}
+function toggleGuide(){
+  const g=document.getElementById('guide-rh');
+  g.style.display = g.style.display==='none' ? '' : 'none';
+}
+function _downloadB64(b64, name, mime){
+  const bin=atob(b64); const arr=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+  const url=URL.createObjectURL(new Blob([arr],{type:mime||'text/csv'}));
+  const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+async function exportFormation(scope){
+  setResult('<i class="bi bi-arrow-repeat"></i> Export en cours…');
+  try{
+    const r=await callApi('kya_hr.api.formation_dashboard.export_besoins', {scope});
+    if(!r.rows){ setResult('Aucune donnée à exporter pour ce périmètre.', false); return; }
+    _downloadB64(r.content_base64, r.filename, 'text/csv');
+    setResult('<i class="bi bi-check-circle"></i> '+r.rows+' ligne(s) exportée(s) — '+r.filename);
+  }catch(e){ setResult('Erreur export : '+e.message, false); }
+}
+// ---- Envoi du lien d'expression de besoin aux chefs (2 modes) ----
+async function ouvrirEnvoiChefs(){
+  let data;
+  try{ data = await callApi('kya_hr.api.formation_dashboard.get_chefs_for_links'); }
+  catch(e){ setResult('Erreur : '+e.message, false); return; }
+  const chefs = data.chefs||[];
+  const avecMail = chefs.filter(c=>c.has_email).length;
+  const sansMail = chefs.filter(c=>!c.has_email);
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998;display:flex;align-items:center;justify-content:center;';
+  overlay.innerHTML=`
+    <div style="background:#fff;border-radius:12px;max-width:560px;width:92%;padding:22px;box-shadow:0 8px 32px rgba(0,0,0,.25);">
+      <h3 style="margin:0 0 8px;color:#0054A6;">Envoyer le lien aux chefs d'équipe</h3>
+      <p style="font-size:.82rem;color:#555;margin:0 0 6px;">Lien : <code>${data.link}</code>
+        <button class="btn btn-sm btn-light" onclick="navigator.clipboard&&navigator.clipboard.writeText('${data.link}');this.textContent='Copié';">Copier</button></p>
+      <div class="form-check"><input class="form-check-input" type="radio" name="fmode" id="m-all" value="all" checked>
+        <label class="form-check-label" for="m-all">Mailer <b>tous les chefs</b> (${avecMail} avec email${sansMail.length?`, ${sansMail.length} sans email seront ignorés`:''})</label></div>
+      <div class="form-check"><input class="form-check-input" type="radio" name="fmode" id="m-list" value="list">
+        <label class="form-check-label" for="m-list">Saisir les adresses de destination</label></div>
+      <textarea id="f-emails" class="form-control form-control-sm mt-1" rows="3" placeholder="email1@ex.com, email2@ex.com" style="display:none;"></textarea>
+      ${sansMail.length?`<div class="small text-muted mt-2">Sans email : ${sansMail.map(c=>c.equipe).join(', ')}</div>`:''}
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">
+        <button class="btn btn-sm btn-light" id="f-cancel">Annuler</button>
+        <button class="btn btn-sm btn-primary" id="f-send">Envoyer</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('#m-list').onchange=overlay.querySelector('#m-all').onchange=function(){
+    overlay.querySelector('#f-emails').style.display = overlay.querySelector('#m-list').checked ? '' : 'none';
+  };
+  overlay.querySelector('#f-cancel').onclick=()=>overlay.remove();
+  overlay.querySelector('#f-send').onclick=async function(){
+    const mode=overlay.querySelector('input[name=fmode]:checked').value;
+    const emails=overlay.querySelector('#f-emails').value;
+    if(mode==='list' && !emails.trim()){ alert('Saisissez au moins une adresse.'); return; }
+    this.disabled=true; this.textContent='Envoi…';
+    try{
+      const r=await callApiPost('kya_hr.api.formation_dashboard.send_besoin_links', {mode, emails});
+      overlay.remove();
+      setResult('<i class="bi bi-check-circle"></i> Lien envoyé à '+r.count_sent+' chef(s)'+(r.count_skipped?(' · '+r.count_skipped+' sans email'):''));
+    }catch(e){ overlay.remove(); setResult('Erreur envoi : '+e.message, false); }
+  };
+}
+async function compilerAnnee(){
+  const annee = new Date().getFullYear();
+  if(!confirm('Compiler dans le plan toutes les formations RETENUES par la RH pour '+annee+' ?')) return;
+  try{
+    const r = await callApi('kya_hr.api.formation_dashboard.compile_year', {annee});
+    alert('Plan '+r.plan+' : '+r.added+' formation(s) ajoutée(s) (total '+r.total+').');
+    loadOverview(); loadPlans();
+  }catch(e){ alert('Erreur de compilation : '+e.message); }
+}
+// ---- Écran de sélection DG ----
+let DG_PLANS = [];
+async function loadPlansForDg(){
+  const sel=document.getElementById('dg-plan-select');
+  const box=document.getElementById('dg-content');
+  try{
+    DG_PLANS = await callApi('kya_hr.api.formation_dashboard.get_plans_for_dg') || [];
+    if(!DG_PLANS.length){
+      sel.innerHTML='<option value="">— Aucun plan à arbitrer —</option>';
+      box.innerHTML='<div class="kya-loader">Aucun plan soumis au DG. La RH doit d’abord compiler puis « Soumettre au DG ».</div>';
+      return;
+    }
+    sel.innerHTML=DG_PLANS.map(p=>'<option value="'+p.name+'">'+p.name+' — '+(p.titre||'')+' ('+p.statut+')</option>').join('');
+    loadDgLignes();
+  }catch(e){ box.innerHTML='<div class="kya-loader text-danger">Erreur: '+e.message+'</div>'; }
+}
+async function loadDgLignes(){
+  const plan=document.getElementById('dg-plan-select').value;
+  const box=document.getElementById('dg-content');
+  if(!plan){ box.innerHTML='<div class="kya-loader">Sélectionnez un plan…</div>'; return; }
+  box.innerHTML='<div class="kya-loader">Chargement du plan…</div>';
+  try{
+    const d=await callApi('kya_hr.api.formation_dashboard.get_plan_lignes', {plan});
+    if(!d.lignes.length){ box.innerHTML='<div class="kya-loader">Ce plan ne contient aucune formation compilée.</div>'; return; }
+    let html='<div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">'
+      +'<div><b>'+d.titre+'</b> — '+d.annee+' '+badge(d.statut)
+      +' &nbsp; <span class="text-muted">'+d.nb_formations+' compilées · <span id="dg-cnt">'+d.nb_retenues_dg+'</span> retenues</span></div>'
+      +'<div class="d-flex gap-2">'
+      +'<button class="btn btn-sm btn-outline-primary" onclick="saveDgSelection()"><i class="bi bi-save"></i> Enregistrer la sélection</button>'
+      +(d.can_validate?'<button class="btn btn-sm btn-success" onclick="validateDgSelection()"><i class="bi bi-check2-circle"></i> Valider la sélection (→ Chiffrage RH)</button>':'')
+      +'</div></div>';
+    html+='<div style="max-height:480px;overflow-y:auto;"><table class="kya-table"><thead><tr>'
+      +'<th style="width:42px;">Retenir</th><th>Équipe</th><th>Formation</th><th>Priorité</th><th class="text-end">Part.</th><th>Justification</th><th>Commentaire DG</th></tr></thead><tbody id="dg-tbody">';
+    html+=d.lignes.map(l=>'<tr data-idx="'+l.idx+'">'
+      +'<td class="text-center"><input type="checkbox" class="form-check-input dg-chk" onchange="recountDg()" '+(l.retenu_dg?'checked':'')+'></td>'
+      +'<td>'+(l.equipe||'—')+'</td>'
+      +'<td><b>'+(l.intitule||'—')+'</b></td>'
+      +'<td>'+badge(l.priorite||'')+'</td>'
+      +'<td class="text-end">'+(l.nb_participants||0)+'</td>'
+      +'<td style="max-width:260px;font-size:.78rem;color:#475569;">'+(l.justification||'')+'</td>'
+      +'<td><input type="text" class="form-control form-control-sm dg-motif" value="'+(l.motif_dg||'').replace(/"/g,'&quot;')+'" placeholder="motif…"></td>'
+      +'</tr>').join('');
+    html+='</tbody></table></div>';
+    box.innerHTML=html;
+  }catch(e){ box.innerHTML='<div class="kya-loader text-danger">Erreur: '+e.message+'</div>'; }
+}
+function recountDg(){
+  const n=document.querySelectorAll('#dg-tbody .dg-chk:checked').length;
+  const el=document.getElementById('dg-cnt'); if(el) el.textContent=n;
+}
+function collectDgDecisions(){
+  return [...document.querySelectorAll('#dg-tbody tr[data-idx]')].map(tr=>({
+    idx: parseInt(tr.dataset.idx,10),
+    retenu: tr.querySelector('.dg-chk').checked?1:0,
+    motif: tr.querySelector('.dg-motif').value
+  }));
+}
+async function saveDgSelection(){
+  const plan=document.getElementById('dg-plan-select').value;
+  if(!plan) return;
+  try{
+    const r=await callApiPost('kya_hr.api.formation_dashboard.save_dg_selection', {plan, decisions: collectDgDecisions()});
+    alert('Sélection enregistrée : '+r.retenues+' formation(s) retenue(s), coût '+fmtN(r.cout_total)+' FCFA.');
+    loadOverview(); loadPlans();
+  }catch(e){ alert('Erreur d’enregistrement : '+e.message); }
+}
+async function validateDgSelection(){
+  const plan=document.getElementById('dg-plan-select').value;
+  if(!plan) return;
+  if(!confirm('Enregistrer la sélection ET la valider ? Le plan passera en « Sélection DG » puis sera transmis à la RH pour chiffrage.')) return;
+  try{
+    await callApiPost('kya_hr.api.formation_dashboard.save_dg_selection', {plan, decisions: collectDgDecisions()});
+    const r=await callApiPost('kya_hr.api.formation_dashboard.submit_dg_selection', {plan});
+    alert('Plan validé. Nouveau statut : '+r.statut+' ('+r.retenues+' retenues, '+fmtN(r.cout_total)+' FCFA).');
+    loadOverview(); loadPlans(); loadPlansForDg();
+  }catch(e){ alert('Erreur de validation : '+e.message); }
+}
+document.addEventListener('DOMContentLoaded', ()=>{ loadOverview(); loadBesoins(); loadPlans(); loadPlansForDg(); loadSuivi(); });
+</script>
+{%- endblock -%}

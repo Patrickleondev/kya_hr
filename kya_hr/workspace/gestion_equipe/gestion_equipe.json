@@ -1,0 +1,105 @@
+{
+ "name": "Gestion Equipe",
+ "label": "Gestion Equipe",
+ "title": "Gestion Equipe",
+ "sequence_id": 0.0,
+ "for_user": "",
+ "module": "KYA Taches",
+ "app": "kya_services",
+ "type": "Workspace",
+ "icon": "users",
+ "hide_custom": 0,
+ "public": 1,
+ "is_hidden": 0,
+ "content": "[{\"id\": \"shortcut-home\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Gestion \\u00c9quipe\", \"col\": 6}}, {\"id\": \"shortcut-dashboard\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dashboard Equipe\", \"col\": 6}}, {\"id\": \"shortcut-plans\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Plans Trimestriels\", \"col\": 6}}, {\"id\": \"shortcut-taches\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Taches d'Equipe\", \"col\": 6}}]",
+ "doctype": "Workspace",
+ "shortcuts": [
+  {
+   "type": "URL",
+   "url": "/app/gestion-equipe",
+   "doc_view": "",
+   "label": "Gestion \u00c9quipe",
+   "icon": "home",
+   "color": "#1a3a5c",
+   "doctype": "Workspace Shortcut"
+  },
+  {
+   "type": "URL",
+   "url": "/kya-dashboard-equipe",
+   "doc_view": "",
+   "label": "Dashboard Equipe",
+   "icon": "chart-bar",
+   "color": "#4CAF50",
+   "doctype": "Workspace Shortcut"
+  },
+  {
+   "type": "DocType",
+   "link_to": "Plan Trimestriel",
+   "doc_view": "",
+   "label": "Plans Trimestriels",
+   "icon": "list",
+   "color": "#1976d2",
+   "doctype": "Workspace Shortcut"
+  },
+  {
+   "type": "DocType",
+   "link_to": "Tache Equipe",
+   "doc_view": "",
+   "label": "Taches d'Equipe",
+   "icon": "task",
+   "color": "#00897b",
+   "doctype": "Workspace Shortcut"
+  }
+ ],
+ "links": [
+  {
+   "type": "Card Break",
+   "label": "Navigation",
+   "hidden": 0,
+   "link_type": "",
+   "link_to": "",
+   "onboard": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "doctype": "Workspace Link"
+  },
+  {
+   "type": "Link",
+   "label": "Plans Trimestriels",
+   "icon": "list",
+   "hidden": 0,
+   "link_type": "DocType",
+   "link_to": "Plan Trimestriel",
+   "onboard": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "doctype": "Workspace Link"
+  },
+  {
+   "type": "Link",
+   "label": "Taches d'Equipe",
+   "icon": "task",
+   "hidden": 0,
+   "link_type": "DocType",
+   "link_to": "Tache Equipe",
+   "onboard": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "doctype": "Workspace Link"
+  }
+ ],
+ "roles": [
+  {
+   "role": "Chef d'\u00c9quipe",
+   "doctype": "Has Role"
+  },
+  {
+   "role": "Chef Service",
+   "doctype": "Has Role"
+  },
+  {
+   "role": "System Manager",
+   "doctype": "Has Role"
+  }
+ ]
+}

@@ -1,0 +1,231 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "format:BF-{YYYY}-{#####}",
+ "creation": "2026-06-16 12:00:00.000000",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_entete",
+  "equipe",
+  "chef_equipe",
+  "chef_equipe_name",
+  "column_break_1",
+  "annee",
+  "trimestre",
+  "date_soumission",
+  "section_lignes",
+  "lignes",
+  "section_rh",
+  "statut",
+  "workflow_state",
+  "column_break_rh",
+  "observations_rh",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_entete",
+   "fieldtype": "Section Break",
+   "label": "Équipe & Période"
+  },
+  {
+   "fieldname": "equipe",
+   "fieldtype": "Link",
+   "label": "Équipe",
+   "options": "Equipe KYA",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "description": "L'équipe concernée (rattachée à un département)."
+  },
+  {
+   "fieldname": "departement",
+   "fieldtype": "Link",
+   "options": "Department",
+   "label": "Département",
+   "fetch_from": "equipe.departement",
+   "read_only": 1,
+   "description": "Déduit automatiquement de l'équipe."
+  },
+  {
+   "fieldname": "chef_equipe",
+   "fieldtype": "Link",
+   "label": "Chef d'équipe",
+   "options": "Employee",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "fetch_from": "equipe.chef_equipe",
+   "read_only": 1,
+   "description": "Renseigné automatiquement depuis l'équipe."
+  },
+  {
+   "fieldname": "chef_equipe_name",
+   "fieldtype": "Data",
+   "label": "Nom du chef",
+   "fetch_from": "equipe.chef_equipe_name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "annee",
+   "fieldtype": "Int",
+   "label": "Année",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "trimestre",
+   "fieldtype": "Select",
+   "label": "Trimestre / Période",
+   "options": "\nT1\nT2\nT3\nT4\nAnnuel",
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "date_soumission",
+   "fieldtype": "Datetime",
+   "label": "Soumis le",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_lignes",
+   "fieldtype": "Section Break",
+   "label": "Besoins en formation de l'équipe"
+  },
+  {
+   "fieldname": "lignes",
+   "fieldtype": "Table",
+   "label": "Formations souhaitées",
+   "options": "Besoin Formation Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_rh",
+   "fieldtype": "Section Break",
+   "label": "Revue RH"
+  },
+  {
+   "fieldname": "statut",
+   "fieldtype": "Select",
+   "label": "Statut",
+   "options": "Brouillon\nSoumis à la RH\nEn revue RH\nTraité",
+   "default": "Brouillon",
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "workflow_state",
+   "fieldtype": "Data",
+   "label": "Workflow State",
+   "hidden": 1,
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "column_break_rh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "observations_rh",
+   "fieldtype": "Small Text",
+   "label": "Observations RH (entretien)"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amendé depuis",
+   "options": "Besoin de Formation",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "links": [],
+ "modified": "2026-06-16 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "KYA HR",
+ "name": "Besoin de Formation",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Responsable RH",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Chef Equipe",
+   "write": 1,
+   "if_owner": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Chef d'Équipe",
+   "write": 1,
+   "if_owner": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Chef Service",
+   "write": 1,
+   "if_owner": 1
+  }
+ ],
+ "search_fields": "equipe,chef_equipe_name,annee",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "chef_equipe_name",
+ "track_changes": 1
+}

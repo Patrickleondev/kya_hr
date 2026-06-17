@@ -51,19 +51,88 @@ DOCTYPE_CONFIG = {
         "employee_field": "employee",
         "icon": "📋",
     },
+    # Fiches stock sans champ Employee -> destinataire = créateur (repli owner).
+    "PV Entree Materiel": {
+        "label": "PV d'Entrée de Matériel",
+        "route": "pv-entree-materiel",
+        "employee_field": "employee",
+        "icon": "📥",
+    },
+    "Retour Materiel KYA": {
+        "label": "Bon de Retour de Matériel",
+        "route": "retour-materiel",
+        "employee_field": "employee",
+        "icon": "↩️",
+    },
+    "Inventaire KYA": {
+        "label": "Fiche d'Inventaire",
+        "route": "inventaire-kya",
+        "employee_field": "employee",
+        "icon": "📊",
+    },
 }
 
 
-def _get_employee_email(doc, config):
-    """Retourne l'email de l'employé lié au document."""
-    emp_id = getattr(doc, config.get("employee_field", "employee"), None)
-    if not emp_id:
+def _logo_inline_attachment():
+    """Logo KYA en pièce jointe INLINE (CID) pour les emails.
+
+    Les <img src="http://.../logo.png"> cassent souvent dans les clients mail
+    (Gmail/Outlook) : l'URL dépend de get_url()/host_name et n'est pas toujours
+    publique (le site interne s'appelle 'frontend' -> http://frontend/...).
+    Un logo embarqué via Content-ID (cid:) s'affiche TOUJOURS, sans dépendre
+    d'un fetch externe. Référencer ensuite <img src="cid:kyalogo">.
+    """
+    for fname in ("kya_logo.png", "logo_kya.png"):
+        try:
+            path = frappe.get_app_path("kya_hr", "public", "images", fname)
+            with open(path, "rb") as f:
+                content = f.read()
+            return {"fname": "kya_logo.png", "fcontent": content, "content_id": "kyalogo"}
+        except Exception:
+            continue
+    return None
+
+
+def _official_print_format(config):
+    """Print format OFFICIEL d'un doctype, lu depuis son Web Form (source de
+    verite : c'est le meme format que le bouton Imprimer). Retourne None si
+    aucun n'est configure (Frappe retombe alors sur le format auto)."""
+    route = config.get("route")
+    if not route:
         return None
-    return frappe.db.get_value(
-        "Employee", emp_id,
-        ["company_email", "personal_email", "user_id", "employee_name"],
-        as_dict=True,
-    )
+    try:
+        pf = frappe.db.get_value("Web Form", route, "print_format")
+        if pf and frappe.db.exists("Print Format", pf):
+            return pf
+    except Exception:
+        pass
+    return None
+
+
+def _get_employee_email(doc, config):
+    """Retourne l'email du destinataire de la confirmation.
+
+    1) l'employé lié (config['employee_field']) s'il existe ;
+    2) sinon repli sur le CRÉATEUR du document (utilisateur ayant soumis le
+       web form) — utile pour les fiches sans champ Employee (PV Entrée,
+       Retour, Inventaire) et plus robuste partout.
+    """
+    emp_id = getattr(doc, config.get("employee_field", "employee"), None)
+    if emp_id:
+        row = frappe.db.get_value(
+            "Employee", emp_id,
+            ["company_email", "personal_email", "user_id", "employee_name"],
+            as_dict=True,
+        )
+        if row:
+            return row
+    owner = getattr(doc, "owner", None)
+    if owner and owner not in ("Administrator", "Guest"):
+        u = frappe.db.get_value("User", owner, ["email", "full_name"], as_dict=True)
+        if u and u.get("email"):
+            return {"company_email": None, "personal_email": u.get("email"),
+                    "user_id": owner, "employee_name": u.get("full_name") or owner}
+    return None
 
 
 def _build_recap_body(doc, config, emp_name, is_update=False):
@@ -87,7 +156,7 @@ def _build_recap_body(doc, config, emp_name, is_update=False):
     return """
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background: linear-gradient(135deg,#f7a800 0%,#e07b00 100%); padding: 24px; border-radius: 12px 12px 0 0; text-align:center;">
-        <img src="{logo_url}"
+        <img src="cid:kyalogo"
              alt="KYA-Energy Group" width="60" height="60" border="0" style="margin-bottom:8px;display:block;margin:0 auto;">
         <h2 style="color:white; margin:0;">{icon} {label}</h2>
         <p style="color:rgba(255,255,255,0.8); margin:4px 0 0;">{title}</p>
@@ -170,13 +239,19 @@ def send_submission_recap(doc, method=None):
 
     body = _build_recap_body(doc, config, emp_name, is_update=False)
 
-    # Générer le PDF si possible
+    # Générer le PDF avec le print format OFFICIEL (fiche KYA), pas le format
+    # auto generique. Le DG/DGA exigent que le PDF ressemble exactement a la
+    # fiche. On prend le format configure sur le Web Form (source de verite),
+    # et on rend SANS Letter Head : la fiche officielle est auto-suffisante
+    # (sinon le Letter Head par defaut, avec ses placeholders XXXX, pollue le bas).
     attachments = []
     try:
+        official_pf = _official_print_format(config)
         pdf_content = frappe.get_print(
             dt, doc.name,
-            print_format=None,  # utilise le format par défaut
+            print_format=official_pf,  # fiche officielle (ex: Ticket Sortie Stagiaire)
             as_pdf=True,
+            no_letterhead=1,
         )
         if pdf_content:
             filename = "{}-{}.pdf".format(
@@ -189,6 +264,11 @@ def send_submission_recap(doc, method=None):
             })
     except Exception:
         pass  # pas de print format disponible, on envoie sans PDF
+
+    # Logo inline (cid:kyalogo) — affichage fiable du logo dans l'email
+    logo = _logo_inline_attachment()
+    if logo:
+        attachments.append(logo)
 
     frappe.sendmail(
         recipients=[email],
@@ -293,7 +373,7 @@ def send_task_assignment_email(doc, method=None):
 
     base_url = get_url()
     espace_url = "{}/mon-espace#sec-tasks".format(base_url)
-    logo_url = "{}/assets/kya_hr/images/kya_logo.png".format(base_url)
+    logo = _logo_inline_attachment()  # logo embarqué (cid:kyalogo), fiable en mail
     libelle = (getattr(doc, "libelle", "") or "")
     resultat = (getattr(doc, "resultat_libelle", "") or "")
     kpi = (getattr(doc, "kpi", "") or "Non défini")
@@ -322,8 +402,8 @@ def send_task_assignment_email(doc, method=None):
         body = """
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background: #1565c0; padding: 24px; border-radius: 12px 12px 0 0; text-align:center;">
-            <img src="{logo_url}" alt="KYA-Energy Group" width="60" height="60" border="0" style="display:block;margin:0 auto 8px;">
-            <h2 style="color:white; margin:0;">📌 Nouvelle tâche assignée</h2>
+            <img src="cid:kyalogo" alt="KYA-Energy Group" width="60" height="60" border="0" style="display:block;margin:0 auto 8px;">
+            <h2 style="color:white; margin:0;">Nouvelle tâche assignée</h2>
           </div>
           <div style="background: #ffffff; padding: 24px; border: 1px solid #e0e0e0;">
             <p>Bonjour <b>{emp_name}</b>,</p>
@@ -353,7 +433,6 @@ def send_task_assignment_email(doc, method=None):
           {footer}
         </div>
         """.format(
-            logo_url=logo_url,
             emp_name=emp.get("employee_name") or emp_id,
             role=role,
             libelle=libelle,
@@ -367,7 +446,8 @@ def send_task_assignment_email(doc, method=None):
 
         frappe.sendmail(
             recipients=[email],
-            subject="[KYA] 📌 Nouvelle tâche : {}".format(libelle[:60] or doc.name),
+            subject="[KYA] Nouvelle tâche : {}".format(libelle[:60] or doc.name),
             message=body,
+            attachments=[logo] if logo else None,
             now=False,
         )

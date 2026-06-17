@@ -62,14 +62,40 @@ def get_context(context):
     for log in sync_logs:
         log["received_at_label"] = format_datetime(log.get("received_at"), "dd/MM/yyyy HH:mm:ss") if log.get("received_at") else ""
 
+    # --- Visites des invités (KYA Guest Visit) ---
+    visits = []
+    visits_total = 0
+    visits_presents = 0
+    if frappe.db.exists("DocType", "KYA Guest Visit"):
+        visits = frappe.get_all(
+            "KYA Guest Visit",
+            filters={"check_in": [">=", start]},
+            fields=[
+                "name", "nom", "prenom", "profession", "service_id",
+                "personne_visitee", "motif", "statut", "check_in", "check_out",
+            ],
+            order_by="check_in desc",
+            limit=50,
+        )
+        for v in visits:
+            v["check_in_label"] = format_datetime(v.get("check_in"), "dd/MM/yyyy HH:mm") if v.get("check_in") else ""
+            v["check_out_label"] = format_datetime(v.get("check_out"), "dd/MM/yyyy HH:mm") if v.get("check_out") else ""
+            v["nom_complet"] = (" ".join([v.get("prenom") or "", v.get("nom") or ""])).strip() or "—"
+            v["present"] = bool(v.get("check_in") and not v.get("check_out"))
+        visits_total = len(visits)
+        visits_presents = sum(1 for v in visits if v["present"])
+
     context.period = period
     context.meetings = meetings
     context.sync_logs = sync_logs
+    context.visits = visits
     context.stats = {
         "total": total,
         "total_presences": total_presences,
         "actifs": actifs,
         "clotures": clotures,
+        "visits_total": visits_total,
+        "visits_presents": visits_presents,
     }
     context.by_type = by_type
     context.no_breadcrumbs = True

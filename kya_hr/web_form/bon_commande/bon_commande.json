@@ -152,19 +152,15 @@
   },
   {
    "fieldname": "autorise_par_fonction",
-   "fieldtype": "Data",
-   "label": "Fonction"
+   "fieldtype": "Select",
+   "label": "Fonction (autorisateur)",
+   "options": "DG\nDGA"
   },
   {
    "fieldname": "signature_dg",
    "fieldtype": "Signature",
-   "label": "Signature DG"
-  },
-  {
-   "fieldname": "signature_dga",
-   "fieldtype": "Signature",
-   "label": "Signature DGA",
-   "description": "Signature alternative si le DG est indisponible"
+   "label": "Signature de l'autorisateur (DG ou DGA)",
+   "description": "Signe la personne qui a autorisé le bon — DG ou DGA selon le cas."
   },
   {
    "fieldname": "date_autorisation",

@@ -10,6 +10,7 @@
   "section_entete",
   "nom_marche",
   "type_marche",
+  "statut",
   "col_entete",
   "numero_marche",
   "objet_marche",
@@ -74,6 +75,15 @@
    "options": "Ménage\nInstitution",
    "reqd": 1,
    "in_list_view": 1
+  },
+  {
+   "fieldname": "statut",
+   "fieldtype": "Select",
+   "label": "Statut du Marché",
+   "options": "En cours\nTerminé\nClôturé\nAnnulé",
+   "default": "En cours",
+   "in_list_view": 1,
+   "in_standard_filter": 1
   },
   {
    "fieldname": "col_entete",

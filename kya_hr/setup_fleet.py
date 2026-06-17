@@ -190,6 +190,33 @@ def _add_role_permission(dt, role):
     return f"added perm on {dt} for {role}"
 
 
+def _add_readonly_permission(dt, role):
+    """Ajoute une DocPerm READ-ONLY (read/report/export uniquement).
+
+    Utilisé pour donner au Gestionnaire de Flotte la lecture de Employee
+    (champ 'chauffeur' des fiches logistique) sans droit d'écriture.
+    """
+    existing = frappe.db.get_value(
+        "DocPerm", {"parent": dt, "role": role, "permlevel": 0}, "name"
+    )
+    if existing:
+        return f"perm already on {dt} for {role}"
+    frappe.db.sql(
+        """INSERT INTO `tabDocPerm`
+            (name, creation, modified, modified_by, owner,
+             parent, parenttype, parentfield, role, permlevel,
+             `read`, `write`, `create`, `delete`,
+             report, export, `share`, print, email)
+           VALUES
+            (%s, NOW(), NOW(), 'Administrator', 'Administrator',
+             %s, 'DocType', 'permissions', %s, 0,
+             1, 0, 0, 0,
+             1, 1, 0, 1, 0)""",
+        (frappe.generate_hash(length=10), dt, role),
+    )
+    return f"added READ-ONLY perm on {dt} for {role}"
+
+
 # ───────────────────────────────────────────────────────────────────
 # 4. UOM Litre
 # ───────────────────────────────────────────────────────────────────
@@ -258,10 +285,17 @@ def run():
     # UOM
     log.append(_ensure_uom())
 
-    # Permissions
-    for dt in FLEET_DOCTYPES:
+    # Permissions (CRUD) sur la flotte native + les fiches logistique KYA
+    fleet_full = FLEET_DOCTYPES + [
+        "Sortie Vehicule", "Plein Carburant KYA", "Entretien Vehicule KYA",
+    ]
+    for dt in fleet_full:
         if frappe.db.exists("DocType", dt):
             log.append(_add_role_permission(dt, "Gestionnaire de Flotte"))
+
+    # Lecture seule de Employee (champ 'chauffeur' des fiches logistique)
+    if frappe.db.exists("DocType", "Employee"):
+        log.append(_add_readonly_permission("Employee", "Gestionnaire de Flotte"))
 
     # Seed vehicles
     log.extend(_seed_vehicles())

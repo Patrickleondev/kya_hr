@@ -213,6 +213,28 @@ body { background: var(--kya-bg); font-family: 'Segoe UI', sans-serif; margin: 0
   <div class="tab-content" id="mod-content"></div>
 </div>
 
+<!-- Vue transversale : par département / par équipe -->
+<style>
+  .kya-gbtn{padding:7px 16px;border:1px solid #cbd5e1;background:#fff;color:#334155;cursor:pointer;font-weight:600;font-size:.85rem;}
+  .kya-gbtn:first-child{border-radius:8px 0 0 8px;}
+  .kya-gbtn:last-child{border-radius:0 8px 8px 0;border-left:none;}
+  .kya-gbtn.active{background:#0054A6;color:#fff;border-color:#0054A6;}
+  .kya-gtable{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+  .kya-gtable th,.kya-gtable td{padding:10px 14px;text-align:center;border-bottom:1px solid #eef2f7;font-size:.88rem;}
+  .kya-gtable thead th{background:#f1f5f9;color:#0054A6;font-weight:700;}
+  .kya-gtable tbody tr:hover{background:#f8fafc;}
+</style>
+<div class="kya-content" id="group-section" style="margin-top:20px;">
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:12px;">
+    <strong style="color:#0054A6;font-size:1.1rem;">📊 Vue transversale</strong>
+    <div role="group">
+      <button type="button" class="kya-gbtn active" data-g="department" onclick="setGroupBy('department')">Par département</button>
+      <button type="button" class="kya-gbtn" data-g="team" onclick="setGroupBy('team')">Par équipe</button>
+    </div>
+  </div>
+  <div id="group-table"><div class="kya-empty">Chargement…</div></div>
+</div>
+
 <script>
 /* ═══════════════════════════════════════════════════════════════
    KYA Global Dashboard — JavaScript
@@ -573,6 +595,7 @@ async function refreshData() {
     populateModuleFilter(data.filters || {});
     renderKPIs(data.totals || {});
     renderModules(data.modules || {});
+    refreshGrouped(period);
     document.getElementById('last-update').textContent =
       new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
   } catch (err) {
@@ -647,6 +670,53 @@ async function openModuleSyncDialog() {
   } catch (err) {
     console.error(err);
     kyaAlert('Impossible de lister les modules : ' + (err.message || err), 'error');
+  }
+}
+
+/* ─── Vue transversale (par département / par équipe) ──────────── */
+let _groupBy = 'department';
+let _groupData = null;
+
+function setGroupBy(g) {
+  _groupBy = g;
+  renderGrouped();
+}
+
+function renderGrouped() {
+  document.querySelectorAll('.kya-gbtn').forEach(b =>
+    b.classList.toggle('active', b.dataset.g === _groupBy));
+  const cont = document.getElementById('group-table');
+  if (!cont) return;
+  if (!_groupData) { cont.innerHTML = '<div class="kya-empty">Chargement…</div>'; return; }
+  const list = _groupBy === 'team' ? _groupData.by_team : _groupData.by_department;
+  if (!list || !list.length) {
+    cont.innerHTML = '<div class="kya-empty">Aucune fiche sur la période sélectionnée.</div>';
+    return;
+  }
+  const head = _groupBy === 'team' ? 'Équipe' : 'Département';
+  const body = list.map(r => `<tr>
+      <td style="text-align:left;font-weight:600;">${r.label}</td>
+      <td><strong>${fmtN(r.total)}</strong></td>
+      <td style="color:var(--kya-orange)">${fmtN(r.pending)}</td>
+      <td style="color:var(--kya-green)">${fmtN(r.approved)}</td>
+      <td style="color:var(--kya-red)">${fmtN(r.rejected)}</td>
+      <td style="color:#64748b">${fmtN(r.draft)}</td>
+    </tr>`).join('');
+  cont.innerHTML = `<table class="kya-gtable"><thead><tr>
+      <th style="text-align:left;">${head}</th><th>Total</th><th>En attente</th>
+      <th>Approuvées</th><th>Rejetées</th><th>Brouillon</th>
+    </tr></thead><tbody>${body}</tbody></table>`;
+}
+
+async function refreshGrouped(period) {
+  try {
+    _groupData = await kyaApiCall(
+      'kya_hr.api.kya_dashboard.get_grouped_stats', { period, group_by: _groupBy }, false);
+    renderGrouped();
+  } catch (err) {
+    console.warn('[KYA Dashboard] grouped stats:', err && err.message);
+    const cont = document.getElementById('group-table');
+    if (cont) cont.innerHTML = '<div class="kya-empty">Vue transversale indisponible.</div>';
   }
 }
 

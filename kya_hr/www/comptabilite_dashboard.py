@@ -5,8 +5,8 @@ from frappe.utils import flt, formatdate
 no_cache = 1
 
 _ALLOWED_ROLES = {
-    "Comptable", "DFC", "DAAF", "Accounts Manager",
-    "Auditeur Interne", "Directeur Général", "System Manager",
+    "Caissier", "Comptable", "DFC", "DAAF", "Accounts Manager", "Accounts User",
+    "Auditeur Interne", "Directeur Général", "DG", "DGA", "System Manager",
 }
 
 

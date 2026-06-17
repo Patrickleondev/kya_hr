@@ -84,7 +84,10 @@ body {
 }
 
 .web-form-container {
-  max-width: 800px !important;
+  /* Largeur elargie pour que les fiches a table (BC, PV, Inventaire...)
+     affichent toutes leurs colonnes sans scroll horizontal. Les fiches KYA
+     sont des documents : une largeur confortable les sert mieux. */
+  max-width: 920px !important;
   margin: 0 auto;
   padding: 20px 16px 60px;
   font-family: var(--kya-font);
@@ -92,6 +95,24 @@ body {
 
 .web-form-container .web-form {
   border-radius: 0; box-shadow: none; border: none; overflow: visible;
+}
+
+/* Elargir la zone de contenu : le shell website de Frappe bride .page_content
+   a 800px et met 80px de padding lateral sur main.container -> le formulaire
+   tombe a ~670px et la grille Frappe (largeur intrinseque ~820px pour 10
+   colonnes) deborde. On reduit le padding et on releve le plafond pour que
+   toutes les colonnes tiennent sans scroll horizontal. kya_webform.css n'est
+   inclus que sur les pages portail KYA (web forms + mon-espace), donc l'impact
+   est limite a notre interface. */
+.page_content {
+  max-width: 1120px !important;
+}
+main.container {
+  padding-left: 24px !important;
+  padding-right: 24px !important;
+}
+.web-form-container {
+  max-width: 1080px !important;
 }
 
 .kya-restructured ~ .web-form-header,
@@ -1638,7 +1659,9 @@ footer .web-footer-menu { display: none !important; }
    horizontal global sur le grid-body uniquement.
    =================================================================== */
 
-/* En-tetes colonnes : ne pas tronquer, wrap si besoin */
+/* En-tetes colonnes : ne pas tronquer, wrap si besoin. Les colonnes sont
+   maintenant <= 10 au total (cf. ensure_webform_table_columns) donc elles
+   tiennent dans la largeur du formulaire : pas de min-width qui force le scroll. */
 .web-form-container .grid-heading-row .grid-static-col,
 .web-form-container .grid-row .grid-static-col {
   overflow: visible !important;
@@ -1646,7 +1669,7 @@ footer .web-footer-menu { display: none !important; }
   white-space: normal !important;
   word-break: break-word;
   hyphens: auto;
-  min-width: 80px;
+  min-width: 0;
 }
 
 /* Cellules : permettre le wrap multi-ligne (inputs restent 1 ligne) */
@@ -1665,10 +1688,11 @@ footer .web-footer-menu { display: none !important; }
   max-width: 100% !important;
 }
 
-/* La grille a une largeur minimale qui force le scroll plutot que de
-   tronquer les headers */
+/* Grille fluide : la largeur suit le formulaire (100%), plus de max-content
+   qui forcait le scroll horizontal. Les colonnes <= 10 tiennent dans la largeur. */
 .web-form-container .form-grid > .grid-body {
-  min-width: max-content !important;
+  min-width: 0 !important;
+  width: 100% !important;
 }
 
 /* Affichage qty + numerics : aligne droit, taille lisible */
@@ -1693,5 +1717,148 @@ footer .web-footer-menu { display: none !important; }
 .web-form-container .btn-add-grid-row:hover {
   background: #d36a10 !important;
   color: #fff !important;
+}
+
+/* ===================================================================
+   KYA-Energy — Tableaux HYBRIDES (rendu HTML fidèle aux fiches)
+   Vrai <table> qui s'imprime, ne déborde pas, désignation qui wrap.
+   Look document officiel (en-tête teal, lignes alternées).
+   =================================================================== */
+.kya-doc-table-host {
+  margin: 4px 0 8px;
+}
+/* CRUCIAL : la section qui contient le tableau est une grille multi-colonnes
+   (repeat(3,1fr)). Sans ça, le contrôle Table n'occupe qu'1/3 de la largeur
+   → la colonne Désignation s'écrase à ~30px (texte vertical). On force le
+   contrôle du tableau à occuper TOUTE la largeur de la grille de section. */
+.kya-section-body.kya-grid > .frappe-control:has(.kya-doc-table-host),
+.kya-section-body.kya-grid > .frappe-control[data-fieldtype="Table"],
+.kya-form-section .frappe-control:has(.kya-doc-table-host) {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+}
+.kya-doc-table-title {
+  background: #009681;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: .3px;
+  padding: 8px 12px;
+  border-radius: 6px 6px 0 0;
+}
+table.kya-doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 13px;
+  background: #fff;
+  border: 1px solid #cfd8dc;
+}
+table.kya-doc-table thead th {
+  background: #f1f6f5;
+  color: #00574e;
+  font-weight: 600;
+  text-align: left;
+  padding: 7px 8px;
+  border: 1px solid #cfd8dc;
+  font-size: 11.5px;
+  line-height: 1.2;
+  white-space: normal;       /* wrap au lieu de déborder sur la colonne voisine */
+  word-break: break-word;
+  vertical-align: bottom;
+}
+table.kya-doc-table tbody td {
+  border: 1px solid #e0e6e8;
+  padding: 4px 6px;
+  vertical-align: top;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+}
+table.kya-doc-table tbody tr:nth-child(even) td {
+  background: #fafbfb;
+}
+table.kya-doc-table tbody td.kya-dt-ro {
+  text-align: right;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  background: #eef5f4;
+  color: #00574e;
+  white-space: nowrap;
+}
+.kya-doc-table .kya-dt-in {
+  width: 100%;
+  border: 1px solid #dce3e6;
+  background: #fff;
+  padding: 5px 7px;
+  font-size: 13px;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+.kya-doc-table .kya-dt-in:focus {
+  border-color: #009681;
+  box-shadow: 0 0 0 2px rgba(0, 150, 129, .12);
+  background: #fff;
+  outline: none;
+}
+.kya-doc-table textarea.kya-dt-text {
+  resize: none;
+  overflow: hidden;
+  line-height: 1.35;
+  min-height: 28px;
+  font-family: inherit;
+}
+.kya-doc-table .kya-dt-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.kya-doc-table .kya-dt-actcol {
+  width: 34px;
+  text-align: center;
+}
+.kya-doc-table .kya-dt-del {
+  border: none;
+  background: transparent;
+  color: #c0392b;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  border-radius: 4px;
+}
+.kya-doc-table .kya-dt-del:hover {
+  background: #fdecea;
+}
+.kya-doc-table tr.kya-dt-empty td {
+  text-align: center;
+  color: #90a4ae;
+  font-style: italic;
+  padding: 14px;
+  background: #fff;
+}
+button.kya-dt-add {
+  margin-top: 8px;
+  background: #F58220;
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  padding: 7px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+button.kya-dt-add:hover {
+  background: #d36a10;
+}
+
+/* Impression écran (Ctrl+P direct) : on garde la table visible et propre.
+   L'impression officielle passe par le Print Format serveur, mais si
+   l'utilisateur fait Ctrl+P sur le web form, la table reste lisible. */
+@media print {
+  .kya-doc-table .kya-dt-del,
+  button.kya-dt-add { display: none !important; }
+  .kya-doc-table .kya-dt-in {
+    border: none !important;
+    background: transparent !important;
+  }
 }
 

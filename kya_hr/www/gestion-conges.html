@@ -1,0 +1,308 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Gestion des Congés — RH{% endblock %}
+
+{% block page_content %}
+<style>
+.kya-cg { max-width: 1180px; margin: 18px auto 40px; padding: 0 16px; font-family: Arial, sans-serif; color: #18212f; }
+.kya-cg-head { background: #0f3d68; color: #fff; padding: 16px 22px; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; gap: 16px; align-items: center; flex-wrap: wrap; }
+.kya-cg-head h2 { margin: 0; font-size: 20px; }
+.kya-cg-head .sub { font-size: 13px; opacity: .92; }
+.kya-cg-tools { background: #eef3f9; border: 1px solid #d9dee7; border-top: none; padding: 12px 22px; display: flex; gap: 14px; align-items: end; flex-wrap: wrap; }
+.kya-cg-tools label { display: block; font-size: 11px; color: #667085; text-transform: uppercase; margin-bottom: 3px; font-weight: 700; }
+.kya-cg-tools select { padding: 7px 10px; border: 1px solid #c9d2de; border-radius: 6px; font-size: 13px; background: #fff; min-width: 150px; }
+.kya-btn { border: 1px solid #0f3d68; background: #0f3d68; color: #fff; border-radius: 6px; padding: 8px 14px; font-weight: 700; font-size: 13px; cursor: pointer; transition: filter .12s; }
+.kya-btn:hover { filter: brightness(1.12); }
+.kya-btn.alt { background: #027a48; border-color: #027a48; }
+.kya-btn.ghost { background: #fff; color: #0f3d68; }
+.kya-btn:disabled { opacity: .5; cursor: wait; }
+.kya-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 16px 0; }
+.kya-kpi { border: 1px solid #d9dee7; border-radius: 8px; background: #fff; padding: 14px; text-align: center; }
+.kya-kpi .label { color: #667085; font-size: 11px; text-transform: uppercase; }
+.kya-kpi .value { font-size: 26px; font-weight: 800; margin-top: 4px; color: #0f3d68; }
+.kya-kpi.a .value { color: #027a48; } .kya-kpi.b .value { color: #b54708; } .kya-kpi.c .value { color: #6941c6; }
+.kya-section { border: 1px solid #d9dee7; border-radius: 8px; background: #fff; overflow: hidden; }
+.kya-table-wrap { overflow-x: auto; }
+table.kya-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.kya-table th, .kya-table td { padding: 10px 12px; border-bottom: 1px solid #edf0f5; text-align: left; vertical-align: middle; }
+.kya-table th { background: #fafbfc; color: #344054; font-weight: 700; }
+.kya-table td.num, .kya-table th.num { text-align: right; }
+.kya-table tbody tr:hover { background: #f7fafd; }
+.kya-droit { cursor: pointer; border-bottom: 1px dashed #98a2b3; font-weight: 700; }
+.kya-droit:hover { color: #0f3d68; border-color: #0f3d68; }
+.kya-restant { font-weight: 800; }
+.kya-restant.neg { color: #b42318; }
+.kya-restant.zero { color: #b54708; }
+.kya-restant.pos { color: #027a48; }
+.kya-mini { border: 1px solid #d8dee8; background: #fff; border-radius: 6px; padding: 5px 10px; font-size: 12px; font-weight: 700; cursor: pointer; color: #0f3d68; }
+.kya-mini:hover { background: #eef3f9; }
+.kya-empty { padding: 24px; text-align: center; color: #98a2b3; }
+/* Modal */
+.kya-modal-bg { position: fixed; inset: 0; background: rgba(15,30,50,.45); display: none; align-items: flex-start; justify-content: center; z-index: 1050; padding: 60px 16px; }
+.kya-modal-bg.on { display: flex; }
+.kya-modal { background: #fff; border-radius: 10px; width: 100%; max-width: 520px; box-shadow: 0 18px 50px rgba(0,0,0,.3); overflow: hidden; }
+.kya-modal-head { background: #0f3d68; color: #fff; padding: 14px 18px; font-weight: 700; display: flex; justify-content: space-between; }
+.kya-modal-head .x { cursor: pointer; opacity: .85; }
+.kya-modal-body { padding: 18px; }
+.kya-field { margin-bottom: 14px; }
+.kya-field label { display: block; font-size: 12px; color: #344054; font-weight: 700; margin-bottom: 4px; }
+.kya-field input, .kya-field select, .kya-field textarea { width: 100%; padding: 8px 10px; border: 1px solid #c9d2de; border-radius: 6px; font-size: 13px; box-sizing: border-box; }
+.kya-modal-foot { padding: 14px 18px; border-top: 1px solid #edf0f5; display: flex; justify-content: flex-end; gap: 10px; }
+.kya-hist-item { border-bottom: 1px solid #edf0f5; padding: 8px 0; font-size: 12px; }
+.kya-hist-item b { color: #0f3d68; }
+.kya-tag { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+.kya-tag.alloc { background: #e0f2fe; color: #0369a1; } .kya-tag.appl { background: #fef0c7; color: #b54708; }
+@media (max-width: 820px) { .kya-grid { grid-template-columns: 1fr 1fr; } }
+@media print { .kya-cg-tools, .kya-acts-col, .kya-btn, .navbar, header, .web-footer { display: none !important; } }
+</style>
+
+<div class="kya-cg">
+  <div class="kya-cg-head">
+    <div>
+      <h2>🏖️ Gestion des Congés</h2>
+      <div class="sub">Pilotage RH — droits, congés pris et soldes (mis à jour en direct, tracés)</div>
+    </div>
+    <button class="kya-btn ghost" onclick="window.print()">Imprimer</button>
+  </div>
+
+  <div class="kya-cg-tools">
+    <div>
+      <label>Année</label>
+      <select id="cg-year">
+        {% for y in years %}<option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>{% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Type de congé</label>
+      <select id="cg-type">
+        {% for lt in leave_types %}<option value="{{ lt.name }}" {% if lt.name == leave_type %}selected{% endif %}>{{ lt.name }}</option>{% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>&nbsp;</label>
+      <button class="kya-btn" id="cg-refresh">Actualiser</button>
+    </div>
+    <div style="flex:1"></div>
+    <div>
+      <label>&nbsp;</label>
+      <button class="kya-btn alt" id="cg-bulk">+ Allouer à tous</button>
+    </div>
+  </div>
+
+  <div class="kya-grid">
+    <div class="kya-kpi"><div class="label">Effectif</div><div class="value" id="k-eff">{{ count }}</div></div>
+    <div class="kya-kpi"><div class="label">Total acquis</div><div class="value" id="k-acq">{{ totals.acquis }}</div></div>
+    <div class="kya-kpi b"><div class="label">Total pris</div><div class="value" id="k-pris">{{ totals.pris }}</div></div>
+    <div class="kya-kpi a"><div class="label">Solde global</div><div class="value" id="k-sol">{{ totals.restant }}</div></div>
+    <div class="kya-kpi c"><div class="label">En congé</div><div class="value" id="k-enc">{{ en_conge }}</div></div>
+  </div>
+
+  <div class="kya-section">
+    <div class="kya-table-wrap">
+      <table class="kya-table">
+        <thead>
+          <tr>
+            <th>Employé</th><th>Département</th>
+            <th class="num">Droit (acquis)</th><th class="num">Pris</th><th class="num">Restant</th>
+            <th class="kya-acts-col">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="cg-body">
+          {% for r in rows %}
+          <tr data-emp="{{ r.employee }}" data-name="{{ r.employee_name }}">
+            <td><b>{{ r.employee_name }}</b>{% if r.designation %}<div style="color:#98a2b3;font-size:11px">{{ r.designation }}</div>{% endif %}</td>
+            <td>{{ r.department }}</td>
+            <td class="num"><span class="kya-droit" data-act="droit">{{ r.acquis }}</span></td>
+            <td class="num cell-pris">{{ r.pris }}</td>
+            <td class="num"><span class="kya-restant {{ 'neg' if r.restant < 0 else ('zero' if r.restant == 0 else 'pos') }} cell-restant">{{ r.restant }}</span></td>
+            <td class="kya-acts-col">
+              <button class="kya-mini" data-act="prendre">📝 Congé pris</button>
+              <button class="kya-mini" data-act="hist">🕑 Historique</button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% if not rows %}<div class="kya-empty">Aucun employé actif.</div>{% endif %}
+    </div>
+  </div>
+  <p style="color:#667085;font-size:12px;margin-top:10px;">
+    Astuce : cliquez sur un <b>Droit</b> pour l'ajuster. Chaque action crée un document HRMS daté et tracé
+    (cohérent avec la paie et le rapport « Fiche Gestion Congés Annuels »).
+  </p>
+</div>
+
+<!-- Modal générique -->
+<div class="kya-modal-bg" id="cg-modal">
+  <div class="kya-modal">
+    <div class="kya-modal-head"><span id="cg-m-title">Action</span><span class="x" id="cg-m-x">✕</span></div>
+    <div class="kya-modal-body" id="cg-m-body"></div>
+    <div class="kya-modal-foot" id="cg-m-foot"></div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const $ = (s, r) => (r || document).querySelector(s);
+  const modal = $('#cg-modal'), mTitle = $('#cg-m-title'), mBody = $('#cg-m-body'), mFoot = $('#cg-m-foot');
+  function closeModal() { modal.classList.remove('on'); mBody.innerHTML = ''; mFoot.innerHTML = ''; }
+  $('#cg-m-x').addEventListener('click', closeModal);
+  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+  function openModal(title, bodyHtml, footHtml) {
+    mTitle.textContent = title; mBody.innerHTML = bodyHtml; mFoot.innerHTML = footHtml || '';
+    modal.classList.add('on');
+  }
+  function curYear() { return $('#cg-year').value; }
+  function curType() { return $('#cg-type').value; }
+  function restClass(v) { return v < 0 ? 'neg' : (v == 0 ? 'zero' : 'pos'); }
+
+  function reload() {
+    const btn = $('#cg-refresh'); btn.disabled = true;
+    frappe.call({
+      method: 'kya_hr.api.conges.get_overview',
+      args: { year: curYear(), leave_type: curType() },
+      callback: function(res) {
+        btn.disabled = false;
+        const d = res.message; if (!d) return;
+        $('#k-eff').textContent = d.count;
+        $('#k-acq').textContent = d.totals.acquis;
+        $('#k-pris').textContent = d.totals.pris;
+        $('#k-sol').textContent = d.totals.restant;
+        $('#k-enc').textContent = d.en_conge;
+        const body = $('#cg-body'); body.innerHTML = '';
+        (d.rows || []).forEach(function(r) {
+          const tr = document.createElement('tr');
+          tr.setAttribute('data-emp', r.employee); tr.setAttribute('data-name', r.employee_name);
+          tr.innerHTML =
+            '<td><b>' + frappe.utils.escape_html(r.employee_name) + '</b>' +
+              (r.designation ? '<div style="color:#98a2b3;font-size:11px">' + frappe.utils.escape_html(r.designation) + '</div>' : '') + '</td>' +
+            '<td>' + frappe.utils.escape_html(r.department) + '</td>' +
+            '<td class="num"><span class="kya-droit" data-act="droit">' + r.acquis + '</span></td>' +
+            '<td class="num cell-pris">' + r.pris + '</td>' +
+            '<td class="num"><span class="kya-restant ' + restClass(r.restant) + ' cell-restant">' + r.restant + '</span></td>' +
+            '<td class="kya-acts-col"><button class="kya-mini" data-act="prendre">📝 Congé pris</button> ' +
+              '<button class="kya-mini" data-act="hist">🕑 Historique</button></td>';
+          body.appendChild(tr);
+        });
+      },
+      error: function() { btn.disabled = false; frappe.show_alert({ message: 'Erreur de chargement', indicator: 'red' }, 5); }
+    });
+  }
+  $('#cg-refresh').addEventListener('click', reload);
+  $('#cg-year').addEventListener('change', reload);
+  $('#cg-type').addEventListener('change', reload);
+
+  function rowUpdate(tr, s) {
+    tr.querySelector('.cell-pris').textContent = s.pris;
+    const rc = tr.querySelector('.cell-restant');
+    rc.textContent = s.restant; rc.className = 'kya-restant ' + restClass(s.restant) + ' cell-restant';
+    tr.querySelector('.kya-droit').textContent = s.acquis;
+  }
+
+  // Délégation sur le tableau
+  $('#cg-body').addEventListener('click', function(e) {
+    const t = e.target.closest('[data-act]'); if (!t) return;
+    const tr = t.closest('tr'); const emp = tr.getAttribute('data-emp'); const nom = tr.getAttribute('data-name');
+    const act = t.getAttribute('data-act');
+    if (act === 'droit') return editDroit(tr, emp, nom);
+    if (act === 'prendre') return prendreConge(tr, emp, nom);
+    if (act === 'hist') return histo(tr, emp, nom);
+  });
+
+  function editDroit(tr, emp, nom) {
+    const cur = tr.querySelector('.kya-droit').textContent.trim();
+    openModal('Ajuster le droit — ' + nom,
+      '<div class="kya-field"><label>Droit annuel (' + curType() + ', ' + curYear() + ')</label>' +
+      '<input type="number" id="m-total" step="0.5" min="0" value="' + cur + '"></div>' +
+      '<p style="font-size:12px;color:#667085">Remplace le droit existant de l\'année (l\'ancienne allocation est annulée, tracée).</p>',
+      '<button class="kya-btn ghost" id="m-cancel">Annuler</button><button class="kya-btn" id="m-ok">Enregistrer</button>');
+    $('#m-cancel').addEventListener('click', closeModal);
+    $('#m-ok').addEventListener('click', function() {
+      const total = $('#m-total').value; this.disabled = true;
+      frappe.call({
+        method: 'kya_hr.api.conges.set_allocation',
+        args: { employee: emp, leave_type: curType(), total: total, year: curYear() },
+        callback: function(res) { closeModal(); if (res.message) { rowUpdate(tr, res.message); reload(); frappe.show_alert({ message: 'Droit mis à jour pour ' + nom, indicator: 'green' }, 3); } },
+        error: function() { const b = $('#m-ok'); if (b) b.disabled = false; frappe.show_alert({ message: 'Erreur (droit RH requis ?)', indicator: 'red' }, 5); }
+      });
+    });
+  }
+
+  function prendreConge(tr, emp, nom) {
+    let opts = '';
+    document.querySelectorAll('#cg-type option').forEach(o => { opts += '<option value="' + o.value + '"' + (o.selected ? ' selected' : '') + '>' + o.textContent + '</option>'; });
+    openModal('Enregistrer un congé pris — ' + nom,
+      '<div class="kya-field"><label>Type de congé</label><select id="m-type">' + opts + '</select></div>' +
+      '<div class="kya-field"><label>Date de départ</label><input type="date" id="m-from"></div>' +
+      '<div class="kya-field"><label>Date de reprise</label><input type="date" id="m-to"></div>' +
+      '<div class="kya-field"><label><input type="checkbox" id="m-half" style="width:auto"> Demi-journée</label></div>' +
+      '<div class="kya-field"><label>Motif / note (optionnel)</label><textarea id="m-desc" rows="2"></textarea></div>',
+      '<button class="kya-btn ghost" id="m-cancel">Annuler</button><button class="kya-btn alt" id="m-ok">Enregistrer le congé</button>');
+    $('#m-cancel').addEventListener('click', closeModal);
+    $('#m-ok').addEventListener('click', function() {
+      const from = $('#m-from').value, to = $('#m-to').value;
+      if (!from || !to) { frappe.show_alert({ message: 'Renseignez les dates', indicator: 'orange' }, 4); return; }
+      this.disabled = true;
+      frappe.call({
+        method: 'kya_hr.api.conges.record_taken',
+        args: { employee: emp, leave_type: $('#m-type').value, from_date: from, to_date: to, half_day: $('#m-half').checked ? 1 : 0, description: $('#m-desc').value },
+        callback: function(res) {
+          closeModal();
+          if (res.message) {
+            frappe.show_alert({ message: nom + ' : ' + res.message.jours + ' jour(s) enregistré(s)', indicator: 'green' }, 4);
+            reload();
+          }
+        },
+        error: function(r) {
+          const b = $('#m-ok'); if (b) b.disabled = false;
+          frappe.show_alert({ message: 'Erreur : solde insuffisant ou dates en conflit', indicator: 'red' }, 6);
+        }
+      });
+    });
+  }
+
+  function histo(tr, emp, nom) {
+    openModal('Historique congés — ' + nom, '<p style="color:#98a2b3">Chargement…</p>', '<button class="kya-btn ghost" id="m-cancel">Fermer</button>');
+    $('#m-cancel').addEventListener('click', closeModal);
+    frappe.call({
+      method: 'kya_hr.api.conges.get_employee_history',
+      args: { employee: emp, year: curYear() },
+      callback: function(res) {
+        const d = res.message; if (!d) return;
+        let html = '<h4 style="margin:0 0 6px">Allocations (' + d.allocations.length + ')</h4>';
+        if (!d.allocations.length) html += '<p style="color:#98a2b3;font-size:12px">Aucune allocation.</p>';
+        d.allocations.forEach(function(a) {
+          html += '<div class="kya-hist-item"><span class="kya-tag alloc">Droit</span> <b>' + a.total_leaves_allocated + ' j</b> · ' + a.leave_type + ' · ' + a.from_date + ' → ' + a.to_date + '<br><span style="color:#98a2b3">' + a.name + ' · par ' + a.owner + '</span></div>';
+        });
+        html += '<h4 style="margin:14px 0 6px">Congés pris (' + d.applications.length + ')</h4>';
+        if (!d.applications.length) html += '<p style="color:#98a2b3;font-size:12px">Aucun congé enregistré.</p>';
+        d.applications.forEach(function(a) {
+          html += '<div class="kya-hist-item"><span class="kya-tag appl">' + a.total_leave_days + ' j</span> ' + a.leave_type + ' · ' + a.from_date + ' → ' + a.to_date + ' · ' + (a.status || '') + (a.description ? '<br><i style="color:#667085">' + frappe.utils.escape_html(a.description) + '</i>' : '') + '<br><span style="color:#98a2b3">' + a.name + '</span></div>';
+        });
+        mBody.innerHTML = html;
+      },
+      error: function() { mBody.innerHTML = '<p style="color:#b42318">Erreur de chargement.</p>'; }
+    });
+  }
+
+  $('#cg-bulk').addEventListener('click', function() {
+    openModal('Allouer à tous les employés',
+      '<div class="kya-field"><label>Type de congé</label><input type="text" value="' + curType() + '" disabled></div>' +
+      '<div class="kya-field"><label>Droit annuel à allouer (jours)</label><input type="number" id="m-total" step="0.5" min="0" value="30"></div>' +
+      '<div class="kya-field"><label><input type="checkbox" id="m-only" checked style="width:auto"> Seulement ceux sans droit (ne pas écraser)</label></div>' +
+      '<p style="font-size:12px;color:#667085">Crée une allocation ' + curType() + ' ' + curYear() + ' pour les employés concernés.</p>',
+      '<button class="kya-btn ghost" id="m-cancel">Annuler</button><button class="kya-btn alt" id="m-ok">Allouer</button>');
+    $('#m-cancel').addEventListener('click', closeModal);
+    $('#m-ok').addEventListener('click', function() {
+      this.disabled = true;
+      frappe.call({
+        method: 'kya_hr.api.conges.allocate_bulk',
+        args: { leave_type: curType(), total: $('#m-total').value, year: curYear(), only_missing: $('#m-only').checked ? 1 : 0 },
+        callback: function(res) { closeModal(); if (res.message) { frappe.show_alert({ message: res.message.total_alloues + ' employé(s) alloué(s)', indicator: 'green' }, 4); reload(); } },
+        error: function() { const b = $('#m-ok'); if (b) b.disabled = false; frappe.show_alert({ message: 'Erreur lors de l\'allocation', indicator: 'red' }, 5); }
+      });
+    });
+  });
+})();
+</script>
+{% endblock %}

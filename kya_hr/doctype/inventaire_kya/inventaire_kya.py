@@ -12,7 +12,26 @@ class InventaireKYA(Document):
     def validate(self):
         block_self_approval(self)
         self.set_responsable_info()
+        self.fill_theoretical_qty()
         self.compute_ecarts_and_totals()
+
+    def fill_theoretical_qty(self):
+        """Renseigne la qté théorique (stock système) + la valorisation depuis le
+        Bin tant que l'inventaire est en brouillon. Indispensable côté WEB FORM
+        où il n'y a pas le bouton desk « Charger Articles » : sans ça, la qté
+        théorique reste vide et l'écart est faux."""
+        if self.docstatus and self.docstatus != 0:
+            return
+        for row in self.items or []:
+            if not row.item_code or not row.warehouse:
+                continue
+            bin_data = frappe.db.get_value(
+                "Bin", {"item_code": row.item_code, "warehouse": row.warehouse},
+                ["actual_qty", "valuation_rate"], as_dict=True,
+            )
+            row.qte_theorique = (bin_data.actual_qty if bin_data else 0) or 0
+            if bin_data and bin_data.valuation_rate and not row.valuation_rate:
+                row.valuation_rate = bin_data.valuation_rate
 
     def set_responsable_info(self):
         if not self.responsable_nom:

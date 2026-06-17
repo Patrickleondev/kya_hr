@@ -87,6 +87,7 @@ on_session_creation = "kya_hr.link_employees_users.on_session_creation"
 # Grille indiciaire : calcul automatique de la valeur indiciaire (Employee)
 doc_events = {
     "Employee": {
+        "before_validate": "kya_hr.matricule.auto_generate_matricule",
         "before_save": "kya_hr.grille_indiciaire.calculer_indice_employee",
         "after_insert": [
             "kya_hr.dashboard_realtime.notify_dashboard_change",
@@ -132,6 +133,7 @@ doc_events = {
         ],
         "on_update": [
             "kya_hr.email_notifications.send_workflow_update",
+            "kya_hr.chef_routing.notify_chef_absent",
             "kya_hr.dashboard_realtime.notify_dashboard_change",
         ],
     },
@@ -144,6 +146,7 @@ doc_events = {
         ],
         "on_update": [
             "kya_hr.email_notifications.send_workflow_update",
+            "kya_hr.chef_routing.notify_chef_absent",
             "kya_hr.dashboard_realtime.notify_dashboard_change",
         ],
     },
@@ -208,6 +211,13 @@ doc_events = {
     # Tache Equipe : statut auto depuis taux_effectif (custom:1 -> controller Python inactif)
     "Tache Equipe": {
         "validate": "kya_hr.auto_calc_logic.compute_tache_equipe",
+    },
+    # Circuit Formation : notifications email + cloche in-app aux acteurs (RH, DG)
+    "Besoin de Formation": {
+        "on_update": "kya_hr.formation_notifications.besoin_on_update",
+    },
+    "Plan de Formation": {
+        "on_update": "kya_hr.formation_notifications.plan_on_update",
     },
 }
 

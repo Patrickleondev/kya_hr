@@ -102,8 +102,13 @@ def block_self_approval(doc):
     if not requester or user != requester:
         return  # ce n'est pas le demandeur qui agit → laisser passer
 
-    target_state = doc.workflow_state or ""
-    if target_state in _FORBIDDEN_STATES:
+    # On bloque selon l'ÉTAT D'ORIGINE (avant la transition), pas l'état cible :
+    # le demandeur a le DROIT de SOUMETTRE sa fiche (Brouillon/Rejeté → En
+    # attente X). Ce qu'il ne peut pas faire, c'est APPROUVER, c.-à-d. faire
+    # AVANCER sa fiche DEPUIS un état d'attente d'approbation.
+    before = doc.get_doc_before_save()
+    previous_state = (before.workflow_state if before else "") or ""
+    if previous_state in _FORBIDDEN_STATES:
         frappe.throw(
             "Vous ne pouvez pas valider votre propre demande. "
             "Cette action est réservée à votre supérieur hiérarchique "

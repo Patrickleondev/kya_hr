@@ -232,6 +232,82 @@ def get_context(context):
     except Exception:
         pass
 
+    # ── Services transverses (kya_services) : enquêtes, évaluations, tâches ──
+    # Vue synthétique des flux du module Services (formulaires de satisfaction,
+    # évaluations, tâches d'équipe) avec leur TAUX DE LIVRAISON (soumis/total).
+    services = {
+        "forms_actifs": 0, "form_invites": 0, "form_soumis": 0, "form_attente": 0,
+        "form_taux": 0,
+        "evals_total": 0, "evals_soumis": 0, "evals_attente": 0, "evals_taux": 0,
+        "taches_total": 0, "taches_en_cours": 0, "taches_terminees": 0,
+        "plans_trimestriels": 0,
+    }
+    try:
+        if frappe.db.exists("DocType", "KYA Form"):
+            services["forms_actifs"] = frappe.db.count("KYA Form", {"statut": "Actif"})
+        if frappe.db.exists("DocType", "KYA Form Response"):
+            services["form_invites"] = frappe.db.count("KYA Form Response")
+            services["form_soumis"] = frappe.db.sql(
+                "SELECT COUNT(*) FROM `tabKYA Form Response` WHERE soumis_le IS NOT NULL AND soumis_le != ''"
+            )[0][0] or 0
+            services["form_attente"] = max(0, services["form_invites"] - services["form_soumis"])
+            if services["form_invites"]:
+                services["form_taux"] = round(services["form_soumis"] / services["form_invites"] * 100, 1)
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "direction-dashboard: kya forms")
+    try:
+        if frappe.db.exists("DocType", "KYA Evaluation"):
+            services["evals_total"] = frappe.db.count("KYA Evaluation")
+            services["evals_soumis"] = frappe.db.sql(
+                "SELECT COUNT(*) FROM `tabKYA Evaluation` WHERE soumis_le IS NOT NULL AND soumis_le != ''"
+            )[0][0] or 0
+            services["evals_attente"] = max(0, services["evals_total"] - services["evals_soumis"])
+            if services["evals_total"]:
+                services["evals_taux"] = round(services["evals_soumis"] / services["evals_total"] * 100, 1)
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "direction-dashboard: kya evals")
+    try:
+        if frappe.db.exists("DocType", "Tache Equipe"):
+            services["taches_total"] = frappe.db.count("Tache Equipe")
+            services["taches_terminees"] = frappe.db.count("Tache Equipe", {"statut": ["like", "%ermin%"]})
+            services["taches_en_cours"] = max(0, services["taches_total"] - services["taches_terminees"])
+        if frappe.db.exists("DocType", "Plan Trimestriel"):
+            services["plans_trimestriels"] = frappe.db.count("Plan Trimestriel")
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "direction-dashboard: kya taches")
+
+    context.services = services
+
+    # ── Intégrations externes : visiteurs (KYA Guest Visit) + réunions ──
+    # DocTypes custom alimentés par les apps des collègues (peuvent être absents).
+    integrations = {
+        "guest_actif": False, "visites_jour": 0, "visites_en_cours": 0, "visites_semaine": 0,
+        "meeting_actif": False, "reunions_actives": 0, "reunions_semaine": 0, "presences_semaine": 0,
+    }
+    try:
+        if frappe.db.exists("DocType", "KYA Guest Visit"):
+            integrations["guest_actif"] = True
+            integrations["visites_jour"] = frappe.db.sql(
+                "SELECT COUNT(*) FROM `tabKYA Guest Visit` WHERE DATE(check_in)=CURDATE()")[0][0] or 0
+            integrations["visites_en_cours"] = frappe.db.count("KYA Guest Visit", {"statut": "En cours"})
+            integrations["visites_semaine"] = frappe.db.sql(
+                "SELECT COUNT(*) FROM `tabKYA Guest Visit` WHERE check_in >= %s", (week_ago,))[0][0] or 0
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "direction-dashboard: guest visits")
+    try:
+        # Réunions : doctypes réels (app, alimentés par kya_hr.api.kya_reunion.sync_meeting)
+        if frappe.db.exists("DocType", "KYA Reunion Meeting"):
+            integrations["meeting_actif"] = True
+            integrations["reunions_actives"] = frappe.db.count("KYA Reunion Meeting", {"status": "active"})
+            integrations["reunions_semaine"] = frappe.db.sql(
+                "SELECT COUNT(*) FROM `tabKYA Reunion Meeting` WHERE start_at >= %s", (week_ago,))[0][0] or 0
+        if frappe.db.exists("DocType", "KYA Reunion Presence"):
+            integrations["presences_semaine"] = frappe.db.sql(
+                "SELECT COUNT(*) FROM `tabKYA Reunion Presence` WHERE creation >= %s", (week_ago,))[0][0] or 0
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "direction-dashboard: meetings")
+
+    context.integrations = integrations
     context.stats = stats
     context.demandes_dg = demandes_dg
     context.brouillards = brouillards

@@ -1,0 +1,32 @@
+{
+ "doctype": "Workflow",
+ "name": "Circuit Plan Formation",
+ "workflow_name": "Circuit Plan Formation",
+ "document_type": "Plan de Formation",
+ "is_active": 1,
+ "override_status": 0,
+ "send_email_alert": 0,
+ "workflow_state_field": "workflow_state",
+ "states": [
+  {"state": "Compilé", "doc_status": "0", "allow_edit": "Responsable RH"},
+  {"state": "Soumis au DG", "doc_status": "0", "allow_edit": "Responsable RH"},
+  {"state": "Sélection DG", "doc_status": "0", "allow_edit": "Directeur Général"},
+  {"state": "Chiffrage RH", "doc_status": "0", "allow_edit": "Responsable RH"},
+  {"state": "Validé", "doc_status": "0", "allow_edit": "Responsable RH"},
+  {"state": "En suivi", "doc_status": "0", "allow_edit": "Responsable RH"},
+  {"state": "Clôturé", "doc_status": "0", "allow_edit": "Responsable RH"}
+ ],
+ "transitions": [
+  {"state": "Compilé", "action": "Soumettre au DG", "next_state": "Soumis au DG", "allowed": "Responsable RH", "allow_self_approval": 1},
+  {"state": "Compilé", "action": "Soumettre au DG", "next_state": "Soumis au DG", "allowed": "HR Manager", "allow_self_approval": 1},
+  {"state": "Soumis au DG", "action": "Valider la sélection", "next_state": "Sélection DG", "allowed": "Directeur Général", "allow_self_approval": 1},
+  {"state": "Soumis au DG", "action": "Valider la sélection", "next_state": "Sélection DG", "allowed": "DG", "allow_self_approval": 1},
+  {"state": "Soumis au DG", "action": "Valider la sélection", "next_state": "Sélection DG", "allowed": "DGA", "allow_self_approval": 1},
+  {"state": "Sélection DG", "action": "Procéder au chiffrage", "next_state": "Chiffrage RH", "allowed": "Responsable RH", "allow_self_approval": 1},
+  {"state": "Sélection DG", "action": "Procéder au chiffrage", "next_state": "Chiffrage RH", "allowed": "HR Manager", "allow_self_approval": 1},
+  {"state": "Chiffrage RH", "action": "Valider le plan", "next_state": "Validé", "allowed": "Responsable RH", "allow_self_approval": 1},
+  {"state": "Chiffrage RH", "action": "Valider le plan", "next_state": "Validé", "allowed": "Directeur Général", "allow_self_approval": 1},
+  {"state": "Validé", "action": "Démarrer le suivi", "next_state": "En suivi", "allowed": "Responsable RH", "allow_self_approval": 1},
+  {"state": "En suivi", "action": "Clôturer", "next_state": "Clôturé", "allowed": "Responsable RH", "allow_self_approval": 1}
+ ]
+}

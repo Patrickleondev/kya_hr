@@ -11,6 +11,9 @@
   "genre_cible",
   "version",
   "is_active",
+  "section_builder",
+  "variables_help",
+  "articles",
   "section_body",
   "html_body",
   "section_articles",
@@ -25,8 +28,11 @@
   {"fieldname": "genre_cible", "fieldtype": "Select", "label": "Genre cible", "options": "Tous\nMasculin\nFéminin", "default": "Tous", "reqd": 1, "in_list_view": 1, "description": "Genre du signataire ciblé par ce template (pour les formulations FR genrées)."},
   {"fieldname": "version", "fieldtype": "Data", "label": "Version", "default": "RH-ENG-V01", "in_list_view": 1},
   {"fieldname": "is_active", "fieldtype": "Check", "label": "Actif (utilisé par défaut pour ce type)", "default": 1, "in_list_view": 1},
-  {"fieldname": "section_body", "fieldtype": "Section Break", "label": "Corps du Contrat (HTML + Jinja)"},
-  {"fieldname": "html_body", "fieldtype": "Code", "label": "Template HTML", "options": "HTML", "description": "Variables: {{ doc.employee_name }}, {{ doc.date_debut }}, {{ doc.duree_mois }}, etc."},
+  {"fieldname": "section_builder", "fieldtype": "Section Break", "label": "Constructeur d'articles (recommandé — sans code)"},
+  {"fieldname": "variables_help", "fieldtype": "HTML", "label": "Aide variables", "options": "<div style='background:#f1f8e9;border:1px solid #c5e1a5;border-radius:6px;padding:10px 14px;font-size:12px;line-height:1.7'><b>Comment écrire un article :</b> tapez votre texte normalement, puis insérez des <b>variables</b> entre accolades et des <b>accords masculin/féminin</b> avec une barre verticale.<br><b>Variables disponibles :</b> <code>{employe}</code> (nom complet), <code>{civilite}</code> (M./Mme/Mlle), <code>{poste}</code>, <code>{type_contrat}</code>, <code>{date_debut}</code>, <code>{date_fin}</code>, <code>{date_jour}</code>, <code>{entreprise}</code>, <code>{dg}</code>.<br><b>Accord M/F :</b> <code>{Le|La}</code> → « Le » (homme) / « La » (femme) ; <code>embauché{|e}</code> → « embauché » / « embauchée » ; <code>{il|elle}</code>. Le genre vient du contrat (champ Sexe).<br><i>Exemple :</i> <code>{Le|La} {poste} est embauché{|e} à compter du {date_debut}.</code></div>"},
+  {"fieldname": "articles", "fieldtype": "Table", "label": "Articles du contrat", "options": "KYA Contract Template Article", "description": "Ajoutez chaque article (numéro, titre, contenu). Rendu dans l'ordre. Si vide, le mode HTML avancé ci-dessous est utilisé."},
+  {"fieldname": "section_body", "fieldtype": "Section Break", "label": "Mode avancé — Template HTML/Jinja (optionnel)", "collapsible": 1, "collapsible_depends_on": "html_body"},
+  {"fieldname": "html_body", "fieldtype": "Code", "label": "Template HTML", "options": "HTML", "description": "Réservé aux cas avancés. Ignoré si des articles sont définis ci-dessus. Variables Jinja: {{ doc.employee_name }}, {{ doc.date_debut }}, etc."},
   {"fieldname": "section_articles", "fieldtype": "Section Break", "label": "Articles Personnalisables", "collapsible": 1},
   {"fieldname": "article_nature", "fieldtype": "Text Editor", "label": "Article 1 — Nature"},
   {"fieldname": "article_fonctions", "fieldtype": "Text Editor", "label": "Article 4 — Fonctions"},
@@ -42,7 +48,7 @@
  "permissions": [
   {"create": 1, "delete": 1, "email": 1, "export": 1, "print": 1, "read": 1, "report": 1, "role": "System Manager", "share": 1, "write": 1},
   {"create": 1, "email": 1, "export": 1, "print": 1, "read": 1, "report": 1, "role": "HR Manager", "share": 1, "write": 1},
-  {"read": 1, "role": "Responsable RH"}
+  {"create": 1, "delete": 1, "email": 1, "export": 1, "print": 1, "read": 1, "report": 1, "role": "Responsable RH", "share": 1, "write": 1}
  ],
  "sort_field": "modified",
  "sort_order": "DESC",

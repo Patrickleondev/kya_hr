@@ -169,6 +169,21 @@ class KYAContrat(Document):
         if tpl:
             self.template = tpl
 
+    def get_corps_html(self):
+        """Corps du contrat rendu : articles du constructeur RH (variables +
+        accord M/F), sinon html_body (mode avancé). Appelé par le print format.
+        """
+        if not self.template:
+            self._select_template()
+        if not self.template:
+            return ""
+        try:
+            tpl = frappe.get_doc("KYA Contract Template", self.template)
+            return tpl.render_for(self)
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), "KYA Contrat get_corps_html")
+            return ""
+
     def _compute_date_fin(self):
         if self.contract_type == "CDI":
             return
@@ -234,43 +249,37 @@ class KYAContrat(Document):
     def _send_final_emails(self):
         if not self.employee_email:
             return
+        from kya_hr.utils import kya_email_html
         subject = f"📄 Contrat finalisé — {self.employee_name} — {self.name}"
-        message = frappe.render_template(
-            """
-            <div style="font-family:Arial,sans-serif; max-width:640px; margin:0 auto; border:1px solid #eee; border-radius:6px; overflow:hidden;">
-              <div style="background:linear-gradient(135deg,#f7a800 0%,#e07b00 100%); padding:24px; color:#fff; text-align:center;">
-                <h2 style="margin:0;">✅ Contrat Finalisé</h2>
-                <p style="margin:6px 0 0 0; opacity:0.95;">{{ doc.contract_type }} — Réf. {{ doc.name }}</p>
-              </div>
-              <div style="padding:24px 28px;">
-                <p>Bonjour <b>{{ doc.employee_name }}</b>,</p>
-                <p>Votre <b>{{ doc.contract_type }}</b> chez KYA-Energy Group est désormais
-                signé par les deux parties et archivé dans notre système.</p>
-                <p>Vous trouverez en <b>pièce jointe</b> votre exemplaire signé (PDF).
-                Conservez ce document précieusement.</p>
-                <table style="width:100%; margin:18px 0; border-collapse:collapse; font-size:14px;">
-                  <tr><td style="padding:6px 0; color:#555;"><b>Date d'effet :</b></td>
-                      <td style="padding:6px 0;">{{ frappe.format_date(doc.date_debut) }}</td></tr>
-                  {% if doc.date_fin %}
-                  <tr><td style="padding:6px 0; color:#555;"><b>Date d'échéance :</b></td>
-                      <td style="padding:6px 0;">{{ frappe.format_date(doc.date_fin) }}</td></tr>
-                  {% else %}
-                  <tr><td style="padding:6px 0; color:#555;"><b>Durée :</b></td>
-                      <td style="padding:6px 0;">Indéterminée (CDI)</td></tr>
-                  {% endif %}
-                  <tr><td style="padding:6px 0; color:#555;"><b>Référence :</b></td>
-                      <td style="padding:6px 0;"><code>{{ doc.name }}</code></td></tr>
-                </table>
-                <p style="font-size:13px; color:#666; border-top:1px solid #eee; padding-top:14px; margin-top:20px;">
-                  Cet email a été envoyé automatiquement par la plateforme KYA-Energy Group.<br>
-                  Pour toute question : <a href="mailto:rh@kya-energy.com">rh@kya-energy.com</a>
-                </p>
-                <p style="margin-top:20px;">Bien cordialement,<br><b>Direction des Ressources Humaines</b><br>KYA-Energy Group</p>
-              </div>
-            </div>
-            """,
-            {"doc": self, "frappe": frappe},
+        if self.date_fin:
+            duree_row = ('<tr><td style="padding:6px 0;color:#555555;"><b>Date d\'échéance :</b></td>'
+                         '<td style="padding:6px 0;">%s</td></tr>' % frappe.format_date(self.date_fin))
+        else:
+            duree_row = ('<tr><td style="padding:6px 0;color:#555555;"><b>Durée :</b></td>'
+                         '<td style="padding:6px 0;">Indéterminée (CDI)</td></tr>')
+        body = (
+            "<p>Bonjour <b>%s</b>,</p>"
+            "<p>Votre <b>%s</b> chez KYA-Energy Group est désormais signé par les deux "
+            "parties et archivé dans notre système.</p>"
+            "<p>Vous trouverez en <b>pièce jointe</b> votre exemplaire signé (PDF). "
+            "Conservez ce document précieusement.</p>"
+            '<table role="presentation" width="100%%" cellpadding="0" cellspacing="0" '
+            'style="margin:16px 0;font-size:14px;font-family:Arial,Helvetica,sans-serif;">'
+            '<tr><td style="padding:6px 0;color:#555555;"><b>Date d\'effet :</b></td>'
+            '<td style="padding:6px 0;">%s</td></tr>'
+            "%s"
+            '<tr><td style="padding:6px 0;color:#555555;"><b>Référence :</b></td>'
+            '<td style="padding:6px 0;">%s</td></tr>'
+            "</table>"
+            "<p>Pour toute question : <a href=\"mailto:rh@kya-energy.com\">rh@kya-energy.com</a></p>"
+            "<p style=\"margin-top:18px;\">Bien cordialement,<br><b>Direction des Ressources "
+            "Humaines</b><br>KYA-Energy Group</p>"
+            % (self.employee_name or "", self.contract_type or "contrat",
+               frappe.format_date(self.date_debut), duree_row, self.name)
         )
+        message = kya_email_html("Contrat finalisé",
+                                 body,
+                                 subtitle="%s — Réf. %s" % (self.contract_type or "", self.name))
         attachments = []
         if self.pdf_final:
             fid = frappe.db.get_value("File", {"file_url": self.pdf_final}, "name")

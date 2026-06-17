@@ -10,14 +10,61 @@ def get_kya_email_footer() -> str:
     """Pied de page HTML standard pour les e-mails KYA-Energy Group.
 
     Utilisé dans les Email Templates via {{ get_kya_email_footer() }}.
+    Table-based pour compatibilité Outlook (moteur Word).
     """
     return (
-        '<div style="margin-top:24px;padding-top:12px;border-top:1px solid #e0e0e0;'
-        'font-size:12px;color:#666;font-family:Arial,sans-serif;line-height:1.5;">'
-        '<strong style="color:#00897B;">KYA-Energy Group</strong><br/>'
+        '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" '
+        'style="margin-top:18px;border-top:1px solid #e0e0e0;font-family:Arial,Helvetica,sans-serif;">'
+        '<tr><td style="padding-top:12px;font-size:12px;color:#666666;line-height:1.5;">'
+        '<strong style="color:#00897B;">KYA-Energy Group</strong> — Move beyond the sky!<br/>'
         "Cet e-mail est généré automatiquement par le système KYA. "
         "Merci de ne pas y répondre directement."
-        "</div>"
+        "</td></tr></table>"
+    )
+
+
+def kya_email_html(title: str, body_html: str, subtitle: str = "",
+                   accent: str = "#e07b00", footer: bool = True) -> str:
+    """Gabarit e-mail KYA **compatible Outlook** (moteur Word).
+
+    Règles Outlook respectées : mise en page 100 % en <table>, largeur fixe
+    600px, styles INLINE, en-tête en couleur PLEINE via attribut bgcolor (pas
+    de linear-gradient — Outlook l'ignore et afficherait un bandeau blanc),
+    polices Arial, pas de flex / border-radius / max-width comme seul recours.
+
+    `title`  : titre du bandeau.   `subtitle` : ligne secondaire (optionnel).
+    `body_html` : contenu HTML déjà formaté (paragraphes, listes...).
+    `accent` : couleur pleine du bandeau (orange KYA par défaut).
+    """
+    sub = (
+        '<br/><span style="font-size:13px;color:#ffffff;opacity:0.95;">%s</span>' % subtitle
+        if subtitle else ""
+    )
+    foot = (
+        '<tr><td style="padding:14px 28px;border-top:1px solid #e0e0e0;color:#888888;'
+        'font-size:12px;line-height:1.5;font-family:Arial,Helvetica,sans-serif;">'
+        '<strong style="color:#00897B;">KYA-Energy Group</strong> — LOMÉ, TOGO — '
+        'Move beyond the sky!<br/>E-mail automatique, merci de ne pas y répondre.'
+        '</td></tr>'
+        if footer else ""
+    )
+    return (
+        '<table role="presentation" width="100%%" cellpadding="0" cellspacing="0" '
+        'style="background:#f4f4f4;padding:0;margin:0;"><tr>'
+        '<td align="center" style="padding:16px;">'
+        '<table role="presentation" width="600" cellpadding="0" cellspacing="0" '
+        'style="width:600px;max-width:600px;background:#ffffff;border:1px solid #e0e0e0;'
+        'font-family:Arial,Helvetica,sans-serif;">'
+        # En-tête couleur pleine (bgcolor + style pour Outlook ET clients modernes)
+        '<tr><td bgcolor="%s" style="background:%s;padding:22px 28px;font-family:Arial,Helvetica,sans-serif;">'
+        '<span style="font-size:20px;font-weight:bold;color:#ffffff;">%s</span>%s'
+        '</td></tr>'
+        # Corps
+        '<tr><td style="padding:24px 28px;color:#333333;font-size:14px;line-height:1.6;'
+        'font-family:Arial,Helvetica,sans-serif;">%s</td></tr>'
+        '%s'
+        '</table></td></tr></table>'
+        % (accent, accent, title, sub, body_html, foot)
     )
 
 

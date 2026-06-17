@@ -7,7 +7,7 @@ from frappe import _
 
 
 def get_context(context):
-    allowed = {"DG", "Directeur Général", "System Manager", "Administrator"}
+    allowed = {"DG", "DGA", "Directeur Général", "System Manager", "Administrator"}
     user_roles = set(frappe.get_roles())
     if not user_roles.intersection(allowed):
         frappe.throw(_("Accès réservé à la Direction Générale"), frappe.PermissionError)

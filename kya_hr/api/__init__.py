@@ -221,6 +221,39 @@ def _is_requester_self_approval(doc, action=None):
 
 
 @frappe.whitelist()
+def get_session_context():
+    """Contexte du user connecté pour les web forms (pages portal).
+
+    Sur les pages portal/web form, `frappe.user_roles` et
+    `frappe.boot.user.roles` sont VIDES côté client : toute la logique de
+    permission/signature basée sur les rôles devient inopérante (champs
+    grisés à tort, signatures jamais déverrouillées). On renvoie donc ici
+    les rôles RÉELS + l'Employee lié, à charger une fois au démarrage du
+    formulaire et à utiliser pour le gating côté client.
+    """
+    user = frappe.session.user
+    roles = frappe.get_roles(user) if user and user != "Guest" else []
+    emp = None
+    emp_name = None
+    if user and user != "Guest":
+        row = frappe.db.get_value(
+            "Employee",
+            {"user_id": user, "status": "Active"},
+            ["name", "employee_name"],
+            as_dict=True,
+        )
+        if row:
+            emp = row.get("name")
+            emp_name = row.get("employee_name")
+    return {
+        "user": user,
+        "roles": roles,
+        "employee": emp,
+        "employee_name": emp_name,
+    }
+
+
+@frappe.whitelist()
 def get_kya_workflow_actions(doctype, docname):
     """Get available workflow actions for the current user on a document.
     Returns current workflow_state and list of possible actions.
@@ -1178,6 +1211,27 @@ def get_dashboard_stagiaires(annee=None):
     except Exception:
         pass
 
+    # Annuaire des stagiaires ACTIFS pour la section effectif + "Signaler départ"
+    try:
+        stats["stagiaires"] = frappe.db.sql(
+            """
+            SELECT name, employee_name, designation, department,
+                   date_of_joining, company_email, cell_number
+            FROM `tabEmployee`
+            WHERE status = 'Active' AND employment_type = 'Stage'
+            ORDER BY employee_name ASC
+            """,
+            as_dict=True,
+        )
+        rep = {}
+        for s in stats["stagiaires"]:
+            k = s.get("department") or "Non défini"
+            rep[k] = rep.get(k, 0) + 1
+        stats["repartition_departement"] = rep
+    except Exception:
+        stats["stagiaires"] = []
+        stats["repartition_departement"] = {}
+
     return stats
 
 
@@ -1337,6 +1391,30 @@ def get_dashboard_employes(annee=None):
             )
     except Exception:
         pass
+
+    # Annuaire des employés ACTIFS (hors stagiaires) pour la section effectif
+    # + l'action "Signaler départ" (lien vers la fiche Employee dans le desk).
+    try:
+        stats["employes"] = frappe.db.sql(
+            """
+            SELECT name, employee_name, designation, department,
+                   date_of_joining, employment_type, company_email, cell_number
+            FROM `tabEmployee`
+            WHERE status = 'Active'
+              AND (employment_type IS NULL OR employment_type != 'Stage')
+            ORDER BY employee_name ASC
+            """,
+            as_dict=True,
+        )
+        # Répartition par département (pour un graphe propre)
+        rep = {}
+        for e in stats["employes"]:
+            k = e.get("department") or "Non défini"
+            rep[k] = rep.get(k, 0) + 1
+        stats["repartition_departement"] = rep
+    except Exception:
+        stats["employes"] = []
+        stats["repartition_departement"] = {}
 
     return stats
 
@@ -1539,6 +1617,35 @@ def get_employee_from_user():
         as_dict=True,
     )
     return employee
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def delegataire_query(doctype, txt, searchfield, start, page_len, filters):
+    """Link query pour le champ 'Sur délégation de' (au_nom_de).
+
+    Permet à TOUT employé connecté (même sans droit de lecture sur Employee)
+    de rechercher un collègue par son NOM COMPLET (nom de famille en premier,
+    comme chez KYA) ou son matricule. Ne renvoie que name + nom complet —
+    aucune donnée sensible. Contourne la permission restrictive d'Employee
+    (recherche SQL en lecture seule) car choisir un délégant est légitime.
+    """
+    if frappe.session.user == "Guest":
+        return []
+    like = "%{0}%".format(txt or "")
+    start = frappe.utils.cint(start)
+    page_len = frappe.utils.cint(page_len) or 20
+    return frappe.db.sql(
+        """
+        SELECT name, employee_name
+        FROM `tabEmployee`
+        WHERE status = 'Active'
+          AND (employee_name LIKE %(t)s OR name LIKE %(t)s)
+        ORDER BY employee_name ASC
+        LIMIT %(start)s, %(page_len)s
+        """,
+        {"t": like, "start": start, "page_len": page_len},
+    )
 
 
 @frappe.whitelist()

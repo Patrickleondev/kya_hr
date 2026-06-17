@@ -10,7 +10,7 @@
    "label": "Statut de la Flotte"
   }
  ],
- "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<b>🚚 Logistique — Gestion de Flotte</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Nouvelle Sortie Véhicule\", \"col\": 4}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Sorties en cours\", \"col\": 4}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Véhicules\", \"col\": 4}}, {\"id\": \"nc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Véhicules Disponibles\", \"col\": 3}}, {\"id\": \"nc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Véhicules En Mission\", \"col\": 3}}, {\"id\": \"nc3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Sorties du Mois\", \"col\": 3}}, {\"id\": \"nc4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Docs Expirant 30j\", \"col\": 3}}, {\"id\": \"ch1\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Sorties Véhicules par Mois\", \"col\": 12}}, {\"id\": \"ch2\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Statut de la Flotte\", \"col\": 12}}]",
+ "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<b>🚚 Logistique — Gestion de Flotte</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"sd\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"📋 Tableau de bord Logistique\", \"col\": 3}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"🚗 Nouvelle Sortie (fiche)\", \"col\": 3}}, {\"id\": \"sc\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"⛽ Nouveau Plein (fiche)\", \"col\": 3}}, {\"id\": \"se\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"🔧 Nouvel Entretien (fiche)\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Sorties en cours\", \"col\": 4}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Véhicules\", \"col\": 4}}, {\"id\": \"sr\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Documents à renouveler\", \"col\": 4}}, {\"id\": \"nc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Véhicules Disponibles\", \"col\": 3}}, {\"id\": \"nc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Véhicules En Mission\", \"col\": 3}}, {\"id\": \"nc3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Sorties du Mois\", \"col\": 3}}, {\"id\": \"nc4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Docs Expirant 30j\", \"col\": 3}}, {\"id\": \"ch1\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Sorties Véhicules par Mois\", \"col\": 12}}, {\"id\": \"ch2\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Statut de la Flotte\", \"col\": 12}}]",
  "creation": "2026-04-25 10:00:00.000000",
  "custom_blocks": [],
  "docstatus": 0,
@@ -106,8 +106,8 @@
   },
   {
    "type": "Link",
-   "label": "Journal Carburant (Vehicle Log)",
-   "link_to": "Vehicle Log",
+   "label": "Pleins Carburant",
+   "link_to": "Plein Carburant KYA",
    "link_type": "DocType",
    "hidden": 0,
    "is_query_report": 0,
@@ -116,8 +116,18 @@
   },
   {
    "type": "Link",
-   "label": "Entretiens (Vehicle Service)",
-   "link_to": "Vehicle Service",
+   "label": "Entretiens / Réparations",
+   "link_to": "Entretien Vehicule KYA",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 1
+  },
+  {
+   "type": "Link",
+   "label": "Journal Carburant (natif)",
+   "link_to": "Vehicle Log",
    "link_type": "DocType",
    "hidden": 0,
    "is_query_report": 0,
@@ -220,23 +230,45 @@
    "color": "Purple",
    "doc_view": "",
    "format": "",
-   "icon": "chart-column",
-   "label": "📊 Dashboard Flotte (DG/DGA)",
-   "link_to": "Tableau de Bord Flotte",
+   "icon": "dashboard",
+   "label": "📋 Tableau de bord Logistique",
+   "link_to": "/kya-logistique-dashboard",
    "stats_filter": "{}",
-   "type": "Dashboard",
-   "url": "/app/dashboard-view/Tableau de Bord Flotte"
+   "type": "URL",
+   "url": "/kya-logistique-dashboard"
   },
   {
    "color": "Blue",
-   "doc_view": "New",
+   "doc_view": "",
    "format": "",
    "icon": "plus",
-   "label": "Nouvelle Sortie Véhicule",
-   "link_to": "Sortie Vehicule",
+   "label": "🚗 Nouvelle Sortie (fiche)",
+   "link_to": "/sortie-vehicule/new",
    "stats_filter": "{}",
-   "type": "DocType",
-   "url": "/app/sortie-vehicule/new"
+   "type": "URL",
+   "url": "/sortie-vehicule/new"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "",
+   "format": "",
+   "icon": "plus",
+   "label": "⛽ Nouveau Plein (fiche)",
+   "link_to": "/plein-carburant/new",
+   "stats_filter": "{}",
+   "type": "URL",
+   "url": "/plein-carburant/new"
+  },
+  {
+   "color": "Green",
+   "doc_view": "",
+   "format": "",
+   "icon": "plus",
+   "label": "🔧 Nouvel Entretien (fiche)",
+   "link_to": "/entretien-vehicule/new",
+   "stats_filter": "{}",
+   "type": "URL",
+   "url": "/entretien-vehicule/new"
   },
   {
    "color": "Orange",

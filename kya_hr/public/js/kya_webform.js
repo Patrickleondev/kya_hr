@@ -402,6 +402,133 @@
         fields: ["signature_caissiere", "signature_comptable", "signature_dfc"],
         sigGrid: true
       }
+    ],
+    "sortie-vehicule": [
+      {
+        title: "VÉHICULE & CHAUFFEUR",
+        icon: "\u{1F697}",
+        fields: ["vehicle", "license_plate", "chauffeur", "demandeur"],
+        grid: { vehicle: "span 2", license_plate: "col", chauffeur: "col", demandeur: "span 2" }
+      },
+      {
+        title: "MISSION",
+        icon: "\u{1F4CD}",
+        fields: ["motif_mission", "destination", "date_depart", "date_retour_prevue"],
+        grid: { motif_mission: "span 2", destination: "span 2", date_depart: "col", date_retour_prevue: "col" }
+      },
+      {
+        title: "PASSAGERS",
+        icon: "\u{1F465}",
+        fields: ["passagers"]
+      },
+      {
+        title: "DÉPART / RETOUR (KM & CARBURANT)",
+        icon: "\u26FD",
+        fields: ["km_depart", "carburant_depart_pourcent", "km_retour", "carburant_retour_pourcent", "observations"],
+        grid: { km_depart: "col", carburant_depart_pourcent: "col", km_retour: "col", carburant_retour_pourcent: "col", observations: "span 2" }
+      }
+    ],
+    "plein-carburant": [
+      {
+        title: "VÉHICULE",
+        icon: "\u26FD",
+        fields: ["vehicle", "license_plate", "date_plein", "chauffeur", "km_actuel"],
+        grid: { vehicle: "span 2", license_plate: "col", date_plein: "col", chauffeur: "col", km_actuel: "col" }
+      },
+      {
+        title: "DÉTAILS DU PLEIN",
+        icon: "\u{1F9FE}",
+        fields: ["litres", "montant", "prix_litre", "plein_complet", "station", "paye_par", "observations"],
+        grid: { litres: "col", montant: "col", prix_litre: "col", plein_complet: "col", station: "col", paye_par: "col", observations: "span 2" }
+      }
+    ],
+    "entretien-vehicule": [
+      {
+        title: "VÉHICULE",
+        icon: "\u{1F527}",
+        fields: ["vehicle", "license_plate", "date_entretien", "statut"],
+        grid: { vehicle: "span 2", license_plate: "col", date_entretien: "col", statut: "span 2" }
+      },
+      {
+        title: "TRAVAUX",
+        icon: "\u{1F6E0}\uFE0F",
+        fields: ["type_entretien", "description", "km_actuel", "cout", "garage"],
+        grid: { type_entretien: "span 2", description: "span 2", km_actuel: "col", cout: "col", garage: "span 2" }
+      },
+      {
+        title: "PROCHAINE ÉCHÉANCE",
+        icon: "\u{1F4C5}",
+        fields: ["prochaine_echeance_date", "prochaine_echeance_km", "observations"],
+        grid: { prochaine_echeance_date: "col", prochaine_echeance_km: "col", observations: "span 2" }
+      }
+    ],
+    "inventaire-kya": [
+      {
+        title: "INFORMATIONS DE L’INVENTAIRE",
+        icon: "\u{1F4E6}",
+        fields: ["objet", "date_inventaire", "type_inventaire", "warehouse_filter", "responsable_nom", "statut"],
+        grid: { objet: "span 2", date_inventaire: "col", type_inventaire: "col", warehouse_filter: "span 2", responsable_nom: "col", statut: "col" }
+      },
+      {
+        title: "LIGNES D’INVENTAIRE",
+        icon: "\u{1F4DD}",
+        fields: ["items"]
+      },
+      {
+        title: "VALIDATIONS & SIGNATURES",
+        icon: "\u270D\uFE0F",
+        fields: ["signature_responsable", "signature_magasin"],
+        sigGrid: true
+      }
+    ],
+    "besoin-formation": [
+      {
+        title: "ÉQUIPE & PÉRIODE",
+        icon: "\u{1F465}",
+        fields: ["equipe", "chef_equipe", "annee", "trimestre"],
+        grid: { equipe: "col", chef_equipe: "col", annee: "col", trimestre: "col" }
+      },
+      {
+        title: "FORMATIONS SOUHAITÉES",
+        icon: "\u{1F393}",
+        fields: ["lignes"]
+      }
+    ],
+    "marche-kya": [
+      { title: "IDENTIFICATION DU MARCHÉ", icon: "\u{1F3E2}",
+        fields: ["nom_marche", "type_marche", "statut", "numero_marche", "client_beneficiaire", "objet_marche"],
+        grid: { nom_marche: "span 2", type_marche: "col", statut: "col", numero_marche: "col", client_beneficiaire: "col", objet_marche: "span 2" } },
+      { title: "PÉRIODE & TECHNIQUE", icon: "\u{1F4C5}",
+        fields: ["date_debut", "date_fin", "duree_jours", "puissance_kwc"],
+        grid: { date_debut: "col", date_fin: "col", duree_jours: "col", puissance_kwc: "col" } },
+      { title: "FACTURATION & BUDGET", icon: "\u{1F4B0}",
+        fields: ["montant_total_facture", "montant_avance_demarrage", "budget_previsionnel"],
+        grid: { montant_total_facture: "col", montant_avance_demarrage: "col", budget_previsionnel: "col" } },
+      { title: "COÛTS DE RÉALISATION", icon: "\u{1F6D2}",
+        fields: ["cout_supports_pv", "cout_supports_batteries", "cout_modules_pv", "cout_batteries", "cout_onduleurs", "cout_cables", "cout_terre", "cout_protection", "cout_accessoires_cablage", "cout_gestionnaire"],
+        grid: { cout_supports_pv: "col", cout_supports_batteries: "col", cout_modules_pv: "col", cout_batteries: "col", cout_onduleurs: "col", cout_cables: "col", cout_terre: "col", cout_protection: "col", cout_accessoires_cablage: "col", cout_gestionnaire: "col" } },
+      { title: "FRAIS DE MISSION", icon: "\u{1F69A}",
+        fields: ["frais_carburant", "frais_location_camion", "frais_perdiems", "frais_hebergement", "frais_autres"],
+        grid: { frais_carburant: "col", frais_location_camion: "col", frais_perdiems: "col", frais_hebergement: "col", frais_autres: "col" } },
+      { title: "SYNTHÈSE FINANCIÈRE", icon: "\u{1F4CA}",
+        fields: ["cout_total_realisation", "ecart_avance", "ecart_budget_previsionnel", "marge_brute", "taxes", "marge_nette", "commentaires"],
+        grid: { cout_total_realisation: "col", ecart_avance: "col", ecart_budget_previsionnel: "col", marge_brute: "col", taxes: "col", marge_nette: "col", commentaires: "span 2" } }
+    ],
+    "sop-client": [
+      { title: "INFORMATIONS CLIENT", icon: "\u{1F464}",
+        fields: ["nom_client", "type_client", "mode_paiement", "statut"],
+        grid: { nom_client: "span 2", type_client: "col", mode_paiement: "col", statut: "col" } },
+      { title: "INSTALLATION", icon: "\u2600\uFE0F",
+        fields: ["date_installation", "puissance_kw", "montant_total", "montant_avance"],
+        grid: { date_installation: "col", puissance_kw: "col", montant_total: "col", montant_avance: "col" } },
+      { title: "SUIVI DU SOLDE", icon: "\u{1F4B3}",
+        fields: ["solde_du", "date_prevue_solde", "statut_paiement", "observations"],
+        grid: { solde_du: "col", date_prevue_solde: "col", statut_paiement: "col", observations: "span 2" } },
+      { title: "ÉCHÉANCIER (PAIEMENT PAR TRANCHE)", icon: "\u{1F4C5}",
+        fields: ["echeancier"] },
+      { title: "CONTRAT DE LOCATION", icon: "\u{1F511}",
+        fields: ["montant_mensuel", "date_fin_location", "etat_paiement_location"],
+        grid: { montant_mensuel: "col", date_fin_location: "col" } }
     ]
   };
 
@@ -475,6 +602,41 @@
       title: "RETOUR DE MAT\u00c9RIEL AU MAGASIN",
       subtitle: "Achats et Stock",
       workflow: "Retourneur \u2192 Responsable Magasin"
+    },
+    "sortie-vehicule": {
+      title: "SORTIE / MISSION V\u00c9HICULE",
+      subtitle: "Logistique & Flotte",
+      workflow: "Saisie directe (Gestionnaire de Flotte / RH)"
+    },
+    "plein-carburant": {
+      title: "PLEIN DE CARBURANT",
+      subtitle: "Logistique & Flotte",
+      workflow: "Saisie directe (Gestionnaire de Flotte / RH)"
+    },
+    "entretien-vehicule": {
+      title: "ENTRETIEN / R\u00c9PARATION V\u00c9HICULE",
+      subtitle: "Logistique & Flotte",
+      workflow: "Saisie directe (Gestionnaire de Flotte / RH)"
+    },
+    "inventaire-kya": {
+      title: "FICHE D\u2019INVENTAIRE",
+      subtitle: "Stock & Inventaire",
+      workflow: "Responsable Inventaire \u2192 Responsable Magasin"
+    },
+    "besoin-formation": {
+      title: "EXPRESSION DE BESOINS DE FORMATION",
+      subtitle: "Ressources Humaines \u2014 Formation",
+      workflow: "Chef d\u2019\u00e9quipe \u2192 RH \u2192 Direction G\u00e9n\u00e9rale"
+    },
+    "marche-kya": {
+      title: "FICHE DE SUIVI DE MARCH\u00c9",
+      subtitle: "Comptabilit\u00e9 & Direction",
+      workflow: "Saisie & suivi (Comptable / DFC / Direction)"
+    },
+    "sop-client": {
+      title: "FICHE CLIENT SoP",
+      subtitle: "Portefeuille Clients \u2014 Comptabilit\u00e9",
+      workflow: "Saisie & suivi (Comptable / DFC)"
     }
   };
 
@@ -530,6 +692,10 @@
       signature_caissiere: null,
       signature_comptable: ["Accounts User", "Accounts Manager", "System Manager"],
       signature_dfc: ["Responsable Comptable", "System Manager"]
+    },
+    "inventaire-kya": {
+      signature_responsable: null,
+      signature_magasin: ["Stock Manager", "Stock User", "Chargé des Stocks", "System Manager"]
     }
   };
 
@@ -622,15 +788,110 @@
     return { section: section, body: body };
   }
 
-  function printForm() { window.print(); }
+  // Mapping route web form -> Print Format officiel (miroir de
+  // kya_hr/ensure_webform_print_formats.py). Le print format est rendu
+  // CÔTÉ SERVEUR : il itère la child table en vrai HTML, donc l'impression
+  // affiche bien toutes les lignes du tableau (ce que window.print() du DOM
+  // ne faisait pas : le grid Frappe est un widget JS qui ne s'imprime pas).
+  var KYA_PRINT_FORMATS = {
+    "bon-commande": "Bon Commande KYA Officiel",
+    "brouillard-caisse": "Brouillard Caisse KYA Officiel",
+    "demande-achat": "Demande Achat KYA Officiel",
+    "bilan-fin-de-stage": "Bilan de Stage KYA",
+    "inventaire-kya": "Fiche Inventaire KYA",
+    "permission-sortie-employe": "Ticket Sortie Employe",
+    "permission-sortie-stagiaire": "Ticket Sortie Stagiaire",
+    "planning-conge": "Demande Conge KYA",
+    "pv-entree-materiel": "Ticket Entrée Matériel KYA",
+    "pv-sortie-materiel": "PV Sortie Matériel Officiel",
+    "etat-recap": "Etat Recap Cheques Officiel",
+    "retour-materiel": "Retour Materiel KYA Officiel"
+  };
 
+  function _kyaDocRef() {
+    var d = (window.frappe && frappe.web_form && frappe.web_form.doc) ? frappe.web_form.doc : null;
+    if (!d || !d.doctype || !d.name) return null;
+    var nm = String(d.name);
+    if (nm.indexOf("new-") === 0 || d.__islocal) return null; // pas encore enregistré
+    return d;
+  }
+  function _kyaPrintFormat() {
+    try {
+      if (frappe.web_form && frappe.web_form.print_format) return frappe.web_form.print_format;
+    } catch (e) {}
+    var route = "";
+    try { route = (frappe.web_form && frappe.web_form.route) || ""; } catch (e) {}
+    if (!route) {
+      var parts = (window.location.pathname || "").split("/").filter(Boolean);
+      route = parts.length ? parts[0] : "";
+    }
+    return KYA_PRINT_FORMATS[route] || "";
+  }
+  function _kyaNeedSave() {
+    if (window.frappe && frappe.msgprint) {
+      frappe.msgprint(__("Veuillez d’abord enregistrer le document, puis cliquez à nouveau sur Imprimer / PDF."));
+    } else {
+      alert("Enregistrez d’abord le document avant d’imprimer.");
+    }
+  }
+  function printForm() {
+    var d = _kyaDocRef();
+    if (!d) return _kyaNeedSave();
+    var fmt = _kyaPrintFormat();
+    var url = "/printview?doctype=" + encodeURIComponent(d.doctype) +
+              "&name=" + encodeURIComponent(d.name) +
+              (fmt ? "&format=" + encodeURIComponent(fmt) : "") +
+              "&trigger_print=1&_lang=fr";
+    window.open(url, "_blank");
+  }
+  function printPDF() {
+    var d = _kyaDocRef();
+    if (!d) return _kyaNeedSave();
+    var fmt = _kyaPrintFormat();
+    var url = "/api/method/frappe.utils.print_format.download_pdf?doctype=" + encodeURIComponent(d.doctype) +
+              "&name=" + encodeURIComponent(d.name) +
+              (fmt ? "&format=" + encodeURIComponent(fmt) : "") +
+              "&_lang=fr";
+    window.open(url, "_blank");
+  }
+
+  /* Rôles réels du user. Sur les pages portal/web form, frappe.user_roles et
+     frappe.boot.user.roles sont VIDES → on s'appuie en priorité sur le
+     contexte chargé via kya_hr.api.get_session_context (window._kyaCtx). */
+  function kyaRoles() {
+    if (window._kyaCtx && window._kyaCtx.roles && window._kyaCtx.roles.length) return window._kyaCtx.roles;
+    if (window.frappe && frappe.user_roles && frappe.user_roles.length) return frappe.user_roles;
+    if (window.frappe && frappe.boot && frappe.boot.user && frappe.boot.user.roles && frappe.boot.user.roles.length) return frappe.boot.user.roles;
+    return [];
+  }
+  function rolesKnown() {
+    return !!(window._kyaCtx && Array.isArray(window._kyaCtx.roles)) ||
+      (window.frappe && ((frappe.user_roles && frappe.user_roles.length) ||
+        (frappe.boot && frappe.boot.user && frappe.boot.user.roles && frappe.boot.user.roles.length)));
+  }
   function userHasRole(r) {
-    return window.frappe && frappe.user_roles && frappe.user_roles.indexOf(r) !== -1;
+    return kyaRoles().indexOf(r) !== -1;
   }
   function userHasAnyRole(roles) {
     if (!roles || !roles.length) return false;
     for (var i = 0; i < roles.length; i++) { if (userHasRole(roles[i])) return true; }
     return false;
+  }
+
+  /* Charge une fois les rôles réels + l'Employee lié, puis ré-applique les
+     permissions de champ et de signature (qui étaient fausses tant que les
+     rôles n'étaient pas connus). */
+  function loadSessionContext(cb) {
+    if (window._kyaCtx) { if (cb) cb(); return; }
+    if (!(window.frappe && frappe.call)) { if (cb) cb(); return; }
+    frappe.call({
+      method: "kya_hr.api.get_session_context",
+      callback: function (r) {
+        window._kyaCtx = (r && r.message) || { roles: [] };
+        if (cb) cb();
+      },
+      error: function () { window._kyaCtx = { roles: [] }; if (cb) cb(); }
+    });
   }
 
   function canSelectAnyEmployee() {
@@ -713,6 +974,15 @@
   }
 
   function setupFieldEditPermissions(route) {
+    // NEUTRALISE (13/06/2026) : ce verrouillage custom grisait a tort les
+    // champs pour les utilisateurs metier legitimes (Caissier, Comptable,
+    // DFC...). Deux bugs : isDocOwner() lisait le proprietaire de la
+    // DEFINITION du Web Form (Administrator) au lieu du document, et
+    // EDITOR_ROLES ne listait pas les roles metier. Or Frappe applique deja
+    // correctement l'editabilite via apply_document_permissions (permissions
+    // serveur reelles + workflow allow_edit). On laisse donc Frappe gerer.
+    return;
+    /* eslint-disable no-unreachable */
     var isEditor = userHasAnyRole(EDITOR_ROLES);
     var owner = isDocOwner();
     if (isEditor || owner) return;
@@ -926,7 +1196,7 @@
       var bp = toolbar.querySelector(".kya-btn-print");
       var bd = toolbar.querySelector(".kya-btn-pdf");
       if (bp) bp.addEventListener("click", printForm);
-      if (bd) bd.addEventListener("click", printForm);
+      if (bd) bd.addEventListener("click", printPDF);
     }, 0);
 
     /* Bandeau circuit d'approbation */
@@ -1070,7 +1340,7 @@
       var bp = toolbar.querySelector(".kya-btn-print");
       var bd = toolbar.querySelector(".kya-btn-pdf");
       if (bp) bp.addEventListener("click", printForm);
-      if (bd) bd.addEventListener("click", printForm);
+      if (bd) bd.addEventListener("click", printPDF);
     }, 0);
 
     /* Info box */
@@ -1260,6 +1530,32 @@
   }
 
   /**
+   * Verrouille le champ Employé pour le mode self-service : un employé qui
+   * remplit sa propre demande ne doit pas pouvoir saisir l'ID d'un autre.
+   * La règle métier est DÉJÀ imposée côté serveur (validation du scope du
+   * demandeur) ; ici c'est uniquement du confort UI.
+   *
+   * IMPORTANT : cette fonction était APPELÉE (l.~1258) mais jamais définie ->
+   * ReferenceError qui faisait planter tout le client_script du web form, ce
+   * qui laissait TOUS les champs désactivés pour les utilisateurs non-admin
+   * (les System Manager n'étaient pas affectés). On la définit donc, en
+   * version sûre (try/catch, no-op si pas d'input).
+   */
+  function lockEmployeeInputForSelfService() {
+    try {
+      var input = document.querySelector('[data-fieldname="employee"] input')
+               || document.querySelector('[data-fieldname="demandeur"] input');
+      if (!input) return;
+      // On ne verrouille que si une valeur a déjà été résolue pour l'utilisateur
+      // courant (auto-fill). Sinon on laisse la recherche fuzzy disponible.
+      if (input.value && input.value.trim()) {
+        input.setAttribute("readonly", "readonly");
+        input.style.background = "#eef3f8";
+      }
+    } catch (e) { /* jamais bloquer le rendu du formulaire */ }
+  }
+
+  /**
    * Fallback INLINE : quand `restructureForm` n'arrive pas à déplacer
    * les `.frappe-control` dans les sections (cas etat-recap, brouillard
    * où Frappe v16 re-monte les contrôles après notre appendChild), on
@@ -1445,6 +1741,14 @@
   function waitForForm() {
     var route = getRoute();
     if (!FORM_SECTIONS[route] && !FORM_META[route]) return;
+
+    // Charger une fois les roles reels (vides sur portal) puis re-appliquer
+    // les permissions de champ/signature qui en dependent.
+    loadSessionContext(function () {
+      var rt = getRoute();
+      try { setupFieldEditPermissions(rt); } catch (e) {}
+      try { setupSignaturePermissions(rt); } catch (e) {}
+    });
 
     // Mode DÉCORATIF SIMPLE : ne touche pas aux champs Frappe, juste header + footer
     // Suffit d'un seul appel quand le formBody est dans le DOM
@@ -1659,6 +1963,581 @@
     frappe.web_form.after_load = function() {
       if (_origAfterLoad) _origAfterLoad.apply(this, arguments);
       setTimeout(waitForForm, 150);
+    };
+  }
+})();
+
+/* ===================================================================
+   KYA-Energy — Tableaux HYBRIDES (rendu HTML fidèle aux fiches papier)
+   -------------------------------------------------------------------
+   Problème : le grid natif Frappe (DataTable JS) ne s'imprime pas,
+   déborde horizontalement et ne ressemble pas aux fiches officielles
+   ni aux web forms du collègue (vrai <table> HTML).
+
+   Solution HYBRIDE : on GARDE la child table native (source de vérité
+   pour stock / compta / impression serveur) mais on MASQUE son grid et
+   on rend un vrai <table> HTML par-dessus. Chaque cellule écrit
+   directement dans le modèle (grid.df.data === doc[field]), donc au
+   submit les lignes persistent normalement → stock & compta intacts.
+   =================================================================== */
+(function () {
+  "use strict";
+
+  function num(v) {
+    var n = parseFloat(v);
+    return isNaN(n) ? 0 : n;
+  }
+  function fmtMoney(v) {
+    var n = num(v);
+    try {
+      return n.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    } catch (e) {
+      return String(Math.round(n));
+    }
+  }
+  function escapeHtml(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function getRoute() {
+    var route = "";
+    try { route = (window.frappe && frappe.web_form && frappe.web_form.route) || ""; } catch (e) {}
+    if (!route) {
+      var parts = (window.location.pathname || "").split("/").filter(Boolean);
+      route = parts.length ? parts[0] : "";
+    }
+    return route;
+  }
+
+  /* --- Registre des tableaux fidèles aux fiches ------------------- */
+  /* Chaque colonne : fn (fieldname child), label, type (date|text|num),
+     w (largeur fixe) ou grow (prend l'espace restant), ro (lecture seule,
+     ex. colonnes calculées), align. `recompute` met à jour les colonnes
+     calculées + les totaux parents. */
+  var KYA_DOC_TABLES = {
+    "brouillard-caisse": {
+      field: "lignes",
+      title: "MOUVEMENTS DE CAISSE DU JOUR",
+      addLabel: "+ Ajouter une opération",
+      columns: [
+        { fn: "date_ligne",  label: "Date",        type: "date", w: "14%" },
+        { fn: "designation", label: "Désignation", type: "text", grow: true },
+        { fn: "entree",      label: "Entrée (FCFA)", type: "num", w: "16%", align: "right" },
+        { fn: "sortie",      label: "Sortie (FCFA)", type: "num", w: "16%", align: "right" },
+        { fn: "solde",       label: "Solde (FCFA)",  type: "num", w: "17%", align: "right", ro: true }
+      ],
+      recompute: function (data, setParent) {
+        var soldePrec = 0;
+        try { soldePrec = num(frappe.web_form.doc.solde_precedent); } catch (e) {}
+        var te = 0, ts = 0, run = soldePrec;
+        data.forEach(function (row) {
+          var e = num(row.entree), s = num(row.sortie);
+          te += e; ts += s; run += e - s;
+          row.solde = run;
+        });
+        setParent("total_entrees", te);
+        setParent("total_sorties", ts);
+        setParent("solde_final", soldePrec + te - ts);
+      }
+    },
+
+    "demande-achat": {
+      field: "items",
+      title: "ARTICLES DEMANDÉS",
+      addLabel: "+ Ajouter un article",
+      columns: [
+        { fn: "description",    label: "Description",     type: "text",  grow: true },
+        { fn: "quantite",       label: "Qté",             type: "float", w: "11%", align: "right" },
+        { fn: "unite",          label: "Unité",           type: "text",  w: "12%" },
+        { fn: "prix_unitaire",  label: "P.U. (XOF)",      type: "num",   w: "18%", align: "right" },
+        { fn: "montant",        label: "Montant (XOF)",   type: "num",   w: "18%", align: "right", ro: true,
+          formula: function (r) { return num(r.quantite) * num(r.prix_unitaire); } }
+      ],
+      recompute: function (data, setParent) {
+        var tot = 0;
+        data.forEach(function (r) { tot += num(r.montant); });
+        setParent("montant_total", tot);
+      }
+    },
+
+    "bon-commande": {
+      field: "articles",
+      title: "ARTICLES COMMANDÉS",
+      addLabel: "+ Ajouter un article",
+      columns: [
+        { fn: "item_code",     label: "Article",     type: "link", link: "Item", w: "16%",
+          fetch: { description: "item_name" } },
+        { fn: "description",   label: "Description",  type: "text",  grow: true },
+        { fn: "unite",         label: "Unité",        type: "text",  w: "9%" },
+        { fn: "quantite",      label: "Qté",          type: "float", w: "9%",  align: "right" },
+        { fn: "prix_unitaire", label: "Prix (FCFA)",  type: "num",   w: "15%", align: "right" },
+        { fn: "total",         label: "Total (FCFA)", type: "num",   w: "16%", align: "right", ro: true,
+          formula: function (r) { return num(r.quantite) * num(r.prix_unitaire); } }
+      ]
+    },
+
+    "etat-recap": {
+      field: "lignes",
+      title: "CHÈQUES ÉMIS",
+      addLabel: "+ Ajouter un chèque",
+      columns: [
+        { fn: "num_cheque",   label: "N° Chèque",    type: "text", w: "12%" },
+        { fn: "banque",       label: "Banque",       type: "text", w: "14%" },
+        { fn: "beneficiaire", label: "Bénéficiaire", type: "text", grow: true },
+        { fn: "libelle",      label: "Libellé",      type: "text", w: "22%" },
+        { fn: "montant",      label: "Montant (FCFA)", type: "num", w: "16%", align: "right" },
+        { fn: "observation",  label: "Observation",  type: "text", w: "14%" }
+      ],
+      recompute: function (data, setParent) {
+        var tot = 0;
+        data.forEach(function (r) { tot += num(r.montant); });
+        setParent("nombre_cheques", data.length);
+        setParent("total_montant", tot);
+      }
+    },
+
+    "pv-entree-materiel": {
+      field: "items",
+      title: "ARTICLES REÇUS",
+      addLabel: "+ Ajouter un article",
+      columns: [
+        { fn: "item_code",     label: "Article",      type: "link", link: "Item", w: "14%",
+          fetch: { designation: "item_name", uom: "stock_uom" } },
+        { fn: "designation",   label: "Désignation",  type: "text", grow: true },
+        { fn: "uom",           label: "Unité",        type: "link", link: "UOM", w: "10%" },
+        { fn: "qte_commandee", label: "Qté Cmd",      type: "float", w: "9%", align: "right" },
+        { fn: "qte_recue",     label: "Qté Reçue",    type: "float", w: "9%", align: "right" },
+        { fn: "prix_unitaire", label: "P.U. (FCFA)",  type: "num",   w: "12%", align: "right" },
+        { fn: "warehouse",     label: "Magasin",      type: "link", link: "Warehouse", w: "16%" }
+      ]
+    },
+
+    "pv-sortie-materiel": {
+      field: "items",
+      title: "LISTE DU MATÉRIEL",
+      addLabel: "+ Ajouter un article",
+      columns: [
+        { fn: "item_code",             label: "Article",       type: "link", link: "Item", w: "16%",
+          fetch: { designation: "item_name", uom: "stock_uom" } },
+        { fn: "designation",           label: "Désignation",   type: "text", grow: true },
+        { fn: "uom",                   label: "Unité",         type: "link", link: "UOM", w: "10%" },
+        { fn: "qte_demandee",          label: "Qté Demandée",  type: "float", w: "12%", align: "right" },
+        { fn: "qte_reellement_sortie", label: "Qté Sortie",    type: "float", w: "12%", align: "right" },
+        { fn: "warehouse",             label: "Magasin source", type: "link", link: "Warehouse", w: "16%" }
+      ]
+    },
+
+    "retour-materiel": {
+      field: "items",
+      title: "ARTICLES RETOURNÉS",
+      addLabel: "+ Ajouter un article",
+      columns: [
+        { fn: "item_code",      label: "Article",     type: "link", link: "Item", w: "15%",
+          fetch: { designation: "item_name", uom: "stock_uom" } },
+        { fn: "designation",    label: "Désignation", type: "text", grow: true },
+        { fn: "qte_retournee",  label: "Qté Retournée", type: "float", w: "11%", align: "right" },
+        { fn: "warehouse",      label: "Magasin dest.", type: "link", link: "Warehouse", w: "16%" },
+        { fn: "etat_au_retour", label: "État au retour", type: "select", w: "16%",
+          opts: ["Bon état", "Endommagé", "À réparer"] }
+      ]
+    },
+
+    "inventaire-kya": {
+      field: "items",
+      title: "LIGNES D'INVENTAIRE",
+      addLabel: "+ Ajouter un article",
+      columns: [
+        { fn: "item_code",     label: "Article",       type: "link", link: "Item", w: "15%",
+          fetch: { designation: "item_name", uom: "stock_uom" } },
+        { fn: "designation",   label: "Désignation",   type: "text", grow: true, ro: true },
+        { fn: "warehouse",     label: "Magasin",       type: "link", link: "Warehouse", w: "16%" },
+        { fn: "qte_theorique", label: "Qté Théorique", type: "float", w: "12%", align: "right", ro: true },
+        { fn: "qte_comptee",   label: "Qté Comptée",   type: "float", w: "12%", align: "right" },
+        { fn: "ecart",         label: "Écart",         type: "float", w: "11%", align: "right", ro: true,
+          formula: function (r) { return num(r.qte_comptee) - num(r.qte_theorique); } }
+      ]
+    }
+  };
+
+  /* --- Accès au modèle de la child table native ------------------ */
+  function getGrid(field) {
+    try {
+      var f = frappe.web_form.fields_dict && frappe.web_form.fields_dict[field];
+      return f && f.grid ? f.grid : null;
+    } catch (e) { return null; }
+  }
+  /* IMPORTANT : dans les web forms v16, grid.df.data et doc[field] peuvent
+     être DEUX tableaux différents (le grid initialise df.data = [] quand
+     doc[field] est vide). Le web form sérialise depuis doc[field] au submit.
+     On force donc une RÉFÉRENCE UNIQUE partagée entre les deux, sinon les
+     lignes saisies via notre <table> HTML ne seraient pas enregistrées. */
+  function getData(field) {
+    var g = getGrid(field);
+    var doc = null;
+    try { doc = frappe.web_form && frappe.web_form.doc; } catch (e) {}
+    if (g && g.df) {
+      if (!Array.isArray(g.df.data)) g.df.data = [];
+      if (doc) {
+        if (Array.isArray(doc[field]) && doc[field] !== g.df.data) {
+          // garder le tableau qui a déjà des lignes, sinon aligner sur le grid
+          if (doc[field].length && !g.df.data.length) { g.df.data = doc[field]; }
+          else { doc[field] = g.df.data; }
+        } else if (!Array.isArray(doc[field])) {
+          doc[field] = g.df.data;
+        }
+      }
+      return g.df.data;
+    }
+    if (doc) {
+      if (!Array.isArray(doc[field])) doc[field] = [];
+      return doc[field];
+    }
+    return [];
+  }
+  function setParent(fieldname, value) {
+    try { frappe.web_form.set_value(fieldname, value); } catch (e) {}
+  }
+  /* Marquer le web form comme modifié : sinon, si l'utilisateur ne touche
+     QUE notre tableau HTML (aucun champ natif Frappe), le bouton Soumettre
+     considère le form non modifié et n'enregistre pas. */
+  function markDirty() {
+    try {
+      if (frappe.web_form && typeof frappe.web_form.make_form_dirty === "function") {
+        frappe.web_form.make_form_dirty();
+      } else if (frappe.web_form && frappe.web_form.doc) {
+        frappe.web_form.doc.__unsaved = 1;
+      }
+    } catch (e) {}
+  }
+
+  /* --- Construction du <table> HTML ------------------------------ */
+  function buildTable(schema) {
+    var data = getData(schema.field);
+
+    var thead = "<thead><tr>";
+    schema.columns.forEach(function (c) {
+      var style = c.w ? ' style="width:' + c.w + '"' : "";
+      thead += "<th" + style + ">" + escapeHtml(c.label) + "</th>";
+    });
+    thead += '<th class="kya-dt-actcol"></th></tr></thead>';
+
+    var tbody = '<tbody data-fieldname="' + escapeHtml(schema.field) + '">';
+    if (!data.length) {
+      tbody += '<tr class="kya-dt-empty"><td colspan="' + (schema.columns.length + 1) +
+        '">Aucune ligne — cliquez sur « ' + escapeHtml(schema.addLabel || "+ Ajouter") +
+        ' » pour commencer.</td></tr>';
+    } else {
+      data.forEach(function (row, i) {
+        tbody += renderRow(schema, row, i);
+      });
+    }
+    tbody += "</tbody>";
+
+    return '<table class="kya-doc-table">' + thead + tbody + "</table>";
+  }
+
+  function roDisplay(c, val) {
+    if (c.type === "num") return fmtMoney(val);
+    if (c.type === "float") return (val == null || val === "") ? "" : String(num(val));
+    return escapeHtml(val);
+  }
+
+  function cellInput(c, i, val) {
+    if (c.type === "date") {
+      return '<input type="date" class="kya-dt-in" data-r="' + i + '" data-c="' + c.fn +
+        '" value="' + escapeHtml(val) + '">';
+    }
+    if (c.type === "num" || c.type === "float") {
+      return '<input type="number" step="any" class="kya-dt-in kya-dt-num" data-r="' + i +
+        '" data-c="' + c.fn + '" value="' + (val == null || val === "" ? "" : num(val)) + '">';
+    }
+    if (c.type === "select") {
+      var opts = '<option value=""></option>';
+      (c.opts || []).forEach(function (o) {
+        opts += '<option value="' + escapeHtml(o) + '"' +
+          (String(val) === String(o) ? " selected" : "") + ">" + escapeHtml(o) + "</option>";
+      });
+      return '<select class="kya-dt-in kya-dt-select" data-r="' + i + '" data-c="' + c.fn + '">' + opts + "</select>";
+    }
+    if (c.type === "link") {
+      var lid = "dl_" + c.fn + "_" + i;
+      return '<input class="kya-dt-in kya-dt-link" list="' + lid + '" autocomplete="off" data-r="' + i +
+        '" data-c="' + c.fn + '" data-link="' + escapeHtml(c.link || "") + '" value="' + escapeHtml(val) +
+        '"><datalist id="' + lid + '"></datalist>';
+    }
+    // text (par défaut) — textarea qui wrap et grandit
+    return '<textarea rows="1" class="kya-dt-in kya-dt-text" data-r="' + i + '" data-c="' + c.fn +
+      '">' + escapeHtml(val) + "</textarea>";
+  }
+
+  function renderRow(schema, row, i) {
+    var tds = "";
+    schema.columns.forEach(function (c) {
+      var val = row[c.fn];
+      var align = c.align ? ' style="text-align:' + c.align + '"' : "";
+      if (c.ro) {
+        tds += '<td class="kya-dt-ro"' + align + ' data-ro="' + c.fn + '" data-r="' + i + '">' +
+          roDisplay(c, val) + "</td>";
+      } else {
+        tds += "<td" + align + ">" + cellInput(c, i, val) + "</td>";
+      }
+    });
+    tds += '<td class="kya-dt-actcol"><button type="button" class="kya-dt-del" data-r="' + i +
+      '" title="Supprimer la ligne">&times;</button></td>';
+    return '<tr data-r="' + i + '">' + tds + "</tr>";
+  }
+
+  /* --- Recalcul + mise à jour des cellules calculées ------------- */
+  function recompute(schema, host) {
+    var data = getData(schema.field);
+    // 1) colonnes calculées par ligne (ex. total = qté × PU, écart = compté − théorique)
+    data.forEach(function (row) {
+      schema.columns.forEach(function (c) {
+        if (typeof c.formula === "function") row[c.fn] = c.formula(row);
+      });
+    });
+    // 2) recalcul global (totaux parents)
+    if (typeof schema.recompute === "function") {
+      schema.recompute(data, setParent);
+    }
+    // 3) rafraîchir les cellules read-only sans re-render (préserve le focus)
+    if (host) {
+      host.querySelectorAll("[data-ro]").forEach(function (td) {
+        var fn = td.getAttribute("data-ro");
+        var r = parseInt(td.getAttribute("data-r"), 10);
+        var col = null;
+        schema.columns.forEach(function (c) { if (c.fn === fn) col = c; });
+        if (data[r] && col) td.textContent = roDisplay(col, data[r][fn]);
+      });
+    }
+  }
+
+  /* --- Autocomplete Link : remplir la datalist d'une cellule ------ */
+  var _kyaLinkTimer = null;
+  function fillDatalist(input) {
+    var dt = input.getAttribute("data-link");
+    if (!dt || !window.frappe || !frappe.call) return;
+    var q = input.value || "";
+    var nameField = dt === "Item" ? "item_name" : "name";
+    var filters = [];
+    if (q) filters.push([dt, nameField, "like", "%" + q + "%"]);
+    frappe.call({
+      method: "frappe.client.get_list",
+      args: {
+        doctype: dt,
+        filters: q ? [[nameField, "like", "%" + q + "%"]] : [],
+        fields: dt === "Item" ? ["name", "item_name"] : ["name"],
+        limit_page_length: 12
+      }
+    }).then(function (r) {
+      var dl = document.getElementById(input.getAttribute("list"));
+      if (!dl) return;
+      dl.innerHTML = (r.message || []).map(function (it) {
+        return '<option value="' + escapeHtml(it.name) + '">' + escapeHtml(it.item_name || it.name) + "</option>";
+      }).join("");
+    }).catch(function () {});
+  }
+
+  /* --- Auto-grandir les textarea (désignation peut dépasser) ----- */
+  function autoGrow(el) {
+    el.style.height = "auto";
+    el.style.height = (el.scrollHeight) + "px";
+  }
+
+  /* --- Rendu complet + câblage ----------------------------------- */
+  function mount(ctrl, schema) {
+    // Masquer le grid natif (mais le garder dans le DOM = source de vérité)
+    var nativeGrid = ctrl.querySelector(".form-grid") || ctrl.querySelector(".grid-body");
+    if (nativeGrid) nativeGrid.style.display = "none";
+    var gridButtons = ctrl.querySelectorAll(".grid-footer, .grid-buttons");
+    gridButtons.forEach(function (b) { b.style.display = "none"; });
+
+    var host = ctrl.querySelector(".kya-doc-table-host");
+    if (!host) {
+      host = document.createElement("div");
+      host.className = "kya-doc-table-host";
+      ctrl.appendChild(host);
+    }
+
+    host.innerHTML =
+      (schema.title ? '<div class="kya-doc-table-title">' + escapeHtml(schema.title) + "</div>" : "") +
+      buildTable(schema) +
+      '<button type="button" class="kya-dt-add">' + escapeHtml(schema.addLabel || "+ Ajouter une ligne") + "</button>";
+
+    // textarea auto-grow initial
+    host.querySelectorAll("textarea.kya-dt-text").forEach(autoGrow);
+    recompute(schema, host);
+  }
+
+  /* --- Gestion des événements : DÉLÉGATION au niveau document ------
+     IMPORTANT : Frappe v16 re-monte parfois le contrôle Table entre deux
+     interactions (ex. après un add). Des listeners attachés au host avec
+     des closures sur ctrl/host deviennent alors PÉRIMÉS (ils rendent dans
+     un host détaché → les lignes tapées n'apparaissent plus). On délègue
+     donc sur `document` et on re-résout le ctrl/host/schema VIVANTS à
+     chaque événement. */
+  function schemaColOf(schema, fn) {
+    var col = null;
+    schema.columns.forEach(function (cc) { if (cc.fn === fn) col = cc; });
+    return col;
+  }
+  function liveCtx(t) {
+    if (!t || !t.closest) return null;
+    var host = t.closest(".kya-doc-table-host");
+    if (!host) return null;
+    var ctrl = t.closest(".frappe-control");
+    var schema = KYA_DOC_TABLES[getRoute()];
+    if (!schema) return null;
+    return { host: host, ctrl: ctrl, schema: schema };
+  }
+  function writeCell(schema, t) {
+    var r = parseInt(t.getAttribute("data-r"), 10);
+    var c = t.getAttribute("data-c");
+    var data = getData(schema.field);
+    if (!data[r]) return null;
+    var col = schemaColOf(schema, c);
+    var isNum = col && (col.type === "num" || col.type === "float");
+    data[r][c] = isNum ? num(t.value) : t.value;
+    return { r: r, c: c, col: col, data: data };
+  }
+
+  function setupDocTableListeners() {
+    if (window._kyaDTListeners) return;
+    window._kyaDTListeners = true;
+
+    document.addEventListener("input", function (e) {
+      var t = e.target;
+      if (!t.classList || !t.classList.contains("kya-dt-in")) return;
+      var cx = liveCtx(t);
+      if (!cx) return;
+      var w = writeCell(cx.schema, t);
+      if (!w) return;
+      if (t.classList.contains("kya-dt-text")) autoGrow(t);
+      if (t.classList.contains("kya-dt-link")) {
+        if (_kyaLinkTimer) clearTimeout(_kyaLinkTimer);
+        _kyaLinkTimer = setTimeout(function () { fillDatalist(t); }, 250);
+      }
+      recompute(cx.schema, cx.host);
+      markDirty();
+    });
+
+    document.addEventListener("change", function (e) {
+      var t = e.target;
+      if (!t.classList || !t.classList.contains("kya-dt-in")) return;
+      var cx = liveCtx(t);
+      if (!cx) return;
+      var w = writeCell(cx.schema, t);
+      if (!w) return;
+      markDirty();
+      if (t.classList.contains("kya-dt-link") && w.col && w.col.fetch && t.value && window.frappe && frappe.call) {
+        var dt = w.col.link;
+        var srcFields = Object.keys(w.col.fetch).map(function (k) { return w.col.fetch[k]; });
+        frappe.call({
+          method: "frappe.client.get_value",
+          args: { doctype: dt, filters: { name: t.value }, fieldname: srcFields }
+        }).then(function (res) {
+          var m = (res && res.message) || {};
+          Object.keys(w.col.fetch).forEach(function (sib) {
+            var src = w.col.fetch[sib];
+            if (m[src] != null && m[src] !== "") w.data[w.r][sib] = m[src];
+          });
+          var cx2 = liveCtx(t) || cx;
+          recompute(cx2.schema, cx2.host);
+          if (cx2.ctrl) mount(cx2.ctrl, cx2.schema);
+        }).catch(function () {});
+      } else {
+        recompute(cx.schema, cx.host);
+      }
+    });
+
+    document.addEventListener("click", function (e) {
+      var t = e.target;
+      if (!t.classList) return;
+      var isAdd = t.classList.contains("kya-dt-add");
+      var isDel = t.classList.contains("kya-dt-del");
+      if (!isAdd && !isDel) return;
+      var cx = liveCtx(t);
+      if (!cx) return;
+      e.preventDefault();
+      if (isAdd) {
+        var g = getGrid(cx.schema.field);
+        if (g && g.add_new_row) { g.add_new_row(); }
+        else { getData(cx.schema.field).push({}); }
+        markDirty();
+        // re-résoudre le ctrl VIVANT (Frappe a pu re-monter le contrôle)
+        var liveCtrl = document.querySelector('.frappe-control[data-fieldname="' + cx.schema.field + '"]') || cx.ctrl;
+        mount(liveCtrl, cx.schema);
+        var host2 = liveCtrl.querySelector(".kya-doc-table-host");
+        if (host2) {
+          var rows = host2.querySelectorAll("tbody tr[data-r]");
+          var last = rows[rows.length - 1];
+          if (last) { var inp = last.querySelector(".kya-dt-in"); if (inp) inp.focus(); }
+        }
+      } else {
+        var ri = parseInt(t.getAttribute("data-r"), 10);
+        var g2 = getGrid(cx.schema.field);
+        if (g2 && g2.grid_rows && g2.grid_rows[ri]) { g2.grid_rows[ri].remove(); }
+        else { getData(cx.schema.field).splice(ri, 1); }
+        markDirty();
+        var liveCtrl2 = document.querySelector('.frappe-control[data-fieldname="' + cx.schema.field + '"]') || cx.ctrl;
+        mount(liveCtrl2, cx.schema);
+      }
+    });
+  }
+
+  function ensureMounted() {
+    var route = getRoute();
+    var schema = KYA_DOC_TABLES[route];
+    if (!schema) return false;
+    var ctrl = document.querySelector('.frappe-control[data-fieldname="' + schema.field + '"]');
+    if (!ctrl) return false;
+    // grid natif monté ?
+    var mounted = ctrl.querySelector(".form-grid, .grid-body, table.table");
+    if (!mounted && !(getGrid(schema.field))) return false;
+    var host = ctrl.querySelector(".kya-doc-table-host");
+    var tbl = host && host.querySelector(".kya-doc-table");
+    // Nombre de lignes affichées vs modèle : si Frappe a re-monté / si le
+    // modèle a changé, on re-rend pour que TOUT ce qui est saisi s'affiche.
+    var domRows = tbl ? tbl.querySelectorAll("tbody tr[data-r]").length : -1;
+    var modelRows = getData(schema.field).length;
+    if (!host || !tbl || domRows !== modelRows) {
+      mount(ctrl, schema);
+    } else {
+      // garder le grid natif masqué si Frappe l'a ré-affiché
+      var ng = ctrl.querySelector(".form-grid");
+      if (ng && ng.style.display !== "none") { ng.style.display = "none"; }
+      recompute(schema, host);
+    }
+    return true;
+  }
+
+  function poll() {
+    if (!KYA_DOC_TABLES[getRoute()]) return;
+    var n = 0;
+    var t = setInterval(function () {
+      n++;
+      ensureMounted();
+      if (n >= 60) clearInterval(t); // ~21s
+    }, 350);
+  }
+
+  window.kyaRenderDocTables = function () { ensureMounted(); };
+
+  setupDocTableListeners();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", poll);
+  } else {
+    poll();
+  }
+  document.addEventListener("page-change", function () { setTimeout(poll, 400); });
+  document.addEventListener("frappe:web_form_loaded", function () { setTimeout(poll, 200); });
+  if (window.frappe && frappe.web_form) {
+    var _orig2 = frappe.web_form.after_load;
+    frappe.web_form.after_load = function () {
+      if (_orig2) _orig2.apply(this, arguments);
+      setTimeout(ensureMounted, 250);
     };
   }
 })();

@@ -492,6 +492,86 @@ def get_global_stats(period="30", module=None):
 
 
 @frappe.whitelist()
+def get_grouped_stats(period="30", group_by="department"):
+    """Vue transversale du tableau de bord : agrège TOUTES les fiches par
+    département et par équipe (Equipe KYA), via l'auteur de chaque fiche
+    (owner → Employee.user_id → department / custom_kya_equipe).
+
+    Retourne les deux regroupements (by_department, by_team) en un appel ;
+    `group_by` n'est qu'indicatif côté front (bascule sans re-fetch)."""
+    allowed = {"DG", "Directeur Général", "DGA", "System Manager", "Administrator"}
+    if not set(frappe.get_roles()).intersection(allowed):
+        frappe.throw(_("Accès refusé"), frappe.PermissionError)
+
+    period = int(period or 30)
+    date_from = add_days(today(), -period)
+    date_to = today()
+
+    # owner (User) -> Employee {department, custom_kya_equipe}
+    user_to_emp = {}
+    for e in frappe.get_all(
+        "Employee", filters={"status": "Active"},
+        fields=["employee_name", "user_id", "department", "custom_kya_equipe"],
+    ):
+        if e.user_id:
+            user_to_emp[e.user_id] = e
+    # Equipe KYA name -> libellé lisible
+    eq_label = {q.name: (q.nom_equipe or q.name)
+                for q in frappe.get_all("Equipe KYA", fields=["name", "nom_equipe"])}
+
+    def _blank():
+        return {"total": 0, "pending": 0, "approved": 0, "rejected": 0, "draft": 0}
+
+    by_dept, by_team = {}, {}
+
+    for mod_cfg in _get_config().values():
+        for dt_cfg in mod_cfg["doctypes"]:
+            dt_name = dt_cfg["name"]
+            try:
+                if not frappe.db.table_exists(dt_name):
+                    continue
+            except Exception:
+                continue
+            sf = dt_cfg.get("status_field") or "workflow_state"
+            df = dt_cfg.get("date_field") or "creation"
+            if not _has_field(dt_name, df):
+                df = "creation"
+            status_expr = (f"`{sf}`" if _has_field(dt_name, sf) and sf != "docstatus"
+                           else "CASE docstatus WHEN 0 THEN 'Brouillon' WHEN 1 THEN 'Approuvé' ELSE 'Rejeté' END")
+            try:
+                rows = frappe.db.sql(
+                    f"""SELECT owner, {status_expr} AS status
+                        FROM `tab{dt_name}`
+                        WHERE docstatus < 2 AND `{df}` >= %(df)s AND `{df}` <= %(dt)s""",
+                    {"df": date_from, "dt": date_to}, as_dict=True,
+                )
+            except Exception:
+                rows = []
+            for r in rows:
+                emp = user_to_emp.get(r.owner)
+                dept = (emp.department if emp and emp.department else None) or "Non défini"
+                team = (eq_label.get(emp.custom_kya_equipe) if emp and emp.custom_kya_equipe else None) or "Non affecté"
+                cls = _classify(r.status or "")
+                for key, bucket in ((dept, by_dept), (team, by_team)):
+                    b = bucket.setdefault(key, _blank())
+                    b["total"] += 1
+                    if cls in b:
+                        b[cls] += 1
+
+    def _as_list(d):
+        out = [dict(label=k, **v) for k, v in d.items()]
+        out.sort(key=lambda x: (-x["total"], x["label"]))
+        return out
+
+    return {
+        "by_department": _as_list(by_dept),
+        "by_team": _as_list(by_team),
+        "period": period,
+        "generated_on": str(now_datetime()),
+    }
+
+
+@frappe.whitelist()
 def get_module_records(doctype, filters=None, limit=50, offset=0):
     """
     Retourne la liste paginée des enregistrements d'un DocType (vue liste par module).

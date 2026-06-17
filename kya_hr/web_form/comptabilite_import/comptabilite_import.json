@@ -25,7 +25,7 @@
  "show_sidebar": 1,
  "success_message": "Import comptable enregistré. Les lignes ont été normalisées et restent consultables depuis le tableau de bord comptabilité.",
  "title": "Import Comptabilité",
- "client_script": "frappe.web_form.on('load', function() {\n  if (window.kyaRestructureForm) {\n    setTimeout(window.kyaRestructureForm, 200);\n  }\n});",
+ "client_script": "frappe.web_form.after_load = function(){\n  if (window.kyaRestructureForm) {\n    setTimeout(window.kyaRestructureForm, 200);\n  }\n};",
  "web_form_fields": [
   {
    "fieldname": "type_document",

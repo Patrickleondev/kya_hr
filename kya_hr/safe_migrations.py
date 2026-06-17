@@ -67,6 +67,14 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.fix_duplicate_desktop_icons.execute", "Purge icones/links dupliques (Direction Generale x3, etc.)"),
     ("kya_hr.fix_workspace_labels_fr.execute", "Labels FR avec accents (Comptabilite, Employes, Generale)"),
     ("kya_hr.setup_kya_redirects.execute", "Website redirects /desk/people, /desk/hrms, etc."),
+    ("kya_hr.assign_orphan_workspaces.execute", "Donne un workspace d'accueil aux DocTypes orphelins (Visites/Réunions->Direction, Formation/Équipes->RH, Retours->Stock) : sortent du fallback Espace Stagiaires"),
+    ("kya_hr.maintenance.fix_workflow_self_approval.execute", "Self-approval=1 sur les transitions de soumission (l'auteur owner doit pouvoir soumettre sa propre fiche : caissier/comptable/employé)"),
+    ("kya_hr.maintenance.ensure_direction_oversight.execute", "Direction (DG/DGA) : main complète (read/write/create/delete/export) sur récaps compta/marchés/SoP des dashboards Direction"),
+    ("kya_hr.maintenance.sync_workspace_shortcuts.execute", "Rend VISIBLES tous les raccourcis des espaces KYA (bug v16 : shortcut absent du content JSON = non affiché → dashboards Direction invisibles)"),
+    ("kya_hr.maintenance.fix_leave_workflow_conditions.execute", "Conditions workflow congés safe-eval (frappe.get_roles indisponible → crash 'Congé pris' ; remplacé par frappe.db.get_list Has Role)"),
+    ("kya_hr.maintenance.ensure_link_shortcuts.execute", "Chaque lien d'espace a un raccourci (Department/Designation/Formation/Equipe/Templates… + dashboards RH/Stocks/Achats) ; enchaîne sync_workspace_shortcuts"),
+    ("kya_hr.maintenance.setup_supplier_mail_buttons.execute", "Boutons desk « Envoyer au fournisseur » sur Bon Commande KYA + Appel Offre KYA (revue avant envoi, PDF joint, gestion sans email)"),
+    ("kya_hr.maintenance.fix_formation_equipe.execute", "Besoin de Formation : champ équipe = Equipe KYA (pas Département) ; département + chef déduits de l'équipe"),
 ]
 
 AFTER_INSTALL: list[tuple[str, str]] = [

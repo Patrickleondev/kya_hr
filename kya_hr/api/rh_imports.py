@@ -793,23 +793,33 @@ def commit_import(name):
 # ─── TEMPLATE DOWNLOAD ───────────────────────────────────────────────────────
 
 @frappe.whitelist()
-def download_template(type_import):
-    """Retourne un modèle Excel pré-formaté pour le type d'import demandé.
+def download_template(type_import, as_json=0):
+    """Modèle Excel pré-formaté pour le type d'import demandé.
 
-    Returns : { filename, data (base64), mime }
+    Par défaut (clic direct sur un lien / raccourci) : déclenche un VRAI
+    téléchargement de fichier .xlsx (frappe.local.response binaire), sinon le
+    navigateur affichait le base64 brut.
+    Avec `as_json=1` : renvoie { filename, data (base64), mime } pour un appel JS.
     """
-    if type_import == "Presence":
-        return _build_template_presence()
-    elif type_import == "Solde Conges":
-        return _build_template_solde_conges()
-    elif type_import == "Planning Conges":
-        return _build_template_planning_conges()
-    elif type_import == "Fiche Gestion Conges":
-        return _build_template_fiche_gestion_conges()
-    elif type_import == "Gestion Equipe":
-        return _build_template_gestion_equipe()
-    else:
+    builders = {
+        "Presence": _build_template_presence,
+        "Solde Conges": _build_template_solde_conges,
+        "Planning Conges": _build_template_planning_conges,
+        "Fiche Gestion Conges": _build_template_fiche_gestion_conges,
+        "Gestion Equipe": _build_template_gestion_equipe,
+    }
+    builder = builders.get(type_import)
+    if not builder:
         frappe.throw(_("Type d'import inconnu : {0}").format(type_import))
+
+    result = builder()  # { filename, data (base64), mime }
+    if frappe.utils.cint(as_json):
+        return result
+
+    import base64
+    frappe.local.response.filename = result["filename"]
+    frappe.local.response.filecontent = base64.b64decode(result["data"])
+    frappe.local.response.type = "binary"
 
 
 def _build_template_presence():

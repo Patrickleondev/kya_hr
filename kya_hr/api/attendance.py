@@ -403,7 +403,7 @@ def get_team_attendance(team: str, date: str | None = None) -> dict:
     members = frappe.get_all(
         "Employee",
         filters={"department": team, "status": "Active"},
-        fields=["name", "employee_name", "kya_matricule", "designation"],
+        fields=["name", "employee_name", "custom_matricule_kya", "designation"],
     )
 
     rows = []
@@ -419,7 +419,7 @@ def get_team_attendance(team: str, date: str | None = None) -> dict:
         rows.append({
             "employee": m["name"],
             "employee_name": m["employee_name"],
-            "matricule": m["kya_matricule"],
+            "matricule": m["custom_matricule_kya"],
             "designation": m["designation"],
             "on_leave": on_leave,
             "attendance": att_data or {},

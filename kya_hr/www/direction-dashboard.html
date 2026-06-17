@@ -121,6 +121,67 @@ table.kya-table { width: 100%; border-collapse: collapse; font-size: 13px; }
     </div>
   </div>
 
+  {# ── Services transverses (kya_services) : enquêtes, évaluations, tâches ── #}
+  <div class="kya-section">
+    <h3>Services transverses — Enquêtes, Évaluations & Tâches (tous départements)</h3>
+    <div class="kya-summary-grid" style="grid-template-columns:repeat(4,1fr);">
+      <div class="kya-summary-card" style="text-align:center;border-left:4px solid #0d7377;">
+        <h4>Enquêtes de satisfaction</h4>
+        <div class="v" style="font-size:26px;color:#0d7377;">{{ services.form_taux }}%</div>
+        <div style="font-size:11px;color:#667085;">{{ services.form_soumis }}/{{ services.form_invites }} livrées · {{ services.forms_actifs }} active(s)</div>
+      </div>
+      <div class="kya-summary-card" style="text-align:center;border-left:4px solid #1565c0;">
+        <h4>Évaluations</h4>
+        <div class="v" style="font-size:26px;color:#1565c0;">{{ services.evals_taux }}%</div>
+        <div style="font-size:11px;color:#667085;">{{ services.evals_soumis }}/{{ services.evals_total }} complétées · {{ services.evals_attente }} en attente</div>
+      </div>
+      <div class="kya-summary-card" style="text-align:center;border-left:4px solid #6a1b9a;">
+        <h4>Tâches d'équipe</h4>
+        <div class="v" style="font-size:26px;color:#6a1b9a;">{{ services.taches_en_cours }}</div>
+        <div style="font-size:11px;color:#667085;">en cours · {{ services.taches_terminees }} terminée(s) / {{ services.taches_total }}</div>
+      </div>
+      <div class="kya-summary-card" style="text-align:center;border-left:4px solid #c77700;">
+        <h4>Plans trimestriels</h4>
+        <div class="v" style="font-size:26px;color:#c77700;">{{ services.plans_trimestriels }}</div>
+        <div style="font-size:11px;color:#667085;">plan(s) actifs</div>
+      </div>
+    </div>
+    {% if services.form_attente > 0 or services.evals_attente > 0 %}
+    <div style="padding:6px 16px 14px;font-size:12px;color:#b54708;">
+      ⚠ {{ services.form_attente }} enquête(s) et {{ services.evals_attente }} évaluation(s) non encore livrées/complétées — relancer les destinataires.
+    </div>
+    {% endif %}
+  </div>
+
+  {# ── Intégrations externes : visiteurs + réunions ── #}
+  {% if integrations.guest_actif or integrations.meeting_actif %}
+  <div class="kya-section">
+    <h3>Visiteurs &amp; Réunions (apps connectées)</h3>
+    <div class="kya-summary-grid" style="grid-template-columns:repeat(4,1fr);">
+      {% if integrations.guest_actif %}
+      <div class="kya-summary-card" style="text-align:center;border-left:4px solid #00897b;">
+        <h4>Visiteurs aujourd'hui</h4>
+        <div class="v" style="font-size:26px;color:#00897b;">{{ integrations.visites_jour }}</div>
+        <div style="font-size:11px;color:#667085;">{{ integrations.visites_en_cours }} en cours · {{ integrations.visites_semaine }} cette semaine</div>
+      </div>
+      {% endif %}
+      {% if integrations.meeting_actif %}
+      <div class="kya-summary-card" style="text-align:center;border-left:4px solid #3949ab;">
+        <h4>Réunions actives</h4>
+        <div class="v" style="font-size:26px;color:#3949ab;">{{ integrations.reunions_actives }}</div>
+        <div style="font-size:11px;color:#667085;">{{ integrations.reunions_semaine }} cette semaine</div>
+      </div>
+      <div class="kya-summary-card" style="text-align:center;border-left:4px solid #5e35b1;">
+        <h4>Présences réunions (7j)</h4>
+        <div class="v" style="font-size:26px;color:#5e35b1;">{{ integrations.presences_semaine }}</div>
+        <div style="font-size:11px;color:#667085;">scans enregistrés</div>
+      </div>
+      {% endif %}
+    </div>
+    <div style="padding:4px 16px 12px;font-size:11px;color:#98a2b3;">Données synchronisées depuis les applications KYA Guest &amp; Meeting Attendance.</div>
+  </div>
+  {% endif %}
+
   {# ── Graphes (Chart.js) : présence, workflows, caisse ── #}
   <div class="kya-charts">
     <div class="kya-section kya-chart-card">
