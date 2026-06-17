@@ -25,10 +25,14 @@ import frappe
 from kya_hr.maintenance import sync_workspace_shortcuts
 
 KYA_WORKSPACES = [
-    "Direction Generale", "Gestion Equipe", "Espace RH", "Espace Achats",
+    "Gestion Equipe", "Espace RH", "Espace Achats",
     "Espace Stock", "Logistique", "Espace Comptabilite", "Espace Employes",
     "Espace Stagiaires", "Inventaire Sorties Materiel",
 ]
+
+# Espaces qui ne doivent montrer QUE des dashboards (pas de raccourcis DocType /
+# Report bruts). La Direction navigue par tableaux de bord, pas par listes.
+DASHBOARDS_ONLY = ["Direction Generale"]
 
 # Raccourcis dashboards à garantir en plus des liens (label, url).
 EXTRA_URL_SHORTCUTS: dict[str, list[tuple[str, str]]] = {
@@ -151,6 +155,34 @@ def ensure_ws(ws: str, wf_map: dict[str, str]) -> list[str]:
     return created
 
 
+def purge_to_dashboards_only(ws: str) -> int:
+    """Direction : ne garder QUE les raccourcis de type URL (dashboards) ;
+    supprimer les raccourcis DocType/Report (listes brutes) et reconstruire le
+    content JSON avec les seuls dashboards restants."""
+    import json
+    removed = frappe.get_all("Workspace Shortcut",
+                             filters={"parent": ws, "type": ["in", ["DocType", "Report"]]},
+                             pluck="name")
+    for n in removed:
+        frappe.delete_doc("Workspace Shortcut", n, ignore_permissions=True, force=True)
+    # reconstruire le content : header + uniquement les shortcuts URL restants
+    remaining = frappe.get_all("Workspace Shortcut", filters={"parent": ws},
+                               fields=["label"], order_by="idx")
+    content = frappe.db.get_value("Workspace", ws, "content") or "[]"
+    try:
+        blocks = json.loads(content)
+    except Exception:
+        blocks = []
+    # garder tout sauf les blocs shortcut (on les re-pose proprement)
+    blocks = [b for b in blocks if b.get("type") != "shortcut"]
+    for s in remaining:
+        if s.label:
+            blocks.append({"id": frappe.generate_hash(length=10), "type": "shortcut",
+                           "data": {"shortcut_name": s.label, "col": 3}})
+    frappe.db.set_value("Workspace", ws, "content", json.dumps(blocks), update_modified=False)
+    return len(removed)
+
+
 def execute() -> dict:
     wf_map = _webform_doctype_map()
     out = {}
@@ -162,6 +194,11 @@ def execute() -> dict:
         if created:
             out[ws] = created
             total += len(created)
+    for ws in DASHBOARDS_ONLY:
+        if frappe.db.exists("Workspace", ws):
+            n = purge_to_dashboards_only(ws)
+            if n:
+                out[ws] = f"-{n} raccourcis DocType/Report (dashboards only)"
     try:
         frappe.db.commit()
         frappe.clear_cache(doctype="Workspace")
