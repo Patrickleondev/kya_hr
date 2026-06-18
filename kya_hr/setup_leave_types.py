@@ -10,6 +10,7 @@ KYA_LEAVE_TYPES = [
     {"leave_type_name": "Congé Annuel", "max_leaves_allowed": 30, "is_lwp": 0, "is_carry_forward": 1, "max_continuous_days_allowed": 30, "include_holiday": 0},
     {"leave_type_name": "Congé Maternité", "max_leaves_allowed": 98, "is_lwp": 0, "is_carry_forward": 0, "max_continuous_days_allowed": 119, "include_holiday": 1},
     {"leave_type_name": "Congé Paternité", "max_leaves_allowed": 2, "is_lwp": 0, "is_carry_forward": 0, "max_continuous_days_allowed": 2, "include_holiday": 1},
+    {"leave_type_name": "Congé Maladie", "max_leaves_allowed": 0, "is_lwp": 0, "is_carry_forward": 0, "max_continuous_days_allowed": 180, "include_holiday": 1, "allow_negative": 1},
     {"leave_type_name": "Décès Conjoint/Ascendant/Descendant", "max_leaves_allowed": 4, "is_lwp": 0, "is_carry_forward": 0, "max_continuous_days_allowed": 4, "include_holiday": 1},
     {"leave_type_name": "Décès Frère/Sœur", "max_leaves_allowed": 2, "is_lwp": 0, "is_carry_forward": 0, "max_continuous_days_allowed": 2, "include_holiday": 1},
     {"leave_type_name": "Décès Beau-père/Belle-mère", "max_leaves_allowed": 3, "is_lwp": 0, "is_carry_forward": 0, "max_continuous_days_allowed": 3, "include_holiday": 1},
