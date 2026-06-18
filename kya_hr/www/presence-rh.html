@@ -20,7 +20,17 @@
   <div class="kyad-hero" style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
     <div><h1><span class="ico">🕒</span> Présences du jour</h1>
       <p>{{ att_date_label }} — saisie RH des heures d'arrivée &amp; de sortie (remplace le cahier papier ; le système calcule les heures)</p></div>
-    <button class="btn btn-light btn-sm no-print" onclick="window.print()"><i class="bi bi-printer"></i> Imprimer</button>
+    <div class="d-flex gap-2 flex-wrap no-print">
+      <button class="btn btn-light btn-sm" onclick="telechargerModele()"><i class="bi bi-file-earmark-excel"></i> Modèle (mois)</button>
+      <button class="btn btn-light btn-sm" onclick="document.getElementById('imp-file').click()"><i class="bi bi-upload"></i> Importer (mois)</button>
+      <input id="imp-file" type="file" accept=".xlsx,.xls" style="display:none" onchange="importerPresences(this)">
+      <button class="btn btn-light btn-sm" onclick="window.print()"><i class="bi bi-printer"></i> Imprimer</button>
+    </div>
+  </div>
+
+  <div class="no-print" style="margin-bottom:14px;">
+    <input type="search" id="pres-search" class="form-control" placeholder="🔎 Filtrer par nom d'employé ou équipe…" style="max-width:420px;border-radius:10px;" oninput="filtrerPresence()">
+    <span id="pres-count" class="text-muted small ms-2"></span>
   </div>
 
   <div class="kyad-kpis">
@@ -43,13 +53,13 @@
           {% for e in employes %}
           {% if e.equipe != ns.team %}
             {% set ns.team = e.equipe %}
-            <tr class="kyad-team"><td colspan="7">{{ e.equipe or "Sans équipe" }}</td></tr>
+            <tr class="kyad-team" data-teamrow="{{ e.equipe or 'Sans équipe' }}"><td colspan="7">{{ e.equipe or "Sans équipe" }}</td></tr>
           {% endif %}
-          <tr data-emp="{{ e.name }}">
+          <tr data-emp="{{ e.name }}" data-name="{{ (e.employee_name or '')|lower }}" data-team="{{ (e.equipe or '')|lower }}">
             <td><b>{{ e.employee_name }}</b></td>
             <td class="text-muted small">{{ e.equipe or "—" }}</td>
-            <td><input type="time" class="kyad-time in-time" value="{{ e.arrivee }}"></td>
-            <td><input type="time" class="kyad-time out-time" value="{{ e.sortie }}"></td>
+            <td><input type="text" class="kyad-time in-time" inputmode="numeric" maxlength="5" placeholder="HH:MM" value="{{ e.arrivee }}"></td>
+            <td><input type="text" class="kyad-time out-time" inputmode="numeric" maxlength="5" placeholder="HH:MM" value="{{ e.sortie }}"></td>
             <td class="cell-hrs kyad-hrs">{{ e.heures if e.heures else "—" }}</td>
             <td class="cell-status">
               {% if e.etat == "Présent" %}<span class="kyad-badge ok">Présent</span>
@@ -123,5 +133,53 @@
     });
   });
 })();
+
+// ── 24h (HH:MM) : auto-formatage des champs heure (pas d'AM/PM) ──
+document.querySelectorAll('.kyad-time').forEach(function(inp){
+  inp.addEventListener('input', function(){
+    var v=this.value.replace(/[^0-9]/g,'').slice(0,4);
+    if(v.length>=3) v=v.slice(0,2)+':'+v.slice(2);
+    this.value=v;
+  });
+});
+
+// ── Recherche / filtre (liste longue) ──
+function filtrerPresence(){
+  var q=(document.getElementById('pres-search').value||'').toLowerCase().trim();
+  var shown=0, teamVisible={};
+  document.querySelectorAll('tr[data-emp]').forEach(function(r){
+    var ok=!q || (r.dataset.name||'').indexOf(q)>-1 || (r.dataset.team||'').indexOf(q)>-1;
+    r.style.display=ok?'':'none';
+    if(ok){ shown++; teamVisible[(r.dataset.team||'')]=true; }
+  });
+  document.querySelectorAll('tr[data-teamrow]').forEach(function(t){
+    var key=(t.dataset.teamrow||'').toLowerCase();
+    t.style.display=(!q || teamVisible[key])?'':'none';
+  });
+  document.getElementById('pres-count').textContent = q ? (shown+' affiché(s)') : '';
+}
+
+// ── Import mensuel (matrice de ventilation) ──
+function telechargerModele(){ window.location='/api/method/kya_hr.api.rh_imports.download_template?type_import=Presence'; }
+function importerPresences(input){
+  var f=input.files[0]; if(!f) return;
+  var periode="{{ att_date }}".slice(0,7);
+  frappe.show_alert({message:'Téléversement…', indicator:'blue'});
+  var fd=new FormData(); fd.append('file', f); fd.append('is_private', 1);
+  fetch('/api/method/upload_file', {method:'POST', headers:{'X-Frappe-CSRF-Token':(window.frappe&&frappe.csrf_token)||''}, body:fd, credentials:'same-origin'})
+   .then(function(r){return r.json();})
+   .then(function(j){
+     var url=j.message&&j.message.file_url; if(!url) throw new Error('upload échoué');
+     return new Promise(function(res,rej){ frappe.call({method:'kya_hr.api.rh_imports.upload_and_parse', args:{file_url:url, type_import:'Presence', periode:periode}, callback:function(rr){res(rr.message);}, error:rej}); });
+   })
+   .then(function(p){
+     var msg=p.total_lignes+' ligne(s) lue(s), '+p.total_erreurs+' erreur(s).';
+     if(p.total_erreurs && p.errors_preview && p.errors_preview.length) msg+='\n• '+p.errors_preview.join('\n• ');
+     if(!confirm(msg+'\n\nÉcrire les présences du mois ?')){ input.value=''; return; }
+     frappe.call({method:'kya_hr.api.rh_imports.commit_import', args:{name:p.name}, callback:function(){ frappe.show_alert({message:'Import terminé.', indicator:'green'}); setTimeout(function(){location.reload();},900); }, error:function(){ frappe.show_alert({message:'Erreur à l\'écriture', indicator:'red'}); }});
+   })
+   .catch(function(e){ frappe.show_alert({message:'Import échoué : '+(e.message||e), indicator:'red'}); })
+   .finally(function(){ input.value=''; });
+}
 </script>
 {% endblock %}
