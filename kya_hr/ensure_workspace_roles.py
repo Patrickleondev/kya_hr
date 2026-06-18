@@ -36,7 +36,11 @@ import frappe
 WORKSPACE_ROLES: dict[str, list[str]] = {
     # --- Espaces de base (tous les employes / stagiaires) ---
     "Espace Employes": ["Employee"],
-    "Espace Stagiaires": ["Stagiaire", "Maître de Stage", "Responsable des Stagiaires"],
+    # Espace Stagiaires = espace de GESTION (liste des stagiaires, dashboard,
+    # présences). Le stagiaire lui-même n'y accède PAS : son self-service est
+    # dans « Mon Espace » (/mon-espace, is_stagiaire). Décision RH.
+    "Espace Stagiaires": ["Maître de Stage", "Responsable des Stagiaires",
+                          "Responsable RH", "HR Manager", "HR User"],
 
     # --- Espaces metier (par role fonctionnel) ---
     "Gestion Equipe": ["Chef Service", "Chef d'Équipe", "Chef Equipe"],
@@ -85,7 +89,28 @@ NATIVE_WORKSPACE_ROLES: dict[str, list[str]] = {
 }
 
 # Espaces personnels : ne PAS y mettre les global viewers (ils ont le leur).
-PERSONAL_WORKSPACES = {"Espace Employes", "Espace Stagiaires"}
+# Espace Stagiaires n'est plus « personnel » (c'est désormais un espace de
+# gestion) -> les global viewers (DG/DGA) doivent le voir.
+PERSONAL_WORKSPACES = {"Espace Employes"}
+
+# Rôles à RETIRER explicitement d'un workspace (le simple "add" ne nettoie pas).
+# Espace Stagiaires devient un espace de gestion : on retire le rôle Stagiaire
+# qui y avait été ajouté avant la décision RES (le stagiaire passe par Mon Espace).
+WORKSPACE_ROLES_TO_REMOVE: dict[str, list[str]] = {
+    "Espace Stagiaires": ["Stagiaire"],
+}
+
+
+def _remove_role_from_workspace(ws_name: str, role: str) -> bool:
+    """Retire le Has Role d'un workspace s'il existe. True si retiré."""
+    rows = frappe.get_all("Has Role", filters={
+        "parent": ws_name, "parenttype": "Workspace", "role": role,
+    }, pluck="name")
+    if not rows:
+        return False
+    for n in rows:
+        frappe.delete_doc("Has Role", n, ignore_permissions=True, force=True)
+    return True
 
 
 def _add_role_to_workspace(ws_name: str, role: str) -> bool:
@@ -209,6 +234,15 @@ def execute() -> dict:
             if _add_role_to_workspace(ws_name, role):
                 summary["native_restricted"].append(f"{ws_name} <- {role}")
                 summary["total_added"] += 1
+
+    # Retrait des rôles obsolètes (ex. Stagiaire sur Espace Stagiaires)
+    summary["removed"] = []
+    for ws_name, roles in WORKSPACE_ROLES_TO_REMOVE.items():
+        if not frappe.db.exists("Workspace", ws_name):
+            continue
+        for role in roles:
+            if _remove_role_from_workspace(ws_name, role):
+                summary["removed"].append(f"{ws_name} -x- {role}")
 
     # Raccourcis dashboards pour le DG (visibilite totale)
     summary["dg_shortcuts_added"] = _ensure_dg_dashboard_shortcuts()

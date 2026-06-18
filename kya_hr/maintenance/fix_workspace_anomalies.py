@@ -18,6 +18,7 @@ role-gated vue par un compte sans le rôle se grise — c'est voulu (RBAC).
 """
 from __future__ import annotations
 
+import json
 import unicodedata
 
 import frappe
@@ -120,6 +121,20 @@ def _enforce_sidebar_ascii() -> dict:
                 )
                 res["label_fixed"].append(f"{di.label!r} -> {canonical!r}")
 
+        # Workspace : title ET label en ASCII (= name). CRUCIAL : la route desk est
+        # /desk/slug(workspace.title). Un title accentué -> /desk/...-é... -> 404.
+        # L'accent d'affichage passe par la traduction __(title)/__(label) (fr).
+        if frappe.db.exists("Workspace", canonical):
+            cur = frappe.db.get_value("Workspace", canonical, ["title", "label"], as_dict=True)
+            upd = {}
+            if cur.title != canonical:
+                upd["title"] = canonical
+            if cur.label != canonical:
+                upd["label"] = canonical
+            if upd:
+                frappe.db.set_value("Workspace", canonical, upd, update_modified=False)
+                res["label_fixed"].append(f"Workspace {canonical}: {upd}")
+
     # Vérification finale : label.lower() doit être une clé sidebar.lower()
     sidebar_names = {n.lower() for n in frappe.get_all("Workspace Sidebar", pluck="name")}
     for canonical in SIDEBAR_ASCII_CANONICAL:
@@ -162,12 +177,40 @@ def _clean_team_sidebar() -> list:
     return fixed
 
 
+def _ensure_people_landing() -> str:
+    """HRMS définit `app_home = "/desk/people"` mais aucun workspace « People »
+    n'existe dans cette version -> clic sur l'app Frappe HR = 404 (SPA, le redirect
+    serveur ne s'applique pas). On crée un workspace « People » CACHÉ (routable par
+    URL `/desk/people`, absent du nav) qui pointe vers l'espace RH. Idempotent."""
+    if frappe.db.exists("Workspace", "People"):
+        return ""
+    content = json.dumps([
+        {"id": "people-hdr", "type": "header",
+         "data": {"text": "<span style='font-size:20px;font-weight:700'>Ressources Humaines</span>", "col": 12}},
+        {"id": "sc-rh", "type": "shortcut", "data": {"shortcut_name": "Espace RH", "col": 4}},
+        {"id": "sc-hr", "type": "shortcut", "data": {"shortcut_name": "Frappe HR", "col": 4}},
+    ])
+    doc = frappe.new_doc("Workspace")
+    doc.update({
+        "name": "People", "title": "People", "label": "People",
+        "public": 1, "is_hidden": 1, "module": "KYA HR",
+        "icon": "users", "content": content, "sequence_id": 99,
+    })
+    # raccourcis URL vers les espaces RH réels (Link Type "Workspace" interdit ici)
+    doc.append("shortcuts", {"type": "URL", "label": "Espace RH", "url": "/desk/espace-rh", "color": "Blue"})
+    doc.append("shortcuts", {"type": "URL", "label": "Frappe HR", "url": "/desk/frappe-hr", "color": "Grey"})
+    doc.flags.ignore_permissions = True
+    doc.insert()
+    return "Workspace People (caché) créé -> /desk/people OK"
+
+
 def execute() -> dict:
     out = {"parent_fixed": [], "icon_fixed": [], "accent_fixed": [], "roles_added": {}}
 
     # 0) alignement label == sidebar.name == workspace.name en ASCII (fix clic + route 404)
     out["sidebar_ascii"] = _enforce_sidebar_ascii()
     out["team_sidebar"] = _clean_team_sidebar()
+    out["people_landing"] = _ensure_people_landing()
 
     # 1) parent_page NULL -> '' sur tous les workspaces publics
     for w in frappe.get_all("Workspace", filters={"public": 1}, fields=["name", "parent_page"]):
@@ -175,15 +218,9 @@ def execute() -> dict:
             frappe.db.set_value("Workspace", w.name, "parent_page", "", update_modified=False)
             out["parent_fixed"].append(w.name)
 
-    # 2) Gestion Equipe : accent label/title + emoji
-    if frappe.db.exists("Workspace", "Gestion Equipe"):
-        cur = frappe.db.get_value("Workspace", "Gestion Equipe",
-                                  ["label", "title", "icon"], as_dict=True)
-        if cur.label != "Gestion Équipe" or cur.title != "Gestion Équipe":
-            frappe.db.set_value("Workspace", "Gestion Equipe",
-                                {"label": "Gestion Équipe", "title": "Gestion Équipe"},
-                                update_modified=False)
-            out["accent_fixed"].append("Gestion Equipe")
+    # 2) (supprimé) — NE PAS accentuer title/label de Gestion Equipe : le title
+    #    pilote la route /desk/slug(title) ; un accent y crée un 404. L'alignement
+    #    ASCII title/label est fait par _enforce_sidebar_ascii (étape 0).
 
     # 3) icônes emoji cohérentes
     for ws, emoji in ICON_FIXUP.items():

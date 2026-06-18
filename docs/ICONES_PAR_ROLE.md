@@ -30,7 +30,7 @@ Tout ceci est rejoué à chaque `bench migrate` par `fix_workspace_anomalies` (a
 | 💰 | **Espace Comptabilité** | `Espace Comptabilite` | Accounts Manager, Accounts User, Auditeur Interne, Caissier, Comptable, DAAF, DFC, DGA, Directeur Général |
 | 🚚 | **Logistique** | `Logistique` | Chef Service, DG, DGA, DST - Responsable Logistique, Directeur Général, Fleet Manager, Gestionnaire de Flotte, HR Manager, Responsable RH |
 | 👤 | **Espace Employés** | `Espace Employes` | Auditeur Interne, Chargé des Stocks, Chef Equipe, Chef Service, DAAF, DGA, Directeur Général, Employee, HR Manager, HR User, KYA Destinataire Notif, Purchase User, Responsable Achats, Responsable RH, Stagiaire, Stock User, Supérieur Immédiat |
-| 🎓 | **Espace Stagiaires** | `Espace Stagiaires` | Directeur Général, HR Manager, HR User, Maître de Stage, Responsable RH, Responsable des Stagiaires, Stagiaire |
+| 🎓 | **Espace Stagiaires** | `Espace Stagiaires` | Directeur Général, DGA, HR Manager, HR User, Maître de Stage, Responsable RH, Responsable des Stagiaires — _espace de **gestion** ; le stagiaire lui-même n'y accède pas (il utilise « Mon Espace »)_ |
 | 📋 | **KYA Services** | `KYA Services` | KYA Survey Admin |
 | 🤝 | **Gestion Équipe** | `Gestion Equipe` | Chef Equipe, Chef Service, Chef d'Équipe, DGA, DST - Chef Equipe Audit Interne, DST - Chef Equipe Installation, DST - Chef Equipe Offres et Formations, Directeur Général, Responsable RH |
 
@@ -42,8 +42,8 @@ Tout ceci est rejoué à chaque `bench migrate` par `fix_workspace_anomalies` (a
 - 👤 Espace Employés
 
 ### Stagiaire
-- 🎓 Espace Stagiaires
 - 👤 Espace Employés
+- 🏠 **Mon Espace** (`/mon-espace`) — self-service stagiaire (demander une permission, mon bilan de stage). _N'accède PAS à « Espace Stagiaires » qui est un espace de gestion RH._
 
 ### Chef d'équipe
 - 👤 Espace Employés

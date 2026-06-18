@@ -227,10 +227,13 @@ permission_query_conditions = {
     "Employee": "kya_hr.employee_permissions.employee_query",
     "Equipe KYA": "kya_hr.equipe_permissions.equipe_kya_query",
     "Tache Equipe": "kya_hr.equipe_permissions.tache_equipe_query",
+    # Présences : un employé ne voit que les siennes (+ subordonnés directs) ; RH/Manager voient tout
+    "Attendance": "kya_hr.attendance_permissions.attendance_query",
 }
 
 has_permission = {
     "Employee": "kya_hr.employee_permissions.employee_has_permission",
+    "Attendance": "kya_hr.attendance_permissions.attendance_has_permission",
 }
 
 # Rappels quotidiens (anniversaires naissance & ancienneté)
