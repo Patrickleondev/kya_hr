@@ -211,7 +211,7 @@ body { background: var(--kya-bg) !important; }
   <!-- Carburant par mois (quantité seulement) -->
   <div class="kya-panel">
     <div class="kya-panel-head"><h3><i class="bi bi-bar-chart"></i> Quantité carburant par mois (12 mois)</h3></div>
-    <div style="padding: 1rem;"><canvas id="chart-fuel" height="80"></canvas></div>
+    <div style="padding: 1rem; position: relative; height: 300px;"><canvas id="chart-fuel"></canvas></div>
   </div>
 
 </div>
@@ -393,7 +393,7 @@ async function loadFuelChart() {
           backgroundColor: '#8b5cf6',
         }],
       },
-      options: { responsive: true, plugins: { legend: { display: false } } },
+      options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false } } },
     });
   } catch (e) { console.error(e); }
 }

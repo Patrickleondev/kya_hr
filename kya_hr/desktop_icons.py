@@ -13,7 +13,9 @@ WORKSPACE_ICONS = [
     {"label": "Logistique", "link_to": "Logistique", "icon": "🚚", "app": "kya_hr", "idx": 15},
     {"label": "Espace Employés", "link_to": "Espace Employes", "icon": "👤", "app": "kya_hr", "idx": 16},
     {"label": "Espace Stagiaires", "link_to": "Espace Stagiaires", "icon": "🎓", "app": "kya_hr", "idx": 17},
-    {"label": "Inventaire & Sorties Matériel", "link_to": "Inventaire Sorties Materiel", "icon": "🧾", "app": "kya_hr", "idx": 18},
+    # "Inventaire & Sorties Matériel" retiré : redondant avec Espace Stock + le
+    # libellé avec '&' cassait la route (404). Le workspace est masqué (cf.
+    # fix_workspace_anomalies). Inventaire/PV sortie restent dans Espace Stock.
     {"label": "KYA Services", "link_to": "KYA Services", "icon": "📋", "app": "kya_services", "idx": 19},
 ]
 

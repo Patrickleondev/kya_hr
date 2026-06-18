@@ -83,6 +83,22 @@ def execute() -> dict:
                 frappe.db.set_value("Workspace", ws, "icon", emoji, update_modified=False)
                 out["icon_fixed"].append(ws)
 
+    # 3b) Desktop Icon Gestion Équipe : emoji (était 'users' -> tuile « G » grise)
+    for di in frappe.get_all("Desktop Icon", filters={"label": "Gestion Équipe"}, pluck="name"):
+        if frappe.db.get_value("Desktop Icon", di, "icon") != "🤝":
+            frappe.db.set_value("Desktop Icon", di, "icon", "🤝", update_modified=False)
+            out["icon_fixed"].append("Desktop Icon Gestion Équipe")
+
+    # 3c) « Inventaire & Sorties Matériel » : retirer l'icône (route 404 via '&',
+    #     redondant avec Espace Stock) + masquer le workspace.
+    for di in frappe.get_all("Desktop Icon", filters={"label": ["like", "Inventaire%"]}, pluck="name"):
+        frappe.delete_doc("Desktop Icon", di, force=1, ignore_permissions=True)
+        out.setdefault("removed", []).append(di)
+    if frappe.db.exists("Workspace", "Inventaire Sorties Materiel"):
+        if not frappe.db.get_value("Workspace", "Inventaire Sorties Materiel", "is_hidden"):
+            frappe.db.set_value("Workspace", "Inventaire Sorties Materiel", "is_hidden", 1, update_modified=False)
+            out.setdefault("removed", []).append("Workspace Inventaire masqué")
+
     # 4) élargir l'accès des workspaces aux rôles doublons (fix « plante au clic »)
     for ws, roles in WORKSPACE_EXTRA_ROLES.items():
         added = _ensure_workspace_roles(ws, roles)
