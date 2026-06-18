@@ -3,83 +3,63 @@
 {% block title %}Présences du jour — RH{% endblock %}
 
 {% block page_content %}
+<link rel="stylesheet" href="/assets/kya_hr/css/kya_dashboard.css">
 <style>
-.kya-pres-page { max-width: 1080px; margin: 18px auto 32px; padding: 0 16px; font-family: Arial, sans-serif; color: #18212f; }
-.kya-letterhead { border: 1px solid #d9dee7; border-radius: 6px; overflow: hidden; background: #fff; }
-.kya-title-band { background: #0f3d68; color: #fff; padding: 16px 22px; display: flex; justify-content: space-between; gap: 16px; align-items: center; flex-wrap: wrap; }
-.kya-title-band h2 { margin: 0; font-size: 20px; }
-.kya-title-band span { font-size: 13px; opacity: .92; }
-.kya-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 18px 0; }
-.kya-kpi { border: 1px solid #d9dee7; border-radius: 6px; background: #fff; padding: 12px 14px; text-align: center; }
-.kya-kpi .label { color: #667085; font-size: 11px; text-transform: uppercase; }
-.kya-kpi .value { font-size: 24px; font-weight: 800; margin-top: 4px; }
-.kya-kpi.p .value { color: #027a48; } .kya-kpi.r .value { color: #b54708; }
-.kya-kpi.a .value { color: #b42318; } .kya-kpi.n .value { color: #98a2b3; }
-.kya-section { margin-top: 8px; border: 1px solid #d9dee7; border-radius: 6px; background: #fff; overflow: hidden; }
-.kya-table-wrap { overflow-x: auto; }
-table.kya-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.kya-table th, .kya-table td { padding: 10px 12px; border-bottom: 1px solid #edf0f5; text-align: left; vertical-align: middle; }
-.kya-table th { background: #fafbfc; color: #344054; font-weight: 700; position: sticky; top: 0; }
-.kya-badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #eef2f7; color: #667085; }
-.kya-badge.p { background: #d1fadf; color: #027a48; } .kya-badge.r { background: #fef0c7; color: #b54708; }
-.kya-badge.a { background: #fee4e2; color: #b42318; }
-.kya-acts { display: flex; gap: 6px; }
-.kya-pbtn { border: 1px solid #d8dee8; background: #fff; border-radius: 6px; padding: 6px 12px; font-weight: 700; font-size: 12px; cursor: pointer; transition: all .12s; }
-.kya-pbtn:hover { filter: brightness(.96); }
-.kya-pbtn.p { color: #027a48; border-color: #a6f4c5; } .kya-pbtn.p.on { background: #027a48; color: #fff; }
-.kya-pbtn.r { color: #b54708; border-color: #fec84b; } .kya-pbtn.r.on { background: #b54708; color: #fff; }
-.kya-pbtn.a { color: #b42318; border-color: #fda29b; } .kya-pbtn.a.on { background: #b42318; color: #fff; }
-.kya-pbtn:disabled { opacity: .5; cursor: wait; }
-.kya-team-row td { background: #f2f6fb; font-weight: 700; color: #0f3d68; }
-@media (max-width: 760px) { .kya-grid { grid-template-columns: 1fr 1fr; } .kya-title-band { display:block; } }
-@media print { .kya-acts, .navbar, header, .web-footer { display: none !important; } }
+.kyad-pres { max-width: 1180px; margin: 18px auto 40px; padding: 0 16px; }
+.kyad-pres .kyad-hero .ico { font-size: 1.6rem; }
+.kyad-time { width: 104px; border: 1px solid var(--kyad-border); border-radius: 8px; padding: 5px 8px; font-size: .85rem; }
+.kyad-ok { background: var(--kyad-green); color:#fff; border:none; border-radius:8px; padding:6px 11px; font-weight:700; font-size:.8rem; cursor:pointer; }
+.kyad-abs { background:#fff; color: var(--kyad-red); border:1px solid #fecaca; border-radius:8px; padding:6px 11px; font-weight:700; font-size:.8rem; cursor:pointer; }
+.kyad-ok:disabled,.kyad-abs:disabled { opacity:.5; cursor:wait; }
+.kyad-team td { background:#eef2ff; font-weight:800; color: var(--kyad-navy); }
+.kyad-hrs { font-weight:800; }
+@media print { .no-print { display:none !important; } .kyad-time { border:none; } }
 </style>
 
-<div class="kya-pres-page">
-  <div class="kya-letterhead">
-    <div class="kya-title-band">
-      <div><h2>Présences du jour</h2><span>{{ att_date_label }} — marquage RH (remplace le cahier papier)</span></div>
-      <button class="kya-pbtn" onclick="window.print()">Imprimer la feuille</button>
-    </div>
+<div class="kyad kyad-pres">
+  <div class="kyad-hero" style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
+    <div><h1><span class="ico">🕒</span> Présences du jour</h1>
+      <p>{{ att_date_label }} — saisie RH des heures d'arrivée &amp; de sortie (remplace le cahier papier ; le système calcule les heures)</p></div>
+    <button class="btn btn-light btn-sm no-print" onclick="window.print()"><i class="bi bi-printer"></i> Imprimer</button>
   </div>
 
-  <div class="kya-grid">
-    <div class="kya-kpi"><div class="label">Effectif</div><div class="value">{{ stats.total }}</div></div>
-    <div class="kya-kpi p"><div class="label">Présents</div><div class="value" id="k-pres">{{ stats.presents }}</div></div>
-    <div class="kya-kpi r"><div class="label">Retards</div><div class="value" id="k-ret">{{ stats.retards }}</div></div>
-    <div class="kya-kpi a"><div class="label">Absents</div><div class="value" id="k-abs">{{ stats.absents }}</div></div>
-    <div class="kya-kpi n"><div class="label">Non marqués</div><div class="value" id="k-non">{{ stats.non_marques }}</div></div>
+  <div class="kyad-kpis">
+    <div class="kyad-kpi"><div class="kyad-kpi-value">{{ stats.total }}</div><div class="kyad-kpi-label">Effectif</div></div>
+    <div class="kyad-kpi is-green"><div class="kyad-kpi-value" id="k-pres">{{ stats.presents }}</div><div class="kyad-kpi-label">Présents</div></div>
+    <div class="kyad-kpi is-orange"><div class="kyad-kpi-value" id="k-ret">{{ stats.retards }}</div><div class="kyad-kpi-label">Retards</div></div>
+    <div class="kyad-kpi is-red"><div class="kyad-kpi-value" id="k-abs">{{ stats.absents }}</div><div class="kyad-kpi-label">Absents</div></div>
+    <div class="kyad-kpi is-blue"><div class="kyad-kpi-value" id="k-hrs">{{ stats.heures }}</div><div class="kyad-kpi-label">Heures totales</div></div>
+    <div class="kyad-kpi"><div class="kyad-kpi-value" id="k-non">{{ stats.non_marques }}</div><div class="kyad-kpi-label">Non marqués</div></div>
   </div>
 
-  <div class="kya-section">
-    <div class="kya-table-wrap">
-      <table class="kya-table">
-        <thead>
-          <tr><th>Employé</th><th>Équipe</th><th>Département</th><th>Statut</th><th>Marquer</th></tr>
-        </thead>
+  <div class="kyad-panel">
+    <div class="kyad-panel-head"><h3>Feuille de présence</h3>
+      <span class="text-muted small">Saisir l'arrivée le matin, la sortie le soir, puis ✓ Valider</span></div>
+    <div style="overflow-x:auto;">
+      <table class="kyad-table" style="min-width:860px;">
+        <thead><tr><th>Employé</th><th>Équipe</th><th>Arrivée</th><th>Sortie</th><th>Heures</th><th>Statut</th><th class="no-print">Action</th></tr></thead>
         <tbody>
           {% set ns = namespace(team='__init__') %}
           {% for e in employes %}
           {% if e.equipe != ns.team %}
             {% set ns.team = e.equipe %}
-            <tr class="kya-team-row"><td colspan="5">{{ e.equipe or "Sans équipe" }}</td></tr>
+            <tr class="kyad-team"><td colspan="7">{{ e.equipe or "Sans équipe" }}</td></tr>
           {% endif %}
           <tr data-emp="{{ e.name }}">
             <td><b>{{ e.employee_name }}</b></td>
-            <td>{{ e.equipe or "—" }}</td>
-            <td>{{ e.departement or "—" }}</td>
+            <td class="text-muted small">{{ e.equipe or "—" }}</td>
+            <td><input type="time" class="kyad-time in-time" value="{{ e.arrivee }}"></td>
+            <td><input type="time" class="kyad-time out-time" value="{{ e.sortie }}"></td>
+            <td class="cell-hrs kyad-hrs">{{ e.heures if e.heures else "—" }}</td>
             <td class="cell-status">
-              {% if e.etat == "Présent" %}<span class="kya-badge p">Présent</span>
-              {% elif e.etat == "Retard" %}<span class="kya-badge r">Retard</span>
-              {% elif e.etat == "Absent" %}<span class="kya-badge a">Absent</span>
-              {% else %}<span class="kya-badge">—</span>{% endif %}
+              {% if e.etat == "Présent" %}<span class="kyad-badge ok">Présent</span>
+              {% elif e.etat == "Retard" %}<span class="kyad-badge wait">Retard</span>
+              {% elif e.etat == "Absent" %}<span class="kyad-badge danger">Absent</span>
+              {% else %}<span class="kyad-badge muted">—</span>{% endif %}
             </td>
-            <td>
-              <div class="kya-acts">
-                <button class="kya-pbtn p {% if e.etat=='Présent' %}on{% endif %}" data-s="Present">Présent</button>
-                <button class="kya-pbtn r {% if e.etat=='Retard' %}on{% endif %}" data-s="Retard">Retard</button>
-                <button class="kya-pbtn a {% if e.etat=='Absent' %}on{% endif %}" data-s="Absent">Absent</button>
-              </div>
+            <td class="no-print" style="white-space:nowrap;">
+              <button class="kyad-ok" data-act="valider">✓ Valider</button>
+              <button class="kyad-abs" data-act="absent">Absent</button>
             </td>
           </tr>
           {% endfor %}
@@ -87,48 +67,59 @@ table.kya-table { width: 100%; border-collapse: collapse; font-size: 13px; }
       </table>
     </div>
   </div>
-  <p style="color:#667085;font-size:12px;margin-top:10px;">Le marquage est tracé (qui, quand). Présent/Retard = présence ; Retard signale une arrivée tardive.</p>
+  <p class="text-muted small mt-2">Le marquage est tracé (qui, quand). Le retard est calculé selon l'heure d'arrivée vs l'horaire de l'employé ; les heures travaillées = sortie − arrivée.</p>
 </div>
 
 <script>
 (function() {
   const DATE = "{{ att_date }}";
   function recount() {
-    let p=0,r=0,a=0,n=0;
-    document.querySelectorAll('tr[data-emp] .cell-status .kya-badge').forEach(function(b){
-      const t=b.textContent.trim();
-      if(t==='Présent')p++; else if(t==='Retard')r++; else if(t==='Absent')a++; else n++;
+    let p=0,r=0,a=0,n=0,h=0;
+    document.querySelectorAll('tr[data-emp]').forEach(function(row){
+      const t=(row.querySelector('.cell-status .kyad-badge')||{}).textContent;
+      const s=(t||'').trim();
+      if(s==='Présent')p++; else if(s==='Retard')r++; else if(s==='Absent')a++; else n++;
+      const hv=parseFloat((row.querySelector('.cell-hrs').textContent||'').replace(',','.'));
+      if(!isNaN(hv)) h+=hv;
     });
     document.getElementById('k-pres').textContent=p;
     document.getElementById('k-ret').textContent=r;
     document.getElementById('k-abs').textContent=a;
     document.getElementById('k-non').textContent=n;
+    document.getElementById('k-hrs').textContent=Math.round(h*10)/10;
   }
-  document.querySelectorAll('tr[data-emp] .kya-pbtn').forEach(function(btn){
+  function setStatus(row, etat){
+    const map={'Présent':'ok','Retard':'wait','Absent':'danger'};
+    row.querySelector('.cell-status').innerHTML='<span class="kyad-badge '+(map[etat]||'muted')+'">'+(etat||'—')+'</span>';
+  }
+  document.querySelectorAll('tr[data-emp] [data-act]').forEach(function(btn){
     btn.addEventListener('click', function(){
-      const row = btn.closest('tr[data-emp]');
-      const emp = row.getAttribute('data-emp');
-      const status = btn.getAttribute('data-s');
-      const group = row.querySelectorAll('.kya-pbtn');
-      group.forEach(function(b){ b.disabled = true; });
-      frappe.call({
-        method: 'kya_hr.api.attendance.mark_status',
-        args: { employee: emp, status: status, date: DATE },
-        callback: function(res) {
-          group.forEach(function(b){ b.disabled = false; b.classList.remove('on'); });
-          btn.classList.add('on');
-          const cls = status==='Present'?'p':(status==='Retard'?'r':'a');
-          const lbl = status==='Present'?'Présent':status;
-          row.querySelector('.cell-status').innerHTML =
-            '<span class="kya-badge '+cls+'">'+lbl+'</span>';
-          recount();
-          frappe.show_alert({message: row.querySelector('b').textContent+' : '+lbl, indicator:'green'}, 3);
+      const row=btn.closest('tr[data-emp]'), emp=row.getAttribute('data-emp');
+      const act=btn.getAttribute('data-act');
+      const btns=row.querySelectorAll('[data-act]'); btns.forEach(b=>b.disabled=true);
+      const done=()=>btns.forEach(b=>b.disabled=false);
+      if(act==='absent'){
+        frappe.call({method:'kya_hr.api.attendance.mark_absent', args:{employee:emp,date:DATE},
+          callback:function(){ done(); setStatus(row,'Absent'); row.querySelector('.cell-hrs').textContent='—'; recount();
+            frappe.show_alert({message:row.querySelector('b').textContent+' : Absent', indicator:'orange'},3); },
+          error:function(){ done(); frappe.show_alert({message:'Erreur — droit RH requis', indicator:'red'},5); }});
+        return;
+      }
+      const arr=row.querySelector('.in-time').value, dep=row.querySelector('.out-time').value;
+      if(!arr){ done(); frappe.show_alert({message:'Saisir au moins l\'heure d\'arrivée', indicator:'orange'},4); return; }
+      frappe.call({method:'kya_hr.api.attendance.mark_arrival', args:{employee:emp, arrival_time:arr, date:DATE},
+        callback:function(r1){
+          const late=r1.message&&(r1.message.lateness_min>0);
+          const finish=function(hrs){ done(); setStatus(row, late?'Retard':'Présent');
+            if(hrs!=null) row.querySelector('.cell-hrs').textContent=Math.round(hrs*100)/100;
+            recount(); frappe.show_alert({message:row.querySelector('b').textContent+' : '+(late?'Retard':'Présent'), indicator:'green'},3); };
+          if(dep){
+            frappe.call({method:'kya_hr.api.attendance.mark_departure', args:{employee:emp, departure_time:dep, date:DATE},
+              callback:function(r2){ finish(r2.message&&r2.message.working_hours); },
+              error:function(){ finish(null); }});
+          } else { finish(null); }
         },
-        error: function() {
-          group.forEach(function(b){ b.disabled = false; });
-          frappe.show_alert({message:'Erreur — droit RH requis pour marquer', indicator:'red'}, 5);
-        }
-      });
+        error:function(){ done(); frappe.show_alert({message:'Erreur — droit RH requis pour marquer', indicator:'red'},5); }});
     });
   });
 })();

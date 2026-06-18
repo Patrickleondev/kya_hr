@@ -28,7 +28,8 @@ def get_context(context):
 
     att_date = today()
     employes = []
-    stats = {"total": 0, "presents": 0, "retards": 0, "absents": 0, "non_marques": 0}
+    stats = {"total": 0, "presents": 0, "retards": 0, "absents": 0,
+             "non_marques": 0, "heures": 0.0}
 
     try:
         rows = frappe.db.sql(
@@ -37,10 +38,13 @@ def get_context(context):
                 e.name, e.employee_name,
                 COALESCE(e.custom_kya_equipe, '') AS equipe,
                 COALESCE(e.department, '') AS departement,
-                a.status AS att_status, a.late_entry AS att_late
+                a.status AS att_status, a.late_entry AS att_late,
+                a.in_time AS in_time, a.out_time AS out_time,
+                a.working_hours AS working_hours
             FROM `tabEmployee` e
             LEFT JOIN `tabAttendance` a
                 ON a.employee = e.name AND a.attendance_date = %(d)s
+                AND a.docstatus != 2
             WHERE e.status='Active'
             ORDER BY e.custom_kya_equipe, e.employee_name
             """,
@@ -48,7 +52,13 @@ def get_context(context):
         )
         employes = rows
         stats["total"] = len(rows)
+        total_hours = 0.0
         for r in rows:
+            # heures d'arrivée / sortie (HH:MM) pour préremplir les champs time
+            r.arrivee = str(r.in_time)[11:16] if r.in_time else ""
+            r.sortie = str(r.out_time)[11:16] if r.out_time else ""
+            r.heures = round(r.working_hours or 0, 2)
+            total_hours += float(r.working_hours or 0)
             if r.att_status == "Absent":
                 stats["absents"] += 1
                 r.etat = "Absent"
@@ -61,6 +71,7 @@ def get_context(context):
             else:
                 stats["non_marques"] += 1
                 r.etat = ""
+        stats["heures"] = round(total_hours, 1)
     except Exception:
         frappe.log_error(frappe.get_traceback(), "presence-rh: chargement")
 
