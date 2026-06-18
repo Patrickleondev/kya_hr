@@ -18,7 +18,34 @@ role-gated vue par un compte sans le rôle se grise — c'est voulu (RBAC).
 """
 from __future__ import annotations
 
+import unicodedata
+
 import frappe
+
+# --- Icônes « mortes au clic » / 404 : alignement label <-> Sidebar.name <-> Workspace.name ---
+# Le frontend résout une Desktop Icon en DEUX temps :
+#  1) trouver le sidebar : boot.workspace_sidebar_item[ icon.label.toLowerCase() ]
+#     où la clé est `Workspace Sidebar.name.lower()` -> il faut label==sidebar.name ;
+#  2) construire la route : "/desk/" + slug(workspace.name) (et certains chemins
+#     slugifient le label/sidebar) -> la route DOIT être celle du workspace.
+# Conséquence : si on met un ACCENT dans le label, on doit aussi accentuer le
+# name du sidebar (étape 1), ce qui accentue la route (étape 2) -> /desk/gestion-équipe
+# alors que le workspace est `Gestion Equipe` (route gestion-equipe) -> 404.
+#
+# L'invariant des icônes qui marchent (Espace RH, Logistique...) :
+#     icon.label == Workspace Sidebar.name == Workspace.name   (tout en ASCII)
+# On l'impose donc aux 3 espaces KYA dont le name de workspace est sans accent.
+# L'accent à l'AFFICHAGE est rendu par la traduction __(label) (cf. fr.csv) ;
+# en prod (langue française) « Gestion Equipe » s'affiche « Gestion Équipe ».
+#
+# Précautions prod : SQL binaire (la collation MariaDB est accent-insensible donc
+# rename_doc refuse en croyant la cible déjà là), aucune FK sur Sidebar.name
+# (vérifié), idempotent, + vérification finale tracée.
+SIDEBAR_ASCII_CANONICAL = [
+    "Direction Generale",
+    "Gestion Equipe",
+    "Espace Employes",
+]
 
 # workspace name -> emoji icon cohérent (aligné sur desktop_icons.py)
 ICON_FIXUP = {
@@ -57,8 +84,90 @@ def _ensure_workspace_roles(ws: str, roles: list[str]) -> list[str]:
     return added
 
 
+def _enforce_sidebar_ascii() -> dict:
+    """Force le `name` des Workspace Sidebar KYA en ASCII (= Workspace.name = label),
+    et le `label` des Desktop Icons en ASCII, pour clic ET route valides.
+    Idempotent et binaire-sûr."""
+    res = {"sidebar_renamed": [], "label_fixed": [], "verified_ok": [], "verify_warn": []}
+    for canonical in SIDEBAR_ASCII_CANONICAL:
+        canonical = unicodedata.normalize("NFC", canonical)  # ASCII -> inchangé
+        # collation accent-insensible : matche la ligne quelle que soit sa forme
+        rows = frappe.db.sql(
+            "SELECT name FROM `tabWorkspace Sidebar` WHERE name=%s", (canonical,)
+        )
+        if len(rows) == 1:
+            current = rows[0][0]
+            if current != canonical:  # encore accentué -> on remet en ASCII (binaire)
+                frappe.db.sql(
+                    "UPDATE `tabWorkspace Sidebar` SET name=%s WHERE name=%s",
+                    (canonical, canonical),
+                )
+                frappe.db.sql(
+                    "UPDATE `tabWorkspace Sidebar Item` SET parent=%s WHERE parent=%s",
+                    (canonical, canonical),
+                )
+                res["sidebar_renamed"].append(f"{current!r} -> {canonical!r}")
+        elif len(rows) > 1:
+            res["verify_warn"].append(f"{canonical}: {len(rows)} sidebars ambigus")
+
+        # Desktop Icon : label en ASCII (collation matche l'accentué existant)
+        for di in frappe.db.sql(
+            "SELECT name, label FROM `tabDesktop Icon` WHERE label=%s", (canonical,), as_dict=True
+        ):
+            if di.label != canonical:
+                frappe.db.sql(
+                    "UPDATE `tabDesktop Icon` SET label=%s WHERE name=%s", (canonical, di.name)
+                )
+                res["label_fixed"].append(f"{di.label!r} -> {canonical!r}")
+
+    # Vérification finale : label.lower() doit être une clé sidebar.lower()
+    sidebar_names = {n.lower() for n in frappe.get_all("Workspace Sidebar", pluck="name")}
+    for canonical in SIDEBAR_ASCII_CANONICAL:
+        if canonical.lower() in sidebar_names:
+            res["verified_ok"].append(canonical)
+        else:
+            res["verify_warn"].append(f"{canonical}: clé {canonical.lower()!r} introuvable")
+    return res
+
+
+def _clean_team_sidebar() -> list:
+    """Nettoie le sidebar Gestion Equipe : retire les liens Workspace en double
+    (self-link dupliqué) et répare l'item « Dashboard Equipe » dont l'URL était
+    vide (-> /kya-dashboard-equipe). Idempotent."""
+    fixed = []
+    if not frappe.db.exists("Workspace Sidebar", "Gestion Equipe"):
+        return fixed
+    doc = frappe.get_doc("Workspace Sidebar", "Gestion Equipe")
+    seen, keep, changed = set(), [], False
+    for it in doc.items:
+        # réparer l'URL du dashboard équipe
+        if it.link_type == "URL" and (it.label or "").strip().lower().startswith("dashboard") and not (it.url or "").strip():
+            it.url = "/kya-dashboard-equipe"
+            changed = True
+            fixed.append("Dashboard Equipe URL -> /kya-dashboard-equipe")
+        # dédoublonner les liens (par type/cible)
+        key = (it.type, it.link_type, it.link_to, it.url, it.label)
+        if it.type == "Link" and key in seen:
+            changed = True
+            fixed.append(f"doublon retiré: {it.label}")
+            continue
+        seen.add(key)
+        keep.append(it)
+    if changed:
+        doc.items = keep
+        for i, it in enumerate(doc.items, 1):
+            it.idx = i
+        doc.flags.ignore_permissions = True
+        doc.save()
+    return fixed
+
+
 def execute() -> dict:
     out = {"parent_fixed": [], "icon_fixed": [], "accent_fixed": [], "roles_added": {}}
+
+    # 0) alignement label == sidebar.name == workspace.name en ASCII (fix clic + route 404)
+    out["sidebar_ascii"] = _enforce_sidebar_ascii()
+    out["team_sidebar"] = _clean_team_sidebar()
 
     # 1) parent_page NULL -> '' sur tous les workspaces publics
     for w in frappe.get_all("Workspace", filters={"public": 1}, fields=["name", "parent_page"]):

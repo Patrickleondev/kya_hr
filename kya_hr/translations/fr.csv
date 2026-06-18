@@ -8289,7 +8289,7 @@ Plaid Access Token,Jeton d'accès plaid
 Plaid Client ID,ID client plaid
 Plaid Environment,Environnement écossais
 Plaid Link Failed,Liaison Plaid échouée
-Plaid Link Refresh Required,étualisation de liaison Plaid requise
+Plaid Link Refresh Required,Actualisation de liaison Plaid requise
 Plaid Link Updated,Liaison Plaid mise à jour
 Plaid Secret,Secret de plaid
 Plaid Settings,Paramètres de plaid
@@ -9523,9 +9523,9 @@ Referrer Name,Nom du référant
 Referring Practitioner,Praticien référant
 Reflections,Réflexions
 Reflexes,Les réflexes
-Refresh,étualiser
-Refresh Google Sheet,étualiser Google Sheet
-Refresh Plaid Link,étualiser le lien Plaid
+Refresh,Actualiser
+Refresh Google Sheet,Actualiser Google Sheet
+Refresh Plaid Link,Actualiser le lien Plaid
 Refresh Token,Jeton de Rafraîchissement
 Refuelling Details,Détails de Ravitaillement
 Regards,Cordialement
@@ -13708,3 +13708,6 @@ you must select Capital Work in Progress Account in accounts table,vous devez s�
 {} {} is already linked with {} {},{} {} est déjà lié avec {} {}
 {} {} is not affecting bank account {},{} {} n'affecte pas le compte bancaire {}
 {} {} open for this position.,{} {} ouvert pour cette position.
+Direction Generale,Direction Générale
+Gestion Equipe,Gestion Équipe
+Espace Employes,Espace Employés

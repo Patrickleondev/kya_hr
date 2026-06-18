@@ -102,6 +102,26 @@ body { background: var(--kya-bg); font-family: 'Segoe UI', sans-serif; margin: 0
 .dt-stat.s-rejected .dt-stat-val { color: var(--kya-red); }
 .dt-stat.s-total .dt-stat-val { color: var(--kya-blue); }
 
+/* ─── Panneau Réunions (rendu dédié) ───────────────────────────── */
+.reu-panel { margin-top: 16px; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; overflow: hidden; }
+.reu-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  padding: 14px 18px; background: linear-gradient(135deg,#eff6ff,#f8fafc); border-bottom: 1px solid #e2e8f0; }
+.reu-title { font-size: 15px; font-weight: 800; color: #0054A6; }
+.reu-sub { font-size: 12px; color: #64748b; margin-top: 2px; }
+.reu-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.reu-actions .btn { font-size: 11px; }
+.reu-kpis { display: grid; grid-template-columns: repeat(auto-fit,minmax(96px,1fr)); gap: 10px; padding: 16px 18px; }
+.reu-kpi { text-align: center; background: #f8fafc; border: 1px solid #eef2f7; border-radius: 10px; padding: 10px 6px; }
+.reu-kpi-val { font-size: 1.5rem; font-weight: 800; line-height: 1; }
+.reu-kpi-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .02em; color: #64748b; margin-top: 4px; }
+.reu-recents { padding: 0 18px 16px; }
+.reu-recents-title { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 6px; }
+.reu-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.reu-table td { padding: 7px 6px; border-top: 1px solid #f1f5f9; }
+.reu-table tr:first-child td { border-top: none; }
+.reu-table a { color: var(--kya-blue); font-weight: 600; text-decoration: none; }
+.reu-table a:hover { text-decoration: underline; }
+
 /* ─── Recent Records mini-list ──────────────────────────────────── */
 .dt-recents { margin-top: 8px; }
 .dt-rec-row {
@@ -377,9 +397,10 @@ function renderModules(modules) {
       </li>
     `);
 
-    // Pane
-    const dtCards = (mod.doctypes || []).map(dt => renderDtCard(modKey, dt)).join('');
-    const chartIds = (mod.doctypes || []).map(dt => `chart-${modKey}-${dt.name.replace(/\s+/g,'_')}`);
+    // Pane — les réunions ont un rendu dédié (renderModuleExtra), pas la carte
+    // générique « Total/Attente/Approuvé/Rejeté » + camembert (inadapté aux réunions).
+    const isReunions = modKey === 'reunions';
+    const dtCards = isReunions ? '' : (mod.doctypes || []).map(dt => renderDtCard(modKey, dt)).join('');
 
     content.insertAdjacentHTML('beforeend', `
       <div class="tab-pane fade ${isFirst ? 'show active' : ''}" id="${paneId}" role="tabpanel">
@@ -401,13 +422,11 @@ function renderModules(modules) {
             </div>
           </div>
 
-          <div class="dt-grid">
-            ${dtCards}
-          </div>
+          ${isReunions ? '' : `<div class="dt-grid">${dtCards}</div>`}
 
           ${renderModuleExtra(modKey, mod)}
 
-          <div class="chart-row">
+          ${isReunions ? '' : `<div class="chart-row">
             ${(mod.doctypes||[]).map(dt => {
               const cId = `chart-${modKey}-${dt.name.replace(/\s+/g,'_')}`;
               return `
@@ -416,7 +435,7 @@ function renderModules(modules) {
                   <div class="chart-wrap"><canvas id="${cId}"></canvas></div>
                 </div>`;
             }).join('')}
-          </div>
+          </div>`}
         </div>
       </div>
     `);
@@ -432,21 +451,50 @@ function renderModules(modules) {
 
 function renderModuleExtra(modKey, mod) {
   if (modKey !== 'reunions') return '';
-  const dt = (mod.doctypes || []).find(item => item.name === 'KYA Reunion Meeting');
-  const s = (dt && dt.reunion_summary) || {};
+  const dt = (mod.doctypes || []).find(item => item.name === 'KYA Reunion Meeting') || {};
+  const s = dt.reunion_summary || {};
+  const total = fmtN(dt.total || 0);
+
+  // Indicateurs propres aux réunions (pas de Attente/Approuvé/Rejeté de soumission)
+  const kpi = (val, lbl, color) => `
+    <div class="reu-kpi">
+      <div class="reu-kpi-val" style="color:${color}">${fmtN(val||0)}</div>
+      <div class="reu-kpi-lbl">${lbl}</div>
+    </div>`;
+
+  // Dernières réunions
+  const recents = (dt.recents || []).slice(0, 6).map(r => `
+    <tr>
+      <td><a href="${r.pdf_url || r.desk_url || (dt.list_url + '/' + r.name)}" target="_blank" title="Ouvrir la fiche">${r.name}</a></td>
+      <td>${statusBadge(r.class, r.status)}</td>
+      <td style="text-align:right;color:#64748b;white-space:nowrap;">${fmtD(r.date)}</td>
+    </tr>`).join('') ||
+    `<tr><td colspan="3" style="text-align:center;color:#94a3b8;padding:14px;">Aucune réunion enregistrée pour le moment.</td></tr>`;
+
   return `
-    <div class="dt-card" style="margin-top:16px;">
-      <div class="dt-name">
-        Synthèse réunions centralisées
-        <a href="/app/kya-reunion-sync-log" target="_blank"><i class="bi bi-clock-history"></i> Historique sync</a>
+    <div class="reu-panel">
+      <div class="reu-head">
+        <div>
+          <div class="reu-title"><i class="bi bi-calendar2-check"></i> Réunions &amp; Émargements</div>
+          <div class="reu-sub">${total} réunion(s) centralisée(s)</div>
+        </div>
+        <div class="reu-actions">
+          <a href="${dt.form_url ? dt.form_url + '/new' : '/app/kya-reunion-meeting/new'}" class="btn btn-sm btn-outline-primary"><i class="bi bi-plus-lg"></i> Nouvelle réunion</a>
+          <a href="${dt.list_url || '/app/kya-reunion-meeting'}" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="bi bi-list-ul"></i> Toutes</a>
+          <a href="/app/kya-reunion-sync-log" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="bi bi-clock-history"></i> Historique sync</a>
+        </div>
       </div>
-      <div class="dt-stats">
-        <div class="dt-stat s-total"><div class="dt-stat-val">${fmtN(s.participants||0)}</div><div class="dt-stat-lbl">Participants</div></div>
-        <div class="dt-stat s-approved"><div class="dt-stat-val">${fmtN(s.closed||0)}</div><div class="dt-stat-lbl">Clôturées</div></div>
-        <div class="dt-stat s-pending"><div class="dt-stat-val">${fmtN(s.active||0)}</div><div class="dt-stat-lbl">Actives</div></div>
-        <div class="dt-stat s-rejected"><div class="dt-stat-val">${fmtN(s.expired||0)}</div><div class="dt-stat-lbl">Expirées</div></div>
-        <div class="dt-stat"><div class="dt-stat-val" style="color:var(--kya-orange)">${fmtN(s.late_count||0)}</div><div class="dt-stat-lbl">Retards</div></div>
-        <div class="dt-stat"><div class="dt-stat-val" style="color:var(--kya-purple)">${fmtN(s.late_minutes||0)}</div><div class="dt-stat-lbl">Minutes retard</div></div>
+      <div class="reu-kpis">
+        ${kpi(s.active, 'Actives', '#2563eb')}
+        ${kpi(s.closed, 'Clôturées', '#16a34a')}
+        ${kpi(s.expired, 'Expirées', '#dc2626')}
+        ${kpi(s.participants, 'Participants', '#0d9488')}
+        ${kpi(s.late_count, 'Retards', '#d97706')}
+        ${kpi(s.late_minutes, 'Min. de retard', '#7c3aed')}
+      </div>
+      <div class="reu-recents">
+        <div class="reu-recents-title">Dernières réunions</div>
+        <table class="reu-table"><tbody>${recents}</tbody></table>
       </div>
     </div>
   `;

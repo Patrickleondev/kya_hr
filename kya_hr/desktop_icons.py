@@ -4,14 +4,19 @@ import frappe
 from frappe.desk.doctype.desktop_icon.desktop_icon import clear_desktop_icons_cache
 
 WORKSPACE_ICONS = [
-    {"label": "Direction Générale", "link_to": "Direction Generale", "sidebar": "Direction Generale", "icon": "🏛️", "app": "kya_hr", "idx": 10},
-    {"label": "Gestion Équipe", "link_to": "Gestion Equipe", "sidebar": "Gestion Equipe", "icon": "🤝", "app": "kya_services", "idx": 20},
+    # NB labels SANS accent (ASCII) = invariant des icônes qui marchent :
+    # label == Workspace Sidebar.name == Workspace.name. L'accent à l'AFFICHAGE
+    # vient de la traduction __(label) (fr.csv) ; en prod (français) ça affiche
+    # « Direction Générale » etc. Un accent dans le label imposerait un accent
+    # dans le name du sidebar (clé du boot) ET dans la route slug() -> 404.
+    {"label": "Direction Generale", "link_to": "Direction Generale", "sidebar": "Direction Generale", "icon": "🏛️", "app": "kya_hr", "idx": 10},
+    {"label": "Gestion Equipe", "link_to": "Gestion Equipe", "sidebar": "Gestion Equipe", "icon": "🤝", "app": "kya_services", "idx": 20},
     {"label": "Espace RH", "link_to": "Espace RH", "icon": "👥", "app": "kya_hr", "idx": 11},
     {"label": "Espace Achats", "link_to": "Espace Achats", "icon": "🛒", "app": "kya_hr", "idx": 12},
     {"label": "Espace Stock", "link_to": "Espace Stock", "icon": "📦", "app": "kya_hr", "idx": 13},
     {"label": "Espace Comptabilité", "link_to": "Espace Comptabilité", "icon": "💰", "app": "kya_hr", "idx": 14},
     {"label": "Logistique", "link_to": "Logistique", "icon": "🚚", "app": "kya_hr", "idx": 15},
-    {"label": "Espace Employés", "link_to": "Espace Employes", "icon": "👤", "app": "kya_hr", "idx": 16},
+    {"label": "Espace Employes", "link_to": "Espace Employes", "icon": "👤", "app": "kya_hr", "idx": 16},
     {"label": "Espace Stagiaires", "link_to": "Espace Stagiaires", "icon": "🎓", "app": "kya_hr", "idx": 17},
     # "Inventaire & Sorties Matériel" retiré : redondant avec Espace Stock + le
     # libellé avec '&' cassait la route (404). Le workspace est masqué (cf.
@@ -20,8 +25,8 @@ WORKSPACE_ICONS = [
 ]
 
 RESTRICTED_LAYOUT_ROLES = {
-    "Direction Générale": ["Directeur Général", "DG", "DGA", "DAAF", "System Manager", "Administrator"],
-    "Gestion Équipe": [
+    "Direction Generale": ["Directeur Général", "DG", "DGA", "DAAF", "System Manager", "Administrator"],
+    "Gestion Equipe": [
         "Chef Equipe", "Chef d'Équipe", "Chef Service", "Responsable Equipe",
         "Supérieur Immédiat", "Directeur Général", "DG", "DGA", "System Manager",
     ],
@@ -84,7 +89,7 @@ RESTRICTED_LAYOUT_ROLES = {
     # Accessible à TOUS les comptes liés à un employé actif : rôle Employee
     # est le rôle par défaut HRMS. Les rôles métier élargissent simplement
     # la portée (gestion RH, stock, achats, direction).
-    "Espace Employés": [
+    "Espace Employes": [
         "Employee",          # ← tout employé KYA (CDI/CDD/Stage/Prestataire)
         "Stagiaire",
         "Chef Service",
