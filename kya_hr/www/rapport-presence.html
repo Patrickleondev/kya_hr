@@ -1,0 +1,139 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Rapport de présence — RH{% endblock %}
+
+{% block page_content %}
+<link rel="stylesheet" href="/assets/kya_hr/css/kya_dashboard.css">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+.kyad-rap { max-width: 1200px; margin: 18px auto 40px; padding: 0 16px; }
+.kyad-rap .ico { font-size: 1.6rem; }
+.rap-ctrl { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:14px; }
+.rap-ctrl select, .rap-ctrl input { border:1px solid var(--kyad-border); border-radius:10px; padding:7px 10px; font-size:.85rem; }
+.rap-seg { display:inline-flex; border:1px solid var(--kyad-border); border-radius:10px; overflow:hidden; }
+.rap-seg button { border:none; background:#fff; padding:7px 14px; font-weight:700; font-size:.82rem; cursor:pointer; color:var(--kyad-navy); }
+.rap-seg button.active { background: var(--kyad-blue, #2563eb); color:#fff; }
+.rap-team td { background:#eef2ff; font-weight:800; color: var(--kyad-navy); }
+.rap-stag { font-size:10px; background:#fce7f3; color:#be185d; border-radius:999px; padding:1px 7px; margin-left:6px; }
+table.rap-tbl td, table.rap-tbl th { text-align:center; }
+table.rap-tbl td.l, table.rap-tbl th.l { text-align:left; }
+.rap-num { font-weight:800; }
+@media print { .no-print { display:none !important; } }
+</style>
+
+<div class="kyad kyad-rap">
+  <div class="kyad-hero" style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
+    <div><h1><span class="ico">📊</span> Rapport de présence</h1>
+      <p id="rap-label">Jours travaillés, heures, retards et absences par employé (stagiaires inclus)</p></div>
+    <div class="d-flex gap-2 flex-wrap no-print">
+      <a class="btn btn-light btn-sm" href="/presence-rh"><i class="bi bi-clock"></i> Saisie du jour</a>
+      <button class="btn btn-success btn-sm" onclick="exporterExcel()"><i class="bi bi-file-earmark-excel"></i> Exporter Excel</button>
+      <button class="btn btn-light btn-sm" onclick="window.print()"><i class="bi bi-printer"></i> Imprimer</button>
+    </div>
+  </div>
+
+  <div class="rap-ctrl no-print">
+    <div class="rap-seg" id="rap-period">
+      <button data-p="semaine">Hebdomadaire</button>
+      <button data-p="mois" class="active">Mensuel</button>
+      <button data-p="trimestre">Trimestriel</button>
+    </div>
+    <input type="date" id="rap-date" title="Date de référence (dans la période)">
+    <input type="search" id="rap-search" placeholder="🔎 Filtrer nom ou équipe…" style="min-width:240px;" oninput="filtrer()">
+    <span id="rap-count" class="text-muted small"></span>
+  </div>
+
+  <div class="kyad-kpis">
+    <div class="kyad-kpi"><div class="kyad-kpi-value" id="k-emp">—</div><div class="kyad-kpi-label">Employés</div></div>
+    <div class="kyad-kpi is-blue"><div class="kyad-kpi-value" id="k-jours">—</div><div class="kyad-kpi-label">Jours travaillés</div></div>
+    <div class="kyad-kpi is-green"><div class="kyad-kpi-value" id="k-heures">—</div><div class="kyad-kpi-label">Heures totales</div></div>
+    <div class="kyad-kpi is-orange"><div class="kyad-kpi-value" id="k-ret">—</div><div class="kyad-kpi-label">Retards</div></div>
+    <div class="kyad-kpi is-red"><div class="kyad-kpi-value" id="k-abs">—</div><div class="kyad-kpi-label">Absences</div></div>
+  </div>
+
+  <div class="kyad-panel">
+    <table class="kyad-table rap-tbl" style="width:100%;">
+      <thead><tr>
+        <th class="l">Employé</th><th class="l">Équipe</th>
+        <th>Jours travaillés</th><th>Heures totales</th><th>Heures / jour</th>
+        <th>Retards</th><th>Absences</th>
+      </tr></thead>
+      <tbody id="rap-body">
+        <tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:24px;">Chargement…</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="text-muted small mt-2">Jours travaillés = jours présents (demi-journées incluses). Heures = somme des heures saisies (sortie − arrivée). Inclut les présences saisies au tableau du jour. Stagiaires marqués <span class="rap-stag">stagiaire</span>.</p>
+</div>
+
+<script>
+let RAP = null, PERIOD = "mois";
+function num(n){ return (Math.round((n||0)*100)/100).toLocaleString('fr-FR'); }
+
+async function charger(){
+  const body=document.getElementById('rap-body');
+  body.innerHTML='<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:24px;">Chargement…</td></tr>';
+  const refDate=document.getElementById('rap-date').value||'';
+  const r=await frappe.call({method:'kya_hr.api.attendance.get_attendance_report',
+    args:{period:PERIOD, ref_date:refDate}});
+  RAP=r.message; render();
+}
+function render(){
+  if(!RAP) return;
+  document.getElementById('rap-label').textContent = RAP.label + ' — par employé (stagiaires inclus)';
+  document.getElementById('k-emp').textContent = RAP.nb_employes;
+  document.getElementById('k-jours').textContent = RAP.totaux.jours;
+  document.getElementById('k-heures').textContent = num(RAP.totaux.heures);
+  document.getElementById('k-ret').textContent = RAP.totaux.retards;
+  document.getElementById('k-abs').textContent = RAP.totaux.absents;
+  const body=document.getElementById('rap-body'); let html=''; let team=null;
+  RAP.employes.forEach(e=>{
+    if(e.equipe!==team){ team=e.equipe; html+=`<tr class="rap-team" data-team="${(team||'').toLowerCase()}"><td colspan="7" class="l">${team}</td></tr>`; }
+    html+=`<tr data-name="${(e.employee_name||'').toLowerCase()}" data-team="${(e.equipe||'').toLowerCase()}">
+      <td class="l"><b>${e.employee_name||''}</b>${e.stagiaire?'<span class="rap-stag">stagiaire</span>':''}</td>
+      <td class="l text-muted">${e.equipe||'—'}</td>
+      <td class="rap-num">${e.jours_travailles}</td>
+      <td class="rap-num">${num(e.heures_totales)}</td>
+      <td>${num(e.heures_moyennes)}</td>
+      <td style="color:${e.jours_retard?'#d97706':'#94a3b8'};font-weight:700;">${e.jours_retard}</td>
+      <td style="color:${e.jours_absent?'#dc2626':'#94a3b8'};font-weight:700;">${e.jours_absent}</td>
+    </tr>`;
+  });
+  body.innerHTML = html || '<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:24px;">Aucun employé.</td></tr>';
+  filtrer();
+}
+function filtrer(){
+  const q=(document.getElementById('rap-search').value||'').toLowerCase().trim();
+  let shown=0;
+  document.querySelectorAll('#rap-body tr[data-name]').forEach(tr=>{
+    const ok=!q || (tr.dataset.name||'').includes(q) || (tr.dataset.team||'').includes(q);
+    tr.style.display=ok?'':'none'; if(ok) shown++;
+  });
+  // masquer les en-têtes d'équipe vides
+  document.querySelectorAll('#rap-body tr.rap-team').forEach(h=>{
+    let n=h.nextElementSibling, any=false;
+    while(n && !n.classList.contains('rap-team')){ if(n.style.display!=='none'){any=true;break;} n=n.nextElementSibling; }
+    h.style.display=any?'':'none';
+  });
+  document.getElementById('rap-count').textContent = q? (shown+' résultat(s)') : '';
+}
+function exporterExcel(){
+  if(!RAP){ return; }
+  const rows=[['Employé','Équipe','Type','Jours travaillés','Heures totales','Heures/jour','Retards','Absences']];
+  RAP.employes.forEach(e=>rows.push([e.employee_name, e.equipe, e.stagiaire?'Stagiaire':'Employé',
+    e.jours_travailles, e.heures_totales, e.heures_moyennes, e.jours_retard, e.jours_absent]));
+  rows.push([]);
+  rows.push(['TOTAL','', '', RAP.totaux.jours, RAP.totaux.heures, '', RAP.totaux.retards, RAP.totaux.absents]);
+  const ws=XLSX.utils.aoa_to_sheet(rows), wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Présences');
+  const safe=(RAP.label||'rapport').replace(/[^\w]+/g,'_');
+  XLSX.writeFile(wb, `KYA_Presence_${safe}.xlsx`);
+}
+document.querySelectorAll('#rap-period button').forEach(b=>b.addEventListener('click',function(){
+  document.querySelectorAll('#rap-period button').forEach(x=>x.classList.remove('active'));
+  this.classList.add('active'); PERIOD=this.dataset.p; charger();
+}));
+document.getElementById('rap-date').addEventListener('change', charger);
+charger();
+</script>
+{% endblock %}
