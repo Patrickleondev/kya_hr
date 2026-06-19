@@ -70,6 +70,11 @@ def _validate_monetisation(doc):
     jours_monetisation = int(doc.get("jours_monetisation") or 0)
     if jours_monetisation < 0:
         frappe.throw("Le nombre de jours à monétiser ne peut être négatif.")
+    # Les plannings générés automatiquement depuis un Planning d'Équipe ne
+    # disposent pas toujours des soldes RH : on ne bloque pas la génération
+    # (la RH ajuste les soldes ensuite si nécessaire).
+    if doc.flags.get("skip_solde_validation"):
+        return
     if doc.solde_final is not None and float(doc.solde_final) < 0:
         frappe.throw(
             f"Solde final négatif ({doc.solde_final:.1f} j) : "

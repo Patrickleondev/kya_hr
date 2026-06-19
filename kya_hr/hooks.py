@@ -49,6 +49,7 @@ doctype_js = {
     "Bilan Fin de Stage": "public/js/bilan_fin_de_stage.js",
     "PV Sortie Materiel": "public/js/pv_sortie_materiel.js",
     "Planning Conge": "public/js/planning_conge.js",
+    "Planning Conge Equipe": "doctype/planning_conge_equipe/planning_conge_equipe.js",
     "Demande Achat KYA": "public/js/demande_achat_kya.js",
     "PV Entree Materiel": "doctype/pv_entree_materiel/pv_entree_materiel.js",
     "Inventaire KYA": "doctype/inventaire_kya/inventaire_kya.js",
@@ -168,6 +169,20 @@ doc_events = {
             "kya_hr.planning_conge_logic.sync_statut",
         ],
     },
+    # Planning de congé d'ÉQUIPE : le chef saisit pour ses collègues.
+    # Flux Chef -> RH -> DG ; à l'approbation, un Planning Conge individuel
+    # est généré par employé (qui déclenche leave_bridge).
+    "Planning Conge Equipe": {
+        "validate": "kya_hr.planning_conge_equipe_logic.compute",
+        "on_update": [
+            "kya_hr.planning_conge_equipe_logic.sync_statut",
+            "kya_hr.planning_conge_equipe_logic.generate_individual_plannings",
+        ],
+        "on_update_after_submit": [
+            "kya_hr.planning_conge_equipe_logic.sync_statut",
+            "kya_hr.planning_conge_equipe_logic.generate_individual_plannings",
+        ],
+    },
     # PV et Bilan : pas de chef_routing (employee_field suffit)
     "PV Sortie Materiel": {
         "after_insert": [
@@ -227,10 +242,13 @@ permission_query_conditions = {
     "Employee": "kya_hr.employee_permissions.employee_query",
     "Equipe KYA": "kya_hr.equipe_permissions.equipe_kya_query",
     "Tache Equipe": "kya_hr.equipe_permissions.tache_equipe_query",
+    # Présences : un employé ne voit que les siennes (+ subordonnés directs) ; RH/Manager voient tout
+    "Attendance": "kya_hr.attendance_permissions.attendance_query",
 }
 
 has_permission = {
     "Employee": "kya_hr.employee_permissions.employee_has_permission",
+    "Attendance": "kya_hr.attendance_permissions.attendance_has_permission",
 }
 
 # Rappels quotidiens (anniversaires naissance & ancienneté)
@@ -244,6 +262,15 @@ scheduler_events = {
     "cron": {
         "0 17 * * 5": [
             "kya_hr.kya_hr.doctype.brouillard_caisse.brouillard_caisse.send_weekly_dg_summary",
+        ],
+        # 1er décembre 06h00 : ouverture de la campagne planning congé (année N+1)
+        # -> brouillon pré-rempli par équipe (reconduction N-1) + email aux chefs
+        "0 6 1 12 *": [
+            "kya_hr.planning_equipe_scheduler.lancer_campagne_annuelle",
+        ],
+        # 28 décembre 06h00 : relance des chefs en retard + escalade RH/DG
+        "0 6 28 12 *": [
+            "kya_hr.planning_equipe_scheduler.relancer_campagne",
         ],
     },
 }

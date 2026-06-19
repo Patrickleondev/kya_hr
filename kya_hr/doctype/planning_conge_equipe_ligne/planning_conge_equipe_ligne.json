@@ -1,0 +1,66 @@
+{
+ "name": "Planning Conge Equipe Ligne",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "istable": 1,
+ "custom": 1,
+ "editable_grid": 1,
+ "fields": [
+  {
+   "fieldname": "employee",
+   "label": "Employé",
+   "fieldtype": "Link",
+   "options": "Employee",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 2
+  },
+  {
+   "fieldname": "employee_name",
+   "label": "Nom",
+   "fieldtype": "Data",
+   "fetch_from": "employee.employee_name",
+   "read_only": 1,
+   "in_list_view": 1,
+   "columns": 2
+  },
+  {
+   "fieldname": "date_debut",
+   "label": "Date Début",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "columns": 2,
+   "description": "Requise à la soumission (peut rester vide dans un brouillon pré-rempli)"
+  },
+  {
+   "fieldname": "date_fin",
+   "label": "Date Fin",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "columns": 2
+  },
+  {
+   "fieldname": "type_conge",
+   "label": "Type de Congé",
+   "fieldtype": "Link",
+   "options": "Leave Type",
+   "default": "Congé Annuel",
+   "in_list_view": 1,
+   "columns": 1
+  },
+  {
+   "fieldname": "nb_jours",
+   "label": "Jours",
+   "fieldtype": "Int",
+   "read_only": 1,
+   "in_list_view": 1,
+   "columns": 1
+  },
+  {
+   "fieldname": "remarque",
+   "label": "Remarque",
+   "fieldtype": "Small Text"
+  }
+ ],
+ "permissions": []
+}

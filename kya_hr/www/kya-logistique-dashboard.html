@@ -82,6 +82,16 @@ body { background: var(--kya-bg) !important; }
     </div>
   </div>
 
+  <details style="margin:0 0 16px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:12px 16px;">
+    <summary style="cursor:pointer;font-weight:700;color:#0f3d68;">ℹ️ Comment ça marche — Logistique</summary>
+    <ol style="margin:10px 0 2px;padding-left:20px;color:#334155;font-size:13px;line-height:1.75;">
+      <li><b>Sortie véhicule</b> : demande de sortie (motif, destination, passagers).</li>
+      <li><b>Plein de carburant</b> : enregistrement des pleins (litres, coût, km).</li>
+      <li><b>Entretien</b> : suivi des entretiens/réparations par véhicule.</li>
+      <li>Le tableau suit l'état de la flotte et des demandes en temps réel.</li>
+    </ol>
+  </details>
+
   <!-- KPIs -->
   <div class="kya-kpi-grid">
     <div class="kya-kpi">
@@ -201,7 +211,7 @@ body { background: var(--kya-bg) !important; }
   <!-- Carburant par mois (quantité seulement) -->
   <div class="kya-panel">
     <div class="kya-panel-head"><h3><i class="bi bi-bar-chart"></i> Quantité carburant par mois (12 mois)</h3></div>
-    <div style="padding: 1rem;"><canvas id="chart-fuel" height="80"></canvas></div>
+    <div style="padding: 1rem; position: relative; height: 300px;"><canvas id="chart-fuel"></canvas></div>
   </div>
 
 </div>
@@ -383,7 +393,7 @@ async function loadFuelChart() {
           backgroundColor: '#8b5cf6',
         }],
       },
-      options: { responsive: true, plugins: { legend: { display: false } } },
+      options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false } } },
     });
   } catch (e) { console.error(e); }
 }

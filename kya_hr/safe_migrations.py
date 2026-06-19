@@ -30,6 +30,7 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.setup_employment_types.execute", "Normalise Employment Types (FR: Stage/CDD/CDI/Prestataire/Apprentissage)"),
     ("kya_hr.setup_leave_types.execute", "Setup leave types HRMS"),
     ("kya_hr.setup_leave_extension.execute", "Setup champs prolongation exceptionnelle DG sur Leave Application"),
+    ("kya_hr.setup_planning_equipe.execute", "Workflow Planning de Congé d'Équipe (Chef -> RH -> DG -> Approuvé)"),
     ("kya_hr.force_sync_workspaces.execute", "Force sync workspaces"),
     ("kya_hr.setup_native_workspaces.execute", "Restaure workspaces natifs vides (HR/Accounting/Stock/Buying/Selling/Payroll)"),
     ("kya_hr.force_publish_webforms.execute", "Force publish web forms"),
@@ -75,6 +76,8 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.maintenance.ensure_link_shortcuts.execute", "Chaque lien d'espace a un raccourci (Department/Designation/Formation/Equipe/Templates… + dashboards RH/Stocks/Achats) ; enchaîne sync_workspace_shortcuts"),
     ("kya_hr.maintenance.setup_supplier_mail_buttons.execute", "Boutons desk « Envoyer au fournisseur » sur Bon Commande KYA + Appel Offre KYA (revue avant envoi, PDF joint, gestion sans email)"),
     ("kya_hr.maintenance.fix_formation_equipe.execute", "Besoin de Formation : champ équipe = Equipe KYA (pas Département) ; département + chef déduits de l'équipe"),
+    ("kya_hr.maintenance.ensure_formation_v2.execute", "Formation v2 : réconcilie coût total ligne (direct+accessoire) + compteurs bénéficiaires (suivi par employé) sur plans existants"),
+    ("kya_hr.maintenance.fix_workspace_anomalies.execute", "Workspaces : parent_page NULL->'' (icônes qui plantent au clic) + Gestion Équipe accent/emoji"),
 ]
 
 AFTER_INSTALL: list[tuple[str, str]] = [

@@ -1,0 +1,204 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Planning de congé de l'équipe{% endblock %}
+
+{% block page_content %}
+<link rel="stylesheet" href="/assets/kya_hr/css/kya_dashboard.css">
+<style>
+.kpe { max-width: 1100px; margin: 18px auto 48px; padding: 0 16px; }
+.kpe .ico { font-size: 1.6rem; }
+.kpe-ctrl { display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; margin:14px 0; }
+.kpe-ctrl label { display:block; font-size:.72rem; font-weight:700; color:var(--kyad-navy,#1e293b); text-transform:uppercase; letter-spacing:.4px; margin-bottom:3px; }
+.kpe-ctrl select, .kpe-ctrl input { border:1px solid var(--kyad-border,#cbd5e1); border-radius:10px; padding:8px 10px; font-size:.9rem; min-width:160px; }
+.kpe-tbl { width:100%; border-collapse:collapse; margin-top:8px; font-size:.85rem; }
+.kpe-tbl th { background:#0e7c4a; color:#fff; padding:8px 6px; font-size:.74rem; text-align:left; }
+.kpe-tbl td { border-bottom:1px solid #eef2f7; padding:6px; vertical-align:middle; }
+.kpe-tbl input, .kpe-tbl select { width:100%; border:1px solid #e2e8f0; border-radius:8px; padding:6px; font-size:.82rem; }
+.kpe-tbl td.jr { text-align:center; font-weight:800; color:#0e7c4a; white-space:nowrap; }
+.kpe-tbl td.del { text-align:center; }
+.kpe-del { border:none; background:#fee2e2; color:#b91c1c; border-radius:8px; width:28px; height:28px; cursor:pointer; font-weight:800; }
+.kpe-add { margin-top:10px; border:1px dashed #0e7c4a; background:#ecfdf5; color:#065f46; border-radius:10px; padding:8px 14px; font-weight:700; cursor:pointer; }
+.kpe-foot { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-top:18px; }
+.kpe-sum { font-size:.85rem; color:#475569; }
+.kpe-sum b { color:#0e7c4a; }
+.kpe-submit { background:#0e7c4a; color:#fff; border:none; border-radius:10px; padding:11px 22px; font-weight:800; font-size:.95rem; cursor:pointer; }
+.kpe-submit:disabled { opacity:.5; cursor:not-allowed; }
+.kpe-note { background:#f1f5f9; border-left:4px solid #0e7c4a; border-radius:8px; padding:10px 14px; font-size:.82rem; color:#475569; margin:10px 0; }
+@media (max-width:640px){ .kpe-ctrl select,.kpe-ctrl input{min-width:100%;} }
+</style>
+
+<div class="kyad kpe">
+  <div class="kyad-hero" style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
+    <div>
+      <h1><span class="ico">🗓️</span> Planning de congé de l'équipe</h1>
+      <p>Le chef planifie en début d'année les congés prévisionnels de ses collègues. Validation : Chef → RH → DG.</p>
+    </div>
+    <a class="btn btn-light btn-sm" href="/calendrier-conges"><i class="bi bi-calendar3"></i> Calendrier annuel</a>
+  </div>
+
+  <div class="kpe-ctrl">
+    <div><label>Équipe</label><select id="kpe-equipe"></select></div>
+    <div><label>Année</label><input type="number" id="kpe-annee" min="2024" max="2100" step="1"></div>
+    <div style="flex:1;min-width:200px;"><label>Commentaire (optionnel)</label><input type="text" id="kpe-comment" placeholder="Note pour la RH…"></div>
+  </div>
+
+  <div class="kpe-note" id="kpe-info">Sélectionnez une équipe pour charger ses membres.</div>
+
+  <div class="kyad-panel" style="overflow-x:auto;">
+    <table class="kpe-tbl">
+      <thead><tr>
+        <th style="width:24%;">Employé</th>
+        <th style="width:17%;">Début</th>
+        <th style="width:17%;">Fin</th>
+        <th style="width:18%;">Type de congé</th>
+        <th style="width:8%;">Jours</th>
+        <th style="width:13%;">Remarque</th>
+        <th style="width:3%;"></th>
+      </tr></thead>
+      <tbody id="kpe-body"></tbody>
+    </table>
+    <button class="kpe-add" onclick="addRow()">＋ Ajouter une période</button>
+  </div>
+
+  <div class="kpe-foot">
+    <div class="kpe-sum">Total : <b id="kpe-nbemp">0</b> employé(s) · <b id="kpe-nbjours">0</b> jour(s) planifié(s)</div>
+    <button class="kpe-submit" id="kpe-go" onclick="soumettre()" disabled>Soumettre à la RH</button>
+  </div>
+</div>
+
+<script>
+let MEMBRES = [], LEAVE_TYPES = [];
+
+function opt(v,t,sel){ return `<option value="${v}"${sel?' selected':''}>${t||v}</option>`; }
+
+async function init(){
+  document.getElementById('kpe-annee').value = new Date().getFullYear();
+  // types de congé
+  const lt = await frappe.call({method:'frappe.client.get_list',
+    args:{doctype:'Leave Type', fields:['name'], limit_page_length:0, order_by:'name asc'}});
+  LEAVE_TYPES = (lt.message||[]).map(x=>x.name);
+  // équipes du chef
+  const r = await frappe.call({method:'kya_hr.api.planning_equipe.get_my_teams'});
+  const teams = (r.message && r.message.teams) || [];
+  const sel = document.getElementById('kpe-equipe');
+  if(!teams.length){
+    document.getElementById('kpe-info').innerHTML = "Aucune équipe ne vous est rattachée comme chef. Contactez la RH.";
+    sel.innerHTML = opt('','— aucune équipe —');
+    return;
+  }
+  sel.innerHTML = teams.map(t=>opt(t.name, (t.nom_equipe||t.name)+(t.departement?(' · '+t.departement):''))).join('');
+  sel.addEventListener('change', loadPlanning);
+  document.getElementById('kpe-annee').addEventListener('change', loadPlanning);
+  loadPlanning();
+}
+
+async function loadPlanning(){
+  const equipe = document.getElementById('kpe-equipe').value;
+  const annee = document.getElementById('kpe-annee').value;
+  const body = document.getElementById('kpe-body');
+  const info = document.getElementById('kpe-info');
+  const go = document.getElementById('kpe-go');
+  body.innerHTML = ''; go.disabled = true;
+  if(!equipe) return;
+  // membres (pour les listes déroulantes)
+  const r = await frappe.call({method:'kya_hr.api.planning_equipe.get_membres_equipe', args:{equipe}});
+  MEMBRES = (r.message && r.message.membres) || [];
+  // planning déjà existant pour l'année ?
+  const ex = (await frappe.call({method:'kya_hr.api.planning_equipe.get_planning_existant', args:{equipe, annee}})).message || {existe:false};
+  if(ex.existe && !ex.editable){
+    info.innerHTML = `⚠️ Un planning <b>${annee}</b> existe déjà pour cette équipe (statut : <b>${ex.statut}</b>). Il n'est plus modifiable ici. Voir le <a href="/calendrier-conges?annee=${annee}">calendrier</a>.`;
+    return;
+  }
+  if(ex.existe && ex.editable && (ex.lignes||[]).length){
+    info.innerHTML = `📝 Brouillon préparé repris (<b>${ex.lignes.length}</b> ligne(s)). Complétez les dates puis soumettez.`;
+    ex.lignes.forEach(l=>addRow(l.employee, l.date_debut, l.date_fin, l.type_conge, l.remarque));
+  } else {
+    info.innerHTML = MEMBRES.length
+      ? `<b>${MEMBRES.length}</b> membre(s) chargé(s). Une ligne par période ; ajoutez plusieurs périodes pour un même employé si besoin.`
+      : "Cette équipe n'a pas encore de membres actifs. Vous pouvez tout de même ajouter des lignes manuellement.";
+    MEMBRES.forEach(m=>addRow(m.name));
+    if(!MEMBRES.length) addRow();
+  }
+  recompute();
+}
+
+function empOptions(selected){
+  let o = opt('','— choisir —', !selected);
+  MEMBRES.forEach(m=>{ o += opt(m.name, m.employee_name||m.name, m.name===selected); });
+  return o;
+}
+function typeOptions(selected){
+  const def = selected || 'Congé Annuel';
+  return LEAVE_TYPES.map(t=>opt(t,t,t===def)).join('');
+}
+
+function esc(s){ return (s||'').replace(/"/g,'&quot;'); }
+function addRow(emp, deb, fin, type, rem){
+  const tb = document.getElementById('kpe-body');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><select class="c-emp">${empOptions(emp)}</select></td>
+    <td><input type="date" class="c-deb" value="${deb||''}"></td>
+    <td><input type="date" class="c-fin" value="${fin||''}"></td>
+    <td><select class="c-type">${typeOptions(type)}</select></td>
+    <td class="jr c-jr">0</td>
+    <td><input type="text" class="c-rem" value="${esc(rem)}" placeholder="…"></td>
+    <td class="del"><button class="kpe-del" title="Supprimer" onclick="this.closest('tr').remove();recompute();">✕</button></td>`;
+  tb.appendChild(tr);
+  tr.querySelectorAll('.c-deb,.c-fin').forEach(i=>i.addEventListener('change',recompute));
+  recompute();
+}
+
+function rowDays(tr){
+  const d1 = tr.querySelector('.c-deb').value, d2 = tr.querySelector('.c-fin').value;
+  if(!d1||!d2) return 0;
+  const a = new Date(d1), b = new Date(d2);
+  if(b<a) return 0;
+  return Math.round((b-a)/86400000)+1;
+}
+function recompute(){
+  let jours=0; const emps=new Set();
+  document.querySelectorAll('#kpe-body tr').forEach(tr=>{
+    const d = rowDays(tr); tr.querySelector('.c-jr').textContent = d; jours += d;
+    const e = tr.querySelector('.c-emp').value; if(e) emps.add(e);
+  });
+  document.getElementById('kpe-nbjours').textContent = jours;
+  document.getElementById('kpe-nbemp').textContent = emps.size;
+  document.getElementById('kpe-go').disabled = (jours===0 || emps.size===0);
+}
+
+async function soumettre(){
+  const equipe = document.getElementById('kpe-equipe').value;
+  const annee = document.getElementById('kpe-annee').value;
+  const commentaire_chef = document.getElementById('kpe-comment').value;
+  const lignes = [];
+  let bad = false;
+  document.querySelectorAll('#kpe-body tr').forEach(tr=>{
+    const employee = tr.querySelector('.c-emp').value;
+    const date_debut = tr.querySelector('.c-deb').value;
+    const date_fin = tr.querySelector('.c-fin').value;
+    const type_conge = tr.querySelector('.c-type').value;
+    const remarque = tr.querySelector('.c-rem').value;
+    if(!employee || !date_debut || !date_fin) return;
+    if(new Date(date_fin) < new Date(date_debut)) bad = true;
+    if(parseInt(date_debut.slice(0,4),10) !== parseInt(annee,10)) bad = true;
+    lignes.push({employee,date_debut,date_fin,type_conge,remarque});
+  });
+  if(bad){ frappe.msgprint("Vérifiez les dates : fin ≥ début et période dans l'année "+annee+"."); return; }
+  if(!lignes.length){ frappe.msgprint("Aucune période valide à soumettre."); return; }
+  const btn = document.getElementById('kpe-go'); btn.disabled=true; btn.textContent='Envoi…';
+  try{
+    const r = await frappe.call({method:'kya_hr.api.planning_equipe.soumettre_planning',
+      args:{equipe, annee, lignes:JSON.stringify(lignes), commentaire_chef}});
+    frappe.msgprint({title:'Planning soumis ✅',
+      message:`Planning <b>${r.message.name}</b> envoyé à la RH (${r.message.nb_lignes} période(s)).`,
+      indicator:'green'});
+    setTimeout(()=>{ window.location.href='/calendrier-conges?annee='+annee; }, 1500);
+  }catch(e){
+    btn.disabled=false; btn.textContent='Soumettre à la RH';
+  }
+}
+
+frappe.ready(init);
+</script>
+{% endblock %}

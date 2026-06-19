@@ -61,6 +61,23 @@ def get_context(context):
     total_e = sum(flt(b.total_entrees or 0) for b in brouillards)
     total_s = sum(flt(b.total_sorties or 0) for b in brouillards)
 
+    # ── PDF officiel de CHAQUE brouillard + PDF GROUPÉ de la semaine ──
+    import json
+    from urllib.parse import quote
+    _PF = "Brouillard Caisse KYA Officiel"
+    for b in brouillards:
+        b["pdf_url"] = (
+            "/api/method/frappe.utils.print_format.download_pdf"
+            f"?doctype={quote('Brouillard Caisse')}&name={quote(b['name'])}"
+            f"&format={quote(_PF)}&no_letterhead=0"
+        )
+    names = [b["name"] for b in brouillards]
+    context.bundle_pdf_url = (
+        "/api/method/frappe.utils.print_format.download_multi_pdf"
+        f"?doctype={quote('Brouillard Caisse')}&name={quote(json.dumps(names))}"
+        f"&format={quote(_PF)}"
+    ) if names else ""
+
     # Semaines précédentes (4 semaines navigation)
     prev_weeks = []
     for i in range(1, 5):

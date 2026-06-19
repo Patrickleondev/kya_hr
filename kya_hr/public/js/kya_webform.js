@@ -485,8 +485,8 @@
       {
         title: "ÉQUIPE & PÉRIODE",
         icon: "\u{1F465}",
-        fields: ["equipe", "chef_equipe", "annee", "trimestre"],
-        grid: { equipe: "col", chef_equipe: "col", annee: "col", trimestre: "col" }
+        fields: ["equipe", "departement", "chef_equipe", "annee", "trimestre"],
+        grid: { equipe: "col", departement: "col", chef_equipe: "col", annee: "col", trimestre: "col" }
       },
       {
         title: "FORMATIONS SOUHAITÉES",

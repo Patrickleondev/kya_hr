@@ -306,10 +306,39 @@ def _get_config():
         return MODULE_MAP  # fallback si le DocType n'existe pas encore
 
 
+_ACTIVE_WF_CACHE = {}
+
+
+def _has_active_workflow(doctype):
+    """True si un Workflow actif existe pour ce doctype (=> workflow_state fait foi)."""
+    if doctype not in _ACTIVE_WF_CACHE:
+        try:
+            _ACTIVE_WF_CACHE[doctype] = bool(
+                frappe.db.exists("Workflow", {"document_type": doctype, "is_active": 1})
+            )
+        except Exception:
+            _ACTIVE_WF_CACHE[doctype] = False
+    return _ACTIVE_WF_CACHE[doctype]
+
+
+def _effective_status_field(dt_name, configured):
+    """Champ de statut RÉEL à lire.
+
+    Bug terrain : certains doctypes ont un champ `statut` obsolète (jamais mis à
+    jour) ET un `workflow_state` piloté par un workflow actif. Le dashboard
+    affichait alors 0 approuvé. Règle : si un workflow est actif et que
+    `workflow_state` existe, c'est LUI la source de vérité, quel que soit le
+    `status_field` configuré.
+    """
+    if _has_field(dt_name, "workflow_state") and _has_active_workflow(dt_name):
+        return "workflow_state"
+    return configured or "workflow_state"
+
+
 def _get_doctype_stats(dt_cfg, date_from, date_to):
     """Retourne les stats agrégées pour un DocType donné."""
     dt_name = dt_cfg["name"]
-    sf = dt_cfg.get("status_field") or "workflow_state"
+    sf = _effective_status_field(dt_name, dt_cfg.get("status_field"))
     df = dt_cfg.get("date_field") or "creation"
     af = dt_cfg.get("amount_field")
     print_format = dt_cfg.get("print_format") or _default_print_format(dt_name)
@@ -532,7 +561,7 @@ def get_grouped_stats(period="30", group_by="department"):
                     continue
             except Exception:
                 continue
-            sf = dt_cfg.get("status_field") or "workflow_state"
+            sf = _effective_status_field(dt_name, dt_cfg.get("status_field"))
             df = dt_cfg.get("date_field") or "creation"
             if not _has_field(dt_name, df):
                 df = "creation"

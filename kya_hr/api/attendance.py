@@ -102,14 +102,36 @@ def _compute_working_hours(in_dt: datetime, out_dt: datetime) -> float:
 
 
 def _create_checkin(employee: str, log_type: str, ts: datetime, marked_by: str) -> str:
-    """Cree un Employee Checkin. Retourne son name."""
+    """Cree un Employee Checkin (idempotent).
+
+    Re-valider une présence rejouait l'insertion -> HRMS levait « Cet employé a
+    déjà un journal avec le même horodatage » et tout le marquage échouait (donc
+    les heures ne se calculaient jamais). On réutilise donc un pointage existant
+    au lieu d'en recréer un.
+    """
+    existing = frappe.db.get_value(
+        "Employee Checkin",
+        {"employee": employee, "log_type": log_type, "time": ts},
+        "name",
+    )
+    if existing:
+        return existing
     doc = frappe.new_doc("Employee Checkin")
     doc.employee = employee
     doc.log_type = log_type  # "IN" ou "OUT"
     doc.time = ts
     doc.device_id = f"manual:{marked_by}"
-    doc.insert(ignore_permissions=True)
-    return doc.name
+    try:
+        doc.insert(ignore_permissions=True)
+        return doc.name
+    except Exception:
+        # doublon d'horodatage (course / re-validation) : réutiliser l'existant
+        existing = frappe.db.get_value(
+            "Employee Checkin", {"employee": employee, "time": ts}, "name"
+        )
+        if existing:
+            return existing
+        raise
 
 
 def _get_or_create_attendance(employee: str, att_date: str) -> Any:
@@ -425,6 +447,100 @@ def get_team_attendance(team: str, date: str | None = None) -> dict:
             "attendance": att_data or {},
         })
     return {"team": team, "date": att_date, "rows": rows}
+
+
+def _period_bounds(period: str, ref_date) -> tuple:
+    """Retourne (from_date, to_date, libellé) pour semaine|mois|trimestre."""
+    from datetime import date as _date
+    from frappe.utils import add_days, get_last_day, getdate as _g
+    d = _g(ref_date) if ref_date else _g(today())
+    if period == "semaine":
+        start = add_days(d, -d.weekday())          # lundi
+        end = add_days(start, 6)                    # dimanche
+        label = f"Semaine du {start.strftime('%d/%m')} au {end.strftime('%d/%m/%Y')}"
+    elif period == "trimestre":
+        q = (d.month - 1) // 3
+        start = _date(d.year, q * 3 + 1, 1)
+        end = get_last_day(_date(d.year, q * 3 + 3, 1))
+        label = f"T{q + 1} {d.year} ({start.strftime('%d/%m')} – {end.strftime('%d/%m/%Y')})"
+    else:  # mois
+        period = "mois"
+        start = d.replace(day=1)
+        end = get_last_day(d)
+        _MOIS = ["", "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet",
+                 "Août", "Septembre", "Octobre", "Novembre", "Décembre"]
+        label = f"{_MOIS[start.month]} {start.year}"
+    return getdate(start), getdate(end), label
+
+
+@frappe.whitelist()
+def get_attendance_report(period: str = "mois", ref_date: str | None = None,
+                          equipe: str | None = None) -> dict:
+    """Rapport de présence PAR EMPLOYÉ sur une période (semaine|mois|trimestre).
+
+    Pour chaque employé actif (stagiaires inclus) : jours travaillés, retards,
+    absences, heures totales et moyennes. Compte les présences saisies au
+    dashboard (docstatus != 2, brouillon inclus). Sert le dashboard RH + export.
+    """
+    _check_rh_role()
+    from_date, to_date, label = _period_bounds(period, ref_date)
+
+    cond_eq = "AND COALESCE(e.custom_kya_equipe,'') = %(eq)s" if equipe else ""
+    rows = frappe.db.sql(
+        f"""
+        SELECT
+            e.name, e.employee_name,
+            COALESCE(e.custom_kya_equipe,'') AS equipe,
+            COALESCE(e.department,'')        AS departement,
+            COALESCE(e.employment_type,'')   AS type_emploi,
+            SUM(CASE WHEN a.status='Present'  THEN 1 ELSE 0 END) AS jours_presents,
+            SUM(CASE WHEN a.status='Half Day' THEN 1 ELSE 0 END) AS jours_demi,
+            SUM(CASE WHEN a.late_entry=1       THEN 1 ELSE 0 END) AS jours_retard,
+            SUM(CASE WHEN a.status='Absent'   THEN 1 ELSE 0 END) AS jours_absent,
+            COALESCE(SUM(a.working_hours),0)  AS heures_saisies,
+            COALESCE(SUM(CASE
+                WHEN COALESCE(a.working_hours,0) <= 0
+                 AND a.in_time IS NOT NULL AND a.out_time IS NOT NULL
+                THEN TIMESTAMPDIFF(MINUTE, a.in_time, a.out_time)/60.0
+                ELSE 0 END), 0)              AS heures_fallback
+        FROM `tabEmployee` e
+        LEFT JOIN `tabAttendance` a
+            ON a.employee = e.name
+           AND a.attendance_date BETWEEN %(fd)s AND %(td)s
+           AND a.docstatus != 2
+        WHERE e.status='Active' {cond_eq}
+        GROUP BY e.name, e.employee_name, e.custom_kya_equipe, e.department, e.employment_type
+        ORDER BY e.custom_kya_equipe, e.employee_name
+        """,
+        {"fd": from_date, "td": to_date, "eq": equipe}, as_dict=True,
+    )
+
+    employes = []
+    tot = {"jours": 0, "retards": 0, "absents": 0, "heures": 0.0}
+    for r in rows:
+        jours = int(r.jours_presents or 0) + int(r.jours_demi or 0)
+        heures = round(float(r.heures_saisies or 0) + float(r.heures_fallback or 0), 2)
+        employes.append({
+            "employee": r.name, "employee_name": r.employee_name,
+            "equipe": r.equipe or "Sans équipe", "departement": r.departement,
+            "stagiaire": (r.type_emploi or "").lower() in ("stage", "stagiaire", "internship"),
+            "jours_travailles": jours,
+            "jours_retard": int(r.jours_retard or 0),
+            "jours_absent": int(r.jours_absent or 0),
+            "heures_totales": heures,
+            "heures_moyennes": round(heures / jours, 2) if jours else 0.0,
+        })
+        tot["jours"] += jours
+        tot["retards"] += int(r.jours_retard or 0)
+        tot["absents"] += int(r.jours_absent or 0)
+        tot["heures"] += heures
+    tot["heures"] = round(tot["heures"], 1)
+
+    return {
+        "period": period, "label": label,
+        "from_date": str(from_date), "to_date": str(to_date),
+        "employes": employes, "totaux": tot, "nb_employes": len(employes),
+    }
 
 
 @frappe.whitelist()

@@ -124,6 +124,16 @@ body { background: var(--kya-bg) !important; }
     <div id="action-result" class="mt-2 small" style="opacity:.9;"></div>
   </div>
 
+  <details style="margin:0 0 16px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:12px 16px;">
+    <summary style="cursor:pointer;font-weight:700;color:#0f3d68;">ℹ️ Comment ça marche — Stocks</summary>
+    <ol style="margin:10px 0 2px;padding-left:20px;color:#334155;font-size:13px;line-height:1.75;">
+      <li><b>Entrée de stock</b> : PV d'entrée matériel (ou import du modèle).</li>
+      <li><b>Sortie de matériel</b> : PV de sortie (décrémente le stock).</li>
+      <li><b>Retour de matériel</b> : réintègre les articles.</li>
+      <li><b>Inventaire</b> : comptage physique vs quantité théorique → écarts.</li>
+    </ol>
+  </details>
+
   <!-- KPIs globaux -->
   <div class="kya-kpi-grid" id="kpi-grid">
     <div class="kya-kpi">
