@@ -57,8 +57,16 @@ def get_context(context):
             # heures d'arrivée / sortie (HH:MM) pour préremplir les champs time
             r.arrivee = str(r.in_time)[11:16] if r.in_time else ""
             r.sortie = str(r.out_time)[11:16] if r.out_time else ""
-            r.heures = round(r.working_hours or 0, 2)
-            total_hours += float(r.working_hours or 0)
+            wh = float(r.working_hours or 0)
+            # Cohérence : si arrivée ET sortie existent mais working_hours non
+            # calculé (fiche marquée avant sans sortie, ou importée), calculer
+            # à la volée (sortie − arrivée) en heures.
+            if wh <= 0 and r.in_time and r.out_time:
+                delta = (r.out_time - r.in_time).total_seconds() / 3600.0
+                if delta > 0:
+                    wh = round(delta, 2)
+            r.heures = round(wh, 2)
+            total_hours += wh
             if r.att_status == "Absent":
                 stats["absents"] += 1
                 r.etat = "Absent"

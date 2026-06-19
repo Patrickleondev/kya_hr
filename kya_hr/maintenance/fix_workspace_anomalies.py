@@ -182,26 +182,59 @@ def _ensure_people_landing() -> str:
     n'existe dans cette version -> clic sur l'app Frappe HR = 404 (SPA, le redirect
     serveur ne s'applique pas). On crée un workspace « People » CACHÉ (routable par
     URL `/desk/people`, absent du nav) qui pointe vers l'espace RH. Idempotent."""
+    # Hub RH affiché quand on clique l'app « Frappe HR » (app_home=/desk/people).
+    # On le veut RICHE (plusieurs raccourcis = les « sous-icônes » RH attendues).
+    # (label, /desk/<slug>, couleur) — uniquement les workspaces qui existent.
+    # (label affiché, nom du workspace cible, couleur). On ÉVITE les workspaces
+    # dont le name contient un '&' (slug fragile -> 404), cf. invariant routing.
+    HUB = [
+        ("Espace RH", "Espace RH", "Blue"),
+        ("Congés", "Leaves", "Green"),
+        ("Paie", "Payroll", "Orange"),
+        ("Recrutement", "Recruitment", "Purple"),
+        ("Performance", "Performance", "Pink"),
+        ("Notes de frais", "Expenses", "Yellow"),
+        ("Frappe HR", "Frappe HR", "Grey"),
+    ]
+    avail = []
+    for label, ws_name, color in HUB:
+        if "&" in ws_name:
+            continue
+        if frappe.db.exists("Workspace", ws_name):
+            url = "/desk/" + ws_name.lower().replace(" ", "-")
+            avail.append((label, url, color))
+
+    blocks = [{"id": "people-hdr", "type": "header",
+               "data": {"text": "<span style='font-size:20px;font-weight:700'>Ressources Humaines</span>", "col": 12}}]
+    for i, (label, _url, _c) in enumerate(avail):
+        blocks.append({"id": f"sc-{i}", "type": "shortcut",
+                       "data": {"shortcut_name": label, "col": 3}})
+    content = json.dumps(blocks)
+
     if frappe.db.exists("Workspace", "People"):
-        return ""
-    content = json.dumps([
-        {"id": "people-hdr", "type": "header",
-         "data": {"text": "<span style='font-size:20px;font-weight:700'>Ressources Humaines</span>", "col": 12}},
-        {"id": "sc-rh", "type": "shortcut", "data": {"shortcut_name": "Espace RH", "col": 4}},
-        {"id": "sc-hr", "type": "shortcut", "data": {"shortcut_name": "Frappe HR", "col": 4}},
-    ])
+        # enrichir : recréer les raccourcis si le hub a moins d'items que prévu
+        doc = frappe.get_doc("Workspace", "People")
+        if len(doc.shortcuts or []) >= len(avail):
+            return ""  # déjà à jour
+        doc.shortcuts = []
+        for label, url, color in avail:
+            doc.append("shortcuts", {"type": "URL", "label": label, "url": url, "color": color})
+        doc.content = content
+        doc.flags.ignore_permissions = True
+        doc.save()
+        return f"Hub People enrichi ({len(avail)} raccourcis)"
+
     doc = frappe.new_doc("Workspace")
     doc.update({
         "name": "People", "title": "People", "label": "People",
         "public": 1, "is_hidden": 1, "module": "KYA HR",
         "icon": "users", "content": content, "sequence_id": 99,
     })
-    # raccourcis URL vers les espaces RH réels (Link Type "Workspace" interdit ici)
-    doc.append("shortcuts", {"type": "URL", "label": "Espace RH", "url": "/desk/espace-rh", "color": "Blue"})
-    doc.append("shortcuts", {"type": "URL", "label": "Frappe HR", "url": "/desk/frappe-hr", "color": "Grey"})
+    for label, url, color in avail:
+        doc.append("shortcuts", {"type": "URL", "label": label, "url": url, "color": color})
     doc.flags.ignore_permissions = True
     doc.insert()
-    return "Workspace People (caché) créé -> /desk/people OK"
+    return f"Workspace People (caché) créé -> /desk/people OK ({len(avail)} raccourcis)"
 
 
 def execute() -> dict:
