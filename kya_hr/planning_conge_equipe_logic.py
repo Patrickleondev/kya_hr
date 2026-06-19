@@ -37,13 +37,24 @@ def _compute_lines(doc):
 def _validate_lines(doc):
     if not (doc.get("lignes") or []):
         frappe.throw(_("Ajoutez au moins une période de congé pour l'équipe."))
+    # En brouillon (campagne pré-remplie), les lignes peuvent ne pas encore
+    # avoir de dates : on ne les exige qu'à partir de la soumission à la RH.
+    is_draft = (doc.get("workflow_state") or "Brouillon") == "Brouillon"
     for row in doc.lignes:
-        if row.date_debut and row.date_fin and getdate(row.date_fin) < getdate(row.date_debut):
+        has_dates = bool(row.date_debut and row.date_fin)
+        if not has_dates:
+            if not is_draft:
+                frappe.throw(
+                    _("Ligne {0} ({1}) : dates de congé manquantes.")
+                    .format(row.idx, row.employee_name or row.employee or "")
+                )
+            continue
+        if getdate(row.date_fin) < getdate(row.date_debut):
             frappe.throw(
                 _("Ligne {0} ({1}) : la date de fin doit être postérieure à la date de début.")
                 .format(row.idx, row.employee_name or row.employee or "")
             )
-        if doc.annee and row.date_debut and getdate(row.date_debut).year != int(doc.annee):
+        if doc.annee and getdate(row.date_debut).year != int(doc.annee):
             frappe.throw(
                 _("Ligne {0} : la période ({1}) n'est pas dans l'année du planning ({2}).")
                 .format(row.idx, row.date_debut, doc.annee)

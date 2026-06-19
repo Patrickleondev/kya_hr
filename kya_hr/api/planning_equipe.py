@@ -72,6 +72,39 @@ def get_membres_equipe(equipe):
 
 
 @frappe.whitelist()
+def get_planning_existant(equipe, annee):
+    """Retourne le planning de l'équipe pour l'année s'il existe déjà :
+    - un BROUILLON (campagne auto ou saisie en cours) -> éditable, ses lignes
+      sont renvoyées pour pré-remplir la grille ;
+    - un planning déjà SOUMIS/approuvé -> signalé (lecture seule)."""
+    if not (equipe and annee):
+        return {"existe": False}
+    rec = frappe.get_all(
+        "Planning Conge Equipe",
+        filters={"equipe": equipe, "annee": int(annee), "docstatus": ["<", 2]},
+        fields=["name", "workflow_state", "statut"],
+        order_by="creation desc", limit=1,
+    )
+    if not rec:
+        return {"existe": False}
+    r = rec[0]
+    state = r.workflow_state or "Brouillon"
+    editable = (state == "Brouillon")
+    lignes = []
+    if editable:
+        doc = frappe.get_doc("Planning Conge Equipe", r.name)
+        lignes = [{
+            "employee": l.employee, "employee_name": l.employee_name,
+            "date_debut": str(l.date_debut) if l.date_debut else "",
+            "date_fin": str(l.date_fin) if l.date_fin else "",
+            "type_conge": l.type_conge or "Congé Annuel",
+            "remarque": l.remarque or "",
+        } for l in doc.lignes]
+    return {"existe": True, "name": r.name, "statut": state,
+            "editable": editable, "lignes": lignes}
+
+
+@frappe.whitelist()
 def soumettre_planning(equipe, annee, lignes, commentaire_chef=None):
     """Crée le Planning d'Équipe et l'envoie directement à la RH (En attente RH)."""
     if isinstance(lignes, str):
@@ -88,9 +121,21 @@ def soumettre_planning(equipe, annee, lignes, commentaire_chef=None):
         frappe.throw(_("Seul le chef de cette équipe (ou la RH) peut soumettre ce planning."),
                      frappe.PermissionError)
 
-    doc = frappe.new_doc("Planning Conge Equipe")
-    doc.equipe = equipe
-    doc.annee = int(annee)
+    # Réutilise un brouillon existant (préparé par la campagne auto ou une
+    # saisie précédente) pour cette équipe/année ; sinon en crée un nouveau.
+    existing = frappe.get_all(
+        "Planning Conge Equipe",
+        filters={"equipe": equipe, "annee": int(annee),
+                 "workflow_state": ["in", ["", "Brouillon"]], "docstatus": 0},
+        order_by="creation desc", limit=1, pluck="name",
+    )
+    if existing:
+        doc = frappe.get_doc("Planning Conge Equipe", existing[0])
+        doc.set("lignes", [])
+    else:
+        doc = frappe.new_doc("Planning Conge Equipe")
+        doc.equipe = equipe
+        doc.annee = int(annee)
     doc.commentaire_chef = commentaire_chef
     for l in lignes:
         if not (l.get("employee") and l.get("date_debut") and l.get("date_fin")):
@@ -109,7 +154,10 @@ def soumettre_planning(equipe, annee, lignes, commentaire_chef=None):
     # puis passage direct « En attente RH » via db_set : on évite la validation
     # de transition (le contrôle d'accès est déjà fait ci-dessus : chef ou RH).
     doc.flags.ignore_permissions = True
-    doc.insert()
+    if existing:
+        doc.save()
+    else:
+        doc.insert()
     doc.db_set("workflow_state", "En attente RH", update_modified=False)
     doc.db_set("statut", "En attente RH", update_modified=False)
     frappe.db.commit()

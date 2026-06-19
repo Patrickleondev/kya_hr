@@ -87,22 +87,38 @@ async function init(){
     return;
   }
   sel.innerHTML = teams.map(t=>opt(t.name, (t.nom_equipe||t.name)+(t.departement?(' · '+t.departement):''))).join('');
-  sel.addEventListener('change', loadMembres);
-  loadMembres();
+  sel.addEventListener('change', loadPlanning);
+  document.getElementById('kpe-annee').addEventListener('change', loadPlanning);
+  loadPlanning();
 }
 
-async function loadMembres(){
+async function loadPlanning(){
   const equipe = document.getElementById('kpe-equipe').value;
-  document.getElementById('kpe-body').innerHTML = '';
+  const annee = document.getElementById('kpe-annee').value;
+  const body = document.getElementById('kpe-body');
+  const info = document.getElementById('kpe-info');
+  const go = document.getElementById('kpe-go');
+  body.innerHTML = ''; go.disabled = true;
   if(!equipe) return;
+  // membres (pour les listes déroulantes)
   const r = await frappe.call({method:'kya_hr.api.planning_equipe.get_membres_equipe', args:{equipe}});
   MEMBRES = (r.message && r.message.membres) || [];
-  document.getElementById('kpe-info').innerHTML = MEMBRES.length
-    ? `<b>${MEMBRES.length}</b> membre(s) chargé(s). Une ligne par période ; ajoutez plusieurs périodes pour un même employé si besoin.`
-    : "Cette équipe n'a pas encore de membres actifs. Vous pouvez tout de même ajouter des lignes manuellement.";
-  // une ligne pré-remplie par membre
-  MEMBRES.forEach(m=>addRow(m.name));
-  if(!MEMBRES.length) addRow();
+  // planning déjà existant pour l'année ?
+  const ex = (await frappe.call({method:'kya_hr.api.planning_equipe.get_planning_existant', args:{equipe, annee}})).message || {existe:false};
+  if(ex.existe && !ex.editable){
+    info.innerHTML = `⚠️ Un planning <b>${annee}</b> existe déjà pour cette équipe (statut : <b>${ex.statut}</b>). Il n'est plus modifiable ici. Voir le <a href="/calendrier-conges?annee=${annee}">calendrier</a>.`;
+    return;
+  }
+  if(ex.existe && ex.editable && (ex.lignes||[]).length){
+    info.innerHTML = `📝 Brouillon préparé repris (<b>${ex.lignes.length}</b> ligne(s)). Complétez les dates puis soumettez.`;
+    ex.lignes.forEach(l=>addRow(l.employee, l.date_debut, l.date_fin, l.type_conge, l.remarque));
+  } else {
+    info.innerHTML = MEMBRES.length
+      ? `<b>${MEMBRES.length}</b> membre(s) chargé(s). Une ligne par période ; ajoutez plusieurs périodes pour un même employé si besoin.`
+      : "Cette équipe n'a pas encore de membres actifs. Vous pouvez tout de même ajouter des lignes manuellement.";
+    MEMBRES.forEach(m=>addRow(m.name));
+    if(!MEMBRES.length) addRow();
+  }
   recompute();
 }
 
@@ -116,16 +132,17 @@ function typeOptions(selected){
   return LEAVE_TYPES.map(t=>opt(t,t,t===def)).join('');
 }
 
-function addRow(emp){
+function esc(s){ return (s||'').replace(/"/g,'&quot;'); }
+function addRow(emp, deb, fin, type, rem){
   const tb = document.getElementById('kpe-body');
   const tr = document.createElement('tr');
   tr.innerHTML = `
     <td><select class="c-emp">${empOptions(emp)}</select></td>
-    <td><input type="date" class="c-deb"></td>
-    <td><input type="date" class="c-fin"></td>
-    <td><select class="c-type">${typeOptions()}</select></td>
+    <td><input type="date" class="c-deb" value="${deb||''}"></td>
+    <td><input type="date" class="c-fin" value="${fin||''}"></td>
+    <td><select class="c-type">${typeOptions(type)}</select></td>
     <td class="jr c-jr">0</td>
-    <td><input type="text" class="c-rem" placeholder="…"></td>
+    <td><input type="text" class="c-rem" value="${esc(rem)}" placeholder="…"></td>
     <td class="del"><button class="kpe-del" title="Supprimer" onclick="this.closest('tr').remove();recompute();">✕</button></td>`;
   tb.appendChild(tr);
   tr.querySelectorAll('.c-deb,.c-fin').forEach(i=>i.addEventListener('change',recompute));

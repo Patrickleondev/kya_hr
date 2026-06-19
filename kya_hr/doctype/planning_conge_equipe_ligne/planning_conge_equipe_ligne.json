@@ -28,15 +28,14 @@
    "fieldname": "date_debut",
    "label": "Date Début",
    "fieldtype": "Date",
-   "reqd": 1,
    "in_list_view": 1,
-   "columns": 2
+   "columns": 2,
+   "description": "Requise à la soumission (peut rester vide dans un brouillon pré-rempli)"
   },
   {
    "fieldname": "date_fin",
    "label": "Date Fin",
    "fieldtype": "Date",
-   "reqd": 1,
    "in_list_view": 1,
    "columns": 2
   },
@@ -45,7 +44,6 @@
    "label": "Type de Congé",
    "fieldtype": "Link",
    "options": "Leave Type",
-   "reqd": 1,
    "default": "Congé Annuel",
    "in_list_view": 1,
    "columns": 1

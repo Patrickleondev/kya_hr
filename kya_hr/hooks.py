@@ -263,6 +263,15 @@ scheduler_events = {
         "0 17 * * 5": [
             "kya_hr.kya_hr.doctype.brouillard_caisse.brouillard_caisse.send_weekly_dg_summary",
         ],
+        # 1er décembre 06h00 : ouverture de la campagne planning congé (année N+1)
+        # -> brouillon pré-rempli par équipe (reconduction N-1) + email aux chefs
+        "0 6 1 12 *": [
+            "kya_hr.planning_equipe_scheduler.lancer_campagne_annuelle",
+        ],
+        # 28 décembre 06h00 : relance des chefs en retard + escalade RH/DG
+        "0 6 28 12 *": [
+            "kya_hr.planning_equipe_scheduler.relancer_campagne",
+        ],
     },
 }
 
