@@ -121,20 +121,32 @@
 
   <div class="kya-sec-header">4. SIGNATURES</div>
   <div class="kya-sec-body">
+    {#- ============================================================= -#}
+    {#-  LIBELLÉS DES RÔLES — MODIFIABLES ICI (une seule ligne chacun). -#}
+    {#-  Libellés neutres par défaut. Modifiez simplement le texte      -#}
+    {#-  entre guillemets si besoin (ex : « Le DAAF », « La Caissière »).-#}
+    {#- ============================================================= -#}
+    {% set ROLE_CAISSE = "Caissier(ère)" %}
+    {% set ROLE_COMPTABLE = "Comptable" %}
+    {% set ROLE_DFC = "DFC" %}
+    {#- ============================================================= -#}
     <div class="kya-sigs">
       <div class="kya-sig">
         {% if doc.signature_caissiere %}<img src="{{ doc.signature_caissiere }}">{% endif %}
-        <div class="sig-line">{{ doc.signataire_caissiere or doc.caissiere_name or 'Caissier' }}</div>
+        <div class="sig-line">{{ doc.signataire_caissiere or doc.caissiere_name or '' }}</div>
+        <div style="font-size:9px;color:#555;margin-top:2px;font-weight:bold;text-transform:uppercase;letter-spacing:.3px;">{{ ROLE_CAISSE }}</div>
         {% if doc.date_signature_caissiere %}<div class="sig-date">{{ frappe.utils.format_date(doc.date_signature_caissiere) }}</div>{% endif %}
       </div>
       <div class="kya-sig">
         {% if doc.signature_comptable %}<img src="{{ doc.signature_comptable }}">{% endif %}
-        <div class="sig-line">{{ doc.signataire_comptable or 'Comptable' }}</div>
+        <div class="sig-line">{{ doc.signataire_comptable or '' }}</div>
+        <div style="font-size:9px;color:#555;margin-top:2px;font-weight:bold;text-transform:uppercase;letter-spacing:.3px;">{{ ROLE_COMPTABLE }}</div>
         {% if doc.date_signature_comptable %}<div class="sig-date">{{ frappe.utils.format_date(doc.date_signature_comptable) }}</div>{% endif %}
       </div>
       <div class="kya-sig">
         {% if doc.signature_dfc %}<img src="{{ doc.signature_dfc }}">{% endif %}
-        <div class="sig-line">{{ doc.signataire_dfc or 'DAAF / DFC' }}</div>
+        <div class="sig-line">{{ doc.signataire_dfc or '' }}</div>
+        <div style="font-size:9px;color:#555;margin-top:2px;font-weight:bold;text-transform:uppercase;letter-spacing:.3px;">{{ ROLE_DFC }}</div>
         {% if doc.date_signature_dfc %}<div class="sig-date">{{ frappe.utils.format_date(doc.date_signature_dfc) }}</div>{% endif %}
       </div>
     </div>

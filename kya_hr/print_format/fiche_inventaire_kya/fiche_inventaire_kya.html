@@ -1,76 +1,123 @@
-<div class="print-format" style="font-family: Arial, sans-serif; font-size: 12px; padding: 20px;">
-  <table style="width:100%; border-bottom: 2px solid #00A651; padding-bottom:10px;">
-    <tr>
-      <td style="width:25%;"><img src="/files/logo_kya.png" style="max-height:80px;"/></td>
+<style>
+  /* ── Fiche Inventaire KYA — impression PDF (wkhtmltopdf) ── */
+  .kya-inv { font-family: Arial, sans-serif; font-size: 12px; color:#222; }
+  .kya-inv * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  .kya-inv table { border-collapse: collapse; width: 100%; }
+  .kya-inv .head-band td { vertical-align: middle; }
+  .kya-inv .meta td { padding:5px 8px; border:1px solid #cfd8dc; }
+  .kya-inv .meta .lbl { font-weight:bold; color:#00703c; }
+  .kya-inv h2.title { text-align:center; color:#00703c; margin:14px 0 10px; font-size:16px; letter-spacing:.5px; }
+
+  /* En-tête de tableau : fond vert ET texte foncé de secours pour que l'écrit
+     reste visible même si le PDF n'imprime pas le fond. */
+  .kya-inv table.items thead th {
+    background:#00A651 !important;
+    color:#ffffff !important;
+    padding:7px 6px; border:1px solid #00703c;
+    font-weight:bold; font-size:11px; text-align:center;
+    text-shadow:0 0 1px rgba(0,0,0,.35);
+  }
+  .kya-inv table.items td { padding:5px 6px; border:1px solid #cfd8dc; }
+  .kya-inv table.items td.c { text-align:center; }
+  .kya-inv table.items td.r { text-align:right; }
+  .kya-inv table.items tr.ecart td { background:#fff3cd !important; }
+  .kya-inv .pos { color:#1b7a3d; font-weight:bold; }
+  .kya-inv .neg { color:#c0392b; font-weight:bold; }
+
+  .kya-inv .sign { margin-top:26px; }
+  .kya-inv .sign td { width:50%; text-align:center; padding:6px 10px; vertical-align:top; }
+  .kya-inv .sign .role { font-weight:bold; border-top:1px solid #333; padding-top:6px; display:block; }
+  .kya-inv .sign .nom { font-size:12px; margin-top:2px; }
+  .kya-inv .sign .dt { font-size:10px; color:#666; margin-top:2px; }
+  .kya-inv .sign img { max-height:55px; margin-top:4px; }
+  .kya-inv .foot { text-align:center; font-size:10px; margin-top:18px; color:#888; }
+
+  @media screen and (max-width:600px){
+    .kya-inv table.items thead th, .kya-inv table.items td { font-size:10px; padding:4px; }
+  }
+</style>
+
+{%- set uom_fr = {
+  "Nos":"Unité(s)", "Unit":"Unité", "Unit(s)":"Unité(s)", "Pcs":"Pièce(s)",
+  "Box":"Boîte", "Set":"Jeu", "Meter":"Mètre", "Metre":"Mètre",
+  "Kg":"Kg", "Litre":"Litre", "Pair":"Paire", "Roll":"Rouleau"
+} -%}
+
+<div class="kya-inv print-format">
+  <table style="border-bottom:2px solid #00A651;">
+    <tr class="head-band">
+      <td style="width:22%;"><img src="/files/logo_kya.png" style="max-height:72px;"/></td>
       <td style="text-align:center;">
-        <h2 style="color:#00A651; margin:0;">KYA-ENERGY GROUP</h2>
+        <h2 style="color:#00A651; margin:0; font-size:18px;">KYA-ENERGY GROUP</h2>
         <p style="margin:2px 0; font-size:10px;">AGOE-LOGOPE | Tél : 70 45 34 81<br/>
         RCCM TG-LOM 2015 B 975 | NIF 1000430317 | CNSS 48863</p>
       </td>
-      <td style="width:25%; text-align:right; font-size:10px;">
+      <td style="width:24%; text-align:right; font-size:10px;">
         <strong>N° :</strong> {{ doc.name }}<br/>
-        <strong>Date :</strong> {{ frappe.format(doc.date_inventaire, {'fieldtype':'Date'}) or '' }}
+        <strong>Date :</strong> {{ frappe.format(doc.date_inventaire, {'fieldtype':'Date'}) or '' }}<br/>
+        <strong>Type :</strong> {{ doc.type_inventaire or '' }}
       </td>
     </tr>
   </table>
 
-  <h3 style="text-align:center; color:#00A651; margin:15px 0;">FICHE D'INVENTAIRE PHYSIQUE</h3>
+  <h2 class="title">FICHE D'INVENTAIRE PHYSIQUE</h2>
 
-  <table style="width:100%; border-collapse:collapse; margin-bottom:10px;">
+  <table class="meta" style="margin-bottom:10px;">
     <tr>
-      <td style="padding:4px; border:1px solid #ccc;"><strong>Magasin :</strong> {{ doc.warehouse or '' }}</td>
-      <td style="padding:4px; border:1px solid #ccc;"><strong>Responsable :</strong> {{ doc.responsable or '' }}</td>
+      <td><span class="lbl">Objet :</span> {{ doc.objet or '' }}</td>
+      <td><span class="lbl">Magasin :</span> {{ doc.warehouse_filter or 'Tous magasins' }}</td>
     </tr>
     <tr>
-      <td colspan="2" style="padding:4px; border:1px solid #ccc;"><strong>Motif :</strong> {{ doc.motif or '' }}</td>
+      <td><span class="lbl">Responsable :</span> {{ doc.responsable_nom or '' }}</td>
+      <td><span class="lbl">Référence :</span> {{ doc.reference or '' }}</td>
     </tr>
   </table>
 
-  <table style="width:100%; border-collapse:collapse; margin-top:10px;">
+  <table class="items">
     <thead>
-      <tr style="background:#00A651; color:white;">
-        <th style="padding:6px; border:1px solid #00A651;">#</th>
-        <th style="padding:6px; border:1px solid #00A651;">Article</th>
-        <th style="padding:6px; border:1px solid #00A651;">Désignation</th>
-        <th style="padding:6px; border:1px solid #00A651;">UOM</th>
-        <th style="padding:6px; border:1px solid #00A651;">Qté théorique</th>
-        <th style="padding:6px; border:1px solid #00A651;">Qté comptée</th>
-        <th style="padding:6px; border:1px solid #00A651;">Écart</th>
-        <th style="padding:6px; border:1px solid #00A651;">Remarque</th>
+      <tr>
+        <th style="width:4%;">#</th>
+        <th style="width:14%;">Article</th>
+        <th style="width:26%;">Désignation</th>
+        <th style="width:11%;">Unité</th>
+        <th style="width:12%;">Qté théorique</th>
+        <th style="width:12%;">Qté comptée</th>
+        <th style="width:9%;">Écart</th>
+        <th style="width:12%;">Remarque</th>
       </tr>
     </thead>
     <tbody>
       {% for it in doc.items %}
-      <tr {% if it.ecart and it.ecart != 0 %}style="background:#fff3cd;"{% endif %}>
-        <td style="padding:4px; border:1px solid #ccc; text-align:center;">{{ loop.index }}</td>
-        <td style="padding:4px; border:1px solid #ccc;">{{ it.item_code or '' }}</td>
-        <td style="padding:4px; border:1px solid #ccc;">{{ it.designation or '' }}</td>
-        <td style="padding:4px; border:1px solid #ccc; text-align:center;">{{ it.uom or '' }}</td>
-        <td style="padding:4px; border:1px solid #ccc; text-align:right;">{{ it.qte_theorique or 0 }}</td>
-        <td style="padding:4px; border:1px solid #ccc; text-align:right;">{{ it.qte_comptee or 0 }}</td>
-        <td style="padding:4px; border:1px solid #ccc; text-align:right; {% if it.ecart and it.ecart < 0 %}color:#c0392b;{% elif it.ecart and it.ecart > 0 %}color:#27ae60;{% endif %}"><strong>{{ it.ecart or 0 }}</strong></td>
-        <td style="padding:4px; border:1px solid #ccc;">{{ it.remarque or '' }}</td>
+      <tr {% if it.ecart and it.ecart != 0 %}class="ecart"{% endif %}>
+        <td class="c">{{ loop.index }}</td>
+        <td>{{ it.item_code or '' }}</td>
+        <td>{{ it.designation or '' }}</td>
+        <td class="c">{{ uom_fr.get(it.uom, it.uom) or '' }}</td>
+        <td class="r">{{ "%g"|format(it.qte_theorique or 0) }}</td>
+        <td class="r">{{ "%g"|format(it.qte_comptee or 0) }}</td>
+        <td class="r"><span class="{% if it.ecart and it.ecart < 0 %}neg{% elif it.ecart and it.ecart > 0 %}pos{% endif %}">{{ "%g"|format(it.ecart or 0) }}</span></td>
+        <td>{{ it.remarque or '' }}</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 
-  <table style="width:100%; margin-top:30px;">
+  <table class="sign">
     <tr>
-      <td style="width:50%; text-align:center; border-top:1px solid #333; padding-top:5px;">
-        <strong>Responsable Inventaire</strong><br/>
-        {{ doc.signature_responsable_nom or '' }}<br/>
-        {% if doc.signature_responsable %}<img src="{{ doc.signature_responsable }}" style="max-height:60px;"/>{% endif %}
+      <td>
+        <span class="role">Responsable Inventaire</span>
+        <span class="nom">{{ doc.responsable_nom or '—' }}</span>
+        {% if doc.signature_responsable %}<br/><img src="{{ doc.signature_responsable }}"/>{% endif %}
+        <span class="dt">Signé le {{ frappe.format(doc.responsable_date, {'fieldtype':'Date'}) or frappe.format(doc.date_inventaire, {'fieldtype':'Date'}) or '' }}{% if doc.docstatus == 1 %} à {{ frappe.utils.format_datetime(doc.modified, "HH:mm") }}{% endif %}</span>
       </td>
-      <td style="width:50%; text-align:center; border-top:1px solid #333; padding-top:5px;">
-        <strong>Magasinier</strong><br/>
-        {{ doc.signature_magasin_nom or '' }}<br/>
-        {% if doc.signature_magasin %}<img src="{{ doc.signature_magasin }}" style="max-height:60px;"/>{% endif %}
+      <td>
+        <span class="role">Responsable Magasin</span>
+        <span class="nom">{{ doc.magasin_nom or '—' }}</span>
+        {% if doc.signature_magasin %}<br/><img src="{{ doc.signature_magasin }}"/>{% endif %}
+        <span class="dt">{% if doc.magasin_date %}Signé le {{ frappe.format(doc.magasin_date, {'fieldtype':'Date'}) }}{% endif %}</span>
       </td>
     </tr>
   </table>
 
-  <p style="text-align:center; font-size:10px; margin-top:20px; color:#888;">
-    Document généré par KYA-ERP — {{ frappe.utils.now_datetime() }}
-  </p>
+  <p class="foot">Document généré par KYA-ERP — {{ frappe.utils.format_datetime(frappe.utils.now_datetime(), "dd/MM/yyyy HH:mm") }}</p>
 </div>

@@ -64,7 +64,11 @@ table.kya-table { width: 100%; border-collapse: collapse; font-size: 13px; }
       <h2>🏖️ Gestion des Congés</h2>
       <div class="sub">Pilotage RH — droits, congés pris et soldes (mis à jour en direct, tracés)</div>
     </div>
-    <button class="kya-btn ghost" onclick="window.print()">Imprimer</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <a class="kya-btn" href="/planning-equipe">🗓️ Planning d'équipe</a>
+      <a class="kya-btn alt" href="/calendrier-conges">📆 Calendrier annuel</a>
+      <button class="kya-btn ghost" onclick="window.print()">Imprimer</button>
+    </div>
   </div>
 
   <div class="kya-cg-tools">

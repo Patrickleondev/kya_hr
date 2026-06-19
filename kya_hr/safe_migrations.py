@@ -30,6 +30,7 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.setup_employment_types.execute", "Normalise Employment Types (FR: Stage/CDD/CDI/Prestataire/Apprentissage)"),
     ("kya_hr.setup_leave_types.execute", "Setup leave types HRMS"),
     ("kya_hr.setup_leave_extension.execute", "Setup champs prolongation exceptionnelle DG sur Leave Application"),
+    ("kya_hr.setup_planning_equipe.execute", "Workflow Planning de Congé d'Équipe (Chef -> RH -> DG -> Approuvé)"),
     ("kya_hr.force_sync_workspaces.execute", "Force sync workspaces"),
     ("kya_hr.setup_native_workspaces.execute", "Restaure workspaces natifs vides (HR/Accounting/Stock/Buying/Selling/Payroll)"),
     ("kya_hr.force_publish_webforms.execute", "Force publish web forms"),

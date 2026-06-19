@@ -1,0 +1,126 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Calendrier annuel des congés{% endblock %}
+
+{% block page_content %}
+<link rel="stylesheet" href="/assets/kya_hr/css/kya_dashboard.css">
+<style>
+.kcal { max-width: 1280px; margin: 18px auto 48px; padding: 0 16px; }
+.kcal .ico { font-size:1.6rem; }
+.kcal-ctrl { display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; margin:14px 0; }
+.kcal-ctrl label { display:block; font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:#1e293b; margin-bottom:3px; }
+.kcal-ctrl select, .kcal-ctrl input { border:1px solid #cbd5e1; border-radius:10px; padding:8px 10px; font-size:.9rem; min-width:150px; }
+.kcal-legend { display:flex; gap:14px; flex-wrap:wrap; font-size:.78rem; color:#475569; margin-bottom:8px; }
+.kcal-legend span { display:inline-flex; align-items:center; gap:5px; }
+.kcal-legend i { width:14px; height:14px; border-radius:4px; display:inline-block; }
+.lg-app{background:#16a34a;} .lg-wait{background:#f59e0b;} .lg-draft{background:#94a3b8;} .lg-rej{background:#ef4444;}
+
+.kcal-team { margin-top:18px; }
+.kcal-team h3 { font-size:.95rem; color:#0e7c4a; margin:0 0 6px; border-bottom:2px solid #e2e8f0; padding-bottom:4px; }
+.kcal-grid { border:1px solid #e2e8f0; border-radius:10px; overflow:hidden; }
+.kcal-hd, .kcal-row { display:grid; grid-template-columns:180px 1fr; align-items:stretch; }
+.kcal-hd { background:#f8fafc; font-size:.68rem; font-weight:700; color:#64748b; }
+.kcal-hd .lab { padding:6px 8px; }
+.kcal-months { position:relative; display:grid; grid-template-columns:repeat(12,1fr); }
+.kcal-months span { text-align:center; padding:6px 0; border-left:1px solid #eef2f7; text-transform:uppercase; }
+.kcal-row { border-top:1px solid #f1f5f9; }
+.kcal-row .name { padding:8px; font-size:.8rem; font-weight:600; color:#1e293b; display:flex; align-items:center; gap:6px; }
+.kcal-track { position:relative; height:30px; background:
+   repeating-linear-gradient(to right,transparent,transparent calc(100%/12 - 1px),#eef2f7 calc(100%/12 - 1px),#eef2f7 calc(100%/12)); }
+.kcal-bar { position:absolute; top:5px; height:20px; border-radius:5px; font-size:.62rem; color:#fff; line-height:20px; padding:0 5px; overflow:hidden; white-space:nowrap; box-shadow:0 1px 2px rgba(0,0,0,.15); cursor:default; }
+.b-app{background:#16a34a;} .b-wait{background:#f59e0b;} .b-draft{background:#94a3b8;} .b-rej{background:#ef4444;opacity:.7;}
+.kcal-stag { font-size:9px; background:#fce7f3; color:#be185d; border-radius:999px; padding:1px 6px; }
+.kcal-empty { text-align:center; color:#94a3b8; padding:40px; }
+@media (max-width:720px){ .kcal-hd,.kcal-row{grid-template-columns:110px 1fr;} .kcal-months span{font-size:.55rem;} }
+</style>
+
+<div class="kyad kcal">
+  <div class="kyad-hero" style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
+    <div><h1><span class="ico">📆</span> Calendrier annuel des congés</h1>
+      <p>Vue d'ensemble des périodes planifiées par équipe (issues des plannings de congé d'équipe).</p></div>
+    <a class="btn btn-light btn-sm" href="/planning-equipe"><i class="bi bi-pencil-square"></i> Saisir un planning</a>
+  </div>
+
+  <div class="kcal-ctrl">
+    <div><label>Année</label><input type="number" id="cal-annee" min="2024" max="2100"></div>
+    <div><label>Équipe</label><select id="cal-equipe"><option value="">Toutes les équipes</option></select></div>
+  </div>
+
+  <div class="kcal-legend">
+    <span><i class="lg-app"></i> Approuvé</span>
+    <span><i class="lg-wait"></i> En attente (RH/DG)</span>
+    <span><i class="lg-draft"></i> Brouillon</span>
+    <span><i class="lg-rej"></i> Rejeté</span>
+  </div>
+
+  <div id="cal-out"><div class="kcal-empty">Chargement…</div></div>
+</div>
+
+<script>
+const MOIS = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Août','Sep','Oct','Nov','Déc'];
+const TYPE_SHORT = {'Congé Annuel':'Annuel','Congé Maladie':'Maladie','Congé Maternité':'Mat.','Congé Paternité':'Pat.'};
+
+function dayOfYear(d){ const dt=new Date(d); const start=new Date(dt.getFullYear(),0,1);
+  return Math.floor((dt-start)/86400000); }
+function yearLen(y){ return ((y%4===0&&y%100!==0)||y%400===0)?366:365; }
+
+function barClass(etat){
+  if(etat==='Approuvé') return 'b-app';
+  if(etat==='Rejeté') return 'b-rej';
+  if((etat||'').indexOf('attente')>=0) return 'b-wait';
+  return 'b-draft';
+}
+
+async function loadEquipes(){
+  const r = await frappe.call({method:'frappe.client.get_list',
+    args:{doctype:'Equipe KYA', fields:['name','nom_equipe'], limit_page_length:0, order_by:'nom_equipe asc'}});
+  const sel=document.getElementById('cal-equipe');
+  (r.message||[]).forEach(t=>{ const o=document.createElement('option'); o.value=t.name; o.textContent=t.nom_equipe||t.name; sel.appendChild(o); });
+}
+
+async function load(){
+  const annee = document.getElementById('cal-annee').value;
+  const equipe = document.getElementById('cal-equipe').value;
+  const out = document.getElementById('cal-out');
+  out.innerHTML = '<div class="kcal-empty">Chargement…</div>';
+  const r = await frappe.call({method:'kya_hr.api.planning_equipe.get_calendrier', args:{annee, equipe}});
+  const data = r.message || {lignes:[]};
+  const lignes = data.lignes || [];
+  if(!lignes.length){ out.innerHTML = '<div class="kcal-empty">Aucun congé planifié pour cette sélection.</div>'; return; }
+
+  // group by equipe then employee
+  const byTeam = {};
+  lignes.forEach(l=>{ (byTeam[l.equipe]=byTeam[l.equipe]||{})[l.employee] = byTeam[l.equipe][l.employee]||{name:l.employee_name, rows:[]}; byTeam[l.equipe][l.employee].rows.push(l); });
+
+  const yl = yearLen(parseInt(annee,10));
+  let html = '';
+  Object.keys(byTeam).sort().forEach(team=>{
+    html += `<div class="kcal-team"><h3>${team}</h3><div class="kcal-grid">`;
+    html += `<div class="kcal-hd"><div class="lab">Employé</div><div class="kcal-months">${MOIS.map(m=>`<span>${m}</span>`).join('')}</div></div>`;
+    const emps = byTeam[team];
+    Object.keys(emps).forEach(empId=>{
+      const e = emps[empId];
+      let bars='';
+      e.rows.forEach(row=>{
+        const s=dayOfYear(row.date_debut), en=dayOfYear(row.date_fin);
+        const left=Math.max(0,(s/yl)*100), width=Math.max(1.2,((en-s+1)/yl)*100);
+        const t=TYPE_SHORT[row.type_conge]||row.type_conge||'';
+        bars+=`<div class="kcal-bar ${barClass(row.etat)}" style="left:${left}%;width:${width}%;" title="${row.employee_name} · ${row.date_debut} → ${row.date_fin} · ${row.type_conge} (${row.nb_jours}j) · ${row.etat}">${row.nb_jours}j ${t}</div>`;
+      });
+      html += `<div class="kcal-row"><div class="name">${e.name}</div><div class="kcal-track">${bars}</div></div>`;
+    });
+    html += `</div></div>`;
+  });
+  out.innerHTML = html;
+}
+
+frappe.ready(async ()=>{
+  const url=new URL(window.location.href);
+  document.getElementById('cal-annee').value = url.searchParams.get('annee') || new Date().getFullYear();
+  await loadEquipes();
+  document.getElementById('cal-annee').addEventListener('change', load);
+  document.getElementById('cal-equipe').addEventListener('change', load);
+  load();
+});
+</script>
+{% endblock %}

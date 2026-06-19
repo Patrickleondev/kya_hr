@@ -49,6 +49,7 @@ doctype_js = {
     "Bilan Fin de Stage": "public/js/bilan_fin_de_stage.js",
     "PV Sortie Materiel": "public/js/pv_sortie_materiel.js",
     "Planning Conge": "public/js/planning_conge.js",
+    "Planning Conge Equipe": "doctype/planning_conge_equipe/planning_conge_equipe.js",
     "Demande Achat KYA": "public/js/demande_achat_kya.js",
     "PV Entree Materiel": "doctype/pv_entree_materiel/pv_entree_materiel.js",
     "Inventaire KYA": "doctype/inventaire_kya/inventaire_kya.js",
@@ -166,6 +167,20 @@ doc_events = {
             "kya_hr.email_notifications.send_workflow_update",
             "kya_hr.leave_bridge.create_leave_from_planning",
             "kya_hr.planning_conge_logic.sync_statut",
+        ],
+    },
+    # Planning de congé d'ÉQUIPE : le chef saisit pour ses collègues.
+    # Flux Chef -> RH -> DG ; à l'approbation, un Planning Conge individuel
+    # est généré par employé (qui déclenche leave_bridge).
+    "Planning Conge Equipe": {
+        "validate": "kya_hr.planning_conge_equipe_logic.compute",
+        "on_update": [
+            "kya_hr.planning_conge_equipe_logic.sync_statut",
+            "kya_hr.planning_conge_equipe_logic.generate_individual_plannings",
+        ],
+        "on_update_after_submit": [
+            "kya_hr.planning_conge_equipe_logic.sync_statut",
+            "kya_hr.planning_conge_equipe_logic.generate_individual_plannings",
         ],
     },
     # PV et Bilan : pas de chef_routing (employee_field suffit)
