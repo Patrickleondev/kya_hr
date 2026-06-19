@@ -26,10 +26,11 @@
 
   .kya-inv .sign { margin-top:26px; }
   .kya-inv .sign td { width:50%; text-align:center; padding:6px 10px; vertical-align:top; }
-  .kya-inv .sign .role { font-weight:bold; border-top:1px solid #333; padding-top:6px; display:block; }
-  .kya-inv .sign .nom { font-size:12px; margin-top:2px; }
-  .kya-inv .sign .dt { font-size:10px; color:#666; margin-top:2px; }
-  .kya-inv .sign img { max-height:55px; margin-top:4px; }
+  .kya-inv .sign .role { font-weight:bold; text-transform:uppercase; font-size:11px; letter-spacing:.3px; display:block; margin-bottom:4px; }
+  .kya-inv .sign img { max-height:50px; display:block; margin:2px auto 0; }
+  .kya-inv .sign .vspace { height:42px; }
+  .kya-inv .sign .nom { font-size:12px; font-weight:bold; border-top:1px solid #333; padding-top:5px; display:block; }
+  .kya-inv .sign .dt { font-size:10px; color:#666; margin-top:2px; display:block; }
   .kya-inv .foot { text-align:center; font-size:10px; margin-top:18px; color:#888; }
 
   @media screen and (max-width:600px){
@@ -106,14 +107,14 @@
     <tr>
       <td>
         <span class="role">Responsable Inventaire</span>
-        <span class="nom">{{ doc.responsable_nom or '—' }}</span>
-        {% if doc.signature_responsable %}<br/><img src="{{ doc.signature_responsable }}"/>{% endif %}
+        {% if doc.signature_responsable %}<img src="{{ doc.signature_responsable }}"/>{% else %}<div class="vspace"></div>{% endif %}
+        <span class="nom">{{ doc.responsable_nom or '' }}</span>
         <span class="dt">Signé le {{ frappe.format(doc.responsable_date, {'fieldtype':'Date'}) or frappe.format(doc.date_inventaire, {'fieldtype':'Date'}) or '' }}{% if doc.docstatus == 1 %} à {{ frappe.utils.format_datetime(doc.modified, "HH:mm") }}{% endif %}</span>
       </td>
       <td>
         <span class="role">Responsable Magasin</span>
-        <span class="nom">{{ doc.magasin_nom or '—' }}</span>
-        {% if doc.signature_magasin %}<br/><img src="{{ doc.signature_magasin }}"/>{% endif %}
+        {% if doc.signature_magasin %}<img src="{{ doc.signature_magasin }}"/>{% else %}<div class="vspace"></div>{% endif %}
+        <span class="nom">{{ doc.magasin_nom or '' }}</span>
         <span class="dt">{% if doc.magasin_date %}Signé le {{ frappe.format(doc.magasin_date, {'fieldtype':'Date'}) }}{% endif %}</span>
       </td>
     </tr>
