@@ -45,7 +45,7 @@ table.brouillards tfoot td { padding: 12px; }
 .empty .icon { font-size: 48px; margin-bottom: 12px; }
 
 @media print {
-    .actions, .recap-nav, .web-footer, header, .navbar { display: none !important; }
+    .actions, .recap-nav, .web-footer, header, .navbar, .no-print { display: none !important; }
     .recap-page { margin: 0; max-width: none; }
 }
 </style>
@@ -82,8 +82,11 @@ table.brouillards tfoot td { padding: 12px; }
         </div>
 
         <div class="actions">
-            <a href="/api/method/kya_hr.kya_hr.doctype.brouillard_caisse.brouillard_caisse.export_recap?semaine={{ iso_tag }}&fmt=pdf" class="btn-export btn-pdf">📄 Télécharger PDF</a>
-            <a href="/api/method/kya_hr.kya_hr.doctype.brouillard_caisse.brouillard_caisse.export_recap?semaine={{ iso_tag }}&fmt=docx" class="btn-export btn-docx">📝 Télécharger Word</a>
+            {% if bundle_pdf_url %}
+            <a href="{{ bundle_pdf_url }}" class="btn-export btn-pdf" target="_blank">📑 Tous les brouillards (PDF groupé)</a>
+            {% endif %}
+            <a href="/api/method/kya_hr.kya_hr.doctype.brouillard_caisse.brouillard_caisse.export_recap?semaine={{ iso_tag }}&fmt=pdf" class="btn-export btn-docx">📄 Synthèse PDF</a>
+            <a href="/api/method/kya_hr.kya_hr.doctype.brouillard_caisse.brouillard_caisse.export_recap?semaine={{ iso_tag }}&fmt=docx" class="btn-export btn-docx">📝 Synthèse Word</a>
             <button onclick="window.print()" class="btn-export btn-print">🖨️ Imprimer / HTML</button>
         </div>
 
@@ -98,6 +101,7 @@ table.brouillards tfoot td { padding: 12px; }
                     <th class="num">Sorties</th>
                     <th class="num">Solde Final</th>
                     <th>Statut</th>
+                    <th class="no-print">PDF</th>
                 </tr>
             </thead>
             <tbody>
@@ -110,6 +114,7 @@ table.brouillards tfoot td { padding: 12px; }
                     <td class="num">{{ "{:,.0f}".format(b.total_sorties or 0).replace(",", " ") }}</td>
                     <td class="num"><b>{{ "{:,.0f}".format(b.solde_final or 0).replace(",", " ") }}</b></td>
                     <td>{{ b.statut or "" }}</td>
+                    <td class="no-print"><a href="{{ b.pdf_url }}" target="_blank" title="PDF officiel signé">📄 PDF</a></td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -120,6 +125,7 @@ table.brouillards tfoot td { padding: 12px; }
                     <td class="num">{{ "{:,.0f}".format(total_s).replace(",", " ") }}</td>
                     <td class="num">{{ "{:,.0f}".format(solde).replace(",", " ") }}</td>
                     <td></td>
+                    <td class="no-print"></td>
                 </tr>
             </tfoot>
         </table>
