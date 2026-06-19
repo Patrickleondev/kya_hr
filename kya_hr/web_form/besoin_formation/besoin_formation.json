@@ -20,7 +20,7 @@
  "module": "KYA HR",
  "name": "besoin-formation",
  "owner": "Administrator",
- "published": 1,
+ "published": 0,
  "route": "besoin-formation",
  "show_sidebar": 1,
  "success_message": "✅ Vos besoins en formation ont été enregistrés. Pensez à cliquer sur « Soumettre à la RH » depuis la fiche pour lancer la revue.",

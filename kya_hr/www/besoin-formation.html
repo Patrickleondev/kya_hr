@@ -1,0 +1,389 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Expression de Besoins de Formation{% endblock %}
+
+{% block page_content %}
+<link rel="stylesheet" href="/assets/kya_hr/css/kya_dashboard.css">
+<style>
+.kbf { max-width: 900px; margin: 18px auto 60px; padding: 0 16px; }
+.kbf .ico { font-size: 1.5rem; }
+
+/* Controls */
+.kbf-ctrl { display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; margin:14px 0 8px; }
+.kbf-ctrl > div { display:flex; flex-direction:column; }
+.kbf-ctrl label { font-size:.72rem; font-weight:700; color:var(--kyad-navy,#1e293b);
+  text-transform:uppercase; letter-spacing:.4px; margin-bottom:3px; }
+.kbf-ctrl select, .kbf-ctrl input[type=number], .kbf-ctrl input[type=text] {
+  border:1px solid var(--kyad-border,#cbd5e1); border-radius:10px;
+  padding:8px 10px; font-size:.9rem; min-width:140px; background:#fff; }
+.kbf-ctrl input[readonly] { background:#f8fafc; color:#64748b; }
+
+/* Status banner */
+.kbf-status { border-left:4px solid #0e7c4a; background:#f0fdf4;
+  border-radius:8px; padding:10px 14px; font-size:.83rem; color:#065f46; margin:8px 0 4px; }
+.kbf-status.warn { border-color:#f59e0b; background:#fffbeb; color:#92400e; }
+
+/* Formation card */
+.kbf-card { background:#fff; border:1px solid #e2e8f0; border-radius:14px;
+  padding:20px 22px; margin-bottom:16px; box-shadow:0 1px 4px rgba(0,0,0,.05); }
+.kbf-card-hdr { display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:16px; padding-bottom:10px; border-bottom:2px solid #f1f5f9; }
+.kbf-card-num { font-weight:800; font-size:.95rem; color:#0e7c4a; letter-spacing:.3px; }
+.kbf-del { border:none; background:#fee2e2; color:#b91c1c; border-radius:8px;
+  padding:5px 12px; font-size:.78rem; font-weight:700; cursor:pointer; }
+.kbf-del:hover { background:#fca5a5; }
+
+/* Fields */
+.kbf-field { display:flex; flex-direction:column; margin-bottom:12px; }
+.kbf-field label { font-size:.74rem; font-weight:700; color:#475569;
+  text-transform:uppercase; letter-spacing:.3px; margin-bottom:4px; }
+.kbf-field input[type=text], .kbf-field input[type=number],
+.kbf-field textarea, .kbf-field select {
+  border:1px solid #e2e8f0; border-radius:9px; padding:8px 10px;
+  font-size:.88rem; font-family:inherit; width:100%; box-sizing:border-box;
+  transition:border-color .15s; }
+.kbf-field input:focus, .kbf-field textarea:focus, .kbf-field select:focus {
+  outline:none; border-color:#0e7c4a; box-shadow:0 0 0 3px rgba(14,124,74,.1); }
+.kbf-field textarea { resize:vertical; min-height:60px; }
+.kbf-field .req { color:#dc2626; }
+.kbf-field.err input, .kbf-field.err textarea { border-color:#dc2626 !important; }
+
+/* Layouts */
+.kbf-full { width:100%; }
+.kbf-row2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.kbf-row3 { display:grid; grid-template-columns:1fr 140px 100px; gap:12px; }
+
+/* Add button */
+.kbf-add { display:block; width:100%; border:2px dashed #0e7c4a; background:#ecfdf5;
+  color:#065f46; border-radius:12px; padding:12px; font-weight:800;
+  font-size:.92rem; cursor:pointer; margin:4px 0 20px; text-align:center; }
+.kbf-add:hover { background:#d1fae5; }
+
+/* Footer */
+.kbf-foot { display:flex; justify-content:space-between; align-items:center;
+  flex-wrap:wrap; gap:12px; margin-top:8px; padding-top:16px;
+  border-top:1px solid #e2e8f0; }
+.kbf-summary { font-size:.85rem; color:#475569; }
+.kbf-summary b { color:#0e7c4a; }
+.kbf-actions { display:flex; gap:10px; flex-wrap:wrap; }
+.kbf-btn-draft { background:#f1f5f9; color:#334155; border:1px solid #cbd5e1;
+  border-radius:10px; padding:10px 18px; font-weight:700; font-size:.88rem; cursor:pointer; }
+.kbf-btn-draft:hover { background:#e2e8f0; }
+.kbf-btn-submit { background:#0e7c4a; color:#fff; border:none; border-radius:10px;
+  padding:10px 20px; font-weight:800; font-size:.9rem; cursor:pointer; }
+.kbf-btn-submit:disabled { opacity:.5; cursor:not-allowed; }
+.kbf-btn-submit:hover:not(:disabled) { background:#065f46; }
+
+@media (max-width:640px) {
+  .kbf-row2, .kbf-row3 { grid-template-columns:1fr; }
+  .kbf-ctrl > div { min-width:100%; }
+  .kbf-actions { width:100%; }
+  .kbf-btn-draft, .kbf-btn-submit { flex:1; text-align:center; }
+}
+</style>
+
+<div class="kyad kbf">
+  <div class="kyad-hero" style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
+    <div>
+      <h1><span class="ico">📋</span> Expression de Besoins de Formation</h1>
+      <p>Recensez les formations souhaitées pour votre équipe. Ajoutez une carte par formation, renseignez l'intitulé et la justification (obligatoires), puis soumettez à la RH.</p>
+    </div>
+    <a class="btn btn-light btn-sm" href="/formation-dashboard">📊 Tableau de bord formation</a>
+  </div>
+
+  <div class="kyad-panel" style="padding:16px 20px;">
+    <div class="kbf-ctrl">
+      <div style="flex:2;min-width:200px;">
+        <label>Équipe <span style="color:#dc2626">*</span></label>
+        <select id="kbf-equipe"></select>
+      </div>
+      <div style="flex:1;min-width:140px;">
+        <label>Département</label>
+        <input type="text" id="kbf-dept" readonly placeholder="Auto">
+      </div>
+      <div style="width:90px;">
+        <label>Année <span style="color:#dc2626">*</span></label>
+        <input type="number" id="kbf-annee" min="2024" max="2100" step="1">
+      </div>
+      <div style="width:130px;">
+        <label>Trimestre / Période</label>
+        <select id="kbf-trim">
+          <option value="">— (non précisé)</option>
+          <option value="T1">T1</option>
+          <option value="T2">T2</option>
+          <option value="T3">T3</option>
+          <option value="T4">T4</option>
+          <option value="Annuel">Annuel</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div id="kbf-status" style="display:none" class="kbf-status"></div>
+
+  <div id="kbf-formations"></div>
+
+  <button class="kbf-add" id="kbf-add-btn" onclick="addFormation()">＋ Ajouter une formation</button>
+
+  <div class="kbf-foot">
+    <div class="kbf-summary"><b id="kbf-nb">0</b> formation(s) saisie(s)</div>
+    <div class="kbf-actions">
+      <button class="kbf-btn-draft" onclick="sauvegarder(false)">💾 Enregistrer le brouillon</button>
+      <button class="kbf-btn-submit" id="kbf-go" onclick="sauvegarder(true)" disabled>✅ Soumettre à la RH</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let DOC_NAME = null;
+let TEAMS = [];
+let LOCKED = false;
+
+function esc(s) { return (s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+/* ── Init ─────────────────────────────────────────────────────── */
+async function init() {
+  document.getElementById('kbf-annee').value = new Date().getFullYear();
+
+  const r = await frappe.call({ method: 'kya_hr.api.besoin_formation.get_equipes_chef' });
+  TEAMS = (r.message && r.message.teams) || [];
+
+  const sel = document.getElementById('kbf-equipe');
+  if (!TEAMS.length) {
+    showStatus("Aucune équipe ne vous est rattachée comme chef. Contactez la RH.", true);
+    document.getElementById('kbf-add-btn').style.display = 'none';
+    return;
+  }
+  sel.innerHTML = TEAMS.map(t =>
+    `<option value="${esc(t.name)}">${esc(t.nom_equipe || t.name)}${t.departement ? ' · ' + esc(t.departement) : ''}</option>`
+  ).join('');
+
+  sel.addEventListener('change', onEquipeChange);
+  document.getElementById('kbf-annee').addEventListener('change', loadExisting);
+
+  onEquipeChange();
+}
+
+function onEquipeChange() {
+  const equipe = document.getElementById('kbf-equipe').value;
+  const team = TEAMS.find(t => t.name === equipe);
+  document.getElementById('kbf-dept').value = (team && team.departement) || '';
+  loadExisting();
+}
+
+/* ── Charger brouillon existant ───────────────────────────────── */
+async function loadExisting() {
+  const equipe = document.getElementById('kbf-equipe').value;
+  const annee  = document.getElementById('kbf-annee').value;
+  if (!equipe || !annee) return;
+
+  document.getElementById('kbf-formations').innerHTML = '';
+  document.getElementById('kbf-status').style.display = 'none';
+  DOC_NAME = null;
+  LOCKED = false;
+
+  const r = await frappe.call({
+    method: 'kya_hr.api.besoin_formation.get_besoin_existant',
+    args: { equipe, annee }
+  });
+  const ex = r.message || { existe: false };
+
+  if (ex.existe && !ex.editable) {
+    LOCKED = true;
+    showStatus(`⚠️ Un besoin de formation <b>${annee}</b> existe déjà pour cette équipe (statut : <b>${esc(ex.statut)}</b>). Il n'est plus modifiable ici. Consultez la RH pour toute modification.`, true);
+    document.getElementById('kbf-add-btn').style.display = 'none';
+    document.getElementById('kbf-go').disabled = true;
+    return;
+  }
+
+  document.getElementById('kbf-add-btn').style.display = '';
+
+  if (ex.existe && ex.editable) {
+    DOC_NAME = ex.name;
+    document.getElementById('kbf-trim').value = ex.trimestre || '';
+    showStatus(`📝 Brouillon <b>${esc(ex.name)}</b> repris — complétez et soumettez.`, false);
+    (ex.lignes || []).forEach(l => addFormation(l));
+  } else {
+    addFormation();
+  }
+  recompute();
+}
+
+/* ── Ajouter une carte formation ──────────────────────────────── */
+function addFormation(data) {
+  if (LOCKED) return;
+  const d = data || {};
+  const idx = document.querySelectorAll('.kbf-card').length + 1;
+  const div = document.createElement('div');
+  div.className = 'kbf-card';
+
+  const pri = d.priorite || 'Moyenne';
+  div.innerHTML = `
+    <div class="kbf-card-hdr">
+      <span class="kbf-card-num">Formation #${idx}</span>
+      <button class="kbf-del" onclick="removeCard(this)">✕ Retirer</button>
+    </div>
+
+    <div class="kbf-field kbf-full">
+      <label>Intitulé de l'action de formation <span class="req">*</span></label>
+      <input type="text" class="c-intitule" value="${esc(d.intitule)}"
+        placeholder="Ex : Excel avancé, Sécurité électrique, Gestion de projet…">
+    </div>
+
+    <div class="kbf-row2">
+      <div class="kbf-field">
+        <label>Besoin exprimé</label>
+        <textarea class="c-besoin" rows="2"
+          placeholder="Quel manque ou difficulté a déclenché cette demande ?">${esc(d.besoin_exprime)}</textarea>
+      </div>
+      <div class="kbf-field">
+        <label>Objectif visé</label>
+        <textarea class="c-objectif" rows="2"
+          placeholder="Que doit maîtriser le(s) bénéficiaire(s) à l'issue ?">${esc(d.objectif)}</textarea>
+      </div>
+    </div>
+
+    <div class="kbf-row3">
+      <div class="kbf-field">
+        <label>Compétence attendue</label>
+        <input type="text" class="c-competence" value="${esc(d.competence)}"
+          placeholder="Ex : Maîtriser les tableaux croisés dynamiques">
+      </div>
+      <div class="kbf-field">
+        <label>Priorité</label>
+        <select class="c-priorite">
+          <option value="Haute"${pri==='Haute'?' selected':''}>🔴 Haute</option>
+          <option value="Moyenne"${pri==='Moyenne'?' selected':''}>🟡 Moyenne</option>
+          <option value="Basse"${pri==='Basse'?' selected':''}>🟢 Basse</option>
+        </select>
+      </div>
+      <div class="kbf-field">
+        <label>Nb. participants</label>
+        <input type="number" class="c-nb" value="${d.nb_participants || 1}" min="1" max="999">
+      </div>
+    </div>
+
+    <div class="kbf-field kbf-full">
+      <label>Bénéficiaires (employés concernés)</label>
+      <textarea class="c-beneficiaires" rows="2"
+        placeholder="Noms ou postes des personnes à former…">${esc(d.employes_concernes)}</textarea>
+    </div>
+
+    <div class="kbf-field kbf-full">
+      <label>Justification / Pourquoi <span class="req">*</span></label>
+      <textarea class="c-justif" rows="3"
+        placeholder="Expliquez en quoi cette formation est nécessaire pour l'activité et l'équipe…">${esc(d.justification)}</textarea>
+    </div>`;
+
+  document.getElementById('kbf-formations').appendChild(div);
+  recompute();
+}
+
+function removeCard(btn) {
+  btn.closest('.kbf-card').remove();
+  renumber();
+  recompute();
+}
+
+function renumber() {
+  document.querySelectorAll('.kbf-card .kbf-card-num').forEach((el, i) => {
+    el.textContent = `Formation #${i + 1}`;
+  });
+}
+
+/* ── Recompute summary + enable/disable submit ────────────────── */
+function recompute() {
+  const cards = document.querySelectorAll('.kbf-card');
+  let valid = 0;
+  cards.forEach(card => {
+    const ok = card.querySelector('.c-intitule').value.trim() &&
+               card.querySelector('.c-justif').value.trim();
+    if (ok) valid++;
+  });
+  document.getElementById('kbf-nb').textContent = cards.length;
+  document.getElementById('kbf-go').disabled = (valid === 0 || LOCKED);
+}
+
+/* ── Enregistrer / Soumettre ──────────────────────────────────── */
+async function sauvegarder(soumettre) {
+  const equipe = document.getElementById('kbf-equipe').value;
+  const annee  = document.getElementById('kbf-annee').value;
+  const trim   = document.getElementById('kbf-trim').value;
+
+  const lignes = [];
+  let hasErr = false;
+
+  document.querySelectorAll('.kbf-card').forEach(card => {
+    const intitule = card.querySelector('.c-intitule').value.trim();
+    const justif   = card.querySelector('.c-justif').value.trim();
+
+    // Validation visuelle des champs obligatoires
+    card.querySelector('.c-intitule').closest('.kbf-field').classList.toggle('err', !intitule);
+    card.querySelector('.c-justif').closest('.kbf-field').classList.toggle('err', !justif);
+    if (!intitule || !justif) { hasErr = true; return; }
+
+    lignes.push({
+      intitule,
+      besoin_exprime:     card.querySelector('.c-besoin').value.trim(),
+      objectif:           card.querySelector('.c-objectif').value.trim(),
+      competence:         card.querySelector('.c-competence').value.trim(),
+      priorite:           card.querySelector('.c-priorite').value,
+      employes_concernes: card.querySelector('.c-beneficiaires').value.trim(),
+      nb_participants:    parseInt(card.querySelector('.c-nb').value) || 1,
+      justification:      justif,
+    });
+  });
+
+  if (hasErr) {
+    frappe.msgprint("Renseignez l'intitulé et la justification pour chaque formation (champs en rouge).");
+    return;
+  }
+  if (!lignes.length) {
+    frappe.msgprint("Ajoutez au moins une formation avant d'enregistrer.");
+    return;
+  }
+
+  const btn = document.getElementById('kbf-go');
+  btn.disabled = true; btn.textContent = 'Enregistrement…';
+
+  try {
+    const r = await frappe.call({
+      method: 'kya_hr.api.besoin_formation.save_besoin',
+      args: { equipe, annee, trimestre: trim, lignes: JSON.stringify(lignes), doc_name: DOC_NAME || '' }
+    });
+    DOC_NAME = r.message.name;
+
+    if (soumettre) {
+      await frappe.call({
+        method: 'kya_hr.api.besoin_formation.soumettre_besoin',
+        args: { doc_name: DOC_NAME }
+      });
+      frappe.msgprint({
+        title: 'Soumis à la RH ✅',
+        message: `Le besoin <b>${DOC_NAME}</b> a été transmis à la RH pour revue. La RH vous contactera pour un entretien de validation.`,
+        indicator: 'green'
+      });
+      setTimeout(() => { window.location.href = '/formation-dashboard'; }, 2000);
+    } else {
+      frappe.show_alert({ message: `💾 Brouillon <b>${DOC_NAME}</b> enregistré.`, indicator: 'green' }, 4);
+      showStatus(`📝 Brouillon <b>${DOC_NAME}</b> enregistré — vous pouvez continuer la saisie ou soumettre.`, false);
+    }
+  } catch(e) {
+    // frappe gère l'affichage d'erreur
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✅ Soumettre à la RH';
+    recompute();
+  }
+}
+
+function showStatus(msg, warn) {
+  const el = document.getElementById('kbf-status');
+  el.innerHTML = msg;
+  el.className = 'kbf-status' + (warn ? ' warn' : '');
+  el.style.display = 'block';
+}
+
+frappe.ready(init);
+</script>
+{% endblock %}
