@@ -58,8 +58,8 @@
           <tr data-emp="{{ e.name }}" data-name="{{ (e.employee_name or '')|lower }}" data-team="{{ (e.equipe or '')|lower }}">
             <td><b>{{ e.employee_name }}</b></td>
             <td class="text-muted small">{{ e.equipe or "—" }}</td>
-            <td><input type="text" class="kyad-time in-time" inputmode="numeric" maxlength="5" placeholder="HH:MM" value="{{ e.arrivee }}"></td>
-            <td><input type="text" class="kyad-time out-time" inputmode="numeric" maxlength="5" placeholder="HH:MM" value="{{ e.sortie }}"></td>
+            <td><input type="text" class="kyad-time in-time" list="kya-heures" inputmode="numeric" maxlength="5" placeholder="HH:MM" value="{{ e.arrivee }}"></td>
+            <td><input type="text" class="kyad-time out-time" list="kya-heures" inputmode="numeric" maxlength="5" placeholder="HH:MM" value="{{ e.sortie }}"></td>
             <td class="cell-hrs kyad-hrs">{{ e.heures if e.heures else "—" }}</td>
             <td class="cell-status">
               {% if e.etat == "Présent" %}<span class="kyad-badge ok">Présent</span>
@@ -77,8 +77,23 @@
       </table>
     </div>
   </div>
-  <p class="text-muted small mt-2">Le marquage est tracé (qui, quand). Le retard est calculé selon l'heure d'arrivée vs l'horaire de l'employé ; les heures travaillées = sortie − arrivée.</p>
+  <p class="text-muted small mt-2">Le marquage est tracé (qui, quand). Le retard est calculé selon l'heure d'arrivée vs l'horaire de l'employé ; les heures travaillées = sortie − arrivée. Choisissez l'heure dans la liste (format 24h) ou saisissez-la.</p>
 </div>
+
+<!-- Sélecteur d'heures 24h (pas d'AM/PM, indépendant de la langue du navigateur).
+     Partagé par tous les champs via list="kya-heures" ; on peut aussi taper l'heure exacte. -->
+<datalist id="kya-heures"></datalist>
+<script>
+(function(){
+  var dl=document.getElementById('kya-heures');
+  if(dl){ var html='';
+    for(var hh=6; hh<=21; hh++){ for(var mm=0; mm<60; mm+=15){
+      var v=(hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm; html+='<option value="'+v+'">';
+    }}
+    dl.innerHTML=html;
+  }
+})();
+</script>
 
 <script>
 (function() {

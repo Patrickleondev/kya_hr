@@ -102,14 +102,36 @@ def _compute_working_hours(in_dt: datetime, out_dt: datetime) -> float:
 
 
 def _create_checkin(employee: str, log_type: str, ts: datetime, marked_by: str) -> str:
-    """Cree un Employee Checkin. Retourne son name."""
+    """Cree un Employee Checkin (idempotent).
+
+    Re-valider une présence rejouait l'insertion -> HRMS levait « Cet employé a
+    déjà un journal avec le même horodatage » et tout le marquage échouait (donc
+    les heures ne se calculaient jamais). On réutilise donc un pointage existant
+    au lieu d'en recréer un.
+    """
+    existing = frappe.db.get_value(
+        "Employee Checkin",
+        {"employee": employee, "log_type": log_type, "time": ts},
+        "name",
+    )
+    if existing:
+        return existing
     doc = frappe.new_doc("Employee Checkin")
     doc.employee = employee
     doc.log_type = log_type  # "IN" ou "OUT"
     doc.time = ts
     doc.device_id = f"manual:{marked_by}"
-    doc.insert(ignore_permissions=True)
-    return doc.name
+    try:
+        doc.insert(ignore_permissions=True)
+        return doc.name
+    except Exception:
+        # doublon d'horodatage (course / re-validation) : réutiliser l'existant
+        existing = frappe.db.get_value(
+            "Employee Checkin", {"employee": employee, "time": ts}, "name"
+        )
+        if existing:
+            return existing
+        raise
 
 
 def _get_or_create_attendance(employee: str, att_date: str) -> Any:
