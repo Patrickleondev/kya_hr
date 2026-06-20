@@ -88,7 +88,7 @@
       <h1><span class="ico">📋</span> Expression de Besoins de Formation</h1>
       <p>Recensez les formations souhaitées pour votre équipe. Ajoutez une carte par formation, renseignez l'intitulé et la justification (obligatoires), puis soumettez à la RH.</p>
     </div>
-    <a class="btn btn-light btn-sm" href="/formation-dashboard">📊 Tableau de bord formation</a>
+    <a class="btn btn-light btn-sm" id="kbf-dash-link" href="/formation-dashboard" style="display:none">📊 Tableau de bord formation</a>
   </div>
 
   <div class="kyad-panel" style="padding:16px 20px;">
@@ -147,6 +147,11 @@ async function init() {
 
   const r = await frappe.call({ method: 'kya_hr.api.besoin_formation.get_equipes_chef' });
   TEAMS = (r.message && r.message.teams) || [];
+
+  // Le tableau de bord formation est réservé à la RH / Direction.
+  if (r.message && r.message.is_rh) {
+    document.getElementById('kbf-dash-link').style.display = '';
+  }
 
   const sel = document.getElementById('kbf-equipe');
   if (!TEAMS.length) {

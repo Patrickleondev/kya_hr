@@ -26,7 +26,9 @@ def _is_rh():
 def get_equipes_chef():
     emp = _emp()
     is_rh = _is_rh()
-    if is_rh and not frappe.db.exists("Equipe KYA", {"chef_equipe": emp}):
+    # La RH voit TOUJOURS toutes les équipes (même si elle est aussi chef d'une équipe).
+    # Un chef (non-RH) ne voit que les équipes dont il est responsable.
+    if is_rh:
         teams = frappe.get_all(
             "Equipe KYA",
             fields=["name", "nom_equipe", "departement", "chef_equipe", "chef_equipe_name"],

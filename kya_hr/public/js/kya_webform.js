@@ -2157,6 +2157,60 @@
         { fn: "ecart",         label: "Écart",         type: "float", w: "11%", align: "right", ro: true,
           formula: function (r) { return num(r.qte_comptee) - num(r.qte_theorique); } }
       ]
+    },
+
+    /* appel-offre : DEUX tables (articles + fournisseurs) -> tableau de schémas */
+    "appel-offre": [
+      {
+        field: "items",
+        title: "ARTICLES À CONSULTER",
+        addLabel: "+ Ajouter un article",
+        columns: [
+          { fn: "item_code",    label: "Article",      type: "text",  w: "16%" },
+          { fn: "description",  label: "Description",  type: "text",  grow: true },
+          { fn: "quantite",     label: "Qté",          type: "float", w: "10%", align: "right" },
+          { fn: "udm",          label: "UdM",          type: "text",  w: "10%" },
+          { fn: "date_requise", label: "Date requise", type: "date",  w: "16%" }
+        ]
+      },
+      {
+        field: "fournisseurs",
+        title: "FOURNISSEURS CONSULTÉS",
+        addLabel: "+ Ajouter un fournisseur",
+        columns: [
+          { fn: "fournisseur",     label: "Fournisseur",          type: "link", link: "Supplier", w: "18%",
+            fetch: { fournisseur_nom: "supplier_name" } },
+          { fn: "fournisseur_nom", label: "Nom / Raison Sociale", type: "text", grow: true },
+          { fn: "email",           label: "Email",                type: "text", w: "18%" },
+          { fn: "telephone",       label: "Téléphone",            type: "text", w: "13%" },
+          { fn: "montant_propose", label: "Montant (XOF)",        type: "num",  w: "15%", align: "right" }
+        ]
+      }
+    ],
+
+    "planning-conge": {
+      field: "periodes",
+      title: "PÉRIODES DE CONGÉ",
+      addLabel: "+ Ajouter une période",
+      columns: [
+        { fn: "date_debut", label: "Date Début",    type: "date",  w: "18%" },
+        { fn: "date_fin",   label: "Date Fin",      type: "date",  w: "18%" },
+        { fn: "nb_jours",   label: "Nb Jours",      type: "float", w: "10%", align: "right", ro: true },
+        { fn: "type_conge", label: "Type de Congé", type: "link",  link: "Leave Type", w: "22%" },
+        { fn: "remarque",   label: "Remarque",      type: "text",  grow: true }
+      ]
+    },
+
+    "sortie-vehicule": {
+      field: "passagers",
+      title: "PASSAGERS / ÉQUIPAGE",
+      addLabel: "+ Ajouter un passager",
+      columns: [
+        { fn: "employee",      label: "Employé",  type: "link", link: "Employee", w: "26%",
+          fetch: { employee_name: "employee_name" } },
+        { fn: "employee_name", label: "Nom",      type: "text", w: "30%", ro: true },
+        { fn: "fonction",      label: "Fonction / Rôle dans la mission", type: "text", grow: true }
+      ]
     }
   };
 
@@ -2314,27 +2368,42 @@
   }
 
   /* --- Autocomplete Link : remplir la datalist d'une cellule ------ */
+  /* Champ "titre" lisible par DocType (sinon on retombe sur le name/ID). */
+  var _kyaTitleField = {
+    "Item": "item_name",
+    "Supplier": "supplier_name",
+    "Employee": "employee_name",
+    "Customer": "customer_name"
+  };
   var _kyaLinkTimer = null;
   function fillDatalist(input) {
     var dt = input.getAttribute("data-link");
     if (!dt || !window.frappe || !frappe.call) return;
     var q = input.value || "";
-    var nameField = dt === "Item" ? "item_name" : "name";
+    var titleField = _kyaTitleField[dt] || null;
+    var fields = titleField ? ["name", titleField] : ["name"];
     var filters = [];
-    if (q) filters.push([dt, nameField, "like", "%" + q + "%"]);
+    if (q) {
+      // chercher sur le name ET sur le titre lisible
+      filters = titleField ? [[titleField, "like", "%" + q + "%"]] : [["name", "like", "%" + q + "%"]];
+    }
     frappe.call({
       method: "frappe.client.get_list",
       args: {
         doctype: dt,
-        filters: q ? [[nameField, "like", "%" + q + "%"]] : [],
-        fields: dt === "Item" ? ["name", "item_name"] : ["name"],
-        limit_page_length: 12
+        filters: filters,
+        fields: fields,
+        order_by: (titleField || "name") + " asc",
+        limit_page_length: 15  // jamais plus de 15 -> ne dump pas 1000 articles
       }
     }).then(function (r) {
       var dl = document.getElementById(input.getAttribute("list"));
       if (!dl) return;
       dl.innerHTML = (r.message || []).map(function (it) {
-        return '<option value="' + escapeHtml(it.name) + '">' + escapeHtml(it.item_name || it.name) + "</option>";
+        var label = (titleField && it[titleField]) ? it[titleField] : it.name;
+        // value = name (clé réelle) ; label affiché = nom lisible + (code) si différent
+        var show = (label && label !== it.name) ? (label + "  —  " + it.name) : it.name;
+        return '<option value="' + escapeHtml(it.name) + '">' + escapeHtml(show) + "</option>";
       }).join("");
     }).catch(function () {});
   }
@@ -2382,12 +2451,22 @@
     schema.columns.forEach(function (cc) { if (cc.fn === fn) col = cc; });
     return col;
   }
+  /* Un form peut déclarer 1 schéma (objet) ou plusieurs (tableau de schémas,
+     ex. appel-offre = articles + fournisseurs). On normalise toujours en liste. */
+  function schemasFor(route) {
+    var s = KYA_DOC_TABLES[route];
+    if (!s) return [];
+    return Array.isArray(s) ? s : [s];
+  }
   function liveCtx(t) {
     if (!t || !t.closest) return null;
     var host = t.closest(".kya-doc-table-host");
     if (!host) return null;
     var ctrl = t.closest(".frappe-control");
-    var schema = KYA_DOC_TABLES[getRoute()];
+    // Résoudre QUEL tableau (par fieldname du contrôle) pour les forms multi-tables.
+    var fn = ctrl && ctrl.getAttribute("data-fieldname");
+    var schema = null;
+    schemasFor(getRoute()).forEach(function (s) { if (s.field === fn) schema = s; });
     if (!schema) return null;
     return { host: host, ctrl: ctrl, schema: schema };
   }
@@ -2406,6 +2485,36 @@
     if (window._kyaDTListeners) return;
     window._kyaDTListeners = true;
 
+    // Proposer les options DÈS le focus (clic) sur un champ lien, pas seulement
+    // en tapant : l'utilisateur voit immédiatement la liste (Article, Magasin…).
+    document.addEventListener("focusin", function (e) {
+      var t = e.target;
+      if (!t.classList || !t.classList.contains("kya-dt-link")) return;
+      fillDatalist(t);
+    });
+
+    // Garde-fou anti-erreur d'enregistrement : à la sortie d'un champ lien, si la
+    // valeur saisie ne correspond à AUCUNE entrée existante, on la marque en rouge
+    // et on prévient (évite un item_code/magasin invalide qui ferait planter le stock).
+    document.addEventListener("focusout", function (e) {
+      var t = e.target;
+      if (!t.classList || !t.classList.contains("kya-dt-link")) return;
+      var val = (t.value || "").trim();
+      if (!val) { t.classList.remove("kya-dt-invalid"); return; }
+      var dt = t.getAttribute("data-link");
+      if (!dt || !window.frappe || !frappe.call) return;
+      frappe.call({
+        method: "frappe.client.get_value",
+        args: { doctype: dt, filters: { name: val }, fieldname: "name" }
+      }).then(function (r) {
+        var ok = r && r.message && r.message.name;
+        t.classList.toggle("kya-dt-invalid", !ok);
+        if (!ok && frappe.show_alert) {
+          frappe.show_alert({ message: "« " + val + " » n'existe pas dans " + dt + " — choisissez une valeur proposée.", indicator: "orange" }, 5);
+        }
+      }).catch(function () {});
+    });
+
     document.addEventListener("input", function (e) {
       var t = e.target;
       if (!t.classList || !t.classList.contains("kya-dt-in")) return;
@@ -2416,7 +2525,7 @@
       if (t.classList.contains("kya-dt-text")) autoGrow(t);
       if (t.classList.contains("kya-dt-link")) {
         if (_kyaLinkTimer) clearTimeout(_kyaLinkTimer);
-        _kyaLinkTimer = setTimeout(function () { fillDatalist(t); }, 250);
+        _kyaLinkTimer = setTimeout(function () { fillDatalist(t); }, 150);
       }
       recompute(cx.schema, cx.host);
       markDirty();
@@ -2487,33 +2596,36 @@
   }
 
   function ensureMounted() {
-    var route = getRoute();
-    var schema = KYA_DOC_TABLES[route];
-    if (!schema) return false;
-    var ctrl = document.querySelector('.frappe-control[data-fieldname="' + schema.field + '"]');
-    if (!ctrl) return false;
-    // grid natif monté ?
-    var mounted = ctrl.querySelector(".form-grid, .grid-body, table.table");
-    if (!mounted && !(getGrid(schema.field))) return false;
-    var host = ctrl.querySelector(".kya-doc-table-host");
-    var tbl = host && host.querySelector(".kya-doc-table");
-    // Nombre de lignes affichées vs modèle : si Frappe a re-monté / si le
-    // modèle a changé, on re-rend pour que TOUT ce qui est saisi s'affiche.
-    var domRows = tbl ? tbl.querySelectorAll("tbody tr[data-r]").length : -1;
-    var modelRows = getData(schema.field).length;
-    if (!host || !tbl || domRows !== modelRows) {
-      mount(ctrl, schema);
-    } else {
-      // garder le grid natif masqué si Frappe l'a ré-affiché
-      var ng = ctrl.querySelector(".form-grid");
-      if (ng && ng.style.display !== "none") { ng.style.display = "none"; }
-      recompute(schema, host);
-    }
-    return true;
+    var schemas = schemasFor(getRoute());
+    if (!schemas.length) return false;
+    var any = false;
+    schemas.forEach(function (schema) {
+      var ctrl = document.querySelector('.frappe-control[data-fieldname="' + schema.field + '"]');
+      if (!ctrl) return; // table absente ou masquée (depends_on) -> ignorer
+      // grid natif monté ?
+      var mounted = ctrl.querySelector(".form-grid, .grid-body, table.table");
+      if (!mounted && !(getGrid(schema.field))) return;
+      var host = ctrl.querySelector(".kya-doc-table-host");
+      var tbl = host && host.querySelector(".kya-doc-table");
+      // Nombre de lignes affichées vs modèle : si Frappe a re-monté / si le
+      // modèle a changé, on re-rend pour que TOUT ce qui est saisi s'affiche.
+      var domRows = tbl ? tbl.querySelectorAll("tbody tr[data-r]").length : -1;
+      var modelRows = getData(schema.field).length;
+      if (!host || !tbl || domRows !== modelRows) {
+        mount(ctrl, schema);
+      } else {
+        // garder le grid natif masqué si Frappe l'a ré-affiché
+        var ng = ctrl.querySelector(".form-grid");
+        if (ng && ng.style.display !== "none") { ng.style.display = "none"; }
+        recompute(schema, host);
+      }
+      any = true;
+    });
+    return any;
   }
 
   function poll() {
-    if (!KYA_DOC_TABLES[getRoute()]) return;
+    if (!schemasFor(getRoute()).length) return;
     var n = 0;
     var t = setInterval(function () {
       n++;
@@ -2524,6 +2636,33 @@
 
   window.kyaRenderDocTables = function () { ensureMounted(); };
 
+  /* --- Normaliser les dates magiques "Today"/"Now" -----------------
+     Certains DocTypes custom (ex. Inventaire KYA) ont default:"Today" sur
+     un champ Date ; le web form n'évalue pas toujours ce défaut et envoie la
+     CHAÎNE "Today" -> le serveur rejette ("doit être au format dd-mm-yyyy").
+     On remplace toute valeur "Today"/"Now" par la date/heure réelle. */
+  function normalizeMagicDates() {
+    try {
+      if (!window.frappe || !frappe.web_form || !frappe.web_form.fields_dict) return;
+      var fd = frappe.web_form.fields_dict;
+      var doc = frappe.web_form.doc || {};
+      Object.keys(fd).forEach(function (fn) {
+        var f = fd[fn];
+        if (!f || !f.df) return;
+        var ft = f.df.fieldtype;
+        if (ft !== "Date" && ft !== "Datetime") return;
+        var v = doc[fn];
+        if (v === "Today" || v === "Now" || v === "today" || v === "now") {
+          var real = ft === "Datetime"
+            ? (frappe.datetime ? frappe.datetime.now_datetime() : null)
+            : (frappe.datetime ? frappe.datetime.get_today() : null);
+          if (real) { try { frappe.web_form.set_value(fn, real); } catch (e) {} }
+        }
+      });
+    } catch (e) {}
+  }
+  window.kyaNormalizeMagicDates = normalizeMagicDates;
+
   setupDocTableListeners();
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", poll);
@@ -2531,12 +2670,16 @@
     poll();
   }
   document.addEventListener("page-change", function () { setTimeout(poll, 400); });
-  document.addEventListener("frappe:web_form_loaded", function () { setTimeout(poll, 200); });
+  document.addEventListener("frappe:web_form_loaded", function () {
+    setTimeout(poll, 200);
+    setTimeout(normalizeMagicDates, 300);
+  });
   if (window.frappe && frappe.web_form) {
     var _orig2 = frappe.web_form.after_load;
     frappe.web_form.after_load = function () {
       if (_orig2) _orig2.apply(this, arguments);
       setTimeout(ensureMounted, 250);
+      setTimeout(normalizeMagicDates, 300);
     };
   }
 })();

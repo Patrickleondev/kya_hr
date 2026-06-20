@@ -1800,6 +1800,11 @@ table.kya-doc-table tbody td.kya-dt-ro {
   background: #fff;
   outline: none;
 }
+/* Champ lien dont la valeur ne correspond à aucune entrée existante */
+.kya-doc-table .kya-dt-in.kya-dt-invalid {
+  border-color: #dc2626 !important;
+  background: #fef2f2;
+}
 .kya-doc-table textarea.kya-dt-text {
   resize: none;
   overflow: hidden;

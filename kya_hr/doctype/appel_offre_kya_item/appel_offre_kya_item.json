@@ -17,7 +17,7 @@
   {"fieldname": "item_code", "fieldtype": "Data", "in_list_view": 1, "label": "Article", "columns": 2},
   {"fieldname": "description", "fieldtype": "Small Text", "in_list_view": 1, "label": "Description", "reqd": 1, "columns": 4},
   {"fieldname": "quantite", "fieldtype": "Float", "in_list_view": 1, "label": "Quantit\u00e9", "reqd": 1, "default": "1"},
-  {"fieldname": "udm", "fieldtype": "Data", "in_list_view": 1, "label": "UdM", "default": "Nos"},
+  {"fieldname": "udm", "fieldtype": "Data", "in_list_view": 1, "label": "UdM", "default": "Unité"},
   {"fieldname": "date_requise", "fieldtype": "Date", "in_list_view": 1, "label": "Date requise"},
   {"fieldname": "specifications", "fieldtype": "Small Text", "label": "Sp\u00e9cifications techniques"}
  ],
