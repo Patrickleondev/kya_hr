@@ -2074,7 +2074,18 @@
         { fn: "prix_unitaire", label: "Prix (FCFA)",  type: "num",   w: "15%", align: "right" },
         { fn: "total",         label: "Total (FCFA)", type: "num",   w: "16%", align: "right", ro: true,
           formula: function (r) { return num(r.quantite) * num(r.prix_unitaire); } }
-      ]
+      ],
+      recompute: function (data, setParent) {
+        var st = 0;
+        data.forEach(function (r) { st += num(r.quantite) * num(r.prix_unitaire); });
+        var remise = 0, taux = 0;
+        try { remise = num(frappe.web_form.doc.remise); taux = num(frappe.web_form.doc.tva_taux); } catch (e) {}
+        var base = st - remise;
+        var tva = base * taux / 100;
+        setParent("sous_total", st);
+        setParent("tva_montant", tva);
+        setParent("total_ttc", base + tva);
+      }
     },
 
     "etat-recap": {

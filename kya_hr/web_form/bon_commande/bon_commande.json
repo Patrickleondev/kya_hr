@@ -7,12 +7,13 @@
  "allow_print": 1,
  "anonymous": 0,
  "apply_document_permissions": 1,
+ "client_script": "frappe.web_form.after_load = function() {\n  var doc = frappe.web_form.doc;\n  var roles = (frappe.boot && frappe.boot.user && frappe.boot.user.roles) ? frappe.boot.user.roles : [];\n  var state = (doc && (doc.workflow_state || doc.statut)) || 'Brouillon';\n  var total = (doc && (doc.total_ttc || doc.sous_total)) || 0;\n  if (doc && doc.name) {\n    var refEl = document.createElement('div');\n    refEl.innerHTML = '<div style=\"margin-bottom:12px;padding:8px 16px;background:#e3f2fd;color:#1565c0;border-left:4px solid #1976d2;border-radius:6px;display:inline-block;font-weight:700;font-size:14px;\">Réf. : ' + (doc.numero_bc || doc.name) + '</div>';\n    var w = document.querySelector('.web-form-wrapper') || document.querySelector('.container');\n    if (w) w.prepend(refEl);\n  }\n  // Signature de l'autorisateur : éditable UNIQUEMENT à 'En attente Autorisation'\n  // par DGA (montant <= 100000) ou DG (tout montant) ou System Manager.\n  try { frappe.web_form.set_df_property('signature_dg','read_only',1); } catch(e){}\n  var isDGA = roles.indexOf('DGA')!==-1, isDG = roles.indexOf('Directeur Général')!==-1, isSM = roles.indexOf('System Manager')!==-1;\n  if (state === 'En attente Autorisation' && (isSM || isDG || (isDGA && total <= 100000))) {\n    try { frappe.web_form.set_df_property('signature_dg','read_only',0); } catch(e){}\n  }\n  if (doc && (doc.workflow_state || doc.statut)) {\n    var st = doc.workflow_state || doc.statut;\n    var cm = {'Émis':'#2e7d32','Annulé':'#c62828','Brouillon':'#757575','En attente Visa Audit':'#e65100','En attente Autorisation':'#1565c0'};\n    var c = cm[st] || '#1565c0';\n    var el = document.createElement('div');\n    el.innerHTML = '<div style=\"margin-bottom:12px;padding:8px 16px;background:'+c+';color:#fff;border-radius:6px;display:inline-block;font-weight:700;\">État : '+st+'</div>';\n    var w2 = document.querySelector('.web-form-wrapper') || document.querySelector('.container');\n    if (w2) w2.prepend(el);\n  }\n};\n",
  "creation": "2026-04-23 00:00:00.000000",
  "doc_type": "Bon Commande KYA",
  "docstatus": 0,
  "doctype": "Web Form",
  "idx": 0,
- "introduction_text": "",
+ "introduction_text": "<p>Enregistrez un Bon de Commande KYA. Renseignez les articles, le destinataire et validez. Le DG signera le document avant envoi.</p>",
  "is_standard": 1,
  "login_required": 1,
  "modified": "2026-04-23 00:00:00.000000",
@@ -25,15 +26,13 @@
  "show_sidebar": 1,
  "success_message": "✅ Bon de Commande enregistré avec succès. Il sera visé par la Direction puis envoyé au client.",
  "title": "Bon de Commande",
- "introduction_text": "<p>Enregistrez un Bon de Commande KYA. Renseignez les articles, le destinataire et validez. Le DG signera le document avant envoi.</p>",
- "client_script": "frappe.web_form.after_load = function() {\n  var doc = frappe.web_form.doc;\n  if (doc && doc.name) {\n    var refEl = document.createElement('div');\n    refEl.innerHTML = '<div style=\"margin-bottom:12px;padding:8px 16px;background:#e3f2fd;color:#1565c0;border-left:4px solid #1976d2;border-radius:6px;display:inline-block;font-weight:700;font-size:14px;\">Réf. : ' + doc.name + '</div>';\n    var w = document.querySelector('.web-form-wrapper') || document.querySelector('.container');\n    if (w) w.prepend(refEl);\n  }\n  var roles = (frappe.boot && frappe.boot.user && frappe.boot.user.roles) ? frappe.boot.user.roles : [];\n  var state = (doc && (doc.workflow_state || doc.statut)) || 'Brouillon';\n  // Masquer la signature DG par défaut, l'activer seulement quand workflow=En attente DG\n  frappe.web_form.set_df_property('signature_dg', 'read_only', 1);\n  if (state === 'En attente DG' && (roles.indexOf('Directeur Général') !== -1 || roles.indexOf('System Manager') !== -1)) {\n    frappe.web_form.set_df_property('signature_dg', 'read_only', 0);\n  }\n  if (doc && doc.statut) {\n    var cm = {'Approuv\\u00e9':'#2e7d32','Rejet\\u00e9':'#c62828','Brouillon':'#757575'};\n    var c = cm[doc.statut] || '#1565c0';\n    var el = document.createElement('div');\n    el.innerHTML = '<div style=\"margin-bottom:12px;padding:8px 16px;background:'+c+';color:#fff;border-radius:6px;display:inline-block;font-weight:700;\">\\u00c9tat\\u00a0: '+doc.statut+'</div>';\n    var w2 = document.querySelector('.web-form-wrapper') || document.querySelector('.container');\n    if (w2) w2.prepend(el);\n  }\n};\n",
  "web_form_fields": [
   {
+   "description": "ex: O4026/KYA/DG/SMA",
    "fieldname": "numero_bc",
    "fieldtype": "Data",
    "label": "N° du Bon de Commande",
-   "reqd": 1,
-   "description": "ex: O4026/KYA/DG/SMA"
+   "reqd": 1
   },
   {
    "fieldname": "date_bc",
@@ -54,11 +53,11 @@
    "reqd": 1
   },
   {
+   "description": "Sélectionnez le fournisseur depuis la base. Les informations seront pré-remplies.",
    "fieldname": "fournisseur",
    "fieldtype": "Link",
    "label": "Fournisseur (référence)",
-   "options": "Supplier",
-   "description": "Sélectionnez le fournisseur depuis la base. Les informations seront pré-remplies."
+   "options": "Supplier"
   },
   {
    "fieldname": "fournisseur_nom",
@@ -77,10 +76,10 @@
    "label": "Adresse"
   },
   {
+   "default": "Lomé",
    "fieldname": "fournisseur_ville",
    "fieldtype": "Data",
-   "label": "Ville",
-   "default": "Lomé"
+   "label": "Ville"
   },
   {
    "fieldname": "fournisseur_telephone",
@@ -105,40 +104,40 @@
    "label": "Remise (XOF)"
   },
   {
+   "default": 18,
    "fieldname": "tva_taux",
    "fieldtype": "Percent",
-   "label": "TVA (%)",
-   "default": 18
+   "label": "TVA (%)"
   },
   {
+   "default": "12 mois",
    "fieldname": "garantie",
    "fieldtype": "Data",
-   "label": "Garantie",
-   "default": "12 mois"
+   "label": "Garantie"
   },
   {
+   "default": "72 heures",
    "fieldname": "delai_livraison",
    "fieldtype": "Data",
-   "label": "Délai de livraison",
-   "default": "72 heures"
+   "label": "Délai de livraison"
   },
   {
+   "default": "30 jours",
    "fieldname": "validite",
    "fieldtype": "Data",
-   "label": "Validité",
-   "default": "30 jours"
+   "label": "Validité"
   },
   {
+   "default": "Lomé — Agoè Logopé",
    "fieldname": "lieu_livraison",
    "fieldtype": "Data",
-   "label": "Lieu de livraison",
-   "default": "Lomé — Agoè Logopé"
+   "label": "Lieu de livraison"
   },
   {
+   "default": "100% à la livraison",
    "fieldname": "modalites_paiement",
    "fieldtype": "Data",
-   "label": "Modalités de paiement",
-   "default": "100% à la livraison"
+   "label": "Modalités de paiement"
   },
   {
    "fieldname": "reglement",
@@ -157,16 +156,15 @@
    "options": "DG\nDGA"
   },
   {
+   "description": "Signe la personne qui a autorisé le bon — DG ou DGA selon le cas.",
    "fieldname": "signature_dg",
    "fieldtype": "Signature",
-   "label": "Signature de l'autorisateur (DG ou DGA)",
-   "description": "Signe la personne qui a autorisé le bon — DG ou DGA selon le cas."
+   "label": "Signature de l'autorisateur (DG ou DGA)"
   },
   {
    "fieldname": "date_autorisation",
    "fieldtype": "Date",
    "label": "Date d'autorisation"
   }
- ],
- "show_sidebar": 1
+ ]
 }
