@@ -150,6 +150,10 @@
          <td style="width:38%; text-align:right;"><span class="kya-foot-line">&nbsp;</span></td>
        </tr>
      </table>
+     {# Les traits de paraphe servent à parapher les pages intermédiaires ; on les
+        masque sur la DERNIÈRE page (qui porte déjà les signatures). wkhtmltopdf passe
+        page/topage dans l'URL du pied → on compare en JS (le pied exécute son onload). #}
+     <script>(function(){function h(){try{var q={},s=location.search.substring(1).split('&');for(var i=0;i<s.length;i++){var a=s[i].split('=');q[a[0]]=a[1];}if(q.page&&q.topage&&q.page===q.topage){var e=document.getElementsByClassName('kya-foot-line');for(var j=0;j<e.length;j++){e[j].style.display='none';}}}catch(x){}}if(document.readyState!=='loading'){h();}window.addEventListener('load',h);})();</script>
    </div>
 
   {# ── Logo + Titre + référence document (page 1 uniquement), conforme au modèle officiel ── #}
