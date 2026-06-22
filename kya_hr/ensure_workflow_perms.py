@@ -72,6 +72,12 @@ def _ensure_approver_perm(doctype: str, role: str, submittable: bool) -> str:
 
     from frappe.permissions import add_permission, update_permission_property
 
+    # CRUCIAL : pour un DocType `custom=1`, Frappe lit UNIQUEMENT les
+    # "Custom DocPerm" et IGNORE les "DocPerm" standard. Une perm standard
+    # (ex. écrite via le JSON du doctype) ne donne donc AUCUN droit réel et
+    # ne doit pas nous faire croire que tout est en ordre.
+    is_custom = bool(frappe.db.get_value("DocType", doctype, "custom"))
+
     # Etat actuel : la perm donne-t-elle deja write sans if_owner ?
     std = frappe.db.get_value(
         "DocPerm",
@@ -86,8 +92,9 @@ def _ensure_approver_perm(doctype: str, role: str, submittable: bool) -> str:
         as_dict=True,
     )
 
-    # Si une perm standard donne write SANS if_owner -> ok
-    if std and std.read and std.write and not std.if_owner:
+    # Si une perm standard donne write SANS if_owner -> ok (sauf doctype custom,
+    # où le DocPerm standard est ignoré par le moteur de permissions).
+    if (not is_custom) and std and std.read and std.write and not std.if_owner:
         return "unchanged"
     if custom and custom.read and custom.write and not custom.if_owner:
         return "unchanged"

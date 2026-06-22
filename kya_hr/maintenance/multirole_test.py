@@ -273,15 +273,40 @@ def _flows(emp):
             "pdf": True,
         },
         {
-            "name": "Bon Commande (Achats, sans workflow)",
+            "name": "Bon Commande (>100k → Achats → Visa Audit → DG)",
             "doctype": "Bon Commande KYA",
             "fields": {
                 "numero_bc": "BC-TEST-001", "date_bc": today(),
                 "objet": "Commande test", "fournisseur_nom": "Fournisseur Test",
                 "articles": [{"description": "Onduleur 5kVA", "quantite": 1, "prix_unitaire": 750000}],
+                "total_ttc": 750000,
             },
+            "submit_action": "Soumettre",
             "submitter": "achats",
-            "steps": [],
+            "steps": [
+                ("Soumettre", "achats", True, None),
+                ("Viser", "audit", True, None),
+                ("Autoriser", "dg", True, None),   # 750000 > 100000 -> DG
+            ],
+            "negative": ("Soumettre", "comptable"),
+            "pdf": True,
+        },
+        {
+            "name": "Bon Commande (≤100k → Achats → Visa Audit → DGA)",
+            "doctype": "Bon Commande KYA",
+            "fields": {
+                "numero_bc": "BC-TEST-002", "date_bc": today(),
+                "objet": "Petit achat test", "fournisseur_nom": "Fournisseur Test",
+                "articles": [{"description": "Câbles", "quantite": 1, "prix_unitaire": 50000}],
+                "total_ttc": 50000,
+            },
+            "submit_action": "Soumettre",
+            "submitter": "achats",
+            "steps": [
+                ("Soumettre", "achats", True, None),
+                ("Viser", "audit", True, None),
+                ("Autoriser", "dga", True, None),   # 50000 <= 100000 -> DGA
+            ],
             "negative": None,
             "pdf": True,
         },
