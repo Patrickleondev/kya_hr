@@ -20,8 +20,30 @@
 
 <style>
   body { font-family: Arial, Helvetica, sans-serif; font-size: 11pt; color: #000; line-height: 1.45; }
-   @page { size: A4; margin: 15mm; }
+  /* Marges élargies haut/bas pour loger l'en-tête + pied COURANTS (répétés sur chaque page) */
+  @page { size: A4; margin: 30mm 14mm 23mm 14mm; }
   .ctr-page { padding: 0 4mm; }
+
+  /* ── En-tête COURANT (letterhead) : répété sur CHAQUE page via position:fixed ── */
+  .ctr-run-head {
+    position: fixed; top: -25mm; left: 0; right: 0;
+    border-bottom: 0.8pt solid #999; padding-bottom: 1.2mm;
+  }
+  .ctr-run-head table { width: 100%; border-collapse: collapse; }
+  .ctr-run-head td { vertical-align: top; padding: 0; font-size: 8.5pt; line-height: 1.3; color: #333; }
+
+  /* ── Pied COURANT (paraphes) : répété sur CHAQUE page ── */
+  .ctr-run-foot {
+    position: fixed; bottom: -19mm; left: 0; right: 0;
+    border-top: 0.8pt solid #999; padding-top: 1.2mm; font-size: 8pt; color: #444;
+  }
+  .ctr-run-foot table { width: 100%; border-collapse: collapse; }
+  .ctr-run-foot td { padding: 0 2mm; vertical-align: bottom; }
+  .ctr-paraphe-label { font-size: 8pt; color: #555; }
+  .ctr-paraphe-line { display: inline-block; min-width: 28mm; border-bottom: 1px solid #888; height: 6mm; vertical-align: bottom; }
+  .ctr-paraphe-img { max-height: 9mm; max-width: 26mm; vertical-align: bottom; }
+  .ctr-cnss { text-align: center; font-size: 7.5pt; color: #777; margin-top: 0.6mm; }
+
   .ctr-header { width: 100%; border-collapse: collapse; margin-bottom: 4mm; }
   .ctr-header td { vertical-align: top; padding: 0; }
   .ctr-addr { font-size: 9.5pt; line-height: 1.25; }
@@ -80,48 +102,40 @@
   .sig-hand-space { min-height: 16mm; border-bottom: 1px solid #000; margin: 4mm 0 2mm 0; }
   .sig-hand-name { font-size: 9.5pt; font-weight: bold; margin-top: 1mm; }
   .sig-hand-date { font-size: 8.5pt; color: #555; margin-top: 1mm; font-style: italic; }
-   .ctr-foot { margin-top: 8mm; text-align: center; font-size: 9pt; color: #555; border-top: 1px solid #ccc; padding-top: 2mm; }
    .page-break { page-break-before: always; break-before: page; height: 0; }
-   .ctr-page-markers { display: none; }
-   @media print {
-      .ctr-page { padding-bottom: 18mm; }
-      .ctr-page-markers {
-         display: block; position: fixed; left: 0; right: 0; bottom: 0;
-         font-size: 8.5pt; color: #555; border-top: 1px solid #ccc; padding-top: 2mm;
-      }
-      .ctr-page-markers .left { float: left; width: 35%; text-align: left; }
-      .ctr-page-markers .center { float: left; width: 30%; text-align: center; }
-      .ctr-page-markers .right { float: right; width: 35%; text-align: right; }
-   }
   strong, b { font-weight: bold; }
 </style>
 
 <div class="ctr-page">
 
-   <div class="ctr-page-markers">
-      <span class="left">{{ Le_La }} stagiaire{% if doc.date_signature_employe %} · {{ frappe.utils.format_datetime(doc.date_signature_employe, "dd/MM/yyyy HH:mm") }}{% endif %}</span>
-      <span class="center">CNSS N° 48863</span>
-      <span class="right">DG{% if doc.date_signature_dg %} · {{ frappe.utils.format_datetime(doc.date_signature_dg, "dd/MM/yyyy HH:mm") }}{% endif %}</span>
+   {# ── EN-TÊTE COURANT (letterhead) — répété sur chaque page ── #}
+   <div class="ctr-run-head">
+     <table>
+       <tr>
+         <td style="width:55%;">08 BP 81101 AGOENYIVE, LOGOPE<br>Tél. : +228 70 45 34 81 / 91 50 21 49</td>
+         <td style="width:45%; text-align:right;">N° CFE : 6254PM2015/2015 &nbsp;·&nbsp; N° RCCM : TG-LOM 2015 B 975<br>NIF N° 1000430317 &nbsp;·&nbsp; RÉGIME FISCAL : Réel</td>
+       </tr>
+     </table>
    </div>
 
-  {# ── Bandeau adresse + références fiscales ───────────────── #}
-  <table class="ctr-header">
-    <tr>
-      <td class="ctr-addr" style="width:55%;">
-        08 BP 81101 AGOENYIVE,<br>
-        LOGOPE<br>
-        Tél. : +228 70 45 34 81 / 91 50 21 49
-      </td>
-      <td class="ctr-meta" style="width:45%;">
-        N° CFE : 6254PM2015/2015<br>
-        N° RCCM : TG-LOM 2015 B 975<br>
-        NIF N° 1000430317<br>
-        RÉGIME FISCAL : Réel
-      </td>
-    </tr>
-  </table>
+   {# ── PIED COURANT (paraphes) — répété sur chaque page ── #}
+   <div class="ctr-run-foot">
+     <table>
+       <tr>
+         <td style="width:50%; text-align:left;">
+           <span class="ctr-paraphe-label">Paraphe {{ le_la }} stagiaire :</span>
+           {% if doc.signature_employe %}<img src="{{ doc.signature_employe }}" class="ctr-paraphe-img" alt="paraphe">{% else %}<span class="ctr-paraphe-line"></span>{% endif %}
+         </td>
+         <td style="width:50%; text-align:right;">
+           <span class="ctr-paraphe-label">Paraphe DG :</span>
+           {% if doc.signature_dg %}<img src="{{ doc.signature_dg }}" class="ctr-paraphe-img" alt="paraphe DG">{% else %}<span class="ctr-paraphe-line"></span>{% endif %}
+         </td>
+       </tr>
+     </table>
+     <div class="ctr-cnss">CNSS N° 48863</div>
+   </div>
 
-  {# ── Titre + logo + référence document ──────────────────── #}
+  {# ── Titre + logo + référence document (page 1 uniquement) ── #}
   <table class="ctr-title-bar">
     <tr>
       <td class="ctr-logo-cell">
@@ -231,12 +245,6 @@
 
   {# ────────────────────────────────────────────────────────────── #}
    <div class="page-break"></div>
-   <table class="ctr-cont-header">
-      <tr>
-         <td style="text-align:left;">KYA-Energy Group · 08 BP 81101 AGOENYIVE, Logopé · Lomé-Togo</td>
-         <td style="text-align:right;">NIF N° 1000430317 · CONTRAT DE STAGE (RH-ENG-07-V01)</td>
-      </tr>
-   </table>
   <div class="ctr-part-title">Deuxième Partie : Engagement de Confidentialité</div>
 
   <h3 class="art">Article 1<sup>er</sup> : Objet</h3>
@@ -295,12 +303,6 @@
 
   {# ────────────────────────────────────────────────────────────── #}
    <div class="page-break"></div>
-   <table class="ctr-cont-header">
-      <tr>
-         <td style="text-align:left;">KYA-Energy Group · 08 BP 81101 AGOENYIVE, Logopé · Lomé-Togo</td>
-         <td style="text-align:right;">NIF N° 1000430317 · CONTRAT DE STAGE (RH-ENG-07-V01)</td>
-      </tr>
-   </table>
   <div class="ctr-part-title">Troisième Partie : Cession d'Images</div>
 
   <h3 class="art">Article 1<sup>er</sup> : Objet</h3>
@@ -339,12 +341,6 @@
 
   {# ────────────────────────────────────────────────────────────── #}
    <div class="page-break"></div>
-   <table class="ctr-cont-header">
-      <tr>
-         <td style="text-align:left;">KYA-Energy Group · 08 BP 81101 AGOENYIVE, Logopé · Lomé-Togo</td>
-         <td style="text-align:right;">NIF N° 1000430317 · CONTRAT DE STAGE (RH-ENG-07-V01)</td>
-      </tr>
-   </table>
   <div class="ctr-part-title">Quatrième Partie : Dispositions Finales Communes</div>
 
   <h3 class="art">Article 1<sup>er</sup> : Droit applicable et litiges</h3>
@@ -405,7 +401,5 @@
       </td>
     </tr>
   </table>
-
-  <div class="ctr-foot">CNSS N° 48863</div>
 
 </div>
