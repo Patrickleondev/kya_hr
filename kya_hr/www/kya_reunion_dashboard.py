@@ -1,8 +1,8 @@
-"""Dashboard centralisé KYA-Reunion / KYA-Digi-Presence.
+"""Dashboard centralisé des réunions & présences (source : KYA Meet Attendance).
 
-Affiche les données synchronisées depuis KYA-Digi-Presence (anciennement
-KYA-Reunion) avec mise à jour temps réel via frappe.publish_realtime
-(événement 'kya_reunion_meeting_synced' déclenché par kya_reunion.sync_meeting).
+Affiche les données synchronisées depuis l'application KYA Meet Attendance via
+kya_reunion.sync_meeting (doctypes KYA Reunion Meeting/Presence), avec mise à
+jour temps réel via frappe.publish_realtime (événement 'kya_reunion_meeting_synced').
 """
 import frappe
 from frappe import _

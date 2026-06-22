@@ -20,27 +20,53 @@
 
 <style>
   body { font-family: Arial, Helvetica, sans-serif; font-size: 11pt; color: #000; line-height: 1.45; }
-   @page { size: A4; margin: 15mm; }
-  .ctr-page { padding: 0 4mm; }
+  /* Marges réservées pour l'en-tête (lettre à en-tête) et le pied (paraphes) qui
+     sont répétés sur CHAQUE page par wkhtmltopdf. Frappe extrait #header-html /
+     #footer-html (ci-dessous) vers --header-html / --footer-html ; position:fixed
+     ne se répète PAS de façon fiable avec ce binaire, d'où ce mécanisme natif.
+     margin-top large = la place du letterhead ; margin-bottom = la place du pied. */
+  .print-format { margin-top: 33mm; margin-bottom: 18mm; margin-left: 13mm; margin-right: 13mm; }
+  /* IMPORTANT : la règle ci-dessus n'est lue par Frappe que pour CALCULER les marges
+     wkhtmltopdf (read_options_from_html ne lit que le sélecteur `.print-format`).
+     On annule sa marge VISUELLE pour éviter (a) un double-décalage de 33mm en haut de
+     la page 1 du corps, et (b) le décalage du contenu de l'en-tête/pied (que le gabarit
+     `pdf_header_footer.html` enveloppe aussi dans `.print-format`). */
+  .print-format { margin: 0 !important; }
+  @page { size: A4; }
+  .ctr-page { padding: 0; }
+
+  /* En-tête (lettre à en-tête) & pied (paraphes) répétés : cachés à l'écran
+     (aperçu navigateur), rendus uniquement dans le PDF par wkhtmltopdf.
+     Le gabarit d'en-tête applique `body{padding:15mm 0 5mm}` ; on remonte le
+     contenu pour le coller en haut de la zone de marge. */
+  @media screen { #header-html, #footer-html { display: none; } }
+  .kya-letterhead { width: 100%; border-collapse: collapse; border-bottom: 0.8pt solid #999; margin-top: -12mm; }
+  .kya-letterhead td { vertical-align: middle; padding: 0 0 1mm 0; font-size: 7.8pt; line-height: 1.25; color: #555; }
+  .kya-lh-logo { height: 11mm; vertical-align: middle; margin-right: 3mm; }
+  .kya-lh-name { font-weight: bold; font-size: 10pt; color: #000; }
+  .kya-foot { width: 100%; border-collapse: collapse; border-top: 0.6pt solid #bbb; margin-top: -8mm; }
+  .kya-foot td { padding: 1mm 0 0 0; vertical-align: bottom; }
+  .kya-foot-line { display: inline-block; border-bottom: 1px solid #888; width: 30mm; height: 5mm; }
+  .kya-foot-cnss { font-size: 7.5pt; color: #777; text-align: center; vertical-align: bottom; }
+
   .ctr-header { width: 100%; border-collapse: collapse; margin-bottom: 4mm; }
   .ctr-header td { vertical-align: top; padding: 0; }
   .ctr-addr { font-size: 9.5pt; line-height: 1.25; }
   .ctr-meta { text-align: right; font-size: 9pt; line-height: 1.3; }
-  .ctr-title-bar { width: 100%; border-collapse: collapse; margin: 3mm 0 6mm 0; }
-  .ctr-title-bar td { padding: 0; vertical-align: middle; }
-    .ctr-title-bar { table-layout: fixed; }
-    .ctr-logo-cell { width: 27%; padding: 2mm; border: 1px solid #ccc; text-align: center; vertical-align: middle; }
-   .ctr-logo-img { width: 42mm; max-width: 100%; max-height: 26mm; object-fit: contain; }
+  .ctr-title-bar { width: 100%; border-collapse: collapse; margin: 1mm 0 6mm 0; table-layout: fixed; }
+  .ctr-title-bar td { padding: 0; height: 24mm; vertical-align: middle; text-align: center; }
+  .ctr-logo-cell { width: 24%; padding: 2mm; border: 1px solid #ccc; vertical-align: middle; }
+  .ctr-logo-img { max-width: 100%; max-height: 20mm; vertical-align: middle; }
   .ctr-title-cell {
-    width: 46%;
+    width: 50%;
     background: #F58220;
-      color: #fff; font-weight: bold; font-size: 19pt;
-    text-align: center; padding: 7mm 4mm; letter-spacing: 1px;
-      border: 1px solid #ccc; vertical-align: middle; line-height: 1.15;
+    color: #fff; font-weight: bold; font-size: 18pt;
+    text-align: center; vertical-align: middle; padding: 0 4mm; letter-spacing: 0.5px;
+    border: 1px solid #ccc; line-height: 1.15;
   }
   .ctr-ref-cell {
-         width: 27%; background: #fff; border: 1px solid #ccc;
-    text-align: center; font-size: 9.5pt; padding: 0 2mm; vertical-align: middle;
+    width: 26%; background: #fff; border: 1px solid #ccc;
+    text-align: center; font-size: 9.5pt; padding: 0; vertical-align: middle;
   }
   /* En-tête compact pour les pages de continuation (parties II, III, IV) */
   .ctr-cont-header {
@@ -58,9 +84,9 @@
   .ctr-ref-date { padding: 4px; display: block; }
   .ctr-part-title {
     text-align: center; font-weight: bold; font-size: 12.5pt;
-    text-decoration: underline; margin: 8mm 0 5mm; text-transform: uppercase;
+    text-decoration: underline; margin: 4mm 0 3mm; text-transform: uppercase;
     border-top: 1.5pt solid #000; border-bottom: 1.5pt solid #000;
-    padding: 3mm 0; letter-spacing: 0.5px;
+    padding: 2.5mm 0; letter-spacing: 0.5px;
   }
   h3.art {
     font-size: 11.5pt; font-weight: bold; margin: 5mm 0 2mm 0;
@@ -68,8 +94,17 @@
   }
   p { text-align: justify; margin: 0 0 3mm 0; }
   .sig-block { margin-top: 7mm; width: 100%; border-collapse: collapse; }
-  .sig-block td { width: 50%; vertical-align: top; padding: 4mm 4mm 0; border: 1px solid #ddd; }
-  .sig-img { max-height: 22mm; max-width: 55mm; display: block; margin-top: 3mm; }
+  .sig-block > tbody > tr > td { width: 50%; height: 46mm; vertical-align: top; text-align: center; padding: 0; border: 1px solid #999; }
+  /* table interne : 3 lignes = rôle (haut) / signature (milieu) / nom (bas du rectangle) */
+  .sig-inner { width: 100%; height: 46mm; border-collapse: collapse; }
+  .sig-inner td { border: 0; text-align: center; padding: 2.5mm 5mm; }
+  .sig-row-role { vertical-align: top; }
+  .sig-row-sign { vertical-align: middle; }
+  .sig-row-name { vertical-align: bottom; border-top: 1px solid #777; }
+  .sig-role { font-weight: bold; }
+  .sig-name-under { font-weight: bold; }
+  .sig-fonction-under { font-size: 9pt; font-style: italic; color: #444; }
+  .sig-img { max-height: 24mm; max-width: 58mm; display: block; margin: 0 auto; }
    .mention-img { max-height: 18mm; max-width: 62mm; display: block; margin-top: 3mm; }
    .mention-text { margin-top: 3mm; font-style: italic; font-weight: bold; }
   .sig-line { border-top: 1px solid #000; margin-top: 18mm; padding-top: 1mm; font-size: 9pt; font-style: italic; }
@@ -77,56 +112,54 @@
   /* Signature manuelle (impression) */
   .sig-hand-label { font-style: italic; font-size: 9.5pt; margin-top: 4mm; margin-bottom: 1mm; }
   .sig-hand-write-line { border-bottom: 1px solid #555; min-height: 8mm; margin-bottom: 4mm; }
-  .sig-hand-space { min-height: 16mm; border-bottom: 1px solid #000; margin: 4mm 0 2mm 0; }
+  .sig-hand-space { min-height: 28mm; border-bottom: 1px solid #000; margin: 4mm 0 2mm 0; }
   .sig-hand-name { font-size: 9.5pt; font-weight: bold; margin-top: 1mm; }
   .sig-hand-date { font-size: 8.5pt; color: #555; margin-top: 1mm; font-style: italic; }
-   .ctr-foot { margin-top: 8mm; text-align: center; font-size: 9pt; color: #555; border-top: 1px solid #ccc; padding-top: 2mm; }
-   .page-break { page-break-before: always; break-before: page; height: 0; }
-   .ctr-page-markers { display: none; }
-   @media print {
-      .ctr-page { padding-bottom: 18mm; }
-      .ctr-page-markers {
-         display: block; position: fixed; left: 0; right: 0; bottom: 0;
-         font-size: 8.5pt; color: #555; border-top: 1px solid #ccc; padding-top: 2mm;
-      }
-      .ctr-page-markers .left { float: left; width: 35%; text-align: left; }
-      .ctr-page-markers .center { float: left; width: 30%; text-align: center; }
-      .ctr-page-markers .right { float: right; width: 35%; text-align: right; }
-   }
+   /* Flux CONTINU entre parties (les titres de partie suffisent à séparer).
+      NB: ne JAMAIS utiliser la classe `page-break` ici — Frappe lui applique
+      `page-break-after: always` (CSS du bundle print), ce qui forçait un saut de
+      page après chaque partie = les grands blancs/vides. D'où `.ctr-gap`. */
+   .ctr-gap { height: 7mm; }
   strong, b { font-weight: bold; }
 </style>
 
 <div class="ctr-page">
 
-   <div class="ctr-page-markers">
-      <span class="left">{{ Le_La }} stagiaire{% if doc.date_signature_employe %} · {{ frappe.utils.format_datetime(doc.date_signature_employe, "dd/MM/yyyy HH:mm") }}{% endif %}</span>
-      <span class="center">CNSS N° 48863</span>
-      <span class="right">DG{% if doc.date_signature_dg %} · {{ frappe.utils.format_datetime(doc.date_signature_dg, "dd/MM/yyyy HH:mm") }}{% endif %}</span>
+   {# ── EN-TÊTE (lettre à en-tête) — Frappe l'extrait et le RÉPÈTE sur CHAQUE page du PDF ── #}
+   <div id="header-html">
+     <table class="kya-letterhead">
+       <tr>
+         <td style="width:50%; text-align:left;">
+           <span class="kya-lh-name">KYA-Energy Group</span><br>
+           08 BP 81101 AGOENYIVE, LOGOPE &nbsp;·&nbsp; Tél. : +228 70 45 34 81 / 91 50 21 49
+         </td>
+         <td style="width:50%; text-align:right;">
+           N° CFE : 6254PM2015/2015 &nbsp;·&nbsp; N° RCCM : TG-LOM 2015 B 975<br>
+           NIF N° 1000430317 &nbsp;·&nbsp; RÉGIME FISCAL : Réel
+         </td>
+       </tr>
+     </table>
    </div>
 
-  {# ── Bandeau adresse + références fiscales ───────────────── #}
-  <table class="ctr-header">
-    <tr>
-      <td class="ctr-addr" style="width:55%;">
-        08 BP 81101 AGOENYIVE,<br>
-        LOGOPE<br>
-        Tél. : +228 70 45 34 81 / 91 50 21 49
-      </td>
-      <td class="ctr-meta" style="width:45%;">
-        N° CFE : 6254PM2015/2015<br>
-        N° RCCM : TG-LOM 2015 B 975<br>
-        NIF N° 1000430317<br>
-        RÉGIME FISCAL : Réel
-      </td>
-    </tr>
-  </table>
+   {# ── PIED : deux traits de paraphe + CNSS centré (comme le modèle officiel) — RÉPÉTÉ sur CHAQUE page ── #}
+   <div id="footer-html">
+     <table class="kya-foot">
+       <tr>
+         <td style="width:38%; text-align:left;"><span class="kya-foot-line">&nbsp;</span></td>
+         <td style="width:24%;" class="kya-foot-cnss">CNSS N° 48863</td>
+         <td style="width:38%; text-align:right;"><span class="kya-foot-line">&nbsp;</span></td>
+       </tr>
+     </table>
+     {# Les traits de paraphe servent à parapher les pages intermédiaires ; on les
+        masque sur la DERNIÈRE page (qui porte déjà les signatures). wkhtmltopdf passe
+        page/topage dans l'URL du pied → on compare en JS (le pied exécute son onload). #}
+     <script>(function(){function h(){try{var q={},s=location.search.substring(1).split('&');for(var i=0;i<s.length;i++){var a=s[i].split('=');q[a[0]]=a[1];}if(q.page&&q.topage&&q.page===q.topage){var e=document.getElementsByClassName('kya-foot-line');for(var j=0;j<e.length;j++){e[j].style.display='none';}}}catch(x){}}if(document.readyState!=='loading'){h();}window.addEventListener('load',h);})();</script>
+   </div>
 
-  {# ── Titre + logo + référence document ──────────────────── #}
+  {# ── Logo + Titre + référence document (page 1 uniquement), conforme au modèle officiel ── #}
   <table class="ctr-title-bar">
     <tr>
-      <td class="ctr-logo-cell">
-             <img src="{{ logo_url }}" class="ctr-logo-img" alt="KYA-Energy Group">
-      </td>
+      <td class="ctr-logo-cell"><img src="{{ logo_url }}" class="ctr-logo-img" alt="KYA-Energy Group"></td>
       <td class="ctr-title-cell">CONTRAT DE STAGE</td>
       <td class="ctr-ref-cell">
         <span class="ctr-ref-tagline"><em>Move beyond the sky !</em></span>
@@ -230,13 +263,7 @@
   <p>Sous réserve de convention exprès, aucune indemnité n'est due à la fin ou à la rupture du contrat de stage.</p>
 
   {# ────────────────────────────────────────────────────────────── #}
-   <div class="page-break"></div>
-   <table class="ctr-cont-header">
-      <tr>
-         <td style="text-align:left;">KYA-Energy Group · 08 BP 81101 AGOENYIVE, Logopé · Lomé-Togo</td>
-         <td style="text-align:right;">NIF N° 1000430317 · CONTRAT DE STAGE (RH-ENG-07-V01)</td>
-      </tr>
-   </table>
+   <div class="ctr-gap"></div>
   <div class="ctr-part-title">Deuxième Partie : Engagement de Confidentialité</div>
 
   <h3 class="art">Article 1<sup>er</sup> : Objet</h3>
@@ -294,13 +321,7 @@
      en relation avec le stage.</p>
 
   {# ────────────────────────────────────────────────────────────── #}
-   <div class="page-break"></div>
-   <table class="ctr-cont-header">
-      <tr>
-         <td style="text-align:left;">KYA-Energy Group · 08 BP 81101 AGOENYIVE, Logopé · Lomé-Togo</td>
-         <td style="text-align:right;">NIF N° 1000430317 · CONTRAT DE STAGE (RH-ENG-07-V01)</td>
-      </tr>
-   </table>
+   <div class="ctr-gap"></div>
   <div class="ctr-part-title">Troisième Partie : Cession d'Images</div>
 
   <h3 class="art">Article 1<sup>er</sup> : Objet</h3>
@@ -338,13 +359,7 @@
      et 2 de la troisième partie du présent contrat, sont accordés à <strong>titre gracieux</strong>.</p>
 
   {# ────────────────────────────────────────────────────────────── #}
-   <div class="page-break"></div>
-   <table class="ctr-cont-header">
-      <tr>
-         <td style="text-align:left;">KYA-Energy Group · 08 BP 81101 AGOENYIVE, Logopé · Lomé-Togo</td>
-         <td style="text-align:right;">NIF N° 1000430317 · CONTRAT DE STAGE (RH-ENG-07-V01)</td>
-      </tr>
-   </table>
+   <div class="ctr-gap"></div>
   <div class="ctr-part-title">Quatrième Partie : Dispositions Finales Communes</div>
 
   <h3 class="art">Article 1<sup>er</sup> : Droit applicable et litiges</h3>
@@ -366,46 +381,36 @@
   <table class="sig-block">
     <tr>
       <td>
-        <strong>{{ Le_La }} stagiaire</strong>
-        {# ── Mention "Lu et approuvé" ─── #}
-        {% if doc.mention_lu_approuve_image %}
-          <img src="{{ doc.mention_lu_approuve_image }}" class="mention-img" alt="Mention manuscrite">
-        {% elif doc.mention_lu_approuve %}
-          <div class="mention-text">{{ doc.mention_lu_approuve }}</div>
-        {% else %}
-          <div class="sig-hand-label">Lu et approuvé :</div>
-          <div class="sig-hand-write-line"></div>
-        {% endif %}
-        {# ── Signature ─── #}
-        {% if doc.signature_employe %}
-          <img src="{{ doc.signature_employe }}" class="sig-img" alt="Signature">
-          <div class="signature-trace">
-            {% if doc.nom_signe_employe %}{{ doc.nom_signe_employe }}<br>{% endif %}
-            {% if doc.date_signature_employe %}Signé le {{ frappe.utils.format_datetime(doc.date_signature_employe, "dd/MM/yyyy HH:mm:ss") }}{% endif %}
-          </div>
-        {% else %}
-          <div class="sig-hand-space"></div>
-          <div class="sig-hand-name">{{ doc.employee_name or "" }}</div>
-          <div class="sig-hand-date">Date : _____ / _____ / __________</div>
-        {% endif %}
+        <table class="sig-inner"><tbody>
+          <tr><td class="sig-row-role"><div class="sig-role">{{ Le_La }} stagiaire</div></td></tr>
+          <tr><td class="sig-row-sign">
+            {% if doc.signature_employe %}
+              <img src="{{ doc.signature_employe }}" class="sig-img" alt="Signature">
+            {% elif doc.mention_lu_approuve_image %}
+              <img src="{{ doc.mention_lu_approuve_image }}" class="mention-img" alt="Mention manuscrite" style="margin:0 auto;">
+            {% else %}&nbsp;{% endif %}
+          </td></tr>
+          <tr><td class="sig-row-name">
+            <div class="sig-name-under">{{ doc.nom_signe_employe or doc.employee_name or "" }}</div>
+            {% if doc.date_signature_employe %}<div class="sig-fonction-under">Signé le {{ frappe.utils.format_datetime(doc.date_signature_employe, "dd/MM/yyyy") }}</div>{% endif %}
+          </td></tr>
+        </tbody></table>
       </td>
       <td>
-        <strong>Le Directeur Général</strong>
-        {% if doc.signature_dg %}
-          <img src="{{ doc.signature_dg }}" class="sig-img" alt="Signature DG">
-          <div class="signature-trace">
-            {% if doc.date_signature_dg %}Signé le {{ frappe.utils.format_datetime(doc.date_signature_dg, "dd/MM/yyyy HH:mm:ss") }}{% endif %}
-          </div>
-        {% else %}
-          <div class="sig-hand-space"></div>
-          <div class="sig-hand-date">Date : _____ / _____ / __________</div>
-        {% endif %}
-        <div style="margin-top:2mm;"><strong>{{ doc.nom_dg or "Prof. Yao AZOUMAH" }}</strong></div>
-        <div style="font-size:9pt; font-style:italic;">{{ doc.fonction_dg or "Directeur Général" }}</div>
+        <table class="sig-inner"><tbody>
+          <tr><td class="sig-row-role"><div class="sig-role">Le Directeur Général</div></td></tr>
+          <tr><td class="sig-row-sign">
+            {% if doc.signature_dg %}
+              <img src="{{ doc.signature_dg }}" class="sig-img" alt="Signature DG">
+            {% else %}&nbsp;{% endif %}
+          </td></tr>
+          <tr><td class="sig-row-name">
+            <div class="sig-name-under">{{ doc.nom_dg or "Prof. Yao AZOUMAH" }}</div>
+            <div class="sig-fonction-under">{{ doc.fonction_dg or "Directeur Général" }}{% if doc.date_signature_dg %} · Signé le {{ frappe.utils.format_datetime(doc.date_signature_dg, "dd/MM/yyyy") }}{% endif %}</div>
+          </td></tr>
+        </tbody></table>
       </td>
     </tr>
   </table>
-
-  <div class="ctr-foot">CNSS N° 48863</div>
 
 </div>
