@@ -1,0 +1,139 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Tableau de bord Services Techniques & SAV — KYA{% endblock %}
+
+{% block head_include %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block page_content %}
+<style>
+  .stx * { box-sizing:border-box; }
+  .stx { --teal:#0d7377; --orange:#F58220; --green:#6fae2f; --ink:#101828; --muted:#667085; --line:#eef1f4;
+         max-width:1480px; margin:0 auto; padding:14px 14px 36px; font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; color:var(--ink); }
+  .stx-hero { background:linear-gradient(120deg,#0d7377,#0a5d61 55%,#0e6e5a); border-radius:16px; padding:16px; box-shadow:0 6px 20px rgba(13,115,119,.20); }
+  .stx-hero h2 { margin:0 0 12px; font-size:16px; color:#fff; font-weight:700; }
+  .stx-hgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; }
+  .stx-hcard { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); border-radius:12px; padding:13px 15px; display:flex; flex-direction:column; gap:6px; }
+  .stx-hcard .lbl { font-size:12px; color:rgba(255,255,255,.82); }
+  .stx-hcard .val { font-size:26px; font-weight:800; color:#fff; line-height:1; }
+  .stx-hcard .un { font-size:12px; font-weight:600; color:rgba(255,255,255,.8); margin-left:5px; }
+  .stx-hcard .sub { font-size:11.5px; color:rgba(255,255,255,.72); }
+  .stx-note { background:#fff7ed; border:1px solid #fed7aa; color:#9a3412; border-radius:12px; padding:11px 15px; margin-top:14px; font-size:12.5px; display:flex; gap:10px; align-items:flex-start; }
+  .stx-band { display:flex; align-items:center; gap:12px; color:#fff; border-radius:14px; padding:13px 16px; margin:18px 0 12px; }
+  .stx-band .bi { width:36px; height:36px; border-radius:10px; background:rgba(255,255,255,.16); display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .stx-band .bt { font-size:15px; font-weight:700; } .stx-band .bs { font-size:12px; color:rgba(255,255,255,.82); }
+  .stx-band .bc { margin-left:auto; font-size:12px; font-weight:600; background:rgba(255,255,255,.18); padding:5px 11px; border-radius:20px; white-space:nowrap; }
+  .stx-table { background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+  .stx-scroll { overflow-x:auto; }
+  .stx-row { display:grid; gap:10px; padding:8px 16px; border-top:1px solid #f1f4f7; align-items:center; font-size:13px; }
+  .stx-row.head { border-top:none; border-bottom:1px solid #f1f4f7; }
+  .stx-row.head span { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:#98a2b3; }
+  .stx-badge { display:inline-flex; align-items:center; font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:20px; white-space:nowrap; }
+  .stx-bar { flex:1; height:6px; border-radius:4px; background:#eef1f4; overflow:hidden; min-width:50px; }
+  .stx-bar > i { display:block; height:100%; border-radius:4px; }
+  .stx-charts { display:grid; grid-template-columns:1fr 1.2fr; gap:12px; margin-top:18px; }
+  @media (max-width:760px){ .stx-charts{ grid-template-columns:1fr; } }
+  .stx-cc { background:#fff; border:1px solid var(--line); border-radius:14px; box-shadow:0 1px 2px rgba(16,24,40,.05); padding:14px; }
+  .stx-cc b { font-size:13.5px; } .stx-cwrap { position:relative; height:260px; margin-top:8px; }
+  .stx-foot { text-align:center; font-size:11.5px; color:#b0b8c1; padding:8px 0; }
+</style>
+
+<div class="stx" id="stx-root">
+  <div style="text-align:center;color:#94a3b8;padding:40px;">Chargement du tableau de bord…</div>
+</div>
+
+<script>
+const STX_DATA = {% if overview_json %}{{ overview_json | safe }}{% else %}null{% endif %};
+const STX_ICONS = {
+  users:[['path',{d:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'}],['circle',{cx:9,cy:7,r:4}],['path',{d:'M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75'}]],
+  wrench:[['path',{d:'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z'}]],
+  check:[['path',{d:'M22 11.08V12a10 10 0 1 1-5.93-9.14'}],['path',{d:'M22 4 12 14.01l-3-3'}]],
+  alert:[['path',{d:'M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z'}],['path',{d:'M12 9v4M12 17h.01'}]],
+  gauge:[['path',{d:'M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z'}],['path',{d:'M13.4 12.6 16 10M4 20a9 9 0 1 1 16 0z'}]],
+  route:[['circle',{cx:6,cy:19,r:3}],['path',{d:'M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15'}],['circle',{cx:18,cy:5,r:3}]],
+  ticket:[['path',{d:'M3 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z'}],['path',{d:'M13 5v14'}]],
+};
+const STX_BADGE = { ok:{bg:'rgba(141,198,63,.20)',fg:'#5f9e2b'}, warn:{bg:'#fff4ea',fg:'#c76a10'}, wait:{bg:'rgba(13,115,119,.10)',fg:'#0d7377'}, bad:{bg:'rgba(214,69,80,.12)',fg:'#d64550'}, teal:{bg:'rgba(13,115,119,.10)',fg:'#0d7377'}, slate:{bg:'#eef1f4',fg:'#667085'} };
+function svg(name,color,size){ const ns='http://www.w3.org/2000/svg'; const e=document.createElementNS(ns,'svg'); const sp=STX_ICONS[name]||STX_ICONS.wrench;
+  e.setAttribute('width',size||18); e.setAttribute('height',size||18); e.setAttribute('viewBox','0 0 24 24'); e.setAttribute('fill','none');
+  e.setAttribute('stroke',color); e.setAttribute('stroke-width','1.9'); e.setAttribute('stroke-linecap','round'); e.setAttribute('stroke-linejoin','round');
+  sp.forEach(s=>{ const c=document.createElementNS(ns,s[0]); for(const k in s[1]) c.setAttribute(k,s[1][k]); e.appendChild(c); }); return e; }
+function chipW(name){ const s=document.createElement('span'); s.style.cssText='width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.18);display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;'; s.appendChild(svg(name,'#fff',17)); return s; }
+function el(t,c,h){ const e=document.createElement(t); if(c)e.className=c; if(h!=null)e.innerHTML=h; return e; }
+function band(icon,title,sub,chipTxt,grad){ const b=el('div','stx-band'); b.style.background=grad;
+  const bi=el('span','bi'); bi.appendChild(svg(icon,'#fff',20)); b.appendChild(bi);
+  const t=el('div'); t.style.cssText='display:flex;flex-direction:column;line-height:1.2;'; t.appendChild(el('span','bt',title)); t.appendChild(el('span','bs',sub)); b.appendChild(t);
+  if(chipTxt) b.appendChild(el('span','bc',chipTxt)); return b; }
+function badge(txt,accent){ const b=STX_BADGE[accent]||STX_BADGE.teal; const bd=el('span','stx-badge'); bd.style.background=b.bg; bd.style.color=b.fg; bd.textContent=txt; const sp=el('span'); sp.appendChild(bd); return sp; }
+
+function render(D){
+  const root=document.getElementById('stx-root'); root.innerHTML='';
+  const hero=el('div','stx-hero'); hero.appendChild(el('h2','Tableau de bord — Services Techniques & SAV'));
+  const hg=el('div','stx-hgrid');
+  (D.hero||[]).forEach(h=>{ const c=el('div','stx-hcard'); const top=el('div'); top.style.cssText='display:flex;justify-content:space-between;align-items:flex-start;';
+    top.appendChild(el('span','lbl',h.label)); top.appendChild(chipW(h.icon)); c.appendChild(top);
+    const v=el('div'); v.style.cssText='display:flex;align-items:baseline;'; v.appendChild(el('span','val',h.value));
+    if(h.unit) v.appendChild(el('span','un',h.unit)); c.appendChild(v); if(h.sub) c.appendChild(el('span','sub',h.sub)); hg.appendChild(c); });
+  hero.appendChild(hg); root.appendChild(hero);
+
+  if(D.sav_note){ const n=el('div','stx-note'); n.appendChild(svg('ticket','#9a3412',18)); n.appendChild(el('span',null,D.sav_note)); root.appendChild(n); }
+
+  root.appendChild(band('wrench','Tâches techniques en cours','source : Tâches d’équipe (plans trimestriels)',(D.ouverts_label||''),'linear-gradient(100deg,#0d7377,#0a5d61)'));
+  const t1=el('div','stx-table'); const s1=el('div','stx-scroll'); const w1=el('div'); w1.style.minWidth='760px';
+  const cols1='1.4fr 2fr 1.4fr 0.9fr 1.1fr';
+  const h1=el('div','stx-row head'); h1.style.gridTemplateColumns=cols1; ['Équipe','Objet','Responsable','Taux','État'].forEach((x,i)=>{ const sp=el('span',null,x); if(i===3)sp.style.textAlign='right'; h1.appendChild(sp); }); w1.appendChild(h1);
+  (D.tache_rows||[]).forEach(r=>{ const row=el('div','stx-row'); row.style.gridTemplateColumns=cols1;
+    row.appendChild(el('span',null,'<b>'+(r.equipe||'')+'</b>'));
+    row.appendChild(el('span',null,'<span style="color:#667085;">'+(r.objet||'')+'</span>'));
+    row.appendChild(el('span',null,'<span style="color:#667085;">'+(r.responsable||'')+'</span>'));
+    const tx=el('span',null,'<span style="color:#667085;font-variant-numeric:tabular-nums;">'+(r.taux||'')+'</span>'); tx.style.textAlign='right'; row.appendChild(tx);
+    row.appendChild(badge(r.etat,r.accent)); w1.appendChild(row); });
+  if(!(D.tache_rows||[]).length) w1.appendChild(el('div','stx-row','<span style="color:#94a3b8;padding:8px;">Aucune tâche technique en cours.</span>'));
+  s1.appendChild(w1); t1.appendChild(s1); root.appendChild(t1);
+
+  root.appendChild(band('users','Charge par équipe','tâches en cours et clôturées',(D.equipes_label||''),'linear-gradient(100deg,#F58220,#e06f12)'));
+  const t2=el('div','stx-table'); const s2=el('div','stx-scroll'); const w2=el('div'); w2.style.minWidth='700px';
+  const cols2='1.7fr 1.4fr 100px 110px 1.6fr';
+  const h2=el('div','stx-row head'); h2.style.gridTemplateColumns=cols2; ['Équipe','Chef','En cours','Clôturées','Charge'].forEach((x,i)=>{ const sp=el('span',null,x); if(i===2||i===3)sp.style.textAlign='center'; h2.appendChild(sp); }); w2.appendChild(h2);
+  (D.team_rows||[]).forEach(r=>{ const row=el('div','stx-row'); row.style.gridTemplateColumns=cols2;
+    row.appendChild(el('span',null,'<b>'+(r.equipe||'')+'</b>'));
+    row.appendChild(el('span',null,'<span style="color:#667085;">'+(r.chef||'')+'</span>'));
+    const ec=el('span',null,'<span style="color:#667085;">'+r.encours+'</span>'); ec.style.textAlign='center'; row.appendChild(ec);
+    const cl=el('span',null,'<span style="color:#667085;">'+r.cloturees+'</span>'); cl.style.textAlign='center'; row.appendChild(cl);
+    const cw=el('span'); cw.style.cssText='display:flex;align-items:center;gap:9px;'; const bar=el('div','stx-bar'); const i=el('i'); i.style.width=r.charge+'%'; i.style.background=r.charge>=80?'#F58220':(r.charge>=50?'#0d7377':'#8DC63F'); bar.appendChild(i);
+    cw.appendChild(bar); cw.appendChild(el('span',null,'<span style="font-size:12px;font-weight:600;color:#667085;">'+r.charge+'%</span>')); row.appendChild(cw); w2.appendChild(row); });
+  if(!(D.team_rows||[]).length) w2.appendChild(el('div','stx-row','<span style="color:#94a3b8;padding:8px;">Aucune équipe active.</span>'));
+  s2.appendChild(w2); t2.appendChild(s2); root.appendChild(t2);
+
+  const cw=el('div','stx-charts');
+  const c1=el('div','stx-cc'); c1.appendChild(el('b',null,'Tâches par état')); const w1c=el('div','stx-cwrap'); const cv1=el('canvas'); cv1.id='stxEtat'; w1c.appendChild(cv1); c1.appendChild(w1c); cw.appendChild(c1);
+  const c2=el('div','stx-cc'); c2.appendChild(el('b',null,'Taux de réalisation par équipe')); const w2c=el('div','stx-cwrap'); const cv2=el('canvas'); cv2.id='stxCharge'; w2c.appendChild(cv2); c2.appendChild(w2c); cw.appendChild(c2);
+  root.appendChild(cw);
+  root.appendChild(el('div','stx-foot','KYA-Energy Group · Données en temps réel de l’ERP'));
+  drawCharts(D);
+}
+
+let STX_C1=null, STX_C2=null;
+function drawCharts(D){ if(!window.Chart) return;
+  Chart.defaults.font.family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif"; Chart.defaults.color='#667085';
+  const e=D.etats||{labels:[],data:[]};
+  if(STX_C1){try{STX_C1.destroy();}catch(ex){}}
+  STX_C1=new Chart(document.getElementById('stxEtat'),{type:'doughnut',data:{labels:e.labels,datasets:[{data:e.data,
+    backgroundColor:['#cbd2d9','#0d7377','#8DC63F','#d64550'],borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'bottom',labels:{boxWidth:9,usePointStyle:true,padding:12}}}}});
+  const c=D.charge||{labels:[],data:[]};
+  if(STX_C2){try{STX_C2.destroy();}catch(ex){}}
+  STX_C2=new Chart(document.getElementById('stxCharge'),{type:'bar',data:{labels:c.labels,datasets:[
+    {label:'Taux',data:c.data,backgroundColor:'#0d7377',borderRadius:5,maxBarThickness:22}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:'#f0f2f5'},max:100,ticks:{callback:v=>v+' %'}},y:{grid:{display:false}}}}});
+}
+
+(function init(){
+  function go(){ if(STX_DATA){ render(STX_DATA); } else if(window.frappe){
+    frappe.call({method:'kya_hr.www.services_techniques_dashboard.get_st_overview'}).then(r=>{ if(r.message) render(r.message); }); } }
+  if(window.Chart) go(); else { let n=0; const iv=setInterval(()=>{ if(window.Chart||n++>60){ clearInterval(iv); go(); } },100); }
+})();
+</script>
+{% endblock %}
