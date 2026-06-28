@@ -1,0 +1,71 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Portail de pilotage — KYA Energy{% endblock %}
+
+{% block page_content %}
+<style>
+  .ppx * { box-sizing:border-box; }
+  .ppx { --teal:#0d7377; --ink:#101828; --muted:#667085; --line:#eef1f4;
+         max-width:1240px; margin:0 auto; padding:18px 16px 40px; font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; color:var(--ink); }
+  .ppx-hero { background:linear-gradient(120deg,#0d7377,#0a5d61 55%,#0e6e5a); border-radius:20px; padding:28px 26px; box-shadow:0 8px 24px rgba(13,115,119,.22); display:flex; flex-direction:column; gap:8px; }
+  .ppx-hero .kicker { font-size:13px; font-weight:700; letter-spacing:.08em; color:rgba(255,255,255,.7); }
+  .ppx-hero h1 { margin:0; font-size:26px; font-weight:800; color:#fff; letter-spacing:-.02em; }
+  .ppx-hero p { margin:0; font-size:14px; color:rgba(255,255,255,.8); max-width:640px; line-height:1.5; }
+  .ppx-hub { display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:18px; margin-top:22px; }
+  .ppx-card { display:flex; flex-direction:column; background:#fff; border:1px solid var(--line); border-radius:18px; box-shadow:0 1px 3px rgba(16,24,40,.06); overflow:hidden; text-decoration:none; color:inherit; transition:transform .16s ease, box-shadow .16s ease; }
+  .ppx-card:hover { transform:translateY(-3px); box-shadow:0 10px 26px rgba(16,24,40,.12); }
+  .ppx-card .top { height:5px; }
+  .ppx-card .body { padding:18px; display:flex; flex-direction:column; gap:12px; flex:1; }
+  .ppx-card .head { display:flex; align-items:center; gap:12px; }
+  .ppx-chip { width:40px; height:40px; border-radius:11px; display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .ppx-card .title { font-size:15.5px; font-weight:700; line-height:1.2; }
+  .ppx-card .desc { font-size:13px; color:var(--muted); line-height:1.45; }
+  .ppx-stats { display:flex; gap:8px; flex-wrap:wrap; margin-top:auto; padding-top:4px; }
+  .ppx-stats span { font-size:12px; font-weight:600; color:#475467; background:#f4f6f9; padding:4px 10px; border-radius:8px; white-space:nowrap; }
+  .ppx-open { display:flex; align-items:center; gap:6px; color:var(--teal); font-size:12.5px; font-weight:700; }
+  .ppx-foot { text-align:center; font-size:11.5px; color:#b0b8c1; padding:14px 0 0; }
+</style>
+
+<div class="ppx" id="ppx-root">
+  <div class="ppx-hero">
+    <span class="kicker">TABLEAUX DE BORD</span>
+    <h1>Pilotage opérationnel KYA-Energy</h1>
+    <p>Sélectionnez un module pour l'explorer. Seuls les tableaux de bord accessibles à votre profil sont affichés.</p>
+  </div>
+  <div class="ppx-hub" id="ppx-hub"></div>
+  <div class="ppx-foot">KYA-Energy Group · Portail de pilotage · Données en temps réel de l'ERP</div>
+</div>
+
+<script>
+const PPX_HUBS = {% if hubs_json %}{{ hubs_json | safe }}{% else %}[]{% endif %};
+const PPX_ICONS = {
+  building:[['rect',{x:4,y:2,width:16,height:20,rx:2}],['path',{d:'M9 22v-4h6v4M8 6h.01M16 6h.01M8 10h.01M16 10h.01M8 14h.01M16 14h.01'}]],
+  users:[['path',{d:'M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'}],['circle',{cx:9,cy:7,r:4}],['path',{d:'M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75'}]],
+  cart:[['circle',{cx:9,cy:21,r:1}],['circle',{cx:20,cy:21,r:1}],['path',{d:'M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6'}]],
+  box:[['path',{d:'M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'}],['path',{d:'m3.27 6.96 8.73 5.05 8.73-5.05M12 22.08V12'}]],
+  truck:[['rect',{x:1,y:3,width:15,height:13,rx:1}],['path',{d:'M16 8h4l3 3v5h-7V8z'}],['circle',{cx:5.5,cy:18.5,r:2.5}],['circle',{cx:18.5,cy:18.5,r:2.5}]],
+  coins:[['circle',{cx:8,cy:8,r:6}],['path',{d:'M18.09 10.37A6 6 0 1 1 10.34 18M7 6h1v4M16.71 13.88l.7.71-2.82 2.82'}]],
+  wrench:[['path',{d:'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z'}]],
+};
+function svg(name,color){ const ns='http://www.w3.org/2000/svg'; const e=document.createElementNS(ns,'svg'); const sp=PPX_ICONS[name]||PPX_ICONS.building;
+  e.setAttribute('width',20); e.setAttribute('height',20); e.setAttribute('viewBox','0 0 24 24'); e.setAttribute('fill','none');
+  e.setAttribute('stroke',color); e.setAttribute('stroke-width','1.9'); e.setAttribute('stroke-linecap','round'); e.setAttribute('stroke-linejoin','round');
+  sp.forEach(s=>{ const c=document.createElementNS(ns,s[0]); for(const k in s[1]) c.setAttribute(k,s[1][k]); e.appendChild(c); }); return e; }
+function el(t,c,h){ const e=document.createElement(t); if(c)e.className=c; if(h!=null)e.innerHTML=h; return e; }
+
+(function render(){
+  const hub=document.getElementById('ppx-hub');
+  if(!PPX_HUBS.length){ hub.appendChild(el('div',null,'<div style="color:#94a3b8;padding:20px;">Aucun tableau de bord accessible à votre profil.</div>')); return; }
+  PPX_HUBS.forEach(h=>{
+    const a=el('a','ppx-card'); a.href=h.route;
+    const top=el('div','top'); top.style.background=h.color; a.appendChild(top);
+    const body=el('div','body');
+    const head=el('div','head'); const chip=el('span','ppx-chip'); chip.style.background=h.bg; chip.appendChild(svg(h.icon,h.color)); head.appendChild(chip); head.appendChild(el('span','title',h.title)); body.appendChild(head);
+    body.appendChild(el('span','desc',h.desc));
+    const st=el('div','ppx-stats'); st.appendChild(el('span',null,h.stat1)); st.appendChild(el('span',null,h.stat2)); body.appendChild(st);
+    body.appendChild(el('div','ppx-open','Ouvrir le tableau de bord <span style="font-size:15px;line-height:1;">→</span>'));
+    a.appendChild(body); hub.appendChild(a);
+  });
+})();
+</script>
+{% endblock %}

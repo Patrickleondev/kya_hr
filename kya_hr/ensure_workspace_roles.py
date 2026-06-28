@@ -157,6 +157,7 @@ def _add_role_to_workspace(ws_name: str, role: str) -> bool:
 # Raccourcis dashboards a garantir sur Direction Generale (le DG voit tout).
 # (label, url)
 DG_DASHBOARD_SHORTCUTS = [
+    ("🏠 Portail de pilotage", "/portail-pilotage"),
     ("📊 Tableau de Bord Global", "/kya-tableau-de-bord"),
     ("🌴 RH — Gestion des congés", "/gestion-conges"),
     ("🕒 RH — Présences", "/presence-rh"),
