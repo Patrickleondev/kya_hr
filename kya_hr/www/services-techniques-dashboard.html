@@ -79,6 +79,35 @@ function render(D){
 
   if(D.sav_note){ const n=el('div','stx-note'); n.appendChild(svg('ticket','#9a3412',18)); n.appendChild(el('span',null,D.sav_note)); root.appendChild(n); }
 
+  // ── Interventions SAV (fiches techniques curatives) ──
+  root.appendChild(band('wrench','Interventions SAV récentes','source : Fiche technique curative (terrain)',(D.sav_label||''),'linear-gradient(100deg,#0d7377,#0a5d61)'));
+  const ts=el('div','stx-table'); const ss=el('div','stx-scroll'); const ws=el('div'); ws.style.minWidth='820px';
+  const colS='1.4fr 1.4fr 2fr 0.9fr 1.1fr';
+  const hs=el('div','stx-row head'); hs.style.gridTemplateColumns=colS; ['Client / site','Technicien(s)','Objet','Date','État système'].forEach(x=>hs.appendChild(el('span',null,x))); ws.appendChild(hs);
+  (D.sav_rows||[]).forEach(r=>{ const row=el('div','stx-row'); row.style.gridTemplateColumns=colS;
+    row.appendChild(el('span',null,'<b>'+(r.client||'')+'</b>'));
+    row.appendChild(el('span',null,'<span style="color:#667085;">'+(r.tech||'')+'</span>'));
+    row.appendChild(el('span',null,'<span style="color:#667085;">'+(r.objet||'')+'</span>'));
+    row.appendChild(el('span',null,'<span style="color:#667085;font-variant-numeric:tabular-nums;">'+(r.date||'')+'</span>'));
+    row.appendChild(badge(r.etat,r.accent)); ws.appendChild(row); });
+  if(!(D.sav_rows||[]).length) ws.appendChild(el('div','stx-row','<span style="color:#94a3b8;padding:8px;">Aucune intervention SAV enregistrée.</span>'));
+  ss.appendChild(ws); ts.appendChild(ss); root.appendChild(ts);
+
+  // ── Ordres de mission (fiches de mission) ──
+  root.appendChild(band('route','Ordres de mission récents','source : Fiche de mission',(D.mission_label||''),'linear-gradient(100deg,#F58220,#e06f12)'));
+  const tm=el('div','stx-table'); const sm=el('div','stx-scroll'); const wm=el('div'); wm.style.minWidth='820px';
+  const colM='1.1fr 1.4fr 1.3fr 2fr 0.9fr 1.1fr';
+  const hm=el('div','stx-row head'); hm.style.gridTemplateColumns=colM; ['Réf.','Chef de mission','Destination','Objet','Émission','État'].forEach(x=>hm.appendChild(el('span',null,x))); wm.appendChild(hm);
+  (D.mission_rows||[]).forEach(r=>{ const row=el('div','stx-row'); row.style.gridTemplateColumns=colM;
+    row.appendChild(el('span',null,'<span style="color:#98a2b3;font-variant-numeric:tabular-nums;">'+(r.ref||'')+'</span>'));
+    row.appendChild(el('span',null,'<b>'+(r.chef||'')+'</b>'));
+    row.appendChild(el('span',null,'<span style="color:#667085;">'+(r.destination||'')+'</span>'));
+    row.appendChild(el('span',null,'<span style="color:#667085;">'+(r.objet||'')+'</span>'));
+    row.appendChild(el('span',null,'<span style="color:#667085;font-variant-numeric:tabular-nums;">'+(r.date||'')+'</span>'));
+    row.appendChild(badge(r.etat,r.accent)); wm.appendChild(row); });
+  if(!(D.mission_rows||[]).length) wm.appendChild(el('div','stx-row','<span style="color:#94a3b8;padding:8px;">Aucun ordre de mission.</span>'));
+  sm.appendChild(wm); tm.appendChild(sm); root.appendChild(tm);
+
   root.appendChild(band('wrench','Tâches techniques en cours','source : Tâches d’équipe (plans trimestriels)',(D.ouverts_label||''),'linear-gradient(100deg,#0d7377,#0a5d61)'));
   const t1=el('div','stx-table'); const s1=el('div','stx-scroll'); const w1=el('div'); w1.style.minWidth='760px';
   const cols1='1.4fr 2fr 1.4fr 0.9fr 1.1fr';

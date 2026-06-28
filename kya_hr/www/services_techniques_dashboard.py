@@ -54,6 +54,15 @@ def _exists(dt):
         return False
 
 
+def _count(dt, filters=None):
+    if not _exists(dt):
+        return 0
+    try:
+        return frappe.db.count(dt, filters or {})
+    except Exception:
+        return 0
+
+
 @frappe.whitelist()
 def get_st_overview() -> dict:
     """Indicateurs Services Techniques (équipes, tâches d'équipe par état, taux
@@ -109,17 +118,80 @@ def get_st_overview() -> dict:
     taux_moyen = round(sum(flt(t.taux_effectif) for t in actifs) / len(actifs)) if actifs else 0
     membres = sum(int(t.nombre_membres or 0) for t in actives)
 
-    # ── Hero (6) ──
+    # ── Opérations terrain (doctypes prod, module CRM ; absents en local) ──
+    # SAV / maintenance curative, ordres de mission, réceptions techniques,
+    # enquêtes de satisfaction client. Tout est défensif (_exists / try-except).
+    SAV_DT, MISSION_DT = "fiche technique curative", "fiche de mission"
+    LAMP_DT, BATT_DT, ENQ_DT = "fiche_recep_tech_lampa", "fiche de recpt de batt", "EnqueteSatisfactionClient"
+
+    def _safe_all(dt, fields, order_by="creation desc", limit=400):
+        if not _exists(dt):
+            return []
+        try:
+            return frappe.get_all(dt, fields=fields, order_by=order_by, limit_page_length=limit)
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), f"st-overview: {dt}")
+            return []
+
+    fiches_sav = _safe_all(SAV_DT, ["name", "clientsite", "techname", "dateinter",
+                                    "objinter", "etatsys", "creation"],
+                           order_by="dateinter desc, creation desc")
+    fiches_mission = _safe_all(MISSION_DT, ["name", "chef_mission", "destination", "objet",
+                                            "date_emission", "workflow_state", "duree", "creation"],
+                               order_by="date_emission desc, creation desc")
+    n_sav = len(fiches_sav)
+    n_mission = len(fiches_mission)
+    n_recep = _count(LAMP_DT) + _count(BATT_DT)
+
+    # Satisfaction client moyenne (/5) — scores texte "1".."5"
+    enquetes = _safe_all(ENQ_DT, ["efficacite_installation", "efficacite_sav",
+                                  "qualite_maintenance", "recommendations"])
+    sat_vals = []
+    for e in enquetes:
+        for f in ("efficacite_sav", "qualite_maintenance", "efficacite_installation"):
+            try:
+                v = int(e.get(f))
+                if 1 <= v <= 5:
+                    sat_vals.append(v)
+            except (TypeError, ValueError):
+                pass
+    sat_avg = round(sum(sat_vals) / len(sat_vals), 1) if sat_vals else 0
+
+    # ── Hero (6) — priorité aux ops terrain réelles ──
     hero = [
-        {"label": "Équipes actives", "value": str(len(actives)), "unit": f"/ {len(teams)}",
-         "sub": "équipes KYA", "icon": "users"},
-        {"label": "Tâches en cours", "value": str(n_cours), "sub": "interventions actives", "icon": "wrench"},
-        {"label": "Tâches terminées", "value": str(n_term), "sub": "trimestre en cours", "icon": "check"},
-        {"label": "Tâches bloquées", "value": str(n_bloc), "sub": "à débloquer", "icon": "alert"},
-        {"label": "Taux de réalisation", "value": str(taux_moyen), "unit": "%",
-         "sub": "moyenne pondérée", "icon": "gauge"},
-        {"label": "Membres mobilisés", "value": str(membres), "sub": "équipes actives", "icon": "route"},
+        {"label": "Interventions SAV", "value": str(n_sav), "sub": "fiches curatives", "icon": "wrench"},
+        {"label": "Ordres de mission", "value": str(n_mission), "sub": "fiches de mission", "icon": "route"},
+        {"label": "Réceptions techniques", "value": str(n_recep), "sub": "lampadaires + batteries", "icon": "check"},
+        {"label": "Équipes techniques", "value": str(len(actives)), "unit": f"/ {len(teams)}",
+         "sub": f"{membres} membres", "icon": "users"},
+        {"label": "Satisfaction client", "value": (str(sat_avg) if sat_avg else "—"),
+         "unit": ("/ 5" if sat_avg else ""), "sub": f"{len(enquetes)} enquêtes", "icon": "gauge"},
+        {"label": "Tâches d'équipe en cours", "value": str(n_cours),
+         "sub": f"{n_bloc} bloquées", "icon": "alert"},
     ]
+
+    # ── Tables ops terrain ──
+    from frappe.utils import formatdate as _fd
+    sav_rows = []
+    for f in fiches_sav[:8]:
+        sav_rows.append({
+            "client": f.clientsite or "—",
+            "tech": f.techname or "—",
+            "objet": f.objinter or "—",
+            "date": _fd(f.dateinter, "dd/MM/y") if f.dateinter else "—",
+            "etat": f.etatsys or "—",
+            "accent": "ok" if (f.etatsys or "").lower().startswith("fonction") else "wait",
+        })
+    mission_rows = []
+    for m in fiches_mission[:8]:
+        st = m.workflow_state or "—"
+        mission_rows.append({
+            "ref": m.name, "chef": m.chef_mission or "—",
+            "destination": m.destination or "—", "objet": m.objet or "—",
+            "date": _fd(m.date_emission, "dd/MM/y") if m.date_emission else "—",
+            "etat": st,
+            "accent": "ok" if st.lower() in ("approved", "approuvé", "approuve") else ("bad" if "reject" in st.lower() else "wait"),
+        })
 
     # ── Tâches techniques en cours (table) ──
     st_badge = {"En cours": "wait", "Bloqué": "bad", "Terminé": "ok", "Non démarré": "slate"}
@@ -166,11 +238,14 @@ def get_st_overview() -> dict:
 
     return {
         "date_str": formatdate(today(), "EEEE d MMMM y"),
-        "hero": hero, "tache_rows": tache_rows, "team_rows": team_rows[:10],
+        "hero": hero, "sav_rows": sav_rows, "mission_rows": mission_rows,
+        "tache_rows": tache_rows, "team_rows": team_rows[:10],
         "etats": etats, "charge": charge,
+        "sav_label": f"{n_sav} interventions",
+        "mission_label": f"{n_mission} missions",
         "ouverts_label": f"{n_cours} en cours · {n_bloc} bloquées",
         "equipes_label": f"{len(actives)} équipes",
-        "sav_note": "Le ticketing SAV dédié (tickets clients, ordres de mission technique) "
-                    "est en cours de mise en place. Ce tableau s'appuie sur les équipes "
-                    "et les tâches d'équipe des plans trimestriels.",
+        "sav_note": "Les interventions SAV proviennent des fiches techniques curatives "
+                    "(saisie terrain) et les déplacements des fiches de mission. Le suivi "
+                    "des tâches d'équipe s'appuie sur les plans trimestriels.",
     }
