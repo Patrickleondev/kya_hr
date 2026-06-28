@@ -125,6 +125,71 @@ RESTRICTED_LAYOUT_ROLES = {
     "KYA Services": ["KYA Survey Admin", "System Manager"],
 }
 
+# ── Icônes NATIVES ERPNext : mêmes restrictions que les workspaces (sinon, une
+# fois chaque user doté d'un layout, elles fuiraient — ex. le Comptable verrait
+# « Accounting / Buying / Stock »). On miroir la matrice par rôle métier ;
+# l'admin pur reste System Manager. Le DG (Directeur Général/DG/DGA) voit tout.
+_DIR = ["Directeur Général", "DG", "DGA", "System Manager"]
+_NATIVE_LAYOUT_ROLES = {
+    # Finance / comptabilité
+    "Accounting": ["Accounts Manager", "Accounts User", "Comptable", "Caissier", "DFC", "DAAF"] + _DIR,
+    "Accounts Setup": ["Accounts Manager", "DFC", "DAAF"] + _DIR,
+    "Invoicing": ["Accounts Manager", "Accounts User", "Comptable", "Caissier"] + _DIR,
+    "Financial Reports": ["Accounts Manager", "Comptable", "DFC", "DAAF"] + _DIR,
+    "Expenses": ["Accounts Manager", "Accounts User", "Expense Approver"] + _DIR,
+    "Payments": ["Accounts Manager", "Accounts User", "Comptable"] + _DIR,
+    "Banking": ["Accounts Manager", "DFC", "DAAF"] + _DIR,
+    "Budget": ["Accounts Manager", "DFC", "DAAF"] + _DIR,
+    "Taxes": ["Accounts Manager", "DFC", "DAAF"] + _DIR,
+    "Assets": ["Accounts Manager"] + _DIR,
+    # Achats
+    "Buying": ["Purchase Manager", "Purchase User", "Responsable Achats"] + _DIR,
+    # Stock
+    "Stock": ["Stock Manager", "Stock User", "Chargé des Stocks", "Responsable Stock", "Magasinier"] + _DIR,
+    # Commercial
+    "Selling": ["Sales User", "Sales Manager", "Sales Master Manager"] + _DIR,
+    # RH (espaces HRMS natifs)
+    "Frappe HR": ["HR Manager", "HR User", "Responsable RH"] + _DIR,
+    "HR Setup": ["HR Manager", "Responsable RH"] + _DIR,
+    "Recruitment": ["HR Manager", "Responsable RH"] + _DIR,
+    "Tenure": ["HR Manager", "Responsable RH"] + _DIR,
+    "Shift & Attendance": ["HR Manager", "Responsable RH"] + _DIR,
+    "Leaves": ["HR Manager", "Responsable RH"] + _DIR,
+    "Performance": ["HR Manager", "Responsable RH"] + _DIR,
+    "Payroll": ["HR Manager", "Responsable RH", "Accounts Manager"] + _DIR,
+    "Tax & Benefits": ["HR Manager", "Responsable RH", "Accounts Manager"] + _DIR,
+    # Technique (espaces DST de l'app servicestechniques)
+    "Services Techniques": ["DST - Directeur Technique", "DST - Chef Equipe Installation",
+                            "DST - Chef Equipe Audit Interne", "DST - Chef Equipe Offres et Formations",
+                            "DST - Responsable Logistique"] + _DIR,
+    "Manufacturing": ["Manufacturing Manager", "Manufacturing User"] + _DIR,
+    "Subcontracting": ["Manufacturing Manager"] + _DIR,
+    "Quality": ["Quality Manager"] + _DIR,
+    "Projects": ["Projects Manager", "Projects User"] + _DIR,
+    # Administration pure / framework → System Manager uniquement
+    "ERPNext Settings": ["System Manager"],
+    "Framework": ["System Manager"],
+    "Organization": ["System Manager"],
+    "System": ["System Manager"],
+    "Users": ["System Manager"],
+    "Integrations": ["System Manager"],
+    "Build": ["System Manager"],
+    "Automation": ["System Manager"],
+    "Email": ["System Manager"],
+    "Printing": ["System Manager"],
+    "Data": ["System Manager"],
+    "Website": ["System Manager", "Website Manager"],
+    "Subscription": ["System Manager"],
+    "Share Management": ["System Manager"],
+}
+# Les espaces DST individuels → leur chef + Direction + SM
+for _dst in ["DST DIrecteur Technique", "DST Installation", "DST Audit Interne",
+             "DST bureau externe", "DST Offres et Formations"]:
+    _NATIVE_LAYOUT_ROLES[_dst] = ["DST - Directeur Technique", "DST - Chef Equipe Installation",
+                                  "DST - Chef Equipe Audit Interne", "DST - Chef Equipe Offres et Formations",
+                                  "DST - Responsable Logistique"] + _DIR
+RESTRICTED_LAYOUT_ROLES.update(_NATIVE_LAYOUT_ROLES)
+
 LAYOUT_FIELDS = [
     "label",
     "bg_color",
@@ -432,6 +497,37 @@ def _dedupe_all_layouts() -> bool:
     return changed
 
 
+def _ensure_layouts_for_enabled_users() -> int:
+    """Crée un Desktop Layout (depuis le défaut) pour chaque user actif qui n'en
+    a pas. SANS ça, un user sans layout perso retombe sur le layout par DÉFAUT
+    (toutes les icônes, NON élaguées) → fuite : le Comptable voyait l'icône
+    « Direction Generale » etc. Une fois le layout créé, `_prune_restricted_*`
+    l'élague selon les rôles. Idempotent (ne recrée pas un layout existant)."""
+    created = 0
+    default_layout = json.dumps(_build_default_layout(), ensure_ascii=False)
+    for user in frappe.get_all("User", filters={"enabled": 1,
+                               "user_type": "System User"}, pluck="name"):
+        if user in ("Guest",):
+            continue
+        if frappe.db.exists("Desktop Layout", user):
+            continue
+        try:
+            doc = frappe.new_doc("Desktop Layout")
+            doc.user = user
+            doc.owner = user
+            doc.layout = default_layout
+            doc.flags.ignore_links = True
+            doc.insert(ignore_permissions=True)
+            created += 1
+        except Exception:
+            try:
+                frappe.log_error(frappe.get_traceback(),
+                                 f"desktop_icons: create layout {user}")
+            except Exception:
+                pass
+    return created
+
+
 def _prune_restricted_desktop_layouts() -> bool:
     changed = False
     for row in frappe.get_all("Desktop Layout", fields=["name"]):
@@ -476,6 +572,10 @@ def execute():
         # Sinon une icône autrefois élaguée (ex. Direction pour un compte "DG")
         # n'était jamais re-ajoutée après correction des rôles.
         changed = _sync_all_desktop_layouts() or changed
+        # Donne un layout perso à CHAQUE user actif (sinon défaut non-élagué = fuite)
+        created_layouts = _ensure_layouts_for_enabled_users()
+        if created_layouts:
+            changed = True
         changed = _dedupe_all_layouts() or changed        # collapse les doublons hérités
         changed = _prune_restricted_desktop_layouts() or changed
     except Exception as e:

@@ -1,3 +1,5 @@
+import json as _json
+
 import frappe
 from frappe import _
 from frappe.utils import flt, formatdate, today, add_days
@@ -9,6 +11,373 @@ _ALLOWED_ROLES = {
     "Auditeur Interne", "System Manager",
 }
 
+# ════════════════════════════════════════════════════════════════════
+#  Macro-départements (4) — la classification se fait au niveau ÉQUIPE
+#  car en prod plusieurs équipes KYA partagent un même Department ERPNext
+#  (ex. « Sales - D » porte Commercial ET Offres). Source de vérité =
+#  Equipe KYA. Override explicite + repli par mots-clés pour les équipes
+#  inconnues. dept → équipes → opérations.
+# ════════════════════════════════════════════════════════════════════
+MACRO_ORDER = ["dg", "supports", "tech", "comm"]
+MACRO_META = {
+    "dg":       {"label": "Direction Générale",   "sub": "Informatique / SI · Administratif"},
+    "supports": {"label": "Services Supports",     "sub": "Achats & Stock · Comptabilité & Finance · RH · Logistique"},
+    "tech":     {"label": "Services Techniques",   "sub": "Interventions & SAV"},
+    "comm":     {"label": "Services Commerciaux",  "sub": "Leads · opportunités · devis · clients"},
+}
+# Override par nom exact d'Equipe KYA (les variantes d'accent sont tolérées).
+MACRO_TEAMS = {
+    "dg":       ["Equipe Informatique"],
+    "supports": ["Equipe Achats et Stocks", "Equipe Comptabilité et Finance",
+                 "Equipe Comptabilite et Finance", "Equipe RH",
+                 "Logistique", "Logistique et flotte"],
+    "tech":     ["Equipe Assemblage", "Equipe Fabrication", "Equipe Installation",
+                 "Equipe Maintenance et SAV", "Equipe Offres", "Equipe Audit Interne"],
+    "comm":     ["Equipe Commercial", "Equipe Communication"],
+}
+_TEAM_TO_MACRO = {n.lower(): m for m, names in MACRO_TEAMS.items() for n in names}
+
+
+def _macro_of_team(equipe_name: str | None, dept_name: str | None = None) -> str:
+    """Renvoie la clé macro-département (dg|supports|tech|comm) d'une équipe."""
+    key = (equipe_name or "").strip().lower()
+    if key in _TEAM_TO_MACRO:
+        return _TEAM_TO_MACRO[key]
+    blob = f"{key} {(dept_name or '').lower()}"
+    if any(k in blob for k in ("informat", "système d'info", "systeme d'info", " si ", "r&d", "research")):
+        return "dg"
+    if any(k in blob for k in ("achat", "stock", "compt", "financ", "rh", "ressources humaines",
+                                "logist", "dispatch", "approvision", "magasin")):
+        return "supports"
+    if any(k in blob for k in ("install", "maintenance", "sav", "fabric", "assembl", "offre",
+                                "audit", "production", "operations", "technique", "génie", "genie")):
+        return "tech"
+    if any(k in blob for k in ("commerc", "vente", "sales", "communicat", "marketing")):
+        return "comm"
+    return "dg"  # administratif / rattaché à la DG par défaut
+
+
+# ── Helpers défensifs : tout doctype peut être absent sur une instance ──
+def _dt_exists(dt: str) -> bool:
+    try:
+        return bool(frappe.db.exists("DocType", dt))
+    except Exception:
+        return False
+
+
+def _count(dt: str, filters=None) -> int:
+    if not _dt_exists(dt):
+        return 0
+    try:
+        return frappe.db.count(dt, filters or {})
+    except Exception:
+        return 0
+
+
+def _waiting(dt: str, states) -> int:
+    if not _dt_exists(dt):
+        return 0
+    try:
+        return frappe.db.count(dt, {"workflow_state": ["in", tuple(states)]})
+    except Exception:
+        return 0
+
+
+def _sum(dt: str, field: str, filters=None) -> float:
+    if not _dt_exists(dt):
+        return 0.0
+    try:
+        rows = frappe.get_all(dt, filters=filters or {}, fields=[f"SUM(`{field}`) as s"])
+        return flt(rows[0].s) if rows and rows[0].s else 0.0
+    except Exception:
+        return 0.0
+
+
+_WAIT_STATES = ("En attente Chef", "En attente DAAF", "En attente DG",
+                "En attente Direction", "En attente RH", "En attente Audit",
+                "En attente Magasin", "En attente Comptable", "En attente DFC",
+                "En attente Achats & Stock", "En attente Signature Salarié",
+                "En attente Resp. Stagiaires", "En attente Chef de Service",
+                "En attente du Supérieur Immédiat", "En attente Signature")
+_DG_STATES = ("En attente DG", "En attente Direction")
+
+
+def _card(label, value, sub="", unit="", icon="layers", accent="slate", trend=None, dir=None):
+    return {"label": label, "value": value, "sub": sub, "unit": unit,
+            "icon": icon, "accent": accent, "trend": trend, "dir": dir}
+
+
+def _fmt_m(xof: float) -> str:
+    """Formate un montant XOF en 'X,Y M' (millions, virgule décimale FR)."""
+    m = (xof or 0) / 1_000_000.0
+    return f"{m:,.1f}".replace(",", " ").replace(".", ",")
+
+
+def _build_overview() -> dict:
+    """Construit la vue DG structurée par 4 macro-départements (données réelles)."""
+    week_ago = add_days(today(), -7)
+
+    # ── Équipes (effectif + présence du jour) classées par macro ──
+    macro_teams = {k: [] for k in MACRO_ORDER}
+    try:
+        rows = frappe.db.sql(
+            """
+            SELECT eq.name AS equipe, eq.nom_equipe AS nom, eq.departement AS dept,
+                   eq.chef_equipe_name AS chef,
+                   COUNT(DISTINCT e.name) AS eff,
+                   SUM(CASE WHEN a.status='Present' THEN 1 ELSE 0 END) AS pres,
+                   SUM(CASE WHEN a.status IN ('On Leave','Half Day') THEN 1 ELSE 0 END) AS conges,
+                   SUM(CASE WHEN a.status='Absent' THEN 1 ELSE 0 END) AS abs
+            FROM `tabEquipe KYA` eq
+            LEFT JOIN `tabEmployee` e
+                ON e.custom_kya_equipe = eq.name AND e.status='Active'
+            LEFT JOIN `tabAttendance` a
+                ON a.employee = e.name AND a.attendance_date = CURDATE()
+            GROUP BY eq.name, eq.nom_equipe, eq.departement, eq.chef_equipe_name
+            ORDER BY eff DESC
+            """, as_dict=True)
+        for r in rows:
+            macro = _macro_of_team(r.nom or r.equipe, r.dept)
+            macro_teams[macro].append({
+                "equipe": r.nom or r.equipe, "chef": r.chef or "",
+                "eff": int(r.eff or 0), "pres": int(r.pres or 0),
+                "conges": int(r.conges or 0), "abs": int(r.abs or 0),
+            })
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "dg-overview: equipes")
+
+    def _macro_eff(m):
+        return sum(t["eff"] for t in macro_teams[m])
+
+    def _macro_pres(m):
+        return sum(t["pres"] for t in macro_teams[m])
+
+    effectif_actif = _count("Employee", {"status": "Active"})
+    presents_jour = _count("Attendance", {"attendance_date": today(), "status": "Present"})
+    conges_jour = (_count("Attendance", {"attendance_date": today(), "status": "On Leave"})
+                   or _waiting("Planning Conge", ("Approuvé", "Validé")))
+
+    # ── Compteurs workflow « en attente » (tous modules) ──
+    modules = {
+        "Demandes d'achat": _waiting("Demande Achat KYA", _WAIT_STATES),
+        "Bons de commande": _waiting("Bon Commande KYA", _WAIT_STATES),
+        "Permissions sortie": (_waiting("Permission Sortie Employe", _WAIT_STATES)
+                               + _waiting("Permission Sortie Stagiaire", _WAIT_STATES)),
+        "Plannings congé": _waiting("Planning Conge", _WAIT_STATES),
+        "PV matériel": (_waiting("PV Sortie Materiel", _WAIT_STATES)
+                        + _waiting("PV Entree Materiel", _WAIT_STATES)
+                        + _waiting("PV Retour Materiel", _WAIT_STATES)),
+        "Inventaires": _waiting("Inventaire KYA", _WAIT_STATES),
+        "Brouillards caisse": _waiting("Brouillard Caisse", _WAIT_STATES),
+        "Contrats": _waiting("KYA Contrat", _WAIT_STATES),
+    }
+    modules_total = sum(modules.values())
+
+    achat_dg_n = _waiting("Demande Achat KYA", _DG_STATES)
+    achat_dg_m = _sum("Demande Achat KYA", "montant_total",
+                      {"workflow_state": ["in", _DG_STATES]})
+
+    # ════════ HERO (global) ════════
+    hero = [
+        _card("Effectif actif", str(effectif_actif), f"{effectif_actif} postes", icon="users"),
+        _card("Présents aujourd'hui", str(presents_jour),
+              (f"{round(presents_jour / effectif_actif * 100)} % de l'effectif" if effectif_actif else "—"),
+              icon="usercheck"),
+        _card("Congés en cours", str(conges_jour), "", icon="calendar"),
+        _card("En attente de visa", str(modules_total), "tous départements",
+              unit="workflows", icon="inbox"),
+        _card("Demandes d'achat à valider", _fmt_m(achat_dg_m), f"{achat_dg_n} demandes",
+              unit="M FCFA", icon="wallet"),
+    ]
+
+    # ════════ DG : Informatique / SI + administratif ════════
+    contrats_attente = _waiting("KYA Contrat", ("En attente Signature", "En attente DG",
+                                                "En attente Direction"))
+    dg_cards = [
+        _card("Demandes d'achat — attente DG", str(achat_dg_n), _fmt_m(achat_dg_m) + " M FCFA",
+              icon="cart", accent="orange"),
+        _card("Plannings congé à valider", str(_waiting("Planning Conge", _DG_STATES)),
+              "", icon="calendar", accent="teal"),
+        _card("Contrats à signer", str(contrats_attente), "", icon="filecheck", accent="teal"),
+        _card("Parc informatique", str(_count("Asset")), "", unit="actifs",
+              icon="monitor", accent="green"),
+        _card("Tickets / incidents SI", str(_count("Issue", {"status": ["in", ("Open", "Replied")]})),
+              "ouverts", icon="ticket", accent="orange"),
+    ]
+    contrat_rows = []
+    try:
+        if _dt_exists("KYA Contrat"):
+            for c in frappe.get_all("KYA Contrat",
+                                    filters={"workflow_state": ["in", ("En attente Signature",
+                                                                       "En attente DG", "En attente Direction")]},
+                                    fields=["name", "employee_name", "designation", "workflow_state"],
+                                    limit_page_length=6):
+                contrat_rows.append({"objet": c.get("name"), "partie": c.get("employee_name") or "—",
+                                     "info": c.get("designation") or "", "statut": c.get("workflow_state") or ""})
+    except Exception:
+        pass
+
+    # ════════ SUPPORTS : Achats & Stock + Comptabilité & Finance ════════
+    achats_cards = [
+        _card("Demandes d'achat en attente", str(_waiting("Demande Achat KYA", _WAIT_STATES)),
+              "", icon="cart", accent="orange"),
+        _card("Bons de commande en attente", str(_waiting("Bon Commande KYA", _WAIT_STATES)),
+              "", icon="file", accent="teal"),
+        _card("Appels d'offres", str(_count("Appel Offre KYA")), "", icon="file", accent="slate"),
+        _card("Inventaires en attente", str(_waiting("Inventaire KYA", _WAIT_STATES)),
+              "", icon="package", accent="teal"),
+        _card("PV matériel en attente",
+              str(_waiting("PV Sortie Materiel", _WAIT_STATES)
+                  + _waiting("PV Entree Materiel", _WAIT_STATES)
+                  + _waiting("PV Retour Materiel", _WAIT_STATES)),
+              "réception / retour", icon="filecheck", accent="slate"),
+    ]
+    # Caisse (semaine)
+    ent_sem = _sum("Brouillard Caisse", "total_entrees", {"date_brouillard": [">=", week_ago]})
+    sor_sem = _sum("Brouillard Caisse", "total_sorties", {"date_brouillard": [">=", week_ago]})
+    solde = _sum("Brouillard Caisse", "total_entrees") - _sum("Brouillard Caisse", "total_sorties")
+    compta_cards = [
+        _card("Brouillards caisse (sem.)", str(_count("Brouillard Caisse", {"date_brouillard": [">=", week_ago]})),
+              "à clôturer", icon="receipt", accent="teal"),
+        _card("Entrées (semaine)", _fmt_m(ent_sem), "caisse + banque", unit="M FCFA",
+              icon="arrowup", accent="green"),
+        _card("Sorties (semaine)", _fmt_m(sor_sem), "décaissements", unit="M FCFA",
+              icon="arrowdown", accent="orange"),
+        _card("Solde caisse", _fmt_m(solde), "cumulé", unit="M FCFA", icon="coins", accent="teal"),
+    ]
+    # Ordres de mission + fiches budgétaires (prod) — masqués si absents
+    for dt_, lbl, ic in [("Ordre de Mission", "Ordres de mission en attente", "route"),
+                         ("Ordre de mission", "Ordres de mission en attente", "route")]:
+        if _dt_exists(dt_):
+            compta_cards.append(_card(lbl, str(_waiting(dt_, _WAIT_STATES)), "", icon=ic, accent="teal"))
+            break
+    for dt_ in ("Fiche Budgetaire Mission", "Fiche Budgétaire de Mission", "Fiche Budgetaire de Mission"):
+        if _dt_exists(dt_):
+            compta_cards.append(_card("Fiches budgétaires mission", str(_waiting(dt_, _WAIT_STATES)),
+                                      "en attente de visa", icon="briefcase", accent="orange"))
+            break
+
+    # ════════ TECHNIQUES : 6 équipes, interventions & SAV ════════
+    tech_teams = [t for t in macro_teams["tech"] if t["eff"] > 0]
+    issues_open = _count("Issue", {"status": ["in", ("Open", "Replied")]})
+    tech_cards = [
+        _card("Équipes", str(len(tech_teams)), "services techniques", icon="layers", accent="teal"),
+        _card("Effectif technique", str(_macro_eff("tech")), "", icon="users", accent="teal"),
+        _card("Présents aujourd'hui", str(_macro_pres("tech")),
+              (f"{round(_macro_pres('tech') / _macro_eff('tech') * 100)} %" if _macro_eff("tech") else "—"),
+              icon="usercheck", accent="green"),
+        _card("Interventions / SAV en cours", str(issues_open), "tickets ouverts",
+              icon="wrench", accent="orange"),
+    ]
+    tech_rows = []
+    for t in sorted(tech_teams, key=lambda x: -x["eff"]):
+        charge = round(t["pres"] / t["eff"] * 100) if t["eff"] else 0
+        tech_rows.append({"equipe": t["equipe"], "eff": t["eff"], "pres": t["pres"], "charge": charge})
+
+    # ════════ COMMERCIAUX : leads, opp, devis, clients ════════
+    comm_cards = [
+        _card("Leads", str(_count("Lead", {"status": ["not in", ("Converted", "Do Not Contact")]})),
+              "actifs", icon="trending", accent="teal"),
+        _card("Opportunités", str(_count("Opportunity", {"status": ["in", ("Open", "Quotation", "Replied")]})),
+              "pipeline actif", icon="target", accent="teal"),
+        _card("Devis en cours", str(_count("Quotation", {"status": ["in", ("Draft", "Open", "Submitted")]})),
+              "", icon="file", accent="orange"),
+        _card("Clients actifs", str(_count("Customer", {"disabled": 0})), "", icon="userplus", accent="green"),
+    ]
+    pipe_rows = []
+    try:
+        if _dt_exists("Opportunity"):
+            rows = frappe.db.sql(
+                """SELECT COALESCE(NULLIF(sales_stage,''),'Prospection') AS etape,
+                          COUNT(*) AS opp, COALESCE(SUM(opportunity_amount),0) AS montant
+                   FROM `tabOpportunity` WHERE status IN ('Open','Quotation','Replied')
+                   GROUP BY etape ORDER BY montant DESC LIMIT 6""", as_dict=True)
+            tot = sum(flt(r.montant) for r in rows) or 1
+            for r in rows:
+                pipe_rows.append({"etape": r.etape, "opp": int(r.opp),
+                                  "montant": _fmt_m(r.montant) + " M",
+                                  "part": round(flt(r.montant) / tot * 100)})
+    except Exception:
+        pass
+
+    # ════════ Charts (réels) ════════
+    pres_labels, pres_p, pres_c, pres_a = [], [], [], []
+    for m in MACRO_ORDER:
+        pres_labels.append(MACRO_META[m]["label"].replace("Services ", ""))
+        pres_p.append(sum(t["pres"] for t in macro_teams[m]))
+        pres_c.append(sum(t["conges"] for t in macro_teams[m]))
+        pres_a.append(sum(t["abs"] for t in macro_teams[m]))
+    presence_chart = {"labels": pres_labels, "presents": pres_p, "conges": pres_c, "absents": pres_a}
+
+    wf_counts = {"En attente": 0, "Approuvé": 0, "Rejeté": 0, "Brouillon": 0}
+    for dt_ in ("Demande Achat KYA", "Bon Commande KYA", "Permission Sortie Employe",
+                "Planning Conge", "PV Sortie Materiel", "PV Entree Materiel",
+                "Inventaire KYA", "Brouillard Caisse", "KYA Contrat"):
+        if not _dt_exists(dt_):
+            continue
+        try:
+            for r in frappe.db.sql(f"SELECT workflow_state ws, COUNT(*) n FROM `tab{dt_}` GROUP BY ws",
+                                   as_dict=True):
+                st = (r.ws or "").lower()
+                if "attente" in st:
+                    wf_counts["En attente"] += r.n
+                elif any(k in st for k in ("approuv", "valid", "archiv", "signé", "signe", "clôtur", "clotur")):
+                    wf_counts["Approuvé"] += r.n
+                elif any(k in st for k in ("rejet", "annul", "refus")):
+                    wf_counts["Rejeté"] += r.n
+                else:
+                    wf_counts["Brouillon"] += r.n
+        except Exception:
+            pass
+
+    caisse_chart = {"labels": [], "entrees": [], "sorties": []}
+    try:
+        if _dt_exists("Brouillard Caisse"):
+            for r in frappe.db.sql(
+                """SELECT CONCAT(YEAR(date_brouillard),'-',LPAD(MONTH(date_brouillard),2,'0')) mois,
+                          SUM(total_entrees) ent, SUM(total_sorties) sor
+                   FROM `tabBrouillard Caisse`
+                   WHERE date_brouillard >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+                   GROUP BY mois ORDER BY mois""", as_dict=True):
+                caisse_chart["labels"].append(r.mois or "")
+                caisse_chart["entrees"].append(round(flt(r.ent) / 1_000_000, 2))
+                caisse_chart["sorties"].append(round(flt(r.sor) / 1_000_000, 2))
+    except Exception:
+        pass
+
+    counts = {
+        "dg": len(contrat_rows) + achat_dg_n,
+        "supports": modules["Demandes d'achat"] + modules["Bons de commande"]
+                    + modules["Inventaires"] + modules["PV matériel"],
+        "tech": issues_open,
+        "comm": _count("Opportunity", {"status": ["in", ("Open", "Quotation", "Replied")]}),
+    }
+
+    return {
+        "date_str": formatdate(today(), "EEEE d MMMM y"),
+        "hero": hero,
+        "depts": {
+            "dg": {"meta": MACRO_META["dg"], "count": counts["dg"], "cards": dg_cards,
+                   "contrats": contrat_rows},
+            "supports": {"meta": MACRO_META["supports"], "count": counts["supports"],
+                         "achats": achats_cards, "compta": compta_cards},
+            "tech": {"meta": MACRO_META["tech"], "count": counts["tech"],
+                     "cards": tech_cards, "teams": tech_rows},
+            "comm": {"meta": MACRO_META["comm"], "count": counts["comm"],
+                     "cards": comm_cards, "pipeline": pipe_rows},
+        },
+        "charts": {"presence": presence_chart, "workflows": wf_counts, "caisse": caisse_chart},
+        "modules": modules, "modules_total": modules_total,
+    }
+
+
+@frappe.whitelist()
+def get_dg_overview() -> dict:
+    """Endpoint rafraîchissement du tableau de bord DG (4 macro-départements)."""
+    if not _ALLOWED_ROLES.intersection(set(frappe.get_roles(frappe.session.user))):
+        frappe.throw(_("Accès réservé à la Direction Générale."), frappe.PermissionError)
+    return _build_overview()
+
 
 def get_context(context):
     if frappe.session.user == "Guest":
@@ -17,6 +386,14 @@ def get_context(context):
     user_roles = set(frappe.get_roles(frappe.session.user))
     if not _ALLOWED_ROLES.intersection(user_roles):
         frappe.throw(_("Accès réservé à la Direction Générale."), frappe.PermissionError)
+
+    # Nouvelle vue par macro-départements (maquette DG). Rendu initial + refresh
+    # via get_dg_overview(). Défensif : si ça casse, on garde l'ancien contexte.
+    try:
+        context.overview_json = _json.dumps(_build_overview(), default=str)
+    except Exception:
+        context.overview_json = "null"
+        frappe.log_error(frappe.get_traceback(), "direction-dashboard: overview")
 
     stats = {
         "demandes_dg": 0,

@@ -35,6 +35,7 @@ from frappe.utils import cint, flt, get_datetime, getdate, now_datetime, today
 # Heure standard d'arrivee : tolerance de 5 minutes avant retard.
 # Pourra etre overridee via Shift Type custom par equipe.
 DEFAULT_SHIFT_START = time(8, 0)        # 08:00
+DEFAULT_SHIFT_END = time(17, 30)        # 17:30 — sortie standard KYA
 DEFAULT_LATENESS_TOLERANCE_MIN = 5      # 5 minutes de tolerance
 DEFAULT_LUNCH_BREAK_MINUTES = 60        # pause dej deductible
 
@@ -218,6 +219,7 @@ def mark_arrival(employee: str, arrival_time: str | None = None, date: str | Non
     att.in_time = arrival_dt
     att.status = "Present"
     # Custom fields KYA
+    att.kya_presence_type = "Présent"
     att.kya_marked_by = frappe.session.user
     att.kya_marked_at = now_datetime()
     att.kya_lateness_minutes = lateness
@@ -317,6 +319,7 @@ def mark_absent(employee: str, motif: str = "", date: str | None = None) -> dict
     att_date = date or today()
     att = _get_or_create_attendance(employee, att_date)
     att.status = "Absent"
+    att.kya_presence_type = "Absent"
     att.kya_marked_by = frappe.session.user
     att.kya_marked_at = now_datetime()
     if motif:
@@ -358,12 +361,25 @@ def mark_status(employee: str, status: str = "Present", date: str | None = None)
     if s in ("absent",):
         att.status = "Absent"
         att.late_entry = 0
+        att.kya_presence_type = "Absent"
+    elif s in ("mission", "en mission"):
+        # En mission = l'employé travaille (hors site) -> compté Présent dans HRMS,
+        # mais distingué via kya_presence_type pour les stats.
+        att.status = "Present"
+        att.late_entry = 0
+        att.kya_presence_type = "En mission"
+    elif s in ("conge", "congé", "leave", "on leave"):
+        att.status = "On Leave"
+        att.late_entry = 0
+        att.kya_presence_type = "Congé"
     elif s in ("retard", "late"):
         att.status = "Present"
         att.late_entry = 1
+        att.kya_presence_type = "Présent"
     else:  # present / présent / défaut
         att.status = "Present"
         att.late_entry = 0
+        att.kya_presence_type = "Présent"
 
     att.kya_marked_by = frappe.session.user
     att.kya_marked_at = now_datetime()
@@ -380,7 +396,63 @@ def mark_status(employee: str, status: str = "Present", date: str | None = None)
         pass
 
     return {"ok": True, "attendance": att.name,
-            "status": att.status, "late_entry": cint(att.late_entry)}
+            "status": att.status, "late_entry": cint(att.late_entry),
+            "presence_type": att.kya_presence_type}
+
+
+@frappe.whitelist()
+def set_default_departure(employee: str, date: str | None = None) -> dict:
+    """Applique la sortie standard 17:30 pour un employé qui n'a pas émargé sa sortie.
+
+    Règle métier RH validée : si la personne est partie sans noter son heure
+    de départ dans le cahier, la RH la CONTACTE d'abord pour confirmer, PUIS
+    clique pour poser 17:30 (sortie standard KYA). On ne fabrique jamais
+    l'heure automatiquement : ce endpoint est déclenché manuellement.
+
+    Exige une arrivée déjà saisie (sinon il n'y a pas de journée à clôturer).
+    """
+    _check_rh_role()
+    if not employee:
+        frappe.throw(_("employee est requis"))
+    att_date = date or today()
+    att_name = frappe.db.get_value(
+        "Attendance",
+        {"employee": employee, "attendance_date": att_date, "docstatus": ["!=", 2]},
+        "name",
+    )
+    if not att_name:
+        frappe.throw(
+            _("Aucune présence pour {0} le {1}.").format(employee, att_date)
+        )
+    if not frappe.db.get_value("Attendance", att_name, "in_time"):
+        frappe.throw(
+            _("Pas d'heure d'arrivée : impossible d'appliquer la sortie par défaut.")
+        )
+    out = mark_departure(employee, departure_time="17:30", date=att_date)
+    out["default_applied"] = True
+    return out
+
+
+def _get_team_members(team: str, fields: list[str] | None = None):
+    """Membres d'une équipe : par custom_kya_equipe, avec repli sur department.
+
+    En prod le champ `department` (texte libre) est incohérent ; la source de
+    vérité est `custom_kya_equipe` (Link Equipe KYA). On cherche d'abord par
+    équipe, et si rien ne ressort on retombe sur le department (compat héritée).
+    """
+    fld = fields or ["name"]
+    members = frappe.get_all(
+        "Employee",
+        filters={"custom_kya_equipe": team, "status": "Active"},
+        fields=fld,
+    )
+    if not members:
+        members = frappe.get_all(
+            "Employee",
+            filters={"department": team, "status": "Active"},
+            fields=fld,
+        )
+    return members
 
 
 @frappe.whitelist()
@@ -393,11 +465,7 @@ def mark_team_bulk(team: str, status: str = "Present", date: str | None = None) 
         frappe.throw(_("status doit etre Present ou Absent"))
 
     att_date = date or today()
-    members = frappe.get_all(
-        "Employee",
-        filters={"department": team, "status": "Active"},
-        pluck="name",
-    )
+    members = [m["name"] for m in _get_team_members(team, ["name"])]
 
     results = {"marked": [], "skipped_leave": [], "errors": []}
     for emp in members:
@@ -422,10 +490,8 @@ def get_team_attendance(team: str, date: str | None = None) -> dict:
     _check_rh_role()
     att_date = date or today()
 
-    members = frappe.get_all(
-        "Employee",
-        filters={"department": team, "status": "Active"},
-        fields=["name", "employee_name", "custom_matricule_kya", "designation"],
+    members = _get_team_members(
+        team, ["name", "employee_name", "custom_matricule_kya", "designation"]
     )
 
     rows = []
@@ -435,7 +501,7 @@ def get_team_attendance(team: str, date: str | None = None) -> dict:
             "Attendance",
             {"employee": m["name"], "attendance_date": att_date, "docstatus": ["!=", 2]},
             ["name", "status", "in_time", "out_time", "working_hours",
-             "kya_lateness_minutes", "kya_marked_by", "kya_marked_at"],
+             "kya_presence_type", "kya_lateness_minutes", "kya_marked_by", "kya_marked_at"],
             as_dict=True,
         )
         rows.append({
@@ -497,6 +563,9 @@ def get_attendance_report(period: str = "mois", ref_date: str | None = None,
             SUM(CASE WHEN a.status='Half Day' THEN 1 ELSE 0 END) AS jours_demi,
             SUM(CASE WHEN a.late_entry=1       THEN 1 ELSE 0 END) AS jours_retard,
             SUM(CASE WHEN a.status='Absent'   THEN 1 ELSE 0 END) AS jours_absent,
+            SUM(CASE WHEN a.kya_presence_type='En mission' THEN 1 ELSE 0 END) AS jours_mission,
+            SUM(CASE WHEN a.in_time IS NOT NULL AND a.out_time IS NULL
+                     THEN 1 ELSE 0 END)                            AS jours_incomplet,
             COALESCE(SUM(a.working_hours),0)  AS heures_saisies,
             COALESCE(SUM(CASE
                 WHEN COALESCE(a.working_hours,0) <= 0
@@ -516,10 +585,13 @@ def get_attendance_report(period: str = "mois", ref_date: str | None = None,
     )
 
     employes = []
-    tot = {"jours": 0, "retards": 0, "absents": 0, "heures": 0.0}
+    tot = {"jours": 0, "retards": 0, "absents": 0, "missions": 0,
+           "incomplets": 0, "heures": 0.0}
     for r in rows:
         jours = int(r.jours_presents or 0) + int(r.jours_demi or 0)
         heures = round(float(r.heures_saisies or 0) + float(r.heures_fallback or 0), 2)
+        mission = int(r.jours_mission or 0)
+        incomplet = int(r.jours_incomplet or 0)
         employes.append({
             "employee": r.name, "employee_name": r.employee_name,
             "equipe": r.equipe or "Sans équipe", "departement": r.departement,
@@ -527,12 +599,16 @@ def get_attendance_report(period: str = "mois", ref_date: str | None = None,
             "jours_travailles": jours,
             "jours_retard": int(r.jours_retard or 0),
             "jours_absent": int(r.jours_absent or 0),
+            "jours_mission": mission,
+            "jours_incomplet": incomplet,
             "heures_totales": heures,
             "heures_moyennes": round(heures / jours, 2) if jours else 0.0,
         })
         tot["jours"] += jours
         tot["retards"] += int(r.jours_retard or 0)
         tot["absents"] += int(r.jours_absent or 0)
+        tot["missions"] += mission
+        tot["incomplets"] += incomplet
         tot["heures"] += heures
     tot["heures"] = round(tot["heures"], 1)
 

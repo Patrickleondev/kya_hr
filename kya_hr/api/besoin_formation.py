@@ -133,7 +133,12 @@ def soumettre_besoin(doc_name):
     if not _is_rh() and emp != chef:
         frappe.throw(_("Seul le chef peut soumettre."), frappe.PermissionError)
 
-    doc.db_set("workflow_state", "Soumis à la RH", update_modified=False)
-    doc.db_set("statut", "Soumis à la RH", update_modified=False)
+    # IMPORTANT : utiliser save() (et NON db_set) pour déclencher on_update →
+    # formation_notifications.besoin_on_update prévient la RH (mail + cloche).
+    # db_set écrit en base SANS lancer les hooks → la notification ne partait jamais.
+    doc.workflow_state = "Soumis à la RH"
+    doc.statut = "Soumis à la RH"
+    doc.flags.ignore_permissions = True
+    doc.save()
     frappe.db.commit()
     return {"name": doc.name, "statut": "Soumis à la RH"}

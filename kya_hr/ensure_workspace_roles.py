@@ -75,18 +75,34 @@ NATIVE_WORKSPACE_ROLES: dict[str, list[str]] = {
     "Integrations": ["System Manager"],
     "Website": ["System Manager", "Website Manager"],
     "Support": ["System Manager", "Support Team"],
-    # RH
+    # RH — espace HRMS natif : réservé RH (sinon visible par tous les rôles)
+    "Frappe HR": ["System Manager", "HR Manager", "Responsable RH"],
     "HR Setup": ["System Manager", "Responsable RH", "HR Manager"],
     "Tenure": ["System Manager", "Responsable RH", "HR Manager"],
     "Tax & Benefits": ["System Manager", "Responsable RH", "HR Manager", "Accounts Manager"],
-    # Finance / comptabilité
+    # Finance / comptabilité — chaque rôle finance voit l'espace compta natif
+    # ET l'Espace Comptabilite KYA (demande user : caissier/comptable/DFC/DAAF).
+    "Comptabilité": ["System Manager", "Accounts Manager", "Accounts User",
+                     "Comptable", "Caissier", "DFC", "DAAF"],
+    "Accounting": ["System Manager", "Accounts Manager", "Accounts User",
+                   "Comptable", "Caissier", "DFC", "DAAF"],
     "Financial Reports": ["System Manager", "Accounts Manager", "DFC", "DAAF", "Comptable"],
-    "Invoicing": ["System Manager", "Accounts Manager", "Accounts User", "Comptable"],
+    "Invoicing": ["System Manager", "Accounts Manager", "Accounts User", "Comptable", "Caissier"],
     "Expenses": ["System Manager", "Accounts Manager", "Accounts User", "Expense Approver"],
     "Assets": ["System Manager", "Accounts Manager"],
-    # Commercial → CRM ouvert aux commerciaux (demande explicite)
+    # Achats — les gens d'achats voient l'espace Buying natif + Espace Achats KYA
+    "Buying": ["System Manager", "Purchase Manager", "Purchase User", "Responsable Achats"],
+    # Stock — les magasiniers voient l'espace Stock natif + Espace Stock KYA
+    "Stock": ["System Manager", "Stock Manager", "Stock User", "Chargé des Stocks",
+              "Responsable Stock", "Magasinier"],
+    # Commercial → Selling + CRM ouverts aux commerciaux (demande explicite)
+    "Selling": ["System Manager", "Sales User", "Sales Manager", "Sales Master Manager"],
     "CRM": ["System Manager", "Sales User", "Sales Manager", "Sales Master Manager"],
 }
+
+# Workspaces publics AUTORISÉS à rester sans rôle (visibles par tous).
+# Seul l'accueil universel : tout le reste sans rôle est un orphelin à restreindre.
+PUBLIC_NO_ROLE_ALLOWLIST = {"Home"}
 
 # Espaces personnels : ne PAS y mettre les global viewers (ils ont le leur).
 # Espace Stagiaires n'est plus « personnel » (c'est désormais un espace de
@@ -151,6 +167,7 @@ DG_DASHBOARD_SHORTCUTS = [
     ("🛒 Dashboard Achats", "/achats-dashboard"),
     ("🏦 Dashboard Comptabilité", "/comptabilite-dashboard"),
     ("📋 Inventaire & Sorties", "/inventaire-dashboard"),
+    ("🔧 Stock par état", "/stock-etat"),
     ("🎓 Tableau Stagiaires", "/tableau-bord-stagiaires"),
     ("🧑‍💼 Tableau Employés", "/tableau-bord-employes"),
 ]
@@ -200,6 +217,41 @@ def _ensure_dg_dashboard_shortcuts() -> int:
     return added
 
 
+def _restrict_orphan_public_workspaces() -> list[str]:
+    """Restreint à System Manager tout workspace public sans rôle (hors Home).
+
+    Frappe : un workspace public SANS Has Role est visible par TOUS les
+    utilisateurs. Ces orphelins (ex. 'Frappe HR', 'Comptabilité', 'Welcome
+    Workspace') faisaient fuiter des icônes vers des rôles qui ne doivent pas
+    les voir. On leur ajoute System Manager → seuls les admins les voient ;
+    les vrais espaces métier gardent leurs rôles dédiés. Les espaces déjà
+    mappés (NATIVE_WORKSPACE_ROLES / WORKSPACE_ROLES) ont reçu leurs rôles
+    avant ce balayage, donc ils ne sont plus orphelins ici.
+    """
+    restricted: list[str] = []
+    try:
+        rows = frappe.get_all(
+            "Workspace",
+            filters={"public": 1, "is_hidden": 0},
+            fields=["name", "for_user"],
+        )
+    except Exception:
+        return restricted
+    for ws in rows:
+        if ws.get("for_user"):
+            continue
+        if ws["name"] in PUBLIC_NO_ROLE_ALLOWLIST:
+            continue
+        has_roles = frappe.get_all("Has Role", filters={
+            "parent": ws["name"], "parenttype": "Workspace",
+        }, limit=1)
+        if has_roles:
+            continue
+        if _add_role_to_workspace(ws["name"], "System Manager"):
+            restricted.append(ws["name"])
+    return restricted
+
+
 def execute() -> dict:
     summary = {"added": [], "skipped_missing_ws": [], "total_added": 0}
 
@@ -243,6 +295,12 @@ def execute() -> dict:
         for role in roles:
             if _remove_role_from_workspace(ws_name, role):
                 summary["removed"].append(f"{ws_name} -x- {role}")
+
+    # ── Anti-fuite : tout workspace PUBLIC sans rôle est visible par TOUS.
+    # On restreint chaque orphelin (sans rôle, non perso, non Home) à System
+    # Manager. Corrige le cas « le Comptable voit Frappe HR / Comptabilité /
+    # etc. » : ces espaces n'avaient aucun rôle donc s'affichaient pour chacun.
+    summary["orphans_restricted"] = _restrict_orphan_public_workspaces()
 
     # Raccourcis dashboards pour le DG (visibilite totale)
     summary["dg_shortcuts_added"] = _ensure_dg_dashboard_shortcuts()

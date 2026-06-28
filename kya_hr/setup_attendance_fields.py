@@ -56,6 +56,15 @@ KYA_ATTENDANCE_FIELDS = [
         "insert_after": "kya_lateness_minutes",
         "depends_on": "eval:doc.status==='Absent'",
     },
+    {
+        "fieldname": "kya_presence_type",
+        "fieldtype": "Select",
+        "label": "Type de présence (KYA)",
+        "insert_after": "kya_motif_absence",
+        "options": "\nPrésent\nEn mission\nCongé\nAbsent",
+        "description": "Type KYA : Présent, En mission (travaille hors site = compté présent), "
+                       "Congé, Absent.",
+    },
 ]
 
 

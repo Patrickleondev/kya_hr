@@ -2,449 +2,266 @@
 
 {% block title %}Tableau de Bord Direction Générale KYA{% endblock %}
 
+{% block head_include %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endblock %}
+
 {% block page_content %}
 <style>
-.kya-dg-page { max-width: 1180px; margin: 18px auto 32px; padding: 0 16px; font-family: Arial, sans-serif; color: #18212f; }
-.kya-letterhead { border: 1px solid #d9dee7; border-radius: 6px; overflow: hidden; background: #fff; }
-.kya-letterhead-top { display: grid; grid-template-columns: 120px 1fr 180px; gap: 18px; align-items: center; padding: 18px 22px; border-bottom: 4px solid #d92d20; }
-.kya-logo { width: 84px; height: 84px; object-fit: contain; }
-.kya-company h1 { margin: 0; font-size: 22px; color: #0f3d68; letter-spacing: 0; }
-.kya-company p { margin: 4px 0 0; font-size: 12px; color: #5c6573; line-height: 1.45; }
-.kya-doc-meta { text-align: right; font-size: 12px; color: #4b5563; }
-.kya-title-band { background: #0f3d68; color: #fff; padding: 14px 22px; display: flex; justify-content: space-between; gap: 16px; align-items: center; }
-.kya-title-band h2 { margin: 0; font-size: 20px; letter-spacing: 0; }
-.kya-title-band span { font-size: 13px; opacity: .92; }
-.kya-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0; }
-.kya-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 9px 14px; border-radius: 6px; border: 1px solid #d8dee8; background: #fff; color: #0f3d68; text-decoration: none; font-weight: 700; font-size: 13px; }
-.kya-btn.primary { background: #d92d20; border-color: #b42318; color: #fff; }
-.kya-btn.dark { background: #0f3d68; border-color: #0f3d68; color: #fff; }
-.kya-btn.warning { background: #f59e0b; border-color: #d97706; color: #fff; }
-.kya-btn:hover { text-decoration: none; filter: brightness(.97); }
-.kya-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 14px 0 20px; }
-.kya-kpi { border: 1px solid #d9dee7; border-radius: 6px; background: #fff; padding: 14px; position: relative; }
-.kya-kpi .label { color: #667085; font-size: 12px; text-transform: uppercase; }
-.kya-kpi .value { font-size: 22px; color: #101828; font-weight: 800; margin-top: 5px; }
-.kya-kpi.alert { border-left: 4px solid #d92d20; }
-.kya-kpi.warning { border-left: 4px solid #f59e0b; }
-.kya-kpi.info { border-left: 4px solid #2e90fa; }
-.kya-section { margin-top: 18px; border: 1px solid #d9dee7; border-radius: 6px; background: #fff; overflow: hidden; }
-.kya-section h3 { margin: 0; padding: 13px 16px; background: #f7f8fa; border-bottom: 1px solid #d9dee7; font-size: 15px; color: #0f3d68; }
-.kya-table-wrap { overflow-x: auto; }
-table.kya-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.kya-table th, .kya-table td { padding: 10px 12px; border-bottom: 1px solid #edf0f5; text-align: left; vertical-align: top; }
-.kya-table th { background: #fafbfc; color: #344054; font-weight: 700; }
-.kya-table td.num, .kya-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
-.kya-badge { display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #eef2f7; color: #344054; }
-.kya-badge.ok { background: #d1fadf; color: #027a48; }
-.kya-badge.err { background: #fee4e2; color: #b42318; }
-.kya-badge.wait { background: #fef0c7; color: #b54708; }
-.kya-help { padding: 14px 18px; color: #5c6573; font-size: 13px; }
-.kya-summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 16px; }
-.kya-summary-card { border: 1px solid #e5e7eb; border-radius: 6px; padding: 14px; background: #fafbfc; }
-.kya-summary-card h4 { margin: 0 0 8px; font-size: 13px; color: #344054; text-transform: uppercase; letter-spacing: .03em; }
-.kya-summary-card .v { font-size: 18px; font-weight: 800; color: #0f3d68; }
-.kya-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px; }
-.kya-chart-card { margin-top: 0; }
-@media (max-width: 860px) { .kya-charts { grid-template-columns: 1fr; } }
-@media (max-width: 860px) {
-  .kya-letterhead-top { grid-template-columns: 80px 1fr; }
-  .kya-doc-meta { grid-column: 1 / -1; text-align: left; }
-  .kya-grid, .kya-summary-grid { grid-template-columns: 1fr; }
-  .kya-title-band { display: block; }
-}
-@media print {
-  .navbar, header, .web-footer, .kya-actions { display: none !important; }
-  .kya-dg-page { margin: 0; max-width: none; }
-}
+  .dgx * { box-sizing: border-box; }
+  .dgx { --teal:#0d7377; --teal2:#0a5d61; --orange:#F58220; --green:#6fae2f; --ink:#101828; --muted:#667085; --line:#eef1f4;
+         max-width:1480px; margin:0 auto; padding:14px 14px 36px; font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; color:var(--ink); }
+  .dgx-hero { background:linear-gradient(120deg,#0d7377,#0a5d61 55%,#0e6e5a); border-radius:16px; padding:16px; box-shadow:0 6px 20px rgba(13,115,119,.20); }
+  .dgx-hero h2 { margin:0 0 12px; font-size:16px; color:#fff; font-weight:700; }
+  .dgx-hgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; }
+  .dgx-hcard { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); border-radius:12px; padding:13px 15px; display:flex; flex-direction:column; gap:6px; }
+  .dgx-hcard .lbl { font-size:12px; color:rgba(255,255,255,.82); }
+  .dgx-hcard .val { font-size:27px; font-weight:800; color:#fff; line-height:1; }
+  .dgx-hcard .un { font-size:12px; font-weight:600; color:rgba(255,255,255,.8); margin-left:5px; }
+  .dgx-hcard .sub { font-size:11.5px; color:rgba(255,255,255,.72); }
+  .dgx-tabs { display:flex; gap:4px; background:#fff; border:1px solid var(--line); border-radius:13px; padding:5px; margin:14px 0; overflow-x:auto; }
+  .dgx-tab { display:flex; align-items:center; gap:9px; padding:9px 14px; border-radius:10px; border:none; background:transparent; cursor:pointer; font-family:inherit; color:var(--muted); white-space:nowrap; flex:1 1 auto; transition:.15s; }
+  .dgx-tab .ti { width:30px; height:30px; border-radius:9px; display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .dgx-tab b { font-size:13px; } .dgx-tab small { font-size:11px; opacity:.72; display:block; text-align:left; }
+  .dgx-sec { display:none; flex-direction:column; gap:12px; } .dgx-sec.on { display:flex; }
+  .dgx-band { display:flex; align-items:center; gap:12px; color:#fff; border-radius:14px; padding:13px 16px; }
+  .dgx-band .bi { width:36px; height:36px; border-radius:10px; background:rgba(255,255,255,.16); display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .dgx-band .bt { font-size:15px; font-weight:700; } .dgx-band .bs { font-size:12px; color:rgba(255,255,255,.82); }
+  .dgx-band .bc { margin-left:auto; font-size:12px; font-weight:600; background:rgba(255,255,255,.18); padding:5px 11px; border-radius:20px; white-space:nowrap; }
+  .dgx-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(158px,1fr)); gap:12px; }
+  .dgx-card { background:#fff; border:1px solid var(--line); border-radius:14px; box-shadow:0 1px 2px rgba(16,24,40,.05); padding:14px; display:flex; flex-direction:column; gap:8px; }
+  .dgx-card.soft { background:#f7f9fb; box-shadow:none; }
+  .dgx-card .ch { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+  .dgx-card .lbl { font-size:12.5px; color:var(--muted); line-height:1.35; }
+  .dgx-card .val { font-size:29px; font-weight:700; color:var(--ink); line-height:1; }
+  .dgx-card .un { font-size:13px; font-weight:600; color:var(--muted); margin-left:6px; }
+  .dgx-card .sub { font-size:12px; color:#98a2b3; }
+  .dgx-chip { width:34px; height:34px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .dgx-sup { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+  .dgx-panel { background:#fff; border:1px solid var(--line); border-radius:14px; box-shadow:0 1px 2px rgba(16,24,40,.05); padding:14px; display:flex; flex-direction:column; gap:12px; }
+  .dgx-panel .ph { display:flex; align-items:center; gap:8px; } .dgx-panel .ph b { font-size:14px; } .dgx-panel .ph .pn { margin-left:auto; font-size:11.5px; color:#98a2b3; }
+  .dgx-table { background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+  .dgx-table .th { padding:11px 16px; border-bottom:1px solid #f1f4f7; display:flex; align-items:center; justify-content:space-between; font-size:13.5px; font-weight:700; }
+  .dgx-row { display:grid; gap:10px; padding:8px 16px; border-top:1px solid #f1f4f7; align-items:center; font-size:13px; }
+  .dgx-row.head { border-top:none; border-bottom:1px solid #f1f4f7; }
+  .dgx-row.head span { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:#98a2b3; }
+  .dgx-bar { flex:1; height:6px; border-radius:4px; background:#eef1f4; overflow:hidden; min-width:60px; }
+  .dgx-bar > i { display:block; height:100%; border-radius:4px; }
+  .dgx-badge { display:inline-flex; align-items:center; font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:20px; white-space:nowrap; }
+  .dgx-charts { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .dgx-charts .cc { background:#fff; border:1px solid var(--line); border-radius:14px; box-shadow:0 1px 2px rgba(16,24,40,.05); padding:14px; }
+  .dgx-charts .cc b { font-size:13.5px; } .dgx-charts .cwrap { position:relative; height:240px; margin-top:8px; }
+  @media (max-width:900px){ .dgx-charts{grid-template-columns:1fr;} .dgx-sup{grid-template-columns:1fr;} }
+  .dgx-foot { text-align:center; font-size:11.5px; color:#b0b8c1; padding:6px 0; margin-top:6px; }
 </style>
 
-<div class="kya-dg-page">
-  <div class="kya-letterhead">
-    <div class="kya-letterhead-top">
-      <img class="kya-logo" src="/assets/kya_hr/images/kya_logo.png" alt="KYA-Energy Group">
-      <div class="kya-company">
-        <h1>KYA-ENERGY GROUP</h1>
-        <p>Solutions solaires • Services techniques • Gestion administrative et financière</p>
-        <p>Agoè-Logopé, Lomé - Togo</p>
-      </div>
-      <div class="kya-doc-meta">
-        <b>Direction Générale</b><br>
-        Vue consolidée — Approbations, Caisse, RH<br>
-        Mise à jour temps réel
-      </div>
-    </div>
-    <div class="kya-title-band">
-      <h2>Tableau de bord Direction Générale</h2>
-      <span>Approbations • Caisse • RH • Achats stratégiques</span>
-    </div>
-  </div>
-
-  <div class="kya-actions">
-    <a class="kya-btn primary" href="/app/demande-achat-kya?workflow_state=En%20attente%20DG">Mes approbations</a>
-    <a class="kya-btn warning" href="/recap-brouillards">Récap Caisse Hebdo</a>
-    <a class="kya-btn" href="/comptabilite-dashboard">Tableau Compta</a>
-    <a class="kya-btn" href="/achats-dashboard">Tableau Achats</a>
-    <a class="kya-btn dark" href="/app/dashboard/Tableau de Bord RH">Dashboard RH</a>
-    <button class="kya-btn" onclick="window.print()">Imprimer</button>
-  </div>
-
-  <div class="kya-grid">
-    <div class="kya-kpi alert">
-      <div class="label">Demandes ≥ 2M à valider</div>
-      <div class="value">{{ stats.demandes_dg }}</div>
-      <div style="font-size:11px;color:#667085;margin-top:4px;">{{ "{:,.0f}".format(stats.montant_demandes_dg).replace(",", " ") }} XOF</div>
-    </div>
-    <div class="kya-kpi warning">
-      <div class="label">Brouillards (7 derniers jours)</div>
-      <div class="value">{{ stats.brouillards_semaine }}</div>
-    </div>
-    <div class="kya-kpi info">
-      <div class="label">Plannings congé en attente</div>
-      <div class="value">{{ stats.plannings_attente }}</div>
-    </div>
-    <div class="kya-kpi">
-      <div class="label">Effectif actif</div>
-      <div class="value">{{ stats.effectif_actif }}</div>
-    </div>
-  </div>
-
-  {# ── 5.1 Bandeau multi-modules : tout ce qui attend, partout ── #}
-  <div class="kya-section">
-    <h3>Synthèse des validations en attente — tous modules ({{ modules_total }})</h3>
-    <div class="kya-summary-grid" style="grid-template-columns:repeat(4,1fr);">
-      {% for label, n in modules.items() %}
-      <div class="kya-summary-card" style="text-align:center; {% if n > 0 %}border-left:4px solid #f59e0b;{% endif %}">
-        <h4>{{ label }}</h4>
-        <div class="v" style="font-size:26px; {% if n > 0 %}color:#b54708;{% else %}color:#98a2b3;{% endif %}">{{ n }}</div>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-
-  {# ── Services transverses (kya_services) : enquêtes, évaluations, tâches ── #}
-  <div class="kya-section">
-    <h3>Services transverses — Enquêtes, Évaluations & Tâches (tous départements)</h3>
-    <div class="kya-summary-grid" style="grid-template-columns:repeat(4,1fr);">
-      <div class="kya-summary-card" style="text-align:center;border-left:4px solid #0d7377;">
-        <h4>Enquêtes de satisfaction</h4>
-        <div class="v" style="font-size:26px;color:#0d7377;">{{ services.form_taux }}%</div>
-        <div style="font-size:11px;color:#667085;">{{ services.form_soumis }}/{{ services.form_invites }} livrées · {{ services.forms_actifs }} active(s)</div>
-      </div>
-      <div class="kya-summary-card" style="text-align:center;border-left:4px solid #1565c0;">
-        <h4>Évaluations</h4>
-        <div class="v" style="font-size:26px;color:#1565c0;">{{ services.evals_taux }}%</div>
-        <div style="font-size:11px;color:#667085;">{{ services.evals_soumis }}/{{ services.evals_total }} complétées · {{ services.evals_attente }} en attente</div>
-      </div>
-      <div class="kya-summary-card" style="text-align:center;border-left:4px solid #6a1b9a;">
-        <h4>Tâches d'équipe</h4>
-        <div class="v" style="font-size:26px;color:#6a1b9a;">{{ services.taches_en_cours }}</div>
-        <div style="font-size:11px;color:#667085;">en cours · {{ services.taches_terminees }} terminée(s) / {{ services.taches_total }}</div>
-      </div>
-      <div class="kya-summary-card" style="text-align:center;border-left:4px solid #c77700;">
-        <h4>Plans trimestriels</h4>
-        <div class="v" style="font-size:26px;color:#c77700;">{{ services.plans_trimestriels }}</div>
-        <div style="font-size:11px;color:#667085;">plan(s) actifs</div>
-      </div>
-    </div>
-    {% if services.form_attente > 0 or services.evals_attente > 0 %}
-    <div style="padding:6px 16px 14px;font-size:12px;color:#b54708;">
-      ⚠ {{ services.form_attente }} enquête(s) et {{ services.evals_attente }} évaluation(s) non encore livrées/complétées — relancer les destinataires.
-    </div>
-    {% endif %}
-  </div>
-
-  {# ── Intégrations externes : visiteurs + réunions ── #}
-  {% if integrations.guest_actif or integrations.meeting_actif %}
-  <div class="kya-section">
-    <h3>Visiteurs &amp; Réunions (apps connectées)</h3>
-    <div class="kya-summary-grid" style="grid-template-columns:repeat(4,1fr);">
-      {% if integrations.guest_actif %}
-      <div class="kya-summary-card" style="text-align:center;border-left:4px solid #00897b;">
-        <h4>Visiteurs aujourd'hui</h4>
-        <div class="v" style="font-size:26px;color:#00897b;">{{ integrations.visites_jour }}</div>
-        <div style="font-size:11px;color:#667085;">{{ integrations.visites_en_cours }} en cours · {{ integrations.visites_semaine }} cette semaine</div>
-      </div>
-      {% endif %}
-      {% if integrations.meeting_actif %}
-      <div class="kya-summary-card" style="text-align:center;border-left:4px solid #3949ab;">
-        <h4>Réunions actives</h4>
-        <div class="v" style="font-size:26px;color:#3949ab;">{{ integrations.reunions_actives }}</div>
-        <div style="font-size:11px;color:#667085;">{{ integrations.reunions_semaine }} cette semaine</div>
-      </div>
-      <div class="kya-summary-card" style="text-align:center;border-left:4px solid #5e35b1;">
-        <h4>Présences réunions (7j)</h4>
-        <div class="v" style="font-size:26px;color:#5e35b1;">{{ integrations.presences_semaine }}</div>
-        <div style="font-size:11px;color:#667085;">scans enregistrés</div>
-      </div>
-      {% endif %}
-    </div>
-    <div style="padding:4px 16px 12px;font-size:11px;color:#98a2b3;">Données synchronisées depuis les applications KYA Guest &amp; Meeting Attendance.</div>
-  </div>
-  {% endif %}
-
-  {# ── Graphes (Chart.js) : présence, workflows, caisse ── #}
-  <div class="kya-charts">
-    <div class="kya-section kya-chart-card">
-      <h3>Présence par département</h3>
-      <div style="padding:14px;"><canvas id="chartPresence" height="160"></canvas></div>
-    </div>
-    <div class="kya-section kya-chart-card">
-      <h3>Workflows par statut</h3>
-      <div style="padding:14px;"><canvas id="chartWorkflows" height="160"></canvas></div>
-    </div>
-  </div>
-  <div class="kya-section">
-    <h3>Évolution de la caisse (6 derniers mois)</h3>
-    <div style="padding:14px;"><canvas id="chartCaisse" height="90"></canvas></div>
-  </div>
-
-  {# ── 5.1 Synthèse par ÉQUIPE (se peuple en prod) ── #}
-  {% if equipes %}
-  <div class="kya-section">
-    <h3>Synthèse par équipe — présences du jour</h3>
-    <div class="kya-table-wrap">
-      <table class="kya-table">
-        <thead>
-          <tr>
-            <th>Équipe</th>
-            <th>Département</th>
-            <th>Chef d'équipe</th>
-            <th class="num">Effectif</th>
-            <th class="num">Présents</th>
-            <th class="num">Retards</th>
-            <th class="num">Absents</th>
-            <th class="num">Taux</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for e in equipes %}
-          {% set taux = ((e.presents or 0) * 100 // (e.effectif or 1)) %}
-          <tr>
-            <td><a href="/app/equipe-kya/{{ e.equipe }}"><b>{{ e.nom or e.equipe }}</b></a></td>
-            <td>{{ e.departement or "—" }}</td>
-            <td>{{ e.chef or "—" }}</td>
-            <td class="num">{{ e.effectif or 0 }}</td>
-            <td class="num">{{ e.presents or 0 }}</td>
-            <td class="num">{% if (e.retards or 0) > 0 %}<span class="kya-badge wait">{{ e.retards }}</span>{% else %}0{% endif %}</td>
-            <td class="num">{% if (e.absents or 0) > 0 %}<span class="kya-badge err">{{ e.absents }}</span>{% else %}0{% endif %}</td>
-            <td class="num"><span class="kya-badge {% if taux >= 80 %}ok{% elif taux >= 50 %}wait{% else %}err{% endif %}">{{ taux }}%</span></td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
-  {% endif %}
-
-  {# ── 5.1 Synthèse par département : toutes les équipes en un écran ── #}
-  <div class="kya-section">
-    <h3>Synthèse par département — présences du jour</h3>
-    {% if departements %}
-    <div class="kya-table-wrap">
-      <table class="kya-table">
-        <thead>
-          <tr>
-            <th>Département / Équipe</th>
-            <th class="num">Effectif</th>
-            <th class="num">Présents</th>
-            <th class="num">Retards</th>
-            <th class="num">Congés</th>
-            <th class="num">Absents</th>
-            <th class="num">Taux présence</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for d in departements %}
-          {% set taux = ((d.presents or 0) * 100 // (d.effectif or 1)) %}
-          <tr>
-            <td><b>{{ d.dept }}</b></td>
-            <td class="num">{{ d.effectif or 0 }}</td>
-            <td class="num">{{ d.presents or 0 }}</td>
-            <td class="num">{% if (d.retards or 0) > 0 %}<span class="kya-badge wait">{{ d.retards }}</span>{% else %}0{% endif %}</td>
-            <td class="num">{{ d.conges or 0 }}</td>
-            <td class="num">{% if (d.absents or 0) > 0 %}<span class="kya-badge err">{{ d.absents }}</span>{% else %}0{% endif %}</td>
-            <td class="num"><span class="kya-badge {% if taux >= 80 %}ok{% elif taux >= 50 %}wait{% else %}err{% endif %}">{{ taux }}%</span></td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    {% else %}
-    <div class="kya-help">Aucun département avec effectif actif.</div>
-    {% endif %}
-  </div>
-
-  {% if demandes_dg %}
-  <div class="kya-section">
-    <h3>Demandes d'achat à valider Directeur Général</h3>
-    <div class="kya-table-wrap">
-      <table class="kya-table">
-        <thead>
-          <tr>
-            <th>Référence</th>
-            <th>Demandeur</th>
-            <th>Objet</th>
-            <th class="num">Montant XOF</th>
-            <th>État</th>
-            <th>Reçu le</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for d in demandes_dg %}
-          <tr>
-            <td><a href="/app/demande-achat-kya/{{ d.name }}">{{ d.name }}</a></td>
-            <td>{{ d.demandeur_nom or "" }}</td>
-            <td>{{ d.objet or "" }}</td>
-            <td class="num">{{ "{:,.0f}".format(d.montant_total or 0).replace(",", " ") }}</td>
-            <td><span class="kya-badge wait">{{ d.workflow_state }}</span></td>
-            <td>{{ d.date_label }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
-  {% endif %}
-
-  <div class="kya-section">
-    <h3>Brouillards Caisse — 7 derniers jours</h3>
-    {% if brouillards %}
-    <div class="kya-table-wrap">
-      <table class="kya-table">
-        <thead>
-          <tr>
-            <th>Référence</th>
-            <th>Date</th>
-            <th>Caissière</th>
-            <th class="num">Entrées</th>
-            <th class="num">Sorties</th>
-            <th class="num">Solde Final</th>
-            <th>État</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for b in brouillards %}
-          <tr>
-            <td><a href="/app/brouillard-caisse/{{ b.name }}">{{ b.name }}</a></td>
-            <td>{{ b.date_label }}</td>
-            <td>{{ b.caissiere or "" }}</td>
-            <td class="num">{{ "{:,.0f}".format(b.total_entrees or 0).replace(",", " ") }}</td>
-            <td class="num">{{ "{:,.0f}".format(b.total_sorties or 0).replace(",", " ") }}</td>
-            <td class="num"><b>{{ "{:,.0f}".format(b.solde_final or 0).replace(",", " ") }}</b></td>
-            <td><span class="kya-badge {% if b.workflow_state == 'Approuvé' %}ok{% endif %}">{{ b.workflow_state }}</span></td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    {% else %}
-    <div class="kya-help">Aucun brouillard enregistré cette semaine.</div>
-    {% endif %}
-  </div>
-
-  {% if plannings_attente %}
-  <div class="kya-section">
-    <h3>Plannings congé à valider</h3>
-    <div class="kya-table-wrap">
-      <table class="kya-table">
-        <thead>
-          <tr>
-            <th>Référence</th>
-            <th>Employé</th>
-            <th>Début</th>
-            <th>Fin</th>
-            <th class="num">Jours</th>
-            <th>État</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for p in plannings_attente %}
-          <tr>
-            <td><a href="/app/planning-conge/{{ p.name }}">{{ p.name }}</a></td>
-            <td>{{ p.employee_name or "" }}</td>
-            <td>{{ p.date_label }}</td>
-            <td>{{ p.date_fin or "" }}</td>
-            <td class="num">{{ p.nb_jours or 0 }}</td>
-            <td><span class="kya-badge wait">{{ p.workflow_state }}</span></td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
-  {% endif %}
-
-  <div class="kya-section">
-    <h3>Accès rapides</h3>
-    <div class="kya-summary-grid">
-      <div class="kya-summary-card">
-        <h4>Demandes d'achat</h4>
-        <div><a href="/app/demande-achat-kya">Liste complète</a> &nbsp;|&nbsp;
-             <a href="/app/demande-achat-kya?workflow_state=En%20attente%20DG">En attente DG</a></div>
-      </div>
-      <div class="kya-summary-card">
-        <h4>Brouillards Caisse</h4>
-        <div><a href="/app/brouillard-caisse">Liste complète</a> &nbsp;|&nbsp;
-             <a href="/recap-brouillards">Récap hebdo</a></div>
-      </div>
-      <div class="kya-summary-card">
-        <h4>Congés &amp; Présences</h4>
-        <div><a href="/app/planning-conge">Plannings</a> &nbsp;|&nbsp;
-             <a href="/app/leave-application">Demandes congé HRMS</a></div>
-      </div>
-      <div class="kya-summary-card">
-        <h4>Stock &amp; Inventaires</h4>
-        <div><a href="/app/inventaire-kya">Inventaires</a> &nbsp;|&nbsp;
-             <a href="/app/pv-sortie-materiel">PV Sorties</a></div>
-      </div>
-    </div>
-  </div>
-
+<div class="dgx" id="dgx-root">
+  <div style="text-align:center;color:#94a3b8;padding:40px;">Chargement du tableau de bord…</div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
-(function() {
-  var presence = {{ presence_chart_json | safe }};
-  var wf = {{ wf_chart_json | safe }};
-  var caisse = {{ caisse_chart_json | safe }};
+const DGX_DATA = {% if overview_json %}{{ overview_json | safe }}{% else %}null{% endif %};
 
-  function fmt(n){ return new Intl.NumberFormat('fr-FR').format(n); }
+const DGX_ICONS = {
+  users:[['path',{d:'M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'}],['circle',{cx:9,cy:7,r:4}],['path',{d:'M23 21v-2a4 4 0 0 0-3-3.87'}],['path',{d:'M16 3.13a4 4 0 0 1 0 7.75'}]],
+  usercheck:[['path',{d:'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'}],['circle',{cx:9,cy:7,r:4}],['path',{d:'m16 11 2 2 4-4'}]],
+  calendar:[['rect',{x:3,y:4,width:18,height:18,rx:2}],['path',{d:'M16 2v4M8 2v4M3 10h18'}]],
+  inbox:[['path',{d:'M22 12h-6l-2 3h-4l-2-3H2'}],['path',{d:'M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'}]],
+  wallet:[['path',{d:'M21 12V7H5a2 2 0 0 1 0-4h14v4'}],['path',{d:'M3 5v14a2 2 0 0 0 2 2h16v-5'}],['path',{d:'M18 12a2 2 0 0 0 0 4h4v-4z'}]],
+  cart:[['circle',{cx:9,cy:21,r:1}],['circle',{cx:20,cy:21,r:1}],['path',{d:'M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6'}]],
+  file:[['path',{d:'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'}],['path',{d:'M14 2v6h6M16 13H8M16 17H8M10 9H8'}]],
+  filecheck:[['path',{d:'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'}],['path',{d:'M14 2v6h6M9 15l2 2 4-4'}]],
+  monitor:[['rect',{x:2,y:3,width:20,height:14,rx:2}],['path',{d:'M8 21h8M12 17v4'}]],
+  ticket:[['path',{d:'M3 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z'}],['path',{d:'M13 5v14'}]],
+  package:[['path',{d:'M16.5 9.4 7.5 4.21M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'}],['path',{d:'m3.27 6.96 8.73 5.05 8.73-5.05M12 22.08V12'}]],
+  alert:[['path',{d:'M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z'}],['path',{d:'M12 9v4M12 17h.01'}]],
+  receipt:[['path',{d:'M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z'}],['path',{d:'M8 7h8M8 11h8M8 15h5'}]],
+  arrowup:[['path',{d:'M12 19V5M5 12l7-7 7 7'}]],
+  arrowdown:[['path',{d:'M12 5v14M19 12l-7 7-7-7'}]],
+  coins:[['circle',{cx:8,cy:8,r:6}],['path',{d:'M18.09 10.37A6 6 0 1 1 10.34 18M7 6h1v4M16.71 13.88l.7.71-2.82 2.82'}]],
+  route:[['circle',{cx:6,cy:19,r:3}],['path',{d:'M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15'}],['circle',{cx:18,cy:5,r:3}]],
+  briefcase:[['rect',{x:2,y:7,width:20,height:14,rx:2}],['path',{d:'M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16'}]],
+  wrench:[['path',{d:'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z'}]],
+  target:[['circle',{cx:12,cy:12,r:10}],['circle',{cx:12,cy:12,r:6}],['circle',{cx:12,cy:12,r:2}]],
+  userplus:[['path',{d:'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'}],['circle',{cx:9,cy:7,r:4}],['path',{d:'M19 8v6M22 11h-6'}]],
+  trending:[['path',{d:'M23 6 13.5 15.5l-5-5L1 18'}],['path',{d:'M17 6h6v6'}]],
+  layers:[['path',{d:'M12 2 2 7l10 5 10-5-10-5z'}],['path',{d:'m2 17 10 5 10-5M2 12l10 5 10-5'}]],
+  building:[['rect',{x:4,y:2,width:16,height:20,rx:2}],['path',{d:'M9 22v-4h6v4M8 6h.01M16 6h.01M8 10h.01M16 10h.01M8 14h.01M16 14h.01'}]],
+};
+const DGX_ACCENT = {
+  teal:{bg:'rgba(13,115,119,.10)',fg:'#0d7377'}, orange:{bg:'rgba(245,130,32,.13)',fg:'#d9700f'},
+  green:{bg:'rgba(141,198,63,.20)',fg:'#5f9e2b'}, red:{bg:'rgba(214,69,80,.12)',fg:'#d64550'}, slate:{bg:'#eef1f4',fg:'#667085'},
+};
+function svg(name, color, size){
+  const specs = DGX_ICONS[name] || DGX_ICONS.layers;
+  const ns='http://www.w3.org/2000/svg'; const el=document.createElementNS(ns,'svg');
+  el.setAttribute('width',size||18); el.setAttribute('height',size||18); el.setAttribute('viewBox','0 0 24 24');
+  el.setAttribute('fill','none'); el.setAttribute('stroke',color); el.setAttribute('stroke-width','1.9');
+  el.setAttribute('stroke-linecap','round'); el.setAttribute('stroke-linejoin','round');
+  specs.forEach(s=>{ const c=document.createElementNS(ns,s[0]); for(const k in s[1]) c.setAttribute(k,s[1][k]); el.appendChild(c); });
+  return el;
+}
+function chip(name, accent, white){
+  const a = DGX_ACCENT[accent] || DGX_ACCENT.slate; const s=document.createElement('span'); s.className='dgx-chip';
+  s.style.background = white ? 'rgba(255,255,255,.18)' : a.bg; s.appendChild(svg(name, white?'#fff':a.fg, 17)); return s;
+}
+function el(tag, cls, html){ const e=document.createElement(tag); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; return e; }
 
-  if (window.Chart && document.getElementById('chartPresence')) {
-    new Chart(document.getElementById('chartPresence'), {
-      type: 'bar',
-      data: { labels: presence.labels, datasets: [
-        { label: 'Présents', data: presence.presents, backgroundColor: '#12b76a' },
-        { label: 'Congés',   data: presence.conges,   backgroundColor: '#f59e0b' },
-        { label: 'Absents',  data: presence.absents,  backgroundColor: '#f04438' },
-      ]},
-      options: { responsive: true, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
-                 plugins: { legend: { position: 'bottom' } } }
-    });
-  }
+function cardEl(c, soft){
+  const card = el('div', 'dgx-card'+(soft?' soft':''));
+  const ch = el('div','ch'); ch.appendChild(el('span','lbl',c.label)); ch.appendChild(chip(c.icon,c.accent)); card.appendChild(ch);
+  const v = el('div'); v.style.cssText='display:flex;align-items:baseline;flex-wrap:wrap;';
+  v.appendChild(el('span','val',c.value));
+  if(c.unit) v.appendChild(el('span','un',c.unit));
+  if(c.trend){ const t=el('span','dgx-badge'); const up=c.dir==='up'; const dn=c.dir==='down';
+    t.style.color=dn?'#d64550':(up?'#2e9e5b':'#98a2b3'); t.style.background=dn?'rgba(214,69,80,.10)':(up?'rgba(46,158,91,.12)':'#f0f2f5');
+    t.style.marginLeft='6px'; t.textContent=(dn?'↓ ':(up?'↑ ':'• '))+c.trend; v.appendChild(t); }
+  card.appendChild(v);
+  if(c.sub) card.appendChild(el('span','sub',c.sub));
+  return card;
+}
+function cardsGrid(arr, soft){ const g=el('div','dgx-cards'); (arr||[]).forEach(c=>g.appendChild(cardEl(c,soft))); return g; }
+function bandEl(meta, count, grad, icon){
+  const b=el('div','dgx-band'); b.style.background=grad;
+  const bi=el('span','bi'); bi.appendChild(svg(icon,'#fff',20)); b.appendChild(bi);
+  const t=el('div'); t.style.cssText='display:flex;flex-direction:column;line-height:1.2;';
+  t.appendChild(el('span','bt',meta.label)); t.appendChild(el('span','bs',meta.sub)); b.appendChild(t);
+  b.appendChild(el('span','bc',(count||0)+' en attente')); return b;
+}
 
-  if (window.Chart && document.getElementById('chartWorkflows')) {
-    new Chart(document.getElementById('chartWorkflows'), {
-      type: 'doughnut',
-      data: { labels: Object.keys(wf), datasets: [{ data: Object.values(wf),
-        backgroundColor: ['#f59e0b', '#12b76a', '#f04438', '#98a2b3'] }] },
-      options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
-    });
-  }
+function render(D){
+  const root = document.getElementById('dgx-root'); root.innerHTML='';
+  // ── HERO ──
+  const hero = el('div','dgx-hero'); hero.appendChild(el('h2','Tableau de bord — Vue d’ensemble'));
+  const hg = el('div','dgx-hgrid');
+  (D.hero||[]).forEach(h=>{ const c=el('div','dgx-hcard'); const top=el('div'); top.style.cssText='display:flex;justify-content:space-between;align-items:flex-start;';
+    top.appendChild(el('span','lbl',h.label)); top.appendChild(chip(h.icon,'teal',true)); c.appendChild(top);
+    const v=el('div'); v.style.cssText='display:flex;align-items:baseline;'; v.appendChild(el('span','val',h.value));
+    if(h.unit) v.appendChild(el('span','un',h.unit)); c.appendChild(v);
+    if(h.sub) c.appendChild(el('span','sub',h.sub)); hg.appendChild(c); });
+  hero.appendChild(hg); root.appendChild(hero);
 
-  if (window.Chart && document.getElementById('chartCaisse')) {
-    new Chart(document.getElementById('chartCaisse'), {
-      type: 'line',
-      data: { labels: caisse.labels, datasets: [
-        { label: 'Entrées (XOF)', data: caisse.entrees, borderColor: '#0054a6', backgroundColor: 'rgba(0,84,166,.08)', fill: true, tension: .3 },
-        { label: 'Sorties (XOF)', data: caisse.sorties, borderColor: '#f04438', backgroundColor: 'rgba(240,68,56,.06)', fill: true, tension: .3 },
-      ]},
-      options: { responsive: true, plugins: { legend: { position: 'bottom' },
-        tooltip: { callbacks: { label: function(c){ return c.dataset.label + ': ' + fmt(c.parsed.y) + ' XOF'; } } } },
-        scales: { y: { beginAtZero: true, ticks: { callback: function(v){ return fmt(v); } } } } }
-    });
-  }
+  // ── TABS ──
+  const order=['dg','supports','tech','comm'];
+  const tabColor={dg:'#0d7377',supports:'#F58220',tech:'#5f9e2b',comm:'#0a5d61'};
+  const tabIcon={dg:'building',supports:'package',tech:'wrench',comm:'trending'};
+  const tabs=el('div','dgx-tabs');
+  order.forEach(k=>{ const d=D.depts[k]; if(!d) return; const a=DGX_ACCENT[k==='supports'?'orange':(k==='tech'?'green':'teal')];
+    const btn=el('button','dgx-tab'); btn.dataset.k=k;
+    const ti=el('span','ti'); ti.style.background=a.bg; ti.appendChild(svg(tabIcon[k],tabColor[k],17)); btn.appendChild(ti);
+    const lab=el('span'); lab.appendChild(el('b',null,d.meta.label)); lab.appendChild(el('small',null,(d.count||0)+' en attente')); btn.appendChild(lab);
+    btn.onclick=()=>activate(k); tabs.appendChild(btn); });
+  root.appendChild(tabs);
+
+  // ── SECTIONS ──
+  const wrap=el('div'); wrap.id='dgx-secs'; root.appendChild(wrap);
+  // DG
+  const dg=D.depts.dg; const sdg=el('div','dgx-sec'); sdg.dataset.k='dg';
+  sdg.appendChild(bandEl(dg.meta,dg.count,'linear-gradient(100deg,#0d7377,#0a5d61)','building'));
+  sdg.appendChild(cardsGrid(dg.cards));
+  if(dg.contrats && dg.contrats.length){ const t=el('div','dgx-table');
+    t.appendChild(el('div','th','<span>Contrats à signer</span><span style="font-weight:400;color:#98a2b3;">'+dg.contrats.length+' document(s)</span>'));
+    const hr=el('div','dgx-row head'); hr.style.gridTemplateColumns='2fr 1.4fr 1.4fr 1.1fr';
+    ['Objet','Contrepartie','Poste','Statut'].forEach(x=>hr.appendChild(el('span',null,x))); t.appendChild(hr);
+    dg.contrats.forEach(r=>{ const row=el('div','dgx-row'); row.style.gridTemplateColumns='2fr 1.4fr 1.4fr 1.1fr';
+      row.appendChild(el('span',null,'<b>'+r.objet+'</b>')); row.appendChild(el('span',null,r.partie));
+      row.appendChild(el('span',null,'<span style="color:#667085;">'+(r.info||'—')+'</span>'));
+      const b=el('span','dgx-badge'); b.style.cssText='background:rgba(13,115,119,.10);color:#0d7377;'; b.textContent=r.statut;
+      const sc=el('span'); sc.appendChild(b); row.appendChild(sc); t.appendChild(row); });
+    sdg.appendChild(t); }
+  wrap.appendChild(sdg);
+  // SUPPORTS
+  const su=D.depts.supports; const ssu=el('div','dgx-sec'); ssu.dataset.k='supports';
+  ssu.appendChild(bandEl(su.meta,su.count,'linear-gradient(100deg,#F58220,#e06f12)','package'));
+  const sup=el('div','dgx-sup');
+  const p1=el('div','dgx-panel'); p1.appendChild(el('div','ph','<span style="width:9px;height:9px;border-radius:3px;background:#F58220;display:inline-block;"></span><b>Achats &amp; Stock</b><span class="pn">'+su.achats.length+' indicateurs</span>'));
+  p1.appendChild(cardsGrid(su.achats,true)); sup.appendChild(p1);
+  const p2=el('div','dgx-panel'); p2.appendChild(el('div','ph','<span style="width:9px;height:9px;border-radius:3px;background:#0d7377;display:inline-block;"></span><b>Comptabilité &amp; Finance</b><span class="pn">'+su.compta.length+' indicateurs</span>'));
+  p2.appendChild(cardsGrid(su.compta,true)); sup.appendChild(p2);
+  ssu.appendChild(sup); wrap.appendChild(ssu);
+  // TECH
+  const te=D.depts.tech; const ste=el('div','dgx-sec'); ste.dataset.k='tech';
+  ste.appendChild(bandEl(te.meta,te.count,'linear-gradient(100deg,#6fae2f,#5a8f24)','wrench'));
+  ste.appendChild(cardsGrid(te.cards));
+  if(te.teams && te.teams.length){ const t=el('div','dgx-table');
+    t.appendChild(el('div','th','<span>Charge par équipe</span><span style="font-weight:400;color:#98a2b3;">jour en cours</span>'));
+    const hr=el('div','dgx-row head'); hr.style.gridTemplateColumns='2fr 90px 90px 180px';
+    ['Équipe','Effectif','Présents','Charge'].forEach((x,i)=>{ const s=el('span',null,x); if(i>0&&i<3)s.style.textAlign='center'; hr.appendChild(s); }); t.appendChild(hr);
+    te.teams.forEach(r=>{ const row=el('div','dgx-row'); row.style.gridTemplateColumns='2fr 90px 90px 180px';
+      row.appendChild(el('span',null,'<b>'+r.equipe+'</b>'));
+      const e1=el('span',null,r.eff); e1.style.textAlign='center'; row.appendChild(e1);
+      const e2=el('span',null,r.pres); e2.style.textAlign='center'; row.appendChild(e2);
+      const cw=el('span'); cw.style.cssText='display:flex;align-items:center;gap:9px;';
+      const bar=el('div','dgx-bar'); const i=el('i'); i.style.width=r.charge+'%'; i.style.background=r.charge>=80?'#F58220':(r.charge>=55?'#0d7377':'#8DC63F'); bar.appendChild(i);
+      cw.appendChild(bar); cw.appendChild(el('span',null,r.charge+'%')); row.appendChild(cw); t.appendChild(row); });
+    ste.appendChild(t); }
+  wrap.appendChild(ste);
+  // COMM
+  const co=D.depts.comm; const sco=el('div','dgx-sec'); sco.dataset.k='comm';
+  sco.appendChild(bandEl(co.meta,co.count,'linear-gradient(100deg,#0a5d61,#084a4d)','trending'));
+  sco.appendChild(cardsGrid(co.cards));
+  if(co.pipeline && co.pipeline.length){ const t=el('div','dgx-table');
+    t.appendChild(el('div','th','<span>Pipeline commercial</span><span style="font-weight:400;color:#98a2b3;">opportunités actives</span>'));
+    const hr=el('div','dgx-row head'); hr.style.gridTemplateColumns='1.4fr 70px 1fr 1.8fr';
+    ['Étape','Opp.','Montant','Répartition'].forEach(x=>hr.appendChild(el('span',null,x))); t.appendChild(hr);
+    co.pipeline.forEach(r=>{ const row=el('div','dgx-row'); row.style.gridTemplateColumns='1.4fr 70px 1fr 1.8fr';
+      row.appendChild(el('span',null,'<b>'+r.etape+'</b>'));
+      const o=el('span',null,r.opp); o.style.textAlign='center'; row.appendChild(o);
+      const m=el('span',null,r.montant); m.style.textAlign='right'; m.style.fontWeight='600'; row.appendChild(m);
+      const cw=el('span'); cw.style.cssText='display:flex;align-items:center;gap:9px;';
+      const bar=el('div','dgx-bar'); const i=el('i'); i.style.width=r.part+'%'; i.style.background='#0d7377'; bar.appendChild(i);
+      cw.appendChild(bar); cw.appendChild(el('span',null,r.part+'%')); row.appendChild(cw); t.appendChild(row); });
+    sco.appendChild(t); }
+  wrap.appendChild(sco);
+
+  // ── CHARTS ──
+  const cs=el('div'); cs.style.cssText='display:flex;flex-direction:column;gap:12px;margin-top:14px;';
+  cs.appendChild(el('div',null,'<div style="font-size:15px;font-weight:700;padding-left:2px;">Synthèse graphique</div>'));
+  const cg=el('div','dgx-charts');
+  cg.innerHTML='<div class="cc"><b>Présence par département</b><div class="cwrap"><canvas id="dgxPres"></canvas></div></div>'
+    +'<div class="cc"><b>Répartition des workflows</b><div class="cwrap"><canvas id="dgxWf"></canvas></div></div>'
+    +'<div class="cc"><b>Évolution caisse — 6 mois (M FCFA)</b><div class="cwrap"><canvas id="dgxCa"></canvas></div></div>';
+  cs.appendChild(cg); root.appendChild(cs);
+  root.appendChild(el('div','dgx-foot','KYA-Energy Group · Données en temps réel de l’ERP'));
+
+  activate('dg'); drawCharts(D.charts);
+}
+
+function activate(k){
+  document.querySelectorAll('#dgx-secs .dgx-sec').forEach(s=>s.classList.toggle('on', s.dataset.k===k));
+  const colors={dg:'#0d7377',supports:'#F58220',tech:'#5f9e2b',comm:'#0a5d61'};
+  const tints={dg:'rgba(13,115,119,.10)',supports:'rgba(245,130,32,.12)',tech:'rgba(141,198,63,.18)',comm:'rgba(10,93,97,.10)'};
+  document.querySelectorAll('.dgx-tab').forEach(b=>{ const on=b.dataset.k===k;
+    b.style.background=on?tints[b.dataset.k]:'transparent'; b.style.color=on?colors[b.dataset.k]:'#667085';
+    b.style.boxShadow=on?('inset 0 0 0 1.5px '+colors[b.dataset.k]):'none'; });
+}
+
+let DGX_CHARTS=[];
+function drawCharts(ch){
+  if(!window.Chart||!ch) return; DGX_CHARTS.forEach(c=>{try{c.destroy();}catch(e){}}); DGX_CHARTS=[];
+  Chart.defaults.font.family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif"; Chart.defaults.font.size=12; Chart.defaults.color='#667085';
+  const legend={position:'bottom',labels:{boxWidth:9,boxHeight:9,usePointStyle:true,padding:12,font:{size:11.5}}};
+  const p=ch.presence||{labels:[],presents:[],conges:[],absents:[]};
+  DGX_CHARTS.push(new Chart(document.getElementById('dgxPres'),{type:'bar',data:{labels:p.labels,datasets:[
+    {label:'Présents',data:p.presents,backgroundColor:'#0d7377',stack:'s',borderRadius:4,maxBarThickness:46},
+    {label:'Congés',data:p.conges,backgroundColor:'#F58220',stack:'s',borderRadius:4,maxBarThickness:46},
+    {label:'Absents',data:p.absents,backgroundColor:'#d8dee4',stack:'s',borderRadius:4,maxBarThickness:46},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#f0f2f5'}}}}}));
+  const wf=ch.workflows||{}; const wl=Object.keys(wf); const wd=wl.map(k=>wf[k]);
+  DGX_CHARTS.push(new Chart(document.getElementById('dgxWf'),{type:'doughnut',data:{labels:wl,datasets:[{data:wd,
+    backgroundColor:['#F58220','#0d7377','#d64550','#cbd2d9'],borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend}}}));
+  const ca=ch.caisse||{labels:[],entrees:[],sorties:[]};
+  DGX_CHARTS.push(new Chart(document.getElementById('dgxCa'),{type:'line',data:{labels:ca.labels,datasets:[
+    {label:'Entrées',data:ca.entrees,borderColor:'#0d7377',backgroundColor:'rgba(13,115,119,.10)',fill:true,tension:.35,pointRadius:3,borderWidth:2},
+    {label:'Sorties',data:ca.sorties,borderColor:'#F58220',backgroundColor:'rgba(245,130,32,.08)',fill:true,tension:.35,pointRadius:3,borderWidth:2},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend},scales:{x:{grid:{display:false}},y:{grid:{color:'#f0f2f5'},ticks:{callback:v=>v+' M'}}}}}));
+}
+
+(function init(){
+  function go(){ if(DGX_DATA){ render(DGX_DATA); } else if(window.frappe){
+    frappe.call({method:'kya_hr.www.direction_dashboard.get_dg_overview'}).then(r=>{ if(r.message) render(r.message); }); } }
+  if(window.Chart) go(); else { let n=0; const iv=setInterval(()=>{ if(window.Chart||n++>60){ clearInterval(iv); go(); } },100); }
 })();
 </script>
 {% endblock %}
