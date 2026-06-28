@@ -257,17 +257,23 @@ def _build_overview() -> dict:
                                       "en attente de visa", icon="briefcase", accent="orange"))
             break
 
-    # ════════ TECHNIQUES : 6 équipes, interventions & SAV ════════
+    # ════════ TECHNIQUES : équipes + ops terrain réelles (prod) ════════
+    # SAV/maintenance = fiche technique curative ; déplacements = fiche de
+    # mission (doctypes prod module CRM, absents en local → 0, défensif).
     tech_teams = [t for t in macro_teams["tech"] if t["eff"] > 0]
-    issues_open = _count("Issue", {"status": ["in", ("Open", "Replied")]})
+    sav_count = _count("fiche technique curative")
+    mission_count = _count("fiche de mission")
+    recep_count = _count("fiche_recep_tech_lampa") + _count("fiche de recpt de batt")
     tech_cards = [
-        _card("Équipes", str(len(tech_teams)), "services techniques", icon="layers", accent="teal"),
-        _card("Effectif technique", str(_macro_eff("tech")), "", icon="users", accent="teal"),
-        _card("Présents aujourd'hui", str(_macro_pres("tech")),
-              (f"{round(_macro_pres('tech') / _macro_eff('tech') * 100)} %" if _macro_eff("tech") else "—"),
-              icon="usercheck", accent="green"),
-        _card("Interventions / SAV en cours", str(issues_open), "tickets ouverts",
+        _card("Effectif technique", str(_macro_eff("tech")),
+              (f"{_macro_pres('tech')} présents" if _macro_eff("tech") else ""),
+              icon="users", accent="teal"),
+        _card("Interventions SAV", str(sav_count), "fiches curatives",
               icon="wrench", accent="orange"),
+        _card("Ordres de mission", str(mission_count), "déplacements terrain",
+              icon="route", accent="teal"),
+        _card("Réceptions techniques", str(recep_count), "lampadaires + batteries",
+              icon="filecheck", accent="green"),
     ]
     tech_rows = []
     for t in sorted(tech_teams, key=lambda x: -x["eff"]):
@@ -371,7 +377,7 @@ def _build_overview() -> dict:
         "dg": len(contrat_rows) + achat_dg_n,
         "supports": modules["Demandes d'achat"] + modules["Bons de commande"]
                     + modules["Inventaires"] + modules["PV matériel"],
-        "tech": issues_open,
+        "tech": sav_count + mission_count,
         "comm": leads_total,
     }
 
