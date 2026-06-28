@@ -101,9 +101,46 @@ def _classify(dept_name: str) -> str | None:
     return None
 
 
+def _link_audit() -> dict:
+    """Compte les rattachements employé/équipe vers un département (intégrité).
+
+    Sert à PROUVER qu'aucun lien n'est cassé par la normalisation : la valeur
+    avant/après doit être identique (on ne déplace que des sous-arbres, jamais
+    les affectations)."""
+    out = {}
+    try:
+        out["employees_with_dept"] = frappe.db.count("Employee",
+            {"department": ["is", "set"], "status": "Active"})
+    except Exception:
+        out["employees_with_dept"] = None
+    try:
+        if frappe.db.exists("DocType", "Equipe KYA"):
+            out["teams_with_dept"] = frappe.db.count("Equipe KYA",
+                {"departement": ["is", "set"]})
+    except Exception:
+        out["teams_with_dept"] = None
+    return out
+
+
+def _is_descendant(candidate: str, ancestor: str) -> bool:
+    """True si `candidate` est dans la lignée de `ancestor` (pour éviter un
+    cycle en reparentant un groupe sous l'un de ses propres descendants)."""
+    seen = set()
+    cur = candidate
+    while cur and cur not in seen:
+        seen.add(cur)
+        if cur == ancestor:
+            return True
+        cur = frappe.db.get_value("Department", cur, "parent_department")
+    return False
+
+
 def execute(dry_run: bool = False) -> dict:
     summary = {"root": None, "abbr": None, "groups_ensured": [], "renamed": [],
-               "reparented": [], "skipped": [], "errors": [], "dry_run": bool(dry_run)}
+               "reparented": [], "skipped": [], "errors": [], "dry_run": bool(dry_run),
+               "links_before": None, "links_after": None, "links_preserved": None}
+
+    summary["links_before"] = _link_audit()
 
     root = _find_root()
     if not root:
@@ -189,6 +226,11 @@ def execute(dry_run: bool = False) -> dict:
         target_parent = macro_name[macro]
         if d.parent_department == target_parent:
             continue
+        # Garde anti-cycle : ne jamais rattacher un groupe sous lui-même ou sous
+        # l'un de ses descendants (casserait l'arbre NestedSet).
+        if d.name == target_parent or (d.is_group and _is_descendant(target_parent, d.name)):
+            summary["skipped"].append(f"{d.name} (cycle évité)")
+            continue
         if dry_run:
             summary["reparented"].append(f"{d.name} -> {target_parent} (simulé)")
             continue
@@ -215,8 +257,18 @@ def execute(dry_run: bool = False) -> dict:
         except Exception:
             pass
 
+    summary["links_after"] = _link_audit()
+    b, a = summary["links_before"], summary["links_after"]
+    summary["links_preserved"] = (b == a)
+    if not summary["links_preserved"]:
+        # Ne devrait jamais arriver (on ne touche pas aux affectations) : on le
+        # signale fort pour audit.
+        summary["errors"].append(f"INTEGRITE: liens modifiés {b} -> {a}")
+        frappe.log_error(f"links_before={b} links_after={a}",
+                         "normalize_departments: INTEGRITE liens")
+
     print(f"[normalize_departments] dry_run={dry_run} root={root} abbr={abbr} "
           f"groups={len(summary['groups_ensured'])} renamed={len(summary['renamed'])} "
           f"reparented={len(summary['reparented'])} skipped={len(summary['skipped'])} "
-          f"errors={len(summary['errors'])}")
+          f"errors={len(summary['errors'])} links_preserved={summary['links_preserved']}")
     return summary
