@@ -274,16 +274,38 @@ def _build_overview() -> dict:
         charge = round(t["pres"] / t["eff"] * 100) if t["eff"] else 0
         tech_rows.append({"equipe": t["equipe"], "eff": t["eff"], "pres": t["pres"], "charge": charge})
 
-    # ════════ COMMERCIAUX : leads, opp, devis, clients ════════
+    # ════════ COMMERCIAUX : équipes + CRM (leads, opp, devis, clients) ════════
+    leads_total = _count("Lead", {"status": ["not in", ("Converted", "Do Not Contact", "Lost Quotation")]})
     comm_cards = [
-        _card("Leads", str(_count("Lead", {"status": ["not in", ("Converted", "Do Not Contact")]})),
-              "actifs", icon="trending", accent="teal"),
-        _card("Opportunités", str(_count("Opportunity", {"status": ["in", ("Open", "Quotation", "Replied")]})),
-              "pipeline actif", icon="target", accent="teal"),
-        _card("Devis en cours", str(_count("Quotation", {"status": ["in", ("Draft", "Open", "Submitted")]})),
-              "", icon="file", accent="orange"),
-        _card("Clients actifs", str(_count("Customer", {"disabled": 0})), "", icon="userplus", accent="green"),
+        _card("Leads actifs", str(leads_total), "pipeline CRM", icon="trending", accent="teal"),
+        _card("Clients", str(_count("Customer", {"disabled": 0})), "comptes actifs", icon="userplus", accent="green"),
+        _card("Effectif commercial", str(_macro_eff("comm")),
+              (f"{_macro_pres('comm')} présents" if _macro_eff("comm") else ""),
+              icon="users", accent="teal"),
+        _card("Devis / opportunités", str(_count("Opportunity", {"status": ["in", ("Open", "Quotation", "Replied")]})
+              + _count("Quotation", {"status": ["in", ("Draft", "Open", "Submitted")]})),
+              "en cours", icon="file", accent="orange"),
     ]
+    # Équipes commerciales (effectif / présence / charge)
+    comm_teams = []
+    for t in sorted([x for x in macro_teams["comm"] if x["eff"] > 0], key=lambda x: -x["eff"]):
+        charge = round(t["pres"] / t["eff"] * 100) if t["eff"] else 0
+        comm_teams.append({"equipe": t["equipe"], "eff": t["eff"], "pres": t["pres"], "charge": charge})
+    # Pipeline réel : répartition des leads par statut (CRM natif)
+    leads_status = []
+    try:
+        if _dt_exists("Lead"):
+            rows = frappe.db.sql(
+                """SELECT COALESCE(NULLIF(status,''),'Lead') AS statut, COUNT(*) AS n
+                   FROM `tabLead` WHERE status NOT IN ('Converted','Do Not Contact','Lost Quotation')
+                   GROUP BY statut ORDER BY n DESC LIMIT 8""", as_dict=True)
+            tot = sum(int(r.n) for r in rows) or 1
+            for r in rows:
+                leads_status.append({"statut": r.statut, "n": int(r.n),
+                                     "part": round(int(r.n) / tot * 100)})
+    except Exception:
+        pass
+    # Pipeline opportunités (si le module CRM Opportunity est utilisé)
     pipe_rows = []
     try:
         if _dt_exists("Opportunity"):
@@ -350,7 +372,7 @@ def _build_overview() -> dict:
         "supports": modules["Demandes d'achat"] + modules["Bons de commande"]
                     + modules["Inventaires"] + modules["PV matériel"],
         "tech": issues_open,
-        "comm": _count("Opportunity", {"status": ["in", ("Open", "Quotation", "Replied")]}),
+        "comm": leads_total,
     }
 
     return {
@@ -364,7 +386,8 @@ def _build_overview() -> dict:
             "tech": {"meta": MACRO_META["tech"], "count": counts["tech"],
                      "cards": tech_cards, "teams": tech_rows},
             "comm": {"meta": MACRO_META["comm"], "count": counts["comm"],
-                     "cards": comm_cards, "pipeline": pipe_rows},
+                     "cards": comm_cards, "teams": comm_teams,
+                     "leads_status": leads_status, "pipeline": pipe_rows},
         },
         "charts": {"presence": presence_chart, "workflows": wf_counts, "caisse": caisse_chart},
         "modules": modules, "modules_total": modules_total,

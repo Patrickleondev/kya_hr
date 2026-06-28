@@ -200,6 +200,29 @@ function render(D){
   const co=D.depts.comm; const sco=el('div','dgx-sec'); sco.dataset.k='comm';
   sco.appendChild(bandEl(co.meta,co.count,'linear-gradient(100deg,#0a5d61,#084a4d)','trending'));
   sco.appendChild(cardsGrid(co.cards));
+  if(co.teams && co.teams.length){ const t=el('div','dgx-table');
+    t.appendChild(el('div','th','<span>Équipes commerciales</span><span style="font-weight:400;color:#98a2b3;">jour en cours</span>'));
+    const hr=el('div','dgx-row head'); hr.style.gridTemplateColumns='2fr 90px 90px 180px';
+    ['Équipe','Effectif','Présents','Charge'].forEach((x,i)=>{ const s=el('span',null,x); if(i>0&&i<3)s.style.textAlign='center'; hr.appendChild(s); }); t.appendChild(hr);
+    co.teams.forEach(r=>{ const row=el('div','dgx-row'); row.style.gridTemplateColumns='2fr 90px 90px 180px';
+      row.appendChild(el('span',null,'<b>'+r.equipe+'</b>'));
+      const e1=el('span',null,r.eff); e1.style.textAlign='center'; row.appendChild(e1);
+      const e2=el('span',null,r.pres); e2.style.textAlign='center'; row.appendChild(e2);
+      const cw=el('span'); cw.style.cssText='display:flex;align-items:center;gap:9px;';
+      const bar=el('div','dgx-bar'); const i=el('i'); i.style.width=r.charge+'%'; i.style.background=r.charge>=80?'#F58220':(r.charge>=55?'#0d7377':'#8DC63F'); bar.appendChild(i);
+      cw.appendChild(bar); cw.appendChild(el('span',null,r.charge+'%')); row.appendChild(cw); t.appendChild(row); });
+    sco.appendChild(t); }
+  if(co.leads_status && co.leads_status.length){ const t=el('div','dgx-table');
+    t.appendChild(el('div','th','<span>Pipeline CRM — leads par statut</span><span style="font-weight:400;color:#98a2b3;">source : Lead</span>'));
+    const hr=el('div','dgx-row head'); hr.style.gridTemplateColumns='1.6fr 70px 1.8fr';
+    ['Statut','Leads','Répartition'].forEach((x,i)=>{ const s=el('span',null,x); if(i===1)s.style.textAlign='center'; hr.appendChild(s); }); t.appendChild(hr);
+    co.leads_status.forEach(r=>{ const row=el('div','dgx-row'); row.style.gridTemplateColumns='1.6fr 70px 1.8fr';
+      row.appendChild(el('span',null,'<b>'+r.statut+'</b>'));
+      const n=el('span',null,r.n); n.style.textAlign='center'; row.appendChild(n);
+      const cw=el('span'); cw.style.cssText='display:flex;align-items:center;gap:9px;';
+      const bar=el('div','dgx-bar'); const i=el('i'); i.style.width=r.part+'%'; i.style.background='#0a5d61'; bar.appendChild(i);
+      cw.appendChild(bar); cw.appendChild(el('span',null,r.part+'%')); row.appendChild(cw); t.appendChild(row); });
+    sco.appendChild(t); }
   if(co.pipeline && co.pipeline.length){ const t=el('div','dgx-table');
     t.appendChild(el('div','th','<span>Pipeline commercial</span><span style="font-weight:400;color:#98a2b3;">opportunités actives</span>'));
     const hr=el('div','dgx-row head'); hr.style.gridTemplateColumns='1.4fr 70px 1fr 1.8fr';
