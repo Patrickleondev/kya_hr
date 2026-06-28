@@ -1,0 +1,169 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Tableau de bord Commercial & CRM — KYA{% endblock %}
+
+{% block head_include %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block page_content %}
+<style>
+  .cmx * { box-sizing:border-box; }
+  .cmx { --teal:#0d7377; --orange:#F58220; --green:#6fae2f; --ink:#101828; --muted:#667085; --line:#eef1f4;
+         max-width:1480px; margin:0 auto; padding:14px 14px 36px; font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; color:var(--ink); }
+  .cmx-hero { background:linear-gradient(120deg,#0a5d61,#084a4d 55%,#0d7377); border-radius:16px; padding:16px; box-shadow:0 6px 20px rgba(10,93,97,.22); }
+  .cmx-hero h2 { margin:0 0 12px; font-size:16px; color:#fff; font-weight:700; }
+  .cmx-hgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; }
+  .cmx-hcard { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); border-radius:12px; padding:13px 15px; display:flex; flex-direction:column; gap:6px; }
+  .cmx-hcard .lbl { font-size:12px; color:rgba(255,255,255,.82); }
+  .cmx-hcard .val { font-size:26px; font-weight:800; color:#fff; line-height:1; }
+  .cmx-hcard .un { font-size:12px; font-weight:600; color:rgba(255,255,255,.8); margin-left:5px; }
+  .cmx-hcard .sub { font-size:11.5px; color:rgba(255,255,255,.72); }
+  .cmx-band { display:flex; align-items:center; gap:12px; color:#fff; border-radius:14px; padding:13px 16px; margin:18px 0 12px; }
+  .cmx-band .bi { width:36px; height:36px; border-radius:10px; background:rgba(255,255,255,.16); display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .cmx-band .bt { font-size:15px; font-weight:700; } .cmx-band .bs { font-size:12px; color:rgba(255,255,255,.82); }
+  .cmx-band .bc { margin-left:auto; font-size:12px; font-weight:600; background:rgba(255,255,255,.18); padding:5px 11px; border-radius:20px; white-space:nowrap; }
+  .cmx-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; }
+  .cmx-card { background:#fff; border:1px solid var(--line); border-radius:14px; box-shadow:0 1px 2px rgba(16,24,40,.05); padding:14px; display:flex; flex-direction:column; gap:8px; }
+  .cmx-card .ch { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+  .cmx-card .lbl { font-size:12.5px; color:var(--muted); line-height:1.35; }
+  .cmx-card .val { font-size:28px; font-weight:700; color:var(--ink); line-height:1; }
+  .cmx-card .sub { font-size:12px; color:#98a2b3; }
+  .cmx-chip { width:34px; height:34px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .cmx-table { background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+  .cmx-scroll { overflow-x:auto; }
+  .cmx-row { display:grid; gap:10px; padding:8px 16px; border-top:1px solid #f1f4f7; align-items:center; font-size:13px; }
+  .cmx-row.head { border-top:none; border-bottom:1px solid #f1f4f7; }
+  .cmx-row.head span { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:#98a2b3; }
+  .cmx-badge { display:inline-flex; align-items:center; font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:20px; white-space:nowrap; }
+  .cmx-bar { flex:1; height:6px; border-radius:4px; background:#eef1f4; overflow:hidden; min-width:50px; }
+  .cmx-bar > i { display:block; height:100%; border-radius:4px; }
+  .cmx-charts { display:grid; grid-template-columns:1.4fr 1fr; gap:12px; margin-top:12px; }
+  @media (max-width:760px){ .cmx-charts{ grid-template-columns:1fr; } }
+  .cmx-cc { background:#fff; border:1px solid var(--line); border-radius:14px; box-shadow:0 1px 2px rgba(16,24,40,.05); padding:14px; }
+  .cmx-cc b { font-size:13.5px; } .cmx-cwrap { position:relative; height:260px; margin-top:8px; }
+  .cmx-foot { text-align:center; font-size:11.5px; color:#b0b8c1; padding:8px 0; }
+</style>
+
+<div class="cmx" id="cmx-root">
+  <div style="text-align:center;color:#94a3b8;padding:40px;">Chargement du tableau de bord…</div>
+</div>
+
+<script>
+const CMX_DATA = {% if overview_json %}{{ overview_json | safe }}{% else %}null{% endif %};
+const CMX_ICONS = {
+  trending:[['path',{d:'M23 6l-9.5 9.5-5-5L1 18'}],['path',{d:'M17 6h6v6'}]],
+  userplus:[['path',{d:'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'}],['circle',{cx:9,cy:7,r:4}],['path',{d:'M20 8v6M23 11h-6'}]],
+  file:[['path',{d:'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'}],['path',{d:'M14 2v6h6M16 13H8M16 17H8M10 9H8'}]],
+  check:[['path',{d:'M22 11.08V12a10 10 0 1 1-5.93-9.14'}],['path',{d:'M22 4 12 14.01l-3-3'}]],
+  users:[['path',{d:'M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'}],['circle',{cx:9,cy:7,r:4}],['path',{d:'M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75'}]],
+  target:[['circle',{cx:12,cy:12,r:10}],['circle',{cx:12,cy:12,r:6}],['circle',{cx:12,cy:12,r:2}]],
+  inbox:[['path',{d:'M22 12h-6l-2 3h-4l-2-3H2'}],['path',{d:'M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'}]],
+  receipt:[['path',{d:'M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z'}],['path',{d:'M8 7h8M8 11h8M8 15h5'}]],
+  coins:[['circle',{cx:8,cy:8,r:6}],['path',{d:'M18.09 10.37A6 6 0 1 1 10.34 18M7 6h1v4M16.71 13.88l.7.71-2.82 2.82'}]],
+  clock:[['circle',{cx:12,cy:12,r:10}],['path',{d:'M12 6v6l4 2'}]],
+};
+const CMX_ACCENT = { teal:{bg:'rgba(13,115,119,.10)',fg:'#0d7377'}, orange:{bg:'rgba(245,130,32,.13)',fg:'#d9700f'}, green:{bg:'rgba(141,198,63,.20)',fg:'#5f9e2b'}, slate:{bg:'#eef1f4',fg:'#667085'} };
+function svg(name,color,size){ const ns='http://www.w3.org/2000/svg'; const e=document.createElementNS(ns,'svg'); const sp=CMX_ICONS[name]||CMX_ICONS.trending;
+  e.setAttribute('width',size||18); e.setAttribute('height',size||18); e.setAttribute('viewBox','0 0 24 24'); e.setAttribute('fill','none');
+  e.setAttribute('stroke',color); e.setAttribute('stroke-width','1.9'); e.setAttribute('stroke-linecap','round'); e.setAttribute('stroke-linejoin','round');
+  sp.forEach(s=>{ const c=document.createElementNS(ns,s[0]); for(const k in s[1]) c.setAttribute(k,s[1][k]); e.appendChild(c); }); return e; }
+function chip(name,accent,white){ const a=CMX_ACCENT[accent]||CMX_ACCENT.slate; const s=document.createElement('span'); s.className='cmx-chip';
+  s.style.background=white?'rgba(255,255,255,.18)':a.bg; s.appendChild(svg(name,white?'#fff':a.fg,17)); return s; }
+function el(t,c,h){ const e=document.createElement(t); if(c)e.className=c; if(h!=null)e.innerHTML=h; return e; }
+function band(icon,title,sub,chipTxt,grad){ const b=el('div','cmx-band'); b.style.background=grad;
+  const bi=el('span','bi'); bi.appendChild(svg(icon,'#fff',20)); b.appendChild(bi);
+  const t=el('div'); t.style.cssText='display:flex;flex-direction:column;line-height:1.2;'; t.appendChild(el('span','bt',title)); t.appendChild(el('span','bs',sub)); b.appendChild(t);
+  if(chipTxt) b.appendChild(el('span','bc',chipTxt)); return b; }
+
+function render(D){
+  const root=document.getElementById('cmx-root'); root.innerHTML='';
+  const hero=el('div','cmx-hero'); hero.appendChild(el('h2','Tableau de bord — Commercial & CRM'));
+  const hg=el('div','cmx-hgrid');
+  (D.hero||[]).forEach(h=>{ const c=el('div','cmx-hcard'); const top=el('div'); top.style.cssText='display:flex;justify-content:space-between;align-items:flex-start;';
+    top.appendChild(el('span','lbl',h.label)); top.appendChild(chip(h.icon,'teal',true)); c.appendChild(top);
+    const v=el('div'); v.style.cssText='display:flex;align-items:baseline;'; v.appendChild(el('span','val',h.value));
+    if(h.unit) v.appendChild(el('span','un',h.unit)); c.appendChild(v); if(h.sub) c.appendChild(el('span','sub',h.sub)); hg.appendChild(c); });
+  hero.appendChild(hg); root.appendChild(hero);
+
+  if(D.funnel && D.funnel.length){
+    root.appendChild(band('target','Tunnel commercial','demande → devis → accepté → facturé → payé','','linear-gradient(100deg,#0d7377,#0a5d61)'));
+    const g=el('div','cmx-cards');
+    D.funnel.forEach(c=>{ const card=el('div','cmx-card'); const ch=el('div','ch'); ch.appendChild(el('span','lbl',c.label)); ch.appendChild(chip(c.icon,c.accent)); card.appendChild(ch);
+      card.appendChild(el('div',null,'<span class="val" style="font-size:28px;font-weight:700;">'+c.value+'</span>')); g.appendChild(card); });
+    root.appendChild(g);
+  }
+
+  // Leads par statut
+  root.appendChild(band('trending','Pipeline CRM','leads par statut',(D.leads_label||''),'linear-gradient(100deg,#0a5d61,#084a4d)'));
+  const t1=el('div','cmx-table'); const s1=el('div','cmx-scroll'); const w1=el('div'); w1.style.minWidth='480px';
+  const cols1='1.6fr 70px 2fr';
+  const h1=el('div','cmx-row head'); h1.style.gridTemplateColumns=cols1; ['Statut','Leads','Répartition'].forEach((x,i)=>{ const sp=el('span',null,x); if(i===1)sp.style.textAlign='center'; h1.appendChild(sp); }); w1.appendChild(h1);
+  (D.leads_status||[]).forEach(r=>{ const row=el('div','cmx-row'); row.style.gridTemplateColumns=cols1;
+    row.appendChild(el('span',null,'<b>'+(r.statut||'')+'</b>'));
+    const n=el('span',null,r.n); n.style.textAlign='center'; row.appendChild(n);
+    const cw=el('span'); cw.style.cssText='display:flex;align-items:center;gap:9px;'; const bar=el('div','cmx-bar'); const i=el('i'); i.style.width=r.part+'%'; i.style.background='#0a5d61'; bar.appendChild(i);
+    cw.appendChild(bar); cw.appendChild(el('span',null,r.part+'%')); row.appendChild(cw); w1.appendChild(row); });
+  if(!(D.leads_status||[]).length) w1.appendChild(el('div','cmx-row','<span style="color:#94a3b8;padding:8px;">Aucun lead actif.</span>'));
+  s1.appendChild(w1); t1.appendChild(s1); root.appendChild(t1);
+
+  // Leads récents
+  root.appendChild(band('userplus','Leads récents','derniers prospects',(D.clients_label||''),'linear-gradient(100deg,#F58220,#e06f12)'));
+  const t2=el('div','cmx-table'); const s2=el('div','cmx-scroll'); const w2=el('div'); w2.style.minWidth='760px';
+  const cols2='2fr 1.1fr 1.1fr 1.2fr 1fr 0.9fr';
+  const h2=el('div','cmx-row head'); h2.style.gridTemplateColumns=cols2; ['Prospect','Type','Statut','Commercial','Étape','Date'].forEach(x=>h2.appendChild(el('span',null,x))); w2.appendChild(h2);
+  (D.lead_rows||[]).forEach(r=>{ const row=el('div','cmx-row'); row.style.gridTemplateColumns=cols2;
+    row.appendChild(el('span',null,'<b>'+(r.nom||'')+'</b>'));
+    row.appendChild(el('span',null,'<span style="color:#667085;">'+(r.type||'')+'</span>'));
+    const bd=el('span','cmx-badge'); bd.style.background='rgba(13,115,119,.10)'; bd.style.color='#0d7377'; bd.textContent=r.statut; const sc=el('span'); sc.appendChild(bd); row.appendChild(sc);
+    row.appendChild(el('span',null,'<span style="color:#667085;">'+(r.owner||'')+'</span>'));
+    row.appendChild(el('span',null,'<span style="color:#667085;">'+(r.etape||'')+'</span>'));
+    row.appendChild(el('span',null,'<span style="color:#667085;font-variant-numeric:tabular-nums;">'+(r.date||'')+'</span>')); w2.appendChild(row); });
+  if(!(D.lead_rows||[]).length) w2.appendChild(el('div','cmx-row','<span style="color:#94a3b8;padding:8px;">Aucun lead récent.</span>'));
+  s2.appendChild(w2); t2.appendChild(s2); root.appendChild(t2);
+
+  // Charts
+  const cw=el('div','cmx-charts');
+  const c1=el('div','cmx-cc'); c1.appendChild(el('b',null,'Nouveaux leads par mois (6 mois)')); const w1c=el('div','cmx-cwrap'); const cv1=el('canvas'); cv1.id='cmxFlux'; w1c.appendChild(cv1); c1.appendChild(w1c); cw.appendChild(c1);
+  const c2=el('div','cmx-cc'); c2.appendChild(el('b',null,'Leads par type de prospect')); const w2c=el('div','cmx-cwrap'); const cv2=el('canvas'); cv2.id='cmxType'; w2c.appendChild(cv2); c2.appendChild(w2c); cw.appendChild(c2);
+  root.appendChild(cw);
+
+  if(D.teams && D.teams.length){
+    root.appendChild(band('users','Équipes commerciales','effectif',(''),'linear-gradient(100deg,#0d7377,#0a5d61)'));
+    const t3=el('div','cmx-table'); const w3=el('div');
+    const cols3='2fr 2fr 110px';
+    const h3=el('div','cmx-row head'); h3.style.gridTemplateColumns=cols3; ['Équipe','Chef','Membres'].forEach((x,i)=>{ const s=el('span',null,x); if(i===2)s.style.textAlign='center'; h3.appendChild(s); }); w3.appendChild(h3);
+    D.teams.forEach(r=>{ const row=el('div','cmx-row'); row.style.gridTemplateColumns=cols3;
+      row.appendChild(el('span',null,'<b>'+(r.equipe||'')+'</b>'));
+      row.appendChild(el('span',null,'<span style="color:#667085;">'+(r.chef||'')+'</span>'));
+      const m=el('span',null,r.membres); m.style.textAlign='center'; row.appendChild(m); w3.appendChild(row); });
+    t3.appendChild(w3); root.appendChild(t3);
+  }
+
+  root.appendChild(el('div','cmx-foot','KYA-Energy Group · Données en temps réel de l’ERP (CRM)'+(D.sat_n?(' · satisfaction '+D.sat_avg+'/5 sur '+D.sat_n+' enquêtes'):'')));
+  drawCharts(D);
+}
+
+let CMX_C1=null, CMX_C2=null;
+function drawCharts(D){ if(!window.Chart) return;
+  Chart.defaults.font.family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif"; Chart.defaults.color='#667085';
+  const f=D.flux||{labels:[],data:[]};
+  if(CMX_C1){try{CMX_C1.destroy();}catch(e){}}
+  CMX_C1=new Chart(document.getElementById('cmxFlux'),{type:'bar',data:{labels:f.labels,datasets:[
+    {label:'Leads',data:f.data,backgroundColor:'#0a5d61',borderRadius:5,maxBarThickness:34}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{grid:{display:false}},y:{grid:{color:'#f0f2f5'},ticks:{precision:0}}}}});
+  const ty=D.leads_type||[];
+  if(CMX_C2){try{CMX_C2.destroy();}catch(ex){}}
+  CMX_C2=new Chart(document.getElementById('cmxType'),{type:'doughnut',data:{labels:ty.map(x=>x.type),datasets:[{data:ty.map(x=>x.n),
+    backgroundColor:['#0d7377','#F58220','#8DC63F','#0a5d61','#e6a23c','#cbd2d9','#d64550','#6fae2f'],borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'bottom',labels:{boxWidth:9,usePointStyle:true,padding:12}}}}});
+}
+
+(function init(){
+  function go(){ if(CMX_DATA){ render(CMX_DATA); } else if(window.frappe){
+    frappe.call({method:'kya_hr.www.commercial_dashboard.get_commercial_overview'}).then(r=>{ if(r.message) render(r.message); }); } }
+  if(window.Chart) go(); else { let n=0; const iv=setInterval(()=>{ if(window.Chart||n++>60){ clearInterval(iv); go(); } },100); }
+})();
+</script>
+{% endblock %}

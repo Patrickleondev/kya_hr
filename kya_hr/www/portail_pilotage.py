@@ -28,6 +28,8 @@ _HUB_ROLES = {
                       "Accounts Manager", "Accounts User"},
     "technique": _DIR | {"Responsable Technique", "Chef de Projet", "Chef Service",
                          "Chef Equipe", "Chef d'Equipe", "Responsable Equipe"},
+    "commercial": _DIR | {"Responsable Commercial", "Commercial", "Chargé Commercial",
+                          "Sales Manager", "Sales User", "CRM Manager", "CRM User"},
 }
 
 
@@ -94,6 +96,9 @@ def get_hubs() -> list:
     # Technique
     taches_cours = _count("Tache Equipe", {"statut": "En cours"})
 
+    # Commercial
+    leads_actifs = _count("Lead", {"status": ["not in", ("Converted", "Do Not Contact", "Lost Quotation")]})
+
     catalog = [
         {"key": "direction", "title": "Direction Générale", "route": "/direction-dashboard",
          "icon": "building", "color": "#0d7377", "bg": "rgba(13,115,119,.10)",
@@ -121,8 +126,12 @@ def get_hubs() -> list:
          "stat1": f"{nb_brouillard} brouillards", "stat2": f"{nb_cheques} états chèques"},
         {"key": "technique", "title": "Services Techniques & SAV", "route": "/services-techniques-dashboard",
          "icon": "wrench", "color": "#5f9e2b", "bg": "rgba(141,198,63,.18)",
-         "desc": "Équipes techniques, tâches d'équipe, interventions et charge.",
+         "desc": "Équipes techniques, interventions SAV, ordres de mission et charge.",
          "stat1": f"{nb_equipes} équipes", "stat2": f"{taches_cours} tâches en cours"},
+        {"key": "commercial", "title": "Commercial & CRM", "route": "/commercial-dashboard",
+         "icon": "trending", "color": "#0a5d61", "bg": "rgba(10,93,97,.10)",
+         "desc": "Pipeline CRM, leads, tunnel de conversion devis et clients.",
+         "stat1": f"{leads_actifs} leads", "stat2": f"{_count('Customer', {'disabled': 0})} clients"},
     ]
 
     return [h for h in catalog if roles & _HUB_ROLES.get(h["key"], set())]

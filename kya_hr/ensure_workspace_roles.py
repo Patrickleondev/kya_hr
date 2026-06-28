@@ -168,6 +168,7 @@ DG_DASHBOARD_SHORTCUTS = [
     ("🛒 Dashboard Achats", "/achats-dashboard"),
     ("🏦 Dashboard Comptabilité", "/comptabilite-dashboard"),
     ("🛠️ Services Techniques & SAV", "/services-techniques-dashboard"),
+    ("📈 Commercial & CRM", "/commercial-dashboard"),
     ("📋 Inventaire & Sorties", "/inventaire-dashboard"),
     ("🔧 Stock par état", "/stock-etat"),
     ("🎓 Tableau Stagiaires", "/tableau-bord-stagiaires"),
