@@ -71,6 +71,8 @@ def _count(dt, filters=None):
 
 def _fmt_m(xof):
     m = (xof or 0) / 1_000_000.0
+    if abs(m) < 0.05:
+        m = 0.0
     return f"{m:,.1f}".replace(",", " ").replace(".", ",")
 
 
