@@ -49,6 +49,8 @@ table.rap-tbl td.l, table.rap-tbl th.l { text-align:left; }
     <div class="kyad-kpi is-green"><div class="kyad-kpi-value" id="k-heures">—</div><div class="kyad-kpi-label">Heures totales</div></div>
     <div class="kyad-kpi is-orange"><div class="kyad-kpi-value" id="k-ret">—</div><div class="kyad-kpi-label">Retards</div></div>
     <div class="kyad-kpi is-red"><div class="kyad-kpi-value" id="k-abs">—</div><div class="kyad-kpi-label">Absences</div></div>
+    <div class="kyad-kpi is-blue"><div class="kyad-kpi-value" id="k-mis">—</div><div class="kyad-kpi-label">Jours en mission</div></div>
+    <div class="kyad-kpi is-orange"><div class="kyad-kpi-value" id="k-inc">—</div><div class="kyad-kpi-label">Sorties manquantes</div></div>
   </div>
 
   <div class="kyad-panel">
@@ -56,14 +58,15 @@ table.rap-tbl td.l, table.rap-tbl th.l { text-align:left; }
       <thead><tr>
         <th class="l">Employé</th><th class="l">Équipe</th>
         <th>Jours travaillés</th><th>Heures totales</th><th>Heures / jour</th>
-        <th>Retards</th><th>Absences</th>
+        <th>Retards</th><th>Absences</th><th>Missions</th>
+        <th title="Jours avec arrivée saisie mais sortie jamais émargée">Sorties manquantes</th>
       </tr></thead>
       <tbody id="rap-body">
-        <tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:24px;">Chargement…</td></tr>
+        <tr><td colspan="9" style="text-align:center;color:#94a3b8;padding:24px;">Chargement…</td></tr>
       </tbody>
     </table>
   </div>
-  <p class="text-muted small mt-2">Jours travaillés = jours présents (demi-journées incluses). Heures = somme des heures saisies (sortie − arrivée). Inclut les présences saisies au tableau du jour. Stagiaires marqués <span class="rap-stag">stagiaire</span>.</p>
+  <p class="text-muted small mt-2">Jours travaillés = jours présents (demi-journées incluses). Heures = somme des heures saisies (sortie − arrivée). <b>Missions</b> = jours « En mission » (travail hors site, compté présent). <b>Sorties manquantes</b> = jours où l'arrivée est saisie mais la sortie n'a jamais été émargée (la RH contacte l'employé puis applique 17:30 depuis la saisie du jour). Inclut les présences saisies au tableau du jour. Stagiaires marqués <span class="rap-stag">stagiaire</span>.</p>
 </div>
 
 <script>
@@ -86,9 +89,11 @@ function render(){
   document.getElementById('k-heures').textContent = num(RAP.totaux.heures);
   document.getElementById('k-ret').textContent = RAP.totaux.retards;
   document.getElementById('k-abs').textContent = RAP.totaux.absents;
+  document.getElementById('k-mis').textContent = RAP.totaux.missions || 0;
+  document.getElementById('k-inc').textContent = RAP.totaux.incomplets || 0;
   const body=document.getElementById('rap-body'); let html=''; let team=null;
   RAP.employes.forEach(e=>{
-    if(e.equipe!==team){ team=e.equipe; html+=`<tr class="rap-team" data-team="${(team||'').toLowerCase()}"><td colspan="7" class="l">${team}</td></tr>`; }
+    if(e.equipe!==team){ team=e.equipe; html+=`<tr class="rap-team" data-team="${(team||'').toLowerCase()}"><td colspan="9" class="l">${team}</td></tr>`; }
     html+=`<tr data-name="${(e.employee_name||'').toLowerCase()}" data-team="${(e.equipe||'').toLowerCase()}">
       <td class="l"><b>${e.employee_name||''}</b>${e.stagiaire?'<span class="rap-stag">stagiaire</span>':''}</td>
       <td class="l text-muted">${e.equipe||'—'}</td>
@@ -97,9 +102,11 @@ function render(){
       <td>${num(e.heures_moyennes)}</td>
       <td style="color:${e.jours_retard?'#d97706':'#94a3b8'};font-weight:700;">${e.jours_retard}</td>
       <td style="color:${e.jours_absent?'#dc2626':'#94a3b8'};font-weight:700;">${e.jours_absent}</td>
+      <td style="color:${e.jours_mission?'#2563eb':'#94a3b8'};font-weight:700;">${e.jours_mission||0}</td>
+      <td style="color:${e.jours_incomplet?'#d97706':'#94a3b8'};font-weight:700;">${e.jours_incomplet||0}</td>
     </tr>`;
   });
-  body.innerHTML = html || '<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:24px;">Aucun employé.</td></tr>';
+  body.innerHTML = html || '<tr><td colspan="9" style="text-align:center;color:#94a3b8;padding:24px;">Aucun employé.</td></tr>';
   filtrer();
 }
 function filtrer(){
@@ -119,11 +126,13 @@ function filtrer(){
 }
 function exporterExcel(){
   if(!RAP){ return; }
-  const rows=[['Employé','Équipe','Type','Jours travaillés','Heures totales','Heures/jour','Retards','Absences']];
+  const rows=[['Employé','Équipe','Type','Jours travaillés','Heures totales','Heures/jour','Retards','Absences','Missions','Sorties manquantes']];
   RAP.employes.forEach(e=>rows.push([e.employee_name, e.equipe, e.stagiaire?'Stagiaire':'Employé',
-    e.jours_travailles, e.heures_totales, e.heures_moyennes, e.jours_retard, e.jours_absent]));
+    e.jours_travailles, e.heures_totales, e.heures_moyennes, e.jours_retard, e.jours_absent,
+    e.jours_mission||0, e.jours_incomplet||0]));
   rows.push([]);
-  rows.push(['TOTAL','', '', RAP.totaux.jours, RAP.totaux.heures, '', RAP.totaux.retards, RAP.totaux.absents]);
+  rows.push(['TOTAL','', '', RAP.totaux.jours, RAP.totaux.heures, '', RAP.totaux.retards, RAP.totaux.absents,
+    RAP.totaux.missions||0, RAP.totaux.incomplets||0]);
   const ws=XLSX.utils.aoa_to_sheet(rows), wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Présences');
   const safe=(RAP.label||'rapport').replace(/[^\w]+/g,'_');

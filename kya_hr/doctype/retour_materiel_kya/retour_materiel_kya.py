@@ -11,37 +11,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-
-REPAIR_WAREHOUSE_NAME = "Atelier-Reparation"
-
-
-def _get_or_create_repair_warehouse(company):
-    """Retourne le nom complet du warehouse Atelier-Réparation.
-    Crée le warehouse à la volée s'il n'existe pas pour la company.
-    Les articles endommagés y sont stockés en attendant réparation."""
-    if not company:
-        return None
-
-    abbr = frappe.db.get_value("Company", company, "abbr")
-    full_name = f"{REPAIR_WAREHOUSE_NAME} - {abbr}" if abbr else REPAIR_WAREHOUSE_NAME
-
-    if frappe.db.exists("Warehouse", full_name):
-        return full_name
-
-    try:
-        wh = frappe.new_doc("Warehouse")
-        wh.warehouse_name = REPAIR_WAREHOUSE_NAME
-        wh.company = company
-        wh.is_group = 0
-        wh.warehouse_type = None
-        wh.insert(ignore_permissions=True)
-        return wh.name
-    except Exception:
-        frappe.log_error(
-            title="Retour Matériel — création warehouse Atelier-Réparation échouée",
-            message=frappe.get_traceback(),
-        )
-        return None
+from kya_hr.stock_etats import warehouse_for_etat
 
 
 class RetourMaterielKYA(Document):
@@ -107,6 +77,14 @@ class RetourMaterielKYA(Document):
                 self.retourneur_date = frappe.utils.today()
 
     # ------------------------------------------------------------------ #
+    def on_submit(self):
+        """Quand le workflow passe en UNE action vers « Approuvé » (docstatus=1),
+        c'est submit() qui s'exécute — PAS on_update_after_submit. Sans ce hook,
+        le Stock Entry n'était jamais créé (articles non remis en stock). Garde
+        anti-doublon via stock_entry."""
+        if self.workflow_state == "Approuvé" and not self.get("stock_entry"):
+            self._create_stock_entry()
+
     def on_update_after_submit(self):
         if self.workflow_state:
             self.db_set("statut", self.workflow_state, update_modified=False)
@@ -138,12 +116,12 @@ class RetourMaterielKYA(Document):
     def _create_stock_entry(self):
         """Stock Entry Material Receipt pour remettre les articles en stock.
 
-        Routage par état :
-          - Bon état            → warehouse choisi par l'utilisateur
-          - Endommagé / À réparer → warehouse 'Atelier-Reparation' (créé si absent)
-            Le Responsable Magasin décide ensuite : Material Transfer
-            vers le magasin d'origine si réparé, ou Material Issue vers
-            le rebut s'il est définitivement hors service.
+        Routage par état (3 magasins distincts ⇒ l'état est porté par le stock) :
+          - Bon état   → magasin choisi par l'utilisateur (stock disponible)
+          - À réparer  → magasin 'Atelier-Reparation' (immobilisé, réparable)
+          - Endommagé  → magasin 'Materiel-Endommage' (hors service, candidat rebut)
+        Le Responsable Magasin décide ensuite de la suite (transfert si réparé,
+        sortie/rebut si définitivement hors service).
         """
         rows = [it for it in self.items if it.get("item_code")]
         if not rows:
@@ -151,8 +129,6 @@ class RetourMaterielKYA(Document):
 
         company = frappe.defaults.get_user_default("Company") \
             or frappe.db.get_single_value("Global Defaults", "default_company")
-
-        repair_wh = _get_or_create_repair_warehouse(company)
 
         se = frappe.new_doc("Stock Entry")
         se.stock_entry_type = "Material Receipt"
@@ -169,11 +145,8 @@ class RetourMaterielKYA(Document):
             if qty <= 0:
                 continue
 
-            etat = (it.get("etat_au_retour") or "Bon état").strip()
-            if etat in ("Endommagé", "À réparer"):
-                target_wh = repair_wh
-            else:
-                target_wh = it.get("warehouse")
+            _etat_key, special_wh = warehouse_for_etat(company, it.get("etat_au_retour"))
+            target_wh = special_wh or it.get("warehouse")
             if not target_wh:
                 continue
 
@@ -225,6 +198,10 @@ def _bind(doc):
 
 def validate(doc, method=None):
     _bind(doc).validate()
+
+
+def on_submit(doc, method=None):
+    _bind(doc).on_submit()
 
 
 def on_update_after_submit(doc, method=None):

@@ -29,6 +29,12 @@ class PVEntreeMateriel(Document):
                 frappe.throw(_("La quantité reçue pour '{0}' doit être positive.").format(it.designation))
 
     # ------------------------------------------------------------------ #
+    def on_submit(self):
+        """Transition workflow en UNE action vers « Approuvé » (docstatus=1) →
+        submit() s'exécute, pas on_update_after_submit. Garde anti-doublon."""
+        if self.workflow_state == "Approuvé" and not self.get("stock_entry"):
+            self._create_stock_entry()
+
     def on_update_after_submit(self):
         if self.workflow_state:
             self.db_set("statut", self.workflow_state, update_modified=False)
@@ -193,6 +199,10 @@ def _bind(doc):
 
 def validate(doc, method=None):
     _bind(doc).validate()
+
+
+def on_submit(doc, method=None):
+    _bind(doc).on_submit()
 
 
 def on_update_after_submit(doc, method=None):

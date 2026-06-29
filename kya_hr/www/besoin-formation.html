@@ -138,6 +138,7 @@
 let DOC_NAME = null;
 let TEAMS = [];
 let LOCKED = false;
+let IS_RH = false;
 
 function esc(s) { return (s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 
@@ -149,7 +150,8 @@ async function init() {
   TEAMS = (r.message && r.message.teams) || [];
 
   // Le tableau de bord formation est réservé à la RH / Direction.
-  if (r.message && r.message.is_rh) {
+  IS_RH = !!(r.message && r.message.is_rh);
+  if (IS_RH) {
     document.getElementById('kbf-dash-link').style.display = '';
   }
 
@@ -368,7 +370,12 @@ async function sauvegarder(soumettre) {
         message: `Le besoin <b>${DOC_NAME}</b> a été transmis à la RH pour revue. La RH vous contactera pour un entretien de validation.`,
         indicator: 'green'
       });
-      setTimeout(() => { window.location.href = '/formation-dashboard'; }, 2000);
+      // Un chef n'a PAS accès au dashboard formation (réservé RH/Direction) :
+      // on recharge SON formulaire pour qu'il voie sa demande dans la liste.
+      // Seule la RH est dirigée vers le tableau de bord.
+      setTimeout(() => {
+        window.location.href = IS_RH ? '/formation-dashboard' : '/besoin-formation';
+      }, 2000);
     } else {
       frappe.show_alert({ message: `💾 Brouillon <b>${DOC_NAME}</b> enregistré.`, indicator: 'green' }, 4);
       showStatus(`📝 Brouillon <b>${DOC_NAME}</b> enregistré — vous pouvez continuer la saisie ou soumettre.`, false);

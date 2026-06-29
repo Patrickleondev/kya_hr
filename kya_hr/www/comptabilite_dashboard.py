@@ -114,3 +114,150 @@ def get_context(context):
     context.recaps = recaps
     context.cheques = cheques
     context.no_breadcrumbs = True
+
+    try:
+        import json as _json
+        context.overview_json = _json.dumps(get_compta_overview(), default=str)
+    except Exception:
+        context.overview_json = "null"
+        frappe.log_error(frappe.get_traceback(), "comptabilite-dashboard: overview")
+    return context
+
+
+# ════════════════════════════════════════════════════════════════════
+#  Vue d'ensemble Comptabilité & Finance (maquette boards/Dashboard
+#  Comptabilite) — données réelles, libellés neutres
+# ════════════════════════════════════════════════════════════════════
+def _exists(dt):
+    try:
+        return bool(frappe.db.exists("DocType", dt))
+    except Exception:
+        return False
+
+
+def _count(dt, filters=None):
+    if not _exists(dt):
+        return 0
+    try:
+        return frappe.db.count(dt, filters or {})
+    except Exception:
+        return 0
+
+
+def _fmt_m(xof):
+    m = (flt(xof) or 0) / 1_000_000.0
+    if abs(m) < 0.05:
+        m = 0.0
+    return f"{m:,.1f}".replace(",", " ").replace(".", ",")
+
+
+@frappe.whitelist()
+def get_compta_overview() -> dict:
+    """Indicateurs Comptabilité & Finance (trésorerie, brouillards de caisse,
+    rapprochements chèques, flux 6 mois). Tout est réel ; défensif si absent."""
+    if not _ALLOWED_ROLES.intersection(set(frappe.get_roles(frappe.session.user))):
+        frappe.throw(_("Accès réservé à la comptabilité."), frappe.PermissionError)
+
+    from frappe.utils import add_days, today, formatdate, get_first_day, getdate
+
+    month_start = str(get_first_day(today()))
+    week_start = str(add_days(today(), -getdate(today()).weekday()))
+    six_m = add_days(today(), -185)
+
+    # ── Brouillards de caisse (flux quotidiens de trésorerie) ──
+    brs = []
+    if _exists("Brouillard Caisse"):
+        try:
+            brs = frappe.get_all(
+                "Brouillard Caisse",
+                fields=["name", "date_brouillard", "caissiere_name", "total_entrees",
+                        "total_sorties", "solde_final", "workflow_state"],
+                order_by="date_brouillard desc, modified desc",
+                limit_page_length=400)
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), "compta-overview: brouillards")
+
+    solde_actuel = flt(brs[0].solde_final) if brs else 0
+    caisses = {b.caissiere_name for b in brs if b.caissiere_name}
+    entrees_mois = sum(flt(b.total_entrees) for b in brs
+                       if str(b.date_brouillard or "") >= month_start)
+    sorties_mois = sum(flt(b.total_sorties) for b in brs
+                       if str(b.date_brouillard or "") >= month_start)
+    br_semaine = sum(1 for b in brs if str(b.date_brouillard or "") >= week_start)
+    br_attente = sum(1 for b in brs if "En attente" in (b.workflow_state or ""))
+    resultat_net = entrees_mois - sorties_mois
+
+    cheques_attente = _count("Etat Recap Cheques", {"workflow_state": ["like", "%En attente%"]})
+    cheques_total = _count("Etat Recap Cheques")
+
+    # ── Hero (6) ──
+    net_sign = "+" if resultat_net >= 0 else ""
+    hero = [
+        {"label": "Trésorerie (solde caisse)", "value": _fmt_m(solde_actuel), "unit": "M FCFA",
+         "sub": f"{len(caisses) or 1} caisse(s)", "icon": "coins"},
+        {"label": "Entrées du mois", "value": _fmt_m(entrees_mois), "unit": "M FCFA",
+         "sub": "encaissements", "icon": "arrowup"},
+        {"label": "Sorties du mois", "value": _fmt_m(sorties_mois), "unit": "M FCFA",
+         "sub": "décaissements", "icon": "arrowdown"},
+        {"label": "Brouillards (semaine)", "value": str(br_semaine),
+         "sub": f"{br_attente} à valider", "icon": "receipt"},
+        {"label": "Rapprochements chèques", "value": str(cheques_attente),
+         "sub": "en attente", "icon": "filecheck"},
+        {"label": "Résultat net du mois", "value": net_sign + _fmt_m(resultat_net), "unit": "M FCFA",
+         "sub": "entrées − sorties", "icon": "gauge"},
+    ]
+
+    # ── Cartes Trésorerie & caisse (5) ──
+    treso_cards = [
+        {"label": "Solde caisse", "value": _fmt_m(solde_actuel), "unit": "M FCFA",
+         "sub": "consolidé", "icon": "coins", "accent": "teal"},
+        {"label": "Entrées du mois", "value": _fmt_m(entrees_mois), "unit": "M FCFA",
+         "sub": "encaissements", "icon": "arrowup", "accent": "green"},
+        {"label": "Sorties du mois", "value": _fmt_m(sorties_mois), "unit": "M FCFA",
+         "sub": "décaissements", "icon": "arrowdown", "accent": "orange"},
+        {"label": "Brouillards (semaine)", "value": str(br_semaine),
+         "sub": f"{br_attente} non validés", "icon": "receipt", "accent": "teal"},
+        {"label": "Rapprochements chèques", "value": str(cheques_attente),
+         "sub": f"{cheques_total} états au total", "icon": "filecheck", "accent": "teal"},
+    ]
+
+    # ── Derniers brouillards (table) ──
+    brouillard_rows = []
+    for b in brs[:8]:
+        brouillard_rows.append({
+            "date": formatdate(b.date_brouillard, "dd/MM") if b.date_brouillard else "—",
+            "par": b.caissiere_name or "—",
+            "entrees": _fmt_m(b.total_entrees) + " M",
+            "sorties": _fmt_m(b.total_sorties) + " M",
+            "solde": _fmt_m(b.solde_final) + " M",
+        })
+
+    # ── Trésorerie 6 mois (entrées / sorties par mois, M FCFA) ──
+    flux = {"labels": [], "entrees": [], "sorties": []}
+    by_month = {}
+    for b in brs:
+        d = str(b.date_brouillard or "")
+        if not d or d < str(six_m):
+            continue
+        k = d[:7]
+        agg = by_month.setdefault(k, [0.0, 0.0])
+        agg[0] += flt(b.total_entrees)
+        agg[1] += flt(b.total_sorties)
+    for k in sorted(by_month):
+        flux["labels"].append(k)
+        flux["entrees"].append(round(by_month[k][0] / 1_000_000, 2))
+        flux["sorties"].append(round(by_month[k][1] / 1_000_000, 2))
+
+    # ── Documents de caisse par état (doughnut, réel) ──
+    etats = {}
+    for b in brs:
+        st = b.workflow_state or "Brouillon"
+        etats[st] = etats.get(st, 0) + 1
+    doc_etats = {"labels": list(etats.keys()), "data": list(etats.values())}
+
+    return {
+        "date_str": formatdate(today(), "EEEE d MMMM y"),
+        "hero": hero, "treso_cards": treso_cards, "brouillard_rows": brouillard_rows,
+        "flux": flux, "doc_etats": doc_etats,
+        "solde_label": _fmt_m(solde_actuel) + " M FCFA",
+    }

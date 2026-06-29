@@ -1,477 +1,147 @@
-{%- extends "templates/web.html" -%}
-{%- block title %}Dashboard Stocks — KYA Energy{%- endblock -%}
+{% extends "templates/web.html" %}
 
-{%- block page_content -%}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+{% block title %}Tableau de bord Stock & Inventaire — KYA{% endblock %}
 
+{% block head_include %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block page_content %}
 <style>
-:root {
-  --kya-blue: #0d7377;
-  --kya-orange: #F58220;
-  --kya-green: #22c55e;
-  --kya-red: #ef4444;
-  --kya-amber: #f59e0b;
-  --kya-gray: #64748b;
-  --kya-bg: #f1f5f9;
-  --kya-card: #ffffff;
-  --kya-border: #e2e8f0;
-  --kya-text: #1e293b;
-  --kya-muted: #94a3b8;
-  --kya-shadow: 0 1px 3px rgba(0,0,0,.06);
-}
-body { background: var(--kya-bg) !important; }
-.page-container { max-width: 1600px !important; }
-
-.kya-hero {
-  background: linear-gradient(135deg, var(--kya-blue) 0%, #0a5557 100%);
-  color: white; border-radius: 16px; padding: 1.5rem 2rem;
-  margin-bottom: 1.5rem;
-}
-.kya-hero h1 { font-size: 1.5rem; font-weight: 800; margin: 0; }
-.kya-hero p { opacity: .85; margin: .3rem 0 0; font-size: .85rem; }
-
-.kya-filter-bar {
-  background: var(--kya-card); border-radius: 12px; padding: 1rem 1.5rem;
-  border: 1px solid var(--kya-border); margin-bottom: 1.5rem;
-  box-shadow: var(--kya-shadow);
-}
-
-.kya-kpi-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 1rem; margin-bottom: 1.5rem;
-}
-.kya-kpi {
-  background: var(--kya-card); border-radius: 12px; padding: 1.2rem 1rem;
-  border: 1px solid var(--kya-border); box-shadow: var(--kya-shadow);
-  text-align: center; transition: transform .15s;
-}
-.kya-kpi:hover { transform: translateY(-2px); }
-.kya-kpi-value { font-size: 1.6rem; font-weight: 800; line-height: 1; color: var(--kya-text); }
-.kya-kpi-label {
-  font-size: .68rem; color: var(--kya-muted); font-weight: 700;
-  text-transform: uppercase; letter-spacing: .5px; margin-top: .4rem;
-}
-.kya-kpi-icon { font-size: 1.4rem; margin-bottom: .5rem; }
-
-.kya-panel {
-  background: var(--kya-card); border-radius: 12px;
-  border: 1px solid var(--kya-border); box-shadow: var(--kya-shadow);
-  margin-bottom: 1.5rem; overflow: hidden;
-}
-.kya-panel-head {
-  padding: 1rem 1.5rem; border-bottom: 1px solid var(--kya-border);
-  display: flex; align-items: center; gap: .8rem; justify-content: space-between;
-  background: #f8fafc;
-}
-.kya-panel-head h3 { font-size: .95rem; font-weight: 700; margin: 0; }
-.kya-panel-body { padding: 0; }
-
-.kya-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
-.kya-table th {
-  background: #f8fafc; padding: .7rem .9rem; font-weight: 700; font-size: .68rem;
-  text-transform: uppercase; letter-spacing: .5px; color: var(--kya-muted);
-  border-bottom: 2px solid var(--kya-border); text-align: left;
-}
-.kya-table td {
-  padding: .65rem .9rem; border-bottom: 1px solid var(--kya-border);
-  vertical-align: middle;
-}
-.kya-table tbody tr:hover { background: #f8fafc; }
-
-.badge-stock { padding: .15rem .55rem; border-radius: 12px; font-size: .7rem; font-weight: 700; }
-.badge-ok { background: #dcfce7; color: #166534; }
-.badge-low { background: #fef3c7; color: #92400e; }
-.badge-out { background: #fee2e2; color: #991b1b; }
-
-.kya-loader {
-  text-align: center; padding: 3rem; color: var(--kya-muted); font-size: .85rem;
-}
-
-@media (max-width: 768px) {
-  .kya-kpi-grid { grid-template-columns: repeat(2, 1fr); }
-  .kya-table { font-size: .72rem; }
-  .kya-table th, .kya-table td { padding: .45rem .5rem; }
-}
+  .skx * { box-sizing:border-box; }
+  .skx { --teal:#0d7377; --orange:#F58220; --green:#6fae2f; --ink:#101828; --muted:#667085; --line:#eef1f4;
+         max-width:1480px; margin:0 auto; padding:14px 14px 36px; font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; color:var(--ink); }
+  .skx-hero { background:linear-gradient(120deg,#0d7377,#0a5d61 55%,#0e6e5a); border-radius:16px; padding:16px; box-shadow:0 6px 20px rgba(13,115,119,.20); }
+  .skx-hero h2 { margin:0 0 12px; font-size:16px; color:#fff; font-weight:700; }
+  .skx-hgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; }
+  .skx-hcard { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); border-radius:12px; padding:13px 15px; display:flex; flex-direction:column; gap:6px; }
+  .skx-hcard .lbl { font-size:12px; color:rgba(255,255,255,.82); }
+  .skx-hcard .val { font-size:26px; font-weight:800; color:#fff; line-height:1; }
+  .skx-hcard .un { font-size:12px; font-weight:600; color:rgba(255,255,255,.8); margin-left:5px; }
+  .skx-hcard .sub { font-size:11.5px; color:rgba(255,255,255,.72); }
+  .skx-band { display:flex; align-items:center; gap:12px; color:#fff; border-radius:14px; padding:13px 16px; margin:18px 0 12px; }
+  .skx-band .bi { width:36px; height:36px; border-radius:10px; background:rgba(255,255,255,.16); display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .skx-band .bt { font-size:15px; font-weight:700; } .skx-band .bs { font-size:12px; color:rgba(255,255,255,.82); }
+  .skx-band .bc { margin-left:auto; font-size:12px; font-weight:600; background:rgba(255,255,255,.18); padding:5px 11px; border-radius:20px; white-space:nowrap; }
+  .skx-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; }
+  .skx-card { background:#fff; border:1px solid var(--line); border-radius:14px; box-shadow:0 1px 2px rgba(16,24,40,.05); padding:14px; display:flex; flex-direction:column; gap:8px; }
+  .skx-card .ch { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+  .skx-card .lbl { font-size:12.5px; color:var(--muted); line-height:1.35; }
+  .skx-card .val { font-size:28px; font-weight:700; color:var(--ink); line-height:1; }
+  .skx-card .un { font-size:13px; font-weight:600; color:var(--muted); margin-left:5px; }
+  .skx-card .sub { font-size:12px; color:#98a2b3; }
+  .skx-chip { width:34px; height:34px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .skx-table { background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+  .skx-scroll { overflow-x:auto; }
+  .skx-row { display:grid; gap:10px; padding:8px 16px; border-top:1px solid #f1f4f7; align-items:center; font-size:13px; }
+  .skx-row.head { border-top:none; border-bottom:1px solid #f1f4f7; }
+  .skx-row.head span { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:#98a2b3; }
+  .skx-badge { display:inline-flex; align-items:center; font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:20px; white-space:nowrap; }
+  .skx-bar { flex:1; height:6px; border-radius:4px; background:#eef1f4; overflow:hidden; min-width:50px; }
+  .skx-bar > i { display:block; height:100%; border-radius:4px; }
+  .skx-cc { background:#fff; border:1px solid var(--line); border-radius:14px; box-shadow:0 1px 2px rgba(16,24,40,.05); padding:14px; margin-top:12px; }
+  .skx-cc b { font-size:13.5px; } .skx-cwrap { position:relative; height:280px; margin-top:8px; }
+  .skx-foot { text-align:center; font-size:11.5px; color:#b0b8c1; padding:8px 0; }
 </style>
 
-<div class="container py-3" style="max-width: 1500px;">
-
-  <div class="kya-hero">
-    <h1><i class="bi bi-box-seam"></i> Dashboard Stocks KYA</h1>
-    <p>Vue d'ensemble des articles, entrepôts, mouvements et alertes — temps réel</p>
-    <div class="mt-3 d-flex gap-2 flex-wrap">
-      <button class="btn btn-sm btn-light" onclick="downloadTemplate()">
-        <i class="bi bi-download"></i> Template d'import
-      </button>
-      <label class="btn btn-sm btn-light mb-0">
-        <i class="bi bi-upload"></i> Importer articles (CSV)
-        <input type="file" accept=".csv" onchange="importCsv(this)" hidden>
-      </label>
-      <button class="btn btn-sm btn-light" onclick="downloadStockTemplate()">
-        <i class="bi bi-download"></i> Modèle entrée de stock
-      </button>
-      <label class="btn btn-sm btn-success mb-0">
-        <i class="bi bi-box-arrow-in-down"></i> Importer entrée de stock
-        <input type="file" accept=".csv" onchange="importOpeningStock(this)" hidden>
-      </label>
-      <button class="btn btn-sm btn-light" onclick="exportCsv()">
-        <i class="bi bi-file-earmark-spreadsheet"></i> Exporter (état stock)
-      </button>
-      <a class="btn btn-sm btn-light" href="/app/item/new"><i class="bi bi-plus-circle"></i> Nouvel article</a>
-    </div>
-    <div id="action-result" class="mt-2 small" style="opacity:.9;"></div>
-  </div>
-
-  <details style="margin:0 0 16px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:12px 16px;">
-    <summary style="cursor:pointer;font-weight:700;color:#0f3d68;">ℹ️ Comment ça marche — Stocks</summary>
-    <ol style="margin:10px 0 2px;padding-left:20px;color:#334155;font-size:13px;line-height:1.75;">
-      <li><b>Entrée de stock</b> : PV d'entrée matériel (ou import du modèle).</li>
-      <li><b>Sortie de matériel</b> : PV de sortie (décrémente le stock).</li>
-      <li><b>Retour de matériel</b> : réintègre les articles.</li>
-      <li><b>Inventaire</b> : comptage physique vs quantité théorique → écarts.</li>
-    </ol>
-  </details>
-
-  <!-- KPIs globaux -->
-  <div class="kya-kpi-grid" id="kpi-grid">
-    <div class="kya-kpi">
-      <div class="kya-kpi-icon" style="color: var(--kya-blue);"><i class="bi bi-box"></i></div>
-      <div class="kya-kpi-value" id="kpi-items">—</div>
-      <div class="kya-kpi-label">Articles actifs</div>
-    </div>
-    <div class="kya-kpi">
-      <div class="kya-kpi-icon" style="color: var(--kya-green);"><i class="bi bi-archive"></i></div>
-      <div class="kya-kpi-value" id="kpi-instock">—</div>
-      <div class="kya-kpi-label">En stock</div>
-    </div>
-    <div class="kya-kpi">
-      <div class="kya-kpi-icon" style="color: var(--kya-orange);"><i class="bi bi-stack"></i></div>
-      <div class="kya-kpi-value" id="kpi-qty">—</div>
-      <div class="kya-kpi-label">Quantité totale</div>
-    </div>
-    <div class="kya-kpi">
-      <div class="kya-kpi-icon" style="color: var(--kya-red);"><i class="bi bi-exclamation-triangle"></i></div>
-      <div class="kya-kpi-value" id="kpi-rupture">—</div>
-      <div class="kya-kpi-label">Ruptures</div>
-    </div>
-    <div class="kya-kpi">
-      <div class="kya-kpi-icon" style="color: var(--kya-blue);"><i class="bi bi-arrow-left-right"></i></div>
-      <div class="kya-kpi-value" id="kpi-mov">—</div>
-      <div class="kya-kpi-label">Mouvements 30j</div>
-    </div>
-  </div>
-
-  <!-- Vue par entrepôt -->
-  <div class="kya-panel">
-    <div class="kya-panel-head">
-      <h3><i class="bi bi-building"></i> Par entrepôt</h3>
-    </div>
-    <div class="kya-panel-body">
-      <table class="kya-table">
-        <thead>
-          <tr>
-            <th>Entrepôt</th>
-            <th>Articles</th>
-            <th class="text-end">Qté totale</th>
-            <th>Dernier mouvement</th>
-          </tr>
-        </thead>
-        <tbody id="tbl-warehouses">
-          <tr><td colspan="5" class="kya-loader">Chargement…</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Vue par groupe -->
-  <div class="kya-panel">
-    <div class="kya-panel-head">
-      <h3><i class="bi bi-tags"></i> Par groupe d'articles</h3>
-    </div>
-    <div class="kya-panel-body">
-      <table class="kya-table">
-        <thead>
-          <tr>
-            <th>Groupe</th>
-            <th class="text-end">Articles</th>
-            <th class="text-end">Qté</th>
-          </tr>
-        </thead>
-        <tbody id="tbl-groups">
-          <tr><td colspan="4" class="kya-loader">Chargement…</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Articles en rupture / faible -->
-  <div class="kya-panel">
-    <div class="kya-panel-head">
-      <h3><i class="bi bi-exclamation-triangle-fill text-danger"></i> Articles en alerte (qty ≤ 0)</h3>
-    </div>
-    <div class="kya-panel-body">
-      <table class="kya-table">
-        <thead>
-          <tr>
-            <th>Article</th>
-            <th>Groupe</th>
-            <th>Entrepôt</th>
-            <th class="text-end">Qté</th>
-          </tr>
-        </thead>
-        <tbody id="tbl-low">
-          <tr><td colspan="4" class="kya-loader">Chargement…</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Derniers mouvements -->
-  <div class="kya-panel">
-    <div class="kya-panel-head">
-      <h3><i class="bi bi-clock-history"></i> Derniers mouvements (50)</h3>
-    </div>
-    <div class="kya-panel-body" style="max-height: 500px; overflow-y: auto;">
-      <table class="kya-table">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Article</th>
-            <th>Entrepôt</th>
-            <th class="text-end">Qté</th>
-            <th>Document</th>
-          </tr>
-        </thead>
-        <tbody id="tbl-movements">
-          <tr><td colspan="5" class="kya-loader">Chargement…</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
+<div class="skx" id="skx-root">
+  <div style="text-align:center;color:#94a3b8;padding:40px;">Chargement du tableau de bord…</div>
 </div>
 
 <script>
-function fmtXof(n) {
-  if (n == null) return '—';
-  return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(n);
-}
-function fmtQty(n) {
-  if (n == null) return '—';
-  return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 }).format(n);
-}
-function badgeStock(q) {
-  if (q <= 0) return '<span class="badge-stock badge-out">Rupture</span>';
-  if (q < 5) return '<span class="badge-stock badge-low">Faible</span>';
-  return '<span class="badge-stock badge-ok">OK</span>';
+const SKX_DATA = {% if overview_json %}{{ overview_json | safe }}{% else %}null{% endif %};
+const SKX_ICONS = {
+  coins:[['circle',{cx:8,cy:8,r:6}],['path',{d:'M18.09 10.37A6 6 0 1 1 10.34 18M7 6h1v4M16.71 13.88l.7.71-2.82 2.82'}]],
+  alert:[['path',{d:'M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z'}],['path',{d:'M12 9v4M12 17h.01'}]],
+  arrowdown:[['path',{d:'M12 5v14M19 12l-7 7-7-7'}]],
+  arrowup:[['path',{d:'M12 19V5M5 12l7-7 7 7'}]],
+  undo:[['path',{d:'M3 7v6h6'}],['path',{d:'M3 13a9 9 0 1 0 3-7.7L3 8'}]],
+  clipboard:[['rect',{x:8,y:2,width:8,height:4,rx:1}],['path',{d:'M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2'}]],
+  receipt:[['path',{d:'M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z'}],['path',{d:'M8 7h8M8 11h8M8 15h5'}]],
+  box:[['path',{d:'M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'}],['path',{d:'m3.27 6.96 8.73 5.05 8.73-5.05M12 22.08V12'}]],
+  activity:[['path',{d:'M22 12h-4l-3 9L9 3l-3 9H2'}]],
+};
+const SKX_ACCENT = { teal:{bg:'rgba(13,115,119,.10)',fg:'#0d7377'}, orange:{bg:'rgba(245,130,32,.13)',fg:'#d9700f'}, green:{bg:'rgba(141,198,63,.20)',fg:'#5f9e2b'}, red:{bg:'rgba(214,69,80,.12)',fg:'#d64550'}, slate:{bg:'#eef1f4',fg:'#667085'} };
+const SKX_BADGE = { green:{bg:'rgba(141,198,63,.20)',fg:'#5f9e2b'}, orange:{bg:'#fff4ea',fg:'#c76a10'}, teal:{bg:'rgba(13,115,119,.10)',fg:'#0d7377'}, red:{bg:'rgba(214,69,80,.12)',fg:'#d64550'} };
+function svg(name,color,size){ const ns='http://www.w3.org/2000/svg'; const e=document.createElementNS(ns,'svg'); const sp=SKX_ICONS[name]||SKX_ICONS.box;
+  e.setAttribute('width',size||18); e.setAttribute('height',size||18); e.setAttribute('viewBox','0 0 24 24'); e.setAttribute('fill','none');
+  e.setAttribute('stroke',color); e.setAttribute('stroke-width','1.9'); e.setAttribute('stroke-linecap','round'); e.setAttribute('stroke-linejoin','round');
+  sp.forEach(s=>{ const c=document.createElementNS(ns,s[0]); for(const k in s[1]) c.setAttribute(k,s[1][k]); e.appendChild(c); }); return e; }
+function chip(name,accent,white){ const a=SKX_ACCENT[accent]||SKX_ACCENT.slate; const s=document.createElement('span'); s.className='skx-chip';
+  s.style.background=white?'rgba(255,255,255,.18)':a.bg; s.appendChild(svg(name,white?'#fff':a.fg,17)); return s; }
+function el(t,c,h){ const e=document.createElement(t); if(c)e.className=c; if(h!=null)e.innerHTML=h; return e; }
+
+function render(D){
+  const root=document.getElementById('skx-root'); root.innerHTML='';
+  const hero=el('div','skx-hero'); hero.appendChild(el('h2','Tableau de bord — Stock & Inventaire'));
+  const hg=el('div','skx-hgrid');
+  (D.hero||[]).forEach(h=>{ const c=el('div','skx-hcard'); const top=el('div'); top.style.cssText='display:flex;justify-content:space-between;align-items:flex-start;';
+    top.appendChild(el('span','lbl',h.label)); top.appendChild(chip(h.icon,'teal',true)); c.appendChild(top);
+    const v=el('div'); v.style.cssText='display:flex;align-items:baseline;'; v.appendChild(el('span','val',h.value));
+    if(h.unit) v.appendChild(el('span','un',h.unit)); c.appendChild(v); if(h.sub) c.appendChild(el('span','sub',h.sub)); hg.appendChild(c); });
+  hero.appendChild(hg); root.appendChild(hero);
+
+  root.appendChild(band('box','Documents de stock','PV Entrée · Sortie · Retour · Inventaire · Réceptions','ce mois','linear-gradient(100deg,#0d7377,#0a5d61)'));
+  const g=el('div','skx-cards');
+  (D.doc_cards||[]).forEach(c=>{ const card=el('div','skx-card'); const ch=el('div','ch'); ch.appendChild(el('span','lbl',c.label)); ch.appendChild(chip(c.icon,c.accent)); card.appendChild(ch);
+    const v=el('div'); v.style.cssText='display:flex;align-items:baseline;'; v.appendChild(el('span','val',c.value)); card.appendChild(v);
+    if(c.sub) card.appendChild(el('span','sub',c.sub)); g.appendChild(card); });
+  root.appendChild(g);
+
+  root.appendChild(band('activity','Derniers mouvements','entrées · sorties · retours','7 jours','linear-gradient(100deg,#F58220,#e06f12)'));
+  const t1=el('div','skx-table'); const s1=el('div','skx-scroll'); const w1=el('div'); w1.style.minWidth='720px';
+  const cols1='1fr 0.9fr 1.9fr 0.8fr 0.8fr 1.1fr';
+  const h1=el('div','skx-row head'); h1.style.gridTemplateColumns=cols1; ['Type','Réf.','Article','Qté','Date','Saisi par'].forEach((x,i)=>{ const sp=el('span',null,x); if(i===3)sp.style.textAlign='right'; h1.appendChild(sp); }); w1.appendChild(h1);
+  (D.mouvements||[]).forEach(r=>{ const row=el('div','skx-row'); row.style.gridTemplateColumns=cols1;
+    const b=SKX_BADGE[r.accent]||SKX_BADGE.teal; const bd=el('span','skx-badge'); bd.style.background=b.bg; bd.style.color=b.fg; bd.textContent=r.type;
+    const tc=el('span'); tc.appendChild(bd); row.appendChild(tc);
+    row.appendChild(el('span',null,'<span style="color:#98a2b3;">'+(r.ref||'')+'</span>'));
+    row.appendChild(el('span',null,'<b>'+(r.article||'')+'</b>'));
+    const q=el('span',null,r.qte||''); q.style.cssText='text-align:right;color:#667085;'; row.appendChild(q);
+    row.appendChild(el('span',null,'<span style="color:#667085;">'+(r.date||'')+'</span>'));
+    row.appendChild(el('span',null,'<span style="color:#667085;">'+(r.par||'')+'</span>')); w1.appendChild(row); });
+  if(!(D.mouvements||[]).length) w1.appendChild(el('div','skx-row','<span style="color:#94a3b8;padding:8px;">Aucun mouvement récent.</span>'));
+  s1.appendChild(w1); t1.appendChild(s1); root.appendChild(t1);
+
+  root.appendChild(band('coins','Top articles par valeur','valorisation du stock',(D.valeur_stock_label||''),'linear-gradient(100deg,#6fae2f,#5a8f24)'));
+  const t2=el('div','skx-table'); const s2=el('div','skx-scroll'); const w2=el('div'); w2.style.minWidth='660px';
+  const cols2='2fr 1.3fr 0.9fr 1fr 1.6fr';
+  const h2=el('div','skx-row head'); h2.style.gridTemplateColumns=cols2; ['Article','Catégorie','Qté','Valeur','Part'].forEach((x,i)=>{ const sp=el('span',null,x); if(i===2||i===3)sp.style.textAlign='right'; h2.appendChild(sp); }); w2.appendChild(h2);
+  (D.top||[]).forEach(r=>{ const row=el('div','skx-row'); row.style.gridTemplateColumns=cols2;
+    row.appendChild(el('span',null,'<b>'+(r.article||'')+'</b>'));
+    row.appendChild(el('span',null,'<span style="color:#667085;">'+(r.cat||'')+'</span>'));
+    const q=el('span',null,r.qte||''); q.style.cssText='text-align:right;color:#667085;'; row.appendChild(q);
+    const val=el('span',null,r.valeur||''); val.style.cssText='text-align:right;font-weight:600;'; row.appendChild(val);
+    const cw=el('span'); cw.style.cssText='display:flex;align-items:center;gap:9px;'; const bar=el('div','skx-bar'); const i=el('i'); i.style.width=r.part+'%'; i.style.background=r.part>=18?'#0d7377':(r.part>=10?'#F58220':'#8DC63F'); bar.appendChild(i);
+    cw.appendChild(bar); cw.appendChild(el('span',null,r.part+'%')); row.appendChild(cw); w2.appendChild(row); });
+  if(!(D.top||[]).length) w2.appendChild(el('div','skx-row','<span style="color:#94a3b8;padding:8px;">Aucun article en stock.</span>'));
+  s2.appendChild(w2); t2.appendChild(s2); root.appendChild(t2);
+
+  const cc=el('div','skx-cc'); cc.appendChild(el('b',null,'Entrées vs sorties — 6 mois (M FCFA)'));
+  const cwrap=el('div','skx-cwrap'); const cv=el('canvas'); cv.id='skxFlow'; cwrap.appendChild(cv); cc.appendChild(cwrap); root.appendChild(cc);
+  root.appendChild(el('div','skx-foot','KYA-Energy Group · Données en temps réel de l’ERP'));
+  drawChart(D.flux);
 }
 
-async function callApi(method, args) {
-  const res = await fetch(`/api/method/${method}` + (args ? '?' + new URLSearchParams(args) : ''), {
-    headers: { 'X-Frappe-CSRF-Token': frappe.csrf_token || '' },
-    credentials: 'same-origin',
-  });
-  if (!res.ok) throw new Error(`${method} HTTP ${res.status}`);
-  const data = await res.json();
-  return data.message;
+function band(icon,title,sub,chipTxt,grad){ const b=el('div','skx-band'); b.style.background=grad;
+  const bi=el('span','bi'); bi.appendChild(svg(icon,'#fff',20)); b.appendChild(bi);
+  const t=el('div'); t.style.cssText='display:flex;flex-direction:column;line-height:1.2;'; t.appendChild(el('span','bt',title)); t.appendChild(el('span','bs',sub)); b.appendChild(t);
+  if(chipTxt) b.appendChild(el('span','bc',chipTxt)); return b; }
+
+let SKX_CHART=null;
+function drawChart(flux){ if(!window.Chart||!flux) return; if(SKX_CHART){try{SKX_CHART.destroy();}catch(e){}}
+  Chart.defaults.font.family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif"; Chart.defaults.color='#667085';
+  SKX_CHART=new Chart(document.getElementById('skxFlow'),{type:'bar',data:{labels:flux.labels,datasets:[
+    {label:'Entrées',data:flux.entrees,backgroundColor:'#0d7377',borderRadius:5,maxBarThickness:34},
+    {label:'Sorties',data:flux.sorties,backgroundColor:'#F58220',borderRadius:5,maxBarThickness:34},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:9,usePointStyle:true,padding:14}}},
+    scales:{x:{grid:{display:false}},y:{grid:{color:'#f0f2f5'},ticks:{callback:v=>v+' M'}}}}});
 }
 
-async function loadOverview() {
-  try {
-    const o = await callApi('kya_hr.api.stocks_dashboard.get_dashboard_overview');
-    document.getElementById('kpi-items').textContent = fmtQty(o.total_items);
-    document.getElementById('kpi-qty').textContent = fmtQty(o.total_qty);
-    document.getElementById('kpi-instock').textContent = fmtQty(o.items_in_stock);
-    document.getElementById('kpi-rupture').textContent = fmtQty(o.rupture_count);
-    document.getElementById('kpi-mov').textContent = fmtQty(o.movements_30d ? o.movements_30d.total_entries : 0);
-  } catch (e) {
-    console.error('Overview error', e);
-  }
-}
-
-async function loadWarehouses() {
-  const tbody = document.getElementById('tbl-warehouses');
-  try {
-    const rows = await callApi('kya_hr.api.stocks_dashboard.get_warehouses_summary');
-    if (!rows || !rows.length) {
-      tbody.innerHTML = '<tr><td colspan="5" class="kya-loader">Aucun entrepôt</td></tr>';
-      return;
-    }
-    tbody.innerHTML = rows.map(r => `
-      <tr>
-        <td><strong>${frappe.utils.escape_html(r.warehouse)}</strong></td>
-        <td>${r.items_in_stock || 0}</td>
-        <td class="text-end">${fmtQty(r.total_qty)}</td>
-        <td>${r.last_movement || '—'}</td>
-      </tr>
-    `).join('');
-  } catch (e) {
-    tbody.innerHTML = `<tr><td colspan="5" class="kya-loader text-danger">Erreur: ${e.message}</td></tr>`;
-  }
-}
-
-async function loadGroups() {
-  const tbody = document.getElementById('tbl-groups');
-  try {
-    const rows = await callApi('kya_hr.api.stocks_dashboard.get_items_by_group');
-    if (!rows || !rows.length) {
-      tbody.innerHTML = '<tr><td colspan="4" class="kya-loader">Aucun groupe</td></tr>';
-      return;
-    }
-    tbody.innerHTML = rows.map(r => `
-      <tr>
-        <td><strong>${frappe.utils.escape_html(r.item_group)}</strong></td>
-        <td class="text-end">${r.items_count}</td>
-        <td class="text-end">${fmtQty(r.total_qty)}</td>
-      </tr>
-    `).join('');
-  } catch (e) {
-    tbody.innerHTML = `<tr><td colspan="4" class="kya-loader text-danger">Erreur: ${e.message}</td></tr>`;
-  }
-}
-
-async function loadLowStock() {
-  const tbody = document.getElementById('tbl-low');
-  try {
-    const rows = await callApi('kya_hr.api.stocks_dashboard.get_low_stock', { threshold: 0 });
-    if (!rows || !rows.length) {
-      tbody.innerHTML = '<tr><td colspan="4" class="kya-loader">Aucun article en rupture</td></tr>';
-      return;
-    }
-    tbody.innerHTML = rows.map(r => `
-      <tr>
-        <td><strong>${frappe.utils.escape_html(r.item_code)}</strong> — ${frappe.utils.escape_html(r.item_name || '')}</td>
-        <td>${frappe.utils.escape_html(r.item_group || '—')}</td>
-        <td>${frappe.utils.escape_html(r.warehouse || '—')}</td>
-        <td class="text-end">${badgeStock(r.actual_qty)} ${fmtQty(r.actual_qty)}</td>
-      </tr>
-    `).join('');
-  } catch (e) {
-    tbody.innerHTML = `<tr><td colspan="4" class="kya-loader text-danger">Erreur: ${e.message}</td></tr>`;
-  }
-}
-
-async function loadMovements() {
-  const tbody = document.getElementById('tbl-movements');
-  try {
-    const rows = await callApi('kya_hr.api.stocks_dashboard.get_recent_movements', { limit: 50 });
-    if (!rows || !rows.length) {
-      tbody.innerHTML = '<tr><td colspan="5" class="kya-loader">Aucun mouvement récent</td></tr>';
-      return;
-    }
-    tbody.innerHTML = rows.map(r => `
-      <tr>
-        <td>${r.posting_date || '—'}</td>
-        <td><strong>${frappe.utils.escape_html(r.item_code)}</strong> — ${frappe.utils.escape_html(r.item_name || '')}</td>
-        <td>${frappe.utils.escape_html(r.warehouse || '—')}</td>
-        <td class="text-end" style="color: ${r.actual_qty < 0 ? 'var(--kya-red)' : 'var(--kya-green)'};">${fmtQty(r.actual_qty)}</td>
-        <td><a href="/app/${r.voucher_type.toLowerCase().replace(/ /g, '-')}/${r.voucher_no}">${r.voucher_no || ''}</a></td>
-      </tr>
-    `).join('');
-  } catch (e) {
-    tbody.innerHTML = `<tr><td colspan="5" class="kya-loader text-danger">Erreur: ${e.message}</td></tr>`;
-  }
-}
-
-function b64ToBlob(b64, type) {
-  const byteCharacters = atob(b64);
-  const byteArray = new Uint8Array(byteCharacters.length);
-  for (let i = 0; i < byteCharacters.length; i++) byteArray[i] = byteCharacters.charCodeAt(i);
-  return new Blob([byteArray], { type });
-}
-function triggerDownload(blob, filename) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = filename; document.body.appendChild(a);
-  a.click(); a.remove(); URL.revokeObjectURL(url);
-}
-function setResult(html, color) {
-  const el = document.getElementById('action-result');
-  el.innerHTML = html;
-  el.style.color = color || 'inherit';
-}
-
-async function downloadTemplate() {
-  try {
-    const r = await callApi('kya_hr.api.stocks_import.download_template');
-    triggerDownload(b64ToBlob(r.content_base64, 'text/csv'), r.filename);
-    setResult('<i class="bi bi-check-circle"></i> Template téléchargé.');
-  } catch (e) { setResult('Erreur: ' + e.message, '#fef3c7'); }
-}
-
-async function importCsv(input) {
-  const file = input.files[0];
-  if (!file) return;
-  setResult('<i class="bi bi-arrow-clockwise"></i> Import en cours…');
-  try {
-    const buf = await file.arrayBuffer();
-    const b64 = btoa(new Uint8Array(buf).reduce((d, b) => d + String.fromCharCode(b), ''));
-    const res = await fetch('/api/method/kya_hr.api.stocks_import.import_items', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Frappe-CSRF-Token': frappe.csrf_token || '' },
-      credentials: 'same-origin',
-      body: 'content_base64=' + encodeURIComponent(b64),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || res.status);
-    const s = data.message;
-    setResult(`<i class="bi bi-check-circle"></i> Import OK : ${s.created} créés, ${s.updated} mis à jour, ${s.unchanged} inchangés, ${s.errors.length} erreurs.`);
-    loadOverview(); loadWarehouses(); loadGroups();
-  } catch (e) { setResult('Erreur import: ' + e.message, '#fef3c7'); }
-  input.value = '';
-}
-
-async function downloadStockTemplate() {
-  try {
-    const r = await callApi('kya_hr.api.stocks_import.download_stock_template');
-    triggerDownload(b64ToBlob(r.content_base64, 'text/csv'), r.filename);
-    setResult('<i class="bi bi-check-circle"></i> Modèle entrée de stock téléchargé.');
-  } catch (e) { setResult('Erreur: ' + e.message, '#fef3c7'); }
-}
-
-async function importOpeningStock(input) {
-  const file = input.files[0];
-  if (!file) return;
-  setResult('<i class="bi bi-arrow-clockwise"></i> Création de l\'entrée de stock…');
-  try {
-    const buf = await file.arrayBuffer();
-    const b64 = btoa(new Uint8Array(buf).reduce((d, b) => d + String.fromCharCode(b), ''));
-    const res = await fetch('/api/method/kya_hr.api.stocks_import.import_opening_stock', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Frappe-CSRF-Token': frappe.csrf_token || '' },
-      credentials: 'same-origin',
-      body: 'content_base64=' + encodeURIComponent(b64),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error((data && data.message) || res.status);
-    const s = data.message;
-    const link = s.stock_entry
-      ? ` <a href="/app/stock-entry/${encodeURIComponent(s.stock_entry)}" target="_blank" style="text-decoration:underline;">Vérifier et valider (${s.stock_entry})</a>`
-      : '';
-    setResult(`<i class="bi bi-check-circle"></i> Brouillon créé : ${s.lines} ligne(s), ${s.items_created} article(s) créé(s), ${s.errors.length} erreur(s).${link}`);
-    loadOverview(); loadWarehouses(); loadGroups();
-  } catch (e) { setResult('Erreur import entrée de stock: ' + e.message, '#fef3c7'); }
-  input.value = '';
-}
-
-async function exportCsv() {
-  setResult('<i class="bi bi-arrow-clockwise"></i> Export en cours…');
-  try {
-    const r = await callApi('kya_hr.api.stocks_import.export_items');
-    triggerDownload(b64ToBlob(r.content_base64, 'text/csv'), r.filename);
-    setResult(`<i class="bi bi-check-circle"></i> ${r.rows_exported} lignes exportées.`);
-  } catch (e) { setResult('Erreur export: ' + e.message, '#fef3c7'); }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  loadOverview();
-  loadWarehouses();
-  loadGroups();
-  loadLowStock();
-  loadMovements();
-});
+(function init(){
+  function go(){ if(SKX_DATA){ render(SKX_DATA); } else if(window.frappe){
+    frappe.call({method:'kya_hr.www.kya_stocks_dashboard.get_stock_overview'}).then(r=>{ if(r.message) render(r.message); }); } }
+  if(window.Chart) go(); else { let n=0; const iv=setInterval(()=>{ if(window.Chart||n++>60){ clearInterval(iv); go(); } },100); }
+})();
 </script>
-
-{%- endblock -%}
+{% endblock %}

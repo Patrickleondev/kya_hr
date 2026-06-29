@@ -1,222 +1,142 @@
 {% extends "templates/web.html" %}
 
-{% block title %}Tableau de Bord Achats KYA{% endblock %}
+{% block title %}Tableau de bord Achats & Approvisionnement — KYA{% endblock %}
+
+{% block head_include %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endblock %}
 
 {% block page_content %}
 <style>
-.kya-achats-page { max-width: 1180px; margin: 18px auto 32px; padding: 0 16px; font-family: Arial, sans-serif; color: #18212f; }
-.kya-letterhead { border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; background: #fff; box-shadow: 0 8px 24px rgba(15,61,104,.10); }
-.kya-letterhead-top { display: grid; grid-template-columns: 120px 1fr 180px; gap: 18px; align-items: center; padding: 18px 22px; border-bottom: 4px solid #f59e0b; }
-.kya-logo { width: 84px; height: 84px; object-fit: contain; }
-.kya-company h1 { margin: 0; font-size: 22px; color: #0f3d68; letter-spacing: 0; }
-.kya-company p { margin: 4px 0 0; font-size: 12px; color: #5c6573; line-height: 1.45; }
-.kya-doc-meta { text-align: right; font-size: 12px; color: #4b5563; }
-.kya-title-band { background: linear-gradient(135deg, #0f3d68 0%, #0d7377 100%); color: #fff; padding: 16px 22px; display: flex; justify-content: space-between; gap: 16px; align-items: center; }
-.kya-title-band h2 { margin: 0; font-size: 20px; letter-spacing: 0; }
-.kya-title-band span { font-size: 13px; opacity: .92; }
-.kya-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0; }
-.kya-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 9px 14px; border-radius: 6px; border: 1px solid #d8dee8; background: #fff; color: #0f3d68; text-decoration: none; font-weight: 700; font-size: 13px; }
-.kya-btn.primary { background: #f59e0b; border-color: #d97706; color: #fff; }
-.kya-btn.dark { background: #0f3d68; border-color: #0f3d68; color: #fff; }
-.kya-btn:hover { text-decoration: none; filter: brightness(.97); }
-.kya-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 14px 0 20px; }
-.kya-kpi { border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06); transition: transform .15s, box-shadow .15s; }
-.kya-kpi:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,.08); }
-.kya-kpi .label { color: #94a3b8; font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: .5px; }
-.kya-kpi .value { font-size: 22px; color: #0f3d68; font-weight: 800; margin-top: 5px; }
-.kya-section { margin-top: 18px; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
-.kya-section h3 { margin: 0; padding: 14px 16px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; font-size: 15px; color: #0f3d68; font-weight: 700; }
-.kya-table-wrap { overflow-x: auto; }
-table.kya-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.kya-table th, .kya-table td { padding: 10px 12px; border-bottom: 1px solid #edf0f5; text-align: left; vertical-align: top; }
-.kya-table th { background: #fafbfc; color: #344054; font-weight: 700; }
-.kya-table td.num, .kya-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
-.kya-badge { display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #eef2f7; color: #344054; }
-.kya-badge.ok { background: #d1fadf; color: #027a48; }
-.kya-badge.err { background: #fee4e2; color: #b42318; }
-.kya-badge.wait { background: #fef0c7; color: #b54708; }
-.kya-help { padding: 14px 18px; color: #5c6573; font-size: 13px; }
-.kya-paliers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 16px; }
-.kya-palier { border: 1px solid #e5e7eb; border-radius: 6px; padding: 14px; }
-.kya-palier .palier-name { font-size: 12px; color: #667085; text-transform: uppercase; font-weight: 700; }
-.kya-palier .palier-count { font-size: 24px; font-weight: 800; color: #0f3d68; margin-top: 4px; }
-.kya-palier.p1 { border-left: 4px solid #2e90fa; }
-.kya-palier.p2 { border-left: 4px solid #f59e0b; }
-.kya-palier.p3 { border-left: 4px solid #d92d20; }
-@media (max-width: 860px) {
-  .kya-letterhead-top { grid-template-columns: 80px 1fr; }
-  .kya-doc-meta { grid-column: 1 / -1; text-align: left; }
-  .kya-grid, .kya-paliers { grid-template-columns: 1fr; }
-  .kya-title-band { display: block; }
-}
-@media print {
-  .navbar, header, .web-footer, .kya-actions { display: none !important; }
-  .kya-achats-page { margin: 0; max-width: none; }
-}
+  .acx * { box-sizing:border-box; }
+  .acx { --teal:#0d7377; --orange:#F58220; --green:#6fae2f; --ink:#101828; --muted:#667085; --line:#eef1f4;
+         max-width:1480px; margin:0 auto; padding:14px 14px 36px; font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; color:var(--ink); }
+  .acx-hero { background:linear-gradient(120deg,#0d7377,#0a5d61 55%,#0e6e5a); border-radius:16px; padding:16px; box-shadow:0 6px 20px rgba(13,115,119,.20); }
+  .acx-hero h2 { margin:0 0 12px; font-size:16px; color:#fff; font-weight:700; }
+  .acx-hgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(185px,1fr)); gap:12px; }
+  .acx-hcard { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); border-radius:12px; padding:13px 15px; display:flex; flex-direction:column; gap:6px; }
+  .acx-hcard .lbl { font-size:12px; color:rgba(255,255,255,.82); }
+  .acx-hcard .val { font-size:26px; font-weight:800; color:#fff; line-height:1; }
+  .acx-hcard .un { font-size:12px; font-weight:600; color:rgba(255,255,255,.8); margin-left:5px; }
+  .acx-hcard .sub { font-size:11.5px; color:rgba(255,255,255,.72); }
+  .acx-band { display:flex; align-items:center; gap:12px; color:#fff; border-radius:14px; padding:13px 16px; margin:18px 0 12px; }
+  .acx-band .bi { width:36px; height:36px; border-radius:10px; background:rgba(255,255,255,.16); display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .acx-band .bt { font-size:15px; font-weight:700; } .acx-band .bs { font-size:12px; color:rgba(255,255,255,.82); }
+  .acx-band .bc { margin-left:auto; font-size:12px; font-weight:600; background:rgba(255,255,255,.18); padding:5px 11px; border-radius:20px; white-space:nowrap; }
+  .acx-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; }
+  .acx-card { background:#fff; border:1px solid var(--line); border-radius:14px; box-shadow:0 1px 2px rgba(16,24,40,.05); padding:14px; display:flex; flex-direction:column; gap:8px; }
+  .acx-card .ch { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+  .acx-card .lbl { font-size:12.5px; color:var(--muted); line-height:1.35; }
+  .acx-card .val { font-size:28px; font-weight:700; color:var(--ink); line-height:1; }
+  .acx-card .un { font-size:13px; font-weight:600; color:var(--muted); margin-left:5px; }
+  .acx-card .sub { font-size:12px; color:#98a2b3; }
+  .acx-chip { width:34px; height:34px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .acx-table { background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden; margin-top:12px; }
+  .acx-scroll { overflow-x:auto; }
+  .acx-row { display:grid; gap:10px; padding:8px 16px; border-top:1px solid #f1f4f7; align-items:center; font-size:13px; }
+  .acx-row.head { border-top:none; border-bottom:1px solid #f1f4f7; }
+  .acx-row.head span { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:#98a2b3; }
+  .acx-badge { display:inline-flex; align-items:center; font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:20px; white-space:nowrap; }
+  .acx-charts { display:grid; grid-template-columns:1.5fr 1fr; gap:12px; margin-top:12px; }
+  @media (max-width:760px){ .acx-charts{ grid-template-columns:1fr; } }
+  .acx-cc { background:#fff; border:1px solid var(--line); border-radius:14px; box-shadow:0 1px 2px rgba(16,24,40,.05); padding:14px; }
+  .acx-cc b { font-size:13.5px; } .acx-cwrap { position:relative; height:260px; margin-top:8px; }
+  .acx-foot { text-align:center; font-size:11.5px; color:#b0b8c1; padding:8px 0; }
 </style>
 
-<div class="kya-achats-page">
-  <div class="kya-letterhead">
-    <div class="kya-letterhead-top">
-      <img class="kya-logo" src="/assets/kya_hr/images/kya_logo.png" alt="KYA-Energy Group">
-      <div class="kya-company">
-        <h1>KYA-ENERGY GROUP</h1>
-        <p>Solutions solaires • Services techniques • Gestion administrative et financière</p>
-        <p>Agoè-Logopé, Lomé - Togo</p>
-      </div>
-      <div class="kya-doc-meta">
-        <b>Achats & Approvisionnements</b><br>
-        Circuit Demandeur → Chef → DAAF → DG<br>
-        Paliers par montant XOF
-      </div>
-    </div>
-    <div class="kya-title-band">
-      <h2>Tableau de bord Achats</h2>
-      <span>Demandes • Bons de commande • Appels d'offres</span>
-    </div>
-  </div>
-
-  <details style="margin:16px 0;background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:12px 16px;">
-    <summary style="cursor:pointer;font-weight:700;color:#0f3d68;">ℹ️ Comment ça marche — Achats</summary>
-    <ol style="margin:10px 0 2px;padding-left:20px;color:#334155;font-size:13px;line-height:1.75;">
-      <li><b>Demande d'achat</b> : le demandeur crée une demande (formulaire en ligne).</li>
-      <li><b>Validation</b> selon le palier du montant (chef → direction).</li>
-      <li><b>Appel d'offres</b> envoyé aux fournisseurs, puis comparaison des offres.</li>
-      <li><b>Bon de commande</b> émis au fournisseur retenu (envoi par email possible).</li>
-      <li><b>Réception</b> : PV d'entrée matériel à la livraison.</li>
-    </ol>
-  </details>
-  <div class="kya-actions">
-    <a class="kya-btn primary" href="/demande-achat/new">Nouvelle Demande</a>
-    <a class="kya-btn" href="/bon-commande/new">Nouveau Bon de Commande</a>
-    <a class="kya-btn" href="/appel-offre/new">Nouvel Appel d'Offre</a>
-    <a class="kya-btn dark" href="/app/marche-kya">Marchés KYA</a>
-    <button class="kya-btn" onclick="window.print()">Imprimer</button>
-  </div>
-
-  <div class="kya-grid">
-    <div class="kya-kpi"><div class="label">Demandes en cours</div><div class="value">{{ stats.demandes_en_cours }}</div></div>
-    <div class="kya-kpi"><div class="label">Bons de commande (30j)</div><div class="value">{{ stats.bons_commande_mois }}</div></div>
-    <div class="kya-kpi"><div class="label">Montant en cours</div><div class="value">{{ "{:,.0f}".format(stats.montant_en_cours).replace(",", " ") }} XOF</div></div>
-    <div class="kya-kpi"><div class="label">Appels d'offres actifs</div><div class="value">{{ stats.appels_offre_actifs }}</div></div>
-  </div>
-
-  <div class="kya-section">
-    <h3>Répartition demandes en cours par palier</h3>
-    <div class="kya-paliers">
-      <div class="kya-palier p1">
-        <div class="palier-name">Palier 1 — Chef Service</div>
-        <div class="palier-count">{{ par_palier['Palier 1 (Chef)'] }}</div>
-        <div style="font-size:11px;color:#667085;margin-top:4px;">&lt; 100 000 XOF</div>
-      </div>
-      <div class="kya-palier p2">
-        <div class="palier-name">Palier 2 — DAAF</div>
-        <div class="palier-count">{{ par_palier['Palier 2 (DAAF)'] }}</div>
-        <div style="font-size:11px;color:#667085;margin-top:4px;">100 000 – 1 999 999 XOF</div>
-      </div>
-      <div class="kya-palier p3">
-        <div class="palier-name">Palier 3 — Directeur Général</div>
-        <div class="palier-count">{{ par_palier['Palier 3 (DG)'] }}</div>
-        <div style="font-size:11px;color:#667085;margin-top:4px;">≥ 2 000 000 XOF</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="kya-section">
-    <h3>Demandes d'achat en attente</h3>
-    {% if demandes %}
-    <div class="kya-table-wrap">
-      <table class="kya-table">
-        <thead>
-          <tr>
-            <th>Référence</th>
-            <th>Demandeur</th>
-            <th>Objet</th>
-            <th class="num">Montant</th>
-            <th>État</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for d in demandes %}
-          <tr>
-            <td><a href="/app/demande-achat-kya/{{ d.name }}">{{ d.name }}</a></td>
-            <td>{{ d.demandeur_nom or "" }}</td>
-            <td>{{ d.objet or "" }}</td>
-            <td class="num">{{ "{:,.0f}".format(d.montant_total or 0).replace(",", " ") }}</td>
-            <td><span class="kya-badge wait">{{ d.workflow_state }}</span></td>
-            <td>{{ d.date_label }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    {% else %}
-    <div class="kya-help">Aucune demande en attente actuellement.</div>
-    {% endif %}
-  </div>
-
-  <div class="kya-section">
-    <h3>Derniers bons de commande (30 jours)</h3>
-    {% if bons %}
-    <div class="kya-table-wrap">
-      <table class="kya-table">
-        <thead>
-          <tr>
-            <th>Référence</th>
-            <th>Fournisseur</th>
-            <th>Objet</th>
-            <th class="num">Montant</th>
-            <th>État</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for b in bons %}
-          <tr>
-            <td><a href="/app/bon-commande-kya/{{ b.name }}">{{ b.name }}</a></td>
-            <td>{{ b.supplier or "" }}</td>
-            <td>{{ b.objet or "" }}</td>
-            <td class="num">{{ "{:,.0f}".format(b.montant_total or 0).replace(",", " ") }}</td>
-            <td><span class="kya-badge {% if b.workflow_state == 'Approuvé' %}ok{% endif %}">{{ b.workflow_state }}</span></td>
-            <td>{{ b.date_label }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    {% else %}
-    <div class="kya-help">Aucun bon de commande émis ces 30 derniers jours.</div>
-    {% endif %}
-  </div>
-
-  {% if appels %}
-  <div class="kya-section">
-    <h3>Appels d'offres actifs</h3>
-    <div class="kya-table-wrap">
-      <table class="kya-table">
-        <thead>
-          <tr>
-            <th>Référence</th>
-            <th>Objet</th>
-            <th>État</th>
-            <th>Publié le</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for a in appels %}
-          <tr>
-            <td><a href="/app/appel-offre/{{ a.name }}">{{ a.name }}</a></td>
-            <td>{{ a.objet or "" }}</td>
-            <td><span class="kya-badge wait">{{ a.workflow_state }}</span></td>
-            <td>{{ a.date_label }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
-  {% endif %}
-
+<div class="acx" id="acx-root">
+  <div style="text-align:center;color:#94a3b8;padding:40px;">Chargement du tableau de bord…</div>
 </div>
+
+<script>
+const ACX_DATA = {% if overview_json %}{{ overview_json | safe }}{% else %}null{% endif %};
+const ACX_ICONS = {
+  cart:[['circle',{cx:9,cy:21,r:1}],['circle',{cx:20,cy:21,r:1}],['path',{d:'M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6'}]],
+  file:[['path',{d:'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'}],['path',{d:'M14 2v6h6M16 13H8M16 17H8M10 9H8'}]],
+  briefcase:[['rect',{x:2,y:7,width:20,height:14,rx:2}],['path',{d:'M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16'}]],
+  wallet:[['path',{d:'M21 12V7H5a2 2 0 0 1 0-4h14v4'}],['path',{d:'M3 5v14a2 2 0 0 0 2 2h16v-5'}],['path',{d:'M18 12a2 2 0 0 0 0 4h4v-4z'}]],
+  building:[['rect',{x:4,y:2,width:16,height:20,rx:2}],['path',{d:'M9 22v-4h6v4M8 6h.01M16 6h.01M8 10h.01M16 10h.01M8 14h.01M16 14h.01'}]],
+  user:[['path',{d:'M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2'}],['circle',{cx:12,cy:7,r:4}]],
+  check:[['path',{d:'M22 11.08V12a10 10 0 1 1-5.93-9.14'}],['path',{d:'M22 4 12 14.01l-3-3'}]],
+  megaphone:[['path',{d:'m3 11 18-5v12L3 14v-3z'}],['path',{d:'M11.6 16.8a3 3 0 1 1-5.8-1.6'}]],
+};
+const ACX_ACCENT = { teal:{bg:'rgba(13,115,119,.10)',fg:'#0d7377'}, orange:{bg:'rgba(245,130,32,.13)',fg:'#d9700f'}, green:{bg:'rgba(141,198,63,.20)',fg:'#5f9e2b'}, red:{bg:'rgba(214,69,80,.12)',fg:'#d64550'}, slate:{bg:'#eef1f4',fg:'#667085'} };
+const ACX_BADGE = { green:{bg:'rgba(141,198,63,.20)',fg:'#5f9e2b'}, orange:{bg:'#fff4ea',fg:'#c76a10'}, teal:{bg:'rgba(13,115,119,.10)',fg:'#0d7377'}, red:{bg:'rgba(214,69,80,.12)',fg:'#d64550'}, slate:{bg:'#eef1f4',fg:'#667085'} };
+function svg(name,color,size){ const ns='http://www.w3.org/2000/svg'; const e=document.createElementNS(ns,'svg'); const sp=ACX_ICONS[name]||ACX_ICONS.file;
+  e.setAttribute('width',size||18); e.setAttribute('height',size||18); e.setAttribute('viewBox','0 0 24 24'); e.setAttribute('fill','none');
+  e.setAttribute('stroke',color); e.setAttribute('stroke-width','1.9'); e.setAttribute('stroke-linecap','round'); e.setAttribute('stroke-linejoin','round');
+  sp.forEach(s=>{ const c=document.createElementNS(ns,s[0]); for(const k in s[1]) c.setAttribute(k,s[1][k]); e.appendChild(c); }); return e; }
+function chip(name,accent,white){ const a=ACX_ACCENT[accent]||ACX_ACCENT.slate; const s=document.createElement('span'); s.className='acx-chip';
+  s.style.background=white?'rgba(255,255,255,.18)':a.bg; s.appendChild(svg(name,white?'#fff':a.fg,17)); return s; }
+function el(t,c,h){ const e=document.createElement(t); if(c)e.className=c; if(h!=null)e.innerHTML=h; return e; }
+function band(icon,title,sub,chipTxt,grad){ const b=el('div','acx-band'); b.style.background=grad;
+  const bi=el('span','bi'); bi.appendChild(svg(icon,'#fff',20)); b.appendChild(bi);
+  const t=el('div'); t.style.cssText='display:flex;flex-direction:column;line-height:1.2;'; t.appendChild(el('span','bt',title)); t.appendChild(el('span','bs',sub)); b.appendChild(t);
+  if(chipTxt) b.appendChild(el('span','bc',chipTxt)); return b; }
+function cardGrid(list){ const g=el('div','acx-cards'); (list||[]).forEach(c=>{ const card=el('div','acx-card'); const ch=el('div','ch'); ch.appendChild(el('span','lbl',c.label)); ch.appendChild(chip(c.icon,c.accent)); card.appendChild(ch);
+    const v=el('div'); v.style.cssText='display:flex;align-items:baseline;'; v.appendChild(el('span','val',c.value)); if(c.unit) v.appendChild(el('span','un',c.unit)); card.appendChild(v);
+    if(c.sub) card.appendChild(el('span','sub',c.sub)); g.appendChild(card); }); return g; }
+
+function render(D){
+  const root=document.getElementById('acx-root'); root.innerHTML='';
+  const hero=el('div','acx-hero'); hero.appendChild(el('h2','Tableau de bord — Achats & Approvisionnement'));
+  const hg=el('div','acx-hgrid');
+  (D.hero||[]).forEach(h=>{ const c=el('div','acx-hcard'); const top=el('div'); top.style.cssText='display:flex;justify-content:space-between;align-items:flex-start;';
+    top.appendChild(el('span','lbl',h.label)); top.appendChild(chip(h.icon,'teal',true)); c.appendChild(top);
+    const v=el('div'); v.style.cssText='display:flex;align-items:baseline;'; v.appendChild(el('span','val',h.value));
+    if(h.unit) v.appendChild(el('span','un',h.unit)); c.appendChild(v); if(h.sub) c.appendChild(el('span','sub',h.sub)); hg.appendChild(c); });
+  hero.appendChild(hg); root.appendChild(hero);
+
+  root.appendChild(band('cart','Demandes d’achat — workflow d’approbation','Demande Achat KYA · paliers de validation',(D.en_attente_label||''),'linear-gradient(100deg,#0d7377,#0a5d61)'));
+  root.appendChild(cardGrid(D.palier_cards));
+
+  root.appendChild(band('file','Documents en cours','Bon de Commande · Appel d’Offre · Marché KYA','','linear-gradient(100deg,#F58220,#e06f12)'));
+  root.appendChild(cardGrid(D.doc_cards));
+
+  const t1=el('div','acx-table');
+  const cap=el('div'); cap.style.cssText='padding:11px 16px;border-bottom:1px solid #f1f4f7;display:flex;justify-content:space-between;align-items:center;';
+  cap.appendChild(el('span',null,'<b style="font-size:13.5px;">Dernières demandes d’achat</b>')); cap.appendChild(el('span',null,'<span style="font-size:11.5px;color:#98a2b3;">récentes</span>')); t1.appendChild(cap);
+  const s1=el('div','acx-scroll'); const w1=el('div'); w1.style.minWidth='700px';
+  const cols='0.9fr 2fr 1.4fr 1fr 1.3fr';
+  const h1=el('div','acx-row head'); h1.style.gridTemplateColumns=cols; ['Réf.','Objet','Demandeur','Montant','État'].forEach((x,i)=>{ const sp=el('span',null,x); if(i===3)sp.style.textAlign='right'; h1.appendChild(sp); }); w1.appendChild(h1);
+  (D.demande_rows||[]).forEach(r=>{ const row=el('div','acx-row'); row.style.gridTemplateColumns=cols;
+    row.appendChild(el('span',null,'<span style="color:#98a2b3;font-variant-numeric:tabular-nums;">'+(r.ref||'')+'</span>'));
+    row.appendChild(el('span',null,'<b>'+(r.objet||'')+'</b>'));
+    row.appendChild(el('span',null,'<span style="color:#667085;">'+(r.demandeur||'')+'</span>'));
+    const mt=el('span',null,'<b>'+(r.montant||'')+'</b>'); mt.style.textAlign='right'; row.appendChild(mt);
+    const b=ACX_BADGE[r.accent]||ACX_BADGE.teal; const bd=el('span','acx-badge'); bd.style.background=b.bg; bd.style.color=b.fg; bd.textContent=r.etat;
+    const tc=el('span'); tc.appendChild(bd); row.appendChild(tc); w1.appendChild(row); });
+  if(!(D.demande_rows||[]).length) w1.appendChild(el('div','acx-row','<span style="color:#94a3b8;padding:8px;">Aucune demande d’achat.</span>'));
+  s1.appendChild(w1); t1.appendChild(s1); root.appendChild(t1);
+
+  const cw=el('div','acx-charts');
+  const c1=el('div','acx-cc'); c1.appendChild(el('b',null,'Engagements (bons de commande) — 6 mois (M FCFA)')); const w1c=el('div','acx-cwrap'); const cv1=el('canvas'); cv1.id='acxMois'; w1c.appendChild(cv1); c1.appendChild(w1c); cw.appendChild(c1);
+  const c2=el('div','acx-cc'); c2.appendChild(el('b',null,'Répartition par fournisseur (M FCFA)')); const w2c=el('div','acx-cwrap'); const cv2=el('canvas'); cv2.id='acxFourn'; w2c.appendChild(cv2); c2.appendChild(w2c); cw.appendChild(c2);
+  root.appendChild(cw);
+  root.appendChild(el('div','acx-foot','KYA-Energy Group · Données en temps réel de l’ERP'));
+  drawCharts(D);
+}
+
+let ACX_C1=null, ACX_C2=null;
+function drawCharts(D){ if(!window.Chart) return;
+  Chart.defaults.font.family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif"; Chart.defaults.color='#667085';
+  const f=D.flux||{labels:[],data:[]};
+  if(ACX_C1){try{ACX_C1.destroy();}catch(e){}}
+  ACX_C1=new Chart(document.getElementById('acxMois'),{type:'bar',data:{labels:f.labels,datasets:[
+    {label:'Engagements',data:f.data,backgroundColor:'#0d7377',borderRadius:5,maxBarThickness:40}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{grid:{display:false}},y:{grid:{color:'#f0f2f5'},ticks:{callback:v=>v+' M'}}}}});
+  const fo=D.fourn||{labels:[],data:[]};
+  if(ACX_C2){try{ACX_C2.destroy();}catch(ex){}}
+  ACX_C2=new Chart(document.getElementById('acxFourn'),{type:'doughnut',data:{labels:fo.labels,datasets:[{data:fo.data,
+    backgroundColor:['#0d7377','#F58220','#8DC63F','#0a5d61','#e6a23c','#cbd2d9'],borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'bottom',labels:{boxWidth:9,usePointStyle:true,padding:12}}}}});
+}
+
+(function init(){
+  function go(){ if(ACX_DATA){ render(ACX_DATA); } else if(window.frappe){
+    frappe.call({method:'kya_hr.www.achats_dashboard.get_achats_overview'}).then(r=>{ if(r.message) render(r.message); }); } }
+  if(window.Chart) go(); else { let n=0; const iv=setInterval(()=>{ if(window.Chart||n++>60){ clearInterval(iv); go(); } },100); }
+})();
+</script>
 {% endblock %}

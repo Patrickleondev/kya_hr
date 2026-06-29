@@ -60,6 +60,13 @@ class InventaireKYA(Document):
         self.valeur_ecart_total = valeur_ecart
 
     # ------------------------------------------------------------------
+    def on_submit(self):
+        """Transition workflow en UNE action vers « Approuvé » (docstatus=1) →
+        submit() s'exécute, pas on_update_after_submit. Sans ce hook, la Stock
+        Reconciliation n'était pas créée (écarts non répercutés). Garde anti-doublon."""
+        if self.workflow_state == "Approuvé" and not self.get("stock_reconciliation"):
+            self._create_stock_reconciliation()
+
     def on_update_after_submit(self):
         if self.workflow_state:
             self.db_set("statut", self.workflow_state, update_modified=False)
@@ -150,6 +157,10 @@ def _bind(doc):
 
 def validate(doc, method=None):
     _bind(doc).validate()
+
+
+def on_submit(doc, method=None):
+    _bind(doc).on_submit()
 
 
 def on_update_after_submit(doc, method=None):
