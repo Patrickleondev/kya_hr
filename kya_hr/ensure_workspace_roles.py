@@ -156,24 +156,65 @@ def _add_role_to_workspace(ws_name: str, role: str) -> bool:
 
 # Raccourcis dashboards a garantir sur Direction Generale (le DG voit tout).
 # (label, url)
+# Espace Direction Générale = pilotage transverse UNIQUEMENT. Les dashboards par
+# département ne sont PLUS listés ici (ils sont accessibles via le Portail de
+# pilotage, navigation Département → Équipe → Opérations). On garde le Portail,
+# la vue consolidée DG, les réunions/visites et la vue projets DGA.
 DG_DASHBOARD_SHORTCUTS = [
     ("🏠 Portail de pilotage", "/portail-pilotage"),
-    ("📊 Tableau de Bord Global", "/kya-tableau-de-bord"),
-    ("🌴 RH — Gestion des congés", "/gestion-conges"),
-    ("🕒 RH — Présences", "/presence-rh"),
-    ("📦 Dashboard Stocks", "/kya-stocks-dashboard"),
-    ("🚚 Dashboard Logistique", "/kya-logistique-dashboard"),
-    ("🏗️ Projets & Clients (DGA)", "/dga-projets-clients"),
+    ("🏛️ Vue consolidée (Direction)", "/direction-dashboard"),
     ("🤝 Réunions & Visites", "/kya-reunion-dashboard"),
-    ("🛒 Dashboard Achats", "/achats-dashboard"),
-    ("🏦 Dashboard Comptabilité", "/comptabilite-dashboard"),
-    ("🛠️ Services Techniques & SAV", "/services-techniques-dashboard"),
-    ("📈 Commercial & CRM", "/commercial-dashboard"),
-    ("📋 Inventaire & Sorties", "/inventaire-dashboard"),
-    ("🔧 Stock par état", "/stock-etat"),
-    ("🎓 Tableau Stagiaires", "/tableau-bord-stagiaires"),
-    ("🧑‍💼 Tableau Employés", "/tableau-bord-employes"),
+    ("🏗️ Projets & Clients (DGA)", "/dga-projets-clients"),
 ]
+
+# Raccourcis par département à RETIRER de l'espace Direction Générale (déplacés
+# vers le Portail de pilotage). Pruning idempotent au migrate.
+DG_SHORTCUTS_TO_PRUNE = {
+    "/kya-tableau-de-bord", "/gestion-conges", "/presence-rh",
+    "/kya-stocks-dashboard", "/kya-logistique-dashboard", "/achats-dashboard",
+    "/comptabilite-dashboard", "/services-techniques-dashboard",
+    "/commercial-dashboard", "/inventaire-dashboard", "/stock-etat",
+    "/tableau-bord-stagiaires", "/tableau-bord-employes", "/recap-brouillards",
+}
+
+
+def _prune_dg_dashboard_shortcuts() -> list[str]:
+    """Retire de l'espace Direction Générale les raccourcis par département
+    (déplacés vers le Portail). Supprime à la fois la ligne enfant Workspace
+    Shortcut ET le bloc correspondant dans le `content` JSON du workspace."""
+    ws = "Direction Generale"
+    removed: list[str] = []
+    if not frappe.db.exists("Workspace", ws):
+        return removed
+    try:
+        rows = frappe.get_all("Workspace Shortcut",
+                              filters={"parent": ws, "url": ["in", list(DG_SHORTCUTS_TO_PRUNE)]},
+                              fields=["name", "label", "url"])
+    except Exception:
+        return removed
+    if not rows:
+        return removed
+    removed_labels = {r.label for r in rows if r.label}
+    for r in rows:
+        try:
+            frappe.delete_doc("Workspace Shortcut", r.name, ignore_permissions=True, force=True)
+            removed.append(r.url)
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), f"prune DG shortcut {r.url}")
+    # Nettoyer le content JSON (blocs shortcut référençant les labels retirés)
+    try:
+        import json as _json
+        content = frappe.db.get_value("Workspace", ws, "content") or "[]"
+        blocks = _json.loads(content)
+        kept = [b for b in blocks
+                if not (isinstance(b, dict) and b.get("type") == "shortcut"
+                        and (b.get("data") or {}).get("shortcut_name") in removed_labels)]
+        if len(kept) != len(blocks):
+            frappe.db.set_value("Workspace", ws, "content", _json.dumps(kept),
+                                update_modified=False)
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "prune DG content")
+    return removed
 
 
 def _ensure_dg_dashboard_shortcuts() -> int:
@@ -305,7 +346,9 @@ def execute() -> dict:
     # etc. » : ces espaces n'avaient aucun rôle donc s'affichaient pour chacun.
     summary["orphans_restricted"] = _restrict_orphan_public_workspaces()
 
-    # Raccourcis dashboards pour le DG (visibilite totale)
+    # Espace Direction Générale : retirer les dashboards par département
+    # (déplacés vers le Portail), puis garantir les raccourcis pilotage/DG.
+    summary["dg_shortcuts_pruned"] = _prune_dg_dashboard_shortcuts()
     summary["dg_shortcuts_added"] = _ensure_dg_dashboard_shortcuts()
 
     try:
