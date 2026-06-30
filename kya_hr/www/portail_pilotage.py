@@ -104,6 +104,9 @@ def get_portail_tree() -> list:
             "desc": "RH, Comptabilité, Achats, Stock & Logistique.",
             "stat": f"{da_attente} demandes d'achat en attente",
             "teams": [
+                {"name": "Vue d'ensemble", "icon": "chart", "ops": [
+                    _op("Dashboard Services Supports", "/services-supports-dashboard", "chart"),
+                ]},
                 {"name": "Ressources Humaines", "icon": "users", "ops": [
                     _op("Présences", "/rapport-presence", "clock"),
                     _op("Gestion des congés", "/gestion-conges", "calendar"),
