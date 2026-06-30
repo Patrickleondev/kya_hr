@@ -156,65 +156,65 @@ def _add_role_to_workspace(ws_name: str, role: str) -> bool:
 
 # Raccourcis dashboards a garantir sur Direction Generale (le DG voit tout).
 # (label, url)
-# Espace Direction Générale = pilotage transverse UNIQUEMENT. Les dashboards par
-# département ne sont PLUS listés ici (ils sont accessibles via le Portail de
-# pilotage, navigation Département → Équipe → Opérations). On garde le Portail,
-# la vue consolidée DG, les réunions/visites et la vue projets DGA.
+# Espace Direction Générale = UNIQUEMENT le Portail de pilotage (index + sous-
+# sections en drill-down). Décision DG : aucun autre raccourci, aucun lien
+# sidebar (ni Demandes d'achat, ni Permissions, ni Contrats, ni Tableau global…).
+# Tout le reste est accessible PAR le Portail.
+DG_PORTAL_URL = "/portail-pilotage"
+DG_PORTAL_LABEL = "🏠 Portail de pilotage"
 DG_DASHBOARD_SHORTCUTS = [
-    ("🏠 Portail de pilotage", "/portail-pilotage"),
-    ("🏛️ Vue consolidée (Direction)", "/direction-dashboard"),
-    ("🤝 Réunions & Visites", "/kya-reunion-dashboard"),
-    ("🏗️ Projets & Clients (DGA)", "/dga-projets-clients"),
+    (DG_PORTAL_LABEL, DG_PORTAL_URL),
 ]
 
-# Raccourcis par département à RETIRER de l'espace Direction Générale (déplacés
-# vers le Portail de pilotage). Pruning idempotent au migrate.
-DG_SHORTCUTS_TO_PRUNE = {
-    "/kya-tableau-de-bord", "/gestion-conges", "/presence-rh",
-    "/kya-stocks-dashboard", "/kya-logistique-dashboard", "/achats-dashboard",
-    "/comptabilite-dashboard", "/services-techniques-dashboard",
-    "/commercial-dashboard", "/inventaire-dashboard", "/stock-etat",
-    "/tableau-bord-stagiaires", "/tableau-bord-employes", "/recap-brouillards",
-}
+_DG_CONTENT = (
+    '[{"id":"hero","type":"header","data":{"text":'
+    '"<div class=\'ellipsis\' title=\'Direction G\\u00e9n\\u00e9rale\'>'
+    '\\ud83c\\udfdb\\ufe0f Espace Direction G\\u00e9n\\u00e9rale \\u2014 KYA</div>",'
+    '"level":3,"col":12}},'
+    '{"id":"sp1","type":"spacer","data":{"col":12}},'
+    '{"id":"hp","type":"header","data":{"text":"<b>\\ud83c\\udfe0 Pilotage</b>",'
+    '"level":4,"col":12}},'
+    '{"id":"scportail","type":"shortcut","data":{"shortcut_name":'
+    '"\\ud83c\\udfe0 Portail de pilotage","col":4}}]'
+)
 
 
-def _prune_dg_dashboard_shortcuts() -> list[str]:
-    """Retire de l'espace Direction Générale les raccourcis par département
-    (déplacés vers le Portail). Supprime à la fois la ligne enfant Workspace
-    Shortcut ET le bloc correspondant dans le `content` JSON du workspace."""
+def _reset_dg_to_pilotage() -> dict:
+    """Réduit l'espace Direction Générale au SEUL Portail de pilotage.
+
+    Supprime tous les raccourcis (sauf le Portail) ET tous les liens sidebar
+    (Card Break + Link : Demandes d'achat, Permissions, Contrats, Tableau
+    global, etc.), puis force un `content` minimal (hero + carte Portail).
+    Idempotent. Le raccourci Portail lui-même est (re)créé par
+    `_ensure_dg_dashboard_shortcuts()` juste après.
+    """
     ws = "Direction Generale"
-    removed: list[str] = []
+    out = {"shortcuts_removed": 0, "links_removed": 0}
     if not frappe.db.exists("Workspace", ws):
-        return removed
+        return out
+    # 1) supprimer tous les raccourcis sauf le Portail
     try:
-        rows = frappe.get_all("Workspace Shortcut",
-                              filters={"parent": ws, "url": ["in", list(DG_SHORTCUTS_TO_PRUNE)]},
-                              fields=["name", "label", "url"])
-    except Exception:
-        return removed
-    if not rows:
-        return removed
-    removed_labels = {r.label for r in rows if r.label}
-    for r in rows:
-        try:
+        for r in frappe.get_all("Workspace Shortcut", filters={"parent": ws},
+                                fields=["name", "url"]):
+            if r.url == DG_PORTAL_URL:
+                continue
             frappe.delete_doc("Workspace Shortcut", r.name, ignore_permissions=True, force=True)
-            removed.append(r.url)
-        except Exception:
-            frappe.log_error(frappe.get_traceback(), f"prune DG shortcut {r.url}")
-    # Nettoyer le content JSON (blocs shortcut référençant les labels retirés)
-    try:
-        import json as _json
-        content = frappe.db.get_value("Workspace", ws, "content") or "[]"
-        blocks = _json.loads(content)
-        kept = [b for b in blocks
-                if not (isinstance(b, dict) and b.get("type") == "shortcut"
-                        and (b.get("data") or {}).get("shortcut_name") in removed_labels)]
-        if len(kept) != len(blocks):
-            frappe.db.set_value("Workspace", ws, "content", _json.dumps(kept),
-                                update_modified=False)
+            out["shortcuts_removed"] += 1
     except Exception:
-        frappe.log_error(frappe.get_traceback(), "prune DG content")
-    return removed
+        frappe.log_error(frappe.get_traceback(), "reset DG: shortcuts")
+    # 2) supprimer TOUS les liens sidebar (Card Break + Link)
+    try:
+        for r in frappe.get_all("Workspace Link", filters={"parent": ws}, pluck="name"):
+            frappe.delete_doc("Workspace Link", r, ignore_permissions=True, force=True)
+            out["links_removed"] += 1
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "reset DG: links")
+    # 3) forcer un content minimal (hero + carte Portail)
+    try:
+        frappe.db.set_value("Workspace", ws, "content", _DG_CONTENT, update_modified=False)
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "reset DG: content")
+    return out
 
 
 def _ensure_dg_dashboard_shortcuts() -> int:
@@ -346,9 +346,9 @@ def execute() -> dict:
     # etc. » : ces espaces n'avaient aucun rôle donc s'affichaient pour chacun.
     summary["orphans_restricted"] = _restrict_orphan_public_workspaces()
 
-    # Espace Direction Générale : retirer les dashboards par département
-    # (déplacés vers le Portail), puis garantir les raccourcis pilotage/DG.
-    summary["dg_shortcuts_pruned"] = _prune_dg_dashboard_shortcuts()
+    # Espace Direction Générale : tout retirer sauf le Portail de pilotage,
+    # puis garantir le raccourci Portail.
+    summary["dg_reset"] = _reset_dg_to_pilotage()
     summary["dg_shortcuts_added"] = _ensure_dg_dashboard_shortcuts()
 
     try:
