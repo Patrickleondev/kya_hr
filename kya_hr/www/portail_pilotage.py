@@ -78,7 +78,8 @@ def get_portail_tree() -> list:
     da_attente = _count("Demande Achat KYA", {"workflow_state": ["not in",
                         ("Approuvé", "Approuve", "Rejeté", "Rejete", "Annulé", "Annule")]})
     sav = _count("fiche technique curative")
-    missions = _count("fiche de mission")
+    # Missions : 2 flux prod coexistent (web form CRM + page workflow signature)
+    missions = _count("fiche de mission") + _count("Ordre de mission2")
 
     tree = [
         {
@@ -145,11 +146,18 @@ def get_portail_tree() -> list:
                 {"name": "Vue d'ensemble & équipes", "icon": "chart", "ops": [
                     _op("Dashboard Services Techniques & SAV", "/services-techniques-dashboard", "chart"),
                 ]},
-                {"name": "Interventions & SAV terrain", "icon": "wrench", "ops": [
+                {"name": "Maintenance & SAV terrain", "icon": "wrench", "ops": [
                     _op("Intervention SAV (fiche curative)", "/prevention-curative", "wrench"),
-                    _op("Ordre de mission", "/fiche-de-mission", "route"),
-                    _op("Réception lampadaires", "/fiche-recept-lamp", "file"),
+                ]},
+                {"name": "Installation & Assemblage", "icon": "box", "ops": [
+                    _op("Bordereau assemblage lampadaire", "/bordereau-assemblage-lampadaire", "box"),
+                    _op("Réception lampadaires", "/fiche%20de%20reception%20lampadaire", "file"),
                     _op("Réception batteries", "/fiche-de-reception-de-batteries", "file"),
+                ]},
+                {"name": "Missions & déplacements", "icon": "route", "ops": [
+                    _op("Ordre de mission (saisie & signature)", "/ordre-de-mission", "route"),
+                    _op("Impression ordre de mission", "/print-ordre-mission", "file"),
+                    _op("Ordre de mission (web form)", "/fiche-de-mission", "route"),
                 ]},
             ],
         },
