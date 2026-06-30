@@ -1,137 +1,146 @@
 {% extends "templates/web.html" %}
 
-{% block title %}Projets & Clients — Direction Générale Adjointe{% endblock %}
+{% block title %}Sorties & Destinations — Clients / Projets — KYA{% endblock %}
+
+{% block head_include %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endblock %}
 
 {% block page_content %}
 <style>
-.kya-dga-page { max-width: 1180px; margin: 18px auto 32px; padding: 0 16px; font-family: Arial, sans-serif; color: #18212f; }
-.kya-letterhead { border: 1px solid #d9dee7; border-radius: 6px; overflow: hidden; background: #fff; }
-.kya-letterhead-top { display: grid; grid-template-columns: 120px 1fr 200px; gap: 18px; align-items: center; padding: 18px 22px; border-bottom: 4px solid #009688; }
-.kya-logo { width: 84px; height: 84px; object-fit: contain; }
-.kya-company h1 { margin: 0; font-size: 22px; color: #0f3d68; }
-.kya-company p { margin: 4px 0 0; font-size: 12px; color: #5c6573; line-height: 1.45; }
-.kya-doc-meta { text-align: right; font-size: 12px; color: #4b5563; }
-.kya-title-band { background: #009688; color: #fff; padding: 14px 22px; display: flex; justify-content: space-between; gap: 16px; align-items: center; }
-.kya-title-band h2 { margin: 0; font-size: 20px; }
-.kya-title-band span { font-size: 13px; opacity: .92; }
-.kya-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 18px 0; }
-.kya-kpi { border: 1px solid #d9dee7; border-radius: 6px; background: #fff; padding: 14px; border-left: 4px solid #009688; }
-.kya-kpi .label { color: #667085; font-size: 12px; text-transform: uppercase; }
-.kya-kpi .value { font-size: 26px; color: #101828; font-weight: 800; margin-top: 5px; }
-.kya-section { margin-top: 18px; border: 1px solid #d9dee7; border-radius: 6px; background: #fff; overflow: hidden; }
-.kya-section h3 { margin: 0; padding: 13px 16px; background: #f7f8fa; border-bottom: 1px solid #d9dee7; font-size: 15px; color: #0f3d68; }
-.kya-table-wrap { overflow-x: auto; }
-table.kya-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.kya-table th, .kya-table td { padding: 10px 12px; border-bottom: 1px solid #edf0f5; text-align: left; vertical-align: middle; }
-.kya-table th { background: #fafbfc; color: #344054; font-weight: 700; }
-.kya-table td.num, .kya-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
-.kya-badge { display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #eef2f7; color: #344054; }
-.kya-badge.open { background: #cff4fc; color: #055160; }
-.kya-badge.done { background: #d1fadf; color: #027a48; }
-.kya-progress { background: #eef2f7; border-radius: 999px; height: 8px; width: 90px; overflow: hidden; display: inline-block; vertical-align: middle; }
-.kya-progress > span { display: block; height: 100%; background: #009688; }
-.kya-help { padding: 14px 18px; color: #5c6573; font-size: 13px; }
-@media (max-width: 860px) {
-  .kya-letterhead-top { grid-template-columns: 80px 1fr; }
-  .kya-doc-meta { grid-column: 1 / -1; text-align: left; }
-  .kya-grid { grid-template-columns: 1fr 1fr; }
-  .kya-title-band { display: block; }
-}
-@media print { .navbar, header, .web-footer { display: none !important; } }
+  .sxc * { box-sizing:border-box; }
+  .sxc { --teal:#0d7377; --orange:#F58220; --green:#6fae2f; --ink:#101828; --muted:#667085; --line:#eef1f4;
+         max-width:1480px; margin:0 auto; padding:14px 14px 36px; font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; color:var(--ink); }
+  .sxc-hero { background:linear-gradient(120deg,#0d7377,#0a5d61 55%,#0e6e5a); border-radius:16px; padding:16px; box-shadow:0 6px 20px rgba(13,115,119,.20); }
+  .sxc-hero h2 { margin:0 0 12px; font-size:16px; color:#fff; font-weight:700; }
+  .sxc-hgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; }
+  .sxc-hcard { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); border-radius:12px; padding:13px 15px; display:flex; flex-direction:column; gap:6px; }
+  .sxc-hcard .lbl { font-size:12px; color:rgba(255,255,255,.82); }
+  .sxc-hcard .val { font-size:26px; font-weight:800; color:#fff; line-height:1; }
+  .sxc-hcard .sub { font-size:11.5px; color:rgba(255,255,255,.72); }
+  .sxc-band { display:flex; align-items:center; gap:12px; color:#fff; border-radius:14px; padding:13px 16px; margin:18px 0 12px; }
+  .sxc-band .bi { width:36px; height:36px; border-radius:10px; background:rgba(255,255,255,.16); display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .sxc-band .bt { font-size:15px; font-weight:700; } .sxc-band .bs { font-size:12px; color:rgba(255,255,255,.82); }
+  .sxc-band .bc { margin-left:auto; font-size:12px; font-weight:600; background:rgba(255,255,255,.18); padding:5px 11px; border-radius:20px; white-space:nowrap; }
+  .sxc-table { background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+  .sxc-scroll { overflow-x:auto; }
+  .sxc-row { display:grid; gap:10px; padding:8px 16px; border-top:1px solid #f1f4f7; align-items:center; font-size:13px; }
+  .sxc-row.head { border-top:none; border-bottom:1px solid #f1f4f7; }
+  .sxc-row.head span { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:#98a2b3; }
+  .sxc-badge { display:inline-flex; align-items:center; font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:20px; white-space:nowrap; }
+  .sxc-charts { display:grid; grid-template-columns:1.4fr 1fr; gap:12px; margin-top:12px; }
+  @media (max-width:760px){ .sxc-charts{ grid-template-columns:1fr; } }
+  .sxc-cc { background:#fff; border:1px solid var(--line); border-radius:14px; box-shadow:0 1px 2px rgba(16,24,40,.05); padding:14px; }
+  .sxc-cc b { font-size:13.5px; } .sxc-cwrap { position:relative; height:260px; margin-top:8px; }
+  .sxc-foot { text-align:center; font-size:11.5px; color:#b0b8c1; padding:8px 0; }
 </style>
 
-<div class="kya-dga-page">
-  <div class="kya-letterhead">
-    <div class="kya-letterhead-top">
-      <img class="kya-logo" src="/assets/kya_hr/images/kya_logo.png" alt="KYA-Energy Group">
-      <div class="kya-company">
-        <h1>KYA-ENERGY GROUP</h1>
-        <p>Solutions solaires • Services techniques • Gestion administrative et financière</p>
-        <p>Agoè-Logopé, Lomé - Togo</p>
-      </div>
-      <div class="kya-doc-meta">
-        <b>Direction Générale Adjointe</b><br>
-        Portefeuille Projets &amp; Clients<br>
-        Matériel livré par chantier
-      </div>
-    </div>
-    <div class="kya-title-band">
-      <h2>Projets &amp; Clients</h2>
-      <span>Installations • Centrales • Maintenance • SAV</span>
-    </div>
-  </div>
-
-  <div class="kya-grid">
-    <div class="kya-kpi"><div class="label">Projets</div><div class="value">{{ stats.projets }}</div></div>
-    <div class="kya-kpi"><div class="label">Projets ouverts</div><div class="value">{{ stats.ouverts }}</div></div>
-    <div class="kya-kpi"><div class="label">Clients</div><div class="value">{{ stats.clients }}</div></div>
-    <div class="kya-kpi"><div class="label">PV matériel liés</div><div class="value">{{ stats.pv_lies }}</div></div>
-  </div>
-
-  <div class="kya-section">
-    <h3>Portefeuille de projets</h3>
-    {% if projets %}
-    <div class="kya-table-wrap">
-      <table class="kya-table">
-        <thead>
-          <tr>
-            <th>Projet</th>
-            <th>Client</th>
-            <th>Statut</th>
-            <th>Avancement</th>
-            <th class="num">PV matériel</th>
-            <th>Début</th>
-            <th>Fin prévue</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for p in projets %}
-          <tr>
-            <td><a href="/app/project/{{ p.name }}"><b>{{ p.project_name or p.name }}</b></a></td>
-            <td>{{ p.client_nom or "—" }}</td>
-            <td><span class="kya-badge {% if p.status == 'Open' %}open{% elif p.status == 'Completed' %}done{% endif %}">{{ p.status or "—" }}</span></td>
-            <td><span class="kya-progress"><span style="width:{{ p.avancement }}%;"></span></span> {{ p.avancement }}%</td>
-            <td class="num">{% if p.nb_pv > 0 %}<a href="/app/pv-sortie-materiel?project={{ p.name }}">{{ p.nb_pv }}</a>{% else %}0{% endif %}</td>
-            <td>{{ p.debut }}</td>
-            <td>{{ p.fin }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    {% else %}
-    <div class="kya-help">Aucun projet enregistré. Créez un projet pour suivre les installations et le matériel livré par chantier.</div>
-    {% endif %}
-  </div>
-
-  <div class="kya-section">
-    <h3>Clients</h3>
-    {% if clients %}
-    <div class="kya-table-wrap">
-      <table class="kya-table">
-        <thead>
-          <tr>
-            <th>Client</th>
-            <th>Groupe</th>
-            <th>Territoire</th>
-            <th class="num">Projets</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for c in clients %}
-          <tr>
-            <td><a href="/app/customer/{{ c.name }}"><b>{{ c.customer_name or c.name }}</b></a></td>
-            <td>{{ c.customer_group or "—" }}</td>
-            <td>{{ c.territory or "—" }}</td>
-            <td class="num">{{ c.nb_projets or 0 }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    {% else %}
-    <div class="kya-help">Aucun client enregistré.</div>
-    {% endif %}
-  </div>
+<div class="sxc" id="sxc-root">
+  <div style="text-align:center;color:#94a3b8;padding:40px;">Chargement du tableau de bord…</div>
 </div>
+
+<script>
+const SXC_DATA = {% if overview_json %}{{ overview_json | safe }}{% else %}null{% endif %};
+const SXC_ICONS = {
+  arrowup:[['path',{d:'M12 19V5M5 12l7-7 7 7'}]],
+  box:[['path',{d:'M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'}],['path',{d:'m3.27 6.96 8.73 5.05 8.73-5.05M12 22.08V12'}]],
+  users:[['path',{d:'M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'}],['circle',{cx:9,cy:7,r:4}],['path',{d:'M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75'}]],
+  truck:[['rect',{x:1,y:3,width:15,height:13,rx:1}],['path',{d:'M16 8h4l3 3v5h-7V8z'}],['circle',{cx:5.5,cy:18.5,r:2.5}],['circle',{cx:18.5,cy:18.5,r:2.5}]],
+  building:[['rect',{x:4,y:2,width:16,height:20,rx:2}],['path',{d:'M9 22v-4h6v4'}]],
+};
+const SXC_BADGE = { ok:{bg:'rgba(141,198,63,.20)',fg:'#5f9e2b'}, warn:{bg:'#fff4ea',fg:'#c76a10'}, wait:{bg:'rgba(13,115,119,.10)',fg:'#0d7377'}, bad:{bg:'rgba(214,69,80,.12)',fg:'#d64550'} };
+function svg(name,color,size){ const ns='http://www.w3.org/2000/svg'; const e=document.createElementNS(ns,'svg'); const sp=SXC_ICONS[name]||SXC_ICONS.box;
+  e.setAttribute('width',size||18); e.setAttribute('height',size||18); e.setAttribute('viewBox','0 0 24 24'); e.setAttribute('fill','none');
+  e.setAttribute('stroke',color); e.setAttribute('stroke-width','1.9'); e.setAttribute('stroke-linecap','round'); e.setAttribute('stroke-linejoin','round');
+  sp.forEach(s=>{ const c=document.createElementNS(ns,s[0]); for(const k in s[1]) c.setAttribute(k,s[1][k]); e.appendChild(c); }); return e; }
+function chipW(name){ const s=document.createElement('span'); s.style.cssText='width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.18);display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;'; s.appendChild(svg(name,'#fff',17)); return s; }
+function el(t,c,h){ const e=document.createElement(t); if(c)e.className=c; if(h!=null)e.innerHTML=h; return e; }
+function band(icon,title,sub,chipTxt,grad){ const b=el('div','sxc-band'); b.style.background=grad;
+  const bi=el('span','bi'); bi.appendChild(svg(icon,'#fff',20)); b.appendChild(bi);
+  const t=el('div'); t.style.cssText='display:flex;flex-direction:column;line-height:1.2;'; t.appendChild(el('span','bt',title)); t.appendChild(el('span','bs',sub)); b.appendChild(t);
+  if(chipTxt) b.appendChild(el('span','bc',chipTxt)); return b; }
+function badge(txt,accent){ const b=SXC_BADGE[accent]||SXC_BADGE.wait; const bd=el('span','sxc-badge'); bd.style.background=b.bg; bd.style.color=b.fg; bd.textContent=txt; const sp=el('span'); sp.appendChild(bd); return sp; }
+
+function render(D){
+  const root=document.getElementById('sxc-root'); root.innerHTML='';
+  const hero=el('div','sxc-hero'); hero.appendChild(el('h2','Sorties & Destinations — Clients / Projets'));
+  const hg=el('div','sxc-hgrid');
+  (D.hero||[]).forEach(h=>{ const c=el('div','sxc-hcard'); const top=el('div'); top.style.cssText='display:flex;justify-content:space-between;align-items:flex-start;';
+    top.appendChild(el('span','lbl',h.label)); top.appendChild(chipW(h.icon)); c.appendChild(top);
+    c.appendChild(el('span','val',h.value)); if(h.sub) c.appendChild(el('span','sub',h.sub)); hg.appendChild(c); });
+  hero.appendChild(hg); root.appendChild(hero);
+
+  // Sorties par projet / chantier
+  root.appendChild(band('building','Sorties par projet / chantier','où va le matériel',(D.periode_label||''),'linear-gradient(100deg,#0d7377,#0a5d61)'));
+  const t1=el('div','sxc-table'); const s1=el('div','sxc-scroll'); const w1=el('div'); w1.style.minWidth='620px';
+  const c1='2fr 1.6fr 0.8fr 0.9fr';
+  const h1=el('div','sxc-row head'); h1.style.gridTemplateColumns=c1; ['Projet / chantier','Client','PV','Qté'].forEach((x,i)=>{ const sp=el('span',null,x); if(i>=2)sp.style.textAlign='right'; h1.appendChild(sp); }); w1.appendChild(h1);
+  (D.par_projet||[]).forEach(r=>{ const row=el('div','sxc-row'); row.style.gridTemplateColumns=c1;
+    row.appendChild(el('span',null,'<b>'+(r.projet||'')+'</b>'));
+    row.appendChild(el('span',null,'<span style="color:#667085;">'+(r.client||'')+'</span>'));
+    const nb=el('span',null,r.nb); nb.style.textAlign='right'; nb.style.color='#667085'; row.appendChild(nb);
+    const q=el('span',null,'<b>'+(r.qte||'')+'</b>'); q.style.textAlign='right'; row.appendChild(q); w1.appendChild(row); });
+  if(!(D.par_projet||[]).length) w1.appendChild(el('div','sxc-row','<span style="color:#94a3b8;padding:8px;">Aucune sortie liée à un projet/chantier.</span>'));
+  s1.appendChild(w1); t1.appendChild(s1); root.appendChild(t1);
+
+  // Sorties par client / destination
+  root.appendChild(band('users','Sorties par client / destination','client externe ou équipe interne','','linear-gradient(100deg,#F58220,#e06f12)'));
+  const t2=el('div','sxc-table'); const s2=el('div','sxc-scroll'); const w2=el('div'); w2.style.minWidth='620px';
+  const c2='2fr 1.4fr 0.8fr 0.9fr';
+  const h2=el('div','sxc-row head'); h2.style.gridTemplateColumns=c2; ['Destination','Type','PV','Qté'].forEach((x,i)=>{ const sp=el('span',null,x); if(i>=2)sp.style.textAlign='right'; h2.appendChild(sp); }); w2.appendChild(h2);
+  (D.par_client||[]).forEach(r=>{ const row=el('div','sxc-row'); row.style.gridTemplateColumns=c2;
+    row.appendChild(el('span',null,'<b>'+(r.dest||'')+'</b>'));
+    row.appendChild(el('span',null,'<span style="color:#667085;">'+(r.type||'')+'</span>'));
+    const nb=el('span',null,r.nb); nb.style.textAlign='right'; nb.style.color='#667085'; row.appendChild(nb);
+    const q=el('span',null,'<b>'+(r.qte||'')+'</b>'); q.style.textAlign='right'; row.appendChild(q); w2.appendChild(row); });
+  if(!(D.par_client||[]).length) w2.appendChild(el('div','sxc-row','<span style="color:#94a3b8;padding:8px;">Aucune sortie.</span>'));
+  s2.appendChild(w2); t2.appendChild(s2); root.appendChild(t2);
+
+  // Dernières sorties
+  root.appendChild(band('arrowup','Dernières sorties matériel','PV de sortie récents','','linear-gradient(100deg,#6fae2f,#5a8f24)'));
+  const t3=el('div','sxc-table'); const s3=el('div','sxc-scroll'); const w3=el('div'); w3.style.minWidth='840px';
+  const c3='1.1fr 0.9fr 1.2fr 1.5fr 1.5fr 0.7fr 1fr';
+  const h3=el('div','sxc-row head'); h3.style.gridTemplateColumns=c3; ['Réf.','Date','Type','Destination','Projet','Qté','État'].forEach((x,i)=>{ const sp=el('span',null,x); if(i===5)sp.style.textAlign='right'; h3.appendChild(sp); }); w3.appendChild(h3);
+  (D.sorties||[]).forEach(r=>{ const row=el('div','sxc-row'); row.style.gridTemplateColumns=c3;
+    row.appendChild(el('span',null,'<span style="color:#98a2b3;font-variant-numeric:tabular-nums;">'+(r.ref||'')+'</span>'));
+    row.appendChild(el('span',null,'<span style="color:#667085;">'+(r.date||'')+'</span>'));
+    row.appendChild(el('span',null,'<span style="color:#667085;">'+(r.type||'')+'</span>'));
+    row.appendChild(el('span',null,'<b>'+(r.destination||'')+'</b>'));
+    row.appendChild(el('span',null,'<span style="color:#667085;">'+(r.projet||'')+'</span>'));
+    const q=el('span',null,r.qte); q.style.textAlign='right'; row.appendChild(q);
+    row.appendChild(badge(r.etat,r.accent)); w3.appendChild(row); });
+  if(!(D.sorties||[]).length) w3.appendChild(el('div','sxc-row','<span style="color:#94a3b8;padding:8px;">Aucune sortie récente.</span>'));
+  s3.appendChild(w3); t3.appendChild(s3); root.appendChild(t3);
+
+  // Charts
+  const cw=el('div','sxc-charts');
+  const cc1=el('div','sxc-cc'); cc1.appendChild(el('b',null,'Top destinations (quantité sortie)')); const w1c=el('div','sxc-cwrap'); const cv1=el('canvas'); cv1.id='sxcTop'; w1c.appendChild(cv1); cc1.appendChild(w1c); cw.appendChild(cc1);
+  const cc2=el('div','sxc-cc'); cc2.appendChild(el('b',null,'Répartition par type de destination')); const w2c=el('div','sxc-cwrap'); const cv2=el('canvas'); cv2.id='sxcSplit'; w2c.appendChild(cv2); cc2.appendChild(w2c); cw.appendChild(cc2);
+  root.appendChild(cw);
+  root.appendChild(el('div','sxc-foot','KYA-Energy Group · Sorties & destinations · données en temps réel'));
+  drawCharts(D);
+}
+
+let SXC1=null, SXC2=null;
+function drawCharts(D){ if(!window.Chart) return;
+  Chart.defaults.font.family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif"; Chart.defaults.color='#667085';
+  const t=D.top_clients||{labels:[],data:[]};
+  if(SXC1){try{SXC1.destroy();}catch(e){}}
+  SXC1=new Chart(document.getElementById('sxcTop'),{type:'bar',data:{labels:t.labels,datasets:[
+    {label:'Quantité',data:t.data,backgroundColor:'#0d7377',borderRadius:5,maxBarThickness:24}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:'#f0f2f5'}},y:{grid:{display:false}}}}});
+  const sp=D.dest_split||{labels:[],data:[]};
+  if(SXC2){try{SXC2.destroy();}catch(ex){}}
+  SXC2=new Chart(document.getElementById('sxcSplit'),{type:'doughnut',data:{labels:sp.labels,datasets:[{data:sp.data,
+    backgroundColor:['#0d7377','#F58220','#8DC63F','#0a5d61','#cbd2d9'],borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'bottom',labels:{boxWidth:9,usePointStyle:true,padding:12}}}}});
+}
+
+(function init(){
+  function go(){ if(SXC_DATA){ render(SXC_DATA); } else if(window.frappe){
+    frappe.call({method:'kya_hr.www.dga_projets_clients.get_sorties_overview'}).then(r=>{ if(r.message) render(r.message); }); } }
+  if(window.Chart) go(); else { let n=0; const iv=setInterval(()=>{ if(window.Chart||n++>60){ clearInterval(iv); go(); } },100); }
+})();
+</script>
 {% endblock %}
