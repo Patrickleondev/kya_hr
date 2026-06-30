@@ -89,6 +89,7 @@ def get_portail_tree() -> list:
             "teams": [
                 {"name": "Pilotage & Direction", "icon": "building", "ops": [
                     _op("Vue consolidée (4 départements)", "/direction-dashboard", "chart"),
+                    _op("Sorties & destinations (clients/projets)", "/dga-projets-clients", "truck"),
                     _op("Tableau de bord global", "/kya-tableau-de-bord", "chart"),
                 ]},
                 {"name": "Réunions & Visites", "icon": "users", "ops": [
@@ -123,6 +124,7 @@ def get_portail_tree() -> list:
                 {"name": "Stock & Logistique", "icon": "box", "ops": [
                     _op("Dashboard Stocks", "/kya-stocks-dashboard", "box"),
                     _op("Stock par état", "/stock-etat", "box"),
+                    _op("Sorties par client / projet", "/dga-projets-clients", "truck"),
                     _op("Dashboard Logistique", "/kya-logistique-dashboard", "truck"),
                     _op("Inventaire & sorties", "/inventaire-dashboard", "file"),
                     _op("PV entrée matériel", "/pv-entree-materiel", "file"),
