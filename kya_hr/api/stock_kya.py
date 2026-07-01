@@ -268,6 +268,93 @@ def importer_stock_initial(rows):
 
 
 @frappe.whitelist()
+def export_inventaire_xlsx(magasin=None):
+    """Exporte l'état d'inventaire (temps réel) en vrai fichier Excel (.xlsx)."""
+    _guard()
+    import base64
+    from frappe.utils.xlsxutils import make_xlsx
+    inv = etat_inventaire(magasin)
+    headers = ["Magasin", "N°", "Désignation", "Qté totale", "Bon état",
+               "En réparation", "Observations"]
+    data = [headers]
+    for s in inv["sections"]:
+        for l in s["lignes"]:
+            data.append([s["magasin"], l["n"], l["designation"], l["qte_totale"],
+                         l["bon_etat"], l["reparation"], l.get("obs", "")])
+    xlsx = make_xlsx(data, "Inventaire")
+    return {"filename": "inventaire-kya-{0}.xlsx".format(today()),
+            "content_base64": base64.b64encode(xlsx.getvalue()).decode("ascii"),
+            "rows": len(data) - 1}
+
+
+@frappe.whitelist()
+def modele_import_xlsx():
+    """Modèle d'import d'articles (par magasin) en Excel (.xlsx)."""
+    _guard()
+    import base64
+    from frappe.utils.xlsxutils import make_xlsx
+    headers = ["code", "nom", "groupe", "uom", "magasin", "bon_etat", "reparation"]
+    exemple = ["ATT6", "Attache de 6", "Consommables", "Unit", "", 45, 0]
+    xlsx = make_xlsx([headers, exemple], "Modele import")
+    return {"filename": "modele-import-stock-kya.xlsx",
+            "content_base64": base64.b64encode(xlsx.getvalue()).decode("ascii")}
+
+
+def _map_import_row(d):
+    """Normalise une ligne d'import (dict en-tête→valeur) vers le format attendu."""
+    g = lambda *keys: next((str(d[k]).strip() for k in keys
+                            if k in d and d[k] not in (None, "")), "")
+    return {
+        "code": g("code", "code de l'article", "code article"),
+        "nom": g("nom", "nom de l'article", "designation", "désignation"),
+        "groupe": g("groupe", "groupe d'article", "groupe d'articles"),
+        "uom": g("uom", "udm", "unité", "unite", "unité de mesure"),
+        "magasin": g("magasin", "entrepot", "entrepôt", "warehouse"),
+        "bon_etat": flt(g("bon_etat", "bon état", "bon etat", "quantite", "quantité", "qte")),
+        "reparation": flt(g("reparation", "réparation", "en réparation", "en reparation")),
+    }
+
+
+@frappe.whitelist()
+def importer_stock_fichier(content_base64, filename=None):
+    """Import d'articles depuis un fichier **Excel (.xlsx)** ou CSV téléversé.
+    On travaille sur Excel ici : on lit directement le classeur rempli."""
+    _guard(write=True)
+    import base64
+    import io
+    raw = base64.b64decode(content_base64)
+    rows = []
+    name = (filename or "").lower()
+    is_xlsx = name.endswith(".xlsx") or raw[:2] == b"PK"
+    if is_xlsx:
+        import openpyxl
+        wb = openpyxl.load_workbook(io.BytesIO(raw), data_only=True, read_only=True)
+        ws = wb.active
+        header = None
+        for r in ws.iter_rows(values_only=True):
+            if header is None:
+                header = [str(c).strip().lower() if c is not None else "" for c in r]
+                continue
+            d = {header[i]: r[i] for i in range(min(len(header), len(r)))}
+            row = _map_import_row(d)
+            if row["code"]:
+                rows.append(row)
+    else:
+        import csv
+        txt = raw.decode("utf-8-sig", errors="replace")
+        sample = txt.splitlines()[0] if txt.splitlines() else ""
+        delim = ";" if sample.count(";") >= sample.count(",") else ","
+        for d in csv.DictReader(io.StringIO(txt), delimiter=delim):
+            d = {(k or "").strip().lower(): v for k, v in d.items()}
+            row = _map_import_row(d)
+            if row["code"]:
+                rows.append(row)
+    if not rows:
+        frappe.throw(_("Aucune ligne valide trouvée (vérifiez l'en-tête : code, nom, groupe, uom, magasin, bon_etat, reparation)."))
+    return importer_stock_initial(rows)
+
+
+@frappe.whitelist()
 def dashboard_overview():
     """Indicateurs temps réel du stock maison (pour le cockpit)."""
     _guard()

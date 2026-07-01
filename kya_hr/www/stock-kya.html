@@ -97,7 +97,8 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
         <code>code, nom, groupe, uom, magasin, bon_etat, reparation</code>.
         Ré-importer une ligne <b>remplace</b> l'ouverture de cet article dans ce magasin (pas de cumul).
         <a href="#" onclick="modele();return false;">⬇️ Télécharger un modèle</a></div>
-      <input type="file" id="ks-file" accept=".csv,text/csv" onchange="charger(this)">
+      <input type="file" id="ks-file" accept=".xlsx,.csv" onchange="charger(this)">
+      <div style="font-size:.75rem;color:#94a3b8;margin:4px 0;">Charge directement ton fichier <b>Excel (.xlsx)</b> rempli (ou CSV). Ou colle des lignes ci-dessous.</div>
       <textarea class="ks-ta" id="ks-csv" placeholder="code,nom,groupe,uom,magasin,bon_etat,reparation&#10;ATT6,Attache de 6,Consommables,Unit,Stores - D,45,0"></textarea>
       <div style="margin-top:10px;display:flex;gap:8px;align-items:center;">
         <button class="ks-btn" id="ks-imp-btn" onclick="importer()">⬆️ Importer</button>
@@ -167,25 +168,35 @@ function tab(t){
   ['inv','mag','mvt','imp'].forEach(p=>document.getElementById('pane-'+p).classList.toggle('ks-hide',p!==t));
 }
 
-function exportInv(){
+async function exportInv(){
   const f=document.getElementById('ks-mag-filter').value;
-  const secs=INV.sections.filter(s=>!f||s.magasin===f);
-  let csv="Magasin;N°;Désignation;Qté totale;Bon état;En réparation\n";
-  secs.forEach(s=>s.lignes.forEach(l=>{
-    csv+=[s.magasin,l.n,'"'+(l.designation||'').replace(/"/g,'""')+'"',l.qte_totale,l.bon_etat,l.reparation].join(';')+"\n";
-  }));
-  dl(csv, "inventaire_kya_"+(INV.genere_le||'')+".csv");
+  const r=(await frappe.call({method:'kya_hr.api.stock_kya.export_inventaire_xlsx',args:{magasin:f||null}})).message;
+  if(!r||!r.rows){ frappe.show_alert({message:'Aucune ligne à exporter.',indicator:'orange'}); return; }
+  dlB64(r.content_base64, r.filename);
 }
 function modele(){
-  dl("code,nom,groupe,uom,magasin,bon_etat,reparation\nATT6,Attache de 6,Consommables,Unit,,45,0\n","modele_import_stock_kya.csv");
+  // Modèle d'import : Excel (.xlsx) côté serveur pour rester cohérent avec vos outils.
+  frappe.call({method:'kya_hr.api.stock_kya.modele_import_xlsx'}).then(res=>{
+    const r=res.message; if(r) dlB64(r.content_base64, r.filename);
+  });
 }
-function dl(text,name){
-  const b=new Blob([text],{type:'text/csv;charset=utf-8;'}); const u=URL.createObjectURL(b);
+function dlB64(b64,name){
+  const bin=atob(b64); const arr=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+  const u=URL.createObjectURL(new Blob([arr],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
   const a=document.createElement('a'); a.href=u; a.download=name; a.click(); URL.revokeObjectURL(u);
 }
-function charger(inp){
+async function charger(inp){
   const f=inp.files[0]; if(!f) return;
-  const rd=new FileReader(); rd.onload=e=>{document.getElementById('ks-csv').value=e.target.result;}; rd.readAsText(f,'utf-8');
+  const res=document.getElementById('ks-imp-res'); res.textContent='Lecture du fichier…';
+  const b64=await new Promise(ok=>{const rd=new FileReader(); rd.onload=e=>ok(e.target.result.split(',')[1]); rd.readAsDataURL(f);});
+  try{
+    const r=(await frappe.call({method:'kya_hr.api.stock_kya.importer_stock_fichier',
+      args:{content_base64:b64, filename:f.name}})).message;
+    res.textContent=`✅ ${r.items_crees} créé(s), ${r.items_maj} màj, ${r.lignes_stock} ligne(s) de stock`+(r.erreurs.length?`, ${r.erreurs.length} erreur(s)`:'');
+    await load(); tab('inv');
+  }catch(e){ res.textContent='Erreur import fichier.'; }
+  inp.value='';
 }
 function parseCSV(txt){
   const lines=txt.split(/\r?\n/).filter(l=>l.trim());

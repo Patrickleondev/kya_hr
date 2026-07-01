@@ -272,7 +272,7 @@ async function exportFormation(scope){
   try{
     const r=await callApi('kya_hr.api.formation_dashboard.export_besoins', {scope});
     if(!r.rows){ setResult('Aucune donnée à exporter pour ce périmètre.', false); return; }
-    _downloadB64(r.content_base64, r.filename, 'text/csv');
+    _downloadB64(r.content_base64, r.filename, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     setResult('<i class="bi bi-check-circle"></i> '+r.rows+' ligne(s) exportée(s) — '+r.filename);
   }catch(e){ setResult('Erreur export : '+e.message, false); }
 }
@@ -499,7 +499,7 @@ async function exportBeneficiaires(){
   try{
     const r=await callApi('kya_hr.api.formation_dashboard.export_beneficiaires', plan?{plan}:{});
     if(!r.rows){ setResult('Aucun bénéficiaire à exporter.', false); return; }
-    _downloadB64(r.content_base64, r.filename, 'text/csv');
+    _downloadB64(r.content_base64, r.filename, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     setResult('<i class="bi bi-check-circle"></i> '+r.rows+' ligne(s) exportée(s) — '+r.filename);
   }catch(e){ setResult('Erreur export : '+e.message, false); }
 }
