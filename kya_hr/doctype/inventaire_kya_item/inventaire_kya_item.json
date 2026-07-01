@@ -5,14 +5,16 @@
     "istable": 1,
     "custom": 1,
     "fields": [
-        { "fieldname": "item_code", "label": "Article", "fieldtype": "Link", "options": "Item", "reqd": 1, "in_list_view": 1, "columns": 3 },
+        { "fieldname": "item_code", "label": "Article", "fieldtype": "Link", "options": "Item", "reqd": 1, "in_list_view": 1, "columns": 2 },
         { "fieldname": "designation", "label": "Désignation", "fieldtype": "Data", "fetch_from": "item_code.item_name", "read_only": 1, "in_list_view": 1, "columns": 2 },
-        { "fieldname": "uom", "label": "Unité", "fieldtype": "Link", "options": "UOM", "fetch_from": "item_code.stock_uom", "read_only": 1, "columns": 1 },
+        { "fieldname": "uom", "label": "Unité", "fieldtype": "Link", "options": "UOM", "fetch_from": "item_code.stock_uom", "read_only": 1 },
         { "fieldname": "warehouse", "label": "Magasin", "fieldtype": "Link", "options": "Warehouse", "reqd": 1, "in_list_view": 1, "columns": 2 },
-        { "fieldname": "qte_theorique", "label": "Qte Théorique (Système)", "fieldtype": "Float", "read_only": 1, "in_list_view": 1, "columns": 1, "description": "Remplie auto depuis Bin ERPNext" },
-        { "fieldname": "qte_comptee", "label": "Qte Comptée", "fieldtype": "Float", "reqd": 1, "in_list_view": 1, "columns": 1 },
+        { "fieldname": "qte_bon_etat", "label": "Bon état", "fieldtype": "Float", "in_list_view": 1, "columns": 1, "default": 0 },
+        { "fieldname": "qte_en_reparation", "label": "En réparation", "fieldtype": "Float", "in_list_view": 1, "columns": 1, "default": 0 },
+        { "fieldname": "qte_comptee", "label": "Qté totale", "fieldtype": "Float", "read_only": 1, "in_list_view": 1, "columns": 1, "description": "Bon état + En réparation (calculé)" },
+        { "fieldname": "qte_theorique", "label": "Qté système", "fieldtype": "Float", "read_only": 1, "description": "Solde actuel au journal de stock" },
         { "fieldname": "ecart", "label": "Écart", "fieldtype": "Float", "read_only": 1, "in_list_view": 1, "columns": 1 },
-        { "fieldname": "valuation_rate", "label": "Taux Valorisation", "fieldtype": "Currency", "read_only": 1 },
-        { "fieldname": "remarque", "label": "Remarque", "fieldtype": "Small Text" }
+        { "fieldname": "valuation_rate", "label": "Taux Valorisation", "fieldtype": "Currency", "read_only": 1, "hidden": 1 },
+        { "fieldname": "remarque", "label": "Observations", "fieldtype": "Small Text" }
     ]
 }

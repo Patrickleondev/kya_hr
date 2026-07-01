@@ -6,6 +6,7 @@ from frappe import _
 from frappe.model.document import Document
 
 from kya_hr.utils.approval_guards import block_self_approval
+from kya_hr.api import stock_kya
 
 
 class InventaireKYA(Document):
@@ -15,23 +16,21 @@ class InventaireKYA(Document):
         self.fill_theoretical_qty()
         self.compute_ecarts_and_totals()
 
+    def _deja_poste(self):
+        return bool(frappe.db.exists(
+            "Mouvement Stock KYA",
+            {"reference_doctype": "Inventaire KYA", "reference_name": self.name}))
+
     def fill_theoretical_qty(self):
-        """Renseigne la qté théorique (stock système) + la valorisation depuis le
-        Bin tant que l'inventaire est en brouillon. Indispensable côté WEB FORM
-        où il n'y a pas le bouton desk « Charger Articles » : sans ça, la qté
-        théorique reste vide et l'écart est faux."""
+        """Qté « système » = solde ACTUEL au journal de stock maison (total),
+        pour calculer l'écart avec le compté. (Plus de Bin ERPNext.)"""
         if self.docstatus and self.docstatus != 0:
             return
         for row in self.items or []:
             if not row.item_code or not row.warehouse:
                 continue
-            bin_data = frappe.db.get_value(
-                "Bin", {"item_code": row.item_code, "warehouse": row.warehouse},
-                ["actual_qty", "valuation_rate"], as_dict=True,
-            )
-            row.qte_theorique = (bin_data.actual_qty if bin_data else 0) or 0
-            if bin_data and bin_data.valuation_rate and not row.valuation_rate:
-                row.valuation_rate = bin_data.valuation_rate
+            solde = stock_kya.solde_item_magasin(row.item_code, row.warehouse)
+            row.qte_theorique = solde.get("total") or 0
 
     def set_responsable_info(self):
         if not self.responsable_nom:
@@ -46,42 +45,32 @@ class InventaireKYA(Document):
     def compute_ecarts_and_totals(self):
         total_lignes = 0
         lignes_ecart = 0
-        valeur_ecart = 0
         for row in self.items or []:
             total_lignes += 1
+            # Qté totale comptée = bon état + en réparation (format fiche KYA)
+            row.qte_comptee = (row.qte_bon_etat or 0) + (row.qte_en_reparation or 0)
             theo = row.qte_theorique or 0
-            cpt = row.qte_comptee or 0
-            row.ecart = cpt - theo
+            row.ecart = (row.qte_comptee or 0) - theo
             if row.ecart:
                 lignes_ecart += 1
-                valeur_ecart += row.ecart * (row.valuation_rate or 0)
         self.total_lignes = total_lignes
         self.lignes_avec_ecart = lignes_ecart
-        self.valeur_ecart_total = valeur_ecart
+        self.valeur_ecart_total = 0  # pas de valorisation dans le stock maison
 
     # ------------------------------------------------------------------
     def on_submit(self):
-        """Transition workflow en UNE action vers « Approuvé » (docstatus=1) →
-        submit() s'exécute, pas on_update_after_submit. Sans ce hook, la Stock
-        Reconciliation n'était pas créée (écarts non répercutés). Garde anti-doublon."""
-        if self.workflow_state == "Approuvé" and not self.get("stock_reconciliation"):
-            self._create_stock_reconciliation()
+        if self.workflow_state == "Approuvé" and not self._deja_poste():
+            self._post_stock_kya()
 
     def on_update_after_submit(self):
         if self.workflow_state:
             self.db_set("statut", self.workflow_state, update_modified=False)
         self._stamp_magasin_signature()
-        if self.workflow_state == "Approuvé" and not self.get("stock_reconciliation"):
-            self._create_stock_reconciliation()
+        if self.workflow_state == "Approuvé" and not self._deja_poste():
+            self._post_stock_kya()
 
     def on_cancel(self):
-        if self.get("stock_reconciliation"):
-            try:
-                sr = frappe.get_doc("Stock Reconciliation", self.stock_reconciliation)
-                if sr.docstatus == 1:
-                    sr.cancel()
-            except frappe.DoesNotExistError:
-                pass
+        stock_kya.supprimer_mouvements("Inventaire KYA", self.name)
 
     def _stamp_magasin_signature(self):
         if self.workflow_state == "En attente Magasin" and not self.get("magasin_nom"):
@@ -90,55 +79,43 @@ class InventaireKYA(Document):
             self.db_set("magasin_nom", emp or frappe.utils.get_fullname(user), update_modified=False)
             self.db_set("magasin_date", frappe.utils.today(), update_modified=False)
 
-    def _create_stock_reconciliation(self):
-        """Create Stock Reconciliation only for lines with an ecart != 0."""
-        rows = [it for it in self.items if it.item_code and it.warehouse
-                and (it.qte_comptee is not None) and ((it.qte_comptee or 0) != (it.qte_theorique or 0))]
+    def _post_stock_kya(self):
+        """Cale le stock maison sur le COMPTÉ : pour chaque (article, magasin),
+        écrit un AJUSTEMENT = compté − solde actuel, par bucket d'état (bon état /
+        en réparation). C'est l'inventaire qui fait foi."""
+        rows = []
+        for it in self.items:
+            if not (it.item_code and it.warehouse):
+                continue
+            solde = stock_kya.solde_item_magasin(it.item_code, it.warehouse)
+            delta_bon = (it.qte_bon_etat or 0) - (solde.get("bon_etat") or 0)
+            delta_rep = (it.qte_en_reparation or 0) - (solde.get("reparation") or 0)
+            if delta_bon:
+                rows.append({"item": it.item_code, "magasin": it.warehouse,
+                             "quantite": delta_bon, "etat": "Bon état",
+                             "remarque": it.get("remarque") or _("Ajustement inventaire")})
+            if delta_rep:
+                rows.append({"item": it.item_code, "magasin": it.warehouse,
+                             "quantite": delta_rep, "etat": "En réparation",
+                             "remarque": it.get("remarque") or _("Ajustement inventaire")})
         if not rows:
+            frappe.msgprint(_("Inventaire validé — aucun écart, stock inchangé."),
+                            indicator="green", alert=True)
             return
-
-        company = frappe.defaults.get_user_default("Company") \
-            or frappe.db.get_single_value("Global Defaults", "default_company")
-
-        sr = frappe.new_doc("Stock Reconciliation")
-        sr.purpose = "Stock Reconciliation"
-        sr.posting_date = self.date_inventaire or frappe.utils.today()
-        sr.posting_time = frappe.utils.nowtime()
-        sr.company = company
-        sr.expense_account = (
-            frappe.db.get_value("Company", company, "stock_adjustment_account") or None
-        )
-        sr.cost_center = frappe.db.get_value("Company", company, "cost_center") if company else None
-        sr.inventaire_kya = self.name
-
-        for it in rows:
-            sr.append("items", {
-                "item_code": it.item_code,
-                "warehouse": it.warehouse,
-                "qty": it.qte_comptee or 0,
-                "valuation_rate": it.valuation_rate or 0,
-            })
-
         try:
-            sr.insert(ignore_permissions=True)
-            sr.submit()
-            self.db_set("stock_reconciliation", sr.name, update_modified=False)
-            frappe.msgprint(
-                _("Stock Reconciliation {0} créée — {1} écart(s) enregistré(s).").format(
-                    frappe.utils.get_link_to_form("Stock Reconciliation", sr.name),
-                    len(rows),
-                ),
-                indicator="green", alert=True,
+            n = stock_kya.enregistrer_mouvements(
+                rows, "Inventaire",
+                reference_doctype="Inventaire KYA", reference_name=self.name,
+                date_mouvement=self.date_inventaire or frappe.utils.today(),
             )
+            frappe.msgprint(
+                _("Inventaire validé — {0} ajustement(s) appliqué(s) au stock.").format(n),
+                indicator="green", alert=True)
         except Exception as e:
-            frappe.log_error(
-                title=f"Inventaire {self.name} — échec Stock Reconciliation",
-                message=frappe.get_traceback(),
-            )
-            frappe.msgprint(
-                _("⚠️ Impossible de créer la Stock Reconciliation : {0}").format(str(e)),
-                indicator="orange",
-            )
+            frappe.log_error(title=f"Inventaire {self.name} — échec ajustement stock KYA",
+                             message=frappe.get_traceback())
+            frappe.msgprint(_("⚠️ Impossible d'appliquer l'inventaire au stock : {0}").format(str(e)),
+                            indicator="orange")
 
 
 # ───────────────────────────────────────────────────────────────────────────
@@ -175,24 +152,17 @@ def on_cancel(doc, method=None):
 # Whitelisted — loader utilisé par le bouton "Charger Articles"
 # ----------------------------------------------------------------------
 @frappe.whitelist()
-def load_items_from_warehouse(inventaire_name: str, warehouse: str | None = None):
-    """Return current Bin qty + valuation_rate for every item in a given warehouse.
-
-    Called by the Desk client script.
-    """
+def load_items_from_warehouse(inventaire_name: str = None, warehouse: str | None = None):
+    """Pré-remplit les lignes depuis le SOLDE ACTUEL du journal de stock maison
+    pour un magasin : bon état / en réparation / total. Appelé par le bouton
+    « Charger Articles » (desk) et le web form."""
     if not warehouse:
         frappe.throw(_("Veuillez renseigner un magasin."))
-
-    rows = frappe.db.sql(
-        """
-        SELECT b.item_code, b.warehouse, b.actual_qty AS qte_theorique, b.valuation_rate,
-               i.item_name AS designation, i.stock_uom AS uom
-        FROM `tabBin` b
-        INNER JOIN `tabItem` i ON i.name = b.item_code
-        WHERE b.warehouse = %s AND b.actual_qty > 0 AND i.disabled = 0
-        ORDER BY i.item_name
-        """,
-        (warehouse,),
-        as_dict=True,
-    )
+    rows = []
+    for d in stock_kya.soldes(magasin=warehouse, only_nonzero=1):
+        rows.append({
+            "item_code": d["item"], "designation": d["item_name"], "warehouse": warehouse,
+            "qte_bon_etat": d["bon_etat"], "qte_en_reparation": d["reparation"],
+            "qte_comptee": d["total"], "qte_theorique": d["total"], "ecart": 0,
+        })
     return rows
