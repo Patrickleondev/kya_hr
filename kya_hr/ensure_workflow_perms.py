@@ -45,6 +45,21 @@ VISIBILITY_RW_GRANTS: dict[str, list[str]] = {
 }
 
 
+# ── Grants de CRÉATION métier (initier les opérations de stock) ──
+# Le magasin (Responsable Stock = « responsable magasin » / Chargé des Stocks)
+# doit pouvoir INITIER les opérations, pas seulement les signer. Les perms de
+# workflow leur donnent write+submit (approbation à leur étape) mais laissent
+# create=0 → ils ne pouvaient PAS créer un PV de sortie / entrée / retour /
+# inventaire ni ajouter du matériel. On leur accorde create (+read+write,
+# if_owner=0, +submit si submittable). Via Custom DocPerm. Idempotent.
+CREATE_GRANTS: dict[str, list[str]] = {
+    "PV Sortie Materiel": ["Responsable Stock", "Chargé des Stocks"],
+    "PV Entree Materiel": ["Responsable Stock", "Chargé des Stocks"],
+    "Retour Materiel KYA": ["Responsable Stock", "Chargé des Stocks"],
+    "Inventaire KYA": ["Responsable Stock", "Chargé des Stocks"],
+}
+
+
 def _workflow_roles_by_doctype() -> dict[str, set[str]]:
     """Retourne {doctype: {roles approbateurs}} depuis les Workflows actifs."""
     result: dict[str, set[str]] = {}
@@ -171,6 +186,44 @@ def _ensure_rw_perm(doctype: str, role: str) -> str:
         return "error"
 
 
+def _ensure_create_perm(doctype: str, role: str) -> str:
+    """Garantit read+write+create (if_owner=0, +submit si submittable) pour un
+    rôle opérationnel qui doit pouvoir INITIER le document (pas juste signer).
+    Via Custom DocPerm (doctypes KYA pilotés par Custom DocPerm). Idempotent."""
+    if not frappe.db.exists("Role", role):
+        return "role_missing"
+
+    from frappe.permissions import add_permission, update_permission_property
+
+    submittable = bool(frappe.db.get_value("DocType", doctype, "is_submittable"))
+    custom = frappe.db.get_value(
+        "Custom DocPerm",
+        {"parent": doctype, "role": role, "permlevel": 0},
+        ["name", "read", "write", "create", "if_owner"],
+        as_dict=True,
+    )
+    if custom and custom.read and custom.write and custom.create and not custom.if_owner:
+        return "unchanged"
+
+    try:
+        if not custom:
+            add_permission(doctype, role, 0)
+        update_permission_property(doctype, role, 0, "read", "1")
+        update_permission_property(doctype, role, 0, "write", "1")
+        update_permission_property(doctype, role, 0, "create", "1")
+        update_permission_property(doctype, role, 0, "if_owner", "0")
+        if submittable:
+            update_permission_property(doctype, role, 0, "submit", "1")
+        return "updated" if custom else "created"
+    except Exception:
+        try:
+            frappe.log_error(frappe.get_traceback(),
+                             f"ensure_workflow_perms(create): {doctype}/{role}")
+        except Exception:
+            pass
+        return "error"
+
+
 def _repair_invalid_perms(doctype: str) -> int:
     """Repare les perms incoherentes (submit/cancel/amend sans write)."""
     repaired = 0
@@ -240,6 +293,16 @@ def execute() -> dict:
             action = _ensure_rw_perm(doctype, role)
             summary["actions"][action] = summary["actions"].get(action, 0) + 1
             summary["visibility"].append(f"{doctype} <- {role}:{action}")
+
+    # ── Grants de création métier (initier les opérations de stock) ──
+    summary["create_grants"] = []
+    for doctype, roles in CREATE_GRANTS.items():
+        if not frappe.db.exists("DocType", doctype):
+            continue
+        for role in roles:
+            action = _ensure_create_perm(doctype, role)
+            summary["actions"][action] = summary["actions"].get(action, 0) + 1
+            summary["create_grants"].append(f"{doctype} <- {role}:{action}")
 
     try:
         frappe.db.commit()
