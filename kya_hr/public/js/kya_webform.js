@@ -950,6 +950,14 @@
   function setupSignaturePermissions(route) {
     var sigMap = SIGNATURE_ROLES[route];
     if (!sigMap) return;
+    // Filet anti-frustration (01/07/2026) : tant que les VRAIS rôles ne sont
+    // pas connus (contexte portail pas encore chargé via get_session_context),
+    // on NE grise AUCUN pad. Sinon un signataire légitime (Responsable RH,
+    // Responsable Stock, DFC/Comptable…) voyait son pad verrouillé à tort au
+    // premier rendu. Le contrôle réel reste serveur (apply_document_permissions
+    // + workflow) ; ce verrouillage fin est ré-appliqué dès loadSessionContext
+    // terminé (cf. appel ligne ~1754). En cas de doute → ouvert, pas bloqué.
+    if (!rolesKnown()) return;
     Object.keys(sigMap).forEach(function(fieldname) {
       var el = findFieldEl(fieldname);
       if (!el) return;
