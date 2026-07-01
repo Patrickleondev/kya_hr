@@ -42,6 +42,16 @@ _FORBIDDEN_STATES = (
 # Profils privilégiés autorisés à valider à la place d'autrui (délégation RH).
 _PRIVILEGED_ROLES = {"System Manager", "HR Manager", "Responsable RH"}
 
+# Champs de DÉLÉGATION : « au nom de » / bénéficiaire réel. Prioritaires.
+# Cas : un chef/responsable SAISIT une demande POUR un subordonné X. Le
+# bénéficiaire (celui qui ne doit pas s'auto-approuver) est X — PAS le
+# créateur. Le créateur (le chef) reste un approbateur légitime à son étape.
+_BENEFICIARY_FIELDS = (
+    "au_nom_de",
+    "beneficiaire",
+    "pour_le_compte_de",
+)
+
 # Champs Link Employee couramment utilisés pour identifier le demandeur.
 # Ordre d'évaluation : on prend le premier champ trouvé sur le doc.
 _EMPLOYEE_LINK_FIELDS = (
@@ -57,11 +67,20 @@ _EMPLOYEE_LINK_FIELDS = (
 
 
 def _get_requester_user(doc):
-    """Retourne l'identifiant utilisateur (email) du demandeur du document.
+    """Retourne l'identifiant utilisateur (email) du DEMANDEUR/BÉNÉFICIAIRE.
 
-    On regarde d'abord les champs Link Employee connus pour récupérer le
-    `user_id` lié, sinon on retombe sur `doc.owner` (le créateur).
+    1. Délégation « au nom de » : si le doc porte un bénéficiaire explicite,
+       c'est LUI le demandeur (le créateur qui saisit pour lui — souvent un
+       chef — n'est pas bloqué et peut approuver à son étape).
+    2. Sinon on regarde les champs Link Employee connus.
+    3. Sinon on retombe sur `doc.owner` (le créateur).
     """
+    for fieldname in _BENEFICIARY_FIELDS:
+        if doc.meta.has_field(fieldname) and doc.get(fieldname):
+            # Bénéficiaire explicite : c'est lui (ou personne d'identifiable →
+            # on ne bloque pas le créateur-approbateur).
+            return frappe.db.get_value("Employee", doc.get(fieldname), "user_id")
+
     for fieldname in _EMPLOYEE_LINK_FIELDS:
         emp = doc.get(fieldname)
         if emp:
