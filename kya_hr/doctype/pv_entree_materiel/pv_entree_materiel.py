@@ -13,6 +13,7 @@ from frappe import _
 from frappe.model.document import Document
 
 from kya_hr.utils.approval_guards import block_self_approval
+from kya_hr.api import stock_kya
 
 
 class PVEntreeMateriel(Document):
@@ -20,6 +21,12 @@ class PVEntreeMateriel(Document):
     def validate(self):
         block_self_approval(self)
         self.validate_items()
+
+    def _deja_poste(self):
+        """Le mouvement de stock de cette fiche est-il déjà écrit au grand livre ?"""
+        return bool(frappe.db.exists(
+            "Mouvement Stock KYA",
+            {"reference_doctype": "PV Entree Materiel", "reference_name": self.name}))
 
     def validate_items(self):
         if not self.items:
@@ -32,24 +39,19 @@ class PVEntreeMateriel(Document):
     def on_submit(self):
         """Transition workflow en UNE action vers « Approuvé » (docstatus=1) →
         submit() s'exécute, pas on_update_after_submit. Garde anti-doublon."""
-        if self.workflow_state == "Approuvé" and not self.get("stock_entry"):
-            self._create_stock_entry()
+        if self.workflow_state == "Approuvé" and not self._deja_poste():
+            self._post_stock_kya()
 
     def on_update_after_submit(self):
         if self.workflow_state:
             self.db_set("statut", self.workflow_state, update_modified=False)
         self._stamp_approvers()
-        if self.workflow_state == "Approuvé" and not self.get("stock_entry"):
-            self._create_stock_entry()
+        if self.workflow_state == "Approuvé" and not self._deja_poste():
+            self._post_stock_kya()
 
     def on_cancel(self):
-        if self.get("stock_entry"):
-            try:
-                se = frappe.get_doc("Stock Entry", self.stock_entry)
-                if se.docstatus == 1:
-                    se.cancel()
-            except frappe.DoesNotExistError:
-                pass
+        # Stock KYA maison : on retire les mouvements de cette fiche du grand livre.
+        stock_kya.supprimer_mouvements("PV Entree Materiel", self.name)
 
     def _stamp_approvers(self):
         """Auto-fill nom + date de chaque signataire à son tour."""
@@ -119,63 +121,44 @@ class PVEntreeMateriel(Document):
                 f"PV Reception {self.name} - auto-creation Item '{designation}'",
             )
 
-    def _create_stock_entry(self):
-        # Etape 1 : creer les Items a la volee pour les lignes sans item_code
+    def _post_stock_kya(self):
+        """Écrit les entrées dans le grand livre maison (stock_kya), au lieu de
+        passer par un Stock Entry ERPNext. Chaque ligne reçue = +qté en magasin,
+        état « Bon état ». Crée les Items à la volée pour les lignes sans code."""
         for it in self.items:
             self._ensure_item_for_row(it)
 
-        # Etape 2 : ne garder que les lignes qui ont maintenant un item_code + warehouse
-        rows = [it for it in self.items if it.get("item_code") and it.get("warehouse")]
+        rows = []
+        for it in self.items:
+            qty = it.get("qte_recue") or 0
+            if not (it.get("item_code") and it.get("warehouse")) or qty <= 0:
+                continue
+            rows.append({
+                "item": it.item_code,
+                "magasin": it.warehouse,
+                "quantite": qty,
+                "etat": it.get("etat") or "Bon état",
+                "remarque": it.get("designation"),
+            })
         if not rows:
             return
-
-        company = frappe.defaults.get_user_default("Company") \
-            or frappe.db.get_single_value("Global Defaults", "default_company")
-
-        se = frappe.new_doc("Stock Entry")
-        se.stock_entry_type = "Material Receipt"
-        se.purpose = "Material Receipt"
-        se.posting_date = self.date_entree or frappe.utils.today()
-        se.company = company
-        se.project = self.get("project") or None
-        se.remarks = _("Auto-créé depuis PV Réception {0} — Fournisseur: {1}").format(
-            self.name,
-            self.get("fournisseur") or self.get("fournisseur_libre") or "—"
-        )
-        se.pv_entree_materiel = self.name
-
-        for it in rows:
-            qty = it.qte_recue or 0
-            if qty <= 0:
-                continue
-            se.append("items", {
-                "item_code": it.item_code,
-                "qty": qty,
-                "uom": it.uom or frappe.db.get_value("Item", it.item_code, "stock_uom"),
-                "t_warehouse": it.warehouse,
-                "basic_rate": it.prix_unitaire or frappe.db.get_value("Item", it.item_code, "last_purchase_rate") or 0,
-            })
-
-        if not se.items:
-            return
-
         try:
-            se.insert(ignore_permissions=True)
-            se.submit()
-            self.db_set("stock_entry", se.name, update_modified=False)
+            n = stock_kya.enregistrer_mouvements(
+                rows, "Entrée",
+                reference_doctype="PV Entree Materiel", reference_name=self.name,
+                date_mouvement=self.date_entree or frappe.utils.today(),
+            )
             frappe.msgprint(
-                _("Stock Entry {0} créé — stocks mis à jour.").format(
-                    frappe.utils.get_link_to_form("Stock Entry", se.name)
-                ),
+                _("Stock mis à jour : {0} entrée(s) enregistrée(s) au grand livre KYA.").format(n),
                 indicator="green", alert=True,
             )
         except Exception as e:
             frappe.log_error(
-                title=f"PV Réception {self.name} — échec Stock Entry",
+                title=f"PV Réception {self.name} — échec écriture stock KYA",
                 message=frappe.get_traceback() + f"\n\nPV: {self.name}\nError: {e}",
             )
             frappe.msgprint(
-                _("⚠️ Impossible de créer le Stock Entry automatique : {0}.").format(str(e)),
+                _("⚠️ Impossible d'enregistrer le mouvement de stock : {0}.").format(str(e)),
                 indicator="orange",
             )
 

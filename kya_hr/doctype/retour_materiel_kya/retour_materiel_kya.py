@@ -11,7 +11,17 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from kya_hr.stock_etats import warehouse_for_etat
+from kya_hr.api import stock_kya
+
+
+def _map_etat_retour(etat_au_retour):
+    """Mappe l'état saisi au retour vers un bucket du grand livre stock."""
+    e = (etat_au_retour or "").strip().lower()
+    if "répar" in e or "repar" in e or "à réparer" in e:
+        return "En réparation"
+    if "endommag" in e or "hors" in e or "rebut" in e:
+        return "Hors service"
+    return "Bon état"
 
 
 class RetourMaterielKYA(Document):
@@ -20,6 +30,11 @@ class RetourMaterielKYA(Document):
         self._validate_items()
         self._set_retourneur_info()
         self._fetch_context_from_sortie()
+
+    def _deja_poste(self):
+        return bool(frappe.db.exists(
+            "Mouvement Stock KYA",
+            {"reference_doctype": "Retour Materiel KYA", "reference_name": self.name}))
 
     def _validate_items(self):
         if not self.items:
@@ -82,28 +97,22 @@ class RetourMaterielKYA(Document):
         c'est submit() qui s'exécute — PAS on_update_after_submit. Sans ce hook,
         le Stock Entry n'était jamais créé (articles non remis en stock). Garde
         anti-doublon via stock_entry."""
-        if self.workflow_state == "Approuvé" and not self.get("stock_entry"):
-            self._create_stock_entry()
+        if self.workflow_state == "Approuvé" and not self._deja_poste():
+            self._post_stock_kya()
 
     def on_update_after_submit(self):
         if self.workflow_state:
             self.db_set("statut", self.workflow_state, update_modified=False)
         self._stamp_magasin()
-        if self.workflow_state == "Approuvé" and not self.get("stock_entry"):
-            self._create_stock_entry()
+        if self.workflow_state == "Approuvé" and not self._deja_poste():
+            self._post_stock_kya()
 
     def on_cancel(self):
-        if self.get("stock_entry"):
-            try:
-                se = frappe.get_doc("Stock Entry", self.stock_entry)
-                if se.docstatus == 1:
-                    se.cancel()
-                    frappe.msgprint(
-                        _("Stock Entry {0} annulé — les articles sont ré-sortis du stock.").format(se.name),
-                        indicator="orange", alert=True,
-                    )
-            except frappe.DoesNotExistError:
-                pass
+        n = stock_kya.supprimer_mouvements("Retour Materiel KYA", self.name)
+        if n:
+            frappe.msgprint(
+                _("Retour annulé — {0} article(s) ré-sortis du stock.").format(n),
+                indicator="orange", alert=True)
 
     def _stamp_magasin(self):
         if self.workflow_state == "En attente Magasin" and not self.get("magasin_nom"):
@@ -113,72 +122,47 @@ class RetourMaterielKYA(Document):
             self.db_set("magasin_date", frappe.utils.today(), update_modified=False)
 
     # ------------------------------------------------------------------ #
-    def _create_stock_entry(self):
-        """Stock Entry Material Receipt pour remettre les articles en stock.
-
-        Routage par état (3 magasins distincts ⇒ l'état est porté par le stock) :
-          - Bon état   → magasin choisi par l'utilisateur (stock disponible)
-          - À réparer  → magasin 'Atelier-Reparation' (immobilisé, réparable)
-          - Endommagé  → magasin 'Materiel-Endommage' (hors service, candidat rebut)
-        Le Responsable Magasin décide ensuite de la suite (transfert si réparé,
-        sortie/rebut si définitivement hors service).
-        """
-        rows = [it for it in self.items if it.get("item_code")]
-        if not rows:
-            return
-
-        company = frappe.defaults.get_user_default("Company") \
-            or frappe.db.get_single_value("Global Defaults", "default_company")
-
-        se = frappe.new_doc("Stock Entry")
-        se.stock_entry_type = "Material Receipt"
-        se.purpose = "Material Receipt"
-        se.posting_date = self.date_retour or frappe.utils.today()
-        se.company = company
-        se.project = self.get("project") or None
-        se.remarks = _("Retour matériel — PV Retour {0} — Sortie origine : {1}").format(
-            self.name, self.get("pv_sortie_origine") or "—"
-        )
-
-        for it in rows:
-            qty = it.qte_retournee or 0
+    def _post_stock_kya(self):
+        """Remet les articles retournés en stock dans le grand livre maison
+        (+qté par magasin). L'ÉTAT au retour porte le bucket de solde :
+          - Bon état   → stock disponible
+          - À réparer  → bucket « En réparation » (immobilisé, pas disponible)
+          - Endommagé  → bucket « Hors service » (candidat rebut)
+        Même magasin ; c'est l'état (colonne de l'inventaire) qui distingue."""
+        rows = []
+        for it in self.items:
+            if not (it.get("item_code") and it.get("warehouse")):
+                continue
+            qty = it.get("qte_retournee") or 0
             if qty <= 0:
                 continue
-
-            _etat_key, special_wh = warehouse_for_etat(company, it.get("etat_au_retour"))
-            target_wh = special_wh or it.get("warehouse")
-            if not target_wh:
-                continue
-
-            se.append("items", {
-                "item_code": it.item_code,
-                "qty": qty,
-                "uom": it.uom or frappe.db.get_value("Item", it.item_code, "stock_uom"),
-                "t_warehouse": target_wh,
-                "basic_rate": frappe.db.get_value("Item", it.item_code, "last_purchase_rate") or 0,
+            rows.append({
+                "item": it.item_code,
+                "magasin": it.warehouse,
+                "quantite": qty,
+                "etat": _map_etat_retour(it.get("etat_au_retour")),
+                "remarque": it.get("designation"),
             })
-
-        if not se.items:
+        if not rows:
             return
-
         try:
-            se.insert(ignore_permissions=True)
-            se.submit()
-            self.db_set("stock_entry", se.name, update_modified=False)
+            n = stock_kya.enregistrer_mouvements(
+                rows, "Retour",
+                reference_doctype="Retour Materiel KYA", reference_name=self.name,
+                date_mouvement=self.date_retour or frappe.utils.today(),
+            )
             frappe.msgprint(
-                _("Stock Entry {0} créé — les articles retournés sont remis en stock.").format(
-                    frappe.utils.get_link_to_form("Stock Entry", se.name)
-                ),
+                _("Stock mis à jour : {0} article(s) retourné(s) au grand livre KYA "
+                  "(état pris en compte).").format(n),
                 indicator="green", alert=True,
             )
         except Exception as e:
             frappe.log_error(
-                title=f"Retour Matériel {self.name} — échec Stock Entry",
+                title=f"Retour Matériel {self.name} — échec écriture stock KYA",
                 message=frappe.get_traceback() + f"\n\nRetour: {self.name}\nError: {e}",
             )
             frappe.msgprint(
-                _("⚠️ Impossible de créer le Stock Entry automatique : {0}. "
-                  "Le retour est approuvé mais la mise à jour du stock doit être faite manuellement.").format(str(e)),
+                _("⚠️ Impossible d'enregistrer le retour de stock : {0}.").format(str(e)),
                 indicator="orange",
             )
 
