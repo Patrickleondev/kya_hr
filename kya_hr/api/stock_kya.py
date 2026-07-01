@@ -204,6 +204,108 @@ def _ensure_uom(uom):
     return uom
 
 
+_REF_IMPORT = "Import Stock Initial"
+
+
+@frappe.whitelist()
+def importer_stock_initial(rows):
+    """Import « template » : crée les articles ET les classe dans leur magasin
+    avec un stock d'ouverture. `rows` = [{code, nom, groupe, uom, magasin,
+    bon_etat, reparation}]. Idempotent : ré-importer une ligne (même article +
+    magasin) REMPLACE son ouverture (on ne cumule pas). Réservé au magasin."""
+    _guard(write=True)
+    if isinstance(rows, str):
+        rows = frappe.parse_json(rows)
+    cree_item, maj_item, lignes_stock, erreurs = 0, 0, 0, []
+    for r in rows:
+        code = (r.get("code") or "").strip()
+        nom = (r.get("nom") or code).strip()
+        magasin = (r.get("magasin") or "").strip()
+        if not code:
+            continue
+        try:
+            groupe = _ensure_item_group(r.get("groupe"))
+            uom = _ensure_uom(r.get("uom"))
+            if frappe.db.exists("Item", code):
+                it = frappe.get_doc("Item", code)
+                changed = False
+                if nom and it.item_name != nom:
+                    it.item_name = nom; changed = True
+                if groupe and it.item_group != groupe:
+                    it.item_group = groupe; changed = True
+                if changed:
+                    it.flags.ignore_permissions = True; it.save(); maj_item += 1
+            else:
+                it = frappe.new_doc("Item")
+                it.item_code = code; it.item_name = nom
+                it.item_group = groupe; it.stock_uom = uom; it.is_stock_item = 1
+                it.flags.ignore_permissions = True; it.insert(); cree_item += 1
+
+            if magasin and frappe.db.exists("Warehouse", magasin):
+                bon = flt(r.get("bon_etat"))
+                repar = flt(r.get("reparation"))
+                # Remplace l'ouverture précédente de cet article dans ce magasin.
+                old = frappe.get_all("Mouvement Stock KYA",
+                    filters={"reference_doctype": _REF_IMPORT, "reference_name": magasin,
+                             "item": code}, pluck="name")
+                for nm in old:
+                    frappe.delete_doc("Mouvement Stock KYA", nm, ignore_permissions=True, force=True)
+                op = []
+                if bon:
+                    op.append({"item": code, "magasin": magasin, "quantite": bon, "etat": "Bon état"})
+                if repar:
+                    op.append({"item": code, "magasin": magasin, "quantite": repar, "etat": "En réparation"})
+                if op:
+                    enregistrer_mouvements(op, "Inventaire", reference_doctype=_REF_IMPORT,
+                                           reference_name=magasin)
+                    lignes_stock += 1
+        except Exception:
+            erreurs.append(code)
+            frappe.log_error(frappe.get_traceback(), "stock_kya.importer_stock_initial")
+    frappe.db.commit()
+    return {"items_crees": cree_item, "items_maj": maj_item,
+            "lignes_stock": lignes_stock, "erreurs": erreurs, "total": len(rows)}
+
+
+@frappe.whitelist()
+def dashboard_overview():
+    """Indicateurs temps réel du stock maison (pour le cockpit)."""
+    _guard()
+    lignes = soldes(only_nonzero=1)
+    magasins_set = {d["magasin"] for d in lignes}
+    articles_set = {d["item"] for d in lignes}
+    en_reparation = sum(1 for d in lignes if d["reparation"] > 0)
+    ruptures = sum(1 for d in lignes if d["total"] <= 0)
+    total_unites = round(sum(d["total"] for d in lignes), 2)
+    # Par magasin : nb articles + unités
+    par_mag = {}
+    for d in lignes:
+        m = par_mag.setdefault(d["magasin"], {"magasin": d["magasin"], "articles": 0, "unites": 0.0,
+                                              "bon_etat": 0.0, "reparation": 0.0})
+        m["articles"] += 1
+        m["unites"] = round(m["unites"] + d["total"], 2)
+        m["bon_etat"] = round(m["bon_etat"] + d["bon_etat"], 2)
+        m["reparation"] = round(m["reparation"] + d["reparation"], 2)
+    # Derniers mouvements
+    recents = frappe.get_all("Mouvement Stock KYA",
+        fields=["date_mouvement", "type_mouvement", "item_name", "magasin",
+                "quantite", "etat", "reference_name"],
+        order_by="creation desc", limit=15)
+    # Répartition par type de mouvement (30 derniers jours)
+    from frappe.utils import add_days
+    depuis = add_days(today(), -30)
+    par_type = frappe.db.sql("""
+        SELECT type_mouvement, COUNT(*) AS n
+        FROM `tabMouvement Stock KYA` WHERE date_mouvement >= %(d)s
+        GROUP BY type_mouvement""", {"d": depuis}, as_dict=True)
+    return {
+        "kpi": {"articles": len(articles_set), "magasins": len(magasins_set),
+                "unites": total_unites, "en_reparation": en_reparation, "ruptures": ruptures},
+        "par_magasin": sorted(par_mag.values(), key=lambda x: x["magasin"]),
+        "recents": recents, "par_type": par_type,
+    }
+
+
 @frappe.whitelist()
 def importer_articles(rows):
     """Crée/Met à jour des Items depuis un import. `rows` = [{code, nom, groupe,

@@ -1,0 +1,216 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Stock KYA — Cockpit magasin{% endblock %}
+
+{% block page_content %}
+<link rel="stylesheet" href="/assets/kya_hr/css/kya_dashboard.css">
+<style>
+.ks { max-width: 1180px; margin: 18px auto 48px; padding: 0 16px; }
+.ks .ico { font-size: 1.6rem; }
+.ks-tabs { display:flex; gap:8px; margin:14px 0; flex-wrap:wrap; }
+.ks-tab { border:1px solid #cbd5e1; background:#fff; border-radius:10px; padding:8px 16px; font-weight:700; font-size:.85rem; cursor:pointer; color:#334155; }
+.ks-tab.on { background:#0e7c4a; color:#fff; border-color:#0e7c4a; }
+.ks-kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:12px; margin:14px 0; }
+.ks-kpi { background:#fff; border-radius:14px; padding:14px 16px; border-left:5px solid #0e7c4a; box-shadow:0 1px 2px rgba(0,0,0,.05); }
+.ks-kpi .n { font-size:1.9rem; font-weight:900; color:#0e7c4a; line-height:1; }
+.ks-kpi .l { font-size:.68rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.4px; margin-top:4px; }
+.ks-kpi.warn{border-left-color:#d97706}.ks-kpi.warn .n{color:#d97706}
+.ks-kpi.blue{border-left-color:#2563eb}.ks-kpi.blue .n{color:#2563eb}
+.ks-kpi.red{border-left-color:#dc2626}.ks-kpi.red .n{color:#dc2626}
+.ks-card { background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:16px; margin-bottom:16px; }
+.ks-card h3 { margin:0 0 8px; font-size:1rem; color:#0e7c4a; }
+.ks-tbl { width:100%; border-collapse:collapse; font-size:.84rem; }
+.ks-tbl th { background:#0e7c4a; color:#fff; padding:8px; font-size:.72rem; text-align:left; text-transform:uppercase; }
+.ks-tbl td { border-bottom:1px solid #eef2f7; padding:7px 8px; }
+.ks-tbl tr:hover td{background:#f8fafc}
+.ks-tbl td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+.ks-mag { font-weight:800; color:#0f172a; background:#f1f5f9; padding:6px 10px; border-radius:8px; margin:14px 0 6px; }
+.ks-btn { background:#0e7c4a; color:#fff; border:none; border-radius:10px; padding:9px 16px; font-weight:800; font-size:.85rem; cursor:pointer; }
+.ks-btn.sec{background:#fff;color:#0e7c4a;border:2px solid #0e7c4a}
+.ks-btn:disabled{opacity:.5}
+.ks-hide{display:none}
+textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radius:10px;padding:10px;font-family:monospace;font-size:.8rem}
+.ks-note{background:#f1f5f9;border-left:4px solid #0e7c4a;border-radius:8px;padding:10px 14px;font-size:.82rem;color:#475569;margin:8px 0}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.72rem;font-weight:800}
+.b-e{background:#dcfce7;color:#166534}.b-s{background:#fee2e2;color:#991b1b}.b-r{background:#fef3c7;color:#92400e}.b-i{background:#dbeafe;color:#1e40af}
+</style>
+
+<div class="kyad ks">
+  <div class="kyad-hero" style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
+    <div>
+      <h1><span class="ico">📦</span> Stock KYA — Cockpit magasin</h1>
+      <p>Soldes temps réel par magasin · export inventaire · import d'articles classés par magasin.</p>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <a class="ks-btn sec" href="/pv-entree-materiel/new">＋ Entrée</a>
+      <a class="ks-btn sec" href="/pv-sortie-materiel/new">－ Sortie</a>
+      <a class="ks-btn sec" href="/retour-materiel/new">🔄 Retour</a>
+    </div>
+  </div>
+
+  <div class="ks-kpis" id="ks-kpis"></div>
+
+  <div class="ks-tabs">
+    <div class="ks-tab on" data-t="inv" onclick="tab('inv')">📋 Inventaire par magasin</div>
+    <div class="ks-tab" data-t="mag" onclick="tab('mag')">🏬 Synthèse magasins</div>
+    <div class="ks-tab" data-t="mvt" onclick="tab('mvt')">🕑 Derniers mouvements</div>
+    <div class="ks-tab" data-t="imp" onclick="tab('imp')">⬆️ Importer des articles</div>
+  </div>
+
+  <!-- INVENTAIRE -->
+  <div id="pane-inv">
+    <div class="ks-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+        <h3 style="margin:0;">État d'inventaire (temps réel)</h3>
+        <div style="display:flex;gap:8px;">
+          <select id="ks-mag-filter" class="ks-btn sec" style="font-weight:600;"></select>
+          <button class="ks-btn" onclick="exportInv()">⬇️ Exporter (CSV)</button>
+        </div>
+      </div>
+      <div id="ks-inv"></div>
+    </div>
+  </div>
+
+  <!-- MAGASINS -->
+  <div id="pane-mag" class="ks-hide">
+    <div class="ks-card">
+      <h3>Synthèse par magasin</h3>
+      <table class="ks-tbl"><thead><tr><th>Magasin</th><th>Articles</th><th>Bon état</th><th>En réparation</th><th>Total unités</th></tr></thead>
+      <tbody id="ks-magbody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- MOUVEMENTS -->
+  <div id="pane-mvt" class="ks-hide">
+    <div class="ks-card">
+      <h3>15 derniers mouvements</h3>
+      <table class="ks-tbl"><thead><tr><th>Date</th><th>Type</th><th>Article</th><th>Magasin</th><th>Qté</th><th>État</th><th>Réf.</th></tr></thead>
+      <tbody id="ks-mvtbody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- IMPORT -->
+  <div id="pane-imp" class="ks-hide">
+    <div class="ks-card">
+      <h3>Importer des articles (classés par magasin)</h3>
+      <div class="ks-note">Colle des lignes <b>CSV</b> ou charge un fichier. Colonnes attendues (avec en-tête) :
+        <code>code, nom, groupe, uom, magasin, bon_etat, reparation</code>.
+        Ré-importer une ligne <b>remplace</b> l'ouverture de cet article dans ce magasin (pas de cumul).
+        <a href="#" onclick="modele();return false;">⬇️ Télécharger un modèle</a></div>
+      <input type="file" id="ks-file" accept=".csv,text/csv" onchange="charger(this)">
+      <textarea class="ks-ta" id="ks-csv" placeholder="code,nom,groupe,uom,magasin,bon_etat,reparation&#10;ATT6,Attache de 6,Consommables,Unit,Stores - D,45,0"></textarea>
+      <div style="margin-top:10px;display:flex;gap:8px;align-items:center;">
+        <button class="ks-btn" id="ks-imp-btn" onclick="importer()">⬆️ Importer</button>
+        <span id="ks-imp-res" style="font-size:.85rem;color:#475569;"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let DASH=null, INV=null;
+
+async function load(){
+  DASH = (await frappe.call({method:'kya_hr.api.stock_kya.dashboard_overview'})).message;
+  INV = (await frappe.call({method:'kya_hr.api.stock_kya.etat_inventaire'})).message;
+  render();
+}
+
+function render(){
+  const k=DASH.kpi;
+  document.getElementById('ks-kpis').innerHTML = `
+    <div class="ks-kpi blue"><div class="n">${k.articles}</div><div class="l">Articles en stock</div></div>
+    <div class="ks-kpi"><div class="n">${k.magasins}</div><div class="l">Magasins</div></div>
+    <div class="ks-kpi"><div class="n">${k.unites}</div><div class="l">Unités totales</div></div>
+    <div class="ks-kpi warn"><div class="n">${k.en_reparation}</div><div class="l">En réparation</div></div>
+    <div class="ks-kpi red"><div class="n">${k.ruptures}</div><div class="l">Ruptures</div></div>`;
+
+  // filtre magasins
+  const sel=document.getElementById('ks-mag-filter');
+  if(!sel.dataset.filled){
+    const mags=INV.sections.map(s=>s.magasin);
+    sel.innerHTML='<option value="">Tous les magasins</option>'+mags.map(m=>`<option>${m}</option>`).join('');
+    sel.dataset.filled=1; sel.addEventListener('change',renderInv);
+  }
+  renderInv();
+
+  document.getElementById('ks-magbody').innerHTML = DASH.par_magasin.map(m=>`<tr>
+    <td><b>${m.magasin}</b></td><td class="num">${m.articles}</td>
+    <td class="num" style="color:#166534">${m.bon_etat}</td>
+    <td class="num" style="color:#92400e">${m.reparation}</td>
+    <td class="num">${m.unites}</td></tr>`).join('') || `<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:16px;">Aucun stock.</td></tr>`;
+
+  const tb={"Entrée":"b-e","Sortie":"b-s","Retour":"b-r","Inventaire":"b-i","Ajustement":"b-i"};
+  document.getElementById('ks-mvtbody').innerHTML = (DASH.recents||[]).map(r=>`<tr>
+    <td>${r.date_mouvement||''}</td><td><span class="badge ${tb[r.type_mouvement]||'b-i'}">${r.type_mouvement}</span></td>
+    <td>${r.item_name||''}</td><td>${r.magasin||''}</td>
+    <td class="num" style="color:${r.quantite<0?'#991b1b':'#166534'}">${r.quantite}</td>
+    <td>${r.etat||''}</td><td style="font-size:.72rem;color:#64748b">${r.reference_name||''}</td></tr>`).join('')
+    || `<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:16px;">Aucun mouvement.</td></tr>`;
+}
+
+function renderInv(){
+  const f=document.getElementById('ks-mag-filter').value;
+  const secs = INV.sections.filter(s=>!f || s.magasin===f);
+  document.getElementById('ks-inv').innerHTML = secs.map(s=>`
+    <div class="ks-mag">🏬 ${s.magasin} — ${s.total_lignes} article(s)</div>
+    <table class="ks-tbl"><thead><tr><th style="width:5%">N°</th><th>Désignation</th>
+      <th style="width:12%">Qté totale</th><th style="width:12%">Bon état</th><th style="width:12%">En réparation</th></tr></thead>
+    <tbody>${s.lignes.map(l=>`<tr><td>${l.n}</td><td>${l.designation}</td>
+      <td class="num">${l.qte_totale}</td><td class="num" style="color:#166534">${l.bon_etat}</td>
+      <td class="num" style="color:#92400e">${l.reparation}</td></tr>`).join('')}</tbody></table>`).join('')
+    || `<div style="text-align:center;color:#94a3b8;padding:20px;">Aucun stock à afficher.</div>`;
+}
+
+function tab(t){
+  document.querySelectorAll('.ks-tab').forEach(x=>x.classList.toggle('on',x.dataset.t===t));
+  ['inv','mag','mvt','imp'].forEach(p=>document.getElementById('pane-'+p).classList.toggle('ks-hide',p!==t));
+}
+
+function exportInv(){
+  const f=document.getElementById('ks-mag-filter').value;
+  const secs=INV.sections.filter(s=>!f||s.magasin===f);
+  let csv="Magasin;N°;Désignation;Qté totale;Bon état;En réparation\n";
+  secs.forEach(s=>s.lignes.forEach(l=>{
+    csv+=[s.magasin,l.n,'"'+(l.designation||'').replace(/"/g,'""')+'"',l.qte_totale,l.bon_etat,l.reparation].join(';')+"\n";
+  }));
+  dl(csv, "inventaire_kya_"+(INV.genere_le||'')+".csv");
+}
+function modele(){
+  dl("code,nom,groupe,uom,magasin,bon_etat,reparation\nATT6,Attache de 6,Consommables,Unit,,45,0\n","modele_import_stock_kya.csv");
+}
+function dl(text,name){
+  const b=new Blob([text],{type:'text/csv;charset=utf-8;'}); const u=URL.createObjectURL(b);
+  const a=document.createElement('a'); a.href=u; a.download=name; a.click(); URL.revokeObjectURL(u);
+}
+function charger(inp){
+  const f=inp.files[0]; if(!f) return;
+  const rd=new FileReader(); rd.onload=e=>{document.getElementById('ks-csv').value=e.target.result;}; rd.readAsText(f,'utf-8');
+}
+function parseCSV(txt){
+  const lines=txt.split(/\r?\n/).filter(l=>l.trim());
+  if(!lines.length) return [];
+  const head=lines[0].split(/[;,]/).map(h=>h.trim().toLowerCase());
+  const idx=n=>head.indexOf(n);
+  return lines.slice(1).map(l=>{
+    const c=l.split(/[;,]/);
+    const g=n=>{const i=idx(n); return i>=0?(c[i]||'').trim().replace(/^"|"$/g,''):'';};
+    return {code:g('code'),nom:g('nom'),groupe:g('groupe'),uom:g('uom'),
+            magasin:g('magasin'),bon_etat:parseFloat(g('bon_etat'))||0,reparation:parseFloat(g('reparation'))||0};
+  }).filter(r=>r.code);
+}
+async function importer(){
+  const rows=parseCSV(document.getElementById('ks-csv').value);
+  if(!rows.length){frappe.msgprint("Aucune ligne valide (vérifiez l'en-tête).");return;}
+  const btn=document.getElementById('ks-imp-btn'); btn.disabled=true;
+  try{
+    const r=(await frappe.call({method:'kya_hr.api.stock_kya.importer_stock_initial',args:{rows:JSON.stringify(rows)}})).message;
+    document.getElementById('ks-imp-res').textContent=
+      `✅ ${r.items_crees} créé(s), ${r.items_maj} màj, ${r.lignes_stock} ligne(s) de stock`+(r.erreurs.length?`, ${r.erreurs.length} erreur(s)`:'');
+    await load();
+  } finally { btn.disabled=false; }
+}
+
+frappe.ready(load);
+</script>
+{% endblock %}
