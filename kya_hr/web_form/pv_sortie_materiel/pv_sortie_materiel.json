@@ -70,6 +70,12 @@
    "description": "À remplir uniquement si le client n'est pas encore dans la base. Vous pourrez l'enregistrer ensuite."
   },
   {
+   "fieldname": "project_manuel",
+   "fieldtype": "Data",
+   "label": "Projet / Chantier (saisie manuelle)",
+   "description": "À remplir si le projet/chantier n'est pas dans la liste. Saisie libre, aucun blocage."
+  },
+  {
    "fieldname": "demandeur_nom",
    "fieldtype": "Data",
    "label": "Nom du Demandeur"

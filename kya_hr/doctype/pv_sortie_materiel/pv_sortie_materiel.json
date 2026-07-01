@@ -98,6 +98,12 @@
    "description": "Nom du client si non encore enregistré dans la base. Sera proposé pour création lors de l'approbation."
   },
   {
+   "fieldname": "project_manuel",
+   "label": "Projet / Chantier (saisie manuelle)",
+   "fieldtype": "Data",
+   "description": "Nom du projet/chantier s'il n'est pas encore enregistré. Saisie libre — aucun blocage."
+  },
+  {
    "fieldname": "destination_type",
    "label": "Destination",
    "fieldtype": "Select",
