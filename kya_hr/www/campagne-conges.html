@@ -1,0 +1,215 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Campagne de congés — Cockpit RH{% endblock %}
+
+{% block page_content %}
+<link rel="stylesheet" href="/assets/kya_hr/css/kya_dashboard.css">
+<style>
+.kcc { max-width: 1180px; margin: 18px auto 48px; padding: 0 16px; }
+.kcc .ico { font-size: 1.6rem; }
+.kcc-ctrl { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin:14px 0; }
+.kcc-ctrl label { display:block; font-size:.72rem; font-weight:700; color:#1e293b; text-transform:uppercase; letter-spacing:.4px; margin-bottom:3px; }
+.kcc-ctrl select,.kcc-ctrl input,.kcc-ctrl textarea { border:1px solid #cbd5e1; border-radius:10px; padding:8px 10px; font-size:.9rem; }
+.kcc-ctrl select,.kcc-ctrl input { min-width:150px; }
+.kcc-def { background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:16px; margin-bottom:16px; }
+.kcc-def h3 { margin:0 0 6px; font-size:1rem; color:#0e7c4a; }
+.kcc-kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin:16px 0; }
+.kcc-kpi { background:#fff; border-radius:14px; padding:14px 16px; border-left:5px solid #0e7c4a; box-shadow:0 1px 2px rgba(0,0,0,.05); }
+.kcc-kpi .n { font-size:2rem; font-weight:900; color:#0e7c4a; line-height:1; }
+.kcc-kpi .l { font-size:.7rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.4px; margin-top:4px; }
+.kcc-kpi.warn { border-left-color:#d97706; } .kcc-kpi.warn .n{ color:#d97706; }
+.kcc-kpi.blue { border-left-color:#2563eb; } .kcc-kpi.blue .n{ color:#2563eb; }
+.kcc-kpi.gray { border-left-color:#94a3b8; } .kcc-kpi.gray .n{ color:#64748b; }
+.kcc-tbl { width:100%; border-collapse:collapse; margin-top:8px; font-size:.85rem; background:#fff; }
+.kcc-tbl th { background:#0e7c4a; color:#fff; padding:9px 8px; font-size:.72rem; text-align:left; text-transform:uppercase; letter-spacing:.3px; }
+.kcc-tbl td { border-bottom:1px solid #eef2f7; padding:8px; vertical-align:middle; }
+.kcc-tbl tr:hover td { background:#f8fafc; }
+.badge { display:inline-block; padding:3px 9px; border-radius:20px; font-size:.72rem; font-weight:800; white-space:nowrap; }
+.b-none{ background:#f1f5f9; color:#64748b; } .b-draft{ background:#fef3c7; color:#92400e; }
+.b-rh{ background:#dbeafe; color:#1e40af; } .b-dg{ background:#e0e7ff; color:#3730a3; }
+.b-ok{ background:#dcfce7; color:#166534; } .b-rej{ background:#fee2e2; color:#991b1b; }
+.act { border:none; border-radius:8px; padding:5px 10px; font-size:.76rem; font-weight:700; cursor:pointer; margin:1px; }
+.act-link{ background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; }
+.act-mail{ background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; }
+.act-open{ background:#f5f3ff; color:#5b21b6; border:1px solid #ddd6fe; }
+.act:disabled{ opacity:.4; cursor:not-allowed; }
+.kcc-btn { background:#0e7c4a; color:#fff; border:none; border-radius:10px; padding:11px 20px; font-weight:800; font-size:.92rem; cursor:pointer; }
+.kcc-btn.sec { background:#fff; color:#0e7c4a; border:2px solid #0e7c4a; }
+.kcc-btn:disabled{ opacity:.5; cursor:not-allowed; }
+.kcc-note { background:#f1f5f9; border-left:4px solid #0e7c4a; border-radius:8px; padding:10px 14px; font-size:.82rem; color:#475569; margin:8px 0; }
+@media (max-width:640px){ .kcc-ctrl select,.kcc-ctrl input{min-width:100%;} }
+</style>
+
+<div class="kyad kcc">
+  <div class="kyad-hero" style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
+    <div>
+      <h1><span class="ico">🗓️</span> Campagne de congés — Cockpit RH</h1>
+      <p>Définissez la période de l'année, ouvrez la campagne (brouillon + lien par équipe), suivez les soumissions.</p>
+    </div>
+    <a class="btn btn-light btn-sm" href="/calendrier-conges"><i class="bi bi-calendar3"></i> Calendrier annuel</a>
+  </div>
+
+  <div class="kcc-ctrl">
+    <div><label>Année de campagne</label><select id="kcc-annee"></select></div>
+    <div><label>Statut</label><div id="kcc-statut" style="padding:8px 0;font-weight:800;">—</div></div>
+  </div>
+
+  <!-- Définition de la période -->
+  <div class="kcc-def">
+    <h3>1 · Définir la période</h3>
+    <div class="kcc-ctrl" style="margin-top:6px;">
+      <div><label>Ouverture</label><input type="date" id="kcc-open"></div>
+      <div><label>Échéance (date limite)</label><input type="date" id="kcc-limit"></div>
+      <div style="flex:1;min-width:240px;"><label>Message aux chefs (optionnel)</label>
+        <input type="text" id="kcc-msg" placeholder="Ex : merci de saisir avant la réunion CODIR…" style="width:100%;"></div>
+      <div><button class="kcc-btn sec" id="kcc-save" onclick="enregistrer()">💾 Enregistrer</button></div>
+    </div>
+  </div>
+
+  <!-- Ouverture -->
+  <div class="kcc-def">
+    <h3>2 · Ouvrir la campagne</h3>
+    <div class="kcc-note">Génère un <b>brouillon pré-rempli</b> pour chaque équipe (membres chargés, périodes de l'an passé reconduites si disponibles) et prépare le lien de saisie de chaque chef.</div>
+    <label style="font-size:.85rem;display:flex;align-items:center;gap:8px;margin:8px 0;">
+      <input type="checkbox" id="kcc-mail" checked> Envoyer aussi l'invitation par e-mail aux chefs
+    </label>
+    <button class="kcc-btn" id="kcc-open-btn" onclick="ouvrir()">🚀 Ouvrir la campagne</button>
+  </div>
+
+  <!-- KPI -->
+  <div class="kcc-kpis" id="kcc-kpis"></div>
+
+  <!-- Suivi par équipe -->
+  <h3 style="color:#0e7c4a;margin:6px 0;">3 · Suivi par équipe</h3>
+  <div style="overflow-x:auto;">
+    <table class="kcc-tbl">
+      <thead><tr>
+        <th style="width:22%;">Équipe</th>
+        <th style="width:16%;">Chef</th>
+        <th style="width:12%;">État</th>
+        <th style="width:8%;">Empl.</th>
+        <th style="width:8%;">Jours</th>
+        <th style="width:10%;">Mise à jour</th>
+        <th style="width:24%;">Actions</th>
+      </tr></thead>
+      <tbody id="kcc-body"><tr><td colspan="7" style="text-align:center;padding:20px;color:#94a3b8;">Chargement…</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+let DATA = null;
+
+function badge(etat){
+  const m = {
+    "Pas lancé":["b-none","Pas lancé"], "Brouillon":["b-draft","Brouillon"],
+    "En attente RH":["b-rh","En attente RH"], "En attente DG":["b-dg","En attente DG"],
+    "Approuvé":["b-ok","Approuvé ✓"], "Rejeté":["b-rej","Rejeté"],
+  };
+  const [c,l] = m[etat] || ["b-draft", etat];
+  return `<span class="badge ${c}">${l}</span>`;
+}
+
+async function load(){
+  const annee = document.getElementById('kcc-annee').value || new Date().getFullYear();
+  const r = await frappe.call({method:'kya_hr.api.campagne_conges.get_campagne', args:{annee}});
+  DATA = r.message;
+  render();
+}
+
+function render(){
+  const d = DATA.definition, k = DATA.kpi;
+  // sélecteur années
+  const selA = document.getElementById('kcc-annee');
+  if(!selA.dataset.filled){
+    selA.innerHTML = DATA.annees.map(a=>`<option value="${a}"${a===DATA.annee?' selected':''}>${a}</option>`).join('');
+    selA.dataset.filled = 1;
+    selA.addEventListener('change', ()=>{ selA.dataset.filled=1; load(); });
+  }
+  document.getElementById('kcc-statut').textContent = d.statut;
+  document.getElementById('kcc-open').value = d.date_ouverture || '';
+  document.getElementById('kcc-limit').value = d.date_limite || '';
+  document.getElementById('kcc-msg').value = d.message_chef || '';
+
+  document.getElementById('kcc-kpis').innerHTML = `
+    <div class="kcc-kpi gray"><div class="n">${k.total}</div><div class="l">Équipes</div></div>
+    <div class="kcc-kpi blue"><div class="n">${k.lances}</div><div class="l">Lancées</div></div>
+    <div class="kcc-kpi warn"><div class="n">${k.en_attente}</div><div class="l">À soumettre</div></div>
+    <div class="kcc-kpi"><div class="n">${k.soumis}</div><div class="l">Soumises</div></div>
+    <div class="kcc-kpi"><div class="n">${k.approuves}</div><div class="l">Approuvées</div></div>
+    <div class="kcc-kpi gray"><div class="n">${k.non_lances}</div><div class="l">Non lancées</div></div>`;
+
+  const body = document.getElementById('kcc-body');
+  if(!DATA.equipes.length){ body.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:#94a3b8;">Aucune équipe avec chef défini.</td></tr>`; return; }
+  body.innerHTML = DATA.equipes.map(e=>{
+    const mailBtn = e.a_email
+      ? `<button class="act act-mail" onclick="mailer('${e.equipe}')">✉ Envoyer</button>`
+      : `<button class="act act-mail" disabled title="Chef sans e-mail">✉ —</button>`;
+    const openBtn = e.planning
+      ? `<a class="act act-open" href="/app/planning-conge-equipe/${e.planning}" target="_blank">📄 Ouvrir</a>` : '';
+    return `<tr>
+      <td><b>${e.nom_equipe}</b>${e.departement?`<div style="font-size:.72rem;color:#94a3b8;">${e.departement}</div>`:''}</td>
+      <td>${e.chef_nom}</td>
+      <td>${badge(e.etat)}</td>
+      <td style="text-align:center;">${e.nb_employes||'—'}</td>
+      <td style="text-align:center;">${e.total_jours||'—'}</td>
+      <td style="font-size:.78rem;color:#64748b;">${e.maj||'—'}</td>
+      <td>
+        <button class="act act-link" onclick="copier('${e.lien}',this)">🔗 Copier lien</button>
+        ${mailBtn} ${openBtn}
+      </td></tr>`;
+  }).join('');
+}
+
+async function enregistrer(){
+  const annee = document.getElementById('kcc-annee').value;
+  const btn = document.getElementById('kcc-save'); btn.disabled=true;
+  try{
+    await frappe.call({method:'kya_hr.api.campagne_conges.definir_campagne', args:{
+      annee,
+      date_ouverture: document.getElementById('kcc-open').value || null,
+      date_limite: document.getElementById('kcc-limit').value || null,
+      message_chef: document.getElementById('kcc-msg').value || '',
+    }});
+    frappe.show_alert({message:'Définition enregistrée ✅', indicator:'green'});
+    await load();
+  } finally { btn.disabled=false; }
+}
+
+function ouvrir(){
+  const annee = document.getElementById('kcc-annee').value;
+  const mail = document.getElementById('kcc-mail').checked;
+  frappe.confirm(
+    `Ouvrir la campagne <b>${annee}</b> ?<br>Un brouillon sera préparé pour chaque équipe`
+    + (mail ? ' et un e-mail envoyé à chaque chef.' : '.'),
+    async ()=>{
+      const btn = document.getElementById('kcc-open-btn'); btn.disabled=true; btn.textContent='Ouverture…';
+      try{
+        const r = await frappe.call({method:'kya_hr.api.campagne_conges.ouvrir', args:{annee, envoyer_mails: mail?1:0}});
+        const m = r.message||{};
+        frappe.msgprint({title:'Campagne ouverte ✅', indicator:'green',
+          message:`${m.crees||0} brouillon(s) créé(s), ${m.ignores||0} déjà existant(s), ${m.mails||0} e-mail(s) envoyé(s).`});
+        await load();
+      } finally { btn.disabled=false; btn.textContent='🚀 Ouvrir la campagne'; }
+    });
+}
+
+async function mailer(equipe){
+  const annee = document.getElementById('kcc-annee').value;
+  try{
+    await frappe.call({method:'kya_hr.api.campagne_conges.relancer_equipe', args:{equipe, annee}});
+    frappe.show_alert({message:'Invitation envoyée au chef ✉', indicator:'green'});
+    await load();
+  }catch(e){ /* message déjà affiché par frappe */ }
+}
+
+function copier(lien, btn){
+  const done = ()=>{ const t=btn.textContent; btn.textContent='✓ Copié'; setTimeout(()=>btn.textContent=t,1500); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(lien).then(done).catch(()=>prompt('Copiez le lien :', lien));
+  } else { prompt('Copiez le lien :', lien); }
+}
+
+frappe.ready(load);
+</script>
+{% endblock %}

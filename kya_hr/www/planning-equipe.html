@@ -71,8 +71,11 @@ let MEMBRES = [], LEAVE_TYPES = [];
 
 function opt(v,t,sel){ return `<option value="${v}"${sel?' selected':''}>${t||v}</option>`; }
 
+function qparam(k){ return new URLSearchParams(window.location.search).get(k); }
+
 async function init(){
-  document.getElementById('kpe-annee').value = new Date().getFullYear();
+  const qAnnee = qparam('annee');
+  document.getElementById('kpe-annee').value = qAnnee || new Date().getFullYear();
   // types de congé
   const lt = await frappe.call({method:'frappe.client.get_list',
     args:{doctype:'Leave Type', fields:['name'], limit_page_length:0, order_by:'name asc'}});
@@ -87,6 +90,9 @@ async function init(){
     return;
   }
   sel.innerHTML = teams.map(t=>opt(t.name, (t.nom_equipe||t.name)+(t.departement?(' · '+t.departement):''))).join('');
+  // Lien direct RH → chef : pré-sélection de l'équipe passée en paramètre.
+  const qEquipe = qparam('equipe');
+  if(qEquipe && teams.some(t=>t.name===qEquipe)) sel.value = qEquipe;
   sel.addEventListener('change', loadPlanning);
   document.getElementById('kpe-annee').addEventListener('change', loadPlanning);
   loadPlanning();
