@@ -57,6 +57,10 @@ CREATE_GRANTS: dict[str, list[str]] = {
     "PV Entree Materiel": ["Responsable Stock", "Chargé des Stocks"],
     "Retour Materiel KYA": ["Responsable Stock", "Chargé des Stocks"],
     "Inventaire KYA": ["Responsable Stock", "Chargé des Stocks"],
+    # Achats : peuvent initier demandes d'achat + bons de commande (opérations
+    # achats = priorité). Stock peut aussi initier une demande d'achat.
+    "Demande Achat KYA": ["Responsable Achats", "Responsable Stock", "Chargé des Stocks"],
+    "Bon Commande KYA": ["Responsable Achats"],
 }
 
 
