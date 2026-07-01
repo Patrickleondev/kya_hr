@@ -47,6 +47,9 @@ RH_ROLES = {
     "Maître de Stage",
     "Responsable des Stagiaires",
     "System Manager",
+    # L'Assistant(e) RH peut saisir les présences (marquage) sans le reste
+    # du cockpit RH : les endpoints présence sont ouverts, pas les autres pages.
+    "Assistant(e) RH",
 }
 
 

@@ -639,62 +639,70 @@
     }
   };
 
-  /* Signature -> role mapping */
+  /* Signature -> role mapping.
+     ALIGNÉ SUR LES VRAIS RÔLES PROD (01/07/2026). Cause du bug « pad de
+     signature grisé pour le signataire légitime » : les maps listaient des
+     rôles théoriques (HR Manager, Stock Manager, « Responsable Comptable »
+     inexistant) alors que les gens portent les rôles métier KYA (Responsable
+     RH, Responsable Stock, Chargé des Stocks, Comptable, DFC, DAAF, Chef
+     Equipe…). On liste désormais toutes les variantes réelles par étape. */
+  var CHEFS = ["Chef Service", "Chef Equipe", "Chef d'Équipe", "Responsable Equipe", "System Manager"];
+  var MAGASIN = ["Responsable Stock", "Chargé des Stocks", "Magasinier", "Stock Manager", "Stock User", "System Manager"];
   var SIGNATURE_ROLES = {
     "permission-sortie-stagiaire": {
       signature_stagiaire: null,
-      signature_chef: ["Chef Service", "HR Manager", "System Manager"],
-      signature_resp_stagiaires: ["Responsable des Stagiaires", "HR Manager", "HR User", "System Manager"],
-      signature_dg: ["Directeur Général", "System Manager"]
+      signature_chef: CHEFS.concat(["HR Manager"]),
+      signature_resp_stagiaires: ["Responsable des Stagiaires", "Maître de Stage", "Responsable RH", "HR Manager", "HR User", "System Manager"],
+      signature_dg: ["Directeur Général", "DG", "System Manager"]
     },
     "permission-sortie-employe": {
       signature_employe: null,
-      signature_chef: ["Chef Service", "HR Manager", "System Manager"],
-      signature_rh: ["HR Manager", "HR User", "System Manager"],
-      signature_dga: ["DGA", "Directeur Général", "System Manager"]
+      signature_chef: CHEFS.concat(["HR Manager"]),
+      signature_rh: ["Responsable RH", "HR Manager", "HR User", "System Manager"],
+      signature_dga: ["DGA", "Directeur Général", "DG", "System Manager"]
     },
     "demande-achat": {
       signature_demandeur: null,
-      signature_chef: ["Chef Service", "System Manager"],
-      signature_dga: ["DGA", "Responsable Comptable", "System Manager"],
-      signature_dg: ["Directeur Général", "System Manager"]
+      signature_chef: CHEFS,
+      signature_dga: ["DGA", "DAAF", "Directeur Général", "System Manager"],
+      signature_dg: ["Directeur Général", "DG", "System Manager"]
     },
     "pv-sortie-materiel": {
       signature_demandeur: null,
-      signature_chef: ["Chef Service", "System Manager"],
-      signature_audit: ["Auditeur Interne", "DGA", "System Manager"],
-      signature_dga: ["DGA", "Directeur Général", "System Manager"],
-      signature_magasin: ["Stock Manager", "Stock User", "System Manager"]
+      signature_chef: CHEFS,
+      signature_audit: ["Auditeur Interne", "Auditeur", "DGA", "System Manager"],
+      signature_dga: ["DGA", "Directeur Général", "DG", "System Manager"],
+      signature_magasin: MAGASIN
     },
     "demande-conge": {
       signature_employe_la: null,
-      signature_superieur_la: ["Chef Service", "HR Manager", "System Manager"],
-      signature_rh_la: ["HR Manager", "HR User", "Responsable RH", "System Manager"],
-      signature_dg_la: ["Directeur Général", "System Manager"]
+      signature_superieur_la: CHEFS.concat(["Supérieur Immédiat", "HR Manager"]),
+      signature_rh_la: ["Responsable RH", "HR Manager", "HR User", "System Manager"],
+      signature_dg_la: ["Directeur Général", "DG", "System Manager"]
     },
     "pv-entree-materiel": {
-      signature_achats_stock: ["Stock Manager", "Stock User", "Chargé des Stocks", "Responsable Achats", "Purchase Manager", "System Manager"],
-      signature_comptable: ["Responsable Comptable", "Accounts Manager", "Accounts User", "System Manager"],
-      signature_audit: ["Auditeur Interne", "System Manager"]
+      signature_achats_stock: ["Responsable Stock", "Chargé des Stocks", "Responsable Achats", "Purchase Manager", "Stock Manager", "Stock User", "System Manager"],
+      signature_comptable: ["Comptable", "DFC", "DAAF", "Accounts Manager", "Accounts User", "System Manager"],
+      signature_audit: ["Auditeur Interne", "Auditeur", "DGA", "System Manager"]
     },
     "retour-materiel": {
       signature_retourneur: null,
-      signature_magasin: ["Stock Manager", "Stock User", "Chargé des Stocks", "System Manager"]
+      signature_magasin: MAGASIN
     },
     "etat-recap": {
       signature_redacteur: null,
-      signature_dfc: ["Responsable Comptable", "Accounts Manager", "System Manager"],
+      signature_dfc: ["DFC", "DAAF", "Accounts Manager", "System Manager"],
       signature_dg: ["Directeur Général", "DG", "System Manager"],
       signature_dga: ["DGA", "Directeur Général", "DG", "System Manager"]
     },
     "brouillard-caisse": {
       signature_caissiere: null,
-      signature_comptable: ["Accounts User", "Accounts Manager", "System Manager"],
-      signature_dfc: ["Responsable Comptable", "System Manager"]
+      signature_comptable: ["Comptable", "Accounts User", "Accounts Manager", "System Manager"],
+      signature_dfc: ["DFC", "DAAF", "Accounts Manager", "System Manager"]
     },
     "inventaire-kya": {
       signature_responsable: null,
-      signature_magasin: ["Stock Manager", "Stock User", "Chargé des Stocks", "System Manager"]
+      signature_magasin: MAGASIN
     }
   };
 

@@ -29,6 +29,22 @@ from __future__ import annotations
 import frappe
 
 
+# ── Grants de VISIBILITÉ métier (HORS workflow) ──
+# Certains rôles doivent VOIR/ÉDITER des documents dont ils ne sont PAS acteurs
+# de workflow. Cas réel : le magasin (Responsable Stock / Chargé des Stocks) ne
+# voyait AUCUNE demande d'achat sauf les siennes (Employee if_owner=1), car ces
+# rôles n'apparaissent pas dans le workflow de la Demande d'Achat → ils n'ont
+# donc aucune Custom DocPerm. On leur donne read+write (if_owner=0, SANS submit :
+# ils voient/éditent mais ne signent pas le circuit). Idempotent.
+VISIBILITY_RW_GRANTS: dict[str, list[str]] = {
+    "Demande Achat KYA": ["Responsable Stock", "Chargé des Stocks", "Responsable Achats"],
+    # Bon de commande : le magasin doit voir ce qui est commandé (Resp Achats déjà OK).
+    "Bon Commande KYA": ["Responsable Stock", "Chargé des Stocks"],
+    # Réception matériel : Responsable Stock manquait (Chargé/Resp Achats déjà présents).
+    "PV Entree Materiel": ["Responsable Stock"],
+}
+
+
 def _workflow_roles_by_doctype() -> dict[str, set[str]]:
     """Retourne {doctype: {roles approbateurs}} depuis les Workflows actifs."""
     result: dict[str, set[str]] = {}
@@ -119,6 +135,42 @@ def _ensure_approver_perm(doctype: str, role: str, submittable: bool) -> str:
         return "error"
 
 
+def _ensure_rw_perm(doctype: str, role: str) -> str:
+    """Garantit read+write (if_owner=0, SANS submit) pour un rôle observateur.
+
+    Utilise Custom DocPerm (les doctypes KYA sont pilotés par Custom DocPerm).
+    Ne touche PAS submit : le rôle voit/édite mais n'entre pas dans le circuit.
+    """
+    if not frappe.db.exists("Role", role):
+        return "role_missing"
+
+    from frappe.permissions import add_permission, update_permission_property
+
+    custom = frappe.db.get_value(
+        "Custom DocPerm",
+        {"parent": doctype, "role": role, "permlevel": 0},
+        ["name", "read", "write", "if_owner"],
+        as_dict=True,
+    )
+    if custom and custom.read and custom.write and not custom.if_owner:
+        return "unchanged"
+
+    try:
+        if not custom:
+            add_permission(doctype, role, 0)
+        update_permission_property(doctype, role, 0, "read", "1")
+        update_permission_property(doctype, role, 0, "write", "1")
+        update_permission_property(doctype, role, 0, "if_owner", "0")
+        return "updated" if custom else "created"
+    except Exception:
+        try:
+            frappe.log_error(frappe.get_traceback(),
+                             f"ensure_workflow_perms(rw): {doctype}/{role}")
+        except Exception:
+            pass
+        return "error"
+
+
 def _repair_invalid_perms(doctype: str) -> int:
     """Repare les perms incoherentes (submit/cancel/amend sans write)."""
     repaired = 0
@@ -178,6 +230,16 @@ def execute() -> dict:
             doctype_roles.append(f"{role}:{action}")
 
         summary["details"].append({"doctype": doctype, "roles": doctype_roles})
+
+    # ── Grants de visibilité métier (hors workflow) ──
+    summary["visibility"] = []
+    for doctype, roles in VISIBILITY_RW_GRANTS.items():
+        if not frappe.db.exists("DocType", doctype):
+            continue
+        for role in roles:
+            action = _ensure_rw_perm(doctype, role)
+            summary["actions"][action] = summary["actions"].get(action, 0) + 1
+            summary["visibility"].append(f"{doctype} <- {role}:{action}")
 
     try:
         frappe.db.commit()
