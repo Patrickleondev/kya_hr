@@ -46,8 +46,10 @@ WORKSPACE_ROLES: dict[str, list[str]] = {
     "Gestion Equipe": ["Chef Service", "Chef d'Équipe", "Chef Equipe"],
     "Espace RH": ["Responsable RH", "HR User", "HR Manager",
                   "Maître de Stage", "Responsable des Stagiaires"],
+    # Comptable ajouté : il vise les PV d'Entrée (réception matériel) — il doit
+    # atteindre l'espace Stock pour les traiter, au même titre que le DAAF.
     "Espace Stock": ["Chargé des Stocks", "Responsable Stock",
-                     "Stock Manager", "Stock User", "Magasinier"],
+                     "Stock Manager", "Stock User", "Magasinier", "Comptable"],
     "Espace Achats": ["Responsable Achats", "Purchase Manager",
                       "Purchase User", "Chef Service"],
     "Espace Comptabilite": ["Comptable", "Caissier", "Accounts Manager",
@@ -94,7 +96,7 @@ NATIVE_WORKSPACE_ROLES: dict[str, list[str]] = {
     "Buying": ["System Manager", "Purchase Manager", "Purchase User", "Responsable Achats"],
     # Stock — les magasiniers voient l'espace Stock natif + Espace Stock KYA
     "Stock": ["System Manager", "Stock Manager", "Stock User", "Chargé des Stocks",
-              "Responsable Stock", "Magasinier"],
+              "Responsable Stock", "Magasinier", "Comptable"],
     # Commercial → Selling + CRM ouverts aux commerciaux (demande explicite)
     "Selling": ["System Manager", "Sales User", "Sales Manager", "Sales Master Manager"],
     "CRM": ["System Manager", "Sales User", "Sales Manager", "Sales Master Manager"],
