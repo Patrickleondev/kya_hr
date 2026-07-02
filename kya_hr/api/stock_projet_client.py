@@ -1,7 +1,26 @@
 # -*- coding: utf-8 -*-
 """API du dashboard Stock par Projet / Client."""
 import frappe
+from frappe import _
 from frappe.utils import flt, add_days, today
+
+
+@frappe.whitelist()
+def export_xlsx(rows, sheet="Export"):
+    """Exporte une liste de lignes (onglet courant) en vrai fichier Excel (.xlsx).
+    On travaille en Excel ici, jamais en CSV."""
+    import base64
+    import json
+    from frappe.utils.xlsxutils import make_xlsx
+    if isinstance(rows, str):
+        rows = json.loads(rows or "[]")
+    if not rows:
+        frappe.throw(_("Aucune donnée à exporter."))
+    keys = list(rows[0].keys())
+    data = [keys] + [[r.get(k, "") for k in keys] for r in rows]
+    xlsx = make_xlsx(data, sheet[:31] or "Export")
+    return {"filename": "kya-stock-{0}-{1}.xlsx".format(sheet, today()),
+            "content_base64": base64.b64encode(xlsx.getvalue()).decode("ascii")}
 
 
 @frappe.whitelist()

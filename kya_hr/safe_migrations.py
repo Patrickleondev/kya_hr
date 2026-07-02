@@ -80,6 +80,7 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.maintenance.fix_formation_equipe.execute", "Besoin de Formation : champ équipe = Equipe KYA (pas Département) ; département + chef déduits de l'équipe"),
     ("kya_hr.maintenance.ensure_formation_v2.execute", "Formation v2 : réconcilie coût total ligne (direct+accessoire) + compteurs bénéficiaires (suivi par employé) sur plans existants"),
     ("kya_hr.maintenance.fix_workspace_anomalies.execute", "Workspaces : parent_page NULL->'' (icônes qui plantent au clic) + Gestion Équipe accent/emoji"),
+    ("kya_hr.maintenance.relabel_native_stock.execute", "Articles : écran ERPNext natif relabellisé en français (Code article/Nom/Groupe/Type/UdM) + droit create Item aux rôles stock (perms standard préservées)"),
 ]
 
 AFTER_INSTALL: list[tuple[str, str]] = [

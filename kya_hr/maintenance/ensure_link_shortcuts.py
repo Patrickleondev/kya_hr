@@ -47,6 +47,10 @@ EXTRA_URL_SHORTCUTS: dict[str, list[tuple[str, str]]] = {
     "Espace Stock": [
         ("🧭 Cockpit Stock (temps réel)", "/stock-kya"),
         ("📦 Dashboard Stocks", "/kya-stocks-dashboard"),
+        ("📋 Liste des articles", "/app/item"),
+        ("➕ Nouvel article", "/app/item/new"),
+        ("➕ Nouveau client", "/app/customer/new"),
+        ("➕ Nouveau projet / chantier", "/app/project/new"),
     ],
     "Espace Achats": [
         ("🛒 Dashboard Achats", "/achats-dashboard"),

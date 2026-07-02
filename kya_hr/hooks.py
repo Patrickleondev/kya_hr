@@ -78,6 +78,11 @@ website_redirects = [
     {"source": r"/desk/people", "target": "/app/hr", "redirect_http_status": 301},
     {"source": r"/desk/hrms", "target": "/app/hr", "redirect_http_status": 301},
     {"source": r"/desk/people/(.*)", "target": "/app/hr", "redirect_http_status": 301, "match_with_query_string": False},
+    # Cockpit stock : le nom /stock-kya se tape souvent à l'envers -> on redirige
+    # les variantes courantes (ancré $ pour ne PAS toucher /kya-stocks-dashboard).
+    {"source": r"/kya-stock$", "target": "/stock-kya", "redirect_http_status": 301},
+    {"source": r"/kya-stocks$", "target": "/stock-kya", "redirect_http_status": 301},
+    {"source": r"/cockpit-stock$", "target": "/stock-kya", "redirect_http_status": 301},
 ]
 
 # Auto-lien Employee <-> User a chaque connexion (self-healing du user_id).

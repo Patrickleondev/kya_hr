@@ -274,17 +274,17 @@ function loadReport() {
   });
 }
 
-function exportCSV() {
+async function exportCSV() {  // export Excel (.xlsx) — plus de CSV
   const active = document.querySelector('.kya-tab.active').dataset.tab;
   const rows = lastData[active] || [];
   if (!rows.length) { alert('Aucune donnée à exporter.'); return; }
-  const keys = Object.keys(rows[0]);
-  const csv = [keys.join(';'), ...rows.map(r => keys.map(k => `"${(r[k]??'').toString().replace(/"/g,'""')}"`).join(';'))].join('\n');
-  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `kya-stock-${active}-${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
+  const rep = (await frappe.call({ method: 'kya_hr.api.stock_projet_client.export_xlsx',
+    args: { rows: JSON.stringify(rows), sheet: active } })).message;
+  if (!rep) return;
+  const bin = atob(rep.content_base64); const arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  const u = URL.createObjectURL(new Blob([arr], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+  const a2 = document.createElement('a'); a2.href = u; a2.download = rep.filename; a2.click(); URL.revokeObjectURL(u);
 }
 
 document.addEventListener('DOMContentLoaded', () => { loadFilters(); loadReport(); });
