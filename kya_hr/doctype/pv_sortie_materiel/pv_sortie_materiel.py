@@ -14,6 +14,44 @@ class PVSortieMateriel(Document):
         block_self_approval(self)
         self.validate_items()
         self.set_demandeur_info()
+        self._ensure_customer_project()
+
+    def _ensure_customer_project(self):
+        """Le remplisseur n'a nulle part où aller : s'il tape un nom de client
+        ou de projet à la main (customer_manuel / project_manuel), on crée
+        automatiquement le Customer / Project et on le LIE — ou on relie
+        l'existant s'il porte déjà ce nom. Ça alimente le dashboard sorties
+        par client/projet sans navigation manuelle.
+        """
+        nom_client = (self.get("customer_manuel") or "").strip()
+        if not self.get("customer") and nom_client:
+            existing = frappe.db.get_value("Customer", {"customer_name": nom_client}, "name")
+            if existing:
+                self.customer = existing
+            else:
+                cust = frappe.get_doc({
+                    "doctype": "Customer",
+                    "customer_name": nom_client,
+                    "customer_type": "Company",
+                    "customer_group": frappe.db.get_value("Customer Group", {"is_group": 0}, "name")
+                        or "All Customer Groups",
+                    "territory": frappe.db.get_value("Territory", {"is_group": 0}, "name")
+                        or "All Territories",
+                })
+                cust.insert(ignore_permissions=True)
+                self.customer = cust.name
+
+        nom_projet = (self.get("project_manuel") or "").strip()
+        if not self.get("project") and nom_projet:
+            existing = frappe.db.get_value("Project", {"project_name": nom_projet}, "name")
+            if existing:
+                self.project = existing
+            else:
+                proj = frappe.get_doc({"doctype": "Project", "project_name": nom_projet})
+                if self.get("customer"):
+                    proj.customer = self.customer
+                proj.insert(ignore_permissions=True)
+                self.project = proj.name
 
     def _deja_poste(self):
         return bool(frappe.db.exists(
