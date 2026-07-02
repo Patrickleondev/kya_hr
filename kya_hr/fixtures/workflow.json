@@ -1141,7 +1141,7 @@
     "update_value": "En attente Achats & Stock"
    },
    {
-    "allow_edit": "Responsable Comptable",
+    "allow_edit": "Comptable",
     "doc_status": "0",
     "is_optional_state": 0,
     "send_email": 1,
@@ -1229,7 +1229,7 @@
    {
     "action": "Valider Comptabilité",
     "allow_self_approval": 0,
-    "allowed": "Responsable Comptable",
+    "allowed": "Comptable",
     "condition": null,
     "next_state": "En attente Audit",
     "state": "En attente Comptable"
@@ -1253,7 +1253,7 @@
    {
     "action": "Rejeter",
     "allow_self_approval": 0,
-    "allowed": "Responsable Comptable",
+    "allowed": "Comptable",
     "condition": null,
     "next_state": "Rejeté",
     "state": "En attente Comptable"
