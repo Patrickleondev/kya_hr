@@ -81,6 +81,8 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.maintenance.ensure_formation_v2.execute", "Formation v2 : réconcilie coût total ligne (direct+accessoire) + compteurs bénéficiaires (suivi par employé) sur plans existants"),
     ("kya_hr.maintenance.fix_workspace_anomalies.execute", "Workspaces : parent_page NULL->'' (icônes qui plantent au clic) + Gestion Équipe accent/emoji"),
     ("kya_hr.maintenance.relabel_native_stock.execute", "Articles : écran ERPNext natif relabellisé en français (Code article/Nom/Groupe/Type/UdM) + droit create Item aux rôles stock (perms standard préservées)"),
+    ("kya_hr.maintenance.ensure_pdf_branding.execute", "En-tête KYA (logo + coordonnées) sur les PDF qui en manquaient (Demande Achat/PV Sortie/PV Entrée/Brouillard/Inventaire)"),
+    ("kya_hr.maintenance.fix_user_permission_links.execute", "ignore_user_permissions sur les liens Employee/Company des fiches à workflow (User Permission 'ma fiche employé' bloquait les approbateurs : Comptable/DFC/Chef… ne pouvaient plus viser un doc d'autrui)"),
 ]
 
 AFTER_INSTALL: list[tuple[str, str]] = [

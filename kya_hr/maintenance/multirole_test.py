@@ -232,7 +232,10 @@ def _flows(emp):
                 ("Approuver", "chef", True, None),
                 ("Approuver", "daaf", True, None),
             ],
-            "negative": ("Soumettre", "comptable"),
+            # Le Comptable a un droit read+write légitime sur les demandes d'achat
+            # (visibilité compta) → ce n'est PAS un « mauvais rôle » ici. On teste
+            # un rôle réellement sans droit d'écriture (Caissier) pour le négatif.
+            "negative": ("Soumettre", "caissier"),
             "pdf": True,
         },
         {

@@ -94,9 +94,11 @@ NATIVE_WORKSPACE_ROLES: dict[str, list[str]] = {
     "Assets": ["System Manager", "Accounts Manager"],
     # Achats — les gens d'achats voient l'espace Buying natif + Espace Achats KYA
     "Buying": ["System Manager", "Purchase Manager", "Purchase User", "Responsable Achats"],
-    # Stock — les magasiniers voient l'espace Stock natif + Espace Stock KYA
-    "Stock": ["System Manager", "Stock Manager", "Stock User", "Chargé des Stocks",
-              "Responsable Stock", "Magasinier", "Comptable"],
+    # Stock NATIF — RÉSERVÉ aux admins. La gestion du stock passe désormais par
+    # l'Espace Stock KYA (cockpit maison + catalogue d'articles relabellisé). On
+    # masque l'espace natif (Stock Balance / Stock Entry) qui affiche l'ancien
+    # stock ERPNext et sèmerait la confusion (5900 modules, déchets de test…).
+    "Stock": ["System Manager"],
     # Commercial → Selling + CRM ouverts aux commerciaux (demande explicite)
     "Selling": ["System Manager", "Sales User", "Sales Manager", "Sales Master Manager"],
     "CRM": ["System Manager", "Sales User", "Sales Manager", "Sales Master Manager"],
@@ -116,6 +118,11 @@ PERSONAL_WORKSPACES = {"Espace Employes"}
 # qui y avait été ajouté avant la décision RES (le stagiaire passe par Mon Espace).
 WORKSPACE_ROLES_TO_REMOVE: dict[str, list[str]] = {
     "Espace Stagiaires": ["Stagiaire"],
+    # Espace Stock NATIF ERPNext : on retire tous les rôles métier (ils passent
+    # par l'Espace Stock KYA). Évite que la magasinière tombe sur l'ancien stock
+    # natif (Stock Balance) et croie que le stock est faux/vide.
+    "Stock": ["Stock Manager", "Stock User", "Chargé des Stocks",
+              "Responsable Stock", "Magasinier", "Comptable"],
 }
 
 
