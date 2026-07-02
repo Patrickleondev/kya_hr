@@ -61,6 +61,10 @@ CREATE_GRANTS: dict[str, list[str]] = {
     # achats = priorité). Stock peut aussi initier une demande d'achat.
     "Demande Achat KYA": ["Responsable Achats", "Responsable Stock", "Chargé des Stocks"],
     "Bon Commande KYA": ["Responsable Achats"],
+    # Compta : le Comptable peut être amené à SAISIR le brouillard de caisse
+    # (caissier absent/indisponible). Un Custom DocPerm existant à create=0
+    # neutralisait le create=1 du JSON → on le rétablit ici, source de vérité.
+    "Brouillard Caisse": ["Comptable"],
 }
 
 

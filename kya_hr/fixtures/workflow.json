@@ -1606,6 +1606,13 @@
     "message": "Le brouillard de caisse a été rejeté. Veuillez corriger et resoumettre.",
     "send_email": 1,
     "state": "Rejeté"
+   },
+   {
+    "allow_edit": "Comptable",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "send_email": 0,
+    "state": "Brouillon"
    }
   ],
   "transitions": [
@@ -1680,6 +1687,14 @@
     "condition": null,
     "next_state": "En attente Comptable",
     "state": "Rejeté"
+   },
+   {
+    "action": "Soumettre au Comptable",
+    "allow_self_approval": 0,
+    "allowed": "Comptable",
+    "condition": null,
+    "next_state": "En attente Comptable",
+    "state": "Brouillon"
    }
   ],
   "workflow_name": "Flux Brouillard Caisse",
