@@ -18,7 +18,6 @@
    "fieldname": "objet",
    "label": "Objet / Motif de la Sortie",
    "fieldtype": "Small Text",
-   "reqd": 1,
    "in_list_view": 1
   },
   {
