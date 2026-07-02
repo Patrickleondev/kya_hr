@@ -210,17 +210,22 @@ _REF_IMPORT = "Import Stock Initial"
 @frappe.whitelist()
 def importer_stock_initial(rows):
     """Import « template » : crée les articles ET les classe dans leur magasin
-    avec un stock d'ouverture. `rows` = [{code, nom, groupe, uom, magasin,
-    bon_etat, reparation}]. Idempotent : ré-importer une ligne (même article +
-    magasin) REMPLACE son ouverture (on ne cumule pas). Réservé au magasin."""
+    avec un stock d'ouverture. `rows` = [{code, nom, groupe, type, uom, magasin,
+    quantite, etat}]. Une ligne = un article, sa quantité et son ÉTAT dans un
+    magasin. Idempotent : ré-importer une ligne (même article + magasin + état)
+    REMPLACE son ouverture (on ne cumule pas). Réservé au magasin."""
     _guard(write=True)
     if isinstance(rows, str):
         rows = frappe.parse_json(rows)
+    _ensure_item_type_field()
     cree_item, maj_item, lignes_stock, erreurs = 0, 0, 0, []
     for r in rows:
         code = (r.get("code") or "").strip()
         nom = (r.get("nom") or code).strip()
         magasin = (r.get("magasin") or "").strip()
+        type_art = (r.get("type") or "").strip()
+        etat = _norm_etat(r.get("etat"))
+        quantite = flt(r.get("quantite"))
         if not code:
             continue
         try:
@@ -233,31 +238,30 @@ def importer_stock_initial(rows):
                     it.item_name = nom; changed = True
                 if groupe and it.item_group != groupe:
                     it.item_group = groupe; changed = True
+                if type_art and it.get("custom_type_article") != type_art:
+                    it.custom_type_article = type_art; changed = True
                 if changed:
                     it.flags.ignore_permissions = True; it.save(); maj_item += 1
             else:
                 it = frappe.new_doc("Item")
                 it.item_code = code; it.item_name = nom
                 it.item_group = groupe; it.stock_uom = uom; it.is_stock_item = 1
+                if type_art:
+                    it.custom_type_article = type_art
                 it.flags.ignore_permissions = True; it.insert(); cree_item += 1
 
             if magasin and frappe.db.exists("Warehouse", magasin):
-                bon = flt(r.get("bon_etat"))
-                repar = flt(r.get("reparation"))
-                # Remplace l'ouverture précédente de cet article dans ce magasin.
+                # Remplace l'ouverture précédente de cet article dans ce magasin
+                # POUR CET ÉTAT (bon état / réparation… coexistent).
                 old = frappe.get_all("Mouvement Stock KYA",
                     filters={"reference_doctype": _REF_IMPORT, "reference_name": magasin,
-                             "item": code}, pluck="name")
+                             "item": code, "etat": etat}, pluck="name")
                 for nm in old:
                     frappe.delete_doc("Mouvement Stock KYA", nm, ignore_permissions=True, force=True)
-                op = []
-                if bon:
-                    op.append({"item": code, "magasin": magasin, "quantite": bon, "etat": "Bon état"})
-                if repar:
-                    op.append({"item": code, "magasin": magasin, "quantite": repar, "etat": "En réparation"})
-                if op:
-                    enregistrer_mouvements(op, "Inventaire", reference_doctype=_REF_IMPORT,
-                                           reference_name=magasin)
+                if quantite:
+                    enregistrer_mouvements(
+                        [{"item": code, "magasin": magasin, "quantite": quantite, "etat": etat}],
+                        "Inventaire", reference_doctype=_REF_IMPORT, reference_name=magasin)
                     lignes_stock += 1
         except Exception:
             erreurs.append(code)
@@ -293,25 +297,61 @@ def modele_import_xlsx():
     _guard()
     import base64
     from frappe.utils.xlsxutils import make_xlsx
-    headers = ["code", "nom", "groupe", "uom", "magasin", "bon_etat", "reparation"]
-    exemple = ["ATT6", "Attache de 6", "Consommables", "Unit", "", 45, 0]
-    xlsx = make_xlsx([headers, exemple], "Modele import")
+    headers = ["code", "nom", "groupe", "type", "uom", "magasin", "quantite", "etat"]
+    exemple = ["ATT6", "Attache de 6", "Consommables", "Fixation", "Unité", "", 45, "Bon état"]
+    ex2 = ["DISJ32", "Disjoncteur 32A", "Électrique", "Protection", "Unité", "", 3, "En réparation"]
+    xlsx = make_xlsx([headers, exemple, ex2], "Modele import")
     return {"filename": "modele-import-stock-kya.xlsx",
             "content_base64": base64.b64encode(xlsx.getvalue()).decode("ascii")}
 
 
+# États possibles d'un article en stock (une seule dimension « état »).
+_ETATS = {
+    "bon etat": "Bon état", "bon état": "Bon état", "bon": "Bon état", "": "Bon état",
+    "neuf": "Neuf", "nouveau": "Neuf",
+    "en reparation": "En réparation", "en réparation": "En réparation",
+    "reparation": "En réparation", "réparation": "En réparation", "repar": "En réparation",
+    "hors service": "Hors service", "hs": "Hors service", "hors-service": "Hors service",
+}
+
+
+def _norm_etat(v):
+    """Normalise le libellé d'état vers une valeur canonique (défaut : Bon état)."""
+    return _ETATS.get((v or "").strip().lower(), "Bon état")
+
+
+def _ensure_item_type_field():
+    """Garantit un champ personnalisé « Type d'article » sur Item (idempotent)."""
+    if not frappe.db.exists("Custom Field", {"dt": "Item", "fieldname": "custom_type_article"}):
+        try:
+            frappe.get_doc({
+                "doctype": "Custom Field", "dt": "Item",
+                "fieldname": "custom_type_article", "label": "Type d'article",
+                "fieldtype": "Data", "insert_after": "item_group",
+            }).insert(ignore_permissions=True)
+        except Exception:
+            pass
+
+
 def _map_import_row(d):
-    """Normalise une ligne d'import (dict en-tête→valeur) vers le format attendu."""
+    """Normalise une ligne d'import (dict en-tête→valeur) vers le format attendu.
+
+    Format article (structure ERPNext + quantité/état par magasin) :
+    code, nom, groupe, type, uom, magasin, quantite, etat.
+    L'ÉTAT est UNE SEULE colonne (Bon état / En réparation / Neuf / Hors service),
+    pas un découpage en plusieurs colonnes.
+    """
     g = lambda *keys: next((str(d[k]).strip() for k in keys
                             if k in d and d[k] not in (None, "")), "")
     return {
         "code": g("code", "code de l'article", "code article"),
         "nom": g("nom", "nom de l'article", "designation", "désignation"),
-        "groupe": g("groupe", "groupe d'article", "groupe d'articles"),
-        "uom": g("uom", "udm", "unité", "unite", "unité de mesure"),
-        "magasin": g("magasin", "entrepot", "entrepôt", "warehouse"),
-        "bon_etat": flt(g("bon_etat", "bon état", "bon etat", "quantite", "quantité", "qte")),
-        "reparation": flt(g("reparation", "réparation", "en réparation", "en reparation")),
+        "groupe": g("groupe", "groupe d'article", "groupe d'articles", "groupe article"),
+        "type": g("type", "type d'article", "type article", "type darticle"),
+        "uom": g("uom", "udm", "unité", "unite", "unité de mesure", "u.d.m"),
+        "magasin": g("magasin", "entrepot", "entrepôt", "warehouse", "stock"),
+        "quantite": flt(g("quantite", "quantité", "qte", "quantity", "qté")),
+        "etat": _norm_etat(g("etat", "état", "condition", "etat article", "état article")),
     }
 
 
@@ -350,7 +390,7 @@ def importer_stock_fichier(content_base64, filename=None):
             if row["code"]:
                 rows.append(row)
     if not rows:
-        frappe.throw(_("Aucune ligne valide trouvée (vérifiez l'en-tête : code, nom, groupe, uom, magasin, bon_etat, reparation)."))
+        frappe.throw(_("Aucune ligne valide trouvée (vérifiez l'en-tête : code, nom, groupe, type, uom, magasin, quantite, etat)."))
     return importer_stock_initial(rows)
 
 

@@ -64,7 +64,7 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
         <h3 style="margin:0;">État d'inventaire (temps réel)</h3>
         <div style="display:flex;gap:8px;">
           <select id="ks-mag-filter" class="ks-btn sec" style="font-weight:600;"></select>
-          <button class="ks-btn" onclick="exportInv()">⬇️ Exporter (CSV)</button>
+          <button class="ks-btn" onclick="exportInv()">⬇️ Exporter (Excel)</button>
         </div>
       </div>
       <div id="ks-inv"></div>
@@ -93,13 +93,14 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
   <div id="pane-imp" class="ks-hide">
     <div class="ks-card">
       <h3>Importer des articles (classés par magasin)</h3>
-      <div class="ks-note">Colle des lignes <b>CSV</b> ou charge un fichier. Colonnes attendues (avec en-tête) :
-        <code>code, nom, groupe, uom, magasin, bon_etat, reparation</code>.
-        Ré-importer une ligne <b>remplace</b> l'ouverture de cet article dans ce magasin (pas de cumul).
-        <a href="#" onclick="modele();return false;">⬇️ Télécharger un modèle</a></div>
-      <input type="file" id="ks-file" accept=".xlsx,.csv" onchange="charger(this)">
-      <div style="font-size:.75rem;color:#94a3b8;margin:4px 0;">Charge directement ton fichier <b>Excel (.xlsx)</b> rempli (ou CSV). Ou colle des lignes ci-dessous.</div>
-      <textarea class="ks-ta" id="ks-csv" placeholder="code,nom,groupe,uom,magasin,bon_etat,reparation&#10;ATT6,Attache de 6,Consommables,Unit,Stores - D,45,0"></textarea>
+      <div class="ks-note">Charge ton fichier <b>Excel (.xlsx)</b> rempli — ou colle les lignes. Colonnes (avec en-tête) :
+        <code>code, nom, groupe, type, uom, magasin, quantite, etat</code>.
+        L'<b>état</b> est une seule colonne : <i>Bon état</i>, <i>En réparation</i>, <i>Neuf</i> ou <i>Hors service</i>.
+        Ré-importer une ligne (même article + magasin + état) <b>remplace</b> son ouverture (pas de cumul).
+        <a href="#" onclick="modele();return false;">⬇️ Télécharger le modèle Excel</a></div>
+      <input type="file" id="ks-file" accept=".xlsx" onchange="charger(this)">
+      <div style="font-size:.75rem;color:#94a3b8;margin:4px 0;">Charge directement ton fichier <b>Excel (.xlsx)</b> rempli. Ou colle des lignes ci-dessous.</div>
+      <textarea class="ks-ta" id="ks-csv" placeholder="code,nom,groupe,type,uom,magasin,quantite,etat&#10;ATT6,Attache de 6,Consommables,Fixation,Unité,Stores - D,45,Bon état"></textarea>
       <div style="margin-top:10px;display:flex;gap:8px;align-items:center;">
         <button class="ks-btn" id="ks-imp-btn" onclick="importer()">⬆️ Importer</button>
         <span id="ks-imp-res" style="font-size:.85rem;color:#475569;"></span>
@@ -206,8 +207,9 @@ function parseCSV(txt){
   return lines.slice(1).map(l=>{
     const c=l.split(/[;,]/);
     const g=n=>{const i=idx(n); return i>=0?(c[i]||'').trim().replace(/^"|"$/g,''):'';};
-    return {code:g('code'),nom:g('nom'),groupe:g('groupe'),uom:g('uom'),
-            magasin:g('magasin'),bon_etat:parseFloat(g('bon_etat'))||0,reparation:parseFloat(g('reparation'))||0};
+    return {code:g('code'),nom:g('nom'),groupe:g('groupe'),type:g('type'),uom:g('uom'),
+            magasin:g('magasin'),quantite:parseFloat(g('quantite')||g('quantité')||g('qte'))||0,
+            etat:g('etat')||g('état')||'Bon état'};
   }).filter(r=>r.code);
 }
 async function importer(){
