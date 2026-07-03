@@ -324,7 +324,9 @@ def _signataires_block(signataires):
     for i, spec in enumerate(_INV_SIGNATAIRES):
         s = (signataires[i] if signataires and i < len(signataires) else {}) or {}
         out.append({
-            "label": spec["label"],
+            # En-tête, nom ET fonction sont saisissables (rien de figé) : le
+            # libellé par défaut n'est qu'une suggestion, écrasable par l'agent.
+            "label": (s.get("label") or spec["label"]).strip(),
             "nom": (s.get("nom") or "").strip(),
             "fonction": (s.get("fonction") or "").strip(),
         })
