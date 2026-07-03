@@ -16,7 +16,28 @@ import re
 
 import frappe
 from frappe.model.document import Document
-from frappe.utils import formatdate, today
+from frappe.utils import formatdate, today, getdate
+
+# Mois en français : formatdate("dd MMMM yyyy") dépend de la locale du serveur
+# et rend souvent l'anglais ("22 May 2026"). On force le français.
+_MOIS_FR = ["", "janvier", "février", "mars", "avril", "mai", "juin",
+            "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
+
+
+def _date_fr(value):
+    """Retourne 'j mois aaaa' en français, ou '' si vide."""
+    if not value:
+        return ""
+    g = getdate(value)
+    return f"{g.day} {_MOIS_FR[g.month]} {g.year}"
+
+
+# Réécrit les appels Jinja `formatdate(<expr>, 'dd MMMM yyyy')` des html_body en
+# `date_fr(<expr>)` (les modèles CDI/CDD embarquent ce format anglais en dur).
+_FORMATDATE_FR_RE = re.compile(
+    r"frappe\.utils\.formatdate\(\s*(.+?)\s*,\s*['\"]dd MMMM yyyy['\"]\s*\)"
+)
+
 
 # {masculin|féminin} — la barre distingue les deux formes.
 _GENDER_RE = re.compile(r"\{([^{}|]*)\|([^{}]*)\}")
@@ -56,7 +77,10 @@ class KYAContractTemplate(Document):
         # Repli : mode avancé html_body (Jinja)
         if self.html_body:
             try:
-                return frappe.render_template(self.html_body, {"doc": ctx_doc, "frappe": frappe})
+                body = _FORMATDATE_FR_RE.sub(r"date_fr(\1)", self.html_body)
+                return frappe.render_template(
+                    body, {"doc": ctx_doc, "frappe": frappe, "date_fr": _date_fr}
+                )
             except Exception:
                 return self.html_body
         return ""
@@ -89,9 +113,9 @@ def _build_context(ctx_doc):
         "civilite": "M." if is_masc else "Mme",
         "poste": g("poste") or "",
         "type_contrat": g("contract_type") or "",
-        "date_debut": formatdate(g("date_debut"), "dd MMMM yyyy") if g("date_debut") else "",
-        "date_fin": formatdate(g("date_fin"), "dd MMMM yyyy") if g("date_fin") else "",
-        "date_jour": formatdate(today(), "dd MMMM yyyy"),
+        "date_debut": _date_fr(g("date_debut")),
+        "date_fin": _date_fr(g("date_fin")),
+        "date_jour": _date_fr(today()),
         "entreprise": "KYA-Energy Group",
         "dg": g("nom_dg") or "Prof. Yao AZOUMAH",
         "_is_masc": is_masc,
