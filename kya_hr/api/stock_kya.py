@@ -308,7 +308,7 @@ def importer_stock_initial(rows):
 # accessibles), sinon on laisse vide → tout le monde signe/écrit à la main à
 # l'impression. AUCUNE résolution auto (pas d'intervention requise).
 _INV_SIGNATAIRES = [
-    {"label": "CHARGÉ RH"},
+    {"label": "CHARGÉ DES STOCKS"},
     {"label": "RESPONSABLE STOCK"},
     {"label": "CHEF D'ÉQUIPE ACHATS ET STOCKS"},
 ]
