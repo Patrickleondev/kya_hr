@@ -302,24 +302,166 @@ def importer_stock_initial(rows):
             "erreurs": erreurs, "total": len(rows)}
 
 
+# ── Export « État d'inventaire » au format officiel KYA (AEA-ENG-13) ─────────
+# Bloc des 3 signataires = les fonctions qui VALIDENT toujours (décision user).
+# Les noms varient : le Responsable Stock les SAISIT au moment de l'export (champs
+# accessibles), sinon on laisse vide → tout le monde signe/écrit à la main à
+# l'impression. AUCUNE résolution auto (pas d'intervention requise).
+_INV_SIGNATAIRES = [
+    {"label": "CHARGÉ RH"},
+    {"label": "RESPONSABLE STOCK"},
+    {"label": "CHEF D'ÉQUIPE ACHATS ET STOCKS"},
+]
+
+
+def _signataires_block(signataires):
+    """Construit les 3 signataires à afficher. `signataires` (optionnel) = liste
+    alignée sur _INV_SIGNATAIRES : [{nom, fonction}, ...]. Non fourni → vides
+    (Fonction pré-remplie au libellé, éditable ; Nom vide, à écrire à la main)."""
+    if isinstance(signataires, str):
+        signataires = frappe.parse_json(signataires)
+    out = []
+    for i, spec in enumerate(_INV_SIGNATAIRES):
+        s = (signataires[i] if signataires and i < len(signataires) else {}) or {}
+        out.append({
+            "label": spec["label"],
+            "nom": (s.get("nom") or "").strip(),
+            "fonction": (s.get("fonction") or "").strip(),
+        })
+    return out
+
+
+def _logo_data_uri():
+    """Logo KYA en data URI (base64) — wkhtmltopdf ne résout pas les URLs /assets."""
+    import base64, os
+    for rel in ("public/images/logo_kya.png", "public/images/kya_logo.png"):
+        p = frappe.get_app_path("kya_hr", rel)
+        if os.path.exists(p):
+            with open(p, "rb") as f:
+                return "data:image/png;base64," + base64.b64encode(f.read()).decode()
+    return ""
+
+
+def _mag_label(name):
+    """« Magasin KYA - D » → « MAGASIN KYA » ; « SOGBOSSITO - D » → « MAGASIN SOGBOSSITO »."""
+    wn = frappe.db.get_value("Warehouse", name, "warehouse_name") or name
+    wn = wn.strip().upper()
+    return wn if wn.startswith("MAGASIN") else f"MAGASIN {wn}"
+
+
 @frappe.whitelist()
-def export_inventaire_xlsx(magasin=None):
-    """Exporte l'état d'inventaire (temps réel) en vrai fichier Excel (.xlsx)."""
+def export_inventaire_xlsx(magasin=None, signataires=None):
+    """Exporte l'état d'inventaire (temps réel) en Excel, au format de la fiche :
+    titre, date, sections par magasin (N°/Désignation/Total/Bon état/Réparation),
+    puis le bloc des 3 signataires (noms/fonctions saisis par le Resp. Stock)."""
     _guard()
     import base64
     from frappe.utils.xlsxutils import make_xlsx
     inv = etat_inventaire(magasin)
-    headers = ["Magasin", "N°", "Désignation", "Qté totale", "Bon état",
-               "En réparation", "Observations"]
-    data = [headers]
+    data = [["ETAT D'INVENTAIRE DE STOCK"],
+            ["DATE : " + frappe.utils.formatdate(today(), "dd/MM/yyyy")],
+            []]
     for s in inv["sections"]:
+        data.append([_mag_label(s["magasin"])])
+        data.append(["N°", "DESIGNATION", "TOTAL", "BON ETAT", "EN REPARAT°"])
         for l in s["lignes"]:
-            data.append([s["magasin"], l["n"], l["designation"], l["qte_totale"],
-                         l["bon_etat"], l["reparation"], l.get("obs", "")])
+            data.append([l["n"], l["designation"], l["qte_totale"],
+                         l["bon_etat"], l["reparation"]])
+        data.append([])
+    # Bloc signataires (fonctions fixes ; noms/fonctions saisis par le Resp. Stock)
+    sign = _signataires_block(signataires)
+    data.append([])
+    data.append([""] + [s["label"] for s in sign])
+    data.append(["Nom"] + [s["nom"] for s in sign])
+    data.append(["Fonction"] + [s["fonction"] for s in sign])
+    data.append(["Date"] + [frappe.utils.formatdate(today(), "dd/MM/yyyy") for _ in sign])
+    data.append(["SIGNATURE", "", "", ""])
     xlsx = make_xlsx(data, "Inventaire")
-    return {"filename": "inventaire-kya-{0}.xlsx".format(today()),
+    return {"filename": "etat-inventaire-kya-{0}.xlsx".format(today()),
             "content_base64": base64.b64encode(xlsx.getvalue()).decode("ascii"),
-            "rows": len(data) - 1}
+            "rows": sum(len(s["lignes"]) for s in inv["sections"])}
+
+
+@frappe.whitelist()
+def export_inventaire_pdf(magasin=None, signataires=None):
+    """Exporte l'état d'inventaire en PDF fidèle à la fiche KYA (AEA-ENG-13) :
+    logo + bandeau orange, date, sections par magasin, bloc 3 signataires
+    (noms/fonctions saisis par le Resp. Stock, sinon vides à signer à la main)."""
+    _guard()
+    import base64
+    from frappe.utils.pdf import get_pdf
+    inv = etat_inventaire(magasin)
+    date_fr = frappe.utils.formatdate(today(), "dd/MM/yyyy")
+
+    sections_html = ""
+    for s in inv["sections"]:
+        lignes = "".join(
+            f"<tr><td class='n'>{l['n']}</td><td class='d'>{frappe.utils.escape_html(l['designation'])}</td>"
+            f"<td class='q'>{_fmt(l['qte_totale'])}</td><td class='q'>{_fmt(l['bon_etat'])}</td>"
+            f"<td class='q'>{_fmt(l['reparation'])}</td></tr>"
+            for l in s["lignes"])
+        sections_html += (
+            f"<tr class='mag'><td colspan='5'>{_mag_label(s['magasin'])}</td></tr>{lignes}")
+    if not sections_html:
+        sections_html = "<tr><td colspan='5' style='text-align:center;padding:14px'>Aucun stock.</td></tr>"
+
+    sign = _signataires_block(signataires)
+    sig_cells = "".join(f"<th>{s['label']}</th>" for s in sign)
+    sig_nom = "".join(f"<td>{frappe.utils.escape_html(s['nom'])}</td>" for s in sign)
+    sig_fct = "".join(f"<td>{frappe.utils.escape_html(s['fonction'])}</td>" for s in sign)
+    sig_date = "".join(f"<td>{date_fr}</td>" for _ in sign)
+
+    logo = _logo_data_uri()
+    logo_img = f"<img src='{logo}'>" if logo else "&nbsp;"
+
+    html = f"""<html><head><meta charset='utf-8'><style>
+      * {{ font-family: 'DejaVu Sans Mono','Courier New',monospace; }}
+      .hdr {{ width:100%; border-collapse:collapse; margin-bottom:6px; }}
+      .hdr td {{ border:1px solid #000; vertical-align:middle; }}
+      .logo {{ width:150px; text-align:center; padding:6px; }}
+      .logo img {{ max-width:120px; }}
+      .band {{ background:#F4A83B; text-align:center; font-weight:bold;
+               font-size:15px; letter-spacing:1px; }}
+      .date {{ font-weight:bold; font-size:13px; margin:6px 0 8px; }}
+      table.inv {{ width:100%; border-collapse:collapse; font-size:11px; }}
+      table.inv th, table.inv td {{ border:1px solid #000; padding:2px 5px; }}
+      table.inv th {{ text-align:center; font-weight:bold; }}
+      td.n {{ text-align:center; width:5%; }} td.d {{ width:60%; }}
+      td.q {{ text-align:right; font-weight:bold; width:11%; }}
+      tr.mag td {{ text-align:center; font-weight:bold; background:#eee; }}
+      table.sig {{ width:100%; border-collapse:collapse; margin-top:26px; font-size:11px; }}
+      table.sig th, table.sig td {{ border:1px solid #000; padding:5px; text-align:center; }}
+      table.sig th {{ background:#ccc; }}
+      table.sig td.lbl {{ background:#f2f2f2; font-weight:bold; text-align:left; width:14%; }}
+      .sigrow td {{ height:34px; }}
+    </style></head><body>
+      <table class='hdr'><tr>
+        <td class='logo'>{logo_img}</td>
+        <td class='band'>ETAT D'INVENTAIRE DE STOCK</td>
+      </tr></table>
+      <div class='date'>DATE : {date_fr}</div>
+      <table class='inv'>
+        <thead><tr><th rowspan='2'>N°</th><th rowspan='2'>DESIGNATION</th>
+          <th colspan='3'>QUANTITE</th></tr>
+          <tr><th>TOTAL</th><th>BON ETAT</th><th>EN REPARAT°</th></tr></thead>
+        <tbody>{sections_html}</tbody>
+      </table>
+      <table class='sig'>
+        <tr><th class='lbl'></th>{sig_cells}</tr>
+        <tr><td class='lbl'>Nom</td>{sig_nom}</tr>
+        <tr><td class='lbl'>Fonction</td>{sig_fct}</tr>
+        <tr><td class='lbl'>Date</td>{sig_date}</tr>
+        <tr class='sigrow'><td class='lbl'>SIGNATURE</td><td></td><td></td><td></td></tr>
+      </table>
+    </body></html>"""
+    pdf = get_pdf(html)
+    return {"filename": "etat-inventaire-kya-{0}.pdf".format(today()),
+            "content_base64": base64.b64encode(pdf).decode("ascii")}
+
+
+def _fmt(v):
+    v = flt(v)
+    return str(int(v)) if v == int(v) else str(v)
 
 
 @frappe.whitelist()

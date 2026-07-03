@@ -65,9 +65,22 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
         <h3 style="margin:0;">État d'inventaire (temps réel)</h3>
         <div style="display:flex;gap:8px;">
           <select id="ks-mag-filter" class="ks-btn sec" style="font-weight:600;"></select>
-          <button class="ks-btn" onclick="exportInv()">⬇️ Exporter (Excel)</button>
+          <button class="ks-btn" onclick="exportInv()">⬇️ Excel</button>
+          <button class="ks-btn" onclick="exportInvPdf()">📄 PDF (fiche signée)</button>
         </div>
       </div>
+      <details style="margin:10px 0;">
+        <summary style="cursor:pointer;font-weight:700;font-size:.82rem;color:#0e7c4a;">✍️ Signataires de la fiche (optionnel — sinon signés à la main à l'impression)</summary>
+        <div class="ks-note" style="margin-top:8px;">Renseignez les noms/fonctions ; ils apparaîtront sur l'Excel et le PDF. La date s'imprime automatiquement ; chacun signe à la main.</div>
+        <table class="ks-tbl" style="font-size:.8rem;">
+          <thead><tr><th style="width:26%">Fonction validante</th><th style="width:37%">Nom</th><th style="width:37%">Fonction (libre)</th></tr></thead>
+          <tbody>
+            <tr><td><b>Chargé RH</b></td><td><input class="sig-in" data-i="0" data-f="nom" style="width:100%" placeholder="Nom du Chargé RH"></td><td><input class="sig-in" data-i="0" data-f="fonction" style="width:100%" placeholder="Chargé(e) RH"></td></tr>
+            <tr><td><b>Responsable Stock</b></td><td><input class="sig-in" data-i="1" data-f="nom" style="width:100%" placeholder="Nom du Responsable Stock"></td><td><input class="sig-in" data-i="1" data-f="fonction" style="width:100%" placeholder="Responsable Stock"></td></tr>
+            <tr><td><b>Chef d'équipe Achats et Stocks</b></td><td><input class="sig-in" data-i="2" data-f="nom" style="width:100%" placeholder="Nom du Chef d'équipe"></td><td><input class="sig-in" data-i="2" data-f="fonction" style="width:100%" placeholder="Chef d'équipe Achats et Stocks"></td></tr>
+          </tbody>
+        </table>
+      </details>
       <div id="ks-inv"></div>
     </div>
   </div>
@@ -249,11 +262,27 @@ async function saiSave(){
   finally{ btn.disabled=false; }
 }
 
+function collectSignataires(){
+  const sg=[{},{},{}];
+  document.querySelectorAll('.sig-in').forEach(i=>{ sg[+i.dataset.i][i.dataset.f]=i.value.trim(); });
+  return sg;
+}
 async function exportInv(){
   const f=document.getElementById('ks-mag-filter').value;
-  const r=(await frappe.call({method:'kya_hr.api.stock_kya.export_inventaire_xlsx',args:{magasin:f||null}})).message;
+  const r=(await frappe.call({method:'kya_hr.api.stock_kya.export_inventaire_xlsx',
+    args:{magasin:f||null, signataires:JSON.stringify(collectSignataires())}})).message;
   if(!r||!r.rows){ frappe.show_alert({message:'Aucune ligne à exporter.',indicator:'orange'}); return; }
   dlB64(r.content_base64, r.filename);
+}
+async function exportInvPdf(){
+  const f=document.getElementById('ks-mag-filter').value;
+  const r=(await frappe.call({method:'kya_hr.api.stock_kya.export_inventaire_pdf',
+    args:{magasin:f||null, signataires:JSON.stringify(collectSignataires())}})).message;
+  if(!r){ frappe.show_alert({message:'Export impossible.',indicator:'orange'}); return; }
+  const bin=atob(r.content_base64); const arr=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+  const u=URL.createObjectURL(new Blob([arr],{type:'application/pdf'}));
+  const a=document.createElement('a'); a.href=u; a.download=r.filename; a.click(); URL.revokeObjectURL(u);
 }
 function modele(){
   // Modèle d'import : Excel (.xlsx) côté serveur pour rester cohérent avec vos outils.
