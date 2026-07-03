@@ -64,11 +64,11 @@
  ],
  "fields": [
   {"fieldname": "section_id", "fieldtype": "Section Break", "label": "Identification"},
-  {"fieldname": "contract_type", "fieldtype": "Select", "label": "Type de Contrat", "options": "Stage Professionnel\nStage Académique\nCDI\nCDD\nPrestataire", "reqd": 1, "in_list_view": 1, "in_standard_filter": 1},
+  {"fieldname": "contract_type", "fieldtype": "Select", "label": "Type de Contrat", "options": "Stage Professionnel\nStage Académique\nStage d'Immersion\nCDI\nCDD\nPrestataire", "reqd": 1, "in_list_view": 1, "in_standard_filter": 1},
   {"fieldname": "template", "fieldtype": "Link", "label": "Template", "options": "KYA Contract Template"},
   {"fieldname": "column_id1", "fieldtype": "Column Break"},
   {"fieldname": "workflow_state", "fieldtype": "Link", "label": "Statut", "options": "Workflow State", "read_only": 1, "in_list_view": 1, "in_standard_filter": 1},
-  {"fieldname": "etablissement_scolaire", "fieldtype": "Data", "label": "Établissement Scolaire", "depends_on": "eval:doc.contract_type=='Stage Académique'"},
+  {"fieldname": "etablissement_scolaire", "fieldtype": "Data", "label": "Établissement Scolaire", "depends_on": "eval:['Stage Académique',\"Stage d'Immersion\"].includes(doc.contract_type)"},
 
   {"fieldname": "section_employee", "fieldtype": "Section Break", "label": "Signataire"},
   {"fieldname": "employee", "fieldtype": "Link", "label": "Employé / Stagiaire créé", "options": "Employee", "read_only": 1, "in_list_view": 1, "in_standard_filter": 1, "description": "Renseigné après finalisation du contrat, lorsque le dossier Employee/Stagiaire est créé."},
@@ -90,7 +90,7 @@
 
   {"fieldname": "section_contract_info", "fieldtype": "Section Break", "label": "Informations du Contrat"},
   {"fieldname": "date_debut", "fieldtype": "Date", "label": "Date de Début", "reqd": 1, "in_list_view": 1},
-  {"fieldname": "duree_mois", "fieldtype": "Int", "label": "Durée (mois)", "depends_on": "eval:['Stage Professionnel','Stage Académique','CDD','Prestataire'].includes(doc.contract_type)"},
+  {"fieldname": "duree_mois", "fieldtype": "Int", "label": "Durée (mois)", "depends_on": "eval:['Stage Professionnel','Stage Académique',\"Stage d'Immersion\",'CDD','Prestataire'].includes(doc.contract_type)"},
   {"fieldname": "date_fin", "fieldtype": "Date", "label": "Date de Fin", "depends_on": "eval:doc.contract_type!='CDI'"},
   {"fieldname": "periode_essai_mois", "fieldtype": "Int", "label": "Période d'essai (mois)", "default": "1", "depends_on": "eval:['CDI','CDD'].includes(doc.contract_type)"},
   {"fieldname": "column_contract", "fieldtype": "Column Break"},
@@ -98,7 +98,7 @@
   {"fieldname": "departement", "fieldtype": "Link", "label": "Département", "options": "Department"},
   {"fieldname": "categorie_grille", "fieldtype": "Data", "label": "Catégorie grille", "default": "C des Cadres", "depends_on": "eval:['CDI','CDD'].includes(doc.contract_type)"},
   {"fieldname": "echelon_grille", "fieldtype": "Data", "label": "Échelon grille", "default": "I1", "depends_on": "eval:['CDI','CDD'].includes(doc.contract_type)"},
-  {"fieldname": "indemnite_mensuelle", "fieldtype": "Currency", "label": "Indemnité Mensuelle (XOF)", "options": "XOF", "depends_on": "eval:['Stage Professionnel','Stage Académique'].includes(doc.contract_type)"},
+  {"fieldname": "indemnite_mensuelle", "fieldtype": "Currency", "label": "Indemnité Mensuelle (XOF)", "options": "XOF", "depends_on": "eval:['Stage Professionnel','Stage Académique',\"Stage d'Immersion\"].includes(doc.contract_type)"},
   {"fieldname": "salaire_mensuel", "fieldtype": "Currency", "label": "Salaire Mensuel (XOF)", "options": "XOF", "depends_on": "eval:['CDI','CDD'].includes(doc.contract_type)"},
   {"fieldname": "montant_mission", "fieldtype": "Currency", "label": "Montant Mission (XOF)", "options": "XOF", "depends_on": "eval:doc.contract_type=='Prestataire'"},
 
@@ -106,7 +106,7 @@
   {"fieldname": "mission_principale", "fieldtype": "Small Text", "label": "Mission principale", "description": "Ex: assurer la maintenance des systèmes solaires"},
   {"fieldname": "taches", "fieldtype": "Table", "label": "Tâches du poste", "options": "KYA Contrat Tache", "description": "Liste à puces des tâches du poste, apparaîtra dans Article 3 du contrat"},
 
-  {"fieldname": "section_maitres", "fieldtype": "Section Break", "label": "Maîtres de Stage", "depends_on": "eval:['Stage Professionnel','Stage Académique'].includes(doc.contract_type)"},
+  {"fieldname": "section_maitres", "fieldtype": "Section Break", "label": "Maîtres de Stage", "depends_on": "eval:['Stage Professionnel','Stage Académique',\"Stage d'Immersion\"].includes(doc.contract_type)"},
   {"fieldname": "maitres_stage", "fieldtype": "Table", "label": "Maîtres de Stage", "options": "KYA Contrat Maitre Stage"},
 
     {"fieldname": "section_document_preview", "fieldtype": "Section Break", "label": "Aperçu du Document", "collapsible": 1},
