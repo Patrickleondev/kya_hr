@@ -1,0 +1,75 @@
+{
+ "name": "Client KYA",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "custom": 0,
+ "engine": "InnoDB",
+ "autoname": "field:nom_client",
+ "title_field": "nom_client",
+ "show_title_field_in_link": 1,
+ "search_fields": "nom_client, telephone",
+ "sort_field": "nom_client",
+ "sort_order": "ASC",
+ "track_changes": 1,
+ "fields": [
+  {
+   "fieldname": "nom_client",
+   "label": "Nom du client",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "unique": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "description": "Le nom du client. Aucun code à saisir."
+  },
+  {
+   "fieldname": "telephone",
+   "label": "Téléphone",
+   "fieldtype": "Data",
+   "options": "Phone",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "contact",
+   "label": "Personne à contacter",
+   "fieldtype": "Data",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "col_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "email",
+   "label": "Email",
+   "fieldtype": "Data",
+   "options": "Email"
+  },
+  {
+   "fieldname": "adresse",
+   "label": "Adresse",
+   "fieldtype": "Small Text"
+  },
+  {
+   "fieldname": "actif",
+   "label": "Actif",
+   "fieldtype": "Check",
+   "default": 1,
+   "in_list_view": 1
+  }
+ ],
+ "permissions": [
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "print": 1, "export": 1, "report": 1, "share": 1},
+  {"role": "Responsable Stock", "read": 1, "write": 1, "create": 1, "export": 1, "report": 1},
+  {"role": "Chargé des Stocks", "read": 1, "write": 1, "create": 1, "export": 1, "report": 1},
+  {"role": "Stock User", "read": 1, "create": 1, "report": 1},
+  {"role": "Responsable Achats", "read": 1, "write": 1, "create": 1, "report": 1},
+  {"role": "Chef Service", "read": 1, "write": 1, "create": 1, "report": 1},
+  {"role": "Sales User", "read": 1, "write": 1, "create": 1, "report": 1},
+  {"role": "Sales Manager", "read": 1, "write": 1, "create": 1, "report": 1},
+  {"role": "Directeur Général", "read": 1, "report": 1, "export": 1},
+  {"role": "DGA", "read": 1, "report": 1, "export": 1},
+  {"role": "Auditeur Interne", "read": 1, "report": 1},
+  {"role": "DAAF", "read": 1, "report": 1}
+ ]
+}

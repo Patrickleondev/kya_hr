@@ -76,7 +76,7 @@
    "fieldname": "project",
    "label": "Projet / Chantier (choisir un existant)",
    "fieldtype": "Link",
-   "options": "Project",
+   "options": "Projet KYA",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "description": "Choisissez un projet déjà enregistré. Sinon, laissez vide et saisissez le nom plus bas."
@@ -85,8 +85,8 @@
    "fieldname": "customer",
    "label": "Client (choisir un existant)",
    "fieldtype": "Link",
-   "options": "Customer",
-   "fetch_from": "project.customer",
+   "options": "Client KYA",
+   "fetch_from": "project.client",
    "in_standard_filter": 1,
    "description": "Choisissez un client déjà enregistré. Sinon, laissez vide et saisissez le nom plus bas."
   },

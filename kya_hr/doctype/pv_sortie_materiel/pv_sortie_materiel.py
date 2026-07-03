@@ -19,39 +19,23 @@ class PVSortieMateriel(Document):
     def _ensure_customer_project(self):
         """Le remplisseur n'a nulle part où aller : s'il tape un nom de client
         ou de projet à la main (customer_manuel / project_manuel), on crée
-        automatiquement le Customer / Project et on le LIE — ou on relie
-        l'existant s'il porte déjà ce nom. Ça alimente le dashboard sorties
-        par client/projet sans navigation manuelle.
+        automatiquement le Client KYA / Projet KYA (maison, SANS code) et on le
+        LIE — ou on relie l'existant s'il porte déjà ce nom. Ça alimente le
+        dashboard sorties par client/projet sans navigation manuelle.
+
+        NB : on n'utilise plus le Customer/Project natif ERPNext (réservé au CRM
+        commercial) ; ces répertoires maison sont légers et propres au stock.
         """
+        from kya_hr.kya_hr.doctype.client_kya.client_kya import creer_ou_recuperer as _client
+        from kya_hr.kya_hr.doctype.projet_kya.projet_kya import creer_ou_recuperer as _projet
+
         nom_client = (self.get("customer_manuel") or "").strip()
         if not self.get("customer") and nom_client:
-            existing = frappe.db.get_value("Customer", {"customer_name": nom_client}, "name")
-            if existing:
-                self.customer = existing
-            else:
-                cust = frappe.get_doc({
-                    "doctype": "Customer",
-                    "customer_name": nom_client,
-                    "customer_type": "Company",
-                    "customer_group": frappe.db.get_value("Customer Group", {"is_group": 0}, "name")
-                        or "All Customer Groups",
-                    "territory": frappe.db.get_value("Territory", {"is_group": 0}, "name")
-                        or "All Territories",
-                })
-                cust.insert(ignore_permissions=True)
-                self.customer = cust.name
+            self.customer = _client(nom_client)
 
         nom_projet = (self.get("project_manuel") or "").strip()
         if not self.get("project") and nom_projet:
-            existing = frappe.db.get_value("Project", {"project_name": nom_projet}, "name")
-            if existing:
-                self.project = existing
-            else:
-                proj = frappe.get_doc({"doctype": "Project", "project_name": nom_projet})
-                if self.get("customer"):
-                    proj.customer = self.customer
-                proj.insert(ignore_permissions=True)
-                self.project = proj.name
+            self.project = _projet(nom_projet, client=self.get("customer") or None)
 
     def _deja_poste(self):
         return bool(frappe.db.exists(

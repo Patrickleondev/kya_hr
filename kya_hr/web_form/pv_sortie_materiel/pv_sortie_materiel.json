@@ -52,14 +52,14 @@
   {
    "fieldname": "project",
    "fieldtype": "Link",
-   "options": "Project",
+   "options": "Projet KYA",
    "label": "Projet / Chantier",
    "description": "Obligatoire si destination = Client / Projet"
   },
   {
    "fieldname": "customer",
    "fieldtype": "Link",
-   "options": "Customer",
+   "options": "Client KYA",
    "label": "Client (référence)",
    "description": "Sélectionnez un client existant. Laissez vide si nouveau client (utilisez le champ manuel ci-dessous)."
   },

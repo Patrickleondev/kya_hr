@@ -72,6 +72,8 @@ KYA_AUTO_SIDEBARS = [
             {"label": "PV Sortie Matériel", "link_to": "PV Sortie Materiel", "link_type": "DocType", "icon": "upload"},
             {"label": "Retours Matériel", "link_to": "Retour Materiel KYA", "link_type": "DocType", "icon": "rotate-ccw"},
             {"label": "Inventaires", "link_to": "Inventaire KYA", "link_type": "DocType", "icon": "clipboard"},
+            {"label": "Clients", "link_to": "Client KYA", "link_type": "DocType", "icon": "users"},
+            {"label": "Projets / Chantiers", "link_to": "Projet KYA", "link_type": "DocType", "icon": "briefcase"},
         ],
     },
     {

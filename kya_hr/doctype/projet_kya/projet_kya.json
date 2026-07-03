@@ -1,0 +1,65 @@
+{
+ "name": "Projet KYA",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "custom": 0,
+ "engine": "InnoDB",
+ "autoname": "field:nom_projet",
+ "title_field": "nom_projet",
+ "show_title_field_in_link": 1,
+ "search_fields": "nom_projet, client",
+ "sort_field": "nom_projet",
+ "sort_order": "ASC",
+ "track_changes": 1,
+ "fields": [
+  {
+   "fieldname": "nom_projet",
+   "label": "Nom du projet / chantier",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "unique": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "description": "Le nom du projet ou chantier. Aucun code à saisir."
+  },
+  {
+   "fieldname": "client",
+   "label": "Client",
+   "fieldtype": "Link",
+   "options": "Client KYA",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "col_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "lieu",
+   "label": "Lieu / Localité",
+   "fieldtype": "Data",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "actif",
+   "label": "Actif",
+   "fieldtype": "Check",
+   "default": 1,
+   "in_list_view": 1
+  }
+ ],
+ "permissions": [
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "print": 1, "export": 1, "report": 1, "share": 1},
+  {"role": "Responsable Stock", "read": 1, "write": 1, "create": 1, "export": 1, "report": 1},
+  {"role": "Chargé des Stocks", "read": 1, "write": 1, "create": 1, "export": 1, "report": 1},
+  {"role": "Stock User", "read": 1, "create": 1, "report": 1},
+  {"role": "Responsable Achats", "read": 1, "write": 1, "create": 1, "report": 1},
+  {"role": "Chef Service", "read": 1, "write": 1, "create": 1, "report": 1},
+  {"role": "Sales User", "read": 1, "write": 1, "create": 1, "report": 1},
+  {"role": "Sales Manager", "read": 1, "write": 1, "create": 1, "report": 1},
+  {"role": "Directeur Général", "read": 1, "report": 1, "export": 1},
+  {"role": "DGA", "read": 1, "report": 1, "export": 1},
+  {"role": "Auditeur Interne", "read": 1, "report": 1},
+  {"role": "DAAF", "read": 1, "report": 1}
+ ]
+}
