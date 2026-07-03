@@ -325,6 +325,24 @@ def magasins():
 
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def magasin_link_query(doctype, txt, searchfield, start, page_len, filters):
+    """Query Link pour les champs « magasin » des formulaires stock : ne propose
+    que les magasins KYA (exclut les entrepôts techniques ERPNext : Goods In
+    Transit, Stores, All Warehouses…). Même exclusion que magasins()."""
+    natifs = tuple(_WH_NATIFS) or ("",)
+    like = "%{0}%".format(txt or "")
+    return frappe.db.sql("""
+        SELECT name, warehouse_name FROM `tabWarehouse`
+        WHERE is_group = 0 AND disabled = 0
+          AND IFNULL(warehouse_name, '') NOT IN %(natifs)s
+          AND (name LIKE %(like)s OR IFNULL(warehouse_name,'') LIKE %(like)s)
+        ORDER BY name
+        LIMIT %(start)s, %(page_len)s
+    """, {"natifs": natifs, "like": like, "start": start, "page_len": page_len})
+
+
+@frappe.whitelist()
 def categories():
     """Liste des catégories d'article (pour les pickers de saisie)."""
     _guard()
