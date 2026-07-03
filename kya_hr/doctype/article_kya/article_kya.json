@@ -1,0 +1,66 @@
+{
+ "name": "Article KYA",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "custom": 0,
+ "engine": "InnoDB",
+ "autoname": "format:ART-{#####}",
+ "title_field": "designation",
+ "show_title_field_in_link": 1,
+ "search_fields": "designation, categorie",
+ "sort_field": "designation",
+ "sort_order": "ASC",
+ "track_changes": 1,
+ "fields": [
+  {
+   "fieldname": "designation",
+   "label": "Désignation",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "unique": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "description": "Le nom de l'article tel qu'il apparaît sur la fiche d'inventaire. Pas de code à saisir."
+  },
+  {
+   "fieldname": "categorie",
+   "label": "Catégorie",
+   "fieldtype": "Link",
+   "options": "Categorie Article KYA",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "col_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "unite",
+   "label": "Unité",
+   "fieldtype": "Data",
+   "default": "Unité",
+   "in_list_view": 1,
+   "description": "Ex. : Unité, m (mètre), Boîte, Rouleau, Carton…"
+  },
+  {
+   "fieldname": "actif",
+   "label": "Actif",
+   "fieldtype": "Check",
+   "default": 1,
+   "in_list_view": 1
+  }
+ ],
+ "permissions": [
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "print": 1, "export": 1, "report": 1, "share": 1},
+  {"role": "Responsable Stock", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1, "report": 1},
+  {"role": "Chargé des Stocks", "read": 1, "write": 1, "create": 1, "export": 1, "report": 1},
+  {"role": "Stock User", "read": 1, "report": 1},
+  {"role": "Responsable Achats", "read": 1, "report": 1},
+  {"role": "Comptable", "read": 1, "report": 1},
+  {"role": "Directeur Général", "read": 1, "report": 1, "export": 1},
+  {"role": "DGA", "read": 1, "report": 1},
+  {"role": "Auditeur Interne", "read": 1, "report": 1, "export": 1},
+  {"role": "DAAF", "read": 1, "report": 1, "export": 1}
+ ]
+}

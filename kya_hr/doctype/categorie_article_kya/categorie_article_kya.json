@@ -1,0 +1,44 @@
+{
+ "name": "Categorie Article KYA",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "custom": 0,
+ "engine": "InnoDB",
+ "autoname": "field:categorie",
+ "title_field": "categorie",
+ "sort_field": "categorie",
+ "sort_order": "ASC",
+ "track_changes": 1,
+ "fields": [
+  {
+   "fieldname": "categorie",
+   "label": "Catégorie",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "unique": 1,
+   "in_list_view": 1,
+   "description": "Ex. : Modules PV, Onduleurs, Batteries, Câbles, Protection, Luminaires, Outillage, Consommables…"
+  },
+  {
+   "fieldname": "ordre",
+   "label": "Ordre d'affichage",
+   "fieldtype": "Int",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "description",
+   "label": "Description",
+   "fieldtype": "Small Text"
+  }
+ ],
+ "permissions": [
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "print": 1, "export": 1, "report": 1, "share": 1},
+  {"role": "Responsable Stock", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1, "report": 1},
+  {"role": "Chargé des Stocks", "read": 1, "write": 1, "create": 1, "export": 1, "report": 1},
+  {"role": "Stock User", "read": 1, "report": 1},
+  {"role": "Directeur Général", "read": 1, "report": 1},
+  {"role": "DGA", "read": 1, "report": 1},
+  {"role": "Auditeur Interne", "read": 1, "report": 1},
+  {"role": "DAAF", "read": 1, "report": 1}
+ ]
+}

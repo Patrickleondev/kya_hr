@@ -37,7 +37,7 @@
    "fieldname": "item",
    "label": "Article",
    "fieldtype": "Link",
-   "options": "Item",
+   "options": "Article KYA",
    "reqd": 1,
    "in_list_view": 1,
    "in_standard_filter": 1
@@ -46,7 +46,7 @@
    "fieldname": "item_name",
    "label": "Désignation",
    "fieldtype": "Data",
-   "fetch_from": "item.item_name",
+   "fetch_from": "item.designation",
    "read_only": 1,
    "in_list_view": 1
   },
