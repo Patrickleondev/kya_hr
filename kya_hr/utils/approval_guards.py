@@ -42,6 +42,14 @@ _FORBIDDEN_STATES = (
 # Profils privilégiés autorisés à valider à la place d'autrui (délégation RH).
 _PRIVILEGED_ROLES = {"System Manager", "HR Manager", "Responsable RH"}
 
+# Exceptions métier (doctype, état d'origine) : cas où l'auteur EST
+# légitimement l'approbateur. La magasinière crée l'inventaire ET le valide
+# (elle compte et signe pour le magasin). Miroir de la whitelist de
+# fix_workflow_self_approval.
+_SELF_APPROVAL_EXEMPT = {
+    ("Inventaire KYA", "En attente Magasin"),
+}
+
 # Champs de DÉLÉGATION : « au nom de » / bénéficiaire réel. Prioritaires.
 # Cas : un chef/responsable SAISIT une demande POUR un subordonné X. Le
 # bénéficiaire (celui qui ne doit pas s'auto-approuver) est X — PAS le
@@ -127,6 +135,8 @@ def block_self_approval(doc):
     # AVANCER sa fiche DEPUIS un état d'attente d'approbation.
     before = doc.get_doc_before_save()
     previous_state = (before.workflow_state if before else "") or ""
+    if (doc.doctype, previous_state) in _SELF_APPROVAL_EXEMPT:
+        return
     if previous_state in _FORBIDDEN_STATES:
         frappe.throw(
             "Vous ne pouvez pas valider votre propre demande. "

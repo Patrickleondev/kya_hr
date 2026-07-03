@@ -34,8 +34,14 @@ KYA_WORKSPACES = [
     "Espace Comptabilité",
     "Direction Generale",
     "Logistique",
-    "Inventaire & Sorties Matériel",
 ]
+
+# Icônes de bureau à SUPPRIMER : doublons/natifs qui perdaient les users.
+# - « Inventaire & Sorties Matériel » : doublon de l'Espace Stock (et son
+#   ancien contenu pointait le natif Stock Entry).
+# - « Stock » (erpnext) : espace natif — redirigeait la magasinière vers
+#   l'ERPNext brut ; réservé aux admins (accès direct /app/stock possible).
+ORPHAN_DESKTOP_ICONS = ["Inventaire & Sorties Matériel", "Stock"]
 
 # Sidebar a auto-creer si manquant : (titre, icon, workspace_name, items)
 KYA_AUTO_SIDEBARS = [
@@ -58,9 +64,13 @@ KYA_AUTO_SIDEBARS = [
         "app": "kya_hr",
         "workspace": "Espace Stock",
         "items": [
-            {"label": "PV Sortie Matériel", "link_to": "PV Sortie Materiel", "link_type": "DocType", "icon": "upload"},
+            # Maison d'abord : le cockpit gère soldes + ajout/import d'articles.
+            # PAS de lien natif (Item/Stock Entry/...) : ça perdait la magasinière.
+            {"label": "Cockpit Stock", "url": "/stock-kya", "link_type": "URL", "icon": "grid"},
             {"label": "PV Entrée Matériel", "link_to": "PV Entree Materiel", "link_type": "DocType", "icon": "download"},
-            {"label": "Articles", "link_to": "Item", "link_type": "DocType", "icon": "box"},
+            {"label": "PV Sortie Matériel", "link_to": "PV Sortie Materiel", "link_type": "DocType", "icon": "upload"},
+            {"label": "Retours Matériel", "link_to": "Retour Materiel KYA", "link_type": "DocType", "icon": "rotate-ccw"},
+            {"label": "Inventaires", "link_to": "Inventaire KYA", "link_type": "DocType", "icon": "clipboard"},
         ],
     },
     {
@@ -112,20 +122,6 @@ KYA_AUTO_SIDEBARS = [
             {"label": "Sorties Véhicule", "link_to": "Sortie Vehicule", "link_type": "DocType", "icon": "log-out"},
             {"label": "Véhicules", "link_to": "Vehicle", "link_type": "DocType", "icon": "truck"},
             {"label": "Documents Véhicule", "link_to": "Document Vehicule", "link_type": "DocType", "icon": "alert-triangle"},
-        ],
-    },
-    {
-        "title": "Inventaire & Sorties Matériel",
-        "icon": "🧾",
-        "module": "KYA HR",
-        "app": "kya_hr",
-        "workspace": "Inventaire Sorties Materiel",
-        "items": [
-            {"label": "Tableau de Bord Inventaires", "url": "/inventaire-dashboard", "link_type": "URL", "icon": "chart-column"},
-            {"label": "Inventaires", "link_to": "Inventaire KYA", "link_type": "DocType", "icon": "clipboard-list"},
-            {"label": "PV Entrée Matériel", "link_to": "PV Entree Materiel", "link_type": "DocType", "icon": "download"},
-            {"label": "PV Sortie Matériel", "link_to": "PV Sortie Materiel", "link_type": "DocType", "icon": "upload"},
-            {"label": "Mouvements Stock", "link_to": "Stock Entry", "link_type": "DocType", "icon": "repeat-2"},
         ],
     },
 ]
@@ -426,8 +422,6 @@ KYA_WORKSPACE_ICONS = {
     "Espace RH": "👥",
     "Espace Stagiaires": "🎓",
     "Espace Stock": "📦",
-    "Inventaire & Sorties Matériel": "🧾",
-    "Inventaire Sorties Materiel": "🧾",
     "Logistique": "🚚",
     "KYA Services": "📋",
     "Gestion Équipe": "👥",
@@ -687,7 +681,35 @@ def execute():
     _link_desktop_icon_to_sidebar("Espace Employes", ["Espace Employes", "Espace Employés"], "👤")
     _link_desktop_icon_to_sidebar("Espace Employés", ["Espace Employes", "Espace Employés"], "👤")
     _link_desktop_icon_to_sidebar("Espace Stagiaires", ["Espace Stagiaires"], "🎓")
-    _link_desktop_icon_to_sidebar("Inventaire & Sorties Matériel", ["Inventaire & Sorties Matériel", "Inventaire Sorties Materiel"], "🧾")
+
+    # 9bis. Icônes doublons/natives à retirer du bureau (voir ORPHAN_DESKTOP_ICONS)
+    for icon_label in ORPHAN_DESKTOP_ICONS:
+        for icon_name in frappe.get_all("Desktop Icon", filters={"label": icon_label}, pluck="name"):
+            frappe.delete_doc("Desktop Icon", icon_name, force=True, ignore_missing=True,
+                              ignore_permissions=True)
+            print(f"  [ICON ORPHELINE SUPPRIMEE] {icon_label}")
+    # ... ET des Desktop Layout par user (bureaux figés en JSON qui gardent la
+    # tuile même après suppression de l'icône).
+    orphan_set = set(ORPHAN_DESKTOP_ICONS)
+    for lay in frappe.get_all("Desktop Layout", fields=["name", "layout"]):
+        try:
+            data = json.loads(lay.layout or "[]")
+        except Exception:
+            continue
+        kept = [t for t in data if (t.get("label") or t.get("name")) not in orphan_set]
+        if len(kept) != len(data):
+            frappe.db.set_value("Desktop Layout", lay.name, "layout",
+                                json.dumps(kept), update_modified=False)
+            print(f"  [LAYOUT PURGE] {lay.name} (-{len(data) - len(kept)} tuile(s))")
+    frappe.cache.delete_key("desktop_icons")
+    # sidebar du doublon Inventaire & Sorties (le workspace caché reste, sans entrée)
+    for sb in ("Inventaire & Sorties Matériel", "Inventaire Sorties Materiel"):
+        sb_name = frappe.db.exists("Workspace Sidebar", {"title": sb})
+        if sb_name:
+            frappe.db.delete("Workspace Sidebar Item", {"parent": sb_name})
+            frappe.delete_doc("Workspace Sidebar", sb_name, force=True, ignore_missing=True,
+                              ignore_permissions=True)
+            print(f"  [SIDEBAR ORPHELINE SUPPRIMEE] {sb}")
 
     _upsert_desktop_url_icon("Mon Espace", "/mon-espace", "home", idx=5)
     for cfg in KYA_AUTO_SIDEBARS:
