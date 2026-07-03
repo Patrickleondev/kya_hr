@@ -30,7 +30,12 @@ class PermissionSortieStagiaire(Document):
         self.calc_nombre_jours()
 
     def validate_requester_employee_scope(self):
+        # NB : ce doctype est custom=1 → la vraie validation exécutée est le hook
+        # doc_events kya_hr.auto_calc_logic.compute_permission_sortie_stagiaire.
+        # On garde ce miroir cohérent (au cas où la classe serait chargée).
         user = frappe.session.user
+        if not self.is_new() and user != self.owner:
+            return
         if user in ("Administrator", "Guest") or _can_select_any_employee(user):
             return
         current_employee = _current_active_employee(user)
