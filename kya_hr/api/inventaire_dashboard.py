@@ -157,53 +157,51 @@ def create_inventaire(objet, date_inventaire=None, warehouse=None, type_inventai
 
 
 def _get_stock_rows(warehouse):
-    return frappe.db.sql(
-        """
-        SELECT b.item_code, b.warehouse, b.actual_qty AS qte_theorique, b.valuation_rate,
-               i.item_name AS designation, i.stock_uom AS uom
-        FROM `tabBin` b
-        INNER JOIN `tabItem` i ON i.name = b.item_code
-        WHERE b.warehouse = %s AND b.actual_qty > 0 AND i.disabled = 0
-        ORDER BY i.item_name
-        """,
-        (warehouse,),
-        as_dict=True,
-    )
+    """Lignes de stock d'un magasin depuis le grand livre maison (pas Bin).
+    qte_theorique = solde total (bon état + réparation) ; pas de valorisation."""
+    from kya_hr.api import stock_kya
+    out = []
+    for d in stock_kya.soldes(magasin=warehouse, only_nonzero=1):
+        out.append(frappe._dict({
+            "item_code": d["item"], "warehouse": warehouse,
+            "qte_theorique": d["total"], "valuation_rate": 0,
+            "designation": d["item_name"],
+            "uom": frappe.db.get_value("Article KYA", d["item"], "unite") or "",
+        }))
+    return out
 
 
 @frappe.whitelist()
 def get_stock_movements(warehouse=None, period="30"):
-    """Entrées/sorties de stock soumises, utilisées par le dashboard inventaire."""
+    """Entrées/sorties de stock, depuis le grand livre maison Mouvement Stock KYA
+    (plus de Stock Entry ERPNext)."""
     period = int(period or 30)
     date_from = add_days(today(), -period)
     args = {"date_from": date_from}
 
     wh_condition = ""
     if warehouse:
-        wh_condition = "AND COALESCE(d.t_warehouse, d.s_warehouse) = %(warehouse)s"
+        wh_condition = "AND m.magasin = %(warehouse)s"
         args["warehouse"] = warehouse
 
     rows = frappe.db.sql(f"""
-        SELECT se.name, se.posting_date, se.stock_entry_type, se.purpose,
-               se.pv_entree_materiel, se.pv_sortie_materiel,
-               d.item_code, d.item_name, d.qty,
-               COALESCE(d.t_warehouse, d.s_warehouse) AS warehouse,
-               COALESCE(d.amount, d.basic_amount, 0) AS amount
-        FROM `tabStock Entry` se
-        INNER JOIN `tabStock Entry Detail` d ON d.parent = se.name
-        WHERE se.docstatus = 1
-          AND se.posting_date >= %(date_from)s
-          AND se.purpose IN ('Material Receipt', 'Material Issue')
+        SELECT m.name, m.date_mouvement AS posting_date, m.type_mouvement AS purpose,
+               m.reference_doctype, m.reference_name,
+               m.item AS item_code, m.item_name, ABS(m.quantite) AS qty,
+               m.magasin AS warehouse, m.etat, 0 AS amount
+        FROM `tabMouvement Stock KYA` m
+        WHERE m.date_mouvement >= %(date_from)s
+          AND m.type_mouvement IN ('Entrée', 'Sortie')
           {wh_condition}
-        ORDER BY se.posting_date DESC, se.modified DESC
+        ORDER BY m.date_mouvement DESC, m.modified DESC
         LIMIT 30
     """, args, as_dict=True)
 
     totals = {"entrees_qty": 0, "sorties_qty": 0, "mouvements": len(rows)}
     for row in rows:
-        if row.purpose == "Material Receipt":
+        if row.purpose == "Entrée":
             totals["entrees_qty"] += flt(row.qty)
-        elif row.purpose == "Material Issue":
+        elif row.purpose == "Sortie":
             totals["sorties_qty"] += flt(row.qty)
 
     return {"totals": totals, "rows": rows}
@@ -211,23 +209,14 @@ def get_stock_movements(warehouse=None, period="30"):
 
 @frappe.whitelist()
 def get_stock_summary(warehouse=None):
-    """Résumé stock actuel par article (pour graphique répartition)."""
-    args = {}
-    wh_filter = ""
-    if warehouse:
-        wh_filter = "AND warehouse = %(warehouse)s"
-        args["warehouse"] = warehouse
-
-    rows = frappe.db.sql(f"""
-        SELECT b.item_code, i.item_name,
-               SUM(b.actual_qty) AS qty,
-               SUM(b.actual_qty * COALESCE(b.valuation_rate, 0)) AS valeur
-        FROM `tabBin` b
-        JOIN `tabItem` i ON i.name = b.item_code
-        WHERE b.actual_qty > 0 {wh_filter}
-        GROUP BY b.item_code
-        ORDER BY valeur DESC
-        LIMIT 20
-    """, args, as_dict=True)
-
+    """Résumé stock actuel par article depuis le grand livre maison (pas Bin).
+    Quantités uniquement (pas de valorisation en maison)."""
+    from kya_hr.api import stock_kya
+    agg = {}
+    for d in stock_kya.soldes(magasin=warehouse, only_nonzero=1):
+        e = agg.setdefault(d["item"], {"item_code": d["item"],
+                                       "item_name": d["item_name"],
+                                       "qty": 0.0, "valeur": 0})
+        e["qty"] += flt(d["total"])
+    rows = sorted(agg.values(), key=lambda r: -r["qty"])[:20]
     return rows
