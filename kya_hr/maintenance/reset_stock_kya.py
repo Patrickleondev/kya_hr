@@ -105,6 +105,84 @@ def zero_natif(magasin: str, company: str | None = None, dry_run=1) -> dict:
     return res
 
 
+# ── Recharger un magasin aux quantités « seed » (36+ vrais articles) ────────
+def _seed_map() -> dict:
+    """{item_code: qty} des vrais articles KYA (source unique : setup_kya_stocks)."""
+    from kya_hr.setup_kya_stocks import KYA_ITEMS
+    return {it["code"]: flt(it["qty"]) for it in KYA_ITEMS}
+
+
+@frappe.whitelist()
+def reconcilier_au_seed(magasin: str, company: str | None = None, dry_run=1) -> dict:
+    """Remet un magasin natif à l'état « catalogue réel » via UNE Stock
+    Reconciliation soumise (auditable, annulable) :
+
+    - les articles du seed  → quantité du seed ;
+    - tout autre code présent → 0 (les ~150 codes parasites).
+
+    Ne fait qu'AJUSTER des lignes existantes (aucune création d'article, aucune
+    valorisation nouvelle : on réutilise le valuation_rate courant du Bin).
+    dry_run=1 => renvoie le diff sans rien écrire. TOUJOURS dry_run d'abord."""
+    dry = _as_bool(dry_run)
+    seed = _seed_map()
+    bins = frappe.get_all(
+        "Bin", filters={"warehouse": magasin},
+        fields=["item_code", "actual_qty", "valuation_rate"], limit=0,
+    )
+    bin_codes = {b.item_code for b in bins}
+
+    lignes = []          # rows for the reconciliation
+    diff_reels = []      # articles seed ajustés
+    diff_zero = []       # parasites remis à 0
+    seed_absents = []    # seed non présents en magasin (à créer manuellement)
+
+    for b in bins:
+        cible = seed.get(b.item_code, 0.0)
+        if flt(b.actual_qty) == flt(cible):
+            continue  # déjà bon, on ne l'inscrit pas
+        rate = flt(b.valuation_rate) if cible > 0 else 0
+        lignes.append({"item_code": b.item_code, "warehouse": magasin,
+                       "qty": cible, "valuation_rate": rate})
+        (diff_reels if cible > 0 else diff_zero).append(
+            {"code": b.item_code, "avant": flt(b.actual_qty), "apres": cible})
+
+    for code, qty in seed.items():
+        if code not in bin_codes:
+            seed_absents.append({"code": code, "qty_voulue": qty})
+
+    res = {
+        "magasin": magasin, "dry_run": dry,
+        "articles_seed": len(seed),
+        "reels_ajustes": len(diff_reels),
+        "parasites_a_zero": len(diff_zero),
+        "seed_absents_du_magasin": seed_absents,   # normalement vide
+        "apercu_reels": diff_reels,
+        "apercu_parasites": diff_zero[:30],
+    }
+    if dry or not lignes:
+        if not lignes:
+            res["message"] = "Rien à faire : le magasin est déjà au seed."
+        return res
+
+    company = company or frappe.db.get_value("Warehouse", magasin, "company") \
+        or frappe.defaults.get_global_default("company")
+    sr = frappe.new_doc("Stock Reconciliation")
+    sr.purpose = "Stock Reconciliation"
+    sr.company = company
+    sr.set_posting_time = 1
+    sr.posting_date = today()
+    for ln in lignes:
+        sr.append("items", ln)
+    sr.flags.ignore_permissions = True
+    sr.insert()
+    sr.submit()
+    frappe.db.commit()
+    res["stock_reconciliation"] = sr.name
+    res["message"] = ("Magasin remis au seed via %s (annulable en annulant ce "
+                      "document). La magasinière peut maintenant ajuster." % sr.name)
+    return res
+
+
 # ── Nettoyer le catalogue : désactiver les Items hors liste ─────────────────
 @frappe.whitelist()
 def desactiver_articles_absents(codes_gardes, dry_run=1) -> dict:

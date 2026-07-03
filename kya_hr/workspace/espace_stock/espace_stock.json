@@ -1,23 +1,78 @@
 {
  "app": "kya_hr",
  "charts": [],
- "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Stock'>📦 Espace Stock & Logistique Matériel</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"sub\", \"type\": \"paragraph\", \"data\": {\"text\": \"<i>Mouvements matériel → audit réel (Stock Entry ERPNext) → inventaires</i>\", \"col\": 12}}, {\"id\": \"sp0\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_act\", \"type\": \"header\", \"data\": {\"text\": \"<b>⚡ Opérations courantes</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"PV Sortie Matériel\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"PV Entrée Matériel\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"À valider (mes approbations)\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Inventaires\", \"col\": 3}}, {\"id\": \"sp_ret\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_ret\", \"type\": \"header\", \"data\": {\"text\": \"<b>🔄 Retours Matériel & traçabilité</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s_ret_new\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"🔄 Nouveau Retour (Web)\", \"col\": 3}}, {\"id\": \"s_ret_list\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Retours Matériel\", \"col\": 3}}, {\"id\": \"s_ret_pending\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Retours \\u00e0 valider (Magasin)\", \"col\": 3}}, {\"id\": \"sp1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_erpnext\", \"type\": \"header\", \"data\": {\"text\": \"<b>📊 Audit ERPNext (stock réel)</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Stock Entries\", \"col\": 3}}, {\"id\": \"s6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Articles\", \"col\": 3}}, {\"id\": \"s7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Entrepôts\", \"col\": 3}}, {\"id\": \"s8\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Bilan Stock\", \"col\": 3}}]",
+ "color": "#2e7d32",
+ "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Stock'>📦 Espace Stock KYA</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"sub\", \"type\": \"paragraph\", \"data\": {\"text\": \"<i>Système Stock KYA (maison) : cockpit des soldes, entrées/sorties/retours et inventaires. Les articles s'ajoutent et s'importent depuis le Cockpit.</i>\", \"col\": 12}}, {\"id\": \"sp0\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_cockpit\", \"type\": \"header\", \"data\": {\"text\": \"<b>🏬 Cockpit — soldes & articles</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"c_cockpit\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"🏬 Cockpit Stock (soldes & articles)\", \"col\": 4}}, {\"id\": \"sp1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_act\", \"type\": \"header\", \"data\": {\"text\": \"<b>⚡ Enregistrer un mouvement (formulaires simples)</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"a_ent\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"➕ Entrée matériel (Web)\", \"col\": 3}}, {\"id\": \"a_sor\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"➖ Sortie matériel (Web)\", \"col\": 3}}, {\"id\": \"a_ret\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"🔄 Retour matériel (Web)\", \"col\": 3}}, {\"id\": \"a_inv\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"📋 Inventaire (Web)\", \"col\": 3}}, {\"id\": \"sp2\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_hist\", \"type\": \"header\", \"data\": {\"text\": \"<b>✅ Validation & 📄 Historique</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"h_valid\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"✅ Retours à valider (Magasin)\", \"col\": 3}}, {\"id\": \"h_hent\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"📄 Historique entrées\", \"col\": 3}}, {\"id\": \"h_hsor\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"📄 Historique sorties\", \"col\": 3}}, {\"id\": \"h_hret\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"📄 Historique retours\", \"col\": 3}}, {\"id\": \"h_hinv\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"📄 Inventaires\", \"col\": 3}}]",
  "creation": "2026-01-01 00:00:00.000000",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
- "type": "Workspace",
  "hide_custom": 0,
- "color": "#2e7d32",
  "icon": "📦",
  "idx": 0,
  "is_hidden": 0,
  "is_standard": 1,
- "name": "Espace Stock",
  "label": "Espace Stock",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Cockpit & consultation",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "PV Entrées Matériel",
+   "link_count": 0,
+   "link_to": "PV Entree Materiel",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "PV Sorties Matériel",
+   "link_count": 0,
+   "link_to": "PV Sortie Materiel",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Retours Matériel",
+   "link_count": 0,
+   "link_to": "Retour Materiel KYA",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Inventaires KYA",
+   "link_count": 0,
+   "link_to": "Inventaire KYA",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-07-03 08:11:04.273824",
+ "modified_by": "Administrator",
  "module": "KYA HR",
+ "name": "Espace Stock",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
  "public": 1,
- "sequence_id": 13,
+ "quick_lists": [],
  "roles": [
   {
    "role": "Stock User"
@@ -44,154 +99,78 @@
    "role": "System Manager"
   }
  ],
+ "sequence_id": 13,
  "shortcuts": [
   {
-   "label": "➕ Nouveau PV Sortie (Web)",
+   "color": "#2e7d32",
+   "icon": "grid",
+   "label": "🏬 Cockpit Stock (soldes & articles)",
    "type": "URL",
-   "url": "/pv-sortie-materiel/new",
-   "color": "#c62828",
-   "icon": "plus-circle"
+   "url": "/stock-kya"
   },
   {
-   "label": "➕ Nouveau PV Entrée (Web)",
-   "type": "URL",
-   "url": "/pv-entree-materiel/new",
    "color": "#1b5e20",
-   "icon": "plus-circle"
-  },
-  {
-   "label": "➕ Nouvel Inventaire (Web)",
+   "icon": "download",
+   "label": "➕ Entrée matériel (Web)",
    "type": "URL",
-   "url": "/inventaire-kya/new",
-   "color": "#0d47a1",
-   "icon": "plus-circle"
+   "url": "/pv-entree-materiel/new"
   },
   {
-   "label": "PV Sortie Matériel",
-   "type": "DocType",
-   "link_to": "PV Sortie Materiel",
    "color": "#c62828",
-   "icon": "upload"
+   "icon": "upload",
+   "label": "➖ Sortie matériel (Web)",
+   "type": "URL",
+   "url": "/pv-sortie-materiel/new"
   },
   {
-   "label": "PV Entrée Matériel",
-   "type": "DocType",
-   "link_to": "PV Entree Materiel",
-   "color": "#1b5e20",
-   "icon": "download"
+   "color": "#880e4f",
+   "icon": "rotate-ccw",
+   "label": "🔄 Retour matériel (Web)",
+   "type": "URL",
+   "url": "/retour-materiel/new"
   },
   {
-   "label": "Inventaires",
-   "type": "DocType",
-   "link_to": "Inventaire KYA",
    "color": "#0d47a1",
-   "icon": "clipboard"
-  },
-  {
-   "label": "🔄 Nouveau Retour (Web)",
+   "icon": "clipboard",
+   "label": "📋 Inventaire (Web)",
    "type": "URL",
-   "url": "/retour-materiel/new",
-   "color": "#880e4f",
-   "icon": "rotate-ccw"
+   "url": "/inventaire-kya/new"
   },
   {
-   "label": "Retours Matériel",
-   "type": "DocType",
-   "link_to": "Retour Materiel KYA",
-   "color": "#880e4f",
-   "icon": "rotate-ccw"
-  },
-  {
-   "label": "Retours à valider (Magasin)",
-   "type": "URL",
-   "url": "/app/retour-materiel-kya?workflow_state=En%20attente%20Magasin",
    "color": "#e65100",
-   "icon": "check-circle"
-  },
-  {
-   "label": "Stock Entries",
-   "type": "DocType",
-   "link_to": "Stock Entry",
-   "color": "#00695c",
-   "icon": "layers"
-  },
-  {
-   "label": "Articles",
-   "type": "DocType",
-   "link_to": "Item",
-   "color": "#37474f",
-   "icon": "box"
-  },
-  {
-   "label": "Entrepôts",
-   "type": "DocType",
-   "link_to": "Warehouse",
-   "color": "#455a64",
-   "icon": "home"
-  },
-  {
-   "label": "Bilan Stock",
+   "icon": "check-circle",
+   "label": "✅ Retours à valider (Magasin)",
    "type": "URL",
-   "url": "/app/query-report/Stock%20Balance",
-   "color": "#F58220",
-   "icon": "bar-chart"
-  }
- ],
- "links": [
-  {
-   "type": "Card Break",
-   "label": "Mouvements & Inventaires",
-   "hidden": 0,
-   "is_query_report": 0,
-   "link_count": 0,
-   "link_type": "DocType",
-   "onboard": 0
+   "url": "/app/retour-materiel-kya?workflow_state=En%20attente%20Magasin"
   },
   {
-   "type": "Link",
-   "label": "PV Sorties Matériel",
-   "link_to": "PV Sortie Materiel",
-   "link_type": "DocType",
-   "hidden": 0,
-   "is_query_report": 0,
-   "link_count": 0,
-   "onboard": 1
-  },
-  {
-   "type": "Link",
-   "label": "PV Entrées Matériel",
+   "color": "#1b5e20",
+   "icon": "list",
+   "label": "📄 Historique entrées",
    "link_to": "PV Entree Materiel",
-   "link_type": "DocType",
-   "hidden": 0,
-   "is_query_report": 0,
-   "link_count": 0,
-   "onboard": 1
+   "type": "DocType"
   },
   {
-   "type": "Link",
-   "label": "Inventaires KYA",
-   "link_to": "Inventaire KYA",
-   "link_type": "DocType",
-   "hidden": 0,
-   "is_query_report": 0,
-   "link_count": 0,
-   "onboard": 1
+   "color": "#c62828",
+   "icon": "list",
+   "label": "📄 Historique sorties",
+   "link_to": "PV Sortie Materiel",
+   "type": "DocType"
   },
   {
-   "type": "Link",
-   "label": "Retours Matériel",
+   "color": "#880e4f",
+   "icon": "list",
+   "label": "📄 Historique retours",
    "link_to": "Retour Materiel KYA",
-   "link_type": "DocType",
-   "hidden": 0,
-   "is_query_report": 0,
-   "link_count": 0,
-   "onboard": 1
+   "type": "DocType"
+  },
+  {
+   "color": "#0d47a1",
+   "icon": "list",
+   "label": "📄 Inventaires",
+   "link_to": "Inventaire KYA",
+   "type": "DocType"
   }
  ],
- "modified": "2026-01-01 00:00:00.000000",
- "modified_by": "Administrator",
- "number_cards": [],
- "owner": "Administrator",
- "parent_page": "",
- "quick_lists": []
+ "type": "Workspace"
 }
