@@ -64,9 +64,9 @@ KYA_AUTO_SIDEBARS = [
         "app": "kya_hr",
         "workspace": "Espace Stock",
         "items": [
-            # Maison d'abord : le cockpit gère soldes + ajout/import d'articles.
+            # Maison d'abord : « Stock KYA » gère soldes + ajout/import d'articles.
             # PAS de lien natif (Item/Stock Entry/...) : ça perdait la magasinière.
-            {"label": "Cockpit Stock", "url": "/stock-kya", "link_type": "URL", "icon": "grid"},
+            {"label": "Stock KYA", "url": "/stock-kya", "link_type": "URL", "icon": "grid"},
             {"label": "PV Entrée Matériel", "link_to": "PV Entree Materiel", "link_type": "DocType", "icon": "download"},
             {"label": "PV Sortie Matériel", "link_to": "PV Sortie Materiel", "link_type": "DocType", "icon": "upload"},
             {"label": "Retours Matériel", "link_to": "Retour Materiel KYA", "link_type": "DocType", "icon": "rotate-ccw"},

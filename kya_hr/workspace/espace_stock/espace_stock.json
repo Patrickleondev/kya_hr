@@ -2,7 +2,7 @@
  "app": "kya_hr",
  "charts": [],
  "color": "#2e7d32",
- "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Stock'>📦 Espace Stock KYA</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"sub\", \"type\": \"paragraph\", \"data\": {\"text\": \"<i>Système Stock KYA (maison) : cockpit des soldes, entrées/sorties/retours et inventaires. Les articles s'ajoutent et s'importent depuis le Cockpit.</i>\", \"col\": 12}}, {\"id\": \"sp0\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_cockpit\", \"type\": \"header\", \"data\": {\"text\": \"<b>🏬 Cockpit — soldes & articles</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"c_cockpit\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"🏬 Cockpit Stock (soldes & articles)\", \"col\": 4}}, {\"id\": \"sp1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_act\", \"type\": \"header\", \"data\": {\"text\": \"<b>⚡ Enregistrer un mouvement (formulaires simples)</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"a_ent\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"➕ Entrée matériel (Web)\", \"col\": 3}}, {\"id\": \"a_sor\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"➖ Sortie matériel (Web)\", \"col\": 3}}, {\"id\": \"a_ret\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"🔄 Retour matériel (Web)\", \"col\": 3}}, {\"id\": \"a_inv\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"📋 Inventaire (Web)\", \"col\": 3}}, {\"id\": \"sp2\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_hist\", \"type\": \"header\", \"data\": {\"text\": \"<b>✅ Validation & 📄 Historique</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"h_valid\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"✅ Retours à valider (Magasin)\", \"col\": 3}}, {\"id\": \"h_hent\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"📄 Historique entrées\", \"col\": 3}}, {\"id\": \"h_hsor\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"📄 Historique sorties\", \"col\": 3}}, {\"id\": \"h_hret\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"📄 Historique retours\", \"col\": 3}}, {\"id\": \"h_hinv\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"📄 Inventaires\", \"col\": 3}}]",
+ "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Stock'>📦 Espace Stock KYA</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"sub\", \"type\": \"paragraph\", \"data\": {\"text\": \"<i>Système Stock KYA (maison) : tableau des soldes, entrées/sorties/retours et inventaires. Les articles s'ajoutent et s'importent depuis « Stock KYA ».</i>\", \"col\": 12}}, {\"id\": \"sp0\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_cockpit\", \"type\": \"header\", \"data\": {\"text\": \"<b>🏬 Stock KYA — soldes & articles</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"c_cockpit\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"🏬 Stock KYA (soldes & articles)\", \"col\": 4}}, {\"id\": \"sp1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_act\", \"type\": \"header\", \"data\": {\"text\": \"<b>⚡ Enregistrer un mouvement (formulaires simples)</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"a_ent\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"➕ Entrée matériel (Web)\", \"col\": 3}}, {\"id\": \"a_sor\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"➖ Sortie matériel (Web)\", \"col\": 3}}, {\"id\": \"a_ret\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"🔄 Retour matériel (Web)\", \"col\": 3}}, {\"id\": \"a_inv\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"📋 Inventaire (Web)\", \"col\": 3}}, {\"id\": \"sp2\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_hist\", \"type\": \"header\", \"data\": {\"text\": \"<b>✅ Validation & 📄 Historique</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"h_valid\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"✅ Retours à valider (Magasin)\", \"col\": 3}}, {\"id\": \"h_hent\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"📄 Historique entrées\", \"col\": 3}}, {\"id\": \"h_hsor\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"📄 Historique sorties\", \"col\": 3}}, {\"id\": \"h_hret\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"📄 Historique retours\", \"col\": 3}}, {\"id\": \"h_hinv\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"📄 Inventaires\", \"col\": 3}}]",
  "creation": "2026-01-01 00:00:00.000000",
  "custom_blocks": [],
  "docstatus": 0,
@@ -17,7 +17,7 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Cockpit & consultation",
+   "label": "Stock KYA & consultation",
    "link_count": 0,
    "link_type": "DocType",
    "onboard": 0,
@@ -104,7 +104,7 @@
   {
    "color": "#2e7d32",
    "icon": "grid",
-   "label": "🏬 Cockpit Stock (soldes & articles)",
+   "label": "🏬 Stock KYA (soldes & articles)",
    "type": "URL",
    "url": "/stock-kya"
   },
