@@ -146,7 +146,7 @@ def _cleanup_doc(doctype, name):
 
 
 # ── STOCKS ───────────────────────────────────────────────────────────────────
-_ITEM = "TEST-REALISTE-01"
+_ART_DESIGN = "Article Test Réaliste"
 
 
 def _magasin():
@@ -169,22 +169,25 @@ def run_stocks():
         return rep.dump()
     rep.add("préparation : magasin", "-", True, mag)
     created = []  # [(doctype, name)]
+    art = None
 
     try:
-        # 1. AJOUT ARTICLE — par le magasin, via l'API du cockpit (= bouton Import)
+        # 1. AJOUT ARTICLE — par le magasin, via l'API (SANS code : désignation)
         _api_as(rep, "stock", SK.importer_articles,
-                "Ajouter un article (cockpit)", rows=[{
-                    "code": _ITEM, "nom": "Article Test Réaliste",
-                    "groupe": "Modules PV - KYA", "uom": "Unité"}])
+                "Ajouter un article (sans code)", rows=[{
+                    "designation": _ART_DESIGN, "categorie": "Modules PV",
+                    "unite": "Unité"}])
         # le même appel par un employé simple doit être REFUSÉ
         _api_as(rep, "employee", SK.importer_articles,
                 "Ajouter un article (employé simple → refus)", expect_deny=True,
-                rows=[{"code": "HACK-01", "nom": "x"}])
+                rows=[{"designation": "HACK ARTICLE"}])
+        art = frappe.db.get_value("Article KYA", {"designation": _ART_DESIGN}, "name")
+        rep.add("Article KYA créé (désignation = clé, pas de code)", "-", bool(art), art)
 
         # 2. PV ENTRÉE +20 : employé déclare → stock valide → comptable → audit
         name = _insert_as(rep, "employee", "PV Entree Materiel", {
             "objet": "Test réaliste entrée", "date_entree": today(),
-            "items": [{"item_code": _ITEM, "designation": "Article Test Réaliste",
+            "items": [{"item_code": art, "designation": "Article Test Réaliste",
                        "qte_recue": 20, "warehouse": mag}],
         }, "PV Entrée : création (employé)")
         if name:
@@ -200,7 +203,7 @@ def run_stocks():
                           etape="PV Entree Materiel : Approuver (Audit)")
             solde = _api_as(rep, "stock", SK.solde_item_magasin,
                             "Ledger : solde après entrée (attendu 20)",
-                            item=_ITEM, magasin=mag)
+                            item=art, magasin=mag)
             if solde is not None:
                 rep.add("Ledger : +20 appliqué", "-", (solde.get("total") == 20), solde)
             _pdf_as(rep, "stock", "PV Entree Materiel", name)
@@ -208,7 +211,7 @@ def run_stocks():
         # 3. PV SORTIE −5 : employé → chef → audit → dga → stock livre
         name = _insert_as(rep, "employee", "PV Sortie Materiel", {
             "objet": "Test réaliste sortie", "date_sortie": today(),
-            "items": [{"item_code": _ITEM, "designation": "Article Test Réaliste",
+            "items": [{"item_code": art, "designation": "Article Test Réaliste",
                        "qte_demandee": 5, "qte_reellement_sortie": 5,
                        "warehouse": mag}],
         }, "PV Sortie : création (employé)")
@@ -228,7 +231,7 @@ def run_stocks():
                           sign_field="signature_magasin")
             solde = _api_as(rep, "stock", SK.solde_item_magasin,
                             "Ledger : solde après sortie (attendu 15)",
-                            item=_ITEM, magasin=mag)
+                            item=art, magasin=mag)
             if solde is not None:
                 rep.add("Ledger : −5 appliqué", "-", (solde.get("total") == 15), solde)
             _pdf_as(rep, "stock", "PV Sortie Materiel", name)
@@ -240,7 +243,7 @@ def run_stocks():
                         etat_opts[0] if etat_opts else "Bon")
         name = _insert_as(rep, "employee", "Retour Materiel KYA", {
             "date_retour": today(), "objet": "Test réaliste retour",
-            "items": [{"item_code": _ITEM, "designation": "Article Test Réaliste",
+            "items": [{"item_code": art, "designation": "Article Test Réaliste",
                        "qte_retournee": 2, "etat_au_retour": etat_rep,
                        "warehouse": mag}],
         }, "Retour : création (employé)")
@@ -252,7 +255,7 @@ def run_stocks():
                           "Réceptionner Retour", sign_field="signature_magasin")
             solde = _api_as(rep, "stock", SK.solde_item_magasin,
                             "Ledger : solde après retour (attendu total 17)",
-                            item=_ITEM, magasin=mag)
+                            item=art, magasin=mag)
             if solde is not None:
                 rep.add("Ledger : +2 réparation", "-",
                         (solde.get("total") == 17 and solde.get("reparation") == 2),
@@ -263,7 +266,7 @@ def run_stocks():
         name = _insert_as(rep, "stock", "Inventaire KYA", {
             "objet": "Test réaliste inventaire", "date_inventaire": today(),
             "responsable_nom": "Magasin Test",
-            "items": [{"item_code": _ITEM, "warehouse": mag,
+            "items": [{"item_code": art, "warehouse": mag,
                        "qte_bon_etat": 10, "qte_en_reparation": 1,
                        "qte_comptee": 11}],
         }, "Inventaire : création (magasin)")
@@ -275,7 +278,7 @@ def run_stocks():
                           sign_field="signature_magasin")
             solde = _api_as(rep, "stock", SK.solde_item_magasin,
                             "Ledger : solde après inventaire (attendu total 11)",
-                            item=_ITEM, magasin=mag)
+                            item=art, magasin=mag)
             if solde is not None:
                 rep.add("Ledger : ajustement inventaire", "-",
                         (solde.get("total") == 11), solde)
@@ -310,16 +313,16 @@ def run_stocks():
         frappe.set_user("Administrator")
         for dt, nm in reversed(created):
             _cleanup_doc(dt, nm)
-        if frappe.db.exists("DocType", "Mouvement Stock KYA"):
+        if art and frappe.db.exists("DocType", "Mouvement Stock KYA"):
             for nm in frappe.get_all("Mouvement Stock KYA",
-                                     filters={"item": _ITEM}, pluck="name"):
+                                     filters={"item": art}, pluck="name"):
                 frappe.delete_doc("Mouvement Stock KYA", nm,
                                   ignore_permissions=True, force=True)
-        if frappe.db.exists("Item", _ITEM):
+        if art and frappe.db.exists("Article KYA", art):
             try:
-                frappe.delete_doc("Item", _ITEM, ignore_permissions=True, force=True)
+                frappe.delete_doc("Article KYA", art, ignore_permissions=True, force=True)
             except Exception:
-                frappe.db.set_value("Item", _ITEM, "disabled", 1)
+                frappe.db.set_value("Article KYA", art, "actif", 0)
         frappe.db.commit()
 
     return rep.dump()

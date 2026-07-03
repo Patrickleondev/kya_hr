@@ -73,52 +73,27 @@ class PVEntreeMateriel(Document):
 
     # ------------------------------------------------------------------ #
     def _ensure_item_for_row(self, it):
-        """Si la ligne n'a qu'une designation (pas d'item_code), cree l'Item.
-
-        Permet a l'utilisateur de receptionner un article jamais reference
-        sans devoir aller le creer manuellement dans /app/item. L'Item cree
-        herite de la designation + UOM saisies. Idempotent : si un Item au
-        meme nom existe deja, on reutilise son code.
-        """
+        """Si la ligne n'a qu'une désignation (pas d'article choisi), crée/récupère
+        l'Article KYA correspondant (maison, SANS code). Permet de réceptionner un
+        article jamais référencé sans aller le créer à la main. Idempotent sur la
+        désignation (voir article_kya.creer_ou_recuperer)."""
         if it.get("item_code"):
             return
         designation = (it.get("designation") or "").strip()
         if not designation:
             return
-
-        # Recherche par item_name exact (case-insensitive via collation MySQL)
-        existing = frappe.db.get_value("Item", {"item_name": designation}, "name")
-        if existing:
-            it.item_code = existing
-            return
-
-        # Choix du groupe : si fournisseur est lie a une categorie connue,
-        # on pourrait raffiner. Pour l'instant on prend "Articles divers - KYA"
-        # comme fourre-tout, ou "All Item Groups" en fallback.
-        item_group = "Articles divers - KYA"
-        if not frappe.db.exists("Item Group", item_group):
-            item_group = "All Item Groups"
-
-        new_code = f"KYA-AUTO-{frappe.generate_hash(length=6).upper()}"
+        from kya_hr.kya_hr.doctype.article_kya.article_kya import creer_ou_recuperer
         try:
-            doc = frappe.new_doc("Item")
-            doc.item_code = new_code
-            doc.item_name = designation
-            doc.item_group = item_group
-            doc.stock_uom = it.get("uom") or "Nos"
-            doc.is_stock_item = 1
-            doc.is_purchase_item = 1
-            doc.is_sales_item = 1
-            doc.insert(ignore_permissions=True)
-            it.item_code = new_code
+            it.item_code = creer_ou_recuperer(
+                designation, categorie=None, unite=it.get("uom") or "Unité")
             frappe.msgprint(
-                _("Article cree automatiquement : {0} (code: {1})").format(designation, new_code),
+                _("Article créé automatiquement : {0}").format(designation),
                 indicator="blue", alert=True,
             )
         except Exception:
             frappe.log_error(
                 frappe.get_traceback(),
-                f"PV Reception {self.name} - auto-creation Item '{designation}'",
+                f"PV Reception {self.name} - auto-création Article KYA '{designation}'",
             )
 
     def _post_stock_kya(self):

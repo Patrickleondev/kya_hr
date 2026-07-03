@@ -1,78 +1,77 @@
 {
-    "name": "PV Entree Materiel Item",
-    "module": "KYA HR",
-    "doctype": "DocType",
-    "istable": 1,
-    "custom": 1,
-    "fields": [
-        {
-            "fieldname": "item_code",
-            "label": "Article",
-            "fieldtype": "Link",
-            "options": "Item",
-            "in_list_view": 1,
-            "columns": 3,
-            "description": "Laissez vide si l'article n'est pas encore référencé en base"
-        },
-        {
-            "fieldname": "designation",
-            "label": "Désignation",
-            "fieldtype": "Data",
-            "reqd": 1,
-            "in_list_view": 1,
-            "columns": 3,
-            "fetch_from": "item_code.item_name"
-        },
-        {
-            "fieldname": "uom",
-            "label": "Unité",
-            "fieldtype": "Link",
-            "options": "UOM",
-            "fetch_from": "item_code.stock_uom",
-            "in_list_view": 1,
-            "columns": 1
-        },
-        {
-            "fieldname": "qte_commandee",
-            "label": "Qte Commandée",
-            "fieldtype": "Float",
-            "in_list_view": 1,
-            "columns": 1,
-            "description": "Quantité initialement commandée (depuis le BC)"
-        },
-        {
-            "fieldname": "qte_recue",
-            "label": "Qte Reçue",
-            "fieldtype": "Float",
-            "reqd": 1,
-            "in_list_view": 1,
-            "columns": 1
-        },
-        {
-            "fieldname": "observations",
-            "label": "Observations",
-            "fieldtype": "Data",
-            "in_list_view": 0,
-            "columns": 2,
-            "description": "État, écart vs commande, remarques"
-        },
-        {
-            "fieldname": "prix_unitaire",
-            "label": "Prix Unitaire",
-            "fieldtype": "Currency",
-            "columns": 1
-        },
-        {
-            "fieldname": "warehouse",
-            "label": "Magasin destination",
-            "fieldtype": "Link",
-            "options": "Warehouse",
-            "description": "Magasin dans lequel l'article est rangé (utilisé pour l'incrément de stock)"
-        },
-        {
-            "fieldname": "reference_bl",
-            "label": "N° Bon de Livraison",
-            "fieldtype": "Data"
-        }
-    ]
+ "name": "PV Entree Materiel Item",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "istable": 1,
+ "custom": 1,
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "label": "Article",
+   "fieldtype": "Link",
+   "options": "Article KYA",
+   "in_list_view": 1,
+   "columns": 3,
+   "description": "Laissez vide si l'article n'est pas encore référencé en base"
+  },
+  {
+   "fieldname": "designation",
+   "label": "Désignation",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 3,
+   "fetch_from": "item_code.designation"
+  },
+  {
+   "fieldname": "uom",
+   "label": "Unité",
+   "fieldtype": "Data",
+   "fetch_from": "item_code.unite",
+   "in_list_view": 1,
+   "columns": 1
+  },
+  {
+   "fieldname": "qte_commandee",
+   "label": "Qte Commandée",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "columns": 1,
+   "description": "Quantité initialement commandée (depuis le BC)"
+  },
+  {
+   "fieldname": "qte_recue",
+   "label": "Qte Reçue",
+   "fieldtype": "Float",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 1
+  },
+  {
+   "fieldname": "observations",
+   "label": "Observations",
+   "fieldtype": "Data",
+   "in_list_view": 0,
+   "columns": 2,
+   "description": "État, écart vs commande, remarques"
+  },
+  {
+   "fieldname": "prix_unitaire",
+   "label": "Prix Unitaire",
+   "fieldtype": "Currency",
+   "columns": 1
+  },
+  {
+   "fieldname": "warehouse",
+   "label": "Magasin destination",
+   "fieldtype": "Link",
+   "options": "Warehouse",
+   "description": "Magasin dans lequel l'article est rangé (utilisé pour l'incrément de stock)"
+  },
+  {
+   "fieldname": "reference_bl",
+   "label": "N° Bon de Livraison",
+   "fieldtype": "Data"
+  }
+ ]
 }
