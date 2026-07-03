@@ -166,6 +166,145 @@ def etat_inventaire(magasin=None):
     return {"sections": sections, "genere_le": today()}
 
 
+# ── Modèle de réapprovisionnement (fiche AEA-ENG-13-V01) ────────────────────
+# Reproduit fidèlement la « Synthèse statistique du stock » de KYA :
+#   • Classe de rotation A/B/C/D selon la quantité totale (bon état + réparation)
+#   • Seuil mini = MAX(plancher ; ARRONDI.SUP(qté totale × coefficient))
+#   • Dispo = BON ÉTAT uniquement (le « en réparation » ne compte pas dispo)
+#   • Statut = REFERENCE VIDE / RUPTURE / A COMMANDER / OK
+#   • Action = commander la quantité qui ramène à 2× le seuil
+# (mêmes seuils, mêmes libellés que le classeur Excel remis par le magasin.)
+_REAPPRO_CLASSES = [
+    # (qté mini incluse, coefficient, plancher mini, classe, description)
+    (500, 0.2, 15, "A", "Forte rotation — consommables structurants"),
+    (100, 0.2, 8,  "B", "Rotation moyenne-haute"),
+    (20,  0.2, 4,  "C", "Rotation moyenne"),
+    (0,   0.0, 2,  "D", "Faible rotation / unitaires"),
+]
+
+
+def _classe_seuil(qte_totale):
+    """Retourne (classe, seuil_mini, coefficient, plancher) pour une qté totale."""
+    import math
+    q = flt(qte_totale)
+    for mini, coef, plancher, classe, _desc in _REAPPRO_CLASSES:
+        if q >= mini:
+            seuil = max(plancher, int(math.ceil(q * coef)))
+            return classe, seuil, coef, plancher
+    return "D", 2, 0.0, 2
+
+
+def evaluer_ligne(bon_etat, reparation):
+    """Évalue UNE référence comme la fiche AEA-ENG-13 : classe, seuil, statut,
+    manque à combler et action. `dispo` = bon état seulement."""
+    bon = flt(bon_etat)
+    rep = flt(reparation)
+    total = round(bon + rep, 3)
+    classe, seuil, coef, plancher = _classe_seuil(total)
+    dispo = bon
+    manque = max(0, seuil - dispo)
+    qte_commander = 0
+    if total <= 0:
+        statut, action = "REFERENCE VIDE", "Vérifier besoin / déréférencer"
+    elif dispo <= 0:                       # tout le stock est en réparation
+        statut = "RUPTURE"
+        qte_commander = max(0, int(2 * seuil - dispo))
+        action = "Commander {0} u (vers 2× seuil)".format(qte_commander)
+    elif dispo <= seuil:                   # sous (ou au) point de commande
+        statut = "A COMMANDER"
+        qte_commander = max(0, int(2 * seuil - dispo))
+        action = "Commander {0} u (vers 2× seuil)".format(qte_commander)
+    else:
+        statut, action = "OK", "-"
+    return {"classe": classe, "seuil_mini": seuil, "coefficient": coef,
+            "plancher": plancher, "dispo": dispo, "manque_a_combler": manque,
+            "statut": statut, "qte_a_commander": qte_commander, "action": action}
+
+
+# Ordre de tri des alertes (du plus urgent au moins urgent).
+_STATUT_RANG = {"RUPTURE": 0, "A COMMANDER": 1, "REFERENCE VIDE": 2, "OK": 3}
+
+
+@frappe.whitelist()
+def reapprovisionnement(magasin=None, only_alertes=0):
+    """État de réapprovisionnement par (article, magasin), calculé sur le grand
+    livre maison mais présenté comme la fiche AEA-ENG-13 (classe, seuil, statut,
+    action). `only_alertes=1` ne renvoie que RUPTURE + A COMMANDER."""
+    _guard()
+    cats = {a["name"]: (a.get("categorie") or "Non classé")
+            for a in frappe.get_all("Article KYA", fields=["name", "categorie"])}
+    out = []
+    for d in soldes(magasin=magasin, only_nonzero=1):
+        ev = evaluer_ligne(d["bon_etat"], d["reparation"])
+        out.append({
+            "item": d["item"], "designation": d["item_name"],
+            "categorie": cats.get(d["item"], "Non classé"), "magasin": d["magasin"],
+            "magasin_label": _mag_label(d["magasin"]),
+            "qte_totale": d["total"], "bon_etat": d["bon_etat"],
+            "reparation": d["reparation"], **ev,
+        })
+    if str(only_alertes) in ("1", "true", "True"):
+        out = [r for r in out if r["statut"] in ("RUPTURE", "A COMMANDER")]
+    out.sort(key=lambda r: (_STATUT_RANG.get(r["statut"], 9),
+                            -r["manque_a_combler"], r["magasin_label"], r["designation"]))
+    return out
+
+
+@frappe.whitelist()
+def synthese_stock(magasin=None):
+    """« Synthèse statistique du stock » façon AEA-ENG-13 : indicateurs globaux
+    (références, quantité totale, taux bon état, à commander, ruptures, vides)
+    + répartition par magasin et par typologie d'équipement (catégorie)."""
+    _guard()
+    reap = reapprovisionnement(magasin)
+    qte = sum(r["qte_totale"] for r in reap)
+    bon = sum(r["bon_etat"] for r in reap)
+
+    def _bloc():
+        return {"references": 0, "qte_totale": 0.0, "bon_etat": 0.0,
+                "ok": 0, "a_commander": 0, "ruptures": 0, "vides": 0}
+
+    par_mag, par_cat = {}, {}
+    for r in reap:
+        for grp, key, lbl in ((par_mag, r["magasin"], r["magasin_label"]),
+                              (par_cat, r["categorie"], r["categorie"])):
+            b = grp.setdefault(key, dict(_bloc(), cle=lbl))
+            b["references"] += 1
+            b["qte_totale"] = round(b["qte_totale"] + r["qte_totale"], 2)
+            b["bon_etat"] = round(b["bon_etat"] + r["bon_etat"], 2)
+            b["ok"] += 1 if r["statut"] == "OK" else 0
+            b["a_commander"] += 1 if r["statut"] == "A COMMANDER" else 0
+            b["ruptures"] += 1 if r["statut"] == "RUPTURE" else 0
+            b["vides"] += 1 if r["statut"] == "REFERENCE VIDE" else 0
+
+    def _finalise(grp):
+        rows = []
+        for b in grp.values():
+            b["taux_bon_etat"] = round(100 * b["bon_etat"] / b["qte_totale"], 1) if b["qte_totale"] else 0.0
+            rows.append(b)
+        rows.sort(key=lambda x: -x["qte_totale"])
+        return rows
+
+    return {
+        "kpi": {
+            "references": len(reap),
+            "qte_totale": round(qte, 2),
+            "taux_bon_etat": round(100 * bon / qte, 1) if qte else 0.0,
+            "a_commander": sum(1 for r in reap if r["statut"] == "A COMMANDER"),
+            "ruptures": sum(1 for r in reap if r["statut"] == "RUPTURE"),
+            "references_vides": sum(1 for r in reap if r["statut"] == "REFERENCE VIDE"),
+        },
+        "par_magasin": _finalise(par_mag),
+        "par_categorie": _finalise(par_cat),
+        "parametres": [
+            {"classe": c, "critere": crit, "coefficient": coef, "plancher": pl, "description": desc}
+            for (mini, coef, pl, c, desc), crit in zip(
+                _REAPPRO_CLASSES,
+                ["Qté ≥ 500", "100 ≤ Qté < 500", "20 ≤ Qté < 100", "Qté < 20"])
+        ],
+    }
+
+
 # ── Masters (pickers) ───────────────────────────────────────────────────────
 # Entrepôts « plomberie » ERPNext (créés d'office par société) : ce ne sont PAS
 # des magasins KYA, on les masque du sélecteur pour ne pas perdre la magasinière.
@@ -576,6 +715,12 @@ def dashboard_overview():
     en_reparation = sum(1 for d in lignes if d["reparation"] > 0)
     ruptures = sum(1 for d in lignes if d["total"] <= 0)
     total_unites = round(sum(d["total"] for d in lignes), 2)
+    # Indicateurs « fiche AEA-ENG-13 » (statut par référence : dispo = bon état).
+    bon_total = round(sum(d["bon_etat"] for d in lignes), 2)
+    _stat = [evaluer_ligne(d["bon_etat"], d["reparation"])["statut"] for d in lignes]
+    taux_bon_etat = round(100 * bon_total / total_unites, 1) if total_unites else 0.0
+    a_commander = sum(1 for s in _stat if s == "A COMMANDER")
+    ruptures_stock = sum(1 for s in _stat if s == "RUPTURE")
     # Par magasin : nb articles + unités
     par_mag = {}
     for d in lignes:
@@ -599,7 +744,10 @@ def dashboard_overview():
         GROUP BY type_mouvement""", {"d": depuis}, as_dict=True)
     return {
         "kpi": {"articles": len(articles_set), "magasins": len(magasins_set),
-                "unites": total_unites, "en_reparation": en_reparation, "ruptures": ruptures},
+                "unites": total_unites, "en_reparation": en_reparation, "ruptures": ruptures,
+                # Indicateurs alignés sur la fiche officielle (dispo = bon état).
+                "taux_bon_etat": taux_bon_etat, "a_commander": a_commander,
+                "ruptures_stock": ruptures_stock},
         "par_magasin": sorted(par_mag.values(), key=lambda x: x["magasin"]),
         "recents": recents, "par_type": par_type,
     }

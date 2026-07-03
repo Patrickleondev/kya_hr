@@ -84,6 +84,7 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.maintenance.ensure_pdf_branding.execute", "En-tête KYA (logo + coordonnées) sur les PDF qui en manquaient (Demande Achat/PV Sortie/PV Entrée/Brouillard/Inventaire)"),
     ("kya_hr.maintenance.fix_user_permission_links.execute", "ignore_user_permissions sur les liens Employee/Company des fiches à workflow (User Permission 'ma fiche employé' bloquait les approbateurs : Comptable/DFC/Chef… ne pouvaient plus viser un doc d'autrui)"),
     ("kya_hr.maintenance.backfill_clients_projets.execute", "Client KYA / Projet KYA (répertoires maison) créés depuis les PV Sortie existants — les Links repointés du Customer/Project natif gardent des valeurs valides"),
+    ("kya_hr.maintenance.seed_categories_typologie.execute", "14 catégories (typologies d'équipement) de la fiche AEA-ENG-13 semées pour le picker de saisie/import (idempotent, n'écrase pas les catégories libres existantes)"),
 ]
 
 AFTER_INSTALL: list[tuple[str, str]] = [

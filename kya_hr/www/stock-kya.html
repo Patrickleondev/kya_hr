@@ -54,6 +54,7 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
     <div class="ks-tab on" data-t="inv" onclick="tab('inv')">📋 Inventaire par magasin</div>
     <div class="ks-tab" data-t="sai" onclick="tab('sai')">📝 Saisie directe</div>
     <div class="ks-tab" data-t="mag" onclick="tab('mag')">🏬 Synthèse magasins</div>
+    <div class="ks-tab" data-t="rea" onclick="tab('rea')">🚨 Réappro / Alertes</div>
     <div class="ks-tab" data-t="mvt" onclick="tab('mvt')">🕑 Derniers mouvements</div>
     <div class="ks-tab" data-t="imp" onclick="tab('imp')">⬆️ Importer (Excel)</div>
   </div>
@@ -93,7 +94,9 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
         <a class="ks-btn sec" href="/app/saisie-stock-kya/new" target="_blank">Ouvrir le formulaire complet ↗</a>
       </div>
       <div class="ks-note">Choisissez le <b>magasin</b>, puis saisissez le matériel ligne par ligne (pas besoin d'importer).
-        À l'enregistrement, les <b>articles manquants sont créés</b> (sans code) et les quantités posées au stock du magasin.</div>
+        À l'enregistrement, les <b>articles manquants sont créés</b> (sans code) et les quantités posées au stock du magasin.
+        <br>Si une partie du matériel arrive <b>défectueuse / à réparer</b>, mettez-la dans la colonne <b>« En réparat° »</b> :
+        elle est stockée mais <b>ne compte pas comme disponible</b> (elle apparaît en réparation, et peut déclencher une alerte de réappro).</div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0;">
         <label style="font-weight:700;font-size:.85rem;">Magasin&nbsp;:</label>
         <select id="sai-mag" class="ks-btn sec" style="font-weight:600;min-width:220px;"></select>
@@ -121,6 +124,27 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
       <h3>Synthèse par magasin</h3>
       <table class="ks-tbl"><thead><tr><th>Magasin</th><th>Articles</th><th>Bon état</th><th>En réparation</th><th>Total unités</th></tr></thead>
       <tbody id="ks-magbody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- REAPPRO / ALERTES -->
+  <div id="pane-rea" class="ks-hide">
+    <div class="ks-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+        <h3 style="margin:0;">Réapprovisionnement &amp; alertes</h3>
+        <label style="font-size:.82rem;font-weight:700;color:#334155;">
+          <input type="checkbox" id="rea-only" onchange="renderRea()"> N'afficher que les alertes
+        </label>
+      </div>
+      <div class="ks-note">Modèle KYA (fiche <b>AEA-ENG-13</b>) : classe de rotation A/B/C/D selon la quantité,
+        <b>seuil mini = MAX(plancher ; quantité × coefficient)</b>. Le <b>dispo</b> ne compte que le <b>bon état</b>
+        (le « en réparation » ne compte pas). Statut&nbsp;: 🔴 rupture · 🟠 à commander · ⚪ référence vide · 🟢 OK.</div>
+      <table class="ks-tbl" style="font-size:.8rem;"><thead><tr>
+        <th>Désignation</th><th>Magasin</th><th>Catégorie</th>
+        <th style="text-align:right">Bon état</th><th style="text-align:right">Répar°</th>
+        <th style="text-align:center">Classe</th><th style="text-align:right">Seuil</th>
+        <th style="text-align:center">Statut</th><th>Action</th>
+      </tr></thead><tbody id="ks-reabody"></tbody></table>
     </div>
   </div>
 
@@ -165,11 +189,13 @@ async function load(){
 function render(){
   const k=DASH.kpi;
   document.getElementById('ks-kpis').innerHTML = `
-    <div class="ks-kpi blue"><div class="n">${k.articles}</div><div class="l">Articles en stock</div></div>
+    <div class="ks-kpi blue"><div class="n">${k.articles}</div><div class="l">Références en stock</div></div>
     <div class="ks-kpi"><div class="n">${k.magasins}</div><div class="l">Magasins</div></div>
     <div class="ks-kpi"><div class="n">${k.unites}</div><div class="l">Unités totales</div></div>
+    <div class="ks-kpi" style="border-left-color:#166534"><div class="n" style="color:#166534">${(k.taux_bon_etat!=null?k.taux_bon_etat:0)}%</div><div class="l">Taux bon état</div></div>
+    <div class="ks-kpi warn"><div class="n">${k.a_commander!=null?k.a_commander:0}</div><div class="l">À commander</div></div>
     <div class="ks-kpi warn"><div class="n">${k.en_reparation}</div><div class="l">En réparation</div></div>
-    <div class="ks-kpi red"><div class="n">${k.ruptures}</div><div class="l">Ruptures</div></div>`;
+    <div class="ks-kpi red"><div class="n">${k.ruptures_stock!=null?k.ruptures_stock:k.ruptures}</div><div class="l">Ruptures</div></div>`;
 
   // filtre magasins
   const sel=document.getElementById('ks-mag-filter');
@@ -210,8 +236,29 @@ function renderInv(){
 
 function tab(t){
   document.querySelectorAll('.ks-tab').forEach(x=>x.classList.toggle('on',x.dataset.t===t));
-  ['inv','sai','mag','mvt','imp'].forEach(p=>document.getElementById('pane-'+p).classList.toggle('ks-hide',p!==t));
+  ['inv','sai','mag','rea','mvt','imp'].forEach(p=>document.getElementById('pane-'+p).classList.toggle('ks-hide',p!==t));
   if(t==='sai') saiInit();
+  if(t==='rea') renderRea();
+}
+
+// ── Réappro / alertes (modèle AEA-ENG-13) ──────────────────────────────────
+let REA=null;
+async function renderRea(){
+  if(!REA){ REA = (await frappe.call({method:'kya_hr.api.stock_kya.reapprovisionnement'})).message||[]; }
+  const only=document.getElementById('rea-only').checked;
+  const rows = only ? REA.filter(r=>r.statut==='RUPTURE'||r.statut==='A COMMANDER') : REA;
+  const dot={'RUPTURE':'🔴','A COMMANDER':'🟠','REFERENCE VIDE':'⚪','OK':'🟢'};
+  const col={'RUPTURE':'#dc2626','A COMMANDER':'#d97706','REFERENCE VIDE':'#94a3b8','OK':'#166534'};
+  document.getElementById('ks-reabody').innerHTML = rows.map(r=>`<tr>
+    <td>${r.designation||''}</td><td style="font-size:.74rem">${r.magasin_label||''}</td>
+    <td style="font-size:.74rem;color:#64748b">${r.categorie||''}</td>
+    <td class="num" style="color:#166534">${r.bon_etat}</td>
+    <td class="num" style="color:#92400e">${r.reparation}</td>
+    <td style="text-align:center;font-weight:800">${r.classe}</td>
+    <td class="num">${r.seuil_mini}</td>
+    <td style="text-align:center;font-weight:800;color:${col[r.statut]||'#334155'};white-space:nowrap">${dot[r.statut]||''} ${r.statut}</td>
+    <td style="font-size:.76rem">${r.action}</td></tr>`).join('')
+    || `<tr><td colspan="9" style="text-align:center;color:#94a3b8;padding:16px;">Aucune ligne.</td></tr>`;
 }
 
 // ── Saisie directe ─────────────────────────────────────────────────────────
