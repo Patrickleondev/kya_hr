@@ -67,6 +67,7 @@ KYA_AUTO_SIDEBARS = [
             # Maison d'abord : « Stock KYA » gère soldes + ajout/import d'articles.
             # PAS de lien natif (Item/Stock Entry/...) : ça perdait la magasinière.
             {"label": "Stock KYA", "url": "/stock-kya", "link_type": "URL", "icon": "grid"},
+            {"label": "Saisie directe du stock", "link_to": "Saisie Stock KYA", "link_type": "DocType", "icon": "edit"},
             {"label": "PV Entrée Matériel", "link_to": "PV Entree Materiel", "link_type": "DocType", "icon": "download"},
             {"label": "PV Sortie Matériel", "link_to": "PV Sortie Materiel", "link_type": "DocType", "icon": "upload"},
             {"label": "Retours Matériel", "link_to": "Retour Materiel KYA", "link_type": "DocType", "icon": "rotate-ccw"},

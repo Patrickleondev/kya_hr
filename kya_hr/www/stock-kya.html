@@ -52,9 +52,10 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
 
   <div class="ks-tabs">
     <div class="ks-tab on" data-t="inv" onclick="tab('inv')">📋 Inventaire par magasin</div>
+    <div class="ks-tab" data-t="sai" onclick="tab('sai')">📝 Saisie directe</div>
     <div class="ks-tab" data-t="mag" onclick="tab('mag')">🏬 Synthèse magasins</div>
     <div class="ks-tab" data-t="mvt" onclick="tab('mvt')">🕑 Derniers mouvements</div>
-    <div class="ks-tab" data-t="imp" onclick="tab('imp')">⬆️ Importer des articles</div>
+    <div class="ks-tab" data-t="imp" onclick="tab('imp')">⬆️ Importer (Excel)</div>
   </div>
 
   <!-- INVENTAIRE -->
@@ -68,6 +69,36 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
         </div>
       </div>
       <div id="ks-inv"></div>
+    </div>
+  </div>
+
+  <!-- SAISIE DIRECTE -->
+  <div id="pane-sai" class="ks-hide">
+    <div class="ks-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+        <h3 style="margin:0;">Saisie directe du stock</h3>
+        <a class="ks-btn sec" href="/app/saisie-stock-kya/new" target="_blank">Ouvrir le formulaire complet ↗</a>
+      </div>
+      <div class="ks-note">Choisissez le <b>magasin</b>, puis saisissez le matériel ligne par ligne (pas besoin d'importer).
+        À l'enregistrement, les <b>articles manquants sont créés</b> (sans code) et les quantités posées au stock du magasin.</div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0;">
+        <label style="font-weight:700;font-size:.85rem;">Magasin&nbsp;:</label>
+        <select id="sai-mag" class="ks-btn sec" style="font-weight:600;min-width:220px;"></select>
+      </div>
+      <datalist id="sai-cats"></datalist>
+      <table class="ks-tbl" id="sai-tbl">
+        <thead><tr>
+          <th style="width:38%">Désignation</th><th style="width:22%">Catégorie</th>
+          <th style="width:12%">Unité</th><th style="width:11%">Bon état</th>
+          <th style="width:11%">En réparat°</th><th style="width:6%"></th>
+        </tr></thead>
+        <tbody id="sai-body"></tbody>
+      </table>
+      <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button class="ks-btn sec" onclick="saiAddRow()">＋ Ajouter une ligne</button>
+        <button class="ks-btn" id="sai-btn" onclick="saiSave()">💾 Enregistrer dans le magasin</button>
+        <span id="sai-res" style="font-size:.85rem;color:#475569;"></span>
+      </div>
     </div>
   </div>
 
@@ -93,14 +124,14 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
   <div id="pane-imp" class="ks-hide">
     <div class="ks-card">
       <h3>Importer des articles (classés par magasin)</h3>
-      <div class="ks-note">Charge ton fichier <b>Excel (.xlsx)</b> rempli — ou colle les lignes. Colonnes (avec en-tête) :
-        <code>code, nom, groupe, type, uom, magasin, quantite, etat</code>.
-        L'<b>état</b> est une seule colonne : <i>Bon état</i>, <i>En réparation</i>, <i>Neuf</i> ou <i>Hors service</i>.
-        Ré-importer une ligne (même article + magasin + état) <b>remplace</b> son ouverture (pas de cumul).
+      <div class="ks-note">Charge ton fichier <b>Excel (.xlsx)</b> rempli — ou colle les lignes. Colonnes (avec en-tête), <b>sans code</b> :
+        <code>designation, categorie, unite, magasin, bon_etat, en_reparation</code>.
+        La <b>désignation</b> est la clé (le nom du matériel). Deux colonnes de quantité : <i>bon_etat</i> et <i>en_reparation</i>.
+        Ré-importer un article dans le même magasin <b>remplace</b> son ouverture (pas de cumul).
         <a href="#" onclick="modele();return false;">⬇️ Télécharger le modèle Excel</a></div>
       <input type="file" id="ks-file" accept=".xlsx" onchange="charger(this)">
       <div style="font-size:.75rem;color:#94a3b8;margin:4px 0;">Charge directement ton fichier <b>Excel (.xlsx)</b> rempli. Ou colle des lignes ci-dessous.</div>
-      <textarea class="ks-ta" id="ks-csv" placeholder="code,nom,groupe,type,uom,magasin,quantite,etat&#10;ATT6,Attache de 6,Consommables,Fixation,Unité,Stores - D,45,Bon état"></textarea>
+      <textarea class="ks-ta" id="ks-csv" placeholder="designation,categorie,unite,magasin,bon_etat,en_reparation&#10;MODULE PV 455Wc,Modules PV,Unité,Magasin KYA - KYA,12,0"></textarea>
       <div style="margin-top:10px;display:flex;gap:8px;align-items:center;">
         <button class="ks-btn" id="ks-imp-btn" onclick="importer()">⬆️ Importer</button>
         <span id="ks-imp-res" style="font-size:.85rem;color:#475569;"></span>
@@ -166,7 +197,56 @@ function renderInv(){
 
 function tab(t){
   document.querySelectorAll('.ks-tab').forEach(x=>x.classList.toggle('on',x.dataset.t===t));
-  ['inv','mag','mvt','imp'].forEach(p=>document.getElementById('pane-'+p).classList.toggle('ks-hide',p!==t));
+  ['inv','sai','mag','mvt','imp'].forEach(p=>document.getElementById('pane-'+p).classList.toggle('ks-hide',p!==t));
+  if(t==='sai') saiInit();
+}
+
+// ── Saisie directe ─────────────────────────────────────────────────────────
+let SAI_READY=false;
+async function saiInit(){
+  if(SAI_READY) return;
+  const mags=(await frappe.call({method:'kya_hr.api.stock_kya.magasins'})).message||[];
+  const sel=document.getElementById('sai-mag');
+  sel.innerHTML='<option value="">— Choisir un magasin —</option>'+
+    mags.map(m=>`<option value="${m.name}">${m.warehouse_name||m.name}</option>`).join('');
+  const cats=(await frappe.call({method:'kya_hr.api.stock_kya.categories'})).message||[];
+  document.getElementById('sai-cats').innerHTML=cats.map(c=>`<option value="${c}">`).join('');
+  if(!document.getElementById('sai-body').children.length){ saiAddRow(); saiAddRow(); saiAddRow(); }
+  SAI_READY=true;
+}
+function saiAddRow(){
+  const tr=document.createElement('tr');
+  tr.innerHTML=`
+    <td><input class="sai-in" data-f="designation" style="width:100%" placeholder="Ex. MODULE PV 455Wc"></td>
+    <td><input class="sai-in" data-f="categorie" list="sai-cats" style="width:100%" placeholder="Catégorie"></td>
+    <td><input class="sai-in" data-f="unite" style="width:100%" value="Unité"></td>
+    <td><input class="sai-in" data-f="bon_etat" type="number" min="0" step="any" style="width:100%" value="0"></td>
+    <td><input class="sai-in" data-f="en_reparation" type="number" min="0" step="any" style="width:100%" value="0"></td>
+    <td style="text-align:center"><button class="ks-btn sec" style="padding:4px 9px" onclick="this.closest('tr').remove()">✕</button></td>`;
+  document.getElementById('sai-body').appendChild(tr);
+}
+function saiCollect(){
+  return [...document.querySelectorAll('#sai-body tr')].map(tr=>{
+    const o={}; tr.querySelectorAll('.sai-in').forEach(i=>o[i.dataset.f]=i.value.trim());
+    o.bon_etat=parseFloat(o.bon_etat)||0; o.en_reparation=parseFloat(o.en_reparation)||0;
+    return o;
+  }).filter(o=>o.designation && (o.bon_etat>0 || o.en_reparation>0));
+}
+async function saiSave(){
+  const mag=document.getElementById('sai-mag').value;
+  const res=document.getElementById('sai-res');
+  if(!mag){ frappe.msgprint("Choisissez d'abord un magasin."); return; }
+  const rows=saiCollect();
+  if(!rows.length){ frappe.msgprint('Aucune ligne valide (désignation + quantité).'); return; }
+  const btn=document.getElementById('sai-btn'); btn.disabled=true; res.textContent='Enregistrement…';
+  try{
+    const r=(await frappe.call({method:'kya_hr.api.stock_kya.saisir_stock_direct',
+      args:{magasin:mag, lignes:JSON.stringify(rows)}})).message;
+    res.textContent=`✅ Fiche ${r.name} enregistrée (${r.lignes} ligne(s)).`;
+    document.getElementById('sai-body').innerHTML=''; saiAddRow(); saiAddRow(); saiAddRow();
+    await load();
+  }catch(e){ res.textContent="Erreur à l'enregistrement."; }
+  finally{ btn.disabled=false; }
 }
 
 async function exportInv(){
@@ -194,7 +274,7 @@ async function charger(inp){
   try{
     const r=(await frappe.call({method:'kya_hr.api.stock_kya.importer_stock_fichier',
       args:{content_base64:b64, filename:f.name}})).message;
-    res.textContent=`✅ ${r.items_crees} créé(s), ${r.items_maj} màj, ${r.lignes_stock} ligne(s) de stock`+(r.erreurs.length?`, ${r.erreurs.length} erreur(s)`:'');
+    res.textContent=`✅ ${r.articles_crees} article(s) créé(s), ${r.lignes_stock} ligne(s) de stock`+(r.erreurs&&r.erreurs.length?`, ${r.erreurs.length} erreur(s)`:'');
     await load(); tab('inv');
   }catch(e){ res.textContent='Erreur import fichier.'; }
   inp.value='';
@@ -207,19 +287,22 @@ function parseCSV(txt){
   return lines.slice(1).map(l=>{
     const c=l.split(/[;,]/);
     const g=n=>{const i=idx(n); return i>=0?(c[i]||'').trim().replace(/^"|"$/g,''):'';};
-    return {code:g('code'),nom:g('nom'),groupe:g('groupe'),type:g('type'),uom:g('uom'),
-            magasin:g('magasin'),quantite:parseFloat(g('quantite')||g('quantité')||g('qte'))||0,
-            etat:g('etat')||g('état')||'Bon état'};
-  }).filter(r=>r.code);
+    return {designation:g('designation')||g('désignation')||g('nom')||g('article'),
+            categorie:g('categorie')||g('catégorie')||g('groupe'),
+            unite:g('unite')||g('unité')||g('uom')||'Unité',
+            magasin:g('magasin')||g('entrepot')||g('entrepôt'),
+            bon_etat:parseFloat(g('bon_etat')||g('bon état')||g('bon etat'))||0,
+            en_reparation:parseFloat(g('en_reparation')||g('en réparation')||g('reparation'))||0};
+  }).filter(r=>r.designation);
 }
 async function importer(){
   const rows=parseCSV(document.getElementById('ks-csv').value);
-  if(!rows.length){frappe.msgprint("Aucune ligne valide (vérifiez l'en-tête).");return;}
+  if(!rows.length){frappe.msgprint("Aucune ligne valide (vérifiez l'en-tête : designation, categorie, unite, magasin, bon_etat, en_reparation).");return;}
   const btn=document.getElementById('ks-imp-btn'); btn.disabled=true;
   try{
     const r=(await frappe.call({method:'kya_hr.api.stock_kya.importer_stock_initial',args:{rows:JSON.stringify(rows)}})).message;
     document.getElementById('ks-imp-res').textContent=
-      `✅ ${r.items_crees} créé(s), ${r.items_maj} màj, ${r.lignes_stock} ligne(s) de stock`+(r.erreurs.length?`, ${r.erreurs.length} erreur(s)`:'');
+      `✅ ${r.articles_crees} article(s) créé(s), ${r.lignes_stock} ligne(s) de stock`+(r.erreurs&&r.erreurs.length?`, ${r.erreurs.length} erreur(s)`:'');
     await load();
   } finally { btn.disabled=false; }
 }

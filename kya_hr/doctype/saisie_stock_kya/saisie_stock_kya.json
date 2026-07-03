@@ -1,0 +1,83 @@
+{
+ "name": "Saisie Stock KYA",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "custom": 0,
+ "is_submittable": 1,
+ "engine": "InnoDB",
+ "autoname": "format:SAISIE-{YYYY}-{#####}",
+ "title_field": "magasin",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1,
+ "fields": [
+  {
+   "fieldname": "sb_entete",
+   "fieldtype": "Section Break",
+   "label": "Saisie du stock dans un magasin"
+  },
+  {
+   "fieldname": "magasin",
+   "label": "Magasin",
+   "fieldtype": "Link",
+   "options": "Warehouse",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "bold": 1,
+   "description": "Le magasin (entrepôt) dans lequel vous saisissez ce matériel."
+  },
+  {
+   "fieldname": "col_entete",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "date_saisie",
+   "label": "Date de saisie",
+   "fieldtype": "Date",
+   "reqd": 1,
+   "in_list_view": 1,
+   "default": "Today"
+  },
+  {
+   "fieldname": "sb_lignes",
+   "fieldtype": "Section Break",
+   "label": "Matériel"
+  },
+  {
+   "fieldname": "lignes",
+   "label": "Lignes de matériel",
+   "fieldtype": "Table",
+   "options": "Saisie Stock KYA Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sb_notes",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "remarque",
+   "label": "Remarque",
+   "fieldtype": "Small Text"
+  },
+  {
+   "fieldname": "statut",
+   "label": "Statut",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "hidden": 1
+  }
+ ],
+ "permissions": [
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "submit": 1, "cancel": 1, "amend": 1, "delete": 1, "print": 1, "export": 1, "report": 1, "share": 1},
+  {"role": "Responsable Stock", "read": 1, "write": 1, "create": 1, "submit": 1, "cancel": 1, "amend": 1, "delete": 1, "print": 1, "export": 1, "report": 1},
+  {"role": "Chargé des Stocks", "read": 1, "write": 1, "create": 1, "submit": 1, "cancel": 1, "amend": 1, "print": 1, "export": 1, "report": 1},
+  {"role": "Stock Manager", "read": 1, "write": 1, "create": 1, "submit": 1, "cancel": 1, "amend": 1, "report": 1},
+  {"role": "Stock User", "read": 1, "write": 1, "create": 1, "report": 1},
+  {"role": "Directeur Général", "read": 1, "report": 1, "export": 1, "print": 1},
+  {"role": "DGA", "read": 1, "report": 1},
+  {"role": "Auditeur Interne", "read": 1, "report": 1, "export": 1, "print": 1},
+  {"role": "DAAF", "read": 1, "report": 1, "export": 1},
+  {"role": "Comptable", "read": 1, "report": 1}
+ ]
+}

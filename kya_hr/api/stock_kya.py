@@ -167,11 +167,65 @@ def etat_inventaire(magasin=None):
 
 
 # ── Masters (pickers) ───────────────────────────────────────────────────────
+# Entrepôts « plomberie » ERPNext (créés d'office par société) : ce ne sont PAS
+# des magasins KYA, on les masque du sélecteur pour ne pas perdre la magasinière.
+_WH_NATIFS = {"Goods In Transit", "Work In Progress", "Finished Goods",
+              "All Warehouses", "Stores"}
+
+
 @frappe.whitelist()
 def magasins():
+    """Magasins KYA sélectionnables (exclut les entrepôts techniques ERPNext)."""
     _guard()
-    return frappe.get_all("Warehouse", filters={"disabled": 0},
+    rows = frappe.get_all("Warehouse", filters={"disabled": 0, "is_group": 0},
                           fields=["name", "warehouse_name"], order_by="name asc")
+    reels = [w for w in rows if (w.get("warehouse_name") or "").strip() not in _WH_NATIFS]
+    # Repli : sur un site sans magasin métier (ex. install neuve), on montre tout
+    # plutôt qu'un sélecteur vide.
+    return reels or rows
+
+
+@frappe.whitelist()
+def categories():
+    """Liste des catégories d'article (pour les pickers de saisie)."""
+    _guard()
+    return frappe.get_all("Categorie Article KYA", order_by="categorie asc", pluck="name")
+
+
+@frappe.whitelist()
+def saisir_stock_direct(magasin, lignes, date_saisie=None):
+    """Saisie directe depuis la page /stock-kya (onglet « Saisie directe »).
+
+    Crée + valide UNE fiche « Saisie Stock KYA » (source unique de vérité,
+    auditable, annulable) à partir des lignes saisies. `lignes` =
+    [{designation, categorie, unite, bon_etat, en_reparation}]. Les catégories
+    libres sont créées au besoin ; les articles manquants aussi (sans code)."""
+    _guard(write=True)
+    if isinstance(lignes, str):
+        lignes = frappe.parse_json(lignes)
+    if not magasin or not frappe.db.exists("Warehouse", magasin):
+        frappe.throw(_("Choisissez un magasin valide."))
+    doc = frappe.new_doc("Saisie Stock KYA")
+    doc.magasin = magasin
+    doc.date_saisie = date_saisie or today()
+    for l in lignes or []:
+        design = " ".join((l.get("designation") or "").split())
+        if not design:
+            continue
+        cat = l.get("categorie")
+        doc.append("lignes", {
+            "designation": design,
+            "categorie": _ensure_categorie(cat) if cat else None,
+            "unite": l.get("unite") or "Unité",
+            "bon_etat": flt(l.get("bon_etat")),
+            "en_reparation": flt(l.get("en_reparation")),
+        })
+    if not doc.lignes:
+        frappe.throw(_("Aucune ligne valide (désignation + quantité requises)."))
+    doc.insert()
+    doc.submit()
+    frappe.db.commit()
+    return {"name": doc.name, "lignes": len(doc.lignes), "magasin": magasin}
 
 
 # ── Import d'articles (SANS code — modèle Article KYA maison) ────────────────
