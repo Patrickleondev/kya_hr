@@ -61,6 +61,15 @@ def _set_label(doctype: str, fieldname: str, label: str) -> str:
 # Rôles KYA qui gèrent les articles nativement (créer / modifier).
 ITEM_CREATE_ROLES = ["Responsable Stock", "Chargé des Stocks"]
 
+# Rôles qui OUVRENT des fiches avec un champ Magasin (Link Warehouse) : saisie
+# stock, PV entrée/sortie/retour, inventaire. Sans droit de LECTURE sur
+# Warehouse, le champ Link plante (« Autorisation insuffisante pour Warehouse »).
+WAREHOUSE_READ_ROLES = [
+    "Responsable Stock", "Chargé des Stocks", "Chef Service",
+    "Responsable Achats", "Comptable", "Auditeur Interne", "DAAF",
+    "Directeur Général", "DGA",
+]
+
 
 def _grant_item_perms() -> list[str]:
     """Donne read+write+create sur Item aux rôles stock, SANS écraser les perms
@@ -79,6 +88,22 @@ def _grant_item_perms() -> list[str]:
     return granted
 
 
+def _grant_warehouse_read() -> list[str]:
+    """Donne le droit de LECTURE sur Warehouse aux rôles stock/approbateurs, sans
+    écraser les perms standard (add_permission copie d'abord les DocPerm standard
+    en Custom DocPerm). Sinon le champ Magasin (Link) plante à l'ouverture."""
+    from frappe.permissions import add_permission, update_permission_property
+    granted = []
+    for role in WAREHOUSE_READ_ROLES:
+        if not frappe.db.exists("Role", role):
+            continue
+        if not frappe.db.exists("Custom DocPerm", {"parent": "Warehouse", "role": role, "permlevel": 0}):
+            add_permission("Warehouse", role, 0)
+        update_permission_property("Warehouse", role, 0, "read", 1)
+        granted.append(role)
+    return granted
+
+
 def execute() -> dict:
     _ensure_type_field()
     out = {"created": 0, "updated": 0, "unchanged": 0}
@@ -88,7 +113,9 @@ def execute() -> dict:
         action = _set_label(dt, fn, label)
         out[action] = out.get(action, 0) + 1
     out["item_perms"] = _grant_item_perms()
+    out["warehouse_read"] = _grant_warehouse_read()
     frappe.clear_cache(doctype="Item")
+    frappe.clear_cache(doctype="Warehouse")
     frappe.db.commit()
     print(f"[relabel_native_stock] {out}")
     return out
