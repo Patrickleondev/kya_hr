@@ -95,8 +95,9 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
       </div>
       <div class="ks-note">Choisissez le <b>magasin</b>, puis saisissez le matériel ligne par ligne (pas besoin d'importer).
         À l'enregistrement, les <b>articles manquants sont créés</b> (sans code) et les quantités posées au stock du magasin.
-        <br>Si une partie du matériel arrive <b>défectueuse / à réparer</b>, mettez-la dans la colonne <b>« En réparat° »</b> :
-        elle est stockée mais <b>ne compte pas comme disponible</b> (elle apparaît en réparation, et peut déclencher une alerte de réappro).</div>
+        <br>Chaque ligne se répartit en trois états : <b>Bon état</b> (disponible), <b>À réparer</b> (immobilisé, récupérable)
+        et <b>Défectueux</b> (à retourner / rebut). À réparer et Défectueux sont <b>stockés mais ne comptent pas comme disponibles</b>
+        (ils peuvent déclencher une alerte de réappro).</div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0;">
         <label style="font-weight:700;font-size:.85rem;">Magasin&nbsp;:</label>
         <select id="sai-mag" class="ks-btn sec" style="font-weight:600;min-width:220px;"></select>
@@ -104,9 +105,9 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
       <datalist id="sai-cats"></datalist>
       <table class="ks-tbl" id="sai-tbl">
         <thead><tr>
-          <th style="width:38%">Désignation</th><th style="width:22%">Catégorie</th>
-          <th style="width:12%">Unité</th><th style="width:11%">Bon état</th>
-          <th style="width:11%">En réparat°</th><th style="width:6%"></th>
+          <th style="width:34%">Désignation</th><th style="width:20%">Catégorie</th>
+          <th style="width:10%">Unité</th><th style="width:10%">Bon état</th>
+          <th style="width:10%">À réparer</th><th style="width:10%">Défectueux</th><th style="width:6%"></th>
         </tr></thead>
         <tbody id="sai-body"></tbody>
       </table>
@@ -122,7 +123,7 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
   <div id="pane-mag" class="ks-hide">
     <div class="ks-card">
       <h3>Synthèse par magasin</h3>
-      <table class="ks-tbl"><thead><tr><th>Magasin</th><th>Articles</th><th>Bon état</th><th>En réparation</th><th>Total unités</th></tr></thead>
+      <table class="ks-tbl"><thead><tr><th>Magasin</th><th>Articles</th><th>Bon état</th><th>À réparer</th><th>Défectueux</th><th>Total unités</th></tr></thead>
       <tbody id="ks-magbody"></tbody></table>
     </div>
   </div>
@@ -138,10 +139,10 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
       </div>
       <div class="ks-note">Modèle KYA (fiche <b>AEA-ENG-13</b>) : classe de rotation A/B/C/D selon la quantité,
         <b>seuil mini = MAX(plancher ; quantité × coefficient)</b>. Le <b>dispo</b> ne compte que le <b>bon état</b>
-        (le « en réparation » ne compte pas). Statut&nbsp;: 🔴 rupture · 🟠 à commander · ⚪ référence vide · 🟢 OK.</div>
+        (ni « à réparer » ni « défectueux » ne comptent). Statut&nbsp;: 🔴 rupture · 🟠 à commander · ⚪ référence vide · 🟢 OK.</div>
       <table class="ks-tbl" style="font-size:.8rem;"><thead><tr>
         <th>Désignation</th><th>Magasin</th><th>Catégorie</th>
-        <th style="text-align:right">Bon état</th><th style="text-align:right">Répar°</th>
+        <th style="text-align:right">Bon état</th><th style="text-align:right">À répar.</th><th style="text-align:right">Défect.</th>
         <th style="text-align:center">Classe</th><th style="text-align:right">Seuil</th>
         <th style="text-align:center">Statut</th><th>Action</th>
       </tr></thead><tbody id="ks-reabody"></tbody></table>
@@ -162,13 +163,13 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
     <div class="ks-card">
       <h3>Importer des articles (classés par magasin)</h3>
       <div class="ks-note">Charge ton fichier <b>Excel (.xlsx)</b> rempli — ou colle les lignes. Colonnes (avec en-tête), <b>sans code</b> :
-        <code>designation, categorie, unite, magasin, bon_etat, en_reparation</code>.
-        La <b>désignation</b> est la clé (le nom du matériel). Deux colonnes de quantité : <i>bon_etat</i> et <i>en_reparation</i>.
+        <code>designation, categorie, unite, magasin, bon_etat, a_reparer, defectueux</code>.
+        La <b>désignation</b> est la clé (le nom du matériel). Trois colonnes de quantité : <i>bon_etat</i>, <i>a_reparer</i> et <i>defectueux</i>.
         Ré-importer un article dans le même magasin <b>remplace</b> son ouverture (pas de cumul).
         <a href="#" onclick="modele();return false;">⬇️ Télécharger le modèle Excel</a></div>
       <input type="file" id="ks-file" accept=".xlsx" onchange="charger(this)">
       <div style="font-size:.75rem;color:#94a3b8;margin:4px 0;">Charge directement ton fichier <b>Excel (.xlsx)</b> rempli. Ou colle des lignes ci-dessous.</div>
-      <textarea class="ks-ta" id="ks-csv" placeholder="designation,categorie,unite,magasin,bon_etat,en_reparation&#10;MODULE PV 455Wc,Modules PV,Unité,Magasin KYA - KYA,12,0"></textarea>
+      <textarea class="ks-ta" id="ks-csv" placeholder="designation,categorie,unite,magasin,bon_etat,a_reparer,defectueux&#10;MODULE PV 455Wc,Modules PV,Unité,Magasin KYA - KYA,12,0,0"></textarea>
       <div style="margin-top:10px;display:flex;gap:8px;align-items:center;">
         <button class="ks-btn" id="ks-imp-btn" onclick="importer()">⬆️ Importer</button>
         <span id="ks-imp-res" style="font-size:.85rem;color:#475569;"></span>
@@ -194,7 +195,8 @@ function render(){
     <div class="ks-kpi"><div class="n">${k.unites}</div><div class="l">Unités totales</div></div>
     <div class="ks-kpi" style="border-left-color:#166534"><div class="n" style="color:#166534">${(k.taux_bon_etat!=null?k.taux_bon_etat:0)}%</div><div class="l">Taux bon état</div></div>
     <div class="ks-kpi warn"><div class="n">${k.a_commander!=null?k.a_commander:0}</div><div class="l">À commander</div></div>
-    <div class="ks-kpi warn"><div class="n">${k.en_reparation}</div><div class="l">En réparation</div></div>
+    <div class="ks-kpi warn"><div class="n">${k.en_reparation}</div><div class="l">À réparer (réf.)</div></div>
+    <div class="ks-kpi" style="border-left-color:#7c3aed"><div class="n" style="color:#7c3aed">${k.defectueux!=null?k.defectueux:0}</div><div class="l">Défectueux (u.)</div></div>
     <div class="ks-kpi red"><div class="n">${k.ruptures_stock!=null?k.ruptures_stock:k.ruptures}</div><div class="l">Ruptures</div></div>`;
 
   // filtre magasins
@@ -210,7 +212,8 @@ function render(){
     <td><b>${m.magasin}</b></td><td class="num">${m.articles}</td>
     <td class="num" style="color:#166534">${m.bon_etat}</td>
     <td class="num" style="color:#92400e">${m.reparation}</td>
-    <td class="num">${m.unites}</td></tr>`).join('') || `<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:16px;">Aucun stock.</td></tr>`;
+    <td class="num" style="color:#7c3aed">${m.defectueux!=null?m.defectueux:0}</td>
+    <td class="num">${m.unites}</td></tr>`).join('') || `<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:16px;">Aucun stock.</td></tr>`;
 
   const tb={"Entrée":"b-e","Sortie":"b-s","Retour":"b-r","Inventaire":"b-i","Ajustement":"b-i"};
   document.getElementById('ks-mvtbody').innerHTML = (DASH.recents||[]).map(r=>`<tr>
@@ -227,10 +230,11 @@ function renderInv(){
   document.getElementById('ks-inv').innerHTML = secs.map(s=>`
     <div class="ks-mag">🏬 ${s.magasin} — ${s.total_lignes} article(s)</div>
     <table class="ks-tbl"><thead><tr><th style="width:5%">N°</th><th>Désignation</th>
-      <th style="width:12%">Qté totale</th><th style="width:12%">Bon état</th><th style="width:12%">En réparation</th></tr></thead>
+      <th style="width:11%">Qté totale</th><th style="width:11%">Bon état</th><th style="width:11%">À réparer</th><th style="width:11%">Défectueux</th></tr></thead>
     <tbody>${s.lignes.map(l=>`<tr><td>${l.n}</td><td>${l.designation}</td>
       <td class="num">${l.qte_totale}</td><td class="num" style="color:#166534">${l.bon_etat}</td>
-      <td class="num" style="color:#92400e">${l.reparation}</td></tr>`).join('')}</tbody></table>`).join('')
+      <td class="num" style="color:#92400e">${l.reparation}</td>
+      <td class="num" style="color:#7c3aed">${l.defectueux!=null?l.defectueux:0}</td></tr>`).join('')}</tbody></table>`).join('')
     || `<div style="text-align:center;color:#94a3b8;padding:20px;">Aucun stock à afficher.</div>`;
 }
 
@@ -254,11 +258,12 @@ async function renderRea(){
     <td style="font-size:.74rem;color:#64748b">${r.categorie||''}</td>
     <td class="num" style="color:#166534">${r.bon_etat}</td>
     <td class="num" style="color:#92400e">${r.reparation}</td>
+    <td class="num" style="color:#7c3aed">${r.defectueux!=null?r.defectueux:0}</td>
     <td style="text-align:center;font-weight:800">${r.classe}</td>
     <td class="num">${r.seuil_mini}</td>
     <td style="text-align:center;font-weight:800;color:${col[r.statut]||'#334155'};white-space:nowrap">${dot[r.statut]||''} ${r.statut}</td>
     <td style="font-size:.76rem">${r.action}</td></tr>`).join('')
-    || `<tr><td colspan="9" style="text-align:center;color:#94a3b8;padding:16px;">Aucune ligne.</td></tr>`;
+    || `<tr><td colspan="10" style="text-align:center;color:#94a3b8;padding:16px;">Aucune ligne.</td></tr>`;
 }
 
 // ── Saisie directe ─────────────────────────────────────────────────────────
@@ -282,6 +287,7 @@ function saiAddRow(){
     <td><input class="sai-in" data-f="unite" style="width:100%" value="Unité"></td>
     <td><input class="sai-in" data-f="bon_etat" type="number" min="0" step="any" style="width:100%" value="0"></td>
     <td><input class="sai-in" data-f="en_reparation" type="number" min="0" step="any" style="width:100%" value="0"></td>
+    <td><input class="sai-in" data-f="defectueux" type="number" min="0" step="any" style="width:100%" value="0"></td>
     <td style="text-align:center"><button class="ks-btn sec" style="padding:4px 9px" onclick="this.closest('tr').remove()">✕</button></td>`;
   document.getElementById('sai-body').appendChild(tr);
 }
@@ -289,8 +295,9 @@ function saiCollect(){
   return [...document.querySelectorAll('#sai-body tr')].map(tr=>{
     const o={}; tr.querySelectorAll('.sai-in').forEach(i=>o[i.dataset.f]=i.value.trim());
     o.bon_etat=parseFloat(o.bon_etat)||0; o.en_reparation=parseFloat(o.en_reparation)||0;
+    o.defectueux=parseFloat(o.defectueux)||0;
     return o;
-  }).filter(o=>o.designation && (o.bon_etat>0 || o.en_reparation>0));
+  }).filter(o=>o.designation && (o.bon_etat>0 || o.en_reparation>0 || o.defectueux>0));
 }
 async function saiSave(){
   const mag=document.getElementById('sai-mag').value;
@@ -368,12 +375,13 @@ function parseCSV(txt){
             unite:g('unite')||g('unité')||g('uom')||'Unité',
             magasin:g('magasin')||g('entrepot')||g('entrepôt'),
             bon_etat:parseFloat(g('bon_etat')||g('bon état')||g('bon etat'))||0,
-            en_reparation:parseFloat(g('en_reparation')||g('en réparation')||g('reparation'))||0};
+            en_reparation:parseFloat(g('a_reparer')||g('à réparer')||g('en_reparation')||g('en réparation')||g('reparation'))||0,
+            defectueux:parseFloat(g('defectueux')||g('défectueux'))||0};
   }).filter(r=>r.designation);
 }
 async function importer(){
   const rows=parseCSV(document.getElementById('ks-csv').value);
-  if(!rows.length){frappe.msgprint("Aucune ligne valide (vérifiez l'en-tête : designation, categorie, unite, magasin, bon_etat, en_reparation).");return;}
+  if(!rows.length){frappe.msgprint("Aucune ligne valide (vérifiez l'en-tête : designation, categorie, unite, magasin, bon_etat, a_reparer, defectueux).");return;}
   const btn=document.getElementById('ks-imp-btn'); btn.disabled=true;
   try{
     const r=(await frappe.call({method:'kya_hr.api.stock_kya.importer_stock_initial',args:{rows:JSON.stringify(rows)}})).message;

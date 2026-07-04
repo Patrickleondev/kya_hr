@@ -75,7 +75,7 @@
    "fieldname": "etat",
    "label": "État du matériel",
    "fieldtype": "Select",
-   "options": "Bon état\nEn réparation\nNeuf\nHors service",
+   "options": "Bon état\nÀ réparer\nDéfectueux",
    "default": "Bon état",
    "in_standard_filter": 1
   },

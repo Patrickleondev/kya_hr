@@ -15,9 +15,19 @@ import frappe
 from frappe import _
 from frappe.utils import flt, today
 
-# États comptant comme stock « disponible » (bon état) vs « en réparation ».
+# Vocabulaire d'état UNIQUE côté magasin (décision KYA) : Bon état / À réparer /
+# Défectueux. On garde en mémoire les libellés HÉRITÉS (Neuf, En réparation, Hors
+# service, Endommagé) uniquement pour reclasser les anciens mouvements sans les
+# perdre — plus aucune écriture ne les émet.
+ETAT_BON = "Bon état"        # disponible (compté dans le stock utilisable)
+ETAT_REPARER = "À réparer"    # présent mais immobilisé (récupérable)
+ETAT_DEFECT = "Défectueux"    # présent mais hors stock utile (à retourner/rebut)
+ETATS_STOCK = (ETAT_BON, ETAT_REPARER, ETAT_DEFECT)
+
+# Regroupement des libellés (canoniques + hérités) par bucket de solde.
 _BON = ("Bon état", "Neuf")
-_REPAR = ("En réparation",)
+_REPAR = ("À réparer", "En réparation")
+_DEFECT = ("Défectueux", "Hors service", "Endommagé")
 
 _STOCK_ROLES = {"System Manager", "Stock Manager", "Stock User",
                 "Responsable Stock", "Chargé des Stocks",
@@ -58,7 +68,7 @@ def enregistrer_mouvements(rows, type_mouvement, reference_doctype=None,
         doc.item = item
         doc.magasin = magasin
         doc.quantite = qte
-        doc.etat = r.get("etat") or "Bon état"
+        doc.etat = r.get("etat") or ETAT_BON
         doc.reference_doctype = reference_doctype
         doc.reference_name = reference_name
         doc.remarque = r.get("remarque")
@@ -93,17 +103,18 @@ def _bucketize(rows):
         key = (r["item"], r["magasin"])
         d = agg.setdefault(key, {"item": r["item"], "item_name": r.get("item_name") or r["item"],
                                  "magasin": r["magasin"], "bon_etat": 0.0,
-                                 "reparation": 0.0, "autre": 0.0, "total": 0.0})
+                                 "reparation": 0.0, "defectueux": 0.0, "total": 0.0})
         q = flt(r["q"])
         if r["etat"] in _BON:
             d["bon_etat"] += q
         elif r["etat"] in _REPAR:
             d["reparation"] += q
-        else:
-            d["autre"] += q
+        else:                       # _DEFECT + tout libellé inconnu → défectueux
+            d["defectueux"] += q
     for d in agg.values():
-        d["total"] = round(d["bon_etat"] + d["reparation"], 3)
-        for k in ("bon_etat", "reparation", "autre"):
+        # Total = stock présent en magasin = bon état + à réparer + défectueux.
+        d["total"] = round(d["bon_etat"] + d["reparation"] + d["defectueux"], 3)
+        for k in ("bon_etat", "reparation", "defectueux"):
             d[k] = round(d[k], 3)
     return agg
 
@@ -141,7 +152,7 @@ def soldes(magasin=None, item=None, only_nonzero=1):
     agg = _bucketize(_raw_sums(magasin=magasin, item=item))
     out = list(agg.values())
     if str(only_nonzero) not in ("0", "false", "False"):
-        out = [d for d in out if abs(d["total"]) > 1e-9 or abs(d["autre"]) > 1e-9]
+        out = [d for d in out if abs(d["total"]) > 1e-9]
     out.sort(key=lambda d: (d["magasin"], d["item_name"]))
     return out
 
@@ -160,7 +171,8 @@ def etat_inventaire(magasin=None):
         for i, d in enumerate(par_magasin[mag], start=1):
             lignes.append({"n": i, "item": d["item"], "designation": d["item_name"],
                            "qte_totale": d["total"], "bon_etat": d["bon_etat"],
-                           "reparation": d["reparation"], "obs": ""})
+                           "reparation": d["reparation"],
+                           "defectueux": d.get("defectueux", 0), "obs": ""})
         sections.append({"magasin": mag, "lignes": lignes,
                          "total_lignes": len(lignes)})
     return {"sections": sections, "genere_le": today()}
@@ -194,19 +206,22 @@ def _classe_seuil(qte_totale):
     return "D", 2, 0.0, 2
 
 
-def evaluer_ligne(bon_etat, reparation):
+def evaluer_ligne(bon_etat, reparation, defectueux=0):
     """Évalue UNE référence comme la fiche AEA-ENG-13 : classe, seuil, statut,
-    manque à combler et action. `dispo` = bon état seulement."""
+    manque à combler et action. `dispo` = BON ÉTAT seulement (ni à réparer ni
+    défectueux ne comptent comme disponibles). Le total (base de la classe de
+    rotation) = tout ce qui est physiquement présent en magasin."""
     bon = flt(bon_etat)
     rep = flt(reparation)
-    total = round(bon + rep, 3)
+    defe = flt(defectueux)
+    total = round(bon + rep + defe, 3)
     classe, seuil, coef, plancher = _classe_seuil(total)
     dispo = bon
     manque = max(0, seuil - dispo)
     qte_commander = 0
     if total <= 0:
         statut, action = "REFERENCE VIDE", "Vérifier besoin / déréférencer"
-    elif dispo <= 0:                       # tout le stock est en réparation
+    elif dispo <= 0:                       # rien de disponible (tout à réparer/défectueux)
         statut = "RUPTURE"
         qte_commander = max(0, int(2 * seuil - dispo))
         action = "Commander {0} u (vers 2× seuil)".format(qte_commander)
@@ -218,6 +233,7 @@ def evaluer_ligne(bon_etat, reparation):
         statut, action = "OK", "-"
     return {"classe": classe, "seuil_mini": seuil, "coefficient": coef,
             "plancher": plancher, "dispo": dispo, "manque_a_combler": manque,
+            "defectueux": round(defe, 3),
             "statut": statut, "qte_a_commander": qte_commander, "action": action}
 
 
@@ -235,7 +251,7 @@ def reapprovisionnement(magasin=None, only_alertes=0):
             for a in frappe.get_all("Article KYA", fields=["name", "categorie"])}
     out = []
     for d in soldes(magasin=magasin, only_nonzero=1):
-        ev = evaluer_ligne(d["bon_etat"], d["reparation"])
+        ev = evaluer_ligne(d["bon_etat"], d["reparation"], d.get("defectueux", 0))
         out.append({
             "item": d["item"], "designation": d["item_name"],
             "categorie": cats.get(d["item"], "Non classé"), "magasin": d["magasin"],
@@ -259,9 +275,10 @@ def synthese_stock(magasin=None):
     reap = reapprovisionnement(magasin)
     qte = sum(r["qte_totale"] for r in reap)
     bon = sum(r["bon_etat"] for r in reap)
+    defe = sum(r.get("defectueux", 0) for r in reap)
 
     def _bloc():
-        return {"references": 0, "qte_totale": 0.0, "bon_etat": 0.0,
+        return {"references": 0, "qte_totale": 0.0, "bon_etat": 0.0, "defectueux": 0.0,
                 "ok": 0, "a_commander": 0, "ruptures": 0, "vides": 0}
 
     par_mag, par_cat = {}, {}
@@ -272,6 +289,7 @@ def synthese_stock(magasin=None):
             b["references"] += 1
             b["qte_totale"] = round(b["qte_totale"] + r["qte_totale"], 2)
             b["bon_etat"] = round(b["bon_etat"] + r["bon_etat"], 2)
+            b["defectueux"] = round(b["defectueux"] + r.get("defectueux", 0), 2)
             b["ok"] += 1 if r["statut"] == "OK" else 0
             b["a_commander"] += 1 if r["statut"] == "A COMMANDER" else 0
             b["ruptures"] += 1 if r["statut"] == "RUPTURE" else 0
@@ -289,6 +307,7 @@ def synthese_stock(magasin=None):
         "kpi": {
             "references": len(reap),
             "qte_totale": round(qte, 2),
+            "defectueux": round(defe, 2),
             "taux_bon_etat": round(100 * bon / qte, 1) if qte else 0.0,
             "a_commander": sum(1 for r in reap if r["statut"] == "A COMMANDER"),
             "ruptures": sum(1 for r in reap if r["statut"] == "RUPTURE"),
@@ -355,8 +374,8 @@ def saisir_stock_direct(magasin, lignes, date_saisie=None):
 
     Crée + valide UNE fiche « Saisie Stock KYA » (source unique de vérité,
     auditable, annulable) à partir des lignes saisies. `lignes` =
-    [{designation, categorie, unite, bon_etat, en_reparation}]. Les catégories
-    libres sont créées au besoin ; les articles manquants aussi (sans code)."""
+    [{designation, categorie, unite, bon_etat, en_reparation, defectueux}]. Les
+    catégories libres sont créées au besoin ; les articles manquants aussi (sans code)."""
     _guard(write=True)
     if isinstance(lignes, str):
         lignes = frappe.parse_json(lignes)
@@ -375,7 +394,8 @@ def saisir_stock_direct(magasin, lignes, date_saisie=None):
             "categorie": _ensure_categorie(cat) if cat else None,
             "unite": l.get("unite") or "Unité",
             "bon_etat": flt(l.get("bon_etat")),
-            "en_reparation": flt(l.get("en_reparation")),
+            "en_reparation": flt(l.get("en_reparation") or l.get("a_reparer")),
+            "defectueux": flt(l.get("defectueux")),
         })
     if not doc.lignes:
         frappe.throw(_("Aucune ligne valide (désignation + quantité requises)."))
@@ -432,9 +452,12 @@ def importer_stock_initial(rows):
             if magasin and frappe.db.exists("Warehouse", magasin):
                 # Deux colonnes (bon état / réparation) comme la fiche d'inventaire,
                 # sinon repli sur quantite + etat.
-                if any(k in r for k in ("bon_etat", "reparation", "en_reparation")):
-                    postes = [("Bon état", flt(r.get("bon_etat"))),
-                              ("En réparation", flt(r.get("reparation") or r.get("en_reparation")))]
+                if any(k in r for k in ("bon_etat", "reparation", "en_reparation",
+                                        "a_reparer", "defectueux")):
+                    postes = [(ETAT_BON, flt(r.get("bon_etat"))),
+                              (ETAT_REPARER, flt(r.get("reparation") or r.get("en_reparation")
+                                                 or r.get("a_reparer"))),
+                              (ETAT_DEFECT, flt(r.get("defectueux")))]
                 else:
                     postes = [(_norm_etat(r.get("etat")), flt(r.get("quantite")))]
                 # Idempotent : purge l'ouverture précédente de cet article/magasin.
@@ -522,10 +545,10 @@ def export_inventaire_xlsx(magasin=None, signataires=None):
             []]
     for s in inv["sections"]:
         data.append([_mag_label(s["magasin"])])
-        data.append(["N°", "DESIGNATION", "TOTAL", "BON ETAT", "EN REPARAT°"])
+        data.append(["N°", "DESIGNATION", "TOTAL", "BON ETAT", "A REPARER", "DEFECTUEUX"])
         for l in s["lignes"]:
             data.append([l["n"], l["designation"], l["qte_totale"],
-                         l["bon_etat"], l["reparation"]])
+                         l["bon_etat"], l["reparation"], l.get("defectueux", 0)])
         data.append([])
     # Bloc signataires (fonctions fixes ; noms/fonctions saisis par le Resp. Stock)
     sign = _signataires_block(signataires)
@@ -557,12 +580,12 @@ def export_inventaire_pdf(magasin=None, signataires=None):
         lignes = "".join(
             f"<tr><td class='n'>{l['n']}</td><td class='d'>{frappe.utils.escape_html(l['designation'])}</td>"
             f"<td class='q'>{_fmt(l['qte_totale'])}</td><td class='q'>{_fmt(l['bon_etat'])}</td>"
-            f"<td class='q'>{_fmt(l['reparation'])}</td></tr>"
+            f"<td class='q'>{_fmt(l['reparation'])}</td><td class='q'>{_fmt(l.get('defectueux', 0))}</td></tr>"
             for l in s["lignes"])
         sections_html += (
-            f"<tr class='mag'><td colspan='5'>{_mag_label(s['magasin'])}</td></tr>{lignes}")
+            f"<tr class='mag'><td colspan='6'>{_mag_label(s['magasin'])}</td></tr>{lignes}")
     if not sections_html:
-        sections_html = "<tr><td colspan='5' style='text-align:center;padding:14px'>Aucun stock.</td></tr>"
+        sections_html = "<tr><td colspan='6' style='text-align:center;padding:14px'>Aucun stock.</td></tr>"
 
     sign = _signataires_block(signataires)
     sig_cells = "".join(f"<th>{s['label']}</th>" for s in sign)
@@ -585,8 +608,8 @@ def export_inventaire_pdf(magasin=None, signataires=None):
       table.inv {{ width:100%; border-collapse:collapse; font-size:11px; }}
       table.inv th, table.inv td {{ border:1px solid #000; padding:2px 5px; }}
       table.inv th {{ text-align:center; font-weight:bold; }}
-      td.n {{ text-align:center; width:5%; }} td.d {{ width:60%; }}
-      td.q {{ text-align:right; font-weight:bold; width:11%; }}
+      td.n {{ text-align:center; width:5%; }} td.d {{ width:55%; }}
+      td.q {{ text-align:right; font-weight:bold; width:10%; }}
       tr.mag td {{ text-align:center; font-weight:bold; background:#eee; }}
       table.sig {{ width:100%; border-collapse:collapse; margin-top:26px; font-size:11px; }}
       table.sig th, table.sig td {{ border:1px solid #000; padding:5px; text-align:center; }}
@@ -601,8 +624,8 @@ def export_inventaire_pdf(magasin=None, signataires=None):
       <div class='date'>DATE : {date_fr}</div>
       <table class='inv'>
         <thead><tr><th rowspan='2'>N°</th><th rowspan='2'>DESIGNATION</th>
-          <th colspan='3'>QUANTITE</th></tr>
-          <tr><th>TOTAL</th><th>BON ETAT</th><th>EN REPARAT°</th></tr></thead>
+          <th colspan='4'>QUANTITE</th></tr>
+          <tr><th>TOTAL</th><th>BON ETAT</th><th>A REPARER</th><th>DEFECTUEUX</th></tr></thead>
         <tbody>{sections_html}</tbody>
       </table>
       <table class='sig'>
@@ -631,28 +654,34 @@ def modele_import_xlsx():
     import base64
     from frappe.utils.xlsxutils import make_xlsx
     mag = frappe.db.get_value("Warehouse", {"is_group": 0, "disabled": 0}, "name") or ""
-    headers = ["designation", "categorie", "unite", "magasin", "bon_etat", "en_reparation"]
-    ex1 = ["MODULE PV 455Wc", "Modules PV", "Unité", mag, 12, 0]
-    ex2 = ["BALAIS TELESCOPIQUE", "Outillage", "Unité", mag, 2, 3]
-    ex3 = ["CABLE 1X25mm² (m)", "Câbles", "m", mag, 6376, 0]
+    headers = ["designation", "categorie", "unite", "magasin",
+               "bon_etat", "a_reparer", "defectueux"]
+    ex1 = ["MODULE PV 455Wc", "Modules PV", "Unité", mag, 12, 0, 0]
+    ex2 = ["BALAIS TELESCOPIQUE", "Outillage", "Unité", mag, 2, 3, 1]
+    ex3 = ["CABLE 1X25mm² (m)", "Câbles", "m", mag, 6376, 0, 0]
     xlsx = make_xlsx([headers, ex1, ex2, ex3], "Modele import")
     return {"filename": "modele-import-stock-kya.xlsx",
             "content_base64": base64.b64encode(xlsx.getvalue()).decode("ascii")}
 
 
-# États possibles d'un article en stock (une seule dimension « état »).
+# Normalisation des libellés d'état vers le vocabulaire UNIQUE (Bon état / À
+# réparer / Défectueux). On reconnaît les anciens libellés en entrée, mais on
+# ne produit QUE les trois canoniques.
 _ETATS = {
-    "bon etat": "Bon état", "bon état": "Bon état", "bon": "Bon état", "": "Bon état",
-    "neuf": "Neuf", "nouveau": "Neuf",
-    "en reparation": "En réparation", "en réparation": "En réparation",
-    "reparation": "En réparation", "réparation": "En réparation", "repar": "En réparation",
-    "hors service": "Hors service", "hs": "Hors service", "hors-service": "Hors service",
+    "bon etat": ETAT_BON, "bon état": ETAT_BON, "bon": ETAT_BON, "": ETAT_BON,
+    "neuf": ETAT_BON, "nouveau": ETAT_BON,
+    "a reparer": ETAT_REPARER, "à reparer": ETAT_REPARER, "à réparer": ETAT_REPARER,
+    "a réparer": ETAT_REPARER, "en reparation": ETAT_REPARER, "en réparation": ETAT_REPARER,
+    "reparation": ETAT_REPARER, "réparation": ETAT_REPARER, "repar": ETAT_REPARER,
+    "defectueux": ETAT_DEFECT, "défectueux": ETAT_DEFECT, "defect": ETAT_DEFECT,
+    "hors service": ETAT_DEFECT, "hs": ETAT_DEFECT, "hors-service": ETAT_DEFECT,
+    "endommage": ETAT_DEFECT, "endommagé": ETAT_DEFECT,
 }
 
 
 def _norm_etat(v):
     """Normalise le libellé d'état vers une valeur canonique (défaut : Bon état)."""
-    return _ETATS.get((v or "").strip().lower(), "Bon état")
+    return _ETATS.get((v or "").strip().lower(), ETAT_BON)
 
 
 def _map_import_row(d):
@@ -673,11 +702,13 @@ def _map_import_row(d):
         "magasin": g("magasin", "entrepot", "entrepôt", "warehouse", "stock"),
     }
     bon = g("bon_etat", "bon état", "bon etat", "bonetat")
-    rep = g("en_reparation", "reparation", "réparation", "en réparation",
-            "en reparation", "repar")
-    if bon or rep:
+    rep = g("a_reparer", "à réparer", "a reparer", "en_reparation", "reparation",
+            "réparation", "en réparation", "en reparation", "repar")
+    defe = g("defectueux", "défectueux", "defect", "hors service", "endommagé")
+    if bon or rep or defe:
         row["bon_etat"] = flt(bon)
         row["en_reparation"] = flt(rep)
+        row["defectueux"] = flt(defe)
     else:
         row["quantite"] = flt(g("quantite", "quantité", "qte", "quantity", "qté", "total"))
         row["etat"] = _norm_etat(g("etat", "état", "condition"))
@@ -731,11 +762,13 @@ def dashboard_overview():
     magasins_set = {d["magasin"] for d in lignes}
     articles_set = {d["item"] for d in lignes}
     en_reparation = sum(1 for d in lignes if d["reparation"] > 0)
+    defectueux_refs = sum(1 for d in lignes if d.get("defectueux", 0) > 0)
     ruptures = sum(1 for d in lignes if d["total"] <= 0)
     total_unites = round(sum(d["total"] for d in lignes), 2)
     # Indicateurs « fiche AEA-ENG-13 » (statut par référence : dispo = bon état).
     bon_total = round(sum(d["bon_etat"] for d in lignes), 2)
-    _stat = [evaluer_ligne(d["bon_etat"], d["reparation"])["statut"] for d in lignes]
+    defect_total = round(sum(d.get("defectueux", 0) for d in lignes), 2)
+    _stat = [evaluer_ligne(d["bon_etat"], d["reparation"], d.get("defectueux", 0))["statut"] for d in lignes]
     taux_bon_etat = round(100 * bon_total / total_unites, 1) if total_unites else 0.0
     a_commander = sum(1 for s in _stat if s == "A COMMANDER")
     ruptures_stock = sum(1 for s in _stat if s == "RUPTURE")
@@ -743,11 +776,12 @@ def dashboard_overview():
     par_mag = {}
     for d in lignes:
         m = par_mag.setdefault(d["magasin"], {"magasin": d["magasin"], "articles": 0, "unites": 0.0,
-                                              "bon_etat": 0.0, "reparation": 0.0})
+                                              "bon_etat": 0.0, "reparation": 0.0, "defectueux": 0.0})
         m["articles"] += 1
         m["unites"] = round(m["unites"] + d["total"], 2)
         m["bon_etat"] = round(m["bon_etat"] + d["bon_etat"], 2)
         m["reparation"] = round(m["reparation"] + d["reparation"], 2)
+        m["defectueux"] = round(m["defectueux"] + d.get("defectueux", 0), 2)
     # Derniers mouvements
     recents = frappe.get_all("Mouvement Stock KYA",
         fields=["date_mouvement", "type_mouvement", "item_name", "magasin",
@@ -763,6 +797,7 @@ def dashboard_overview():
     return {
         "kpi": {"articles": len(articles_set), "magasins": len(magasins_set),
                 "unites": total_unites, "en_reparation": en_reparation, "ruptures": ruptures,
+                "defectueux": defect_total, "defectueux_refs": defectueux_refs,
                 # Indicateurs alignés sur la fiche officielle (dispo = bon état).
                 "taux_bon_etat": taux_bon_etat, "a_commander": a_commander,
                 "ruptures_stock": ruptures_stock},

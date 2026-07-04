@@ -15,12 +15,13 @@ from kya_hr.api import stock_kya
 
 
 def _map_etat_retour(etat_au_retour):
-    """Mappe l'état saisi au retour vers un bucket du grand livre stock."""
+    """Mappe l'état saisi au retour vers le vocabulaire unique du grand livre
+    (Bon état / À réparer / Défectueux)."""
     e = (etat_au_retour or "").strip().lower()
-    if "répar" in e or "repar" in e or "à réparer" in e:
-        return "En réparation"
-    if "endommag" in e or "hors" in e or "rebut" in e:
-        return "Hors service"
+    if "répar" in e or "repar" in e:
+        return "À réparer"
+    if "défect" in e or "defect" in e or "endommag" in e or "hors" in e or "rebut" in e:
+        return "Défectueux"
     return "Bon état"
 
 
@@ -126,8 +127,8 @@ class RetourMaterielKYA(Document):
         """Remet les articles retournés en stock dans le grand livre maison
         (+qté par magasin). L'ÉTAT au retour porte le bucket de solde :
           - Bon état   → stock disponible
-          - À réparer  → bucket « En réparation » (immobilisé, pas disponible)
-          - Endommagé  → bucket « Hors service » (candidat rebut)
+          - À réparer  → immobilisé (pas disponible, récupérable)
+          - Défectueux → hors stock utile (candidat retour fournisseur / rebut)
         Même magasin ; c'est l'état (colonne de l'inventaire) qui distingue."""
         rows = []
         for it in self.items:

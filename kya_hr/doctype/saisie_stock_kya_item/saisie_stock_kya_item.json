@@ -42,11 +42,20 @@
   },
   {
    "fieldname": "en_reparation",
-   "label": "En réparation",
+   "label": "À réparer",
    "fieldtype": "Float",
    "default": "0",
    "in_list_view": 1,
-   "columns": 2
+   "columns": 1
+  },
+  {
+   "fieldname": "defectueux",
+   "label": "Défectueux",
+   "fieldtype": "Float",
+   "default": "0",
+   "in_list_view": 1,
+   "columns": 1,
+   "description": "Matériel reçu/présent mais défectueux (non disponible)."
   }
  ],
  "permissions": []

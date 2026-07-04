@@ -1,0 +1,45 @@
+{
+ "name": "Solde Tout Compte KYA",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "custom": 0,
+ "engine": "InnoDB",
+ "autoname": "format:STC-{YYYY}-{#####}",
+ "title_field": "nom_complet",
+ "search_fields": "salarie, nom_complet, motif_depart",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1,
+ "description": "Décompte du solde de tout compte (indemnités) d'un salarié — calcul maison (Convention Collective), aucun recours à la paie ERPNext.",
+ "fields": [
+  {"fieldname": "sb_emp", "fieldtype": "Section Break", "label": "Salarié"},
+  {"fieldname": "salarie", "label": "Salarié", "fieldtype": "Link", "options": "Salarie KYA", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "nom_complet", "label": "Nom & Prénoms", "fieldtype": "Data", "fetch_from": "salarie.nom_complet", "read_only": 1, "in_list_view": 1},
+  {"fieldname": "poste_occupe", "label": "Poste occupé", "fieldtype": "Data", "fetch_from": "salarie.poste_occupe", "read_only": 1},
+  {"fieldname": "date_embauche", "label": "Date d'embauche", "fieldtype": "Date", "fetch_from": "salarie.date_embauche", "read_only": 1},
+  {"fieldname": "cb_emp", "fieldtype": "Column Break"},
+  {"fieldname": "date_calcul", "label": "Date de calcul / sortie", "fieldtype": "Date", "reqd": 1, "default": "Today", "in_list_view": 1},
+  {"fieldname": "motif_depart", "label": "Motif de départ", "fieldtype": "Select", "options": "\nLicenciement\nRetraite\nDémission\nFin de contrat\nRupture conventionnelle", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "salaire_base", "label": "Salaire de base", "fieldtype": "Currency", "fetch_from": "salarie.salaire_base", "read_only": 1},
+  {"fieldname": "salaire_mensuel_moyen", "label": "Salaire mensuel moyen (12 mois)", "fieldtype": "Currency", "description": "Par défaut = salaire de base. Ajustez si des primes entrent dans la moyenne."},
+
+  {"fieldname": "sb_calcul", "fieldtype": "Section Break", "label": "Décompte (calculé automatiquement)"},
+  {"fieldname": "anciennete_annees", "label": "Ancienneté (années)", "fieldtype": "Float", "read_only": 1, "precision": "2"},
+  {"fieldname": "prime_taux", "label": "Taux prime d'ancienneté (%)", "fieldtype": "Percent", "read_only": 1},
+  {"fieldname": "cb_calcul", "fieldtype": "Column Break"},
+  {"fieldname": "total_indemnites", "label": "TOTAL à verser (FCFA)", "fieldtype": "Currency", "read_only": 1, "bold": 1, "in_list_view": 1},
+
+  {"fieldname": "sb_lignes", "fieldtype": "Section Break", "label": "Détail des composantes"},
+  {"fieldname": "lignes", "label": "Composantes", "fieldtype": "Table", "options": "Solde Tout Compte Ligne KYA", "read_only": 1},
+
+  {"fieldname": "sb_obs", "fieldtype": "Section Break", "label": "Observations"},
+  {"fieldname": "observations", "label": "Observations", "fieldtype": "Small Text"}
+ ],
+ "permissions": [
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1, "report": 1, "share": 1, "print": 1, "email": 1},
+  {"role": "Responsable RH", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1, "report": 1, "print": 1, "email": 1, "share": 1},
+  {"role": "HR Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1, "report": 1, "print": 1},
+  {"role": "Directeur Général", "read": 1, "report": 1, "export": 1, "print": 1},
+  {"role": "DGA", "read": 1, "report": 1, "print": 1}
+ ]
+}

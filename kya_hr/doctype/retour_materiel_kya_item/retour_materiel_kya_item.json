@@ -53,12 +53,12 @@
    "fieldname": "etat_au_retour",
    "label": "État au retour",
    "fieldtype": "Select",
-   "options": "Bon état\nÀ réparer\nEndommagé",
+   "options": "Bon état\nÀ réparer\nDéfectueux",
    "default": "Bon état",
    "in_list_view": 1,
    "columns": 2,
    "reqd": 1,
-   "description": "Bon état → magasin choisi (disponible). À réparer → magasin Atelier-Reparation. Endommagé → magasin Materiel-Endommage. Le Responsable Magasin décide de la suite."
+   "description": "Bon état → stock disponible. À réparer → immobilisé (atelier). Défectueux → hors stock utile (à retourner/rebut). Le Responsable Magasin décide de la suite."
   },
   {
    "fieldname": "observations",

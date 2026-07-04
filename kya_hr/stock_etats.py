@@ -64,7 +64,7 @@ def _norm_etat(etat: str | None) -> str:
     e = (etat or "").strip().lower()
     if e.startswith("à répar") or e.startswith("a repar") or "répar" in e or "repar" in e:
         return "a_reparer"
-    if e.startswith("endommag") or "endommag" in e:
+    if "défect" in e or "defect" in e or "endommag" in e or "hors" in e or "rebut" in e:
         return "endommage"
     return "disponible"
 
@@ -79,11 +79,12 @@ def _classify_warehouse(name: str, warehouse_name: str | None) -> str:
     return "disponible"
 
 
-# Mapping état du ledger maison -> clé de la vue consolidée.
+# Mapping état du ledger maison -> clé de la vue consolidée. Vocabulaire unique
+# = Bon état / À réparer / Défectueux (anciens libellés reconnus pour compat).
 _ETAT_TO_KEY = {
     "Bon état": "disponible", "Neuf": "disponible",
-    "En réparation": "a_reparer",
-    "Hors service": "endommage", "Endommagé": "endommage",
+    "À réparer": "a_reparer", "En réparation": "a_reparer",
+    "Défectueux": "endommage", "Hors service": "endommage", "Endommagé": "endommage",
 }
 
 

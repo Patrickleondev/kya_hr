@@ -31,24 +31,29 @@ LAYOUTS: dict[str, dict[str, tuple[int, int]]] = {
         "prix_unitaire": (1, 1),
         "total": (1, 2),
     },
-    # 3+3+1+1+1 = 9 (observations -> hors liste, accessible via le crayon)
+    # 2+3+1+1+1+1 = 9 (état à la réception ajouté ; obs/prix -> hors liste)
     "PV Entree Materiel Item": {
-        "item_code": (1, 3),
+        "item_code": (1, 2),
         "designation": (1, 3),
         "uom": (1, 1),
         "qte_commandee": (1, 1),
         "qte_recue": (1, 1),
+        "etat": (1, 1),
         "observations": (0, 2),
         "prix_unitaire": (0, 1),
     },
-    # 3+2+2+1+1+1 = 10
+    # 2+2+1+1+1+1+1 = 9 (bon état / à réparer / défectueux visibles pour compter ;
+    # qté système en repère ; total + écart hors liste, via le crayon)
     "Inventaire KYA Item": {
-        "item_code": (1, 3),
+        "item_code": (1, 2),
         "designation": (1, 2),
-        "warehouse": (1, 2),
+        "warehouse": (1, 1),
+        "qte_bon_etat": (1, 1),
+        "qte_en_reparation": (1, 1),
+        "qte_defectueux": (1, 1),
         "qte_theorique": (1, 1),
-        "qte_comptee": (1, 1),
-        "ecart": (1, 1),
+        "qte_comptee": (0, 1),
+        "ecart": (0, 1),
     },
     # 2+3+1+2+2 = 10 (uom + observations -> hors liste)
     "Retour Materiel KYA Item": {

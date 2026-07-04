@@ -1,0 +1,47 @@
+{
+ "name": "Evolution Carriere KYA",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "custom": 0,
+ "engine": "InnoDB",
+ "autoname": "format:EVOL-{#####}",
+ "title_field": "nom_complet",
+ "search_fields": "matricule, nom_complet, nature_evolution",
+ "sort_field": "date_debut",
+ "sort_order": "DESC",
+ "track_changes": 1,
+ "description": "Un enregistrement = un évènement de carrière (embauche, promotion, mutation, renouvellement…). Trace le parcours complet d'un salarié.",
+ "fields": [
+  {"fieldname": "salarie", "label": "Salarié", "fieldtype": "Link", "options": "Salarie KYA", "reqd": 1, "in_list_view": 1, "in_standard_filter": 1, "columns": 2},
+  {"fieldname": "matricule", "label": "Matricule", "fieldtype": "Data", "fetch_from": "salarie.matricule", "read_only": 1, "in_list_view": 1, "columns": 1},
+  {"fieldname": "nom_complet", "label": "Nom & Prénoms", "fieldtype": "Data", "fetch_from": "salarie.nom_complet", "read_only": 1, "in_list_view": 1, "columns": 2},
+  {"fieldname": "nature_evolution", "label": "Nature de l'évolution", "fieldtype": "Select", "options": "Embauche\nPromotion\nMutation\nRenouvellement\nAugmentation salariale\nRétrogradation\nFin de contrat", "reqd": 1, "in_standard_filter": 1, "in_list_view": 1, "columns": 1},
+  {"fieldname": "cb_1", "fieldtype": "Column Break"},
+  {"fieldname": "date_debut", "label": "Date de début", "fieldtype": "Date", "reqd": 1, "in_list_view": 1, "columns": 1},
+  {"fieldname": "date_fin", "label": "Date de fin", "fieldtype": "Date", "description": "Laisser vide si l'évènement est en cours."},
+  {"fieldname": "duree", "label": "Durée", "fieldtype": "Data", "read_only": 1, "description": "Calculée : « X an(s) Y mois » ou « En cours depuis le … »."},
+  {"fieldname": "nombre_renouvellements", "label": "Nombre de renouvellements", "fieldtype": "Int", "default": "0"},
+
+  {"fieldname": "sb_poste", "fieldtype": "Section Break", "label": "Situation à cette étape"},
+  {"fieldname": "type_contrat", "label": "Type de contrat", "fieldtype": "Select", "options": "\nCDI\nCDD\nStagiaire\nPrestataire\nIntérim"},
+  {"fieldname": "departement", "label": "Département", "fieldtype": "Link", "options": "Departement KYA"},
+  {"fieldname": "poste_occupe", "label": "Poste occupé", "fieldtype": "Data"},
+  {"fieldname": "cb_2", "fieldtype": "Column Break"},
+  {"fieldname": "categorie", "label": "Catégorie", "fieldtype": "Select", "options": "\nC\nAM\nAE"},
+  {"fieldname": "classe_echelon", "label": "Classe & échelon", "fieldtype": "Data"},
+  {"fieldname": "salaire_base", "label": "Salaire de base", "fieldtype": "Currency"},
+
+  {"fieldname": "sb_motif", "fieldtype": "Section Break", "label": "Motif & observation"},
+  {"fieldname": "motif_evolution", "label": "Motif de l'évolution", "fieldtype": "Small Text"},
+  {"fieldname": "observation", "label": "Observation", "fieldtype": "Small Text"}
+ ],
+ "permissions": [
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1, "report": 1, "share": 1, "print": 1},
+  {"role": "Responsable RH", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1, "report": 1, "print": 1, "share": 1},
+  {"role": "HR Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1, "report": 1, "print": 1},
+  {"role": "HR User", "read": 1, "write": 1, "create": 1, "export": 1, "report": 1, "print": 1},
+  {"role": "Assistant(e) RH", "read": 1, "write": 1, "create": 1, "export": 1, "report": 1, "print": 1},
+  {"role": "Directeur Général", "read": 1, "report": 1, "export": 1, "print": 1},
+  {"role": "DGA", "read": 1, "report": 1, "export": 1}
+ ]
+}

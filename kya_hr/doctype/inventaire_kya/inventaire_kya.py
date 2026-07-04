@@ -47,8 +47,9 @@ class InventaireKYA(Document):
         lignes_ecart = 0
         for row in self.items or []:
             total_lignes += 1
-            # Qté totale comptée = bon état + en réparation (format fiche KYA)
-            row.qte_comptee = (row.qte_bon_etat or 0) + (row.qte_en_reparation or 0)
+            # Qté totale comptée = bon état + à réparer + défectueux (format fiche KYA)
+            row.qte_comptee = ((row.qte_bon_etat or 0) + (row.qte_en_reparation or 0)
+                               + (row.get("qte_defectueux") or 0))
             theo = row.qte_theorique or 0
             row.ecart = (row.qte_comptee or 0) - theo
             if row.ecart:
@@ -90,13 +91,18 @@ class InventaireKYA(Document):
             solde = stock_kya.solde_item_magasin(it.item_code, it.warehouse)
             delta_bon = (it.qte_bon_etat or 0) - (solde.get("bon_etat") or 0)
             delta_rep = (it.qte_en_reparation or 0) - (solde.get("reparation") or 0)
+            delta_def = (it.get("qte_defectueux") or 0) - (solde.get("defectueux") or 0)
             if delta_bon:
                 rows.append({"item": it.item_code, "magasin": it.warehouse,
                              "quantite": delta_bon, "etat": "Bon état",
                              "remarque": it.get("remarque") or _("Ajustement inventaire")})
             if delta_rep:
                 rows.append({"item": it.item_code, "magasin": it.warehouse,
-                             "quantite": delta_rep, "etat": "En réparation",
+                             "quantite": delta_rep, "etat": "À réparer",
+                             "remarque": it.get("remarque") or _("Ajustement inventaire")})
+            if delta_def:
+                rows.append({"item": it.item_code, "magasin": it.warehouse,
+                             "quantite": delta_def, "etat": "Défectueux",
                              "remarque": it.get("remarque") or _("Ajustement inventaire")})
         if not rows:
             frappe.msgprint(_("Inventaire validé — aucun écart, stock inchangé."),
@@ -163,6 +169,7 @@ def load_items_from_warehouse(inventaire_name: str = None, warehouse: str | None
         rows.append({
             "item_code": d["item"], "designation": d["item_name"], "warehouse": warehouse,
             "qte_bon_etat": d["bon_etat"], "qte_en_reparation": d["reparation"],
+            "qte_defectueux": d.get("defectueux", 0),
             "qte_comptee": d["total"], "qte_theorique": d["total"], "ecart": 0,
         })
     return rows

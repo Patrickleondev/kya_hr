@@ -48,6 +48,16 @@
    "columns": 1
   },
   {
+   "fieldname": "etat",
+   "label": "État à la réception",
+   "fieldtype": "Select",
+   "options": "Bon état\nÀ réparer\nDéfectueux",
+   "default": "Bon état",
+   "in_list_view": 1,
+   "columns": 1,
+   "description": "Bon état → stock disponible. À réparer / Défectueux → reçu mais non disponible (le matériel reste enregistré)."
+  },
+  {
    "fieldname": "observations",
    "label": "Observations",
    "fieldtype": "Data",

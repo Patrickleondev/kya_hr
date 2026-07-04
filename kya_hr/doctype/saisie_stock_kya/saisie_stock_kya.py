@@ -34,10 +34,10 @@ class SaisieStockKYA(Document):
                 l.designation = " ".join(l.designation.split())
             if not l.designation:
                 frappe.throw(_("Chaque ligne doit avoir une désignation."))
-            if flt(l.bon_etat) < 0 or flt(l.en_reparation) < 0:
+            if flt(l.bon_etat) < 0 or flt(l.en_reparation) < 0 or flt(l.get("defectueux")) < 0:
                 frappe.throw(_("Ligne « {0} » : les quantités ne peuvent pas être négatives.").format(l.designation))
-            if flt(l.bon_etat) == 0 and flt(l.en_reparation) == 0:
-                frappe.throw(_("Ligne « {0} » : indiquez une quantité (bon état et/ou en réparation).").format(l.designation))
+            if flt(l.bon_etat) == 0 and flt(l.en_reparation) == 0 and flt(l.get("defectueux")) == 0:
+                frappe.throw(_("Ligne « {0} » : indiquez une quantité (bon état, à réparer et/ou défectueux).").format(l.designation))
 
     def on_submit(self):
         self.db_set("statut", "Validée", update_modified=False)
@@ -63,7 +63,11 @@ class SaisieStockKYA(Document):
                              "remarque": l.designation})
             if flt(l.en_reparation):
                 rows.append({"item": art, "magasin": self.magasin,
-                             "quantite": flt(l.en_reparation), "etat": "En réparation",
+                             "quantite": flt(l.en_reparation), "etat": "À réparer",
+                             "remarque": l.designation})
+            if flt(l.get("defectueux")):
+                rows.append({"item": art, "magasin": self.magasin,
+                             "quantite": flt(l.get("defectueux")), "etat": "Défectueux",
                              "remarque": l.designation})
         if not rows:
             return

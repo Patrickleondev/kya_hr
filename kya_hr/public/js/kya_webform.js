@@ -2135,8 +2135,10 @@
         { fn: "uom",           label: "Unité",        type: "link", link: "UOM", w: "10%" },
         { fn: "qte_commandee", label: "Qté Cmd",      type: "float", w: "9%", align: "right" },
         { fn: "qte_recue",     label: "Qté Reçue",    type: "float", w: "9%", align: "right" },
-        { fn: "prix_unitaire", label: "P.U. (FCFA)",  type: "num",   w: "12%", align: "right" },
-        { fn: "warehouse",     label: "Magasin",      type: "link", link: "Warehouse", w: "16%" }
+        { fn: "etat",          label: "État",         type: "select", w: "12%",
+          opts: ["Bon état", "À réparer", "Défectueux"] },
+        { fn: "prix_unitaire", label: "P.U. (FCFA)",  type: "num",   w: "11%", align: "right" },
+        { fn: "warehouse",     label: "Magasin",      type: "link", link: "Warehouse", w: "15%" }
       ]
     },
 
@@ -2166,7 +2168,7 @@
         { fn: "qte_retournee",  label: "Qté Retournée", type: "float", w: "11%", align: "right" },
         { fn: "warehouse",      label: "Magasin dest.", type: "link", link: "Warehouse", w: "16%" },
         { fn: "etat_au_retour", label: "État au retour", type: "select", w: "16%",
-          opts: ["Bon état", "Endommagé", "À réparer"] }
+          opts: ["Bon état", "À réparer", "Défectueux"] }
       ]
     },
 
