@@ -1,10 +1,14 @@
-"""Page : Portail de pilotage (Accueil des tableaux de bord).
+"""Page : Portail de pilotage (Accueil) — navigation Département → Équipe → Opérations.
 
 Route : /portail-pilotage
 
-Hub listant les tableaux de bord KYA. Chaque carte n'apparaît que si
-l'utilisateur a un rôle d'accès au module correspondant ; deux indicateurs
-réels y sont affichés.
+Hub hiérarchique à 3 niveaux :
+  1. les 4 départements (DG, DSS, DST, DSC) ;
+  2. les équipes de chaque département ;
+  3. les opérations (dashboards, web forms, listes) de chaque équipe.
+
+Chaque département n'apparaît que si l'utilisateur a un rôle d'accès. Quelques
+indicateurs réels sont calculés au niveau département. Tout est défensif.
 """
 from __future__ import annotations
 
@@ -15,21 +19,20 @@ import frappe
 _DIR = {"System Manager", "Directeur General", "Directeur Général", "DG", "DGA",
         "Responsable RH", "HR Manager", "Auditeur Interne", "Auditeur"}
 
-_HUB_ROLES = {
-    "direction": _DIR,
-    "rh": _DIR | {"HR User", "Responsable RH"},
-    "achats": _DIR | {"Responsable Achats", "Purchase Manager", "Purchase User",
-                      "Chef Service", "DAAF", "DFC", "Comptable"},
-    "stocks": _DIR | {"Chargé des Stocks", "Responsable Stock", "Magasinier",
-                      "Stock User", "Stock Manager", "Chef Service Achats"},
-    "logistique": _DIR | {"Responsable Logistique", "Logisticien",
-                          "Gestionnaire de Flotte", "Fleet Manager", "Chef Service"},
-    "compta": _DIR | {"Caissier", "Comptable", "DFC", "DAAF",
-                      "Accounts Manager", "Accounts User"},
-    "technique": _DIR | {"Responsable Technique", "Chef de Projet", "Chef Service",
-                         "Chef Equipe", "Chef d'Equipe", "Responsable Equipe"},
-    "commercial": _DIR | {"Responsable Commercial", "Commercial", "Chargé Commercial",
-                          "Sales Manager", "Sales User", "CRM Manager", "CRM User"},
+_DEPT_ROLES = {
+    "DG": _DIR,
+    "DSS": _DIR | {
+        "HR User", "Responsable RH",
+        "Caissier", "Comptable", "DFC", "DAAF", "Accounts Manager", "Accounts User",
+        "Responsable Achats", "Purchase Manager", "Purchase User", "Chef Service",
+        "Chef Service Achats",
+        "Chargé des Stocks", "Responsable Stock", "Magasinier", "Stock User", "Stock Manager",
+        "Responsable Logistique", "Logisticien", "Gestionnaire de Flotte", "Fleet Manager",
+    },
+    "DST": _DIR | {"Responsable Technique", "Chef de Projet", "Chef Service",
+                   "Chef Equipe", "Chef d'Equipe", "Responsable Equipe"},
+    "DSC": _DIR | {"Responsable Commercial", "Commercial", "Chargé Commercial",
+                   "Sales Manager", "Sales User", "CRM Manager", "CRM User"},
 }
 
 
@@ -44,10 +47,10 @@ def get_context(context):
     context.no_breadcrumbs = True
     try:
         import json as _json
-        context.hubs_json = _json.dumps(get_hubs(), default=str)
+        context.tree_json = _json.dumps(get_portail_tree(), default=str)
     except Exception:
-        context.hubs_json = "[]"
-        frappe.log_error(frappe.get_traceback(), "portail-pilotage: hubs")
+        context.tree_json = "[]"
+        frappe.log_error(frappe.get_traceback(), "portail-pilotage: tree")
     return context
 
 
@@ -60,78 +63,124 @@ def _count(dt, filters=None):
         return 0
 
 
+def _op(label, route, icon="file"):
+    return {"label": label, "route": route, "icon": icon}
+
+
 @frappe.whitelist()
-def get_hubs() -> list:
-    """Cartes du portail, filtrées par rôle, avec 2 indicateurs réels chacune."""
+def get_portail_tree() -> list:
+    """Arbre Département → Équipe → Opérations, filtré par rôle, + stats réelles."""
     roles = set(frappe.get_roles(frappe.session.user))
 
+    # ── Indicateurs département (réels, légers) ──
     nb_emp = _count("Employee", {"status": "Active"})
-    nb_equipes = _count("Equipe KYA", {"est_active": 1})
-
-    # Achats
+    leads = _count("Lead", {"status": ["not in", ("Converted", "Do Not Contact", "Lost Quotation")]})
     da_attente = _count("Demande Achat KYA", {"workflow_state": ["not in",
                         ("Approuvé", "Approuve", "Rejeté", "Rejete", "Annulé", "Annule")]})
-    bc = _count("Bon Commande KYA")
+    sav = _count("fiche technique curative")
+    # Missions : 2 flux prod coexistent (web form CRM + page workflow signature)
+    missions = _count("fiche de mission") + _count("Ordre de mission2")
 
-    # Stocks
-    nb_refs = rupt = 0
-    try:
-        r = frappe.db.sql("SELECT COUNT(DISTINCT item_code) n FROM `tabBin` WHERE actual_qty != 0", as_dict=True)
-        nb_refs = int(r[0].n or 0) if r else 0
-        rr = frappe.db.sql("""SELECT COUNT(*) n FROM (SELECT item_code, SUM(actual_qty) q
-                              FROM `tabBin` GROUP BY item_code HAVING q <= 0) t""", as_dict=True)
-        rupt = int(rr[0].n or 0) if rr else 0
-    except Exception:
-        pass
-
-    # Logistique
-    total_v = _count("Vehicle")
-    dispo_v = _count("Vehicle", {"kya_statut": "Disponible"})
-    mission_v = _count("Vehicle", {"kya_statut": "En mission"})
-
-    # Compta
-    nb_brouillard = _count("Brouillard Caisse")
-    nb_cheques = _count("Etat Recap Cheques")
-
-    # Technique
-    taches_cours = _count("Tache Equipe", {"statut": "En cours"})
-
-    # Commercial
-    leads_actifs = _count("Lead", {"status": ["not in", ("Converted", "Do Not Contact", "Lost Quotation")]})
-
-    catalog = [
-        {"key": "direction", "title": "Direction Générale", "route": "/direction-dashboard",
-         "icon": "building", "color": "#0d7377", "bg": "rgba(13,115,119,.10)",
-         "desc": "Vue consolidée des 4 départements, workflows et achats à valider.",
-         "stat1": f"{nb_emp} employés", "stat2": "4 départements"},
-        {"key": "rh", "title": "Ressources Humaines", "route": "/rapport-presence",
-         "icon": "users", "color": "#0d7377", "bg": "rgba(13,115,119,.10)",
-         "desc": "Effectif, présence, heures travaillées, congés et statistiques d'équipe.",
-         "stat1": f"{nb_emp} actifs", "stat2": f"{nb_equipes} équipes"},
-        {"key": "achats", "title": "Achats & Approvisionnement", "route": "/achats-dashboard",
-         "icon": "cart", "color": "#d9700f", "bg": "rgba(245,130,32,.13)",
-         "desc": "Workflow d'approbation, bons de commande, appels d'offres et marchés.",
-         "stat1": f"{da_attente} en attente", "stat2": f"{bc} bons de commande"},
-        {"key": "stocks", "title": "Stock & Inventaire", "route": "/kya-stocks-dashboard",
-         "icon": "box", "color": "#5f9e2b", "bg": "rgba(141,198,63,.18)",
-         "desc": "Mouvements entrée / sortie / retour, valorisation et top articles.",
-         "stat1": f"{nb_refs} références", "stat2": f"{rupt} ruptures"},
-        {"key": "logistique", "title": "Logistique & Flotte", "route": "/kya-logistique-dashboard",
-         "icon": "truck", "color": "#0d7377", "bg": "rgba(13,115,119,.10)",
-         "desc": "Sorties véhicule, consommation carburant et entretiens planifiés.",
-         "stat1": f"{dispo_v}/{total_v} disponibles", "stat2": f"{mission_v} en mission"},
-        {"key": "compta", "title": "Comptabilité & Finance", "route": "/comptabilite-dashboard",
-         "icon": "coins", "color": "#d9700f", "bg": "rgba(245,130,32,.13)",
-         "desc": "Trésorerie, brouillards de caisse et rapprochements de chèques.",
-         "stat1": f"{nb_brouillard} brouillards", "stat2": f"{nb_cheques} états chèques"},
-        {"key": "technique", "title": "Services Techniques & SAV", "route": "/services-techniques-dashboard",
-         "icon": "wrench", "color": "#5f9e2b", "bg": "rgba(141,198,63,.18)",
-         "desc": "Équipes techniques, interventions SAV, ordres de mission et charge.",
-         "stat1": f"{nb_equipes} équipes", "stat2": f"{taches_cours} tâches en cours"},
-        {"key": "commercial", "title": "Commercial & CRM", "route": "/commercial-dashboard",
-         "icon": "trending", "color": "#0a5d61", "bg": "rgba(10,93,97,.10)",
-         "desc": "Pipeline CRM, leads, tunnel de conversion devis et clients.",
-         "stat1": f"{leads_actifs} leads", "stat2": f"{_count('Customer', {'disabled': 0})} clients"},
+    tree = [
+        {
+            "key": "DG", "code": "DG", "title": "Direction Générale", "icon": "building",
+            "color": "#0d7377", "bg": "rgba(13,115,119,.10)",
+            "desc": "Pilotage transverse, réunions, indicateurs.",
+            "stat": f"{nb_emp} employés actifs",
+            "teams": [
+                {"name": "Pilotage & Direction", "icon": "building", "ops": [
+                    _op("Vue consolidée (4 départements)", "/direction-dashboard", "chart"),
+                    _op("Sorties & destinations (clients/projets)", "/dga-projets-clients", "truck"),
+                    _op("Tableau de bord global", "/kya-tableau-de-bord", "chart"),
+                ]},
+                {"name": "Réunions & Visites", "icon": "users", "ops": [
+                    _op("Réunions & Visites", "/kya-reunion-dashboard", "users"),
+                ]},
+            ],
+        },
+        {
+            "key": "DSS", "code": "DSS", "title": "Services Supports", "icon": "package",
+            "color": "#F58220", "bg": "rgba(245,130,32,.13)",
+            "desc": "RH, Comptabilité, Achats, Stock & Logistique.",
+            "stat": f"{da_attente} demandes d'achat en attente",
+            "teams": [
+                {"name": "Vue d'ensemble", "icon": "chart", "ops": [
+                    _op("Dashboard Services Supports", "/services-supports-dashboard", "chart"),
+                ]},
+                {"name": "Ressources Humaines", "icon": "users", "ops": [
+                    _op("Présences", "/rapport-presence", "clock"),
+                    _op("Gestion des congés", "/gestion-conges", "calendar"),
+                    _op("Permissions de sortie", "/permission-sortie-employe", "file"),
+                    _op("Formations", "/formation-dashboard", "chart"),
+                ]},
+                {"name": "Comptabilité & Finance", "icon": "coins", "ops": [
+                    _op("Dashboard Comptabilité", "/comptabilite-dashboard", "chart"),
+                    _op("Brouillard de caisse", "/brouillard-caisse", "file"),
+                    _op("État récap. chèques", "/etat-recap", "file"),
+                ]},
+                {"name": "Achats & Approvisionnement", "icon": "cart", "ops": [
+                    _op("Dashboard Achats", "/achats-dashboard", "chart"),
+                    _op("Demande d'achat", "/demande-achat", "file"),
+                    _op("Bon de commande", "/bon-commande", "file"),
+                    _op("Appel d'offre", "/appel-offre", "file"),
+                    _op("Marché", "/marche-kya", "file"),
+                ]},
+                {"name": "Stock & Logistique", "icon": "box", "ops": [
+                    _op("Dashboard Stocks", "/kya-stocks-dashboard", "box"),
+                    _op("Stock par état", "/stock-etat", "box"),
+                    _op("Sorties par client / projet", "/dga-projets-clients", "truck"),
+                    _op("Dashboard Logistique", "/kya-logistique-dashboard", "truck"),
+                    _op("Inventaire & sorties", "/inventaire-dashboard", "file"),
+                    _op("PV entrée matériel", "/pv-entree-materiel", "file"),
+                    _op("PV sortie matériel", "/pv-sortie-materiel", "file"),
+                    _op("Retour matériel", "/retour-materiel", "file"),
+                    _op("Sortie véhicule", "/sortie-vehicule", "truck"),
+                    _op("Plein de carburant", "/plein-carburant", "truck"),
+                    _op("Entretien véhicule", "/entretien-vehicule", "truck"),
+                ]},
+            ],
+        },
+        {
+            "key": "DST", "code": "DST", "title": "Services Techniques", "icon": "wrench",
+            "color": "#5f9e2b", "bg": "rgba(141,198,63,.18)",
+            "desc": "Installation, Maintenance & SAV, Offres, terrain.",
+            "stat": f"{sav} interventions SAV · {missions} missions",
+            "teams": [
+                {"name": "Vue d'ensemble & équipes", "icon": "chart", "ops": [
+                    _op("Dashboard Services Techniques & SAV", "/services-techniques-dashboard", "chart"),
+                ]},
+                {"name": "Maintenance & SAV terrain", "icon": "wrench", "ops": [
+                    _op("Intervention SAV (fiche curative)", "/prevention-curative", "wrench"),
+                ]},
+                {"name": "Installation & Assemblage", "icon": "box", "ops": [
+                    _op("Bordereau assemblage lampadaire", "/bordereau-assemblage-lampadaire", "box"),
+                    _op("Réception lampadaires", "/fiche%20de%20reception%20lampadaire", "file"),
+                    _op("Réception batteries", "/fiche-de-reception-de-batteries", "file"),
+                ]},
+                {"name": "Missions & déplacements", "icon": "route", "ops": [
+                    _op("Ordre de mission (saisie & signature)", "/ordre-de-mission", "route"),
+                    _op("Impression ordre de mission", "/print-ordre-mission", "file"),
+                    _op("Ordre de mission (web form)", "/fiche-de-mission", "route"),
+                ]},
+            ],
+        },
+        {
+            "key": "DSC", "code": "DSC", "title": "Services Commerciaux", "icon": "trending",
+            "color": "#0a5d61", "bg": "rgba(10,93,97,.10)",
+            "desc": "CRM, prospection, devis, clients.",
+            "stat": f"{leads} leads actifs",
+            "teams": [
+                {"name": "Commercial & CRM", "icon": "trending", "ops": [
+                    _op("Dashboard Commercial & CRM", "/commercial-dashboard", "chart"),
+                    _op("Leads / prospects", "/app/lead", "trending"),
+                    _op("Clients", "/app/customer", "users"),
+                    _op("Enquête satisfaction client", "/enquête-satisfaction-client", "file"),
+                ]},
+                {"name": "Communication", "icon": "users", "ops": [
+                    _op("Espace CRM", "/app/crm", "trending"),
+                ]},
+            ],
+        },
     ]
 
-    return [h for h in catalog if roles & _HUB_ROLES.get(h["key"], set())]
+    return [d for d in tree if roles & _DEPT_ROLES.get(d["key"], set())]

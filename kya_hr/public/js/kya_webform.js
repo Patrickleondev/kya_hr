@@ -640,62 +640,70 @@
     }
   };
 
-  /* Signature -> role mapping */
+  /* Signature -> role mapping.
+     ALIGNÉ SUR LES VRAIS RÔLES PROD (01/07/2026). Cause du bug « pad de
+     signature grisé pour le signataire légitime » : les maps listaient des
+     rôles théoriques (HR Manager, Stock Manager, « Responsable Comptable »
+     inexistant) alors que les gens portent les rôles métier KYA (Responsable
+     RH, Responsable Stock, Chargé des Stocks, Comptable, DFC, DAAF, Chef
+     Equipe…). On liste désormais toutes les variantes réelles par étape. */
+  var CHEFS = ["Chef Service", "Chef Equipe", "Chef d'Équipe", "Responsable Equipe", "System Manager"];
+  var MAGASIN = ["Responsable Stock", "Chargé des Stocks", "Magasinier", "Stock Manager", "Stock User", "System Manager"];
   var SIGNATURE_ROLES = {
     "permission-sortie-stagiaire": {
       signature_stagiaire: null,
-      signature_chef: ["Chef Service", "HR Manager", "System Manager"],
-      signature_resp_stagiaires: ["Responsable des Stagiaires", "HR Manager", "HR User", "System Manager"],
-      signature_dg: ["Directeur Général", "System Manager"]
+      signature_chef: CHEFS.concat(["HR Manager"]),
+      signature_resp_stagiaires: ["Responsable des Stagiaires", "Maître de Stage", "Responsable RH", "HR Manager", "HR User", "System Manager"],
+      signature_dg: ["Directeur Général", "DG", "System Manager"]
     },
     "permission-sortie-employe": {
       signature_employe: null,
-      signature_chef: ["Chef Service", "HR Manager", "System Manager"],
-      signature_rh: ["HR Manager", "HR User", "System Manager"],
-      signature_dga: ["DGA", "Directeur Général", "System Manager"]
+      signature_chef: CHEFS.concat(["HR Manager"]),
+      signature_rh: ["Responsable RH", "HR Manager", "HR User", "System Manager"],
+      signature_dga: ["DGA", "Directeur Général", "DG", "System Manager"]
     },
     "demande-achat": {
       signature_demandeur: null,
-      signature_chef: ["Chef Service", "System Manager"],
-      signature_dga: ["DGA", "Responsable Comptable", "System Manager"],
-      signature_dg: ["Directeur Général", "System Manager"]
+      signature_chef: CHEFS,
+      signature_dga: ["DGA", "DAAF", "Directeur Général", "System Manager"],
+      signature_dg: ["Directeur Général", "DG", "System Manager"]
     },
     "pv-sortie-materiel": {
       signature_demandeur: null,
-      signature_chef: ["Chef Service", "System Manager"],
-      signature_audit: ["Auditeur Interne", "DGA", "System Manager"],
-      signature_dga: ["DGA", "Directeur Général", "System Manager"],
-      signature_magasin: ["Stock Manager", "Stock User", "System Manager"]
+      signature_chef: CHEFS,
+      signature_audit: ["Auditeur Interne", "Auditeur", "DGA", "System Manager"],
+      signature_dga: ["DGA", "Directeur Général", "DG", "System Manager"],
+      signature_magasin: MAGASIN
     },
     "demande-conge": {
       signature_employe_la: null,
-      signature_superieur_la: ["Chef Service", "HR Manager", "System Manager"],
-      signature_rh_la: ["HR Manager", "HR User", "Responsable RH", "System Manager"],
-      signature_dg_la: ["Directeur Général", "System Manager"]
+      signature_superieur_la: CHEFS.concat(["Supérieur Immédiat", "HR Manager"]),
+      signature_rh_la: ["Responsable RH", "HR Manager", "HR User", "System Manager"],
+      signature_dg_la: ["Directeur Général", "DG", "System Manager"]
     },
     "pv-entree-materiel": {
-      signature_achats_stock: ["Stock Manager", "Stock User", "Chargé des Stocks", "Responsable Achats", "Purchase Manager", "System Manager"],
-      signature_comptable: ["Responsable Comptable", "Accounts Manager", "Accounts User", "System Manager"],
-      signature_audit: ["Auditeur Interne", "System Manager"]
+      signature_achats_stock: ["Responsable Stock", "Chargé des Stocks", "Responsable Achats", "Purchase Manager", "Stock Manager", "Stock User", "System Manager"],
+      signature_comptable: ["Comptable", "DFC", "DAAF", "Accounts Manager", "Accounts User", "System Manager"],
+      signature_audit: ["Auditeur Interne", "Auditeur", "DGA", "System Manager"]
     },
     "retour-materiel": {
       signature_retourneur: null,
-      signature_magasin: ["Stock Manager", "Stock User", "Chargé des Stocks", "System Manager"]
+      signature_magasin: MAGASIN
     },
     "etat-recap": {
       signature_redacteur: null,
-      signature_dfc: ["Responsable Comptable", "Accounts Manager", "System Manager"],
+      signature_dfc: ["DFC", "DAAF", "Accounts Manager", "System Manager"],
       signature_dg: ["Directeur Général", "DG", "System Manager"],
       signature_dga: ["DGA", "Directeur Général", "DG", "System Manager"]
     },
     "brouillard-caisse": {
       signature_caissiere: null,
-      signature_comptable: ["Accounts User", "Accounts Manager", "System Manager"],
-      signature_dfc: ["Responsable Comptable", "System Manager"]
+      signature_comptable: ["Comptable", "Accounts User", "Accounts Manager", "System Manager"],
+      signature_dfc: ["DFC", "DAAF", "Accounts Manager", "System Manager"]
     },
     "inventaire-kya": {
       signature_responsable: null,
-      signature_magasin: ["Stock Manager", "Stock User", "Chargé des Stocks", "System Manager"]
+      signature_magasin: MAGASIN
     }
   };
 
@@ -943,6 +951,14 @@
   function setupSignaturePermissions(route) {
     var sigMap = SIGNATURE_ROLES[route];
     if (!sigMap) return;
+    // Filet anti-frustration (01/07/2026) : tant que les VRAIS rôles ne sont
+    // pas connus (contexte portail pas encore chargé via get_session_context),
+    // on NE grise AUCUN pad. Sinon un signataire légitime (Responsable RH,
+    // Responsable Stock, DFC/Comptable…) voyait son pad verrouillé à tort au
+    // premier rendu. Le contrôle réel reste serveur (apply_document_permissions
+    // + workflow) ; ce verrouillage fin est ré-appliqué dès loadSessionContext
+    // terminé (cf. appel ligne ~1754). En cas de doute → ouvert, pas bloqué.
+    if (!rolesKnown()) return;
     Object.keys(sigMap).forEach(function(fieldname) {
       var el = findFieldEl(fieldname);
       if (!el) return;
@@ -2120,8 +2136,10 @@
         { fn: "uom",           label: "Unité",        type: "link", link: "UOM", w: "10%" },
         { fn: "qte_commandee", label: "Qté Cmd",      type: "float", w: "9%", align: "right" },
         { fn: "qte_recue",     label: "Qté Reçue",    type: "float", w: "9%", align: "right" },
-        { fn: "prix_unitaire", label: "P.U. (FCFA)",  type: "num",   w: "12%", align: "right" },
-        { fn: "warehouse",     label: "Magasin",      type: "link", link: "Warehouse", w: "16%" }
+        { fn: "etat",          label: "État",         type: "select", w: "12%",
+          opts: ["Bon état", "À réparer", "Défectueux"] },
+        { fn: "prix_unitaire", label: "P.U. (FCFA)",  type: "num",   w: "11%", align: "right" },
+        { fn: "warehouse",     label: "Magasin",      type: "link", link: "Warehouse", w: "15%" }
       ]
     },
 
@@ -2151,7 +2169,7 @@
         { fn: "qte_retournee",  label: "Qté Retournée", type: "float", w: "11%", align: "right" },
         { fn: "warehouse",      label: "Magasin dest.", type: "link", link: "Warehouse", w: "16%" },
         { fn: "etat_au_retour", label: "État au retour", type: "select", w: "16%",
-          opts: ["Bon état", "Endommagé", "À réparer"] }
+          opts: ["Bon état", "À réparer", "Défectueux"] }
       ]
     },
 

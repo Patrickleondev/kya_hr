@@ -42,6 +42,24 @@ _FORBIDDEN_STATES = (
 # Profils privilégiés autorisés à valider à la place d'autrui (délégation RH).
 _PRIVILEGED_ROLES = {"System Manager", "HR Manager", "Responsable RH"}
 
+# Exceptions métier (doctype, état d'origine) : cas où l'auteur EST
+# légitimement l'approbateur. La magasinière crée l'inventaire ET le valide
+# (elle compte et signe pour le magasin). Miroir de la whitelist de
+# fix_workflow_self_approval.
+_SELF_APPROVAL_EXEMPT = {
+    ("Inventaire KYA", "En attente Magasin"),
+}
+
+# Champs de DÉLÉGATION : « au nom de » / bénéficiaire réel. Prioritaires.
+# Cas : un chef/responsable SAISIT une demande POUR un subordonné X. Le
+# bénéficiaire (celui qui ne doit pas s'auto-approuver) est X — PAS le
+# créateur. Le créateur (le chef) reste un approbateur légitime à son étape.
+_BENEFICIARY_FIELDS = (
+    "au_nom_de",
+    "beneficiaire",
+    "pour_le_compte_de",
+)
+
 # Champs Link Employee couramment utilisés pour identifier le demandeur.
 # Ordre d'évaluation : on prend le premier champ trouvé sur le doc.
 _EMPLOYEE_LINK_FIELDS = (
@@ -57,11 +75,20 @@ _EMPLOYEE_LINK_FIELDS = (
 
 
 def _get_requester_user(doc):
-    """Retourne l'identifiant utilisateur (email) du demandeur du document.
+    """Retourne l'identifiant utilisateur (email) du DEMANDEUR/BÉNÉFICIAIRE.
 
-    On regarde d'abord les champs Link Employee connus pour récupérer le
-    `user_id` lié, sinon on retombe sur `doc.owner` (le créateur).
+    1. Délégation « au nom de » : si le doc porte un bénéficiaire explicite,
+       c'est LUI le demandeur (le créateur qui saisit pour lui — souvent un
+       chef — n'est pas bloqué et peut approuver à son étape).
+    2. Sinon on regarde les champs Link Employee connus.
+    3. Sinon on retombe sur `doc.owner` (le créateur).
     """
+    for fieldname in _BENEFICIARY_FIELDS:
+        if doc.meta.has_field(fieldname) and doc.get(fieldname):
+            # Bénéficiaire explicite : c'est lui (ou personne d'identifiable →
+            # on ne bloque pas le créateur-approbateur).
+            return frappe.db.get_value("Employee", doc.get(fieldname), "user_id")
+
     for fieldname in _EMPLOYEE_LINK_FIELDS:
         emp = doc.get(fieldname)
         if emp:
@@ -108,6 +135,8 @@ def block_self_approval(doc):
     # AVANCER sa fiche DEPUIS un état d'attente d'approbation.
     before = doc.get_doc_before_save()
     previous_state = (before.workflow_state if before else "") or ""
+    if (doc.doctype, previous_state) in _SELF_APPROVAL_EXEMPT:
+        return
     if previous_state in _FORBIDDEN_STATES:
         frappe.throw(
             "Vous ne pouvez pas valider votre propre demande. "

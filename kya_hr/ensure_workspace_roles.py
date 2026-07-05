@@ -46,8 +46,10 @@ WORKSPACE_ROLES: dict[str, list[str]] = {
     "Gestion Equipe": ["Chef Service", "Chef d'Équipe", "Chef Equipe"],
     "Espace RH": ["Responsable RH", "HR User", "HR Manager",
                   "Maître de Stage", "Responsable des Stagiaires"],
+    # Comptable ajouté : il vise les PV d'Entrée (réception matériel) — il doit
+    # atteindre l'espace Stock pour les traiter, au même titre que le DAAF.
     "Espace Stock": ["Chargé des Stocks", "Responsable Stock",
-                     "Stock Manager", "Stock User", "Magasinier"],
+                     "Stock Manager", "Stock User", "Magasinier", "Comptable"],
     "Espace Achats": ["Responsable Achats", "Purchase Manager",
                       "Purchase User", "Chef Service"],
     "Espace Comptabilite": ["Comptable", "Caissier", "Accounts Manager",
@@ -92,9 +94,11 @@ NATIVE_WORKSPACE_ROLES: dict[str, list[str]] = {
     "Assets": ["System Manager", "Accounts Manager"],
     # Achats — les gens d'achats voient l'espace Buying natif + Espace Achats KYA
     "Buying": ["System Manager", "Purchase Manager", "Purchase User", "Responsable Achats"],
-    # Stock — les magasiniers voient l'espace Stock natif + Espace Stock KYA
-    "Stock": ["System Manager", "Stock Manager", "Stock User", "Chargé des Stocks",
-              "Responsable Stock", "Magasinier"],
+    # Stock NATIF — RÉSERVÉ aux admins. La gestion du stock passe désormais par
+    # l'Espace Stock KYA (cockpit maison + catalogue d'articles relabellisé). On
+    # masque l'espace natif (Stock Balance / Stock Entry) qui affiche l'ancien
+    # stock ERPNext et sèmerait la confusion (5900 modules, déchets de test…).
+    "Stock": ["System Manager"],
     # Commercial → Selling + CRM ouverts aux commerciaux (demande explicite)
     "Selling": ["System Manager", "Sales User", "Sales Manager", "Sales Master Manager"],
     "CRM": ["System Manager", "Sales User", "Sales Manager", "Sales Master Manager"],
@@ -114,6 +118,11 @@ PERSONAL_WORKSPACES = {"Espace Employes"}
 # qui y avait été ajouté avant la décision RES (le stagiaire passe par Mon Espace).
 WORKSPACE_ROLES_TO_REMOVE: dict[str, list[str]] = {
     "Espace Stagiaires": ["Stagiaire"],
+    # Espace Stock NATIF ERPNext : on retire tous les rôles métier (ils passent
+    # par l'Espace Stock KYA). Évite que la magasinière tombe sur l'ancien stock
+    # natif (Stock Balance) et croie que le stock est faux/vide.
+    "Stock": ["Stock Manager", "Stock User", "Chargé des Stocks",
+              "Responsable Stock", "Magasinier", "Comptable"],
 }
 
 
@@ -156,24 +165,65 @@ def _add_role_to_workspace(ws_name: str, role: str) -> bool:
 
 # Raccourcis dashboards a garantir sur Direction Generale (le DG voit tout).
 # (label, url)
+# Espace Direction Générale = UNIQUEMENT le Portail de pilotage (index + sous-
+# sections en drill-down). Décision DG : aucun autre raccourci, aucun lien
+# sidebar (ni Demandes d'achat, ni Permissions, ni Contrats, ni Tableau global…).
+# Tout le reste est accessible PAR le Portail.
+DG_PORTAL_URL = "/portail-pilotage"
+DG_PORTAL_LABEL = "🏠 Portail de pilotage"
 DG_DASHBOARD_SHORTCUTS = [
-    ("🏠 Portail de pilotage", "/portail-pilotage"),
-    ("📊 Tableau de Bord Global", "/kya-tableau-de-bord"),
-    ("🌴 RH — Gestion des congés", "/gestion-conges"),
-    ("🕒 RH — Présences", "/presence-rh"),
-    ("📦 Dashboard Stocks", "/kya-stocks-dashboard"),
-    ("🚚 Dashboard Logistique", "/kya-logistique-dashboard"),
-    ("🏗️ Projets & Clients (DGA)", "/dga-projets-clients"),
-    ("🤝 Réunions & Visites", "/kya-reunion-dashboard"),
-    ("🛒 Dashboard Achats", "/achats-dashboard"),
-    ("🏦 Dashboard Comptabilité", "/comptabilite-dashboard"),
-    ("🛠️ Services Techniques & SAV", "/services-techniques-dashboard"),
-    ("📈 Commercial & CRM", "/commercial-dashboard"),
-    ("📋 Inventaire & Sorties", "/inventaire-dashboard"),
-    ("🔧 Stock par état", "/stock-etat"),
-    ("🎓 Tableau Stagiaires", "/tableau-bord-stagiaires"),
-    ("🧑‍💼 Tableau Employés", "/tableau-bord-employes"),
+    (DG_PORTAL_LABEL, DG_PORTAL_URL),
 ]
+
+_DG_CONTENT = (
+    '[{"id":"hero","type":"header","data":{"text":'
+    '"<div class=\'ellipsis\' title=\'Direction G\\u00e9n\\u00e9rale\'>'
+    '\\ud83c\\udfdb\\ufe0f Espace Direction G\\u00e9n\\u00e9rale \\u2014 KYA</div>",'
+    '"level":3,"col":12}},'
+    '{"id":"sp1","type":"spacer","data":{"col":12}},'
+    '{"id":"hp","type":"header","data":{"text":"<b>\\ud83c\\udfe0 Pilotage</b>",'
+    '"level":4,"col":12}},'
+    '{"id":"scportail","type":"shortcut","data":{"shortcut_name":'
+    '"\\ud83c\\udfe0 Portail de pilotage","col":4}}]'
+)
+
+
+def _reset_dg_to_pilotage() -> dict:
+    """Réduit l'espace Direction Générale au SEUL Portail de pilotage.
+
+    Supprime tous les raccourcis (sauf le Portail) ET tous les liens sidebar
+    (Card Break + Link : Demandes d'achat, Permissions, Contrats, Tableau
+    global, etc.), puis force un `content` minimal (hero + carte Portail).
+    Idempotent. Le raccourci Portail lui-même est (re)créé par
+    `_ensure_dg_dashboard_shortcuts()` juste après.
+    """
+    ws = "Direction Generale"
+    out = {"shortcuts_removed": 0, "links_removed": 0}
+    if not frappe.db.exists("Workspace", ws):
+        return out
+    # 1) supprimer tous les raccourcis sauf le Portail
+    try:
+        for r in frappe.get_all("Workspace Shortcut", filters={"parent": ws},
+                                fields=["name", "url"]):
+            if r.url == DG_PORTAL_URL:
+                continue
+            frappe.delete_doc("Workspace Shortcut", r.name, ignore_permissions=True, force=True)
+            out["shortcuts_removed"] += 1
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "reset DG: shortcuts")
+    # 2) supprimer TOUS les liens sidebar (Card Break + Link)
+    try:
+        for r in frappe.get_all("Workspace Link", filters={"parent": ws}, pluck="name"):
+            frappe.delete_doc("Workspace Link", r, ignore_permissions=True, force=True)
+            out["links_removed"] += 1
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "reset DG: links")
+    # 3) forcer un content minimal (hero + carte Portail)
+    try:
+        frappe.db.set_value("Workspace", ws, "content", _DG_CONTENT, update_modified=False)
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "reset DG: content")
+    return out
 
 
 def _ensure_dg_dashboard_shortcuts() -> int:
@@ -305,7 +355,9 @@ def execute() -> dict:
     # etc. » : ces espaces n'avaient aucun rôle donc s'affichaient pour chacun.
     summary["orphans_restricted"] = _restrict_orphan_public_workspaces()
 
-    # Raccourcis dashboards pour le DG (visibilite totale)
+    # Espace Direction Générale : tout retirer sauf le Portail de pilotage,
+    # puis garantir le raccourci Portail.
+    summary["dg_reset"] = _reset_dg_to_pilotage()
     summary["dg_shortcuts_added"] = _ensure_dg_dashboard_shortcuts()
 
     try:

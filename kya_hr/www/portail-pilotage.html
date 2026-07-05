@@ -7,66 +7,132 @@
   .ppx * { box-sizing:border-box; }
   .ppx { --teal:#0d7377; --ink:#101828; --muted:#667085; --line:#eef1f4;
          max-width:1240px; margin:0 auto; padding:18px 16px 40px; font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; color:var(--ink); }
-  .ppx-hero { background:linear-gradient(120deg,#0d7377,#0a5d61 55%,#0e6e5a); border-radius:20px; padding:28px 26px; box-shadow:0 8px 24px rgba(13,115,119,.22); display:flex; flex-direction:column; gap:8px; }
-  .ppx-hero .kicker { font-size:13px; font-weight:700; letter-spacing:.08em; color:rgba(255,255,255,.7); }
-  .ppx-hero h1 { margin:0; font-size:26px; font-weight:800; color:#fff; letter-spacing:-.02em; }
-  .ppx-hero p { margin:0; font-size:14px; color:rgba(255,255,255,.8); max-width:640px; line-height:1.5; }
-  .ppx-hub { display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:18px; margin-top:22px; }
-  .ppx-card { display:flex; flex-direction:column; background:#fff; border:1px solid var(--line); border-radius:18px; box-shadow:0 1px 3px rgba(16,24,40,.06); overflow:hidden; text-decoration:none; color:inherit; transition:transform .16s ease, box-shadow .16s ease; }
+  .ppx-hero { background:linear-gradient(120deg,#0d7377,#0a5d61 55%,#0e6e5a); border-radius:20px; padding:24px 26px; box-shadow:0 8px 24px rgba(13,115,119,.22); display:flex; flex-direction:column; gap:6px; }
+  .ppx-hero .kicker { font-size:12.5px; font-weight:700; letter-spacing:.08em; color:rgba(255,255,255,.7); }
+  .ppx-hero h1 { margin:0; font-size:24px; font-weight:800; color:#fff; letter-spacing:-.02em; }
+  .ppx-hero p { margin:0; font-size:13.5px; color:rgba(255,255,255,.8); max-width:640px; line-height:1.5; }
+  .ppx-crumb { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:18px 0 12px; font-size:13.5px; }
+  .ppx-crumb a { color:var(--teal); font-weight:700; text-decoration:none; cursor:pointer; }
+  .ppx-crumb .sep { color:#cbd2d9; }
+  .ppx-crumb .cur { color:#101828; font-weight:700; }
+  .ppx-back { display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:700; color:var(--teal); cursor:pointer; background:none; border:none; padding:0; }
+  .ppx-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
+  .ppx-card { display:flex; flex-direction:column; background:#fff; border:1px solid var(--line); border-radius:16px; box-shadow:0 1px 3px rgba(16,24,40,.06); overflow:hidden; cursor:pointer; transition:transform .15s ease, box-shadow .15s ease; text-decoration:none; color:inherit; }
   .ppx-card:hover { transform:translateY(-3px); box-shadow:0 10px 26px rgba(16,24,40,.12); }
   .ppx-card .top { height:5px; }
-  .ppx-card .body { padding:18px; display:flex; flex-direction:column; gap:12px; flex:1; }
+  .ppx-card .body { padding:16px 18px; display:flex; flex-direction:column; gap:9px; flex:1; }
   .ppx-card .head { display:flex; align-items:center; gap:12px; }
   .ppx-chip { width:40px; height:40px; border-radius:11px; display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; }
-  .ppx-card .title { font-size:15.5px; font-weight:700; line-height:1.2; }
+  .ppx-code { font-size:11px; font-weight:800; letter-spacing:.06em; color:#98a2b3; }
+  .ppx-card .title { font-size:16px; font-weight:700; line-height:1.2; }
   .ppx-card .desc { font-size:13px; color:var(--muted); line-height:1.45; }
-  .ppx-stats { display:flex; gap:8px; flex-wrap:wrap; margin-top:auto; padding-top:4px; }
-  .ppx-stats span { font-size:12px; font-weight:600; color:#475467; background:#f4f6f9; padding:4px 10px; border-radius:8px; white-space:nowrap; }
-  .ppx-open { display:flex; align-items:center; gap:6px; color:var(--teal); font-size:12.5px; font-weight:700; }
-  .ppx-foot { text-align:center; font-size:11.5px; color:#b0b8c1; padding:14px 0 0; }
+  .ppx-card .stat { font-size:12px; font-weight:600; color:#475467; background:#f4f6f9; padding:4px 10px; border-radius:8px; align-self:flex-start; }
+  .ppx-card .more { display:flex; align-items:center; gap:6px; color:var(--teal); font-size:12.5px; font-weight:700; margin-top:auto; }
+  .ppx-op { display:flex; align-items:center; gap:12px; background:#fff; border:1px solid var(--line); border-radius:12px; padding:13px 15px; box-shadow:0 1px 2px rgba(16,24,40,.05); text-decoration:none; color:inherit; transition:transform .12s ease, box-shadow .12s ease, border-color .12s; }
+  .ppx-op:hover { transform:translateY(-2px); box-shadow:0 6px 16px rgba(16,24,40,.10); border-color:#d7e0e0; }
+  .ppx-op .title { font-size:14px; font-weight:600; }
+  .ppx-op .arrow { margin-left:auto; color:#0d7377; font-weight:700; }
+  .ppx-foot { text-align:center; font-size:11.5px; color:#b0b8c1; padding:18px 0 0; }
+  .ppx-empty { color:#94a3b8; padding:24px; }
 </style>
 
 <div class="ppx" id="ppx-root">
   <div class="ppx-hero">
-    <span class="kicker">TABLEAUX DE BORD</span>
-    <h1>Pilotage opérationnel KYA-Energy</h1>
-    <p>Sélectionnez un module pour l'explorer. Seuls les tableaux de bord accessibles à votre profil sont affichés.</p>
+    <span class="kicker">PORTAIL DE PILOTAGE</span>
+    <h1 id="ppx-h1">Pilotage opérationnel KYA-Energy</h1>
+    <p id="ppx-sub">Choisissez un département, puis une équipe, puis une opération. Seuls les départements accessibles à votre profil sont affichés.</p>
   </div>
-  <div class="ppx-hub" id="ppx-hub"></div>
+  <div class="ppx-crumb" id="ppx-crumb"></div>
+  <div id="ppx-view"></div>
   <div class="ppx-foot">KYA-Energy Group · Portail de pilotage · Données en temps réel de l'ERP</div>
 </div>
 
 <script>
-const PPX_HUBS = {% if hubs_json %}{{ hubs_json | safe }}{% else %}[]{% endif %};
+const PPX_TREE = {% if tree_json %}{{ tree_json | safe }}{% else %}[]{% endif %};
 const PPX_ICONS = {
   building:[['rect',{x:4,y:2,width:16,height:20,rx:2}],['path',{d:'M9 22v-4h6v4M8 6h.01M16 6h.01M8 10h.01M16 10h.01M8 14h.01M16 14h.01'}]],
+  package:[['path',{d:'M16.5 9.4 7.55 4.24'}],['path',{d:'M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'}],['path',{d:'m3.27 6.96 8.73 5.05 8.73-5.05M12 22.08V12'}]],
+  wrench:[['path',{d:'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z'}]],
+  trending:[['path',{d:'M23 6l-9.5 9.5-5-5L1 18'}],['path',{d:'M17 6h6v6'}]],
   users:[['path',{d:'M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'}],['circle',{cx:9,cy:7,r:4}],['path',{d:'M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75'}]],
+  coins:[['circle',{cx:8,cy:8,r:6}],['path',{d:'M18.09 10.37A6 6 0 1 1 10.34 18M7 6h1v4M16.71 13.88l.7.71-2.82 2.82'}]],
   cart:[['circle',{cx:9,cy:21,r:1}],['circle',{cx:20,cy:21,r:1}],['path',{d:'M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6'}]],
   box:[['path',{d:'M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'}],['path',{d:'m3.27 6.96 8.73 5.05 8.73-5.05M12 22.08V12'}]],
   truck:[['rect',{x:1,y:3,width:15,height:13,rx:1}],['path',{d:'M16 8h4l3 3v5h-7V8z'}],['circle',{cx:5.5,cy:18.5,r:2.5}],['circle',{cx:18.5,cy:18.5,r:2.5}]],
-  coins:[['circle',{cx:8,cy:8,r:6}],['path',{d:'M18.09 10.37A6 6 0 1 1 10.34 18M7 6h1v4M16.71 13.88l.7.71-2.82 2.82'}]],
-  wrench:[['path',{d:'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z'}]],
-  trending:[['path',{d:'M23 6l-9.5 9.5-5-5L1 18'}],['path',{d:'M17 6h6v6'}]],
+  chart:[['path',{d:'M3 3v18h18'}],['path',{d:'M18 17V9M13 17V5M8 17v-3'}]],
+  clock:[['circle',{cx:12,cy:12,r:10}],['path',{d:'M12 6v6l4 2'}]],
+  calendar:[['rect',{x:3,y:4,width:18,height:18,rx:2}],['path',{d:'M16 2v4M8 2v4M3 10h18'}]],
+  file:[['path',{d:'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'}],['path',{d:'M14 2v6h6M16 13H8M16 17H8M10 9H8'}]],
+  route:[['circle',{cx:6,cy:19,r:3}],['path',{d:'M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15'}],['circle',{cx:18,cy:5,r:3}]],
 };
-function svg(name,color){ const ns='http://www.w3.org/2000/svg'; const e=document.createElementNS(ns,'svg'); const sp=PPX_ICONS[name]||PPX_ICONS.building;
-  e.setAttribute('width',20); e.setAttribute('height',20); e.setAttribute('viewBox','0 0 24 24'); e.setAttribute('fill','none');
+function svg(name,color,size){ const ns='http://www.w3.org/2000/svg'; const e=document.createElementNS(ns,'svg'); const sp=PPX_ICONS[name]||PPX_ICONS.file;
+  e.setAttribute('width',size||20); e.setAttribute('height',size||20); e.setAttribute('viewBox','0 0 24 24'); e.setAttribute('fill','none');
   e.setAttribute('stroke',color); e.setAttribute('stroke-width','1.9'); e.setAttribute('stroke-linecap','round'); e.setAttribute('stroke-linejoin','round');
   sp.forEach(s=>{ const c=document.createElementNS(ns,s[0]); for(const k in s[1]) c.setAttribute(k,s[1][k]); e.appendChild(c); }); return e; }
 function el(t,c,h){ const e=document.createElement(t); if(c)e.className=c; if(h!=null)e.innerHTML=h; return e; }
 
-(function render(){
-  const hub=document.getElementById('ppx-hub');
-  if(!PPX_HUBS.length){ hub.appendChild(el('div',null,'<div style="color:#94a3b8;padding:20px;">Aucun tableau de bord accessible à votre profil.</div>')); return; }
-  PPX_HUBS.forEach(h=>{
-    const a=el('a','ppx-card'); a.href=h.route;
-    const top=el('div','top'); top.style.background=h.color; a.appendChild(top);
+let DEPT=null, TEAM=null;  // état de navigation
+
+function setCrumb(){
+  const c=document.getElementById('ppx-crumb'); c.innerHTML='';
+  const home=el('a',null,'🏠 Départements'); home.onclick=()=>{DEPT=null;TEAM=null;draw();}; c.appendChild(home);
+  if(DEPT){ c.appendChild(el('span','sep','/'));
+    if(TEAM){ const d=el('a',null,DEPT.code+' · '+DEPT.title); d.onclick=()=>{TEAM=null;draw();}; c.appendChild(d); }
+    else { c.appendChild(el('span','cur',DEPT.code+' · '+DEPT.title)); } }
+  if(TEAM){ c.appendChild(el('span','sep','/')); c.appendChild(el('span','cur',TEAM.name)); }
+}
+
+function chip(icon,color,bg){ const s=el('span','ppx-chip'); s.style.background=bg||'rgba(13,115,119,.10)'; s.appendChild(svg(icon,color||'#0d7377',20)); return s; }
+
+function drawDepts(){
+  const v=document.getElementById('ppx-view'); v.innerHTML='';
+  document.getElementById('ppx-h1').textContent='Pilotage opérationnel KYA-Energy';
+  document.getElementById('ppx-sub').textContent='Choisissez un département, puis une équipe, puis une opération. Seuls les départements accessibles à votre profil sont affichés.';
+  if(!PPX_TREE.length){ v.appendChild(el('div','ppx-empty','Aucun département accessible à votre profil.')); return; }
+  const g=el('div','ppx-grid');
+  PPX_TREE.forEach(d=>{ const card=el('div','ppx-card'); const top=el('div','top'); top.style.background=d.color; card.appendChild(top);
     const body=el('div','body');
-    const head=el('div','head'); const chip=el('span','ppx-chip'); chip.style.background=h.bg; chip.appendChild(svg(h.icon,h.color)); head.appendChild(chip); head.appendChild(el('span','title',h.title)); body.appendChild(head);
-    body.appendChild(el('span','desc',h.desc));
-    const st=el('div','ppx-stats'); st.appendChild(el('span',null,h.stat1)); st.appendChild(el('span',null,h.stat2)); body.appendChild(st);
-    body.appendChild(el('div','ppx-open','Ouvrir le tableau de bord <span style="font-size:15px;line-height:1;">→</span>'));
-    a.appendChild(body); hub.appendChild(a);
-  });
-})();
+    const head=el('div','head'); head.appendChild(chip(d.icon,d.color,d.bg));
+    const ti=el('div'); ti.style.cssText='display:flex;flex-direction:column;'; ti.appendChild(el('span','ppx-code',d.code)); ti.appendChild(el('span','title',d.title)); head.appendChild(ti);
+    body.appendChild(head);
+    body.appendChild(el('span','desc',d.desc||''));
+    if(d.stat) body.appendChild(el('span','stat',d.stat));
+    body.appendChild(el('div','more','Voir les équipes <span style="font-size:15px;">→</span>'));
+    card.appendChild(body); card.onclick=()=>{DEPT=d;TEAM=null;draw();}; g.appendChild(card); });
+  v.appendChild(g);
+}
+
+function drawTeams(){
+  const v=document.getElementById('ppx-view'); v.innerHTML='';
+  document.getElementById('ppx-h1').textContent=DEPT.title;
+  document.getElementById('ppx-sub').textContent=DEPT.desc||'';
+  const back=el('button','ppx-back','‹ Retour aux départements'); back.onclick=()=>{DEPT=null;TEAM=null;draw();};
+  v.appendChild(back); v.appendChild(el('div',null,'<div style="height:12px;"></div>'));
+  const g=el('div','ppx-grid');
+  (DEPT.teams||[]).forEach(t=>{ const card=el('div','ppx-card'); const top=el('div','top'); top.style.background=DEPT.color; card.appendChild(top);
+    const body=el('div','body');
+    const head=el('div','head'); head.appendChild(chip(t.icon||'users',DEPT.color,DEPT.bg)); head.appendChild(el('span','title',t.name)); body.appendChild(head);
+    body.appendChild(el('span','desc',(t.ops||[]).length+' opération(s)'));
+    body.appendChild(el('div','more','Ouvrir <span style="font-size:15px;">→</span>'));
+    card.appendChild(body); card.onclick=()=>{TEAM=t;draw();}; g.appendChild(card); });
+  if(!(DEPT.teams||[]).length) v.appendChild(el('div','ppx-empty','Aucune équipe.'));
+  v.appendChild(g);
+}
+
+function drawOps(){
+  const v=document.getElementById('ppx-view'); v.innerHTML='';
+  document.getElementById('ppx-h1').textContent=TEAM.name;
+  document.getElementById('ppx-sub').textContent=DEPT.code+' · '+DEPT.title;
+  const back=el('button','ppx-back','‹ Retour aux équipes'); back.onclick=()=>{TEAM=null;draw();};
+  v.appendChild(back); v.appendChild(el('div',null,'<div style="height:12px;"></div>'));
+  const g=el('div','ppx-grid');
+  (TEAM.ops||[]).forEach(o=>{ const a=el('a','ppx-op'); a.href=o.route; a.appendChild(chip(o.icon||'file',DEPT.color,DEPT.bg));
+    a.appendChild(el('span','title',o.label)); a.appendChild(el('span','arrow','→')); g.appendChild(a); });
+  if(!(TEAM.ops||[]).length) v.appendChild(el('div','ppx-empty','Aucune opération.'));
+  v.appendChild(g);
+}
+
+function draw(){ setCrumb(); if(!DEPT) drawDepts(); else if(!TEAM) drawTeams(); else drawOps(); window.scrollTo(0,0); }
+draw();
 </script>
 {% endblock %}

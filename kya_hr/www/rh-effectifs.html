@@ -1,0 +1,166 @@
+<script src="/assets/kya_hr/js/chart.umd.min.js"></script>
+<style>
+  .rh-wrap{max-width:1280px;margin:0 auto;padding:18px 16px 60px;font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#0f172a;}
+  .rh-head{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px;}
+  .rh-head h1{margin:0;font-size:1.4rem;font-weight:800;}
+  .rh-head .sub{color:#64748b;font-size:.82rem;}
+  .rh-filters{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px;margin:12px 0 18px;}
+  .rh-filters label{display:block;font-size:.72rem;font-weight:700;color:#475569;margin-bottom:3px;}
+  .rh-filters input,.rh-filters select{border:1px solid #cbd5e1;border-radius:8px;padding:7px 9px;font-size:.85rem;background:#fff;}
+  .rh-btn{background:#0f766e;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-weight:700;font-size:.85rem;cursor:pointer;}
+  .rh-btn.sec{background:#fff;color:#0f766e;border:1px solid #0f766e;}
+  .rh-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:10px;}
+  .rh-kpi{background:#fff;border:1px solid #e2e8f0;border-left:4px solid #0f766e;border-radius:12px;padding:12px 14px;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .rh-kpi .n{font-size:1.5rem;font-weight:800;line-height:1.1;}
+  .rh-kpi .l{font-size:.72rem;color:#64748b;font-weight:600;margin-top:3px;text-transform:uppercase;letter-spacing:.02em;}
+  .rh-kpi.blue{border-left-color:#2563eb;} .rh-kpi.blue .n{color:#2563eb;}
+  .rh-kpi.pink{border-left-color:#db2777;} .rh-kpi.pink .n{color:#db2777;}
+  .rh-kpi.green{border-left-color:#16a34a;} .rh-kpi.green .n{color:#16a34a;}
+  .rh-kpi.amber{border-left-color:#d97706;} .rh-kpi.amber .n{color:#d97706;}
+  .rh-kpi.violet{border-left-color:#7c3aed;} .rh-kpi.violet .n{color:#7c3aed;}
+  .rh-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:8px;}
+  .rh-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .rh-card h3{margin:0 0 10px;font-size:.9rem;font-weight:700;color:#334155;}
+  .rh-card .cbox{position:relative;height:250px;}
+  .rh-card.wide{grid-column:1 / -1;}
+  .rh-note{color:#94a3b8;font-size:.78rem;text-align:center;padding:26px;}
+  @media(max-width:1024px){.rh-kpis{grid-template-columns:repeat(3,1fr);}.rh-grid{grid-template-columns:1fr;}}
+  @media(max-width:560px){.rh-kpis{grid-template-columns:repeat(2,1fr);}}
+</style>
+
+<div class="rh-wrap">
+  <div class="rh-head">
+    <div>
+      <h1>👥 Tableau de Bord — Ressources Humaines</h1>
+      <div class="sub" id="rh-date">Effectifs, structure et évolution du personnel</div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <a class="rh-btn sec" href="/app/salarie-kya" target="_blank">Registre du personnel ↗</a>
+      <button class="rh-btn" onclick="exportExcel()">⬇️ Export Excel</button>
+    </div>
+  </div>
+
+  <div class="rh-filters">
+    <div><label>Département</label>
+      <select id="f-dept"><option value="">Tous</option></select></div>
+    <div><label>Période — du</label><input type="date" id="f-debut"></div>
+    <div><label>au</label><input type="date" id="f-fin"></div>
+    <button class="rh-btn" onclick="reload()">Actualiser</button>
+    <button class="rh-btn sec" onclick="resetF()">Réinitialiser</button>
+  </div>
+
+  <div class="rh-kpis" id="rh-kpi1"></div>
+  <div class="rh-kpis" id="rh-kpi2"></div>
+
+  <div class="rh-grid">
+    <div class="rh-card"><h3>Répartition par sexe</h3><div class="cbox"><canvas id="c-sexe"></canvas></div></div>
+    <div class="rh-card"><h3>Répartition par catégorie</h3><div class="cbox"><canvas id="c-cat"></canvas></div></div>
+    <div class="rh-card"><h3>Répartition par type de contrat</h3><div class="cbox"><canvas id="c-contrat"></canvas></div></div>
+    <div class="rh-card"><h3>Répartition par type de travail</h3><div class="cbox"><canvas id="c-travail"></canvas></div></div>
+    <div class="rh-card"><h3>Répartition par département</h3><div class="cbox"><canvas id="c-dept"></canvas></div></div>
+    <div class="rh-card"><h3>Répartition par niveau d'études</h3><div class="cbox"><canvas id="c-niveau"></canvas></div></div>
+    <div class="rh-card"><h3>Répartition par poste occupé (top 10)</h3><div class="cbox"><canvas id="c-poste"></canvas></div></div>
+    <div class="rh-card"><h3>Répartition par tranche d'âge</h3><div class="cbox"><canvas id="c-tranche"></canvas></div></div>
+    <div class="rh-card wide"><h3>Évolution de l'effectif dans le temps</h3><div class="cbox"><canvas id="c-effectif"></canvas></div></div>
+    <div class="rh-card wide"><h3>Évolution de la masse salariale (M FCFA)</h3><div class="cbox"><canvas id="c-masse"></canvas></div></div>
+  </div>
+</div>
+
+<script>
+let RH = {{ overview_json | safe }};
+const PALETTE = ['#0f766e','#2563eb','#d97706','#7c3aed','#db2777','#16a34a','#0891b2','#dc2626','#65a30d','#9333ea'];
+// Ces pages www ne chargent pas le bundle JS `frappe` → on appelle l'API via fetch.
+async function apiCall(method, args){
+  const p = new URLSearchParams();
+  Object.entries(args||{}).forEach(([k,v])=>{ if(v!==null&&v!==undefined&&v!=='') p.append(k,v); });
+  const q = p.toString();
+  const r = await fetch('/api/method/'+method+(q?('?'+q):''), {headers:{'Accept':'application/json'}, credentials:'same-origin'});
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  return (await r.json()).message;
+}
+const CHARTS = {};
+function nf(v){ return (v==null?0:v).toLocaleString('fr-FR'); }
+function fcfa(v){ return nf(Math.round(v||0)); }
+
+function kpiCard(n, l, cls){ return `<div class="rh-kpi ${cls||''}"><div class="n">${n}</div><div class="l">${l}</div></div>`; }
+
+function render(){
+  if(!RH){ document.getElementById('rh-kpi1').innerHTML='<div class="rh-note">Aucune donnée. Ajoutez des salariés dans le registre.</div>'; return; }
+  const k=RH.kpi;
+  document.getElementById('rh-date').textContent = 'Situation au '+(RH.date_str||'')+(k.retraites?(' · '+k.retraites+' retraité(s), '+k.sortis+' sorti(s)'):'');
+  document.getElementById('rh-kpi1').innerHTML =
+    kpiCard(nf(k.effectif_total),'Effectif total (actifs)','green')+
+    kpiCard(nf(k.hommes),'Hommes','blue')+
+    kpiCard(nf(k.femmes),'Femmes','pink')+
+    kpiCard(nf(k.cdi),'Permanents (CDI)')+
+    kpiCard(nf(k.temporaires),'Temporaires (hors CDI)','amber')+
+    kpiCard(fcfa(k.masse_salariale),'Masse salariale mensuelle','violet');
+  document.getElementById('rh-kpi2').innerHTML =
+    kpiCard(nf(k.cadres),'Cadres (C)','blue')+
+    kpiCard(nf(k.maitrise),"Agents de maîtrise (AM)")+
+    kpiCard(nf(k.execution),"Agents d'exécution (AE)",'amber')+
+    kpiCard(k.age_moyen,'Âge moyen','green')+
+    kpiCard(k.age_median,'Âge médian','green')+
+    kpiCard(k.anciennete_moyenne,'Ancienneté moyenne (ans)','violet');
+
+  // remplir le filtre département une seule fois
+  const sel=document.getElementById('f-dept');
+  if(!sel.dataset.filled){
+    (RH.departements||[]).forEach(d=>{ const o=document.createElement('option'); o.value=d.code; o.textContent=d.code+(d.libelle?(' — '+d.libelle):''); sel.appendChild(o); });
+    sel.dataset.filled=1;
+  }
+
+  pie('c-sexe', RH.par_sexe, ['#2563eb','#db2777']);
+  pie('c-cat', RH.par_categorie);
+  pie('c-contrat', RH.par_contrat);
+  pie('c-travail', RH.par_travail);
+  bar('c-dept', RH.par_departement, false);
+  bar('c-niveau', RH.par_niveau, false);
+  bar('c-poste', RH.par_poste, true);
+  bar('c-tranche', RH.par_tranche, false);
+  line('c-effectif', RH.evolution.labels, RH.evolution.effectif, 'Effectif', '#0f766e');
+  line('c-masse', RH.evolution.labels, RH.evolution.masse, 'Masse (M FCFA)', '#7c3aed');
+}
+
+function destroy(id){ if(CHARTS[id]){ CHARTS[id].destroy(); delete CHARTS[id]; } }
+function empty(d){ return !d || !d.data || d.data.reduce((a,b)=>a+b,0)===0; }
+
+function pie(id, d, colors){
+  destroy(id); const el=document.getElementById(id); if(empty(d)){ blank(el); return; }
+  CHARTS[id]=new Chart(el,{type:'doughnut',data:{labels:d.labels,datasets:[{data:d.data,backgroundColor:colors||PALETTE,borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}}}}});
+}
+function bar(id, d, horizontal){
+  destroy(id); const el=document.getElementById(id); if(empty(d)){ blank(el); return; }
+  CHARTS[id]=new Chart(el,{type:'bar',data:{labels:d.labels,datasets:[{data:d.data,backgroundColor:PALETTE[0],borderRadius:5}]},
+    options:{indexAxis:horizontal?'y':'x',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{ticks:{font:{size:10}}},y:{beginAtZero:true,ticks:{precision:0,font:{size:10}}}}}});
+}
+function line(id, labels, data, lbl, color){
+  destroy(id); const el=document.getElementById(id); if(!labels||!labels.length){ blank(el); return; }
+  CHARTS[id]=new Chart(el,{type:'line',data:{labels:labels,datasets:[{label:lbl,data:data,borderColor:color,backgroundColor:color+'22',fill:true,tension:.25,pointRadius:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{maxTicksLimit:12,font:{size:9}}},y:{beginAtZero:true}}}});
+}
+function blank(el){ const c=el.getContext('2d'); c.clearRect(0,0,el.width,el.height); c.font='13px sans-serif'; c.fillStyle='#94a3b8'; c.textAlign='center'; c.fillText('Aucune donnée', el.width/2, el.height/2); }
+
+async function reload(){
+  const args={departement:document.getElementById('f-dept').value||null,
+              periode_debut:document.getElementById('f-debut').value||null,
+              periode_fin:document.getElementById('f-fin').value||null};
+  try{ RH=await apiCall('kya_hr.api.rh_effectifs.dashboard_data', args); render(); }
+  catch(e){ alert('Erreur de chargement.'); }
+}
+function resetF(){ document.getElementById('f-dept').value=''; document.getElementById('f-debut').value=''; document.getElementById('f-fin').value=''; reload(); }
+
+async function exportExcel(){
+  try{
+    const r=await apiCall('kya_hr.api.rh_effectifs.export_excel',
+      {departement:document.getElementById('f-dept').value||null});
+    if(r&&r.content_base64){ const a=document.createElement('a');
+      a.href='data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'+r.content_base64;
+      a.download=r.filename||'effectifs-kya.xlsx'; a.click(); }
+  }catch(e){ alert("Export indisponible."); }
+}
+
+render();
+</script>

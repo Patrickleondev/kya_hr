@@ -23,6 +23,13 @@ import frappe
 # états depuis lesquels une transition = (re)soumission par l'auteur
 SUBMIT_FROM_STATES_EXTRA = {"Rejeté"}
 
+# Exceptions métier : transitions d'APPROBATION où l'auteur EST légitimement
+# l'approbateur. Cas détecté par le harnais réaliste : la magasinière crée
+# l'inventaire ET le valide (elle compte et signe pour le magasin).
+SELF_APPROVAL_WHITELIST = {
+    ("Flux Inventaire KYA", "En attente Magasin", "Valider"),
+}
+
 
 def execute() -> dict:
     fixed = []
@@ -41,6 +48,22 @@ def execute() -> dict:
             frappe.db.set_value("Workflow Transition", t.name,
                                 "allow_self_approval", 1, update_modified=False)
             fixed.append("%s | %s --%s--> [%s]" % (wf, t.state, t.action, t.allowed))
+
+        # exceptions métier ciblées (liste blanche)
+        for (wl_wf, wl_state, wl_action) in SELF_APPROVAL_WHITELIST:
+            if wl_wf != wf:
+                continue
+            rows = frappe.get_all(
+                "Workflow Transition",
+                filters={"parent": wf, "state": wl_state, "action": wl_action,
+                         "allow_self_approval": 0},
+                fields=["name", "state", "action", "allowed"],
+            )
+            for t in rows:
+                frappe.db.set_value("Workflow Transition", t.name,
+                                    "allow_self_approval", 1, update_modified=False)
+                fixed.append("%s | %s --%s--> [%s] (whitelist métier)"
+                             % (wf, t.state, t.action, t.allowed))
 
     if fixed:
         frappe.db.commit()

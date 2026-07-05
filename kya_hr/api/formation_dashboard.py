@@ -248,15 +248,14 @@ def get_suivi(limit: int = 100) -> list[dict]:
 #  EXPORT (besoins soumis / formations sélectionnées) — Excel-compatible CSV
 # ───────────────────────────────────────────────────────────────────────────
 
-def _csv_b64(headers, rows):
-    import csv, io, base64
-    out = io.StringIO()
-    w = csv.writer(out, quoting=csv.QUOTE_ALL)
-    w.writerow(headers)
-    for r in rows:
-        w.writerow(r)
-    txt = out.getvalue()
-    return base64.b64encode(("﻿" + txt).encode("utf-8")).decode("ascii")
+def _xlsx_b64(headers, rows, sheet="Export"):
+    """Génère un vrai fichier Excel (.xlsx) encodé base64. On travaille sur
+    Excel ici — plus de CSV."""
+    import base64
+    from frappe.utils.xlsxutils import make_xlsx
+    data = [list(headers)] + [list(r) for r in rows]
+    xlsx = make_xlsx(data, sheet[:31] or "Export")
+    return base64.b64encode(xlsx.getvalue()).decode("ascii")
 
 
 @frappe.whitelist()
@@ -327,8 +326,8 @@ def export_besoins(scope="soumis", annee=None):
         fname = "besoins-formation-soumis"
 
     return {
-        "filename": f"{fname}-{frappe.utils.today()}.csv",
-        "content_base64": _csv_b64(headers, data),
+        "filename": f"{fname}-{frappe.utils.today()}.xlsx",
+        "content_base64": _xlsx_b64(headers, data, sheet=fname[:31]),
         "rows": len(data),
     }
 
@@ -641,7 +640,7 @@ def export_beneficiaires(plan: str = None, annee=None) -> dict:
              r.employee_name or "", r.statut or "", str(r.date_realisation or "")]
             for r in rows]
     return {
-        "filename": f"suivi-formation-employes-{frappe.utils.today()}.csv",
-        "content_base64": _csv_b64(headers, data),
+        "filename": f"suivi-formation-employes-{frappe.utils.today()}.xlsx",
+        "content_base64": _xlsx_b64(headers, data, sheet="Suivi formation"),
         "rows": len(data),
     }

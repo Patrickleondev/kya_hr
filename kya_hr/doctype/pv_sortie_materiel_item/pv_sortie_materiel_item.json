@@ -1,59 +1,58 @@
 {
-    "name": "PV Sortie Materiel Item",
-    "module": "KYA HR",
-    "doctype": "DocType",
-    "istable": 1,
-    "custom": 0,
-    "fields": [
-        {
-            "fieldname": "item_code",
-            "label": "Article",
-            "fieldtype": "Link",
-            "options": "Item",
-            "in_list_view": 1,
-            "columns": 3,
-            "description": "Tapez pour filtrer dans la base articles (laisser vide si article non r\u00e9f\u00e9renc\u00e9)"
-        },
-        {
-            "fieldname": "designation",
-            "label": "D\u00e9signation",
-            "fieldtype": "Data",
-            "reqd": 1,
-            "in_list_view": 1,
-            "columns": 3,
-            "fetch_from": "item_code.item_name",
-            "fetch_if_empty": 0
-        },
-        {
-            "fieldname": "uom",
-            "label": "Unit\u00e9",
-            "fieldtype": "Link",
-            "options": "UOM",
-            "fetch_from": "item_code.stock_uom",
-            "in_list_view": 1,
-            "columns": 1
-        },
-        {
-            "fieldname": "qte_demandee",
-            "label": "Qte Demand\u00e9e",
-            "fieldtype": "Float",
-            "reqd": 1,
-            "in_list_view": 1,
-            "columns": 1
-        },
-        {
-            "fieldname": "qte_reellement_sortie",
-            "label": "Qte R\u00e9ellement Sortie",
-            "fieldtype": "Float",
-            "in_list_view": 1,
-            "columns": 1
-        },
-        {
-            "fieldname": "warehouse",
-            "label": "Magasin source",
-            "fieldtype": "Link",
-            "options": "Warehouse",
-            "description": "Utilis\u00e9 pour la d\u00e9duction de stock lors de la validation du PV"
-        }
-    ]
+ "name": "PV Sortie Materiel Item",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "istable": 1,
+ "custom": 0,
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "label": "Article",
+   "fieldtype": "Link",
+   "options": "Article KYA",
+   "in_list_view": 1,
+   "columns": 3,
+   "description": "Tapez pour filtrer dans la base articles (laisser vide si article non référencé)"
+  },
+  {
+   "fieldname": "designation",
+   "label": "Désignation",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 3,
+   "fetch_from": "item_code.designation",
+   "fetch_if_empty": 0
+  },
+  {
+   "fieldname": "uom",
+   "label": "Unité",
+   "fieldtype": "Data",
+   "fetch_from": "item_code.unite",
+   "in_list_view": 1,
+   "columns": 1
+  },
+  {
+   "fieldname": "qte_demandee",
+   "label": "Qte Demandée",
+   "fieldtype": "Float",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 1
+  },
+  {
+   "fieldname": "qte_reellement_sortie",
+   "label": "Qte Réellement Sortie",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "columns": 1
+  },
+  {
+   "fieldname": "warehouse",
+   "label": "Magasin source",
+   "fieldtype": "Link",
+   "options": "Warehouse",
+   "description": "Utilisé pour la déduction de stock lors de la validation du PV"
+  }
+ ]
 }

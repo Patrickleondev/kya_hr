@@ -156,8 +156,6 @@ def _build_recap_body(doc, config, emp_name, is_update=False):
     return """
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background: linear-gradient(135deg,#f7a800 0%,#e07b00 100%); padding: 24px; border-radius: 12px 12px 0 0; text-align:center;">
-        <img src="cid:kyalogo"
-             alt="KYA-Energy Group" width="60" height="60" border="0" style="margin-bottom:8px;display:block;margin:0 auto;">
         <h2 style="color:white; margin:0;">{icon} {label}</h2>
         <p style="color:rgba(255,255,255,0.8); margin:4px 0 0;">{title}</p>
       </div>
@@ -265,10 +263,8 @@ def send_submission_recap(doc, method=None):
     except Exception:
         pass  # pas de print format disponible, on envoie sans PDF
 
-    # Logo inline (cid:kyalogo) — affichage fiable du logo dans l'email
-    logo = _logo_inline_attachment()
-    if logo:
-        attachments.append(logo)
+    # Pas de logo dans les emails : sous Outlook (client de l'entreprise) les
+    # images inline (cid:) se cassent. On envoie les notifs SANS logo.
 
     frappe.sendmail(
         recipients=[email],
@@ -373,7 +369,6 @@ def send_task_assignment_email(doc, method=None):
 
     base_url = get_url()
     espace_url = "{}/mon-espace#sec-tasks".format(base_url)
-    logo = _logo_inline_attachment()  # logo embarqué (cid:kyalogo), fiable en mail
     libelle = (getattr(doc, "libelle", "") or "")
     resultat = (getattr(doc, "resultat_libelle", "") or "")
     kpi = (getattr(doc, "kpi", "") or "Non défini")
@@ -402,7 +397,6 @@ def send_task_assignment_email(doc, method=None):
         body = """
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background: #1565c0; padding: 24px; border-radius: 12px 12px 0 0; text-align:center;">
-            <img src="cid:kyalogo" alt="KYA-Energy Group" width="60" height="60" border="0" style="display:block;margin:0 auto 8px;">
             <h2 style="color:white; margin:0;">Nouvelle tâche assignée</h2>
           </div>
           <div style="background: #ffffff; padding: 24px; border: 1px solid #e0e0e0;">
@@ -448,6 +442,5 @@ def send_task_assignment_email(doc, method=None):
             recipients=[email],
             subject="[KYA] Nouvelle tâche : {}".format(libelle[:60] or doc.name),
             message=body,
-            attachments=[logo] if logo else None,
             now=False,
         )

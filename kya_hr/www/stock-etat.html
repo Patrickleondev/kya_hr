@@ -22,7 +22,7 @@
 <div class="kyad se">
   <div class="kyad-hero" style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
     <div><h1><span class="ico">📦</span> Stock par état</h1>
-      <p>Quantités par article : disponible · à réparer · endommagé — tous magasins confondus.</p></div>
+      <p>Quantités par article : disponible · à réparer · défectueux — tous magasins confondus.</p></div>
     <div class="d-flex gap-2 flex-wrap no-print">
       <button class="btn btn-success btn-sm" onclick="exporter()"><i class="bi bi-file-earmark-excel"></i> Exporter</button>
       <button class="btn btn-light btn-sm" onclick="window.print()"><i class="bi bi-printer"></i> Imprimer</button>
@@ -33,27 +33,27 @@
     <div class="kyad-kpi"><div class="kyad-kpi-value" id="k-items">—</div><div class="kyad-kpi-label">Articles en stock</div></div>
     <div class="kyad-kpi is-teal"><div class="kyad-kpi-value" id="k-dis">—</div><div class="kyad-kpi-label">Disponible (qté)</div></div>
     <div class="kyad-kpi is-orange"><div class="kyad-kpi-value" id="k-rep">—</div><div class="kyad-kpi-label">À réparer (qté)</div></div>
-    <div class="kyad-kpi is-red"><div class="kyad-kpi-value" id="k-end">—</div><div class="kyad-kpi-label">Endommagé (qté)</div></div>
+    <div class="kyad-kpi is-red"><div class="kyad-kpi-value" id="k-end">—</div><div class="kyad-kpi-label">Défectueux (qté)</div></div>
   </div>
 
   <div class="se-ctrl no-print">
     <input type="search" id="se-search" placeholder="🔎 Filtrer article…" oninput="filtrer()">
     <span id="se-count" class="text-muted small"></span>
-    <label class="small text-muted" style="margin-left:auto;"><input type="checkbox" id="se-only" onchange="filtrer()"> N'afficher que à réparer / endommagé</label>
+    <label class="small text-muted" style="margin-left:auto;"><input type="checkbox" id="se-only" onchange="filtrer()"> N'afficher que à réparer / défectueux</label>
   </div>
 
   <div class="kyad-panel">
     <table class="kyad-table se-tbl" style="width:100%;">
       <thead><tr>
         <th class="l">Article</th><th>Unité</th>
-        <th>Disponible</th><th>À réparer</th><th>Endommagé</th><th>Valeur (FCFA)</th>
+        <th>Disponible</th><th>À réparer</th><th>Défectueux</th><th>Valeur (FCFA)</th>
       </tr></thead>
       <tbody id="se-body">
         <tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:24px;">Chargement…</td></tr>
       </tbody>
     </table>
   </div>
-  <p class="text-muted small mt-2">« À réparer » = magasin <b>Atelier-Reparation</b> · « Endommagé » = magasin <b>Materiel-Endommage</b> (alimentés automatiquement au retour de matériel). Le reste = stock disponible.</p>
+  <p class="text-muted small mt-2">« À réparer » = matériel immobilisé (récupérable) · « Défectueux » = hors stock utile (à retourner / rebut). Alimentés automatiquement au retour de matériel et à la saisie. Le reste = stock disponible.</p>
 </div>
 
 <script>
@@ -75,7 +75,7 @@ function render(){
     html += `<tr data-name="${(it.item_name||'').toLowerCase()} ${(it.item_code||'').toLowerCase()}" data-flag="${flag}">
       <td class="l"><b>${it.item_name||''}</b> <span class="text-muted small">${it.item_code||''}</span>
         ${it.a_reparer>0?'<span class="se-pill rep">à réparer</span>':''}
-        ${it.endommage>0?'<span class="se-pill end">endommagé</span>':''}</td>
+        ${it.endommage>0?'<span class="se-pill end">défectueux</span>':''}</td>
       <td class="text-muted">${it.uom||''}</td>
       <td class="se-num se-dis">${num(it.disponible)}</td>
       <td class="se-num se-rep">${it.a_reparer>0?num(it.a_reparer):'—'}</td>
@@ -98,7 +98,7 @@ function filtrer(){
 }
 function exporter(){
   if(!SE) return;
-  const rows=[['Article','Code','Unité','Disponible','À réparer','Endommagé','Valeur']];
+  const rows=[['Article','Code','Unité','Disponible','À réparer','Défectueux','Valeur']];
   SE.items.forEach(it=>rows.push([it.item_name,it.item_code,it.uom,it.disponible,it.a_reparer,it.endommage,it.valeur]));
   rows.push([]);
   rows.push(['TOTAL','','',SE.totaux.disponible,SE.totaux.a_reparer,SE.totaux.endommage,'']);

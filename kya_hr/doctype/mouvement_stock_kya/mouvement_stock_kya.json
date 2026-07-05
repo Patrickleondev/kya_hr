@@ -1,0 +1,148 @@
+{
+ "name": "Mouvement Stock KYA",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "custom": 0,
+ "engine": "InnoDB",
+ "autoname": "format:MVT-{YYYY}-{#####}",
+ "title_field": "item_name",
+ "search_fields": "item, magasin, type_mouvement, reference_name",
+ "track_changes": 0,
+ "sort_field": "date_mouvement",
+ "sort_order": "DESC",
+ "fields": [
+  {
+   "fieldname": "date_mouvement",
+   "label": "Date",
+   "fieldtype": "Date",
+   "reqd": 1,
+   "default": "Today",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "type_mouvement",
+   "label": "Type de mouvement",
+   "fieldtype": "Select",
+   "options": "Entrée\nSortie\nRetour\nInventaire\nAjustement",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "col_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item",
+   "label": "Article",
+   "fieldtype": "Link",
+   "options": "Article KYA",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "item_name",
+   "label": "Désignation",
+   "fieldtype": "Data",
+   "fetch_from": "item.designation",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "magasin",
+   "label": "Magasin",
+   "fieldtype": "Link",
+   "options": "Warehouse",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "section_qte",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "quantite",
+   "label": "Quantité (signée : + entrée / − sortie)",
+   "fieldtype": "Float",
+   "reqd": 1,
+   "in_list_view": 1,
+   "description": "Positive pour une entrée/retour, négative pour une sortie."
+  },
+  {
+   "fieldname": "etat",
+   "label": "État du matériel",
+   "fieldtype": "Select",
+   "options": "Bon état\nÀ réparer\nDéfectueux",
+   "default": "Bon état",
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "col_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reference_doctype",
+   "label": "Document source (type)",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_name",
+   "label": "Document source",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "section_note",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "remarque",
+   "label": "Remarque / Observation",
+   "fieldtype": "Small Text"
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1, "write": 1, "create": 1, "delete": 1, "print": 1, "export": 1, "report": 1, "share": 1
+  },
+  {
+   "role": "Stock Manager",
+   "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1, "report": 1
+  },
+  {
+   "role": "Responsable Stock",
+   "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1, "report": 1
+  },
+  {
+   "role": "Chargé des Stocks",
+   "read": 1, "write": 1, "create": 1, "export": 1, "report": 1
+  },
+  {
+   "role": "Stock User",
+   "read": 1, "report": 1
+  },
+  {
+   "role": "Directeur Général",
+   "read": 1, "report": 1, "export": 1
+  },
+  {
+   "role": "DGA",
+   "read": 1, "report": 1
+  },
+  {
+   "role": "Auditeur Interne",
+   "read": 1, "report": 1, "export": 1
+  },
+  {
+   "role": "DAAF",
+   "read": 1, "report": 1, "export": 1
+  }
+ ]
+}

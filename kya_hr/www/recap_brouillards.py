@@ -8,14 +8,14 @@ no_cache = 1
 def get_context(context):
     """Page récap hebdomadaire des brouillards de caisse.
 
-    Accessible aux rôles : Directeur Général, DGA, DAAF, Comptable,
+    Accessible aux rôles : Directeur Général, DGA, DAAF, DFC, Comptable,
     Responsable RH, System Manager.
     """
     if frappe.session.user == "Guest":
         frappe.throw(_("Veuillez vous connecter"), frappe.AuthenticationError)
 
     allowed_roles = {
-        "Directeur Général", "DGA", "DAAF", "Comptable",
+        "Directeur Général", "DGA", "DAAF", "DFC", "Comptable",
         "Responsable RH", "System Manager", "HR Manager",
     }
     user_roles = set(frappe.get_roles(frappe.session.user))

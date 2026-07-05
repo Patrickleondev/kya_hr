@@ -1,0 +1,101 @@
+<style>
+    @page { size: A4; margin: 15mm; }
+    body { font-family: Arial, "DejaVu Sans", sans-serif; font-size: 11px; color: #333; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .kya-doc { max-width: 100%; margin: 0 auto; }
+    .kya-doc-header { display: table; width: 100%; padding: 10px 0 0; }
+    .kya-doc-header > div { display: table-cell; vertical-align: top; }
+    .kya-doc-logo { width: 120px; padding-right: 24px; }
+    .kya-doc-logo img { max-height: 80px; max-width: 100px; }
+    .kya-doc-info { text-align: right; }
+    .kya-doc-title { font-size: 20px; font-weight: 800; color: #009B77; text-transform: uppercase; margin: 0 0 4px; }
+    .kya-doc-slogan { font-style: italic; color: #F58220; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    .kya-doc-company { font-size: 10px; color: #666; line-height: 1.6; }
+    .kya-doc-line { height: 3px; background: #009B77; margin: 14px 0 10px; }
+    .kya-doc-ref { text-align: center; font-size: 14px; font-weight: 800; color: #009B77; margin: 8px 0 16px; }
+    .kya-sec-header { background: #009B77; color: #fff; padding: 8px 16px; font-size: 12px; font-weight: 700; text-transform: uppercase; margin: 14px 0 0; }
+    .kya-sec-body { padding: 12px 16px; border: 1px solid #dee2e6; border-top: none; }
+    .kya-row { display: table; width: 100%; table-layout: fixed; margin-bottom: 8px; }
+    .kya-col { display: table-cell; vertical-align: top; padding-right: 16px; }
+    .kya-lbl { font-weight: 700; color: #009B77; font-size: 10px; text-transform: uppercase; margin-bottom: 2px; }
+    .kya-val { font-size: 12px; padding: 4px 0; color: #333; }
+    .kya-items { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 8px 0; }
+    .kya-items th { background: #009B77; color: #fff; padding: 7px 10px; text-align: left; font-size: 10px; text-transform: uppercase; }
+    .kya-items td { padding: 6px 10px; border-bottom: 1px solid #eee; font-size: 11px; color: #333; }
+    .kya-items .num { text-align: right; }
+    .kya-total { background: #e8f5e9; }
+    .kya-total td { font-weight: 800; font-size: 13px; color: #009B77; border-top: 2px solid #009B77; }
+    .kya-sigs { display: table; width: 100%; table-layout: fixed; margin-top: 26px; border-spacing: 10px 0; }
+    .kya-sig { display: table-cell; text-align: center; vertical-align: top; }
+    .kya-sig .sig-line { border-top: 1px solid #333; margin-top: 40px; padding-top: 4px; font-size: 9px; font-weight: 600; }
+    .kya-doc-footer { text-align: center; padding: 12px 0 0; margin-top: 16px; border-top: 2px solid #009B77; font-size: 9px; color: #999; }
+    .kya-note { font-size: 9px; color: #888; margin-top: 4px; }
+</style>
+{%- macro money(v) -%}{{ "{:,.0f}".format(v or 0) | replace(",", " ") }}{%- endmacro -%}
+<div class="kya-doc">
+  <div class="kya-doc-header">
+    <div class="kya-doc-logo"><img src="/files/vrai.png" alt="KYA"></div>
+    <div class="kya-doc-info">
+      <div class="kya-doc-title">Solde de Tout Compte</div>
+      <div class="kya-doc-slogan">Move beyond the sky!</div>
+      <div class="kya-doc-company">
+        info@kya-energy.com<br>
+        N° RCCM : TG-LOM 2015 B 975<br>
+        NIF : 1000430317 | CNSS : 48863
+      </div>
+    </div>
+  </div>
+  <div class="kya-doc-line"></div>
+  <div class="kya-doc-ref">N° {{ doc.name }}</div>
+
+  <div class="kya-sec-header">1. Salarié concerné</div>
+  <div class="kya-sec-body">
+    <div class="kya-row">
+      <div class="kya-col"><div class="kya-lbl">Nom &amp; Prénoms</div><div class="kya-val">{{ doc.nom_complet or '—' }}</div></div>
+      <div class="kya-col"><div class="kya-lbl">Matricule</div><div class="kya-val">{{ doc.salarie or '—' }}</div></div>
+      <div class="kya-col"><div class="kya-lbl">Poste occupé</div><div class="kya-val">{{ doc.poste_occupe or '—' }}</div></div>
+    </div>
+    <div class="kya-row">
+      <div class="kya-col"><div class="kya-lbl">Date d'embauche</div><div class="kya-val">{{ frappe.utils.format_date(doc.date_embauche) if doc.date_embauche else '—' }}</div></div>
+      <div class="kya-col"><div class="kya-lbl">Date de sortie</div><div class="kya-val">{{ frappe.utils.format_date(doc.date_calcul) if doc.date_calcul else '—' }}</div></div>
+      <div class="kya-col"><div class="kya-lbl">Motif de départ</div><div class="kya-val">{{ doc.motif_depart or '—' }}</div></div>
+    </div>
+    <div class="kya-row">
+      <div class="kya-col"><div class="kya-lbl">Ancienneté</div><div class="kya-val">{{ "%.2f"|format(doc.anciennete_annees or 0) }} an(s)</div></div>
+      <div class="kya-col"><div class="kya-lbl">Salaire de base</div><div class="kya-val">{{ money(doc.salaire_base) }} FCFA</div></div>
+      <div class="kya-col"><div class="kya-lbl">Salaire mensuel moyen</div><div class="kya-val">{{ money(doc.salaire_mensuel_moyen) }} FCFA</div></div>
+    </div>
+  </div>
+
+  <div class="kya-sec-header">2. Décompte des indemnités</div>
+  <div class="kya-sec-body">
+    <table class="kya-items">
+      <thead><tr><th style="width:44%">Composante</th><th>Détail du calcul</th><th class="num" style="width:20%">Montant (FCFA)</th></tr></thead>
+      <tbody>
+        {% for row in doc.lignes %}
+        <tr>
+          <td>{{ row.libelle }}</td>
+          <td style="color:#666;font-size:10px">{{ row.detail }}</td>
+          <td class="num">{{ money(row.montant) }}</td>
+        </tr>
+        {% endfor %}
+        {% if not doc.lignes %}
+        <tr><td colspan="3" style="text-align:center;color:#999;padding:14px">Aucune indemnité due pour ce motif.</td></tr>
+        {% endif %}
+        <tr class="kya-total">
+          <td colspan="2">TOTAL À VERSER</td>
+          <td class="num">{{ money(doc.total_indemnites) }} FCFA</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="kya-note">Calcul établi conformément à la Convention Collective Interprofessionnelle (Art. 25 licenciement, Art. 40 prime d'ancienneté, Art. 70 départ à la retraite). Barèmes paramétrés dans « Paramètres RH KYA ».</div>
+    {% if doc.observations %}<div class="kya-note"><b>Observations :</b> {{ doc.observations }}</div>{% endif %}
+  </div>
+
+  <div class="kya-sigs">
+    <div class="kya-sig"><div class="sig-line">Le Salarié<br>(lu et approuvé)</div></div>
+    <div class="kya-sig"><div class="sig-line">Responsable RH</div></div>
+    <div class="kya-sig"><div class="sig-line">Direction Générale</div></div>
+  </div>
+
+  <div class="kya-doc-footer">KYA-Energy Group — Solde de tout compte établi le {{ frappe.utils.format_date(frappe.utils.today()) }} — document interne</div>
+</div>

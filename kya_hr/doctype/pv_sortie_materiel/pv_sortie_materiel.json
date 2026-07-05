@@ -18,7 +18,6 @@
    "fieldname": "objet",
    "label": "Objet / Motif de la Sortie",
    "fieldtype": "Small Text",
-   "reqd": 1,
    "in_list_view": 1
   },
   {
@@ -75,27 +74,33 @@
   },
   {
    "fieldname": "project",
-   "label": "Projet / Chantier",
+   "label": "Projet / Chantier (choisir un existant)",
    "fieldtype": "Link",
-   "options": "Project",
+   "options": "Projet KYA",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "description": "Projet/chantier pour lequel la sortie est effectuée (sert aux rapports par projet)"
+   "description": "Choisissez un projet déjà enregistré. Sinon, laissez vide et saisissez le nom plus bas."
   },
   {
    "fieldname": "customer",
-   "label": "Client",
+   "label": "Client (choisir un existant)",
    "fieldtype": "Link",
-   "options": "Customer",
-   "fetch_from": "project.customer",
+   "options": "Client KYA",
+   "fetch_from": "project.client",
    "in_standard_filter": 1,
-   "description": "Client associé (rempli automatiquement si projet lié)"
+   "description": "Choisissez un client déjà enregistré. Sinon, laissez vide et saisissez le nom plus bas."
   },
   {
    "fieldname": "customer_manuel",
-   "label": "Client (saisie manuelle)",
+   "label": "Nouveau client (tapez le nom → créé automatiquement)",
    "fieldtype": "Data",
-   "description": "Nom du client si non encore enregistré dans la base. Sera proposé pour création lors de l'approbation."
+   "description": "Client pas encore dans la base ? Tapez simplement son nom ici : il sera CRÉÉ et LIÉ automatiquement à la validation. Inutile d'aller ailleurs."
+  },
+  {
+   "fieldname": "project_manuel",
+   "label": "Nouveau projet / chantier (tapez le nom → créé automatiquement)",
+   "fieldtype": "Data",
+   "description": "Projet/chantier pas encore enregistré ? Tapez son nom ici : il sera CRÉÉ et LIÉ automatiquement. Aucune navigation nécessaire."
   },
   {
    "fieldname": "destination_type",

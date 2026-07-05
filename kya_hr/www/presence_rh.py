@@ -16,6 +16,9 @@ _VIEW_ROLES = {
     "Responsable RH", "HR Manager", "HR User", "Maître de Stage",
     "Responsable des Stagiaires", "System Manager",
     "Directeur Général", "DGA", "Chef Service",
+    # L'Assistant(e) RH (« chargé RH ») saisit les présences, sans le reste
+    # du cockpit RH (congés/paie non ouverts par ce seul rôle).
+    "Assistant(e) RH",
 }
 
 

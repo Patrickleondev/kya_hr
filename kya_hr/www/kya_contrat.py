@@ -76,9 +76,17 @@ def get_context(context):
     rendered_body = ""
     pf_name = "Contrat de Stage KYA" if (doc.contract_type or "").lower().startswith("stage") else "KYA Contrat PDF"
     try:
-        rendered_body = frappe.get_print(
-            "KYA Contrat", doc.name, print_format=pf_name, no_letterhead=1
-        )
+        # Le signataire accède en Guest (token validé ci-dessus). frappe.get_print
+        # exige la permission 'print' → refus pour Guest. On élève temporairement
+        # au contexte système : le token fait foi de l'autorisation d'accès.
+        _prev_user = frappe.session.user
+        try:
+            frappe.set_user("Administrator")
+            rendered_body = frappe.get_print(
+                "KYA Contrat", doc.name, print_format=pf_name, no_letterhead=1
+            )
+        finally:
+            frappe.set_user(_prev_user)
     except Exception:
         # Fallback : ancien rendu via KYA Contract Template
         if doc.template:

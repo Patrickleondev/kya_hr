@@ -1,4 +1,5 @@
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, today
 
@@ -12,6 +13,46 @@ class BrouillardCaisse(Document):
     Totaux calculés + solde ligne-à-ligne côté serveur pour cohérence,
     même si le JS fait la même chose côté client.
     """
+
+    def before_validate(self):
+        # Résout le caissier AVANT toute validation de lien, pour éviter
+        # l'erreur cryptique « Impossible de trouver Caissier: <nom> » quand
+        # le champ Lien reçoit un nom affiché au lieu de l'ID Employé
+        # (fiche non reliée au compte, saisie manuelle, etc.).
+        self._resolve_caissiere()
+
+    def _resolve_caissiere(self):
+        val = (self.caissiere or "").strip()
+
+        # 1. Déjà un ID Employé valide → rien à faire.
+        if val and frappe.db.exists("Employee", val):
+            return
+
+        candidate = None
+
+        # 2. Un nom a été saisi → retrouver l'Employé par son nom (actif prioritaire).
+        if val:
+            candidate = (
+                frappe.db.get_value("Employee", {"employee_name": val, "status": "Active"}, "name")
+                or frappe.db.get_value("Employee", {"employee_name": val}, "name")
+            )
+
+        # 3. Sinon (ou nom introuvable) → l'Employé du compte connecté.
+        if not candidate:
+            candidate = (
+                frappe.db.get_value("Employee", {"user_id": frappe.session.user, "status": "Active"}, "name")
+                or frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
+            )
+
+        if candidate:
+            self.caissiere = candidate
+            self.caissiere_name = frappe.db.get_value("Employee", candidate, "employee_name")
+        elif val:
+            frappe.throw(
+                _("Aucun employé ne correspond au caissier « {0} ». "
+                  "Reliez votre fiche Employé à votre compte utilisateur "
+                  "(champ « ID Utilisateur ») ou sélectionnez un employé existant.").format(val)
+            )
 
     def validate(self):
         block_self_approval(self)

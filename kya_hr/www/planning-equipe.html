@@ -42,6 +42,8 @@
     <div style="flex:1;min-width:200px;"><label>Commentaire (optionnel)</label><input type="text" id="kpe-comment" placeholder="Note pour la RH…"></div>
   </div>
 
+  <div id="kpe-campagne" style="display:none;margin:0 0 12px;padding:12px 16px;border-radius:10px;font-size:.9rem;"></div>
+
   <div class="kpe-note" id="kpe-info">Sélectionnez une équipe pour charger ses membres.</div>
 
   <div class="kyad-panel" style="overflow-x:auto;">
@@ -71,8 +73,11 @@ let MEMBRES = [], LEAVE_TYPES = [];
 
 function opt(v,t,sel){ return `<option value="${v}"${sel?' selected':''}>${t||v}</option>`; }
 
+function qparam(k){ return new URLSearchParams(window.location.search).get(k); }
+
 async function init(){
-  document.getElementById('kpe-annee').value = new Date().getFullYear();
+  const qAnnee = qparam('annee');
+  document.getElementById('kpe-annee').value = qAnnee || new Date().getFullYear();
   // types de congé
   const lt = await frappe.call({method:'frappe.client.get_list',
     args:{doctype:'Leave Type', fields:['name'], limit_page_length:0, order_by:'name asc'}});
@@ -87,14 +92,48 @@ async function init(){
     return;
   }
   sel.innerHTML = teams.map(t=>opt(t.name, (t.nom_equipe||t.name)+(t.departement?(' · '+t.departement):''))).join('');
+  // Lien direct RH → chef : pré-sélection de l'équipe passée en paramètre.
+  const qEquipe = qparam('equipe');
+  if(qEquipe && teams.some(t=>t.name===qEquipe)) sel.value = qEquipe;
   sel.addEventListener('change', loadPlanning);
   document.getElementById('kpe-annee').addEventListener('change', loadPlanning);
   loadPlanning();
 }
 
+// Bandeau : période de congés définie par la RH (campagne) pour l'année.
+async function loadCampagne(annee){
+  const el = document.getElementById('kpe-campagne');
+  if(!el) return;
+  try {
+    const resp = (await frappe.call({method:'kya_hr.api.campagne_conges.get_campagne', args:{annee}})).message || {};
+    const c = resp.definition || {};
+    const st = c.statut || 'Non définie';
+    const fmt = d => d ? new Date(d).toLocaleDateString('fr-FR') : '—';
+    let bg, brd, txt;
+    if(st === 'Ouverte'){
+      bg='#e6f4ef'; brd='#009B77';
+      txt = `📅 <b>Campagne congés ${annee} ouverte par la RH.</b> Période à planifier : <b>${fmt(c.date_ouverture)}</b>`
+          + (c.date_limite ? ` → à renvoyer <b>avant le ${fmt(c.date_limite)}</b>` : '')
+          + (c.message_chef ? `<br><span style="color:#334155;">✉️ ${c.message_chef}</span>` : '');
+    } else if(st === 'Préparée'){
+      bg='#fff7e6'; brd='#f59e0b';
+      txt = `🕒 La RH prépare la campagne congés <b>${annee}</b>. Vous pouvez déjà saisir ; l'ouverture officielle suivra.`;
+    } else if(st === 'Clôturée'){
+      bg='#fdecec'; brd='#e53935';
+      txt = `🔒 La campagne congés <b>${annee}</b> est clôturée par la RH.`;
+    } else {
+      bg='#f1f5f9'; brd='#94a3b8';
+      txt = `ℹ️ La RH n'a pas encore défini de campagne pour <b>${annee}</b>. Vous pouvez néanmoins préparer le planning de votre équipe.`;
+    }
+    el.style.display='block'; el.style.background=bg; el.style.border='1px solid '+brd; el.style.borderLeft='4px solid '+brd;
+    el.innerHTML = txt;
+  } catch(e){ el.style.display='none'; }
+}
+
 async function loadPlanning(){
   const equipe = document.getElementById('kpe-equipe').value;
   const annee = document.getElementById('kpe-annee').value;
+  loadCampagne(annee);
   const body = document.getElementById('kpe-body');
   const info = document.getElementById('kpe-info');
   const go = document.getElementById('kpe-go');

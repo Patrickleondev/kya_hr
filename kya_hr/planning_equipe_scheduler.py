@@ -67,12 +67,31 @@ def _role_users(*roles):
 
 # ── Lancement de campagne (1er décembre) ───────────────────────────────────
 def lancer_campagne_annuelle():
-    annee = _target_year()
-    cree, ignore = 0, 0
+    """Cron 1er décembre : prépare l'année N+1 et notifie les chefs."""
+    return ouvrir_campagne(_target_year(), envoyer_mails=True)
+
+
+def ouvrir_campagne(annee, envoyer_mails=True, deadline_label=None, message_chef=None):
+    """Cœur réutilisable : crée un brouillon de planning pré-rempli par équipe
+    ayant un chef (idempotent), et — si demandé — envoie l'invitation au chef.
+
+    Appelé par le cron (`lancer_campagne_annuelle`) ET par le cockpit RH
+    (`kya_hr.api.campagne_conges.ouvrir`). Retourne un compte-rendu.
+    """
+    annee = int(annee)
+    cree, ignore, mails = 0, 0, 0
     for t in _teams_with_chef():
         equipe = t["name"]
-        if frappe.db.exists("Planning Conge Equipe", {"equipe": equipe, "annee": annee}):
+        existing = frappe.db.exists("Planning Conge Equipe", {"equipe": equipe, "annee": annee})
+        if existing:
             ignore += 1
+            # Renotifier un chef qui n'a pas encore soumis (brouillon en attente).
+            if envoyer_mails:
+                state = frappe.db.get_value("Planning Conge Equipe", existing, "workflow_state")
+                if state in ("", "Brouillon", None):
+                    doc = frappe.get_doc("Planning Conge Equipe", existing)
+                    if _email_chef_invitation(doc, t, deadline_label, message_chef):
+                        mails += 1
             continue
         try:
             doc = frappe.new_doc("Planning Conge Equipe")
@@ -86,12 +105,14 @@ def lancer_campagne_annuelle():
             doc.flags.ignore_permissions = True
             doc.insert()
             cree += 1
-            _email_chef_invitation(doc, t)
+            if envoyer_mails and _email_chef_invitation(doc, t, deadline_label, message_chef):
+                mails += 1
         except Exception:
-            frappe.log_error(frappe.get_traceback(), "planning_equipe.lancer_campagne_annuelle")
+            frappe.log_error(frappe.get_traceback(), "planning_equipe.ouvrir_campagne")
     frappe.db.commit()
-    print(f"[planning_equipe_scheduler] campagne {annee} : {cree} brouillon(s) créé(s), {ignore} ignoré(s).")
-    return {"annee": annee, "crees": cree, "ignores": ignore}
+    print(f"[planning_equipe_scheduler] campagne {annee} : {cree} brouillon(s) créé(s), "
+          f"{ignore} existant(s), {mails} mail(s).")
+    return {"annee": annee, "crees": cree, "ignores": ignore, "mails": mails}
 
 
 def _prefill_lignes(doc, equipe, annee):
@@ -124,11 +145,24 @@ def _prefill_lignes(doc, equipe, annee):
         doc.append("lignes", {"employee": m["name"], "type_conge": "Congé Annuel"})
 
 
-def _email_chef_invitation(doc, team):
+def _planning_equipe_url(equipe=None, annee=None):
+    """Lien direct vers la page de saisie, pré-sélectionnant l'équipe/année."""
+    q = []
+    if equipe:
+        q.append("equipe=" + frappe.utils.quote(str(equipe)))
+    if annee:
+        q.append("annee=" + str(annee))
+    suffix = ("?" + "&".join(q)) if q else ""
+    return frappe.utils.get_url("/planning-equipe" + suffix)
+
+
+def _email_chef_invitation(doc, team, deadline_label=None, message_chef=None):
     email = _chef_email(team["chef_equipe"])
     if not email:
-        return
-    url = frappe.utils.get_url("/planning-equipe")
+        return False
+    url = _planning_equipe_url(doc.equipe, doc.annee)
+    extra = ("<p style='background:#f1f5f9;border-left:4px solid #0e7c4a;padding:8px 12px;'>{0}</p>"
+             .format(frappe.utils.escape_html(message_chef))) if message_chef else ""
     try:
         frappe.sendmail(
             recipients=[email],
@@ -138,15 +172,18 @@ def _email_chef_invitation(doc, team):
                 "<p>La campagne de planification des congés <b>{annee}</b> est ouverte. "
                 "Un brouillon a été préparé pour votre équipe <b>{equipe}</b> "
                 "(membres déjà chargés{recond}).</p>"
+                "{extra}"
                 "<p>Merci de <b>renseigner les périodes</b> et de soumettre avant le <b>{deadline}</b> :</p>"
                 "<p><a href='{url}'>➡️ Compléter le planning de mon équipe</a></p>"
             ).format(chef=team["chef_equipe_name"] or "", annee=doc.annee, equipe=team["nom_equipe"] or doc.equipe,
                      recond=_(", périodes de l'an passé reconduites") if any(l.date_debut for l in doc.lignes) else "",
-                     deadline=DEADLINE_LABEL, url=url),
+                     extra=extra, deadline=deadline_label or DEADLINE_LABEL, url=url),
             reference_doctype=doc.doctype, reference_name=doc.name,
         )
+        return True
     except Exception:
         frappe.log_error(frappe.get_traceback(), "planning_equipe._email_chef_invitation")
+        return False
 
 
 # ── Relance + escalade (~28 décembre) ──────────────────────────────────────
@@ -174,7 +211,7 @@ def _relance_chef(team, annee):
     email = _chef_email(team["chef_equipe"])
     if not email:
         return
-    url = frappe.utils.get_url("/planning-equipe")
+    url = _planning_equipe_url(team["name"], annee)
     try:
         frappe.sendmail(
             recipients=[email],

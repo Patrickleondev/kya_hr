@@ -122,7 +122,7 @@
     "cc": null,
     "condition": null,
     "receiver_by_document_field": null,
-    "receiver_by_role": "Directeur General"
+    "receiver_by_role": "Directeur Général"
    }
   ],
   "send_system_notification": 0,
@@ -482,7 +482,7 @@
     "cc": null,
     "condition": null,
     "receiver_by_document_field": null,
-    "receiver_by_role": "Directeur General"
+    "receiver_by_role": "Directeur Général"
    }
   ],
   "send_system_notification": 0,
@@ -849,7 +849,7 @@
     "cc": null,
     "condition": null,
     "receiver_by_document_field": null,
-    "receiver_by_role": "Directeur General"
+    "receiver_by_role": "Directeur Général"
    }
   ],
   "send_system_notification": 0,
@@ -1268,7 +1268,7 @@
     "cc": null,
     "condition": null,
     "receiver_by_document_field": null,
-    "receiver_by_role": "Directeur General"
+    "receiver_by_role": "Directeur Général"
    }
   ],
   "send_system_notification": 0,
@@ -1403,7 +1403,7 @@
     "cc": null,
     "condition": null,
     "receiver_by_document_field": null,
-    "receiver_by_role": "Directeur General"
+    "receiver_by_role": "Directeur Général"
    }
   ],
   "send_system_notification": 0,
@@ -1785,7 +1785,7 @@
   "subject": "PV Réception {{ doc.name }} — Validation comptabilité requise",
   "recipients": [
    {
-    "receiver_by_role": "Responsable Comptable"
+    "receiver_by_role": "Comptable"
    }
   ],
   "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:#1565c0;padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='{{ frappe.utils.get_url() }}/assets/kya_hr/images/kya_logo.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>PV Réception de Matériels</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><p>Bonjour,</p><p>Le PV de réception <b>{{ doc.name }}</b> a été validé par le magasin et nécessite maintenant votre validation comptable.</p><p><b>Objet :</b> {{ doc.objet }}<br><b>Fournisseur :</b> {{ doc.fournisseur or doc.fournisseur_libre or '—' }}<br><b>Projet :</b> {{ doc.project or '—' }}</p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url() }}/pv-entree-materiel/{{ doc.name }}' style='display:inline-block;padding:12px 32px;background:#1565c0;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;'>Valider Comptabilité</a></div></div>{{ get_kya_email_footer() }}</div>",

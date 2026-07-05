@@ -49,6 +49,14 @@ ASSIGNMENTS: dict[str, tuple[str, list[str]]] = {
         "Mouvements & Retours",
         [
             "Retour Materiel KYA",
+            # Doctypes maison du stock : sinon ils retombent dans le fallback
+            # « Espace Stagiaires » (plus basse séquence du module KYA HR).
+            "Article KYA",
+            "Categorie Article KYA",
+            "Saisie Stock KYA",
+            "Client KYA",
+            "Projet KYA",
+            "Mouvement Stock KYA",
         ],
     ),
 }

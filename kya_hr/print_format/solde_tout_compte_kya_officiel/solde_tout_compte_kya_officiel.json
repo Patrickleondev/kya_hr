@@ -1,0 +1,10 @@
+{
+    "name": "Solde Tout Compte KYA Officiel",
+    "doctype": "Print Format",
+    "doc_type": "Solde Tout Compte KYA",
+    "module": "KYA HR",
+    "print_format_type": "Jinja",
+    "standard": "Yes",
+    "default_print_language": "fr",
+    "custom_format": 1
+}

@@ -112,6 +112,19 @@ def cleanup_users(force=1):
 
 
 def _ref_employee():
+    # On privilégie l'employé du compte de test « employee » (demandeur attendu),
+    # sinon un employé réel NON lié à un compte de test (pour éviter qu'un
+    # approbateur de test soit pris pour le demandeur → faux self-approval).
+    own = frappe.db.get_value("Employee", {"user_id": _email("employee"), "status": "Active"}, "name")
+    if own:
+        return own
+    e = frappe.get_all(
+        "Employee",
+        filters={"status": "Active", "user_id": ["not like", "t\\_%@kyatest.local"]},
+        pluck="name", limit=1,
+    )
+    if e:
+        return e[0]
     e = frappe.get_all("Employee", filters={"status": "Active"}, pluck="name", limit=1)
     return e[0] if e else frappe.get_all("Employee", pluck="name", limit=1)[0]
 
@@ -232,7 +245,10 @@ def _flows(emp):
                 ("Approuver", "chef", True, None),
                 ("Approuver", "daaf", True, None),
             ],
-            "negative": ("Soumettre", "comptable"),
+            # Le Comptable a un droit read+write légitime sur les demandes d'achat
+            # (visibilité compta) → ce n'est PAS un « mauvais rôle » ici. On teste
+            # un rôle réellement sans droit d'écriture (Caissier) pour le négatif.
+            "negative": ("Soumettre", "caissier"),
             "pdf": True,
         },
         {

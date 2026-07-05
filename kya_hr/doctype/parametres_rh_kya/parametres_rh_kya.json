@@ -1,0 +1,44 @@
+{
+ "name": "Parametres RH KYA",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "custom": 0,
+ "issingle": 1,
+ "engine": "InnoDB",
+ "description": "Paramètres et barèmes RH KYA — configurables par la RH (aucun calcul via la paie ERPNext). Base : Convention Collective Interprofessionnelle.",
+ "fields": [
+  {"fieldname": "sb_general", "fieldtype": "Section Break", "label": "Général"},
+  {"fieldname": "age_retraite", "label": "Âge d'admission à la retraite (ans)", "fieldtype": "Int", "default": "60"},
+
+  {"fieldname": "sb_licenciement", "fieldtype": "Section Break", "label": "Indemnité de licenciement (Art. 25) — % du salaire mensuel moyen (12 mois) par année de présence"},
+  {"fieldname": "lic_taux_1_5", "label": "1re à 5e année (%)", "fieldtype": "Percent", "default": "35"},
+  {"fieldname": "lic_taux_6_10", "label": "6e à 10e année (%)", "fieldtype": "Percent", "default": "40"},
+  {"fieldname": "cb_lic", "fieldtype": "Column Break"},
+  {"fieldname": "lic_taux_11_plus", "label": "Au-delà de la 10e année (%)", "fieldtype": "Percent", "default": "45"},
+  {"fieldname": "lic_mois_moyenne", "label": "Nombre de mois pour la moyenne du salaire", "fieldtype": "Int", "default": "12"},
+
+  {"fieldname": "sb_anciennete", "fieldtype": "Section Break", "label": "Prime d'ancienneté (Art. 40) — majoration du salaire de base"},
+  {"fieldname": "anc_seuil_annees", "label": "Ancienneté minimale pour la prime (ans)", "fieldtype": "Int", "default": "2"},
+  {"fieldname": "anc_taux_seuil", "label": "Taux au seuil (%)", "fieldtype": "Percent", "default": "2"},
+  {"fieldname": "cb_anc", "fieldtype": "Column Break"},
+  {"fieldname": "anc_annee_debut_annuel", "label": "Année de début du taux annuel", "fieldtype": "Int", "default": "4"},
+  {"fieldname": "anc_taux_annuel", "label": "Taux additionnel par année (%)", "fieldtype": "Percent", "default": "1"},
+  {"fieldname": "anc_plafond", "label": "Plafond de la prime (%)", "fieldtype": "Percent", "default": "35"},
+
+  {"fieldname": "sb_retraite", "fieldtype": "Section Break", "label": "Indemnité de départ à la retraite (Art. 70) — % de l'indemnité de licenciement"},
+  {"fieldname": "ret_taux_1_5", "label": "1 à 5 ans (%)", "fieldtype": "Percent", "default": "45"},
+  {"fieldname": "ret_taux_6_10", "label": "6 à 10 ans (%)", "fieldtype": "Percent", "default": "50"},
+  {"fieldname": "cb_ret", "fieldtype": "Column Break"},
+  {"fieldname": "ret_taux_11_plus", "label": "Plus de 10 ans (%)", "fieldtype": "Percent", "default": "60"},
+  {"fieldname": "ret_min_mois", "label": "Plancher (mois de salaire)", "fieldtype": "Int", "default": "3"},
+
+  {"fieldname": "sb_permissions", "fieldtype": "Section Break", "label": "Permissions exceptionnelles (Art. 50)"},
+  {"fieldname": "permissions", "label": "Barème des permissions", "fieldtype": "Table", "options": "Permission Exceptionnelle KYA"}
+ ],
+ "permissions": [
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1},
+  {"role": "Responsable RH", "read": 1, "write": 1, "create": 1},
+  {"role": "HR Manager", "read": 1, "write": 1, "create": 1},
+  {"role": "Directeur Général", "read": 1}
+ ]
+}

@@ -64,7 +64,7 @@ def _norm_etat(etat: str | None) -> str:
     e = (etat or "").strip().lower()
     if e.startswith("à répar") or e.startswith("a repar") or "répar" in e or "repar" in e:
         return "a_reparer"
-    if e.startswith("endommag") or "endommag" in e:
+    if "défect" in e or "defect" in e or "endommag" in e or "hors" in e or "rebut" in e:
         return "endommage"
     return "disponible"
 
@@ -79,25 +79,34 @@ def _classify_warehouse(name: str, warehouse_name: str | None) -> str:
     return "disponible"
 
 
+# Mapping état du ledger maison -> clé de la vue consolidée. Vocabulaire unique
+# = Bon état / À réparer / Défectueux (anciens libellés reconnus pour compat).
+_ETAT_TO_KEY = {
+    "Bon état": "disponible", "Neuf": "disponible",
+    "À réparer": "a_reparer", "En réparation": "a_reparer",
+    "Défectueux": "endommage", "Hors service": "endommage", "Endommagé": "endommage",
+}
+
+
 @frappe.whitelist()
 def get_stock_par_etat(search: str | None = None) -> dict:
     """Vue consolidée du stock par état (disponible / à réparer / endommagé).
 
-    Pour chaque article ayant du stock : quantités ventilées par état (tous
-    magasins confondus) + valorisation. Sert la page /stock-etat.
+    Source = grand livre maison `Mouvement Stock KYA` (l'état est une COLONNE du
+    stock, plus un magasin spécial). Quantités uniquement (pas de valorisation
+    en maison → valeur = 0). Sert la page /stock-etat (Resp. Stock + Direction).
     """
     rows = frappe.db.sql(
         """
-        SELECT b.item_code, i.item_name, i.stock_uom,
-               b.warehouse, w.warehouse_name,
-               b.actual_qty, b.valuation_rate
-        FROM `tabBin` b
-        INNER JOIN `tabItem` i ON i.name = b.item_code
-        LEFT JOIN `tabWarehouse` w ON w.name = b.warehouse
-        WHERE b.actual_qty != 0
+        SELECT m.item AS item_code, MAX(m.item_name) AS item_name,
+               m.etat AS etat, SUM(m.quantite) AS qty
+        FROM `tabMouvement Stock KYA` m
+        GROUP BY m.item, m.etat
         """,
         as_dict=True,
     )
+    unites = dict(frappe.get_all("Article KYA", fields=["name", "unite"],
+                                 as_list=True)) if rows else {}
 
     items: dict[str, dict] = {}
     tot = {"disponible": 0.0, "a_reparer": 0.0, "endommage": 0.0,
@@ -107,18 +116,17 @@ def get_stock_par_etat(search: str | None = None) -> dict:
         it = items.get(key)
         if not it:
             it = {"item_code": r.item_code, "item_name": r.item_name or r.item_code,
-                  "uom": r.stock_uom or "", "disponible": 0.0, "a_reparer": 0.0,
-                  "endommage": 0.0, "valeur": 0.0}
+                  "uom": unites.get(r.item_code, ""), "disponible": 0.0,
+                  "a_reparer": 0.0, "endommage": 0.0, "valeur": 0.0}
             items[key] = it
-        etat = _classify_warehouse(r.warehouse, r.warehouse_name)
-        qty = float(r.actual_qty or 0)
-        val = qty * float(r.valuation_rate or 0)
+        etat = _ETAT_TO_KEY.get((r.etat or "").strip(), "disponible")
+        qty = float(r.qty or 0)
         it[etat] += qty
-        it["valeur"] += val
         tot[etat] += qty
-        tot["val_" + etat] += val
 
-    data = list(items.values())
+    # On ne garde que les articles avec du stock (somme des états non nulle).
+    data = [d for d in items.values()
+            if abs(d["disponible"]) + abs(d["a_reparer"]) + abs(d["endommage"]) > 1e-9]
     if search:
         s = search.lower().strip()
         data = [d for d in data if s in (d["item_name"] or "").lower()

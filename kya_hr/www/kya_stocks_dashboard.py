@@ -78,37 +78,32 @@ def _fmt_m(xof):
 
 @frappe.whitelist()
 def get_stock_overview() -> dict:
-    """Indicateurs Stock & Inventaire (valeur, ruptures, documents, mouvements,
-    top articles, flux 6 mois). Tout est réel ; défensif si doctype absent."""
+    """Indicateurs Stock & Inventaire — branchés sur le JOURNAL DE STOCK MAISON
+    (Mouvement Stock KYA), plus ERPNext Bin/SLE. Unités (pas de valorisation)."""
     if not (set(frappe.get_roles(frappe.session.user)) & STOCK_ACCESS_ROLES):
         frappe.throw("Accès réservé au magasin et à la Direction.", frappe.PermissionError)
 
     from frappe.utils import add_days, today, formatdate
+    from kya_hr.api import stock_kya
 
-    # ── Valeur totale du stock + nb références ──
-    val_rows = frappe.db.sql(
-        "SELECT COALESCE(SUM(actual_qty*valuation_rate),0) v, "
-        "COUNT(DISTINCT item_code) n FROM `tabBin` WHERE actual_qty != 0", as_dict=True)
-    valeur_stock = float(val_rows[0].v or 0) if val_rows else 0
-    nb_refs = int(val_rows[0].n or 0) if val_rows else 0
-
-    # ── Ruptures (stock total <= 0) + critiques (sous le seuil de réappro) ──
-    rupt = frappe.db.sql(
-        """SELECT COUNT(*) n FROM (
-              SELECT b.item_code, SUM(b.actual_qty) q
-              FROM `tabBin` b GROUP BY b.item_code HAVING q <= 0
-           ) t""", as_dict=True)
-    nb_rupture = int(rupt[0].n or 0) if rupt else 0
+    # ── Soldes calculés depuis le journal ──
+    try:
+        soldes = stock_kya.soldes(only_nonzero=1)
+    except Exception:
+        soldes = []
+    nb_refs = len({d["item"] for d in soldes})
+    nb_mag = len({d["magasin"] for d in soldes})
+    total_unites = round(sum(d["total"] for d in soldes), 2)
+    nb_reparation = sum(1 for d in soldes if d["reparation"] > 0)
+    nb_rupture = sum(1 for d in soldes if d["total"] <= 0)
 
     month_start = today()[:8] + "01"
-    d48 = add_days(today(), -2)
     six_m = add_days(today(), -180)
 
-    # ── Hero ──
     hero = [
-        {"label": "Valeur totale du stock", "value": _fmt_m(valeur_stock), "unit": "M FCFA",
-         "sub": f"{nb_refs} références", "icon": "coins"},
-        {"label": "Articles en rupture", "value": str(nb_rupture), "sub": "stock épuisé", "icon": "alert"},
+        {"label": "Unités en stock", "value": f"{total_unites:g}", "unit": "u.",
+         "sub": f"{nb_refs} articles · {nb_mag} magasins", "icon": "coins"},
+        {"label": "Articles en réparation", "value": str(nb_reparation), "sub": "immobilisés", "icon": "alert"},
         {"label": "PV d'entrée (mois)", "value": str(_count("PV Entree Materiel", {"creation": [">=", month_start]})),
          "sub": "matériel reçu", "icon": "arrowdown"},
         {"label": "PV de sortie (mois)", "value": str(_count("PV Sortie Materiel", {"creation": [">=", month_start]})),
@@ -119,7 +114,6 @@ def get_stock_overview() -> dict:
          {"workflow_state": ["not in", ("Approuvé", "Rejeté")]})), "sub": "magasin", "icon": "clipboard"},
     ]
 
-    # ── Documents de stock ──
     doc_cards = [
         {"label": "PV Entrée Matériel", "value": str(_count("PV Entree Materiel", {"creation": [">=", month_start]})),
          "sub": "ce mois", "icon": "arrowdown", "accent": "green"},
@@ -129,70 +123,57 @@ def get_stock_overview() -> dict:
          {"workflow_state": ["in", ("Brouillon", "En attente Magasin")]})), "sub": "en attente", "icon": "undo", "accent": "teal"},
         {"label": "Inventaire", "value": str(_count("Inventaire KYA",
          {"workflow_state": ["not in", ("Approuvé", "Rejeté")]})), "sub": "en cours", "icon": "clipboard", "accent": "teal"},
-        {"label": "Réceptions (Material Receipt)", "value": str(_count("Stock Entry",
-         {"stock_entry_type": "Material Receipt", "creation": [">=", month_start], "docstatus": 1})),
-         "sub": "ce mois", "icon": "receipt", "accent": "slate"},
+        {"label": "Mouvements (mois)", "value": str(_count("Mouvement Stock KYA", {"date_mouvement": [">=", month_start]})),
+         "sub": "journal de stock", "icon": "receipt", "accent": "slate"},
     ]
 
-    # ── Derniers mouvements (Stock Ledger Entry, ~7 jours) ──
+    # ── Derniers mouvements (journal maison) ──
     mouvements = []
     try:
         rows = frappe.db.sql(
-            """SELECT sle.item_code, it.item_name, sle.warehouse, sle.actual_qty,
-                      sle.posting_date, sle.voucher_type, sle.voucher_no, sle.owner
-               FROM `tabStock Ledger Entry` sle
-               INNER JOIN `tabItem` it ON it.name = sle.item_code
-               WHERE sle.is_cancelled = 0 AND sle.posting_date >= %s
-               ORDER BY sle.posting_date DESC, sle.creation DESC LIMIT 12""",
-            (add_days(today(), -7),), as_dict=True)
+            """SELECT item_name, magasin, type_mouvement, quantite, date_mouvement,
+                      reference_name, owner
+               FROM `tabMouvement Stock KYA`
+               ORDER BY creation DESC LIMIT 12""", as_dict=True)
         for r in rows:
-            qty = float(r.actual_qty or 0)
+            qty = float(r.quantite or 0)
             mouvements.append({
-                "type": "Entrée" if qty > 0 else "Sortie",
+                "type": r.type_mouvement or ("Entrée" if qty > 0 else "Sortie"),
                 "accent": "green" if qty > 0 else "orange",
-                "ref": r.voucher_no or "", "article": r.item_name or r.item_code,
+                "ref": r.reference_name or "", "article": r.item_name or "",
                 "qte": ("+" if qty > 0 else "") + (f"{qty:g}"),
-                "date": formatdate(r.posting_date, "dd/MM"),
+                "date": formatdate(r.date_mouvement, "dd/MM") if r.date_mouvement else "",
                 "par": frappe.utils.get_fullname(r.owner) if r.owner else "",
             })
     except Exception:
         frappe.log_error(frappe.get_traceback(), "stock-overview: mouvements")
 
-    # ── Top articles par valeur ──
+    # ── Top articles par quantité en stock ──
     top = []
-    try:
-        rows = frappe.db.sql(
-            """SELECT b.item_code, it.item_name, it.item_group, it.stock_uom,
-                      SUM(b.actual_qty) qte, SUM(b.actual_qty*b.valuation_rate) val
-               FROM `tabBin` b INNER JOIN `tabItem` it ON it.name = b.item_code
-               WHERE b.actual_qty != 0
-               GROUP BY b.item_code, it.item_name, it.item_group, it.stock_uom
-               ORDER BY val DESC LIMIT 8""", as_dict=True)
-        tot = sum(float(r.val or 0) for r in rows) or 1
-        for r in rows:
-            top.append({
-                "article": r.item_name or r.item_code, "cat": r.item_group or "—",
-                "qte": f"{float(r.qte or 0):g} {r.stock_uom or ''}".strip(),
-                "valeur": _fmt_m(r.val) + " M",
-                "part": round(float(r.val or 0) / tot * 100),
-            })
-    except Exception:
-        frappe.log_error(frappe.get_traceback(), "stock-overview: top")
+    tot_q = sum(d["total"] for d in soldes) or 1
+    for d in sorted(soldes, key=lambda x: x["total"], reverse=True)[:8]:
+        grp = frappe.db.get_value("Item", d["item"], "item_group") or "—"
+        top.append({
+            "article": d["item_name"], "cat": grp,
+            "qte": f"{d['total']:g}",
+            "valeur": f"{d['bon_etat']:g} bon / {d['reparation']:g} rép.",
+            "part": round(d["total"] / tot_q * 100),
+        })
 
-    # ── Flux entrées/sorties 6 mois (valeur, M FCFA) ──
+    # ── Flux entrées/sorties 6 mois (unités) ──
     flux = {"labels": [], "entrees": [], "sorties": []}
     try:
         rows = frappe.db.sql(
-            """SELECT CONCAT(YEAR(posting_date),'-',LPAD(MONTH(posting_date),2,'0')) mois,
-                      SUM(CASE WHEN actual_qty>0 THEN actual_qty*valuation_rate ELSE 0 END) ent,
-                      SUM(CASE WHEN actual_qty<0 THEN -actual_qty*valuation_rate ELSE 0 END) sor
-               FROM `tabStock Ledger Entry`
-               WHERE is_cancelled=0 AND posting_date >= %s
+            """SELECT CONCAT(YEAR(date_mouvement),'-',LPAD(MONTH(date_mouvement),2,'0')) mois,
+                      SUM(CASE WHEN quantite>0 THEN quantite ELSE 0 END) ent,
+                      SUM(CASE WHEN quantite<0 THEN -quantite ELSE 0 END) sor
+               FROM `tabMouvement Stock KYA`
+               WHERE date_mouvement >= %s
                GROUP BY mois ORDER BY mois""", (six_m,), as_dict=True)
         for r in rows:
             flux["labels"].append(r.mois or "")
-            flux["entrees"].append(round(float(r.ent or 0) / 1_000_000, 2))
-            flux["sorties"].append(round(float(r.sor or 0) / 1_000_000, 2))
+            flux["entrees"].append(round(float(r.ent or 0), 2))
+            flux["sorties"].append(round(float(r.sor or 0), 2))
     except Exception:
         frappe.log_error(frappe.get_traceback(), "stock-overview: flux")
 
@@ -200,5 +181,5 @@ def get_stock_overview() -> dict:
         "date_str": formatdate(today(), "EEEE d MMMM y"),
         "hero": hero, "doc_cards": doc_cards, "mouvements": mouvements,
         "top": top, "flux": flux,
-        "valeur_stock_label": _fmt_m(valeur_stock) + " M FCFA",
+        "valeur_stock_label": f"{total_unites:g} unités",
     }

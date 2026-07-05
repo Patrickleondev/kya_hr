@@ -1,0 +1,126 @@
+<style>
+  .ps-wrap{max-width:960px;margin:0 auto;padding:18px 16px 60px;font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#0f172a;}
+  .ps-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
+  .ps-head h1{margin:0;font-size:1.35rem;font-weight:800;}
+  .ps-sel{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px;margin:14px 0;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;}
+  .ps-sel label{display:block;font-size:.72rem;font-weight:700;color:#475569;margin-bottom:3px;}
+  .ps-sel input{border:1px solid #cbd5e1;border-radius:8px;padding:8px 10px;font-size:.9rem;min-width:320px;}
+  .ps-btn{background:#0f766e;color:#fff;border:none;border-radius:8px;padding:9px 15px;font-weight:700;font-size:.85rem;cursor:pointer;}
+  .ps-btn.sec{background:#fff;color:#0f766e;border:1px solid #0f766e;}
+  .ps-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;box-shadow:0 1px 2px rgba(0,0,0,.03);margin-bottom:16px;}
+  .ps-name{font-size:1.3rem;font-weight:800;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .badge{display:inline-block;padding:3px 12px;border-radius:12px;font-weight:700;font-size:.78rem;color:#fff;}
+  .b-actif{background:#16a34a;} .b-retraite{background:#7c3aed;} .b-sorti{background:#64748b;}
+  .ps-kv{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px;}
+  .ps-kv .lbl{font-size:.68rem;color:#0f766e;font-weight:700;text-transform:uppercase;}
+  .ps-kv .val{font-size:.95rem;font-weight:600;margin-top:2px;}
+  .ps-tl{position:relative;margin:8px 0 8px 8px;padding-left:26px;border-left:3px solid #e2e8f0;}
+  .ps-ev{position:relative;margin-bottom:16px;}
+  .ps-ev::before{content:'';position:absolute;left:-33px;top:3px;width:14px;height:14px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px currentColor;background:currentColor;}
+  .ps-ev .card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px 14px;}
+  .ps-ev .date{font-size:.75rem;color:#64748b;font-weight:600;}
+  .ps-ev .nat{font-weight:800;font-size:.95rem;}
+  .ps-ev .meta{font-size:.82rem;color:#475569;margin-top:3px;}
+  .ps-sub h3{font-size:.9rem;margin:0 0 6px;color:#334155;}
+  .ps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  .pill{display:inline-block;background:#f1f5f9;border-radius:8px;padding:5px 9px;font-size:.78rem;margin:2px 0;}
+  .muted{color:#94a3b8;font-size:.85rem;}
+  @media(max-width:760px){.ps-kv,.ps-grid{grid-template-columns:1fr 1fr;}}
+</style>
+
+<div class="ps-wrap">
+  <div class="ps-head">
+    <h1>🧭 Parcours du salarié</h1>
+    <a class="ps-btn sec" href="/rh-effectifs">← Tableau de bord RH</a>
+  </div>
+
+  <div class="ps-sel">
+    <div><label>Rechercher un salarié (nom ou matricule)</label>
+      <input list="ps-list" id="ps-input" placeholder="Tapez un nom…" onchange="choisir()">
+      <datalist id="ps-list"></datalist></div>
+    <button class="ps-btn" onclick="choisir()">Afficher</button>
+  </div>
+
+  <div id="ps-body"><div class="muted" style="text-align:center;padding:40px;">Sélectionnez un salarié pour voir son parcours.</div></div>
+</div>
+
+<script>
+const SAL = {{ salaries_json | safe }};
+const NAT_COLOR = {Embauche:'#0f766e',Promotion:'#16a34a',Mutation:'#2563eb',Renouvellement:'#0891b2','Augmentation salariale':'#7c3aed','Rétrogradation':'#dc2626','Fin de contrat':'#64748b'};
+async function apiCall(method, args){
+  const p = new URLSearchParams();
+  Object.entries(args||{}).forEach(([k,v])=>{ if(v!==null&&v!==undefined&&v!=='') p.append(k,v); });
+  const q = p.toString();
+  const r = await fetch('/api/method/'+method+(q?('?'+q):''), {headers:{'Accept':'application/json'}, credentials:'same-origin'});
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  return (await r.json()).message;
+}
+const esc=s=>(s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const nf=v=>(v==null?0:v).toLocaleString('fr-FR');
+
+const dl=document.getElementById('ps-list');
+SAL.forEach(s=>{ const o=document.createElement('option'); o.value=s.nom_complet+' ['+s.name+']'; dl.appendChild(o); });
+
+function matchName(v){
+  v=(v||'').trim();
+  let m=v.match(/\[([^\]]+)\]\s*$/); if(m) return m[1];
+  const hit=SAL.find(s=>s.nom_complet===v||s.name===v); return hit?hit.name:null;
+}
+async function choisir(){
+  const id=matchName(document.getElementById('ps-input').value);
+  if(!id){ return; }
+  const box=document.getElementById('ps-body'); box.innerHTML='<div class="muted" style="text-align:center;padding:30px;">Chargement…</div>';
+  try{ const d=await apiCall('kya_hr.api.rh_effectifs.parcours',{salarie:id}); render(d); }
+  catch(e){ box.innerHTML='<div class="muted">Erreur de chargement.</div>'; }
+}
+
+function evCard(e){
+  const c=NAT_COLOR[e.nature_evolution]||'#0f766e';
+  const fin=e.date_fin?(' → '+e.date_fin):' → (en cours)';
+  const sal=e.salaire_base?(' · '+nf(e.salaire_base)+' F'):'';
+  return `<div class="ps-ev" style="color:${c}"><div class="card">
+    <div class="date">${esc(e.date_debut)}${esc(fin)} · <span style="color:#0f766e">${esc(e.duree||'')}</span></div>
+    <div class="nat" style="color:${c}">${esc(e.nature_evolution)}</div>
+    <div class="meta" style="color:#334155">${esc(e.poste_occupe||'—')} · ${esc(e.departement||'—')} · ${esc(e.categorie||'')} ${esc(e.classe_echelon||'')}${sal}</div>
+    ${e.motif_evolution?`<div class="meta">📝 ${esc(e.motif_evolution)}</div>`:''}
+  </div></div>`;
+}
+function subList(titre, arr){
+  return `<div class="ps-sub"><h3>${titre} (${arr.length})</h3>${arr.length?arr.map(e=>`<div class="pill">${esc(e.date_debut)} · ${esc(e.poste_occupe||'—')}</div>`).join(''):'<div class="muted">Aucune</div>'}</div>`;
+}
+function render(d){
+  const s=d.salarie;
+  const bcls=s.statut==='Actif'?'b-actif':(s.statut==='Retraité'?'b-retraite':'b-sorti');
+  const tl=d.evolutions.length?d.evolutions.map(evCard).join(''):'<div class="muted">Aucun évènement de carrière. Ajoutez-en depuis la fiche du salarié.</div>';
+  document.getElementById('ps-body').innerHTML=`
+    <div class="ps-card">
+      <div class="ps-name">${esc(s.nom_complet)} <span class="badge ${bcls}">${esc(s.statut)}</span></div>
+      <div class="ps-kv">
+        <div><div class="lbl">Matricule</div><div class="val">${esc(s.matricule)}</div></div>
+        <div><div class="lbl">Poste actuel</div><div class="val">${esc(s.poste_occupe||'—')}</div></div>
+        <div><div class="lbl">Département</div><div class="val">${esc(s.departement||'—')}</div></div>
+        <div><div class="lbl">Contrat</div><div class="val">${esc(s.type_contrat||'—')}</div></div>
+        <div><div class="lbl">Date d'embauche</div><div class="val">${esc(s.date_embauche||'—')}</div></div>
+        <div><div class="lbl">Ancienneté</div><div class="val">${s.anciennete} an(s)</div></div>
+        <div><div class="lbl">Âge</div><div class="val">${s.age!=null?s.age+' ans':'—'}</div></div>
+        <div><div class="lbl">Catégorie</div><div class="val">${esc(s.categorie||'—')} ${esc(s.classe_echelon||'')}</div></div>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+        <a class="ps-btn sec" href="/app/salarie-kya/${encodeURIComponent(s.matricule)}" target="_blank">Ouvrir la fiche ↗</a>
+        <a class="ps-btn sec" href="/app/evolution-carriere-kya/new?salarie=${encodeURIComponent(s.matricule)}" target="_blank">+ Ajouter un évènement</a>
+        <button class="ps-btn" onclick="pdf('${encodeURIComponent(s.matricule)}')">📄 Générer la fiche PDF</button>
+      </div>
+    </div>
+    <div class="ps-card"><h3 style="margin-top:0">Historique de carrière</h3><div class="ps-tl">${tl}</div></div>
+    <div class="ps-card"><div class="ps-grid">
+      ${subList('Promotions', d.promotions)}
+      ${subList('Mutations', d.mutations)}
+      ${subList('Rétrogradations', d.retrogradations)}
+    </div></div>`;
+}
+async function pdf(id){
+  try{ const r=await apiCall('kya_hr.api.rh_effectifs.parcours_pdf',{salarie:decodeURIComponent(id)});
+    if(r&&r.content_base64){ const a=document.createElement('a'); a.href='data:application/pdf;base64,'+r.content_base64; a.download=r.filename||'parcours.pdf'; a.click(); } }
+  catch(e){ alert('PDF indisponible.'); }
+}
+</script>

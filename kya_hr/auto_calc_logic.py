@@ -144,6 +144,13 @@ def _pss_current_active_employee(user=None):
 
 def _pss_validate_requester_scope(doc):
     user = frappe.session.user
+    # Ce périmètre ne concerne QUE la création par le demandeur (empêcher un
+    # stagiaire de saisir pour un autre). Les approbateurs (maître de stage,
+    # responsable des stagiaires, DG) ne font qu'avancer le workflow sur un
+    # document existant : ils ne doivent PAS être re-scopés (sinon un maître de
+    # stage non-RH est bloqué à l'approbation). Caught par les tests réalistes.
+    if not doc.is_new() and user != doc.owner:
+        return
     if user in ("Administrator", "Guest") or _pss_can_select_any_employee(user):
         return
     current_employee = _pss_current_active_employee(user)

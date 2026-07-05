@@ -1,0 +1,14 @@
+{
+ "name": "Solde Tout Compte Ligne KYA",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "istable": 1,
+ "custom": 0,
+ "engine": "InnoDB",
+ "fields": [
+  {"fieldname": "libelle", "label": "Composante", "fieldtype": "Data", "in_list_view": 1, "columns": 5, "read_only": 1},
+  {"fieldname": "detail", "label": "Détail du calcul", "fieldtype": "Data", "in_list_view": 1, "columns": 4, "read_only": 1},
+  {"fieldname": "montant", "label": "Montant (FCFA)", "fieldtype": "Currency", "in_list_view": 1, "columns": 2, "read_only": 1}
+ ],
+ "permissions": []
+}

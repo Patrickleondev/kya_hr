@@ -220,9 +220,20 @@ async function ouvrirRevueBesoin(besoin){
   catch(e){ setResult('Erreur : '+e.message, false); return; }
   const ov=document.createElement('div');
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;display:flex;align-items:center;justify-content:center;padding:1rem;';
-  const rows=d.lignes.map(l=>'<tr data-idx="'+l.idx+'"><td>'+l.intitule+'<div class="text-muted small">'+(l.competence||'')+(l.employes_concernes?(' · '+l.employes_concernes):'')+'</div></td>'
+  const esc=s=>(s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const prio=p=>{ if(!p) return ''; const c=p==='Haute'?'#dc2626':(p==='Moyenne'?'#d97706':'#64748b'); return '<span style="font-weight:700;color:'+c+'">● '+esc(p)+'</span>'; };
+  const rows=d.lignes.map(l=>'<tr data-idx="'+l.idx+'"><td>'
+    +'<div style="font-weight:700">'+esc(l.intitule)+'</div>'
+    +(l.besoin_exprime?'<div class="text-muted small">'+esc(l.besoin_exprime)+'</div>':'')
+    +(l.objectif?'<div class="small" style="color:#475569">🎯 '+esc(l.objectif)+'</div>':'')
+    +(l.competence?'<div class="small" style="color:#475569">🛠️ '+esc(l.competence)+'</div>':'')
+    +'<div class="small mt-1">'+prio(l.priorite)+(l.nb_participants?' · <b>'+l.nb_participants+'</b> participant(s)':'')+'</div>'
+    +'<div class="small mt-1" style="color:#0e7c4a;font-weight:600">👥 Bénéficiaires : '
+      +(l.employes_concernes?esc(l.employes_concernes):'<span class="text-muted" style="font-weight:400">(non précisé par le chef)</span>')+'</div>'
+    +(l.justification?'<div class="small mt-1 text-muted">📝 '+esc(l.justification)+'</div>':'')
+    +'</td>'
     +'<td><select class="form-select form-select-sm rv-st"><option'+(l.statut_rh==='En attente'?' selected':'')+'>En attente</option><option'+(l.statut_rh==='Retenu'?' selected':'')+'>Retenu</option><option'+(l.statut_rh==='Écarté'?' selected':'')+'>Écarté</option></select></td>'
-    +'<td><input class="form-control form-control-sm rv-mo" value="'+(l.motif_rh||'').replace(/"/g,'&quot;')+'" placeholder="motif si écarté"></td></tr>').join('');
+    +'<td><input class="form-control form-control-sm rv-mo" value="'+esc(l.motif_rh)+'" placeholder="motif si écarté"></td></tr>').join('');
   const acts=[...new Set(d.actions)].filter(a=>a);
   ov.innerHTML='<div style="background:#fff;border-radius:12px;max-width:720px;width:100%;padding:1.3rem;max-height:90vh;overflow:auto;">'
     +'<h5 class="mb-1"><i class="bi bi-clipboard-check"></i> Revue RH — '+besoin+'</h5>'
@@ -272,7 +283,7 @@ async function exportFormation(scope){
   try{
     const r=await callApi('kya_hr.api.formation_dashboard.export_besoins', {scope});
     if(!r.rows){ setResult('Aucune donnée à exporter pour ce périmètre.', false); return; }
-    _downloadB64(r.content_base64, r.filename, 'text/csv');
+    _downloadB64(r.content_base64, r.filename, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     setResult('<i class="bi bi-check-circle"></i> '+r.rows+' ligne(s) exportée(s) — '+r.filename);
   }catch(e){ setResult('Erreur export : '+e.message, false); }
 }
@@ -499,7 +510,7 @@ async function exportBeneficiaires(){
   try{
     const r=await callApi('kya_hr.api.formation_dashboard.export_beneficiaires', plan?{plan}:{});
     if(!r.rows){ setResult('Aucun bénéficiaire à exporter.', false); return; }
-    _downloadB64(r.content_base64, r.filename, 'text/csv');
+    _downloadB64(r.content_base64, r.filename, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     setResult('<i class="bi bi-check-circle"></i> '+r.rows+' ligne(s) exportée(s) — '+r.filename);
   }catch(e){ setResult('Erreur export : '+e.message, false); }
 }

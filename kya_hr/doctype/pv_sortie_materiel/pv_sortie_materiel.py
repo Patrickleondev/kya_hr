@@ -6,6 +6,7 @@ from frappe import _
 from frappe.model.document import Document
 
 from kya_hr.utils.approval_guards import block_self_approval
+from kya_hr.api import stock_kya
 
 
 class PVSortieMateriel(Document):
@@ -13,6 +14,33 @@ class PVSortieMateriel(Document):
         block_self_approval(self)
         self.validate_items()
         self.set_demandeur_info()
+        self._ensure_customer_project()
+
+    def _ensure_customer_project(self):
+        """Le remplisseur n'a nulle part où aller : s'il tape un nom de client
+        ou de projet à la main (customer_manuel / project_manuel), on crée
+        automatiquement le Client KYA / Projet KYA (maison, SANS code) et on le
+        LIE — ou on relie l'existant s'il porte déjà ce nom. Ça alimente le
+        dashboard sorties par client/projet sans navigation manuelle.
+
+        NB : on n'utilise plus le Customer/Project natif ERPNext (réservé au CRM
+        commercial) ; ces répertoires maison sont légers et propres au stock.
+        """
+        from kya_hr.kya_hr.doctype.client_kya.client_kya import creer_ou_recuperer as _client
+        from kya_hr.kya_hr.doctype.projet_kya.projet_kya import creer_ou_recuperer as _projet
+
+        nom_client = (self.get("customer_manuel") or "").strip()
+        if not self.get("customer") and nom_client:
+            self.customer = _client(nom_client)
+
+        nom_projet = (self.get("project_manuel") or "").strip()
+        if not self.get("project") and nom_projet:
+            self.project = _projet(nom_projet, client=self.get("customer") or None)
+
+    def _deja_poste(self):
+        return bool(frappe.db.exists(
+            "Mouvement Stock KYA",
+            {"reference_doctype": "PV Sortie Materiel", "reference_name": self.name}))
 
     def validate_items(self):
         if not self.items:
@@ -35,25 +63,25 @@ class PVSortieMateriel(Document):
     # ------------------------------------------------------------------
     # Workflow lifecycle
     # ------------------------------------------------------------------
+    def on_submit(self):
+        if self.workflow_state == "Approuvé" and not self._deja_poste():
+            self._post_stock_kya()
+
     def on_update_after_submit(self):
         if self.workflow_state:
             self.db_set("statut", self.workflow_state, update_modified=False)
         self._stamp_approver_signature()
-        # Auto-create Stock Entry the moment PV becomes "Approuvé"
-        if self.workflow_state == "Approuvé" and not self.get("stock_entry"):
-            self._create_stock_entry()
+        # Décrémente le stock maison dès que le PV passe « Approuvé »
+        if self.workflow_state == "Approuvé" and not self._deja_poste():
+            self._post_stock_kya()
 
     def on_cancel(self):
-        """If the PV is cancelled, cancel the associated Stock Entry too."""
-        if self.get("stock_entry"):
-            try:
-                se = frappe.get_doc("Stock Entry", self.stock_entry)
-                if se.docstatus == 1:
-                    se.cancel()
-                    frappe.msgprint(_("Stock Entry {0} annulé — les articles sont remis en stock.").format(se.name),
-                                    indicator="orange", alert=True)
-            except frappe.DoesNotExistError:
-                pass
+        """Annulation du PV → on retire ses mouvements du grand livre (le
+        matériel est remis en stock)."""
+        n = stock_kya.supprimer_mouvements("PV Sortie Materiel", self.name)
+        if n:
+            frappe.msgprint(_("Sortie annulée — {0} article(s) remis en stock.").format(n),
+                            indicator="orange", alert=True)
 
     def _stamp_approver_signature(self):
         """Auto-fill approver name and date when they approve at their workflow level."""
@@ -74,106 +102,54 @@ class PVSortieMateriel(Document):
             self.db_set("magasin_date", today, update_modified=False)
 
     # ------------------------------------------------------------------
-    # ERPNext Stock integration — Material Issue
+    # Stock KYA maison — sortie (décrémente le grand livre)
     # ------------------------------------------------------------------
-    def _check_stock_availability(self, rows):
-        """Bloque la sortie si la quantite demandee depasse le stock disponible.
-
-        Verifie pour chaque ligne (item_code, warehouse) que la qty
-        reellement sortie (ou demandee a defaut) est <= au actual_qty du Bin.
-        Throw une erreur listant TOUTES les anomalies a la fois (pas une
-        par une) pour aider l'utilisateur a corriger en un seul passage.
-        """
-        anomalies = []
-        for it in rows:
-            qty = it.qte_reellement_sortie or it.qte_demandee or 0
+    def _post_stock_kya(self):
+        """Écrit les sorties dans le grand livre maison (−qté par magasin).
+        Contrôle de disponibilité SOUPLE : on prévient si le solde devient
+        négatif mais on NE bloque PAS (migration en cours, stock d'ouverture
+        pas forcément complet ; régularisable par inventaire)."""
+        rows, alertes = [], []
+        for it in self.items:
+            if not (it.get("item_code") and it.get("warehouse")):
+                continue
+            qty = it.get("qte_reellement_sortie") or it.get("qte_demandee") or 0
             if qty <= 0:
                 continue
-            available = frappe.db.get_value(
-                "Bin",
-                {"item_code": it.item_code, "warehouse": it.warehouse},
-                "actual_qty",
-            ) or 0
-            if qty > available:
-                anomalies.append(
-                    _("{0} dans {1} : demande {2}, disponible {3}").format(
-                        it.designation or it.item_code,
-                        it.warehouse, qty, available,
-                    )
-                )
-
-        if anomalies:
-            frappe.throw(
-                _("Sortie impossible — stock insuffisant pour {0} article(s) :<br><br>{1}<br><br>"
-                  "Corrigez les quantites ou l'entrepot source, ou faites un PV de Reception au prealable.").format(
-                    len(anomalies),
-                    "<br>".join(f"&bull; {a}" for a in anomalies),
-                ),
-                title=_("Stock insuffisant"),
-            )
-
-    def _create_stock_entry(self):
-        """
-        Create a Stock Entry (Material Issue) that decrements stock for all items
-        with an item_code + warehouse. Items without item_code are skipped (non-ERPNext
-        articles) but still tracked on the PV for traceability.
-        """
-        rows = [it for it in self.items if it.get("item_code") and it.get("warehouse")]
-        if not rows:
-            # No ERPNext-linked articles → nothing to decrement, pure paper PV
-            return
-
-        # Bloque l'approbation si stock insuffisant - throw avant le submit
-        self._check_stock_availability(rows)
-
-        default_wh = frappe.db.get_single_value("Stock Settings", "default_warehouse") or None
-        company = self.get("company") or frappe.defaults.get_user_default("Company") \
-            or frappe.db.get_single_value("Global Defaults", "default_company")
-
-        se = frappe.new_doc("Stock Entry")
-        se.stock_entry_type = "Material Issue"
-        se.purpose = "Material Issue"
-        se.posting_date = self.date_sortie or frappe.utils.today()
-        se.company = company
-        se.project = self.get("project") or None
-        se.remarks = _("Auto-créé depuis PV Sortie Matériel {0}").format(self.name)
-        # Custom reference back to the PV for traceability (see Custom Field in fixtures)
-        se.pv_sortie_materiel = self.name
-
-        for it in rows:
-            qty = it.qte_reellement_sortie or it.qte_demandee or 0
-            if qty <= 0:
-                continue
-            se.append("items", {
-                "item_code": it.item_code,
-                "qty": qty,
-                "uom": it.uom or frappe.db.get_value("Item", it.item_code, "stock_uom"),
-                "s_warehouse": it.warehouse or default_wh,
-                "basic_rate": frappe.db.get_value("Item", it.item_code, "last_purchase_rate") or 0,
-                "cost_center": frappe.db.get_value("Company", company, "cost_center") if company else None,
+            solde = stock_kya.solde_item_magasin(it.item_code, it.warehouse)
+            if qty > (solde.get("total") or 0):
+                alertes.append(_("{0} dans {1} : sortie {2}, disponible {3}").format(
+                    it.get("designation") or it.item_code, it.warehouse, qty, solde.get("total") or 0))
+            rows.append({
+                "item": it.item_code,
+                "magasin": it.warehouse,
+                "quantite": qty,  # signe appliqué par enregistrer_mouvements (Sortie)
+                "etat": "Bon état",
+                "remarque": it.get("designation"),
             })
-
-        if not se.items:
+        if not rows:
             return
-
         try:
-            se.insert(ignore_permissions=True)
-            se.submit()
-            self.db_set("stock_entry", se.name, update_modified=False)
+            n = stock_kya.enregistrer_mouvements(
+                rows, "Sortie",
+                reference_doctype="PV Sortie Materiel", reference_name=self.name,
+                date_mouvement=self.date_sortie or frappe.utils.today(),
+            )
             frappe.msgprint(
-                _("Stock Entry {0} créé et soumis automatiquement — les stocks ont été mis à jour.").format(
-                    frappe.utils.get_link_to_form("Stock Entry", se.name)
-                ),
+                _("Stock mis à jour : {0} sortie(s) enregistrée(s) au grand livre KYA.").format(n),
                 indicator="green", alert=True,
             )
+            if alertes:
+                frappe.msgprint(
+                    _("⚠️ Stock négatif après cette sortie (à régulariser par inventaire) :<br>{0}")
+                    .format("<br>".join(f"&bull; {a}" for a in alertes)),
+                    indicator="orange")
         except Exception as e:
-            # Do not block PV approval if stock is insufficient — log and notify
             frappe.log_error(
-                title=f"PV Sortie {self.name} — échec création Stock Entry",
+                title=f"PV Sortie {self.name} — échec écriture stock KYA",
                 message=frappe.get_traceback() + f"\n\nPV: {self.name}\nError: {e}",
             )
             frappe.msgprint(
-                _("⚠️ Impossible de créer le Stock Entry automatique : {0}. "
-                  "Le PV reste approuvé, mais la déduction de stock doit être faite manuellement.").format(str(e)),
+                _("⚠️ Impossible d'enregistrer la sortie de stock : {0}.").format(str(e)),
                 indicator="orange",
             )
