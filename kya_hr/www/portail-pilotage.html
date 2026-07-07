@@ -56,7 +56,7 @@ const PPX_ALERTES = {% if alertes_json %}{{ alertes_json | safe }}{% else %}{}{%
   s.onload=function(){ var al=PPX_ALERTES||{};
     KYAKPI.prio(document.getElementById('ppx-prio'),{chips:[
       {icon:'🛒',count:al.achats,label:'dossier(s) achats en attente de visa'},
-      {icon:'🪙',count:al.compta,label:'compta / caisse'},
+      {icon:'🪙',count:al.compta,label:'Comptabilité & Finances'},
       {icon:'📦',count:al.stock,label:'stock / matériel'},
       {icon:'🧑‍💼',count:al.rh,label:'RH (congés, permissions)'}],
     okLabel:'Aucun dossier en attente de visa dans les circuits'}); };

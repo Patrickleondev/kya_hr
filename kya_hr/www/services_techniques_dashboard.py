@@ -236,6 +236,19 @@ def get_st_overview() -> dict:
     charge = {"labels": [r["equipe"] for r in team_rows[:8]],
               "data": [r["charge"] for r in team_rows[:8]]}
 
+    # Bandeau « À traiter en priorité » — calé sur les données PROD réelles :
+    # etatsys ∈ Fonctionnel / Partiel / En panne ; missions « En attente DGA/DG ».
+    from frappe.utils import add_days
+    _d30 = str(add_days(today(), -30))
+    alertes = {
+        "sav_non_resolus": sum(1 for f in fiches_sav
+                               if (f.get("etatsys") or "") in ("Partiel", "En panne")
+                               and str(f.get("dateinter") or "") >= _d30),
+        "missions_attente": sum(1 for m in fiches_mission
+                                if "attente" in (m.get("workflow_state") or "").lower()),
+        "taches_bloquees": n_bloc,
+    }
+
     return {
         "date_str": formatdate(today(), "EEEE d MMMM y"),
         "hero": hero, "sav_rows": sav_rows, "mission_rows": mission_rows,
@@ -244,6 +257,7 @@ def get_st_overview() -> dict:
         "sav_label": f"{n_sav} interventions",
         "mission_label": f"{n_mission} missions",
         "ouverts_label": f"{n_cours} en cours · {n_bloc} bloquées",
+        "alertes": alertes,
         "equipes_label": f"{len(actives)} équipes",
         "sav_note": "Les interventions SAV proviennent des fiches techniques curatives "
                     "(saisie terrain) et les déplacements des fiches de mission. Le suivi "

@@ -244,5 +244,12 @@ def get_commercial_overview() -> dict:
         "leads_type": leads_type, "flux": flux, "lead_rows": lead_rows,
         "teams": teams, "sat_avg": sat_avg, "sat_n": sat_n,
         "leads_label": f"{leads_actifs} actifs",
+        "alertes": {
+            # calé sur la répartition réelle des statuts en prod
+            "a_relancer": _count("Lead", {"status": "Open"}),
+            "opportunites": _count("Lead", {"status": "Opportunity"}),
+            "devis": _count("Lead", {"status": "Quotation"}),
+            "jamais_qualifies": _count("Lead", {"status": "Lead"}),
+        },
         "clients_label": f"{clients} clients",
     }

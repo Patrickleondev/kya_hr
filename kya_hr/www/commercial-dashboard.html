@@ -4,6 +4,7 @@
 
 {% block head_include %}
 <script src="/assets/kya_hr/js/chart.umd.min.js"></script>
+<script src="/assets/kya_hr/js/kya_kpi.js"></script>
 {% endblock %}
 
 {% block page_content %}
@@ -85,6 +86,14 @@ function render(D){
     const v=el('div'); v.style.cssText='display:flex;align-items:baseline;'; v.appendChild(el('span','val',h.value));
     if(h.unit) v.appendChild(el('span','un',h.unit)); c.appendChild(v); if(h.sub) c.appendChild(el('span','sub',h.sub)); hg.appendChild(c); });
   hero.appendChild(hg); root.appendChild(hero);
+
+  // Bandeau « À traiter en priorité » (brique partagée KYAKPI)
+  if(window.KYAKPI){ const al=D.alertes||{}; KYAKPI.prio(root,{chips:[
+      {icon:'📞',count:al.a_relancer,label:'lead(s) ouverts à relancer'},
+      {icon:'💼',count:al.opportunites,label:'opportunité(s) à concrétiser'},
+      {icon:'📝',count:al.devis,label:'devis en attente de retour client'},
+      {icon:'🆕',count:al.jamais_qualifies,label:'nouveau(x) lead(s) jamais qualifié(s)'}],
+    okLabel:'Pipeline à jour'}); }
 
   if(D.funnel && D.funnel.length){
     root.appendChild(band('target','Tunnel commercial','demande → devis → accepté → facturé → payé','','linear-gradient(100deg,#0d7377,#0a5d61)'));
