@@ -89,13 +89,20 @@ function render(){
   if(!RH){ document.getElementById('rh-kpi1').innerHTML='<div class="rh-note">Aucune donnée. Ajoutez des salariés dans le registre.</div>'; return; }
   const k=RH.kpi;
   document.getElementById('rh-date').textContent = 'Situation au '+(RH.date_str||'')+(k.retraites?(' · '+k.retraites+' retraité(s), '+k.sortis+' sorti(s)'):'');
+  // Tendance vs mois précédent (séries d'évolution déjà calculées)
+  const ev=RH.evolution||{}; const _last=a=>(a&&a.length>1)?(a[a.length-1]-a[a.length-2]):0;
+  const dEff=_last(ev.effectif), dMasse=_last(ev.masse);
+  const chip=(d,suf)=>{const v=Math.round(d*10)/10;
+    if(v>0) return ' <span style="font-size:.68rem;font-weight:800;background:#dcfce7;color:#166534;padding:1px 7px;border-radius:10px;white-space:nowrap;">▲ +'+v+suf+'</span>';
+    if(v<0) return ' <span style="font-size:.68rem;font-weight:800;background:#fee2e2;color:#991b1b;padding:1px 7px;border-radius:10px;white-space:nowrap;">▼ '+v+suf+'</span>';
+    return ' <span style="font-size:.68rem;font-weight:800;background:#f1f5f9;color:#64748b;padding:1px 7px;border-radius:10px;white-space:nowrap;">= stable</span>';};
   document.getElementById('rh-kpi1').innerHTML =
-    kpiCard(nf(k.effectif_total),'Effectif total (actifs)','green')+
+    kpiCard(nf(k.effectif_total)+chip(dEff,' vs mois préc.'),'Effectif total (actifs)','green')+
     kpiCard(nf(k.hommes),'Hommes','blue')+
     kpiCard(nf(k.femmes),'Femmes','pink')+
     kpiCard(nf(k.cdi),'Permanents (CDI)')+
     kpiCard(nf(k.temporaires),'Temporaires (hors CDI)','amber')+
-    kpiCard(fcfa(k.masse_salariale),'Masse salariale mensuelle','violet');
+    kpiCard(fcfa(k.masse_salariale)+chip(dMasse,' M vs mois préc.'),'Masse salariale mensuelle','violet');
   document.getElementById('rh-kpi2').innerHTML =
     kpiCard(nf(k.cadres),'Cadres (C)','blue')+
     kpiCard(nf(k.maitrise),"Agents de maîtrise (AM)")+

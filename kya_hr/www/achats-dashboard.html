@@ -4,6 +4,7 @@
 
 {% block head_include %}
 <script src="/assets/kya_hr/js/chart.umd.min.js"></script>
+<script src="/assets/kya_hr/js/kya_kpi.js"></script>
 {% endblock %}
 
 {% block page_content %}
@@ -86,6 +87,15 @@ function render(D){
     const v=el('div'); v.style.cssText='display:flex;align-items:baseline;'; v.appendChild(el('span','val',h.value));
     if(h.unit) v.appendChild(el('span','un',h.unit)); c.appendChild(v); if(h.sub) c.appendChild(el('span','sub',h.sub)); hg.appendChild(c); });
   hero.appendChild(hg); root.appendChild(hero);
+
+  // Bandeau « À traiter en priorité » (brique partagée KYAKPI)
+  if(window.KYAKPI){ const al=D.alertes||{}; KYAKPI.prio(root,{chips:[
+      {icon:'👤',count:al.chef,label:'demande(s) chez le chef'},
+      {icon:'🏛️',count:al.daaf,label:'chez DAAF / Audit'},
+      {icon:'🎯',count:al.dg,label:'chez la Direction'},
+      {icon:'📄',count:al.bc,label:'bon(s) de commande à viser'}],
+    href:'/app/demande-achat-kya?workflow_state=%5B%22not%20in%22%2C%5B%22Approuv%C3%A9%22%2C%22Rejet%C3%A9%22%5D%5D',
+    cta:'Ouvrir les demandes →', okLabel:'Aucune demande ni BC en attente'}); }
 
   root.appendChild(band('cart','Demandes d’achat — workflow d’approbation','Demande Achat KYA · paliers de validation',(D.en_attente_label||''),'linear-gradient(100deg,#0d7377,#0a5d61)'));
   root.appendChild(cardGrid(D.palier_cards));

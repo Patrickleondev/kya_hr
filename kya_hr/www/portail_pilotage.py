@@ -48,8 +48,10 @@ def get_context(context):
     try:
         import json as _json
         context.tree_json = _json.dumps(get_portail_tree(), default=str)
+        context.alertes_json = _json.dumps(get_alertes_consolidees(), default=str)
     except Exception:
         context.tree_json = "[]"
+        context.alertes_json = "{}"
         frappe.log_error(frappe.get_traceback(), "portail-pilotage: tree")
     return context
 
@@ -61,6 +63,26 @@ def _count(dt, filters=None):
         return frappe.db.count(dt, filters or {})
     except Exception:
         return 0
+
+
+def get_alertes_consolidees() -> dict:
+    """Dossiers en attente de visa TOUS circuits confondus (bandeau DG).
+    Défensif : chaque compteur retombe à 0 si le doctype manque."""
+    att = ["like", "%En attente%"]
+    return {
+        "achats": _count("Demande Achat KYA", {"workflow_state": att})
+        + _count("Bon Commande KYA", {"workflow_state": att}),
+        "compta": _count("Brouillard Caisse", {"workflow_state": att})
+        + _count("Etat Recap Cheques", {"workflow_state": att}),
+        "stock": _count("PV Sortie Materiel", {"workflow_state": att})
+        + _count("PV Entree Materiel", {"workflow_state": att})
+        + _count("Retour Materiel KYA", {"workflow_state": att})
+        + _count("Inventaire KYA", {"workflow_state": att}),
+        "rh": _count("Leave Application", {"workflow_state": att})
+        + _count("Permission Sortie Employe", {"workflow_state": att})
+        + _count("Permission Sortie Stagiaire", {"workflow_state": att})
+        + _count("Planning Conge", {"workflow_state": att}),
+    }
 
 
 def _op(label, route, icon="file"):

@@ -255,9 +255,16 @@ def get_compta_overview() -> dict:
         etats[st] = etats.get(st, 0) + 1
     doc_etats = {"labels": list(etats.keys()), "data": list(etats.values())}
 
+    # Bandeau « À traiter en priorité » (design v2) : ventilation par étape.
+    br_comptable = sum(1 for b in brs if "comptable" in (b.workflow_state or "").lower())
+    br_dfc = sum(1 for b in brs if "dfc" in (b.workflow_state or "").lower())
+    alertes = {"br_comptable": br_comptable, "br_dfc": br_dfc,
+               "br_autres": max(0, br_attente - br_comptable - br_dfc),
+               "cheques": cheques_attente}
+
     return {
         "date_str": formatdate(today(), "EEEE d MMMM y"),
         "hero": hero, "treso_cards": treso_cards, "brouillard_rows": brouillard_rows,
-        "flux": flux, "doc_etats": doc_etats,
+        "flux": flux, "doc_etats": doc_etats, "alertes": alertes,
         "solde_label": _fmt_m(solde_actuel) + " M FCFA",
     }
