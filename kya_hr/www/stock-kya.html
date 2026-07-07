@@ -33,6 +33,23 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
 .ks-note{background:#f1f5f9;border-left:4px solid #0e7c4a;border-radius:8px;padding:10px 14px;font-size:.82rem;color:#475569;margin:8px 0}
 .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.72rem;font-weight:800}
 .b-e{background:#dcfce7;color:#166534}.b-s{background:#fee2e2;color:#991b1b}.b-r{background:#fef3c7;color:#92400e}.b-i{background:#dbeafe;color:#1e40af}
+/* Tables larges : défilement horizontal DANS la carte (jamais la page). */
+.ks-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.ks-scroll .ks-tbl{min-width:640px;}
+.rap-filtres{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin:8px 0 12px;}
+.rap-filtres label{display:block;font-size:.7rem;font-weight:700;color:#475569;margin-bottom:2px;text-transform:uppercase;}
+.rap-filtres select,.rap-filtres input{border:1px solid #cbd5e1;border-radius:8px;padding:8px 10px;font-size:16px;background:#fff;}
+/* Mobile : boutons pleine largeur, saisie utilisable au doigt. */
+@media(max-width:720px){
+  .ks{padding:0 8px;}
+  .kyad-hero>div:last-child{width:100%;}
+  .kyad-hero .ks-btn{flex:1;text-align:center;}
+  .ks-kpis{grid-template-columns:repeat(2,1fr);}
+  #sai-tbl input{font-size:16px;min-width:70px;}
+  #sai-tbl input[data-f="designation"]{min-width:150px;}
+  .rap-filtres>div{flex:1 1 45%;}
+  #rap-grid{grid-template-columns:1fr !important;}
+}
 </style>
 
 <div class="kyad ks">
@@ -45,6 +62,7 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
       <a class="ks-btn sec" href="/pv-entree-materiel/new">＋ Entrée</a>
       <a class="ks-btn sec" href="/pv-sortie-materiel/new">－ Sortie</a>
       <a class="ks-btn sec" href="/retour-materiel/new">🔄 Retour</a>
+      <a class="ks-btn sec" href="/stock-catalogue" title="La vue que voient les demandeurs">📖 Catalogue</a>
     </div>
   </div>
 
@@ -55,6 +73,7 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
     <div class="ks-tab" data-t="sai" onclick="tab('sai')">📝 Saisie directe</div>
     <div class="ks-tab" data-t="mag" onclick="tab('mag')">🏬 Synthèse magasins</div>
     <div class="ks-tab" data-t="rea" onclick="tab('rea')">🚨 Réappro / Alertes</div>
+    <div class="ks-tab" data-t="rap" onclick="tab('rap')">📊 Rapport de période</div>
     <div class="ks-tab" data-t="mvt" onclick="tab('mvt')">🕑 Derniers mouvements</div>
     <div class="ks-tab" data-t="imp" onclick="tab('imp')">⬆️ Importer (Excel)</div>
   </div>
@@ -103,14 +122,14 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
         <select id="sai-mag" class="ks-btn sec" style="font-weight:600;min-width:220px;"></select>
       </div>
       <datalist id="sai-cats"></datalist>
-      <table class="ks-tbl" id="sai-tbl">
+      <div class="ks-scroll"><table class="ks-tbl" id="sai-tbl">
         <thead><tr>
           <th style="width:34%">Désignation</th><th style="width:20%">Catégorie</th>
           <th style="width:10%">Unité</th><th style="width:10%">Bon état</th>
           <th style="width:10%">À réparer</th><th style="width:10%">Défectueux</th><th style="width:6%"></th>
         </tr></thead>
         <tbody id="sai-body"></tbody>
-      </table>
+      </table></div>
       <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
         <button class="ks-btn sec" onclick="saiAddRow()">＋ Ajouter une ligne</button>
         <button class="ks-btn" id="sai-btn" onclick="saiSave()">💾 Enregistrer dans le magasin</button>
@@ -123,8 +142,8 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
   <div id="pane-mag" class="ks-hide">
     <div class="ks-card">
       <h3>Synthèse par magasin</h3>
-      <table class="ks-tbl"><thead><tr><th>Magasin</th><th>Articles</th><th>Bon état</th><th>À réparer</th><th>Défectueux</th><th>Total unités</th></tr></thead>
-      <tbody id="ks-magbody"></tbody></table>
+      <div class="ks-scroll"><table class="ks-tbl"><thead><tr><th>Magasin</th><th>Articles</th><th>Bon état</th><th>À réparer</th><th>Défectueux</th><th>Total unités</th></tr></thead>
+      <tbody id="ks-magbody"></tbody></table></div>
     </div>
   </div>
 
@@ -133,19 +152,71 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
     <div class="ks-card">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
         <h3 style="margin:0;">Réapprovisionnement &amp; alertes</h3>
-        <label style="font-size:.82rem;font-weight:700;color:#334155;">
-          <input type="checkbox" id="rea-only" onchange="renderRea()"> N'afficher que les alertes
-        </label>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <label style="font-size:.82rem;font-weight:700;color:#334155;">
+            <input type="checkbox" id="rea-only" onchange="renderRea()"> N'afficher que les alertes
+          </label>
+          <a class="ks-btn sec" href="/app/parametres-stock-kya" target="_blank">⚙️ Règles par catégorie &amp; alertes mail ↗</a>
+        </div>
       </div>
       <div class="ks-note">Modèle KYA (fiche <b>AEA-ENG-13</b>) : classe de rotation A/B/C/D selon la quantité,
         <b>seuil mini = MAX(plancher ; quantité × coefficient)</b>. Le <b>dispo</b> ne compte que le <b>bon état</b>
-        (ni « à réparer » ni « défectueux » ne comptent). Statut&nbsp;: 🔴 rupture · 🟠 à commander · ⚪ référence vide · 🟢 OK.</div>
-      <table class="ks-tbl" style="font-size:.8rem;"><thead><tr>
+        (ni « à réparer » ni « défectueux » ne comptent). Statut&nbsp;: 🔴 rupture · 🟠 à commander · ⚪ référence vide · 🟢 OK.
+        <br>💡 Le responsable stock peut <b>surcharger le coefficient et le plancher PAR CATÉGORIE</b> (bouton ⚙️ ci-dessus) ;
+        les catégories sans règle suivent le barème A/B/C/D. Il peut aussi y activer l'<b>alerte e-mail quotidienne</b>.</div>
+      <div class="ks-scroll"><table class="ks-tbl" style="font-size:.8rem;"><thead><tr>
         <th>Désignation</th><th>Magasin</th><th>Catégorie</th>
         <th style="text-align:right">Bon état</th><th style="text-align:right">À répar.</th><th style="text-align:right">Défect.</th>
         <th style="text-align:center">Classe</th><th style="text-align:right">Seuil</th>
         <th style="text-align:center">Statut</th><th>Action</th>
-      </tr></thead><tbody id="ks-reabody"></tbody></table>
+      </tr></thead><tbody id="ks-reabody"></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- RAPPORT DE PÉRIODE -->
+  <div id="pane-rap" class="ks-hide">
+    <div class="ks-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+        <h3 style="margin:0;">Rapport de période (mouvements)</h3>
+        <button class="ks-btn" onclick="exportRap()">⬇️ Rapport Excel</button>
+      </div>
+      <div class="ks-note">Pour le <b>rapport du responsable stock</b> : entrées / sorties / retours sur la période,
+        ventilés par <b>équipe demandeuse</b> (via les PV de sortie), par catégorie et par magasin.</div>
+      <div class="rap-filtres">
+        <div><label>Période</label>
+          <select id="rap-per" onchange="rapPerChange()">
+            <option value="semaine">7 derniers jours</option>
+            <option value="mois" selected>Mois en cours</option>
+            <option value="trimestre">90 derniers jours</option>
+            <option value="annee">12 derniers mois</option>
+            <option value="perso">Dates personnalisées…</option>
+          </select></div>
+        <div id="rap-dates" class="ks-hide" style="display:flex;gap:8px;">
+          <div><label>Du</label><input type="date" id="rap-du"></div>
+          <div><label>Au</label><input type="date" id="rap-au"></div>
+        </div>
+        <div><label>Magasin</label><select id="rap-mag"><option value="">Tous</option></select></div>
+        <div><button class="ks-btn sec" onclick="renderRap(true)">Appliquer</button></div>
+      </div>
+      <div class="ks-kpis" id="rap-kpis"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;" id="rap-grid">
+        <div>
+          <div class="ks-mag">👥 Par équipe demandeuse (sorties)</div>
+          <div class="ks-scroll"><table class="ks-tbl"><thead><tr><th>Équipe</th><th style="text-align:right">Qté sortie</th><th style="text-align:right">Mouvements</th></tr></thead>
+          <tbody id="rap-equipe"></tbody></table></div>
+        </div>
+        <div>
+          <div class="ks-mag">🗂️ Par catégorie</div>
+          <div class="ks-scroll"><table class="ks-tbl"><thead><tr><th>Catégorie</th><th style="text-align:right">Entrées</th><th style="text-align:right">Sorties</th><th style="text-align:right">Retours</th></tr></thead>
+          <tbody id="rap-cat"></tbody></table></div>
+        </div>
+      </div>
+      <div class="ks-mag">🏬 Par magasin</div>
+      <div class="ks-scroll"><table class="ks-tbl"><thead><tr><th>Magasin</th><th style="text-align:right">Entrées</th><th style="text-align:right">Sorties</th><th style="text-align:right">Retours</th></tr></thead>
+      <tbody id="rap-mag-body"></tbody></table></div>
+      <div class="ks-mag">🕑 Détail chronologique</div>
+      <div class="ks-scroll"><table class="ks-tbl" style="font-size:.78rem;"><thead><tr><th>Date</th><th>Type</th><th>Désignation</th><th>Catégorie</th><th>Magasin</th><th style="text-align:right">Qté</th><th>État</th><th>Équipe</th></tr></thead>
+      <tbody id="rap-detail"></tbody></table></div>
     </div>
   </div>
 
@@ -153,8 +224,8 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
   <div id="pane-mvt" class="ks-hide">
     <div class="ks-card">
       <h3>15 derniers mouvements</h3>
-      <table class="ks-tbl"><thead><tr><th>Date</th><th>Type</th><th>Article</th><th>Magasin</th><th>Qté</th><th>État</th><th>Réf.</th></tr></thead>
-      <tbody id="ks-mvtbody"></tbody></table>
+      <div class="ks-scroll"><table class="ks-tbl"><thead><tr><th>Date</th><th>Type</th><th>Article</th><th>Magasin</th><th>Qté</th><th>État</th><th>Réf.</th></tr></thead>
+      <tbody id="ks-mvtbody"></tbody></table></div>
     </div>
   </div>
 
@@ -229,20 +300,74 @@ function renderInv(){
   const secs = INV.sections.filter(s=>!f || s.magasin===f);
   document.getElementById('ks-inv').innerHTML = secs.map(s=>`
     <div class="ks-mag">🏬 ${s.magasin} — ${s.total_lignes} article(s)</div>
-    <table class="ks-tbl"><thead><tr><th style="width:5%">N°</th><th>Désignation</th>
+    <div class="ks-scroll"><table class="ks-tbl"><thead><tr><th style="width:5%">N°</th><th>Désignation</th>
       <th style="width:11%">Qté totale</th><th style="width:11%">Bon état</th><th style="width:11%">À réparer</th><th style="width:11%">Défectueux</th></tr></thead>
     <tbody>${s.lignes.map(l=>`<tr><td>${l.n}</td><td>${l.designation}</td>
       <td class="num">${l.qte_totale}</td><td class="num" style="color:#166534">${l.bon_etat}</td>
       <td class="num" style="color:#92400e">${l.reparation}</td>
-      <td class="num" style="color:#7c3aed">${l.defectueux!=null?l.defectueux:0}</td></tr>`).join('')}</tbody></table>`).join('')
+      <td class="num" style="color:#7c3aed">${l.defectueux!=null?l.defectueux:0}</td></tr>`).join('')}</tbody></table></div>`).join('')
     || `<div style="text-align:center;color:#94a3b8;padding:20px;">Aucun stock à afficher.</div>`;
 }
 
 function tab(t){
   document.querySelectorAll('.ks-tab').forEach(x=>x.classList.toggle('on',x.dataset.t===t));
-  ['inv','sai','mag','rea','mvt','imp'].forEach(p=>document.getElementById('pane-'+p).classList.toggle('ks-hide',p!==t));
+  ['inv','sai','mag','rea','rap','mvt','imp'].forEach(p=>document.getElementById('pane-'+p).classList.toggle('ks-hide',p!==t));
   if(t==='sai') saiInit();
   if(t==='rea') renderRea();
+  if(t==='rap') renderRap();
+}
+
+// ── Rapport de période (stats + export pour le responsable stock) ──────────
+let RAP_INIT=false;
+function rapPerChange(){
+  const perso = document.getElementById('rap-per').value==='perso';
+  document.getElementById('rap-dates').classList.toggle('ks-hide',!perso);
+  if(!perso) renderRap(true);
+}
+function rapArgs(){
+  const per=document.getElementById('rap-per').value;
+  const a={magasin:document.getElementById('rap-mag').value||null};
+  if(per==='perso'){ a.date_debut=document.getElementById('rap-du').value||null;
+    a.date_fin=document.getElementById('rap-au').value||null; }
+  else a.periode=per;
+  return a;
+}
+async function renderRap(force){
+  if(RAP_INIT && !force) return;
+  if(!RAP_INIT){
+    const mags=(await frappe.call({method:'kya_hr.api.stock_kya.magasins'})).message||[];
+    const sel=document.getElementById('rap-mag');
+    mags.forEach(m=>{const o=document.createElement('option');o.value=m.name;o.textContent=m.warehouse_name||m.name;sel.appendChild(o);});
+    RAP_INIT=true;
+  }
+  const d=(await frappe.call({method:'kya_hr.kya_hr.api.stock_catalogue.stats_mouvements',args:rapArgs()})).message;
+  const k=d.kpi;
+  document.getElementById('rap-kpis').innerHTML=`
+    <div class="ks-kpi"><div class="n">${k.entrees}</div><div class="l">Entrées (u.)</div></div>
+    <div class="ks-kpi red"><div class="n">${k.sorties}</div><div class="l">Sorties (u.)</div></div>
+    <div class="ks-kpi warn"><div class="n">${k.retours}</div><div class="l">Retours (u.)</div></div>
+    <div class="ks-kpi blue"><div class="n">${k.nb_mouvements}</div><div class="l">Mouvements</div></div>
+    <div class="ks-kpi" style="border-left-color:#64748b"><div class="n" style="color:#64748b;font-size:1rem;line-height:1.4">${d.periode.debut}<br>→ ${d.periode.fin}</div><div class="l">Période</div></div>`;
+  const vide=c=>`<tr><td colspan="${c}" style="text-align:center;color:#94a3b8;padding:14px;">Aucune donnée sur la période.</td></tr>`;
+  document.getElementById('rap-equipe').innerHTML=(d.par_equipe||[]).map(e=>`<tr>
+    <td><b>${e.equipe}</b></td><td class="num" style="color:#991b1b">${e.sorties}</td><td class="num">${e.mouvements}</td></tr>`).join('')||vide(3);
+  document.getElementById('rap-cat').innerHTML=(d.par_categorie||[]).map(c=>`<tr>
+    <td>${c.categorie}</td><td class="num" style="color:#166534">${c.entrees}</td>
+    <td class="num" style="color:#991b1b">${c.sorties}</td><td class="num" style="color:#92400e">${c.retours}</td></tr>`).join('')||vide(4);
+  document.getElementById('rap-mag-body').innerHTML=(d.par_magasin||[]).map(m=>`<tr>
+    <td><b>${m.magasin}</b></td><td class="num" style="color:#166534">${m.entrees}</td>
+    <td class="num" style="color:#991b1b">${m.sorties}</td><td class="num" style="color:#92400e">${m.retours}</td></tr>`).join('')||vide(4);
+  const tb={"Entrée":"b-e","Sortie":"b-s","Retour":"b-r","Inventaire":"b-i","Ajustement":"b-i"};
+  document.getElementById('rap-detail').innerHTML=(d.detail||[]).map(m=>`<tr>
+    <td>${m.date}</td><td><span class="badge ${tb[m.type]||'b-i'}">${m.type}</span></td>
+    <td>${m.designation}</td><td style="font-size:.74rem;color:#64748b">${m.categorie}</td>
+    <td style="font-size:.74rem">${m.magasin}</td>
+    <td class="num" style="color:${m.quantite<0?'#991b1b':'#166534'}">${m.quantite}</td>
+    <td>${m.etat||''}</td><td style="font-size:.74rem">${m.equipe||''}</td></tr>`).join('')||vide(8);
+}
+async function exportRap(){
+  const r=(await frappe.call({method:'kya_hr.kya_hr.api.stock_catalogue.rapport_periode_xlsx',args:rapArgs()})).message;
+  if(r&&r.content_base64) dlB64(r.content_base64,r.filename);
 }
 
 // ── Réappro / alertes (modèle AEA-ENG-13) ──────────────────────────────────

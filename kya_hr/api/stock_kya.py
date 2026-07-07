@@ -13,7 +13,7 @@ On tient notre propre grand livre signé et on calcule les soldes à la volée.
 """
 import frappe
 from frappe import _
-from frappe.utils import flt, today
+from frappe.utils import cint, flt, today
 
 # Vocabulaire d'état UNIQUE côté magasin (décision KYA) : Bon état / À réparer /
 # Défectueux. On garde en mémoire les libellés HÉRITÉS (Neuf, En réparation, Hors
@@ -195,18 +195,46 @@ _REAPPRO_CLASSES = [
 ]
 
 
-def _classe_seuil(qte_totale):
-    """Retourne (classe, seuil_mini, coefficient, plancher) pour une qté totale."""
+def _regles_categorie():
+    """Règles de réappro définies PAR CATÉGORIE par le responsable stock dans
+    « Paramètres Stock KYA ». Retourne {categorie: (coefficient, plancher)}.
+    Mise en cache par requête (frappe.local)."""
+    cache = getattr(frappe.local, "_kya_regles_reappro", None)
+    if cache is not None:
+        return cache
+    regles = {}
+    try:
+        if frappe.db.exists("DocType", "Parametres Stock KYA"):
+            for r in frappe.get_all("Regle Reappro KYA",
+                                    filters={"parenttype": "Parametres Stock KYA"},
+                                    fields=["categorie", "coefficient", "plancher"]):
+                regles[r.categorie] = (flt(r.coefficient), cint(r.plancher))
+    except Exception:
+        regles = {}
+    frappe.local._kya_regles_reappro = regles
+    return regles
+
+
+def _classe_seuil(qte_totale, categorie=None):
+    """Retourne (classe, seuil_mini, coefficient, plancher) pour une qté totale.
+    Si le responsable stock a défini une règle pour la catégorie, elle PRIME
+    sur le barème générique A/B/C/D (la classe de rotation reste indicative)."""
     import math
     q = flt(qte_totale)
+    regle = _regles_categorie().get(categorie) if categorie else None
     for mini, coef, plancher, classe, _desc in _REAPPRO_CLASSES:
         if q >= mini:
+            if regle:
+                coef, plancher = regle
             seuil = max(plancher, int(math.ceil(q * coef)))
             return classe, seuil, coef, plancher
+    if regle:
+        coef, plancher = regle
+        return "D", max(plancher, int(math.ceil(q * coef))), coef, plancher
     return "D", 2, 0.0, 2
 
 
-def evaluer_ligne(bon_etat, reparation, defectueux=0):
+def evaluer_ligne(bon_etat, reparation, defectueux=0, categorie=None):
     """Évalue UNE référence comme la fiche AEA-ENG-13 : classe, seuil, statut,
     manque à combler et action. `dispo` = BON ÉTAT seulement (ni à réparer ni
     défectueux ne comptent comme disponibles). Le total (base de la classe de
@@ -215,7 +243,7 @@ def evaluer_ligne(bon_etat, reparation, defectueux=0):
     rep = flt(reparation)
     defe = flt(defectueux)
     total = round(bon + rep + defe, 3)
-    classe, seuil, coef, plancher = _classe_seuil(total)
+    classe, seuil, coef, plancher = _classe_seuil(total, categorie)
     dispo = bon
     manque = max(0, seuil - dispo)
     qte_commander = 0
@@ -251,7 +279,8 @@ def reapprovisionnement(magasin=None, only_alertes=0):
             for a in frappe.get_all("Article KYA", fields=["name", "categorie"])}
     out = []
     for d in soldes(magasin=magasin, only_nonzero=1):
-        ev = evaluer_ligne(d["bon_etat"], d["reparation"], d.get("defectueux", 0))
+        ev = evaluer_ligne(d["bon_etat"], d["reparation"], d.get("defectueux", 0),
+                           categorie=cats.get(d["item"], "Non classé"))
         out.append({
             "item": d["item"], "designation": d["item_name"],
             "categorie": cats.get(d["item"], "Non classé"), "magasin": d["magasin"],

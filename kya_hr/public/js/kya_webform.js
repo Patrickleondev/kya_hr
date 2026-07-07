@@ -682,7 +682,7 @@
     },
     "pv-entree-materiel": {
       signature_achats_stock: ["Responsable Stock", "Chargé des Stocks", "Responsable Achats", "Purchase Manager", "Stock Manager", "Stock User", "System Manager"],
-      signature_comptable: ["Comptable", "DFC", "DAAF", "Accounts Manager", "Accounts User", "System Manager"],
+      signature_comptable: ["Comptable", "Responsable Comptable", "DFC", "DAAF", "Accounts Manager", "Accounts User", "System Manager"],
       signature_audit: ["Auditeur Interne", "Auditeur", "DGA", "System Manager"]
     },
     "retour-materiel": {
@@ -729,7 +729,8 @@
       signature_demandeur: ["Brouillon", "En attente Chef"],
       signature_chef: ["En attente Chef"],
       signature_audit: ["En attente Audit"],
-      signature_dga: ["En attente DGA", "En attente DG"],
+      // le vrai état du workflow est « En attente Direction » (pas DGA/DG)
+      signature_dga: ["En attente Direction", "En attente DGA", "En attente DG"],
       signature_magasin: ["En attente Magasin"]
     },
     "demande-conge": {
@@ -745,6 +746,10 @@
     },
     "retour-materiel": {
       signature_retourneur: ["Brouillon", "En attente Magasin"],
+      signature_magasin: ["En attente Magasin"]
+    },
+    "inventaire-kya": {
+      signature_responsable: ["Brouillon", "En attente Magasin"],
       signature_magasin: ["En attente Magasin"]
     },
     "etat-recap": {

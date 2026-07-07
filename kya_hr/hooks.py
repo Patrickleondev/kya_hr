@@ -265,6 +265,7 @@ scheduler_events = {
         "kya_hr.reminders.send_kya_birthday_reminders",
         "kya_hr.reminders.send_kya_anniversary_reminders",
         "kya_hr.kya_hr.doctype.document_vehicule.document_vehicule.send_expiry_reminders",
+        "kya_hr.kya_hr.api.stock_catalogue.envoyer_alertes_reappro",
     ],
     # Vendredi 17h00 : point hebdomadaire caisse au DG + DGA
     "cron": {

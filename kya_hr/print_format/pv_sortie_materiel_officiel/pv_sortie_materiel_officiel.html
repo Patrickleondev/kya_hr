@@ -116,6 +116,7 @@
   <div class="kya-sec-body">
     <div class="kya-sigs">
       <div class="kya-sig">{% if doc.signature_demandeur %}<img src="{{ doc.signature_demandeur }}">{% endif %}<div class="sig-line">{{ doc.demandeur_nom or 'Demandeur' }}</div>{% if doc.demandeur_date %}<div class="sig-date">{{ frappe.utils.format_date(doc.demandeur_date) }}</div>{% endif %}</div>
+      <div class="kya-sig">{% if doc.signature_chef %}<img src="{{ doc.signature_chef }}">{% endif %}<div class="sig-line">{{ doc.chef_nom or 'Chef de Service' }}</div>{% if doc.chef_date %}<div class="sig-date">{{ frappe.utils.format_date(doc.chef_date) }}</div>{% endif %}</div>
       <div class="kya-sig">{% if doc.signature_audit %}<img src="{{ doc.signature_audit }}">{% endif %}<div class="sig-line">{{ doc.audit_nom or 'Auditeur' }}</div>{% if doc.audit_date %}<div class="sig-date">{{ frappe.utils.format_date(doc.audit_date) }}</div>{% endif %}</div>
       <div class="kya-sig">{% if doc.signature_dga %}<img src="{{ doc.signature_dga }}">{% endif %}<div class="sig-line">{{ doc.dga_nom or 'DGA' }}</div>{% if doc.dga_date %}<div class="sig-date">{{ frappe.utils.format_date(doc.dga_date) }}</div>{% endif %}</div>
       <div class="kya-sig">{% if doc.signature_magasin %}<img src="{{ doc.signature_magasin }}">{% endif %}<div class="sig-line">{{ doc.magasin_nom or 'Magasin' }}</div>{% if doc.magasin_date %}<div class="sig-date">{{ frappe.utils.format_date(doc.magasin_date) }}</div>{% endif %}</div>

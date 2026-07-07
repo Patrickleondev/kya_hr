@@ -1,0 +1,48 @@
+{
+ "name": "Regle Reappro KYA",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "istable": 1,
+ "custom": 0,
+ "engine": "InnoDB",
+ "field_order": [
+  "categorie",
+  "coefficient",
+  "plancher",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "categorie",
+   "fieldtype": "Link",
+   "label": "Catégorie d'article",
+   "options": "Categorie Article KYA",
+   "reqd": 1,
+   "in_list_view": 1,
+   "unique": 0
+  },
+  {
+   "fieldname": "coefficient",
+   "fieldtype": "Float",
+   "label": "Coefficient (seuil = qté × coef)",
+   "default": "0.2",
+   "in_list_view": 1,
+   "description": "Part de la quantité totale qui déclenche la commande (ex : 0.2 = 20 %)."
+  },
+  {
+   "fieldname": "plancher",
+   "fieldtype": "Int",
+   "label": "Seuil plancher (unités)",
+   "default": "2",
+   "in_list_view": 1,
+   "description": "Seuil minimum quel que soit le volume (MAX(plancher ; qté × coef))."
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Data",
+   "label": "Commentaire",
+   "in_list_view": 1
+  }
+ ],
+ "permissions": []
+}

@@ -191,6 +191,26 @@
    "fieldtype": "Signature"
   },
   {
+   "fieldname": "col_chef",
+   "fieldtype": "Column Break",
+   "label": "Chef de Service"
+  },
+  {
+   "fieldname": "chef_nom",
+   "fieldtype": "Data",
+   "label": "Nom Chef de Service"
+  },
+  {
+   "fieldname": "chef_date",
+   "fieldtype": "Date",
+   "label": "Date Signature Chef"
+  },
+  {
+   "fieldname": "signature_chef",
+   "fieldtype": "Signature",
+   "label": "Signature Chef de Service"
+  },
+  {
    "fieldname": "col_magasin",
    "fieldtype": "Column Break",
    "label": "Responsable Magasin"
@@ -334,5 +354,54 @@
    "create": 1,
    "if_owner": 1
   }
+ ],
+ "field_order": [
+  "section_general",
+  "objet",
+  "date_sortie",
+  "col_ref",
+  "reference",
+  "section_delegation",
+  "au_nom_de",
+  "au_nom_de_nom",
+  "col_company",
+  "company",
+  "project",
+  "customer",
+  "customer_manuel",
+  "project_manuel",
+  "destination_type",
+  "stock_entry",
+  "employee",
+  "employee_name",
+  "report_to",
+  "section_items",
+  "items",
+  "section_signatures",
+  "col_demandeur",
+  "demandeur_nom",
+  "demandeur_date",
+  "signature_demandeur",
+  "col_chef",
+  "chef_nom",
+  "chef_date",
+  "signature_chef",
+  "col_magasin",
+  "magasin_nom",
+  "magasin_date",
+  "signature_magasin",
+  "section_signatures_2",
+  "col_audit",
+  "audit_nom",
+  "audit_date",
+  "signature_audit",
+  "col_dga",
+  "dga_nom",
+  "dga_date",
+  "signature_dga",
+  "section_statut",
+  "statut",
+  "workflow_state",
+  "amended_from"
  ]
 }

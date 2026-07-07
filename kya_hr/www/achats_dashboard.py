@@ -109,7 +109,7 @@ def get_context(context):
 
 
 # ════════════════════════════════════════════════════════════════════
-#  Vue d'ensemble Achats & Approvisionnement (maquette boards/Dashboard
+#  Vue d'ensemble Achats & Stocks (maquette boards/Dashboard
 #  Achats) — données réelles, libellés neutres
 # ════════════════════════════════════════════════════════════════════
 _END_STATES = ("Approuvé", "Approuve", "Rejeté", "Rejete", "Annulé", "Annule",

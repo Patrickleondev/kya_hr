@@ -1,0 +1,72 @@
+{
+ "name": "Parametres Stock KYA",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "issingle": 1,
+ "custom": 0,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_reappro",
+  "note_reappro",
+  "regles",
+  "section_alertes",
+  "alertes_actives",
+  "inclure_a_commander",
+  "destinataires",
+  "note_alertes"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_reappro",
+   "fieldtype": "Section Break",
+   "label": "Règles de réapprovisionnement par catégorie"
+  },
+  {
+   "fieldname": "note_reappro",
+   "fieldtype": "HTML",
+   "options": "<p>Pour chaque <b>catégorie d'article</b>, définissez le <b>coefficient</b> et le <b>plancher</b> : le seuil mini d'une référence = MAX(plancher ; quantité totale × coefficient). Les catégories <b>sans règle</b> suivent le barème par défaut de la fiche AEA-ENG-13 (classes A/B/C/D).</p>"
+  },
+  {
+   "fieldname": "regles",
+   "fieldtype": "Table",
+   "label": "Règles par catégorie",
+   "options": "Regle Reappro KYA"
+  },
+  {
+   "fieldname": "section_alertes",
+   "fieldtype": "Section Break",
+   "label": "Alertes e-mail"
+  },
+  {
+   "fieldname": "alertes_actives",
+   "fieldtype": "Check",
+   "label": "Envoyer un e-mail quotidien si des références sont en alerte",
+   "default": "0"
+  },
+  {
+   "fieldname": "inclure_a_commander",
+   "fieldtype": "Check",
+   "label": "Inclure les références « À commander » (sinon ruptures seules)",
+   "default": "1"
+  },
+  {
+   "fieldname": "destinataires",
+   "fieldtype": "Small Text",
+   "label": "Destinataires (e-mails, un par ligne)",
+   "description": "Si vide : tous les utilisateurs actifs ayant le rôle « Responsable Stock »."
+  },
+  {
+   "fieldname": "note_alertes",
+   "fieldtype": "HTML",
+   "options": "<p>L'e-mail récapitule chaque matin les références en <b>RUPTURE</b> (et « À commander » si coché) avec la quantité à commander.</p>"
+  }
+ ],
+ "permissions": [
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1},
+  {"role": "Responsable Stock", "read": 1, "write": 1, "create": 1},
+  {"role": "Chargé des Stocks", "read": 1, "write": 1, "create": 1},
+  {"role": "Stock Manager", "read": 1, "write": 1, "create": 1},
+  {"role": "Directeur Général", "read": 1},
+  {"role": "Auditeur Interne", "read": 1}
+ ]
+}

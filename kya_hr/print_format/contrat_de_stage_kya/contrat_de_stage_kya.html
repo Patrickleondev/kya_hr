@@ -64,8 +64,9 @@
   .kya-foot td { padding: 1mm 0 0 0; vertical-align: bottom; }
   .kya-foot-line { display: inline-block; border-bottom: 1px solid #888; width: 30mm; height: 5mm; }
   .kya-foot-cnss { font-size: 7.5pt; color: #777; text-align: center; vertical-align: bottom; }
-  .kya-paraphe { font-family: 'Segoe Script','Brush Script MT','Comic Sans MS',cursive;
-                 font-size: 11pt; color:#1a3d66; font-style: italic; display:block; margin-bottom:0.3mm; }
+  /* Paraphe = la VRAIE signature en miniature (pas des initiales dactylographiées). */
+  .kya-paraphe { display:block; margin-bottom:0.3mm; }
+  .kya-paraphe img { max-height: 7mm; max-width: 26mm; display:block; }
   .kya-paraphe-lbl { font-size: 6.3pt; color:#999; display:block; }
 
   .ctr-header { width: 100%; border-collapse: collapse; margin-bottom: 4mm; }
@@ -170,13 +171,13 @@
      <table class="kya-foot">
        <tr>
          <td style="width:38%; text-align:left;">
-           {% if doc.signature_employe %}<span class="kya-paraphe">{{ emp_initiales }}</span>{% endif %}
+           {% if doc.signature_employe %}<span class="kya-paraphe"><img src="{{ doc.signature_employe }}"></span>{% endif %}
            <span class="kya-foot-line">&nbsp;</span>
            <span class="kya-paraphe-lbl">Paraphe stagiaire</span>
          </td>
          <td style="width:24%;" class="kya-foot-cnss">CNSS N° 48863</td>
          <td style="width:38%; text-align:right;">
-           {% if doc.signature_dg %}<span class="kya-paraphe">{{ dg_initiales }}</span>{% endif %}
+           {% if doc.signature_dg %}<span class="kya-paraphe"><img src="{{ doc.signature_dg }}"></span>{% endif %}
            <span class="kya-foot-line">&nbsp;</span>
            <span class="kya-paraphe-lbl">Paraphe DG</span>
          </td>

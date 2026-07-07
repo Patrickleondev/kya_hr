@@ -1,6 +1,6 @@
 {% extends "templates/web.html" %}
 
-{% block title %}Tableau de bord Achats & Approvisionnement — KYA{% endblock %}
+{% block title %}Tableau de bord Achats & Stocks — KYA{% endblock %}
 
 {% block head_include %}
 <script src="/assets/kya_hr/js/chart.umd.min.js"></script>
@@ -79,7 +79,7 @@ function cardGrid(list){ const g=el('div','acx-cards'); (list||[]).forEach(c=>{ 
 
 function render(D){
   const root=document.getElementById('acx-root'); root.innerHTML='';
-  const hero=el('div','acx-hero'); hero.appendChild(el('h2','Tableau de bord — Achats & Approvisionnement'));
+  const hero=el('div','acx-hero'); hero.appendChild(el('h2','Tableau de bord — Achats & Stocks'));
   const hg=el('div','acx-hgrid');
   (D.hero||[]).forEach(h=>{ const c=el('div','acx-hcard'); const top=el('div'); top.style.cssText='display:flex;justify-content:space-between;align-items:flex-start;';
     top.appendChild(el('span','lbl',h.label)); top.appendChild(chip(h.icon,'teal',true)); c.appendChild(top);

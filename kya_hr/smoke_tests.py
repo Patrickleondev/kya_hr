@@ -64,7 +64,7 @@ def run():
         "Demande Achat KYA", "Bon Commande KYA", "Appel Offre KYA",
         "PV Sortie Matériel", "PV Entree Materiel", "Inventaire KYA",
         "Brouillard Caisse", "Etat Recap Cheques",
-        "Permission de Sortie Employé", "Permission Sortie Stagiaire",
+        "Permission Sortie Employe", "Permission Sortie Stagiaire",
         "Demande Conge Stagiaire", "Planning Conge",
         "KYA Contrat", "Equipe KYA", "Plan Trimestriel", "Tache Equipe",
         "Sortie Vehicule", "Document Vehicule",
@@ -110,7 +110,7 @@ def run():
         "Demande Achat KYA Officiel", "Bon Commande KYA Officiel",
         "PV Sortie Matériel Officiel", "Ticket Sortie Employe",
         "Ticket Sortie Stagiaire", "Ticket Sortie Materiel",
-        "Ticket Entree Materiel", "Brouillard Caisse KYA Officiel",
+        "Ticket Entrée Matériel KYA", "Brouillard Caisse KYA Officiel",
         "Demande Conge KYA", "Bilan de Stage KYA",
         "Fiche Inventaire KYA", "KYA Contrat PDF",
     ]
@@ -121,13 +121,18 @@ def run():
     print("\n[5] NOTIFICATIONS")
     notifs = frappe.db.count("Notification", {"enabled": 1})
     check(f"Notifications actives: {notifs}", notifs > 0)
-    # Check pour roles inexistants
-    bad_role_notifs = frappe.db.sql("""
-        SELECT n.name, n.subject FROM `tabNotification` n
-        WHERE n.enabled=1 AND n.recipients LIKE '%receiver_by_role%'
-    """, as_dict=True)
-    if bad_role_notifs:
-        print(f"    ℹ {len(bad_role_notifs)} notifications avec receiver_by_role à vérifier manuellement")
+    # Check pour roles inexistants (v16 : destinataires = table enfant
+    # `Notification Recipient`, la colonne n.recipients n'existe plus)
+    try:
+        bad_role_notifs = frappe.db.sql("""
+            SELECT DISTINCT n.name FROM `tabNotification` n
+            JOIN `tabNotification Recipient` r ON r.parent = n.name
+            WHERE n.enabled = 1 AND IFNULL(r.receiver_by_role, '') != ''
+        """, as_dict=True)
+        if bad_role_notifs:
+            print(f"    ℹ {len(bad_role_notifs)} notifications avec receiver_by_role à vérifier manuellement")
+    except Exception as e:
+        print(f"    ℹ check receiver_by_role sauté ({e})")
 
     # ─── 6. Scheduler ───────────────────────────────────────────────────
     print("\n[6] SCHEDULER EVENTS")
@@ -145,7 +150,9 @@ def run():
                     os.path.exists(os.path.join(base, f"{page.replace('-', '_')}.py"))
         html_exists = os.path.exists(os.path.join(base, f"{page}.html")) or \
                       os.path.exists(os.path.join(base, f"{page.replace('-', '_')}.html"))
-        check(f"Page /{page}", py_exists and html_exists,
+        # Le contrôleur .py est optionnel (pages 100 % html/JS : inventaire,
+        # stock-projet-client…) — seule la présence du html est bloquante.
+        check(f"Page /{page}", html_exists,
               f"py={py_exists} html={html_exists}")
 
     # ─── 8. Roles canoniques ────────────────────────────────────────────

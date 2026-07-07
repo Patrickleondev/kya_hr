@@ -39,7 +39,10 @@
 .kya-section-footer { background:#fafbfc; padding:12px 18px; border-top:1px solid #eaedef; display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap;}
 .kya-check-row { display:flex; align-items:center; gap:8px; }
 .kya-check-row input[type=checkbox] { transform:scale(1.2); cursor:pointer; }
+/* Paraphe de section = la vraie signature en miniature (si déjà signée),
+   sinon les initiales en attendant. */
 .paraphes { font-family:'Brush Script MT', cursive; font-size:18px; color:#1a5276; padding:4px 12px; border-bottom:1px solid #1a5276; min-width:80px; text-align:center; display:none;}
+.paraphes img { max-height:26px; max-width:90px; vertical-align:middle; }
 .kya-section.signed .paraphes { display:inline-block; }
 
 /* Signature finale */
@@ -195,7 +198,7 @@
       <div class="kya-section {% if sec.id in sections_signed %}signed{% endif %}" data-section-id="{{ sec.id }}">
         <div class="kya-section-header" onclick="toggleSection(this)">
           <span>{{ loop.index }}. {{ sec.title }}</span>
-          <span class="paraphes">{% if contrat.employee_name %}{{ contrat.employee_name.split()[0][0] }}{% if contrat.employee_name.split()|length > 1 %}{{ contrat.employee_name.split()[-1][0] }}{% endif %}{% endif %}</span>
+          <span class="paraphes">{% if contrat.signature_employe %}<img src="{{ contrat.signature_employe }}" alt="paraphe">{% elif contrat.employee_name %}{{ contrat.employee_name.split()[0][0] }}{% if contrat.employee_name.split()|length > 1 %}{{ contrat.employee_name.split()[-1][0] }}{% endif %}{% endif %}</span>
         </div>
         <div class="kya-section-content">{{ sec.html | safe }}</div>
         {% if peut_signer_employe or peut_signer_dg %}

@@ -6,8 +6,8 @@ Vue consolidée du macro-département Services Supports — les 4 fonctions
 support de KYA réunies sur un seul écran, avec graphiques parlants :
   • Ressources Humaines (effectif, présence, congés, permissions) ;
   • Comptabilité & Finance (trésorerie caisse, brouillards) ;
-  • Achats & Approvisionnement (demandes, bons de commande, marchés) ;
-  • Stock & Logistique (mouvements matériel, inventaires, flotte).
+  • Achats & Stocks (demandes, bons de commande, marchés) ;
+  • Logistique (flotte, sorties véhicule, entretiens).
 
 Même pattern que les autres dashboards départementaux (hero + bandes +
 tables + Chart.js), libellés FR neutres, données réelles, défensif :
@@ -200,7 +200,7 @@ def get_ss_overview() -> dict:
     hero = [
         _card("Effectif supports", str(sup_eff),
               (f"{sup_pres} présents aujourd'hui" if sup_eff else "—"), icon="users"),
-        _card("En attente de visa", str(wait_total), "RH · Compta · Achats · Stock",
+        _card("En attente de visa", str(wait_total), "RH · Achats & Stocks · Logistique · Compta",
               unit="dossiers", icon="inbox"),
         _card("Demandes d'achat à valider", str(da_n), _fmt_m(da_m) + " M FCFA",
               icon="cart"),
