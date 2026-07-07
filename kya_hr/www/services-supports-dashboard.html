@@ -122,17 +122,8 @@ function render(D){
       cw.appendChild(bar); cw.appendChild(el('span',null,'<span style="font-size:12px;font-weight:600;color:#667085;">'+r.charge+'%</span>')); row.appendChild(cw); },
     'Aucune équipe support active.'));
 
-  // ── COMPTABILITÉ & FINANCE ──
-  root.appendChild(band('coins','Comptabilité & Finance','trésorerie caisse · brouillards',(D.compta_label||''),GO));
-  root.appendChild(kcards(D.compta&&D.compta.cards));
-  root.appendChild(table('820px','1.1fr 0.9fr 1.5fr 1fr 1fr 1fr 1.1fr',
-    ['Réf.','Date','Saisi par','Entrées','Sorties','Solde','État'],(D.compta&&D.compta.rows),
-    (row,r)=>{ row.appendChild(cell(num(r.ref))); row.appendChild(cell(num(r.date))); row.appendChild(cell('<b>'+(r.saisi_par||'')+'</b>'));
-      row.appendChild(cell(num(r.entrees))); row.appendChild(cell(num(r.sorties))); row.appendChild(cell(num(r.solde))); row.appendChild(badge(r.etat,r.accent)); },
-    'Aucun brouillard de caisse récent.'));
-
-  // ── ACHATS & APPROVISIONNEMENT ──
-  root.appendChild(band('cart','Achats & Approvisionnement','demandes · bons de commande · marchés',(D.achats_label||''),GT));
+  // ── ACHATS & STOCKS ──
+  root.appendChild(band('cart','Achats & Stocks','demandes · bons de commande · marchés · stock',(D.achats_label||''),GT));
   root.appendChild(kcards(D.achats&&D.achats.cards));
   root.appendChild(table('820px','1.1fr 2.2fr 1.5fr 1fr 1.2fr',
     ['Réf.','Objet','Demandeur','Montant','État'],(D.achats&&D.achats.rows),
@@ -140,14 +131,23 @@ function render(D){
       row.appendChild(cell(num(r.montant))); row.appendChild(badge(r.etat,r.accent)); },
     'Aucune demande d’achat en attente.'));
 
-  // ── STOCK & LOGISTIQUE ──
-  root.appendChild(band('truck','Stock & Logistique','mouvements matériel · inventaires · flotte',(D.logi_label||''),GO));
+  // ── LOGISTIQUE ──
+  root.appendChild(band('truck','Logistique','flotte · sorties véhicule · entretiens',(D.logi_label||''),GO));
   root.appendChild(kcards(D.logistique&&D.logistique.cards));
   root.appendChild(table('700px','1.3fr 1.8fr 1.2fr 1.6fr',
     ['Immatriculation','Modèle','Statut','Chauffeur'],(D.logistique&&D.logistique.vehicules),
     (row,r)=>{ row.appendChild(cell('<b>'+(r.immat||'')+'</b>')); row.appendChild(cell(muted(r.modele)));
       row.appendChild(badge(r.statut,r.accent)); row.appendChild(cell(muted(r.chauffeur))); },
     'Aucun véhicule enregistré.'));
+
+  // ── COMPTABILITÉ & FINANCES ──
+  root.appendChild(band('coins','Comptabilité & Finances','trésorerie caisse · brouillards',(D.compta_label||''),GO));
+  root.appendChild(kcards(D.compta&&D.compta.cards));
+  root.appendChild(table('820px','1.1fr 0.9fr 1.5fr 1fr 1fr 1fr 1.1fr',
+    ['Réf.','Date','Saisi par','Entrées','Sorties','Solde','État'],(D.compta&&D.compta.rows),
+    (row,r)=>{ row.appendChild(cell(num(r.ref))); row.appendChild(cell(num(r.date))); row.appendChild(cell('<b>'+(r.saisi_par||'')+'</b>'));
+      row.appendChild(cell(num(r.entrees))); row.appendChild(cell(num(r.sorties))); row.appendChild(cell(num(r.solde))); row.appendChild(badge(r.etat,r.accent)); },
+    'Aucun brouillard de caisse récent.'));
 
   // ── CHARTS ──
   const cw=el('div','ssx-charts');

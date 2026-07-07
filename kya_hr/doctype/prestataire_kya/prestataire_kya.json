@@ -1,0 +1,46 @@
+{
+ "name": "Prestataire KYA",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "custom": 0,
+ "engine": "InnoDB",
+ "autoname": "format:PREST-{####}",
+ "title_field": "raison_sociale",
+ "field_order": [
+  "section_identite", "raison_sociale", "type_prestataire", "contact", "email",
+  "col_id2", "nature_prestation", "departement_beneficiaire",
+  "section_contrat", "date_debut_contrat", "date_fin_contrat", "duree", "statut",
+  "col_ct2", "montant_contrat", "mode_paiement", "reference_contrat", "observation"
+ ],
+ "fields": [
+  {"fieldname": "section_identite", "fieldtype": "Section Break", "label": "Prestataire"},
+  {"fieldname": "raison_sociale", "fieldtype": "Data", "label": "Nom / Raison sociale", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "type_prestataire", "fieldtype": "Select", "label": "Type de prestataire",
+   "options": "\nPersonne physique\nEntreprise", "in_list_view": 1, "in_standard_filter": 1},
+  {"fieldname": "contact", "fieldtype": "Data", "label": "Contact téléphonique"},
+  {"fieldname": "email", "fieldtype": "Data", "label": "Email", "options": "Email"},
+  {"fieldname": "col_id2", "fieldtype": "Column Break"},
+  {"fieldname": "nature_prestation", "fieldtype": "Small Text", "label": "Nature de la prestation"},
+  {"fieldname": "departement_beneficiaire", "fieldtype": "Link", "label": "Département bénéficiaire", "options": "Departement KYA"},
+  {"fieldname": "section_contrat", "fieldtype": "Section Break", "label": "Contrat"},
+  {"fieldname": "date_debut_contrat", "fieldtype": "Date", "label": "Date de début du contrat", "in_list_view": 1},
+  {"fieldname": "date_fin_contrat", "fieldtype": "Date", "label": "Date de fin du contrat"},
+  {"fieldname": "duree", "fieldtype": "Data", "label": "Durée (auto)", "read_only": 1},
+  {"fieldname": "statut", "fieldtype": "Select", "label": "Statut (auto)",
+   "options": "\nÀ venir\nEn cours\nTerminé", "read_only": 1, "in_list_view": 1, "in_standard_filter": 1},
+  {"fieldname": "col_ct2", "fieldtype": "Column Break"},
+  {"fieldname": "montant_contrat", "fieldtype": "Float", "label": "Montant du contrat (FCFA)"},
+  {"fieldname": "mode_paiement", "fieldtype": "Select", "label": "Mode de paiement",
+   "options": "\nPaiement unique\nMensuel\nTrimestriel\nÀ la livraison"},
+  {"fieldname": "reference_contrat", "fieldtype": "Data", "label": "Référence contrat / Facture"},
+  {"fieldname": "observation", "fieldtype": "Small Text", "label": "Observation"}
+ ],
+ "permissions": [
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1, "report": 1},
+  {"role": "HR Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1, "report": 1},
+  {"role": "Responsable RH", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1, "report": 1},
+  {"role": "HR User", "read": 1, "write": 1, "create": 1, "export": 1, "report": 1},
+  {"role": "Assistant(e) RH", "read": 1, "write": 1, "create": 1, "export": 1, "report": 1},
+  {"role": "Directeur Général", "read": 1, "export": 1, "report": 1}
+ ]
+}

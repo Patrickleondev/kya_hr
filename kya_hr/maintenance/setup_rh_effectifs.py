@@ -39,6 +39,8 @@ _SHORTCUTS = [
     {"type": "DocType", "label": "Évolution de Carrière", "link_to": "Evolution Carriere KYA"},
     {"type": "DocType", "label": "Solde de Tout Compte", "link_to": "Solde Tout Compte KYA"},
     {"type": "DocType", "label": "⚙️ Paramètres RH (barèmes)", "link_to": "Parametres RH KYA"},
+    {"type": "DocType", "label": "Stagiaires (registre RH)", "link_to": "Stagiaire RH KYA"},
+    {"type": "DocType", "label": "Prestataires externes", "link_to": "Prestataire KYA"},
 ]
 # Liens de la barre latérale (sous une nouvelle rubrique).
 _LINKS = [
@@ -48,6 +50,8 @@ _LINKS = [
     {"type": "Link", "label": "Solde de Tout Compte", "link_type": "DocType", "link_to": "Solde Tout Compte KYA"},
     {"type": "Link", "label": "Département KYA", "link_type": "DocType", "link_to": "Departement KYA"},
     {"type": "Link", "label": "Paramètres RH (barèmes)", "link_type": "DocType", "link_to": "Parametres RH KYA"},
+    {"type": "Link", "label": "Stagiaires (registre RH)", "link_type": "DocType", "link_to": "Stagiaire RH KYA"},
+    {"type": "Link", "label": "Prestataires externes", "link_type": "DocType", "link_to": "Prestataire KYA"},
 ]
 
 

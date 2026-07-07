@@ -265,12 +265,15 @@ def mark_departure(employee: str, departure_time: str | None = None, date: str |
         {"employee": employee, "attendance_date": att_date, "docstatus": ["!=", 2]},
         "name",
     )
+    # Cahier d'émargement réel : la RH peut n'avoir QUE l'heure de sortie
+    # (l'arrivée n'a pas été émargée). L'essentiel est que la personne soit
+    # marquée présente → on crée la fiche au lieu d'exiger l'arrivée d'abord.
     if not att_name:
-        frappe.throw(
-            _("Aucune Attendance trouvee pour {0} le {1}. Marquer l'arrivee d'abord.").format(
-                employee, att_date
-            )
-        )
+        att_seule = _get_or_create_attendance(employee, att_date)
+        att_seule.status = "Present"
+        att_seule.kya_presence_type = "Présent"
+        att_seule.save(ignore_permissions=True)
+        att_name = att_seule.name
 
     if departure_time:
         if len(departure_time) <= 8 and ":" in departure_time:

@@ -1,0 +1,107 @@
+<style>
+  .cat-wrap{max-width:1080px;margin:0 auto;padding:14px 12px 70px;font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#0f172a;}
+  .cat-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+  .cat-head h1{margin:0;font-size:1.25rem;font-weight:800;}
+  .cat-cta{background:#0f766e;color:#fff !important;border-radius:10px;padding:10px 16px;font-weight:700;font-size:.9rem;text-decoration:none;display:inline-block;}
+  .cat-filtres{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px;margin:12px 0;display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;}
+  .cat-filtres label{display:block;font-size:.7rem;font-weight:700;color:#475569;margin-bottom:3px;text-transform:uppercase;}
+  .cat-filtres input,.cat-filtres select{width:100%;border:1px solid #cbd5e1;border-radius:8px;padding:10px;font-size:16px;background:#fff;}
+  .cat-note{font-size:.8rem;color:#64748b;margin:4px 0 10px;}
+  .cat-count{font-size:.85rem;color:#475569;font-weight:600;margin:6px 0;}
+  /* Desktop : tableau */
+  .cat-tablewrap{overflow-x:auto;border:1px solid #e2e8f0;border-radius:12px;background:#fff;}
+  table.cat-table{width:100%;border-collapse:collapse;font-size:.88rem;min-width:640px;}
+  .cat-table th{background:#0f766e;color:#fff;text-align:left;padding:10px 12px;font-size:.75rem;text-transform:uppercase;position:sticky;top:0;}
+  .cat-table td{padding:10px 12px;border-top:1px solid #f1f5f9;}
+  .cat-table tr:hover td{background:#f0fdfa;}
+  .badge{display:inline-block;padding:3px 10px;border-radius:12px;font-weight:700;font-size:.75rem;}
+  .b-ok{background:#dcfce7;color:#166534;} .b-ko{background:#fee2e2;color:#991b1b;}
+  .qte{font-weight:800;color:#0f766e;}
+  /* Mobile : cartes */
+  .cat-cards{display:none;}
+  .cat-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;margin-bottom:10px;box-shadow:0 1px 2px rgba(0,0,0,.04);}
+  .cat-card .t{font-weight:800;font-size:.95rem;display:flex;justify-content:space-between;gap:8px;align-items:flex-start;}
+  .cat-card .m{font-size:.8rem;color:#64748b;margin-top:4px;}
+  .cat-card .q{margin-top:6px;font-size:.9rem;}
+  .muted{color:#94a3b8;text-align:center;padding:36px 10px;font-size:.9rem;}
+  @media(max-width:720px){
+    .cat-filtres{grid-template-columns:1fr;}
+    .cat-tablewrap{display:none;}
+    .cat-cards{display:block;}
+    .cat-head h1{font-size:1.1rem;}
+    .cat-cta{width:100%;text-align:center;}
+  }
+</style>
+
+<div class="cat-wrap">
+  <div class="cat-head">
+    <h1>📦 Catalogue du stock</h1>
+    <a class="cat-cta" href="/pv-sortie-materiel">➜ Faire une demande de sortie</a>
+  </div>
+  <div class="cat-note">Consultez la disponibilité <b>avant</b> de faire votre demande de sortie de matériel.
+    Le « disponible » ne compte que le matériel en bon état.</div>
+
+  <div class="cat-filtres">
+    <div><label>Rechercher un article</label>
+      <input id="f-q" type="search" placeholder="Ex : câble, batterie…" oninput="applique()"></div>
+    <div><label>Catégorie</label>
+      <select id="f-cat" onchange="applique()"><option value="">Toutes</option></select></div>
+    <div><label>Magasin</label>
+      <select id="f-mag" onchange="applique()"><option value="">Tous</option></select></div>
+  </div>
+
+  <div class="cat-count" id="compte"></div>
+  <div class="cat-tablewrap">
+    <table class="cat-table">
+      <thead><tr><th>Désignation</th><th>Catégorie</th><th>Magasin</th>
+        <th style="text-align:center">Disponible</th><th style="text-align:center">Statut</th></tr></thead>
+      <tbody id="tbody"><tr><td colspan="5" class="muted">Chargement…</td></tr></tbody>
+    </table>
+  </div>
+  <div class="cat-cards" id="cards"><div class="muted">Chargement…</div></div>
+</div>
+
+<script>
+let TOUT = [];
+const esc = s => (s == null ? '' : String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const nf = v => (v == null ? 0 : v).toLocaleString('fr-FR');
+
+async function charger(){
+  try{
+    const r = await fetch('/api/method/kya_hr.kya_hr.api.stock_catalogue.catalogue',
+      {headers:{'Accept':'application/json'}, credentials:'same-origin'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const d = (await r.json()).message;
+    TOUT = d.articles || [];
+    const selC = document.getElementById('f-cat');
+    (d.categories||[]).forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; selC.appendChild(o); });
+    const selM = document.getElementById('f-mag');
+    (d.magasins||[]).forEach(m=>{ const o=document.createElement('option'); o.value=m.name||m; o.textContent=m.warehouse_name||m.name||m; selM.appendChild(o); });
+    applique();
+  }catch(e){
+    document.getElementById('tbody').innerHTML = '<tr><td colspan="5" class="muted">Impossible de charger le catalogue. Êtes-vous connecté ?</td></tr>';
+    document.getElementById('cards').innerHTML = '<div class="muted">Impossible de charger le catalogue. Êtes-vous connecté ?</div>';
+  }
+}
+
+function applique(){
+  const q = (document.getElementById('f-q').value||'').trim().toLowerCase();
+  const cat = document.getElementById('f-cat').value;
+  const mag = document.getElementById('f-mag').value;
+  const rows = TOUT.filter(r =>
+    (!q || (r.designation||'').toLowerCase().includes(q) || (r.categorie||'').toLowerCase().includes(q)) &&
+    (!cat || r.categorie === cat) && (!mag || r.magasin === mag));
+  document.getElementById('compte').textContent = rows.length + ' article(s)' + (q||cat||mag ? ' (filtré)' : '');
+  const badge = r => '<span class="badge '+(r.statut==='Disponible'?'b-ok':'b-ko')+'">'+esc(r.statut)+'</span>';
+  document.getElementById('tbody').innerHTML = rows.length ? rows.map(r =>
+    '<tr><td><b>'+esc(r.designation)+'</b></td><td>'+esc(r.categorie)+'</td><td>'+esc(r.magasin_label)+
+    '</td><td style="text-align:center" class="qte">'+nf(r.disponible)+'</td><td style="text-align:center">'+badge(r)+'</td></tr>'
+  ).join('') : '<tr><td colspan="5" class="muted">Aucun article ne correspond.</td></tr>';
+  document.getElementById('cards').innerHTML = rows.length ? rows.map(r =>
+    '<div class="cat-card"><div class="t"><span>'+esc(r.designation)+'</span>'+badge(r)+'</div>'+
+    '<div class="m">'+esc(r.categorie)+' · '+esc(r.magasin_label)+'</div>'+
+    '<div class="q">Disponible : <span class="qte">'+nf(r.disponible)+'</span></div></div>'
+  ).join('') : '<div class="muted">Aucun article ne correspond.</div>';
+}
+charger();
+</script>

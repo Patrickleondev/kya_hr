@@ -1,0 +1,49 @@
+{
+ "name": "Stagiaire RH KYA",
+ "module": "KYA HR",
+ "doctype": "DocType",
+ "custom": 0,
+ "engine": "InnoDB",
+ "autoname": "format:STG-RH-{####}",
+ "title_field": "nom_complet",
+ "field_order": [
+  "section_identite", "nom", "prenoms", "nom_complet", "sexe", "contact",
+  "col_id2", "etablissement", "niveau_filiere",
+  "section_stage", "theme_stage", "departement_accueil", "encadreur",
+  "col_st2", "date_debut", "date_fin", "duree", "statut",
+  "section_admin", "convention_signee", "indemnite_stage", "observation"
+ ],
+ "fields": [
+  {"fieldname": "section_identite", "fieldtype": "Section Break", "label": "Identité"},
+  {"fieldname": "nom", "fieldtype": "Data", "label": "Nom", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "prenoms", "fieldtype": "Data", "label": "Prénoms", "in_list_view": 1},
+  {"fieldname": "nom_complet", "fieldtype": "Data", "label": "Nom complet", "read_only": 1, "hidden": 1},
+  {"fieldname": "sexe", "fieldtype": "Select", "label": "Sexe", "options": "\nM\nF"},
+  {"fieldname": "contact", "fieldtype": "Data", "label": "Contact téléphonique"},
+  {"fieldname": "col_id2", "fieldtype": "Column Break"},
+  {"fieldname": "etablissement", "fieldtype": "Data", "label": "Établissement / École"},
+  {"fieldname": "niveau_filiere", "fieldtype": "Data", "label": "Niveau d'études / Filière"},
+  {"fieldname": "section_stage", "fieldtype": "Section Break", "label": "Stage"},
+  {"fieldname": "theme_stage", "fieldtype": "Small Text", "label": "Thème / Sujet du stage"},
+  {"fieldname": "departement_accueil", "fieldtype": "Link", "label": "Département d'accueil", "options": "Departement KYA", "in_list_view": 1},
+  {"fieldname": "encadreur", "fieldtype": "Data", "label": "Encadreur (KYA-Energy)"},
+  {"fieldname": "col_st2", "fieldtype": "Column Break"},
+  {"fieldname": "date_debut", "fieldtype": "Date", "label": "Date de début", "in_list_view": 1},
+  {"fieldname": "date_fin", "fieldtype": "Date", "label": "Date de fin"},
+  {"fieldname": "duree", "fieldtype": "Data", "label": "Durée (auto)", "read_only": 1},
+  {"fieldname": "statut", "fieldtype": "Select", "label": "Statut (auto)",
+   "options": "\nÀ venir\nEn cours\nTerminé", "read_only": 1, "in_list_view": 1, "in_standard_filter": 1},
+  {"fieldname": "section_admin", "fieldtype": "Section Break", "label": "Administratif"},
+  {"fieldname": "convention_signee", "fieldtype": "Select", "label": "Convention signée", "options": "\nOui\nNon"},
+  {"fieldname": "indemnite_stage", "fieldtype": "Float", "label": "Indemnité de stage (FCFA)"},
+  {"fieldname": "observation", "fieldtype": "Small Text", "label": "Observation"}
+ ],
+ "permissions": [
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1, "report": 1},
+  {"role": "HR Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1, "report": 1},
+  {"role": "Responsable RH", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1, "report": 1},
+  {"role": "HR User", "read": 1, "write": 1, "create": 1, "export": 1, "report": 1},
+  {"role": "Assistant(e) RH", "read": 1, "write": 1, "create": 1, "export": 1, "report": 1},
+  {"role": "Directeur Général", "read": 1, "export": 1, "report": 1}
+ ]
+}

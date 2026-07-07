@@ -101,7 +101,7 @@ def get_portail_tree() -> list:
         {
             "key": "DSS", "code": "DSS", "title": "Services Supports", "icon": "package",
             "color": "#F58220", "bg": "rgba(245,130,32,.13)",
-            "desc": "RH, Comptabilité, Achats, Stock & Logistique.",
+            "desc": "RH, Achats & Stocks, Logistique, Comptabilité & Finances.",
             "stat": f"{da_attente} demandes d'achat en attente",
             "teams": [
                 {"name": "Vue d'ensemble", "icon": "chart", "ops": [
@@ -113,30 +113,30 @@ def get_portail_tree() -> list:
                     _op("Permissions de sortie", "/permission-sortie-employe", "file"),
                     _op("Formations", "/formation-dashboard", "chart"),
                 ]},
-                {"name": "Comptabilité & Finance", "icon": "coins", "ops": [
-                    _op("Dashboard Comptabilité", "/comptabilite-dashboard", "chart"),
-                    _op("Brouillard de caisse", "/brouillard-caisse", "file"),
-                    _op("État récap. chèques", "/etat-recap", "file"),
-                ]},
-                {"name": "Achats & Approvisionnement", "icon": "cart", "ops": [
+                {"name": "Achats & Stocks", "icon": "cart", "ops": [
                     _op("Dashboard Achats", "/achats-dashboard", "chart"),
                     _op("Demande d'achat", "/demande-achat", "file"),
                     _op("Bon de commande", "/bon-commande", "file"),
                     _op("Appel d'offre", "/appel-offre", "file"),
                     _op("Marché", "/marche-kya", "file"),
-                ]},
-                {"name": "Stock & Logistique", "icon": "box", "ops": [
-                    _op("Dashboard Stocks", "/kya-stocks-dashboard", "box"),
+                    _op("Cockpit Stock KYA", "/stock-kya", "box"),
                     _op("Stock par état", "/stock-etat", "box"),
-                    _op("Sorties par client / projet", "/dga-projets-clients", "truck"),
-                    _op("Dashboard Logistique", "/kya-logistique-dashboard", "truck"),
+                    _op("Sorties par client / projet", "/dga-projets-clients", "box"),
                     _op("Inventaire & sorties", "/inventaire-dashboard", "file"),
                     _op("PV entrée matériel", "/pv-entree-materiel", "file"),
                     _op("PV sortie matériel", "/pv-sortie-materiel", "file"),
                     _op("Retour matériel", "/retour-materiel", "file"),
+                ]},
+                {"name": "Logistique", "icon": "box", "ops": [
+                    _op("Dashboard Logistique", "/kya-logistique-dashboard", "truck"),
                     _op("Sortie véhicule", "/sortie-vehicule", "truck"),
                     _op("Plein de carburant", "/plein-carburant", "truck"),
                     _op("Entretien véhicule", "/entretien-vehicule", "truck"),
+                ]},
+                {"name": "Comptabilité & Finances", "icon": "coins", "ops": [
+                    _op("Dashboard Comptabilité", "/comptabilite-dashboard", "chart"),
+                    _op("Brouillard de caisse", "/brouillard-caisse", "file"),
+                    _op("État récap. chèques", "/etat-recap", "file"),
                 ]},
             ],
         },

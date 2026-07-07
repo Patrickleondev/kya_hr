@@ -45,7 +45,7 @@
 
   <div class="kyad-panel">
     <div class="kyad-panel-head"><h3>Feuille de présence</h3>
-      <span class="text-muted small">Saisir l'arrivée le matin, la sortie le soir, puis ✓ Valider</span></div>
+      <span class="text-muted small">Saisir l'arrivée le matin, la sortie le soir, puis ✓ Valider — une seule des deux heures suffit pour marquer présent</span></div>
     <div style="overflow-x:auto;">
       <table class="kyad-table" style="min-width:860px;">
         <thead><tr><th>Employé</th><th>Équipe</th><th>Arrivée</th><th>Sortie</th><th>Heures</th><th>Statut</th><th class="no-print">Action</th></tr></thead>
@@ -132,7 +132,18 @@
         return;
       }
       const arr=row.querySelector('.in-time').value, dep=row.querySelector('.out-time').value;
-      if(!arr){ done(); frappe.show_alert({message:'Saisir au moins l\'heure d\'arrivée', indicator:'orange'},4); return; }
+      // Une SEULE heure suffit (cahier d'émargement incomplet) : l'essentiel
+      // est que la personne soit marquée présente.
+      if(!arr && !dep){ done(); frappe.show_alert({message:'Saisir l\'heure d\'arrivée ou de sortie', indicator:'orange'},4); return; }
+      if(!arr){
+        frappe.call({method:'kya_hr.api.attendance.mark_departure', args:{employee:emp, departure_time:dep, date:DATE},
+          callback:function(r2){ done(); setStatus(row,'Présent');
+            const hrs=r2.message&&r2.message.working_hours;
+            if(hrs) row.querySelector('.cell-hrs').textContent=Math.round(hrs*100)/100;
+            recount(); frappe.show_alert({message:row.querySelector('b').textContent+' : Présent (sortie seule)', indicator:'green'},3); },
+          error:function(){ done(); frappe.show_alert({message:'Erreur — droit RH requis pour marquer', indicator:'red'},5); }});
+        return;
+      }
       frappe.call({method:'kya_hr.api.attendance.mark_arrival', args:{employee:emp, arrival_time:arr, date:DATE},
         callback:function(r1){
           const late=r1.message&&(r1.message.lateness_min>0);
