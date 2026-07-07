@@ -76,7 +76,9 @@
   .ctr-title-bar { width: 100%; border-collapse: collapse; margin: 1mm 0 6mm 0; table-layout: fixed; }
   .ctr-title-bar td { padding: 0; height: 26mm; vertical-align: middle; text-align: center; }
   .ctr-logo-cell { width: 24%; padding: 1mm; border: 1px solid #ccc; vertical-align: middle; text-align: center; }
-  .ctr-logo-img { max-width: 100%; max-height: 24mm; vertical-align: middle; }
+  /* height explicite : max-* ne fait que RÉDUIRE — un logo plus petit que le
+     rectangle restait minuscule. On le force à remplir la hauteur de la case. */
+  .ctr-logo-img { height: 22mm; width: auto; max-width: 96%; vertical-align: middle; }
   .ctr-title-cell {
     width: 50%;
     background: #F58220;
@@ -84,8 +86,10 @@
     text-align: center; vertical-align: middle; padding: 0; letter-spacing: 0.5px;
     border: 1px solid #ccc; line-height: 1.15; white-space: nowrap;
   }
-  /* Div interne centré : wkhtmltopdf centre plus fiablement un bloc dans la cellule */
-  .ctr-title-cell .ctr-title-txt { display: block; width: 100%; text-align: center; }
+  /* Div interne centré : wkhtmltopdf centre plus fiablement un bloc dans la
+     cellule. line-height = hauteur de la case → centrage VERTICAL exact du
+     titre (une seule ligne), en plus du centrage horizontal. */
+  .ctr-title-cell .ctr-title-txt { display: block; width: 100%; text-align: center; line-height: 26mm; }
   .ctr-ref-cell {
     width: 26%; background: #fff; border: 1px solid #ccc;
     text-align: center; font-size: 9.5pt; padding: 0; vertical-align: middle;
@@ -244,10 +248,12 @@
     {%- for m in (doc.maitres_stage or []) -%}
          {%- if m.employee_name -%}{%- set _ = tuteurs.append("M. " + m.employee_name) -%}{%- endif -%}
     {%- endfor -%}
-    {%- if tuteurs -%}
+    {#- ne PAS trimmer à droite (-%}) ici : ça avalait l'espace après
+        « l'article 2, » et collait le nom du maître de stage à la virgule -#}
+    {%- if tuteurs %}
       <strong>{{ tuteurs|join(" et ") }}</strong>
       {%- if tuteurs|length > 1 %} sont autorisés{% else %} est autorisé{% endif %}
-    {%- else -%}
+    {%- else %}
       le ou les maîtres de stage désignés par la société sont autorisés
     {%- endif %}
     à suivre {{ genre }} <strong>{{ doc.employee_name }}</strong> en tant que
