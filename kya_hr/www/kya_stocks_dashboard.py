@@ -97,6 +97,25 @@ def get_stock_overview() -> dict:
     nb_reparation = sum(1 for d in soldes if d["reparation"] > 0)
     nb_rupture = sum(1 for d in soldes if d["total"] <= 0)
 
+    # Alertes réappro (mêmes règles que le cockpit : dispo = bon état,
+    # seuils par catégorie du responsable stock pris en compte).
+    alertes = {"ruptures": 0, "a_commander": 0, "defectueux_refs": 0}
+    try:
+        cats = {a["name"]: (a.get("categorie") or "Non classé")
+                for a in frappe.get_all("Article KYA", fields=["name", "categorie"])}
+        for d in soldes:
+            ev = stock_kya.evaluer_ligne(d["bon_etat"], d["reparation"],
+                                         d.get("defectueux", 0),
+                                         categorie=cats.get(d["item"], "Non classé"))
+            if ev["statut"] == "RUPTURE":
+                alertes["ruptures"] += 1
+            elif ev["statut"] == "A COMMANDER":
+                alertes["a_commander"] += 1
+            if d.get("defectueux", 0) > 0:
+                alertes["defectueux_refs"] += 1
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "stock-overview: alertes")
+
     month_start = today()[:8] + "01"
     six_m = add_days(today(), -180)
 
@@ -152,7 +171,8 @@ def get_stock_overview() -> dict:
     top = []
     tot_q = sum(d["total"] for d in soldes) or 1
     for d in sorted(soldes, key=lambda x: x["total"], reverse=True)[:8]:
-        grp = frappe.db.get_value("Item", d["item"], "item_group") or "—"
+        grp = frappe.db.get_value("Article KYA", d["item"], "categorie") \
+            or frappe.db.get_value("Item", d["item"], "item_group") or "—"
         top.append({
             "article": d["item_name"], "cat": grp,
             "qte": f"{d['total']:g}",
@@ -180,6 +200,6 @@ def get_stock_overview() -> dict:
     return {
         "date_str": formatdate(today(), "EEEE d MMMM y"),
         "hero": hero, "doc_cards": doc_cards, "mouvements": mouvements,
-        "top": top, "flux": flux,
+        "top": top, "flux": flux, "alertes": alertes,
         "valeur_stock_label": f"{total_unites:g} unités",
     }

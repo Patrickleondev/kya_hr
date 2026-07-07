@@ -10,8 +10,8 @@
 .ks-tabs { display:flex; gap:8px; margin:14px 0; flex-wrap:wrap; }
 .ks-tab { border:1px solid #cbd5e1; background:#fff; border-radius:10px; padding:8px 16px; font-weight:700; font-size:.85rem; cursor:pointer; color:#334155; }
 .ks-tab.on { background:#0e7c4a; color:#fff; border-color:#0e7c4a; }
-.ks-kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:12px; margin:14px 0; }
-.ks-kpi { background:#fff; border-radius:14px; padding:14px 16px; border-left:5px solid #0e7c4a; box-shadow:0 1px 2px rgba(0,0,0,.05); }
+.ks-kpis { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:14px 0; }
+.ks-kpi { background:#fff; border-radius:14px; padding:12px 14px; border-left:5px solid #0e7c4a; box-shadow:0 1px 2px rgba(0,0,0,.05); min-height:112px; }
 .ks-kpi .n { font-size:1.9rem; font-weight:900; color:#0e7c4a; line-height:1; }
 .ks-kpi .l { font-size:.68rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.4px; margin-top:4px; }
 .ks-kpi.warn{border-left-color:#d97706}.ks-kpi.warn .n{color:#d97706}
@@ -25,7 +25,7 @@
 .ks-kpi.red .ico2{background:rgba(220,38,38,.1)} .ks-kpi.violet .ico2{background:rgba(124,58,237,.1)}
 .ks-kpi.violet{border-left-color:#7c3aed}.ks-kpi.violet .n{color:#7c3aed}
 .ks-trend{display:inline-flex;align-items:center;gap:3px;font-size:.72rem;font-weight:800;margin-top:5px;
-  padding:2px 8px;border-radius:12px;}
+  padding:2px 8px;border-radius:12px;white-space:nowrap;}
 .ks-trend.up{background:#dcfce7;color:#166534}.ks-trend.down{background:#fee2e2;color:#991b1b}
 .ks-trend.flat{background:#f1f5f9;color:#64748b}
 .ks-spark{display:block;margin-top:6px;width:100%;height:26px;}
@@ -44,6 +44,11 @@
 .ks-prio .go{margin-left:auto;}
 .ks-prio.ok{background:#f0fdf4;border-color:#bbf7d0;border-left-color:#16a34a;}
 .ks-prio.ok .pt{color:#166534;}
+/* Barres de taux (synthèse par catégorie) */
+.ks-bar{display:flex;align-items:center;gap:8px;min-width:130px;}
+.ks-bar .tr{flex:1;height:8px;background:#e2e8f0;border-radius:6px;overflow:hidden;}
+.ks-bar .tr i{display:block;height:100%;border-radius:6px;}
+.ks-bar .pv{font-size:.75rem;font-weight:800;min-width:42px;text-align:right;}
 .ks-card { background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:16px; margin-bottom:16px; }
 .ks-card h3 { margin:0 0 8px; font-size:1rem; color:#0e7c4a; }
 .ks-tbl { width:100%; border-collapse:collapse; font-size:.84rem; }
@@ -60,9 +65,13 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
 .ks-note{background:#f1f5f9;border-left:4px solid #0e7c4a;border-radius:8px;padding:10px 14px;font-size:.82rem;color:#475569;margin:8px 0}
 .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.72rem;font-weight:800}
 .b-e{background:#dcfce7;color:#166534}.b-s{background:#fee2e2;color:#991b1b}.b-r{background:#fef3c7;color:#92400e}.b-i{background:#dbeafe;color:#1e40af}
-/* Tables larges : défilement horizontal DANS la carte (jamais la page). */
-.ks-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-.ks-scroll .ks-tbl{min-width:640px;}
+/* Tables larges : défilement horizontal DANS la carte (jamais la page).
+   min-width:0 = indispensable quand .ks-scroll est enfant d'une grille
+   (sinon la colonne refuse de rétrécir et TOUT déborde de la carte). */
+.ks-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;min-width:0;}
+.ks-tbl-wide{min-width:640px;}
+#rap-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;}
+#rap-grid>div{min-width:0;}
 .rap-filtres{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin:8px 0 12px;}
 .rap-filtres label{display:block;font-size:.7rem;font-weight:700;color:#475569;margin-bottom:2px;text-transform:uppercase;}
 .rap-filtres select,.rap-filtres input{border:1px solid #cbd5e1;border-radius:8px;padding:8px 10px;font-size:16px;background:#fff;}
@@ -75,7 +84,6 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
   #sai-tbl input{font-size:16px;min-width:70px;}
   #sai-tbl input[data-f="designation"]{min-width:150px;}
   .rap-filtres>div{flex:1 1 45%;}
-  #rap-grid{grid-template-columns:1fr !important;}
 }
 </style>
 
@@ -150,7 +158,7 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
         <select id="sai-mag" class="ks-btn sec" style="font-weight:600;min-width:220px;"></select>
       </div>
       <datalist id="sai-cats"></datalist>
-      <div class="ks-scroll"><table class="ks-tbl" id="sai-tbl">
+      <div class="ks-scroll"><table class="ks-tbl ks-tbl-wide" id="sai-tbl">
         <thead><tr>
           <th style="width:34%">Désignation</th><th style="width:20%">Catégorie</th>
           <th style="width:10%">Unité</th><th style="width:10%">Bon état</th>
@@ -173,6 +181,15 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
       <div class="ks-scroll"><table class="ks-tbl"><thead><tr><th>Magasin</th><th>Articles</th><th>Bon état</th><th>À réparer</th><th>Défectueux</th><th>Total unités</th></tr></thead>
       <tbody id="ks-magbody"></tbody></table></div>
     </div>
+    <div class="ks-card">
+      <h3>🗂️ Synthèse par catégorie d'équipement</h3>
+      <div class="ks-note">Lecture rapide façon fiche AEA-ENG-13 : volume par typologie, <b>taux bon état</b> en barre,
+        et références en alerte (à commander / rupture) par catégorie.</div>
+      <div class="ks-scroll"><table class="ks-tbl"><thead><tr>
+        <th>Catégorie</th><th style="text-align:right">Réf.</th><th style="text-align:right">Qté totale</th>
+        <th>Taux bon état</th><th style="text-align:right">À commander</th><th style="text-align:right">Ruptures</th>
+      </tr></thead><tbody id="ks-catbody"><tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:14px;">Chargement…</td></tr></tbody></table></div>
+    </div>
   </div>
 
   <!-- REAPPRO / ALERTES -->
@@ -192,7 +209,7 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
         (ni « à réparer » ni « défectueux » ne comptent). Statut&nbsp;: 🔴 rupture · 🟠 à commander · ⚪ référence vide · 🟢 OK.
         <br>💡 Le responsable stock peut <b>surcharger le coefficient et le plancher PAR CATÉGORIE</b> (bouton ⚙️ ci-dessus) ;
         les catégories sans règle suivent le barème A/B/C/D. Il peut aussi y activer l'<b>alerte e-mail quotidienne</b>.</div>
-      <div class="ks-scroll"><table class="ks-tbl" style="font-size:.8rem;"><thead><tr>
+      <div class="ks-scroll"><table class="ks-tbl ks-tbl-wide" style="font-size:.8rem;"><thead><tr>
         <th>Désignation</th><th>Magasin</th><th>Catégorie</th>
         <th style="text-align:right">Bon état</th><th style="text-align:right">À répar.</th><th style="text-align:right">Défect.</th>
         <th style="text-align:center">Classe</th><th style="text-align:right">Seuil</th>
@@ -227,7 +244,7 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
         <div><button class="ks-btn sec" onclick="renderRap(true)">Appliquer</button></div>
       </div>
       <div class="ks-kpis" id="rap-kpis"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;" id="rap-grid">
+      <div id="rap-grid">
         <div>
           <div class="ks-mag">👥 Par équipe demandeuse (sorties)</div>
           <div class="ks-scroll"><table class="ks-tbl"><thead><tr><th>Équipe</th><th style="text-align:right">Qté sortie</th><th style="text-align:right">Mouvements</th></tr></thead>
@@ -243,7 +260,7 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
       <div class="ks-scroll"><table class="ks-tbl"><thead><tr><th>Magasin</th><th style="text-align:right">Entrées</th><th style="text-align:right">Sorties</th><th style="text-align:right">Retours</th></tr></thead>
       <tbody id="rap-mag-body"></tbody></table></div>
       <div class="ks-mag">🕑 Détail chronologique</div>
-      <div class="ks-scroll"><table class="ks-tbl" style="font-size:.78rem;"><thead><tr><th>Date</th><th>Type</th><th>Désignation</th><th>Catégorie</th><th>Magasin</th><th style="text-align:right">Qté</th><th>État</th><th>Équipe</th></tr></thead>
+      <div class="ks-scroll"><table class="ks-tbl ks-tbl-wide" style="font-size:.78rem;"><thead><tr><th>Date</th><th>Type</th><th>Désignation</th><th>Catégorie</th><th>Magasin</th><th style="text-align:right">Qté</th><th>État</th><th>Équipe</th></tr></thead>
       <tbody id="rap-detail"></tbody></table></div>
     </div>
   </div>
@@ -252,7 +269,7 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
   <div id="pane-mvt" class="ks-hide">
     <div class="ks-card">
       <h3>15 derniers mouvements</h3>
-      <div class="ks-scroll"><table class="ks-tbl"><thead><tr><th>Date</th><th>Type</th><th>Article</th><th>Magasin</th><th>Qté</th><th>État</th><th>Réf.</th></tr></thead>
+      <div class="ks-scroll"><table class="ks-tbl ks-tbl-wide"><thead><tr><th>Date</th><th>Type</th><th>Article</th><th>Magasin</th><th>Qté</th><th>État</th><th>Réf.</th></tr></thead>
       <tbody id="ks-mvtbody"></tbody></table></div>
     </div>
   </div>
@@ -366,7 +383,7 @@ function renderInv(){
   const secs = INV.sections.filter(s=>!f || s.magasin===f);
   document.getElementById('ks-inv').innerHTML = secs.map(s=>`
     <div class="ks-mag">🏬 ${s.magasin} — ${s.total_lignes} article(s)</div>
-    <div class="ks-scroll"><table class="ks-tbl"><thead><tr><th style="width:5%">N°</th><th>Désignation</th>
+    <div class="ks-scroll"><table class="ks-tbl ks-tbl-wide"><thead><tr><th style="width:5%">N°</th><th>Désignation</th>
       <th style="width:11%">Qté totale</th><th style="width:11%">Bon état</th><th style="width:11%">À réparer</th><th style="width:11%">Défectueux</th></tr></thead>
     <tbody>${s.lignes.map(l=>`<tr><td>${l.n}</td><td>${l.designation}</td>
       <td class="num">${l.qte_totale}</td><td class="num" style="color:#166534">${l.bon_etat}</td>
@@ -379,8 +396,28 @@ function tab(t){
   document.querySelectorAll('.ks-tab').forEach(x=>x.classList.toggle('on',x.dataset.t===t));
   ['inv','sai','mag','rea','rap','mvt','imp'].forEach(p=>document.getElementById('pane-'+p).classList.toggle('ks-hide',p!==t));
   if(t==='sai') saiInit();
+  if(t==='mag') renderSyn();
   if(t==='rea') renderRea();
   if(t==='rap') renderRap();
+}
+
+// ── Synthèse par catégorie (barres de taux, alertes) ───────────────────────
+let SYN=null;
+function tauxBar(p){
+  const c = p>=80?'#16a34a':(p>=50?'#d97706':'#dc2626');
+  return `<div class="ks-bar"><div class="tr"><i style="width:${Math.max(2,Math.min(100,p))}%;background:${c}"></i></div>
+    <span class="pv" style="color:${c}">${p}%</span></div>`;
+}
+async function renderSyn(){
+  if(SYN) return;
+  SYN = (await frappe.call({method:'kya_hr.api.stock_kya.synthese_stock'})).message||{};
+  const rows = SYN.par_categorie||[];
+  document.getElementById('ks-catbody').innerHTML = rows.map(c=>`<tr>
+    <td><b>${c.cle}</b></td><td class="num">${c.references}</td><td class="num">${c.qte_totale}</td>
+    <td>${tauxBar(c.taux_bon_etat!=null?c.taux_bon_etat:0)}</td>
+    <td class="num" style="color:${c.a_commander?'#d97706':'#94a3b8'}">${c.a_commander||0}</td>
+    <td class="num" style="color:${c.ruptures?'#dc2626':'#94a3b8'}">${c.ruptures||0}</td></tr>`).join('')
+    || `<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:14px;">Aucun stock.</td></tr>`;
 }
 
 // ── Rapport de période (stats + export pour le responsable stock) ──────────

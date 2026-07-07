@@ -42,6 +42,16 @@
   .skx-cc { background:#fff; border:1px solid var(--line); border-radius:14px; box-shadow:0 1px 2px rgba(16,24,40,.05); padding:14px; margin-top:12px; }
   .skx-cc b { font-size:13.5px; } .skx-cwrap { position:relative; height:280px; margin-top:8px; }
   .skx-foot { text-align:center; font-size:11.5px; color:#b0b8c1; padding:8px 0; }
+  /* Bandeau « À traiter en priorité » (design v2) */
+  .skx-prio{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:linear-gradient(100deg,#fef2f2,#fff7ed);
+    border:1px solid #fecaca;border-left:6px solid #d64550;border-radius:14px;padding:11px 16px;margin:14px 0 4px;}
+  .skx-prio .pt{font-weight:800;color:#b42331;font-size:14px;}
+  .skx-prio .chip{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #fecaca;
+    border-radius:20px;padding:4px 12px;font-size:12.5px;font-weight:700;color:#344054;}
+  .skx-prio .go{margin-left:auto;background:#0d7377;color:#fff;border-radius:10px;padding:8px 14px;
+    font-size:12.5px;font-weight:700;text-decoration:none;white-space:nowrap;}
+  .skx-prio.ok{background:#f2faf1;border-color:#cde8c8;border-left-color:#5f9e2b;}
+  .skx-prio.ok .pt{color:#48781f;}
 </style>
 
 <div class="skx" id="skx-root">
@@ -81,6 +91,18 @@ function render(D){
     if(h.unit) v.appendChild(el('span','un',h.unit)); c.appendChild(v); if(h.sub) c.appendChild(el('span','sub',h.sub)); hg.appendChild(c); });
   hero.appendChild(hg); root.appendChild(hero);
 
+  // ── Bandeau « À traiter en priorité » (design v2) ──
+  const al=D.alertes||{};
+  const nAl=(al.ruptures||0)+(al.a_commander||0);
+  const prio=el('div','skx-prio'+(nAl?'':' ok'));
+  prio.appendChild(el('span','pt',nAl?'🔴 À traiter en priorité':'🟢 Rien d\'urgent'));
+  if(al.ruptures) prio.appendChild(el('span','chip','🚫 <b>'+al.ruptures+'</b>&nbsp;rupture(s)'));
+  if(al.a_commander) prio.appendChild(el('span','chip','🟠 <b>'+al.a_commander+'</b>&nbsp;à commander'));
+  if(al.defectueux_refs) prio.appendChild(el('span','chip','🟣 <b>'+al.defectueux_refs+'</b>&nbsp;réf. avec défectueux'));
+  if(!nAl) prio.appendChild(el('span','chip','Aucune rupture ni référence à commander'));
+  const go=el('a','go',nAl?'Voir les alertes →':'Cockpit stock →'); go.href='/stock-kya'; prio.appendChild(go);
+  root.appendChild(prio);
+
   root.appendChild(band('box','Documents de stock','PV Entrée · Sortie · Retour · Inventaire · Réceptions','ce mois','linear-gradient(100deg,#0d7377,#0a5d61)'));
   const g=el('div','skx-cards');
   (D.doc_cards||[]).forEach(c=>{ const card=el('div','skx-card'); const ch=el('div','ch'); ch.appendChild(el('span','lbl',c.label)); ch.appendChild(chip(c.icon,c.accent)); card.appendChild(ch);
@@ -103,10 +125,10 @@ function render(D){
   if(!(D.mouvements||[]).length) w1.appendChild(el('div','skx-row','<span style="color:#94a3b8;padding:8px;">Aucun mouvement récent.</span>'));
   s1.appendChild(w1); t1.appendChild(s1); root.appendChild(t1);
 
-  root.appendChild(band('coins','Top articles par valeur','valorisation du stock',(D.valeur_stock_label||''),'linear-gradient(100deg,#6fae2f,#5a8f24)'));
+  root.appendChild(band('coins','Top articles en stock','répartition par quantité · bon état / à réparer',(D.valeur_stock_label||''),'linear-gradient(100deg,#6fae2f,#5a8f24)'));
   const t2=el('div','skx-table'); const s2=el('div','skx-scroll'); const w2=el('div'); w2.style.minWidth='660px';
   const cols2='2fr 1.3fr 0.9fr 1fr 1.6fr';
-  const h2=el('div','skx-row head'); h2.style.gridTemplateColumns=cols2; ['Article','Catégorie','Qté','Valeur','Part'].forEach((x,i)=>{ const sp=el('span',null,x); if(i===2||i===3)sp.style.textAlign='right'; h2.appendChild(sp); }); w2.appendChild(h2);
+  const h2=el('div','skx-row head'); h2.style.gridTemplateColumns=cols2; ['Article','Catégorie','Qté','État (bon / rép.)','Part'].forEach((x,i)=>{ const sp=el('span',null,x); if(i===2||i===3)sp.style.textAlign='right'; h2.appendChild(sp); }); w2.appendChild(h2);
   (D.top||[]).forEach(r=>{ const row=el('div','skx-row'); row.style.gridTemplateColumns=cols2;
     row.appendChild(el('span',null,'<b>'+(r.article||'')+'</b>'));
     row.appendChild(el('span',null,'<span style="color:#667085;">'+(r.cat||'')+'</span>'));
