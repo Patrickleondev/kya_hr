@@ -285,9 +285,16 @@ def get_achats_overview() -> dict:
     fourn = {"labels": [k for k, _v in four_sorted],
              "data": [round(v / 1_000_000, 2) for _k, v in four_sorted]}
 
+    # Bandeau « À traiter en priorité » (design v2)
+    bc_attente = sum(1 for b in bons_en_cours
+                     if "attente" in (b.workflow_state or "").lower()
+                     or "visa" in (b.workflow_state or "").lower())
+    alertes = {"chef": p_chef, "daaf": p_daaf, "dg": p_dg, "bc": bc_attente}
+
     return {
         "date_str": formatdate(today(), "EEEE d MMMM y"),
         "hero": hero, "palier_cards": palier_cards, "doc_cards": doc_cards,
         "demande_rows": demande_rows, "flux": flux, "fourn": fourn,
+        "alertes": alertes,
         "en_attente_label": f"{len(en_cours)} en attente",
     }

@@ -198,10 +198,21 @@ def get_logistique_overview() -> dict:
     veh_sorted = sorted(by_veh.items(), key=lambda kv: kv[1], reverse=True)[:8]
     util = {"labels": [k for k, _v in veh_sorted], "data": [v for _k, v in veh_sorted]}
 
+    # Bandeau « À traiter en priorité » (design v2)
+    docs_expirent = 0
+    try:
+        docs_expirent = frappe.db.count("Document Vehicule", {
+            "date_expiration": ["<=", add_days(today(), 30)]})
+    except Exception:
+        pass
+    alertes = {"entretiens": len(a_prevoir), "docs_expirent": docs_expirent,
+               "retours_attente": sum(1 for x in sorties
+                                      if (x.statut or "") == "En mission")}
+
     return {
         "date_str": formatdate(today(), "EEEE d MMMM y"),
         "hero": hero, "sortie_rows": sortie_rows, "entretien_rows": entretien_rows,
-        "fuel": fuel, "util": util,
+        "fuel": fuel, "util": util, "alertes": alertes,
         "en_mission_label": f"{en_mission_v or len(en_cours)} en mission",
         "a_prevoir_label": f"{len(a_prevoir)} à prévoir",
     }

@@ -4,6 +4,7 @@
 
 {% block head_include %}
 <script src="/assets/kya_hr/js/chart.umd.min.js"></script>
+<script src="/assets/kya_hr/js/kya_kpi.js"></script>
 {% endblock %}
 
 {% block page_content %}
@@ -107,6 +108,16 @@ function render(D){
     const v=el('div'); v.style.cssText='display:flex;align-items:baseline;'; v.appendChild(el('span','val',h.value));
     if(h.unit) v.appendChild(el('span','un',h.unit)); c.appendChild(v); if(h.sub) c.appendChild(el('span','sub',h.sub)); hg.appendChild(c); });
   hero.appendChild(hg); root.appendChild(hero);
+
+  // Bandeau « À traiter en priorité » — ventilé par circuit support
+  if(window.KYAKPI){ const w=D.alertes_wait||{};
+    const n=(...ks)=>ks.reduce((a,k)=>a+(w[k]||0),0);
+    KYAKPI.prio(root,{chips:[
+      {icon:'🛒',count:n('Demande Achat KYA','Bon Commande KYA'),label:'achats (demandes + BC)'},
+      {icon:'📦',count:n('PV Sortie Materiel','PV Entree Materiel','PV Retour Materiel','Inventaire KYA'),label:'stock / matériel'},
+      {icon:'🪙',count:n('Brouillard Caisse'),label:'Comptabilité & Finances'},
+      {icon:'🧑‍💼',count:n('Planning Conge','Permission Sortie Employe','Permission Sortie Stagiaire'),label:'RH (congés, permissions)'}],
+    okLabel:'Aucun dossier support en attente de visa'}); }
 
   const GT='linear-gradient(100deg,#0d7377,#0a5d61)', GO='linear-gradient(100deg,#F58220,#e06f12)';
 

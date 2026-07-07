@@ -42,6 +42,7 @@
     <h1 id="ppx-h1">Pilotage opérationnel KYA-Energy</h1>
     <p id="ppx-sub">Choisissez un département, puis une équipe, puis une opération. Seuls les départements accessibles à votre profil sont affichés.</p>
   </div>
+  <div id="ppx-prio"></div>
   <div class="ppx-crumb" id="ppx-crumb"></div>
   <div id="ppx-view"></div>
   <div class="ppx-foot">KYA-Energy Group · Portail de pilotage · Données en temps réel de l'ERP</div>
@@ -49,6 +50,17 @@
 
 <script>
 const PPX_TREE = {% if tree_json %}{{ tree_json | safe }}{% else %}[]{% endif %};
+const PPX_ALERTES = {% if alertes_json %}{{ alertes_json | safe }}{% else %}{}{% endif %};
+// Bandeau consolidé « À traiter en priorité » (brique partagée KYAKPI)
+(function(){ var s=document.createElement('script'); s.src='/assets/kya_hr/js/kya_kpi.js';
+  s.onload=function(){ var al=PPX_ALERTES||{};
+    KYAKPI.prio(document.getElementById('ppx-prio'),{chips:[
+      {icon:'🛒',count:al.achats,label:'dossier(s) achats en attente de visa'},
+      {icon:'🪙',count:al.compta,label:'Comptabilité & Finances'},
+      {icon:'📦',count:al.stock,label:'stock / matériel'},
+      {icon:'🧑‍💼',count:al.rh,label:'RH (congés, permissions)'}],
+    okLabel:'Aucun dossier en attente de visa dans les circuits'}); };
+  document.head.appendChild(s); })();
 const PPX_ICONS = {
   building:[['rect',{x:4,y:2,width:16,height:20,rx:2}],['path',{d:'M9 22v-4h6v4M8 6h.01M16 6h.01M8 10h.01M16 10h.01M8 14h.01M16 14h.01'}]],
   package:[['path',{d:'M16.5 9.4 7.55 4.24'}],['path',{d:'M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'}],['path',{d:'m3.27 6.96 8.73 5.05 8.73-5.05M12 22.08V12'}]],

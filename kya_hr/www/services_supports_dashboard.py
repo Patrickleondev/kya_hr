@@ -372,4 +372,5 @@ def get_ss_overview() -> dict:
         "compta_label": _fmt_m(solde) + " M FCFA de solde",
         "logi_label": f"{veh_dispo}/{veh_total} véhicules dispo",
         "wait_total": wait_total,
+        "alertes_wait": wait,
     }

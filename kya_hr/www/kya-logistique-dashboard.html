@@ -4,6 +4,7 @@
 
 {% block head_include %}
 <script src="/assets/kya_hr/js/chart.umd.min.js"></script>
+<script src="/assets/kya_hr/js/kya_kpi.js"></script>
 {% endblock %}
 
 {% block page_content %}
@@ -77,6 +78,14 @@ function render(D){
     const v=el('div'); v.style.cssText='display:flex;align-items:baseline;'; v.appendChild(el('span','val',h.value));
     if(h.unit) v.appendChild(el('span','un',h.unit)); c.appendChild(v); if(h.sub) c.appendChild(el('span','sub',h.sub)); hg.appendChild(c); });
   hero.appendChild(hg); root.appendChild(hero);
+
+  // Bandeau « À traiter en priorité » (brique partagée KYAKPI)
+  if(window.KYAKPI){ const al=D.alertes||{}; KYAKPI.prio(root,{chips:[
+      {icon:'🛠️',count:al.entretiens,label:'entretien(s) à prévoir'},
+      {icon:'📑',count:al.docs_expirent,label:'document(s) véhicule expirant sous 30 j'},
+      {icon:'🚚',count:al.retours_attente,label:'véhicule(s) en mission (retour à confirmer)'}],
+    href:'/app/entretien-vehicule-kya', cta:'Ouvrir les entretiens →',
+    okLabel:'Flotte à jour : rien à signaler'}); }
 
   root.appendChild(band('truck','Sorties véhicule en cours','source : Sortie véhicule',(D.en_mission_label||''),'linear-gradient(100deg,#0d7377,#0a5d61)'));
   root.appendChild(table('1.2fr 1.3fr 2fr 1fr 1fr 1.1fr',['Véhicule','Conducteur','Motif','Départ','Retour prévu','Statut'],[],
