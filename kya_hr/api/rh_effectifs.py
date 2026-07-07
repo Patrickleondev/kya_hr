@@ -122,6 +122,11 @@ def dashboard_data(departement=None, periode_debut=None, periode_fin=None):
         # bonus (parcours / retraités)
         "retraites": sum(1 for r in rows if _statut(r) == "Retraité"),
         "sortis": sum(1 for r in rows if _statut(r) == "Sorti"),
+        # comme le classeur (ligne « STAGIAIRES EN COURS / PRESTATAIRES EN COURS »)
+        "stagiaires_en_cours": frappe.db.count("Stagiaire RH KYA", {"statut": "En cours"})
+        if frappe.db.exists("DocType", "Stagiaire RH KYA") else 0,
+        "prestataires_en_cours": frappe.db.count("Prestataire KYA", {"statut": "En cours"})
+        if frappe.db.exists("DocType", "Prestataire KYA") else 0,
     }
 
     # ── Distributions (camemberts + barres) ──
@@ -275,8 +280,109 @@ def importer_salaries(content_base64, filename=None):
             crees += 1
 
     frappe.db.commit()
+    out = {"crees": crees, "mis_a_jour": maj, "ignores": ignores,
+           "colonnes_reconnues": len(colmap)}
+    # Les autres feuilles du classeur (Stagiaires / Prestataires) sont
+    # importées dans la foulée si présentes — « tout digitaliser ».
+    try:
+        out["stagiaires"] = _importer_feuille_annexe(
+            wb, "stagiaires", "Stagiaire RH KYA", _MAP_STAGIAIRE,
+            cle=("nom", "prenoms", "date_debut"), dates=("date_debut", "date_fin"),
+            dep_field="departement_accueil")
+        out["prestataires"] = _importer_feuille_annexe(
+            wb, "prestataires", "Prestataire KYA", _MAP_PRESTATAIRE,
+            cle=("raison_sociale", "date_debut_contrat"),
+            dates=("date_debut_contrat", "date_fin_contrat"),
+            dep_field="departement_beneficiaire")
+        frappe.db.commit()
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "rh_effectifs.import_annexes")
+    return out
+
+
+# En-têtes (normalisés, sous-chaîne) des feuilles annexes du classeur.
+_MAP_STAGIAIRE = [
+    ("prenoms", "prenoms"), ("nom", "nom"), ("sexe", "sexe"),
+    ("contact", "contact"), ("etablissement", "etablissement"),
+    ("niveau", "niveau_filiere"), ("theme", "theme_stage"),
+    ("departement d accueil", "departement_accueil"), ("encadreur", "encadreur"),
+    ("date de debut", "date_debut"), ("date de fin", "date_fin"),
+    ("convention", "convention_signee"), ("indemnite", "indemnite_stage"),
+    ("observation", "observation"),
+]
+_MAP_PRESTATAIRE = [
+    ("raison sociale", "raison_sociale"), ("nom", "raison_sociale"),
+    ("type de prestataire", "type_prestataire"), ("contact", "contact"),
+    ("email", "email"), ("nature de la prestation", "nature_prestation"),
+    ("departement beneficiaire", "departement_beneficiaire"),
+    ("date de debut", "date_debut_contrat"), ("date de fin", "date_fin_contrat"),
+    ("montant", "montant_contrat"), ("mode de paiement", "mode_paiement"),
+    ("reference", "reference_contrat"), ("observation", "observation"),
+]
+
+
+def _importer_feuille_annexe(wb, titre, doctype, mapping, cle, dates, dep_field):
+    """Importe une feuille annexe (Stagiaires/Prestataires) si elle existe.
+    Idempotent par `cle` (tuple de champs). Durée/statut = recalculés au save."""
+    ws = None
+    for cand in wb.worksheets:
+        if titre in _norm(cand.title):
+            ws = cand
+            break
+    if ws is None:
+        return "feuille absente"
+    rows = list(ws.iter_rows(values_only=True))
+    hidx = None
+    for i, r in enumerate(rows[:12]):
+        cells = [_norm(c) for c in r]
+        if "nom" in cells or any("raison sociale" in c for c in cells):
+            hidx = i
+            break
+    if hidx is None:
+        return "en-tête introuvable"
+    colmap = {}
+    for ci, h in enumerate(rows[hidx]):
+        n = _norm(h)
+        if not n or n in ("n ord", "duree", "statut"):
+            continue  # n° d'ordre, durée et statut sont calculés chez nous
+        for key, field in mapping:
+            if key in n and field not in colmap.values():
+                colmap[ci] = field
+                break
+    crees, maj, ignores = 0, 0, 0
+    for r in rows[hidx + 1:]:
+        data = {}
+        for ci, field in colmap.items():
+            if ci < len(r) and r[ci] not in (None, ""):
+                data[field] = r[ci]
+        if not data.get(cle[0]):
+            ignores += 1
+            continue
+        for df in dates:
+            v = data.get(df)
+            if hasattr(v, "date"):
+                data[df] = v.date()
+            elif isinstance(v, str) and v.strip():
+                data[df] = frappe.utils.getdate(v)
+        dep = (str(data.get(dep_field)).strip() if data.get(dep_field) else "")
+        if dep and not frappe.db.exists("Departement KYA", dep):
+            frappe.get_doc({"doctype": "Departement KYA", "code": dep,
+                            "libelle": dep, "actif": 1}).insert(ignore_permissions=True)
+        filtres = {f: data.get(f) for f in cle if data.get(f)}
+        existant = frappe.get_all(doctype, filters=filtres, pluck="name", limit=1)
+        if existant:
+            doc = frappe.get_doc(doctype, existant[0])
+            doc.update(data)
+            doc.flags.ignore_permissions = True
+            doc.save(ignore_permissions=True)
+            maj += 1
+        else:
+            doc = frappe.get_doc(dict(doctype=doctype, **data))
+            doc.flags.ignore_permissions = True
+            doc.insert(ignore_permissions=True)
+            crees += 1
     return {"crees": crees, "mis_a_jour": maj, "ignores": ignores,
-            "colonnes_reconnues": len(colmap)}
+            "colonnes": len(colmap)}
 
 
 @frappe.whitelist()
@@ -475,7 +581,9 @@ def export_excel(departement=None):
                      ("Cadres (C)", "cadres"), ("Agents de maîtrise (AM)", "maitrise"),
                      ("Agents d'exécution (AE)", "execution"), ("Âge moyen", "age_moyen"),
                      ("Âge médian", "age_median"), ("Ancienneté moyenne (ans)", "anciennete_moyenne"),
-                     ("Retraités", "retraites"), ("Sortis", "sortis")]:
+                     ("Retraités", "retraites"), ("Sortis", "sortis"),
+                     ("Stagiaires en cours", "stagiaires_en_cours"),
+                     ("Prestataires en cours", "prestataires_en_cours")]:
         wi.append([lbl, k.get(key)])
 
     # ── Feuille Répartitions + graphiques natifs ──
@@ -504,6 +612,43 @@ def export_excel(departement=None):
         bar.add_data(Reference(wr, min_col=5, min_row=2, max_row=2 + n_dep), titles_from_data=True)
         bar.set_categories(Reference(wr, min_col=4, min_row=3, max_row=2 + n_dep))
         wr.add_chart(bar, "H16")
+
+    # ── Feuilles Stagiaires & Prestataires (comme le classeur) ──
+    wsg = wb.create_sheet("Stagiaires")
+    wsg.append(["N° Ord", "Nom", "Prénoms", "Sexe", "Contact", "Établissement / École",
+                "Niveau / Filière", "Thème du stage", "Département d'accueil",
+                "Encadreur", "Date début", "Date fin", "Durée", "Convention signée",
+                "Indemnité", "Statut", "Observation"])
+    for i, s in enumerate(frappe.get_all(
+            "Stagiaire RH KYA",
+            fields=["nom", "prenoms", "sexe", "contact", "etablissement",
+                    "niveau_filiere", "theme_stage", "departement_accueil", "encadreur",
+                    "date_debut", "date_fin", "duree", "convention_signee",
+                    "indemnite_stage", "statut", "observation"],
+            order_by="date_debut desc", limit_page_length=0), start=1):
+        wsg.append([i, s.nom, s.prenoms, s.sexe, s.contact, s.etablissement,
+                    s.niveau_filiere, s.theme_stage, s.departement_accueil, s.encadreur,
+                    str(s.date_debut or ""), str(s.date_fin or ""), s.duree,
+                    s.convention_signee, flt(s.indemnite_stage), s.statut, s.observation])
+
+    wpr = wb.create_sheet("Prestataires")
+    wpr.append(["N° Ord", "Nom / Raison sociale", "Type", "Contact", "Email",
+                "Nature de la prestation", "Département bénéficiaire", "Date début",
+                "Date fin", "Durée", "Montant", "Mode de paiement", "Statut",
+                "Référence contrat / Facture", "Observation"])
+    for i, p in enumerate(frappe.get_all(
+            "Prestataire KYA",
+            fields=["raison_sociale", "type_prestataire", "contact", "email",
+                    "nature_prestation", "departement_beneficiaire",
+                    "date_debut_contrat", "date_fin_contrat", "duree",
+                    "montant_contrat", "mode_paiement", "statut",
+                    "reference_contrat", "observation"],
+            order_by="date_debut_contrat desc", limit_page_length=0), start=1):
+        wpr.append([i, p.raison_sociale, p.type_prestataire, p.contact, p.email,
+                    p.nature_prestation, p.departement_beneficiaire,
+                    str(p.date_debut_contrat or ""), str(p.date_fin_contrat or ""),
+                    p.duree, flt(p.montant_contrat), p.mode_paiement, p.statut,
+                    p.reference_contrat, p.observation])
 
     buf = io.BytesIO()
     wb.save(buf)

@@ -51,6 +51,7 @@
 
   <div class="rh-kpis" id="rh-kpi1"></div>
   <div class="rh-kpis" id="rh-kpi2"></div>
+  <div class="rh-kpis" id="rh-kpi3" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));max-width:520px;"></div>
 
   <div class="rh-grid">
     <div class="rh-card"><h3>Répartition par sexe</h3><div class="cbox"><canvas id="c-sexe"></canvas></div></div>
@@ -102,6 +103,12 @@ function render(){
     kpiCard(k.age_moyen,'Âge moyen','green')+
     kpiCard(k.age_median,'Âge médian','green')+
     kpiCard(k.anciennete_moyenne,'Ancienneté moyenne (ans)','violet');
+  // ligne 3 du classeur : stagiaires / prestataires en cours (hors effectif)
+  document.getElementById('rh-kpi3').innerHTML =
+    '<a href="/app/stagiaire-rh-kya" target="_blank" style="text-decoration:none;">'+
+      kpiCard(nf(k.stagiaires_en_cours||0),'Stagiaires en cours','blue')+'</a>'+
+    '<a href="/app/prestataire-kya" target="_blank" style="text-decoration:none;">'+
+      kpiCard(nf(k.prestataires_en_cours||0),'Prestataires en cours','amber')+'</a>';
 
   // remplir le filtre département une seule fois
   const sel=document.getElementById('f-dept');
