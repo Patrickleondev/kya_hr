@@ -797,7 +797,11 @@ def dashboard_overview():
     # Indicateurs « fiche AEA-ENG-13 » (statut par référence : dispo = bon état).
     bon_total = round(sum(d["bon_etat"] for d in lignes), 2)
     defect_total = round(sum(d.get("defectueux", 0) for d in lignes), 2)
-    _stat = [evaluer_ligne(d["bon_etat"], d["reparation"], d.get("defectueux", 0))["statut"] for d in lignes]
+    _cats = {a["name"]: (a.get("categorie") or "Non classé")
+             for a in frappe.get_all("Article KYA", fields=["name", "categorie"])}
+    _stat = [evaluer_ligne(d["bon_etat"], d["reparation"], d.get("defectueux", 0),
+                           categorie=_cats.get(d["item"], "Non classé"))["statut"]
+             for d in lignes]
     taux_bon_etat = round(100 * bon_total / total_unites, 1) if total_unites else 0.0
     a_commander = sum(1 for s in _stat if s == "A COMMANDER")
     ruptures_stock = sum(1 for s in _stat if s == "RUPTURE")
@@ -823,6 +827,33 @@ def dashboard_overview():
         SELECT type_mouvement, COUNT(*) AS n
         FROM `tabMouvement Stock KYA` WHERE date_mouvement >= %(d)s
         GROUP BY type_mouvement""", {"d": depuis}, as_dict=True)
+    # Tendances (tuiles KPI v2) : variation nette 30 j + activité des 8
+    # dernières semaines (sparklines). Les imports/ajustements comptent dans
+    # le net mais pas dans entrées/sorties.
+    flux = frappe.db.sql("""
+        SELECT date_mouvement AS d, type_mouvement AS t, quantite AS q
+        FROM `tabMouvement Stock KYA` WHERE date_mouvement >= %(d)s""",
+        {"d": add_days(today(), -56)}, as_dict=True)
+    ref = frappe.utils.getdate(today())
+    hebdo = [{"entrees": 0.0, "sorties": 0.0, "net": 0.0} for _ in range(8)]
+    delta_30j = entrees_30j = sorties_30j = 0.0
+    d30 = frappe.utils.getdate(depuis)
+    for f in flux:
+        dj = frappe.utils.getdate(f["d"])
+        age = (ref - dj).days
+        wi = 7 - min(age // 7, 7)  # 0 = semaine la plus ancienne, 7 = courante
+        q = flt(f["q"])
+        hebdo[wi]["net"] = round(hebdo[wi]["net"] + q, 2)
+        if f["t"] == "Entrée":
+            hebdo[wi]["entrees"] = round(hebdo[wi]["entrees"] + q, 2)
+        elif f["t"] == "Sortie":
+            hebdo[wi]["sorties"] = round(hebdo[wi]["sorties"] + abs(q), 2)
+        if dj >= d30:
+            delta_30j = round(delta_30j + q, 2)
+            if f["t"] == "Entrée":
+                entrees_30j = round(entrees_30j + q, 2)
+            elif f["t"] == "Sortie":
+                sorties_30j = round(sorties_30j + abs(q), 2)
     return {
         "kpi": {"articles": len(articles_set), "magasins": len(magasins_set),
                 "unites": total_unites, "en_reparation": en_reparation, "ruptures": ruptures,
@@ -830,6 +861,8 @@ def dashboard_overview():
                 # Indicateurs alignés sur la fiche officielle (dispo = bon état).
                 "taux_bon_etat": taux_bon_etat, "a_commander": a_commander,
                 "ruptures_stock": ruptures_stock},
+        "tendances": {"delta_30j": delta_30j, "entrees_30j": entrees_30j,
+                      "sorties_30j": sorties_30j, "hebdo": hebdo},
         "par_magasin": sorted(par_mag.values(), key=lambda x: x["magasin"]),
         "recents": recents, "par_type": par_type,
     }
