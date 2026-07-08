@@ -1,145 +1,145 @@
-<!-- KYA-BRAND -->
 <style>
-.kyab-head{display:flex;align-items:center;justify-content:space-between;
-  border-bottom:2px solid #0E5C8A;padding-bottom:8px;margin-bottom:14px;
-  font-family:Arial,Helvetica,sans-serif;}
-.kyab-head .kyab-l img{max-height:58px;}
-.kyab-head .kyab-r{text-align:right;font-size:9px;color:#555;line-height:1.4;}
-.kyab-head .kyab-r .kyab-slog{color:#F77F00;font-weight:700;font-style:italic;
-  font-size:11px;display:block;margin-bottom:2px;}
+    @page { size: A4 landscape; margin: 12mm; }
+    body { font-family: Arial, "DejaVu Sans", "Liberation Sans", sans-serif; font-size: 11px; color: #333; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    img { max-width: 100%; height: auto; }
+    .kya-doc { max-width: 100%; margin: 0 auto; }
+    .kya-sec-body { page-break-inside: avoid; }
+    .kya-doc-header { display: table; width: 100%; padding: 10px 0 0; border-collapse: collapse; }
+    .kya-doc-header > div { display: table-cell; vertical-align: top; }
+    .kya-doc-logo { width: 150px; padding-right: 24px; }
+    .kya-doc-logo img { height: 88px; width: auto; max-width: 140px; }
+    .kya-doc-info { text-align: right; }
+    .kya-doc-title { font-size: 22px; font-weight: 800; color: #009B77; text-transform: uppercase; margin: 0 0 4px; }
+    .kya-doc-slogan { font-style: italic; color: #F58220; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    .kya-doc-company { font-size: 9px; color: #666; line-height: 1.6; }
+    .kya-doc-line { height: 3px; background: #009B77; margin: 12px 0 8px; }
+    .kya-doc-ref { text-align: center; font-size: 14px; font-weight: 800; color: #009B77; margin: 8px 0 14px; }
+    .kya-sec-header { background: #009688; color: #fff; padding: 7px 14px; font-size: 12px; font-weight: 700; text-transform: uppercase; margin: 12px 0 0; }
+    .kya-sec-body { padding: 10px 14px; border: 1px solid #dee2e6; border-top: none; }
+    .kya-row { display: table; width: 100%; table-layout: fixed; margin-bottom: 6px; }
+    .kya-col { display: table-cell; vertical-align: top; padding-right: 16px; }
+    .kya-col:last-child { padding-right: 0; }
+    .kya-lbl { font-weight: 700; color: #009B77; font-size: 9px; text-transform: uppercase; margin-bottom: 2px; }
+    .kya-val { font-size: 12px; padding: 3px 0; min-height: 18px; }
+    .kya-items { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 6px 0; }
+    .kya-items th { border: 1px solid #333; background: #009688; color: #fff; padding: 7px 10px; text-align: left; word-break: break-word; overflow-wrap: break-word; font-size: 10px; }
+    .kya-items td { padding: 5px 10px; border: 1px solid #333; word-break: break-word; overflow-wrap: break-word; font-size: 11px; }
+    .kya-items .num { text-align: right; }
+    .kya-totals { display: table; width: 100%; table-layout: fixed; margin-top: 8px; border-collapse: separate; border-spacing: 12px 0; }
+    .kya-totals .kpi { display: table-cell; vertical-align: top; background: #f5f5f5; padding: 10px; border-radius: 6px; border-left: 4px solid #009688; }
+    .kya-totals .kpi.pos { border-left-color: #2e7d32; }
+    .kya-totals .kpi.neg { border-left-color: #c62828; }
+    .kya-totals .kpi .lbl { font-size: 9px; color: #666; text-transform: uppercase; }
+    .kya-totals .kpi .val { font-size: 14px; font-weight: 700; color: #1a1a1a; margin-top: 4px; }
+    .kya-status { text-align: center; margin: 12px 0; }
+    .kya-badge { display: inline-block; padding: 5px 18px; border-radius: 14px; font-weight: 700; font-size: 11px; }
+    .kya-badge-ok { background: #e8f5e9; color: #2e7d32; border: 2px solid #4caf50; }
+    .kya-badge-wait { background: #fff3e0; color: #e65100; border: 2px solid #ff9800; }
+    .kya-sigs { display: table; width: 100%; table-layout: fixed; margin-top: 10px; border-collapse: separate; border-spacing: 10px 0; page-break-inside: avoid; }
+    .kya-sig { display: table-cell; text-align: center; vertical-align: top; }
+    .kya-sig img { max-height: 50px; display: block; margin: 0 auto 4px; }
+    .kya-sig .sig-line { border-top: 1px solid #333; margin-top: 28px; padding-top: 4px; font-size: 9px; font-weight: 600; }
+    .kya-sig .sig-date { font-size: 8px; color: #888; }
+    .kya-doc-footer { text-align: center; padding: 10px 0 0; margin-top: 14px; border-top: 2px solid #009B77; font-size: 9px; color: #999; }
 </style>
-<div class="kyab-head">
-  <div class="kyab-l">
-    <img src="/assets/kya_hr/images/logo_kya.png" onerror="this.onerror=null;this.src='/files/vrai.png'">
+<div class="kya-doc">
+  <div class="kya-doc-header">
+    <div class="kya-doc-logo">
+      <img src="data:image/png;base64,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" alt="KYA">
+    </div>
+    <div class="kya-doc-info">
+      <div class="kya-doc-title">FICHE D'INVENTAIRE</div>
+      <div class="kya-doc-slogan">Move beyond the sky!</div>
+      <div class="kya-doc-company">
+        info@kya-energy.com<br>
+        N° RCCM : TG-LOM 2015 B 975<br>
+        NIF : 1000430317 | CNSS : 48863
+      </div>
+    </div>
   </div>
-  <div class="kyab-r">
-    <span class="kyab-slog">KYA, move beyond the sky!</span>
-    info@kya-energy.com<br>
-    N&deg; RCCM : TG-LOM 2015 B 975<br>
-    NIF : 1000430317 &nbsp;|&nbsp; CNSS : 48863
+  <div class="kya-doc-line"></div>
+  <div class="kya-doc-ref">N° {{ doc.name }} — {{ frappe.utils.format_date(doc.date_inventaire) }}</div>
+
+  <div class="kya-sec-header">1. IDENTIFICATION</div>
+  <div class="kya-sec-body">
+    <div class="kya-row">
+      <div class="kya-col"><div class="kya-lbl">Date de l'inventaire</div><div class="kya-val">{{ frappe.utils.format_date(doc.date_inventaire) }}</div></div>
+      <div class="kya-col"><div class="kya-lbl">Référence</div><div class="kya-val">{{ doc.reference or '—' }}</div></div>
+      <div class="kya-col"><div class="kya-lbl">Type</div><div class="kya-val">{{ doc.type_inventaire or '—' }}</div></div>
+      <div class="kya-col"><div class="kya-lbl">Magasin</div><div class="kya-val">{{ doc.warehouse_filter or 'Tous' }}</div></div>
+    </div>
+    {% if doc.objet %}<div class="kya-row"><div class="kya-col"><div class="kya-lbl">Objet</div><div class="kya-val">{{ doc.objet }}</div></div></div>{% endif %}
   </div>
-</div>
-<style>
-  /* ── Fiche Inventaire KYA — impression PDF (wkhtmltopdf) ── */
-  .kya-inv { font-family: Arial, sans-serif; font-size: 12px; color:#222; }
-  .kya-inv * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-  .kya-inv table { border-collapse: collapse; width: 100%; }
-  .kya-inv .head-band td { vertical-align: middle; }
-  .kya-inv .meta td { padding:5px 8px; border:1px solid #cfd8dc; }
-  .kya-inv .meta .lbl { font-weight:bold; color:#00703c; }
-  .kya-inv h2.title { text-align:center; color:#00703c; margin:14px 0 10px; font-size:16px; letter-spacing:.5px; }
 
-  /* En-tête de tableau : fond vert ET texte foncé de secours pour que l'écrit
-     reste visible même si le PDF n'imprime pas le fond. */
-  .kya-inv table.items thead th {
-    background:#00A651 !important;
-    color:#ffffff !important;
-    padding:7px 6px; border:1px solid #00703c;
-    font-weight:bold; font-size:11px; text-align:center;
-    text-shadow:0 0 1px rgba(0,0,0,.35);
-  }
-  .kya-inv table.items td { padding:5px 6px; border:1px solid #cfd8dc; }
-  .kya-inv table.items td.c { text-align:center; }
-  .kya-inv table.items td.r { text-align:right; }
-  .kya-inv table.items tr.ecart td { background:#fff3cd !important; }
-  .kya-inv .pos { color:#1b7a3d; font-weight:bold; }
-  .kya-inv .neg { color:#c0392b; font-weight:bold; }
+  <div class="kya-sec-header">2. LIGNES D'INVENTAIRE</div>
+  <div class="kya-sec-body">
+    <table class="kya-items">
+      <colgroup><col style='width:4%'><col style='width:12%'><col style='width:24%'><col style='width:8%'><col style='width:7%'><col style='width:7%'><col style='width:8%'><col style='width:9%'><col style='width:7%'><col style='width:14%'></colgroup>
+      <thead><tr>
+        <th>#</th><th>Article</th><th>Désignation</th>
+        <th class="num">Bon état</th><th class="num">En rép.</th><th class="num">Défect.</th>
+        <th class="num">Compté</th><th class="num">Théorique</th><th class="num">Écart</th><th>Remarque</th>
+      </tr></thead>
+      <tbody>
+        {% for it in doc.items %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ it.item_code or '' }}</td>
+          <td>{{ it.designation or '' }}</td>
+          <td class="num">{{ it.qte_bon_etat or 0 }}</td>
+          <td class="num">{{ it.qte_en_reparation or 0 }}</td>
+          <td class="num">{{ it.qte_defectueux or 0 }}</td>
+          <td class="num"><strong>{{ it.qte_comptee or 0 }}</strong></td>
+          <td class="num">{{ it.qte_theorique or 0 }}</td>
+          <td class="num">{% if (it.ecart or 0) != 0 %}<strong style="color:#c62828;">{{ it.ecart }}</strong>{% else %}0{% endif %}</td>
+          <td>{{ it.remarque or '' }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="10" style="text-align:center;padding:18px;color:#999;">Aucune ligne</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 
-  .kya-inv .sign { margin-top:26px; }
-  .kya-inv .sign td { width:50%; text-align:center; padding:6px 10px; vertical-align:top; }
-  .kya-inv .sign .role { font-weight:bold; text-transform:uppercase; font-size:11px; letter-spacing:.3px; display:block; margin-bottom:4px; }
-  .kya-inv .sign img { max-height:50px; display:block; margin:2px auto 0; }
-  .kya-inv .sign .vspace { height:42px; }
-  .kya-inv .sign .nom { font-size:12px; font-weight:bold; border-top:1px solid #333; padding-top:5px; display:block; }
-  .kya-inv .sign .dt { font-size:10px; color:#666; margin-top:2px; display:block; }
-  .kya-inv .foot { text-align:center; font-size:10px; margin-top:18px; color:#888; }
+  <div class="kya-sec-header">3. RÉCAPITULATIF</div>
+  <div class="kya-sec-body">
+    {% set lignes_ecart = doc.items | selectattr('ecart') | list | length %}
+    <div class="kya-totals">
+      <div class="kpi"><div class="lbl">Lignes inventoriées</div><div class="val">{{ doc.items | length }}</div></div>
+      <div class="kpi pos"><div class="lbl">Total compté</div><div class="val">{{ doc.items | sum(attribute='qte_comptee') or 0 }}</div></div>
+      <div class="kpi"><div class="lbl">Total théorique</div><div class="val">{{ doc.items | sum(attribute='qte_theorique') or 0 }}</div></div>
+      <div class="kpi {{ 'neg' if lignes_ecart else '' }}"><div class="lbl">Lignes en écart</div><div class="val">{{ lignes_ecart }}</div></div>
+    </div>
+  </div>
 
-  @media screen and (max-width:600px){
-    .kya-inv table.items thead th, .kya-inv table.items td { font-size:10px; padding:4px; }
-  }
-</style>
+  <div class="kya-status">
+    {% if doc.workflow_state == "Approuvé" %}
+      <span class="kya-badge kya-badge-ok">{{ doc.workflow_state }}</span>
+    {% else %}
+      <span class="kya-badge kya-badge-wait">{{ doc.workflow_state or 'EN ATTENTE' }}</span>
+    {% endif %}
+  </div>
 
-{%- set uom_fr = {
-  "Nos":"Unité(s)", "Unit":"Unité", "Unit(s)":"Unité(s)", "Pcs":"Pièce(s)",
-  "Box":"Boîte", "Set":"Jeu", "Meter":"Mètre", "Metre":"Mètre",
-  "Kg":"Kg", "Litre":"Litre", "Pair":"Paire", "Roll":"Rouleau"
-} -%}
+  <div class="kya-sec-header">4. SIGNATURES</div>
+  <div class="kya-sec-body">
+    {%- set _rh = "font-weight:bold;text-transform:uppercase;font-size:10px;letter-spacing:.3px;margin-bottom:4px;" -%}
+    <div class="kya-sigs">
+      <div class="kya-sig">
+        <div style="{{ _rh }}">Responsable de l'inventaire</div>
+        {% if doc.signature_responsable %}<img src="{{ doc.signature_responsable }}">{% else %}<div style="height:40px;"></div>{% endif %}
+        <div class="sig-line">{{ doc.responsable_nom or '' }}</div>
+        {% if doc.responsable_date %}<div class="sig-date">Le {{ frappe.utils.format_date(doc.responsable_date) }}</div>{% endif %}
+      </div>
+      <div class="kya-sig">
+        <div style="{{ _rh }}">Magasin / Stock</div>
+        {% if doc.signature_magasin %}<img src="{{ doc.signature_magasin }}">{% else %}<div style="height:40px;"></div>{% endif %}
+        <div class="sig-line">{{ doc.magasin_nom or '' }}</div>
+        {% if doc.magasin_date %}<div class="sig-date">Le {{ frappe.utils.format_date(doc.magasin_date) }}</div>{% endif %}
+      </div>
+    </div>
+  </div>
 
-<div class="kya-inv print-format">
-  <table style="border-bottom:2px solid #00A651;">
-    <tr class="head-band">
-      <td style="width:22%;"><img src="/files/vrai.png" style="max-height:72px;"/></td>
-      <td style="text-align:center;">
-        <h2 style="color:#00A651; margin:0; font-size:18px;">KYA-ENERGY GROUP</h2>
-        <p style="margin:2px 0; font-size:10px;">AGOE-LOGOPE | Tél : 70 45 34 81<br/>
-        RCCM TG-LOM 2015 B 975 | NIF 1000430317 | CNSS 48863</p>
-      </td>
-      <td style="width:24%; text-align:right; font-size:10px;">
-        <strong>N° :</strong> {{ doc.name }}<br/>
-        <strong>Date :</strong> {{ frappe.format(doc.date_inventaire, {'fieldtype':'Date'}) or '' }}<br/>
-        <strong>Type :</strong> {{ doc.type_inventaire or '' }}
-      </td>
-    </tr>
-  </table>
-
-  <h2 class="title">FICHE D'INVENTAIRE PHYSIQUE</h2>
-
-  <table class="meta" style="margin-bottom:10px;">
-    <tr>
-      <td><span class="lbl">Objet :</span> {{ doc.objet or '' }}</td>
-      <td><span class="lbl">Magasin :</span> {{ doc.warehouse_filter or 'Tous magasins' }}</td>
-    </tr>
-    <tr>
-      <td><span class="lbl">Responsable :</span> {{ doc.responsable_nom or '' }}</td>
-      <td><span class="lbl">Référence :</span> {{ doc.reference or '' }}</td>
-    </tr>
-  </table>
-
-  <table class="items">
-    <thead>
-      <tr>
-        <th style="width:4%;">#</th>
-        <th style="width:14%;">Article</th>
-        <th style="width:26%;">Désignation</th>
-        <th style="width:11%;">Unité</th>
-        <th style="width:12%;">Qté théorique</th>
-        <th style="width:12%;">Qté comptée</th>
-        <th style="width:9%;">Écart</th>
-        <th style="width:12%;">Remarque</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for it in doc.items %}
-      <tr {% if it.ecart and it.ecart != 0 %}class="ecart"{% endif %}>
-        <td class="c">{{ loop.index }}</td>
-        <td>{{ it.item_code or '' }}</td>
-        <td>{{ it.designation or '' }}</td>
-        <td class="c">{{ uom_fr.get(it.uom, it.uom) or '' }}</td>
-        <td class="r">{{ "%g"|format(it.qte_theorique or 0) }}</td>
-        <td class="r">{{ "%g"|format(it.qte_comptee or 0) }}</td>
-        <td class="r"><span class="{% if it.ecart and it.ecart < 0 %}neg{% elif it.ecart and it.ecart > 0 %}pos{% endif %}">{{ "%g"|format(it.ecart or 0) }}</span></td>
-        <td>{{ it.remarque or '' }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-
-  <table class="sign">
-    <tr>
-      <td>
-        <span class="role">Responsable Inventaire</span>
-        {% if doc.signature_responsable %}<img src="{{ doc.signature_responsable }}"/>{% else %}<div class="vspace"></div>{% endif %}
-        <span class="nom">{{ doc.responsable_nom or '' }}</span>
-        <span class="dt">Signé le {{ frappe.format(doc.responsable_date, {'fieldtype':'Date'}) or frappe.format(doc.date_inventaire, {'fieldtype':'Date'}) or '' }}{% if doc.docstatus == 1 %} à {{ frappe.utils.format_datetime(doc.modified, "HH:mm") }}{% endif %}</span>
-      </td>
-      <td>
-        <span class="role">Responsable Magasin</span>
-        {% if doc.signature_magasin %}<img src="{{ doc.signature_magasin }}"/>{% else %}<div class="vspace"></div>{% endif %}
-        <span class="nom">{{ doc.magasin_nom or '' }}</span>
-        <span class="dt">{% if doc.magasin_date %}Signé le {{ frappe.format(doc.magasin_date, {'fieldtype':'Date'}) }}{% endif %}</span>
-      </td>
-    </tr>
-  </table>
-
-  <p class="foot">Document généré par KYA-ERP — {{ frappe.utils.format_datetime(frappe.utils.now_datetime(), "dd/MM/yyyy HH:mm") }}</p>
+  <div class="kya-doc-footer">
+    Généré le {{ frappe.utils.now_datetime().strftime('%d/%m/%Y à %H:%M') }} — KYA-Energy Group, Lomé, Togo
+  </div>
 </div>

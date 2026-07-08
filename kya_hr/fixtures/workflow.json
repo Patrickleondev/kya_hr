@@ -98,7 +98,7 @@
   "transitions": [
    {
     "action": "Soumettre",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Employee",
     "condition": "not frappe.db.get_list('Has Role', {'parenttype': 'User', 'parent': frappe.db.get_value('Employee', doc.employee, 'user_id') or '__none__', 'role': 'Supérieur Immédiat'})",
     "next_state": "En attente du Supérieur Immédiat",
@@ -109,7 +109,7 @@
    },
    {
     "action": "Soumettre",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Employee",
     "condition": "frappe.db.get_list('Has Role', {'parenttype': 'User', 'parent': frappe.db.get_value('Employee', doc.employee, 'user_id') or '__none__', 'role': 'Supérieur Immédiat'})",
     "next_state": "En attente RH",
@@ -120,7 +120,7 @@
    },
    {
     "action": "Approuver",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Supérieur Immédiat",
     "condition": null,
     "next_state": "En attente RH",
@@ -131,7 +131,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Supérieur Immédiat",
     "condition": null,
     "next_state": "Rejeté",
@@ -142,7 +142,7 @@
    },
    {
     "action": "Approuver",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Responsable RH",
     "condition": null,
     "next_state": "En attente DG",
@@ -153,7 +153,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Responsable RH",
     "condition": null,
     "next_state": "Rejeté",
@@ -164,7 +164,7 @@
    },
    {
     "action": "Approuver",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Directeur Général",
     "condition": null,
     "next_state": "Approuvé",
@@ -175,7 +175,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Directeur Général",
     "condition": null,
     "next_state": "Rejeté",
@@ -260,7 +260,7 @@
   "transitions": [
    {
     "action": "Envoyer pour Validation",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Employee",
     "condition": null,
     "next_state": "En attente",
@@ -271,7 +271,7 @@
    },
    {
     "action": "Approuver",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Responsable Stock",
     "condition": null,
     "next_state": "Approuvé",
@@ -282,7 +282,7 @@
    },
    {
     "action": "Approuver",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Chargé des Stocks",
     "condition": null,
     "next_state": "Approuvé",
@@ -293,7 +293,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Responsable Stock",
     "condition": null,
     "next_state": "Rejeté",
@@ -304,7 +304,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Chargé des Stocks",
     "condition": null,
     "next_state": "Rejeté",
@@ -381,7 +381,7 @@
   "transitions": [
    {
     "action": "Soumettre",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Employee",
     "condition": "not doc.chef_absent",
     "next_state": "En attente Chef",
@@ -389,7 +389,7 @@
    },
    {
     "action": "Soumettre",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Stagiaire",
     "condition": "not doc.chef_absent",
     "next_state": "En attente Chef",
@@ -397,7 +397,7 @@
    },
    {
     "action": "Approuver",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Maître de Stage",
     "condition": null,
     "next_state": "En attente Resp. Stagiaires",
@@ -405,7 +405,7 @@
    },
    {
     "action": "Approuver",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Supérieur Immédiat",
     "condition": null,
     "next_state": "En attente Resp. Stagiaires",
@@ -413,7 +413,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Maître de Stage",
     "condition": null,
     "next_state": "Rejeté",
@@ -421,7 +421,7 @@
    },
    {
     "action": "Approuver",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Responsable des Stagiaires",
     "condition": null,
     "next_state": "En attente DG",
@@ -429,7 +429,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Responsable des Stagiaires",
     "condition": null,
     "next_state": "Rejeté",
@@ -437,7 +437,7 @@
    },
    {
     "action": "Approuver",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Directeur Général",
     "condition": null,
     "next_state": "Approuvé",
@@ -445,7 +445,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Directeur Général",
     "condition": null,
     "next_state": "Rejeté",
@@ -453,7 +453,7 @@
    },
    {
     "action": "Soumettre",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Employee",
     "condition": "doc.chef_absent",
     "next_state": "En attente Resp. Stagiaires",
@@ -461,7 +461,7 @@
    },
    {
     "action": "Soumettre",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Stagiaire",
     "condition": "doc.chef_absent",
     "next_state": "En attente Resp. Stagiaires",
@@ -558,7 +558,7 @@
    },
    {
     "action": "Approuver",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Chef Service",
     "condition": null,
     "next_state": "En attente Audit",
@@ -566,7 +566,7 @@
    },
    {
     "action": "Approuver",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Supérieur Immédiat",
     "condition": null,
     "next_state": "En attente Audit",
@@ -574,7 +574,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Chef Service",
     "condition": null,
     "next_state": "Rejeté",
@@ -582,7 +582,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Supérieur Immédiat",
     "condition": null,
     "next_state": "Rejeté",
@@ -590,7 +590,7 @@
    },
    {
     "action": "Approuver",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Auditeur Interne",
     "condition": null,
     "next_state": "En attente Direction",
@@ -598,7 +598,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Auditeur Interne",
     "condition": null,
     "next_state": "Rejeté",
@@ -606,7 +606,7 @@
    },
    {
     "action": "Approuver",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "DGA",
     "condition": null,
     "next_state": "En attente Magasin",
@@ -614,7 +614,7 @@
    },
    {
     "action": "Approuver",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Directeur Général",
     "condition": null,
     "next_state": "En attente Magasin",
@@ -622,7 +622,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "DGA",
     "condition": null,
     "next_state": "Rejeté",
@@ -630,7 +630,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Directeur Général",
     "condition": null,
     "next_state": "Rejeté",
@@ -638,7 +638,7 @@
    },
    {
     "action": "Livrer",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Chargé des Stocks",
     "condition": null,
     "next_state": "Approuvé",
@@ -646,7 +646,7 @@
    },
    {
     "action": "Livrer",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Responsable Stock",
     "condition": null,
     "next_state": "Approuvé",
@@ -654,7 +654,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Chargé des Stocks",
     "condition": null,
     "next_state": "Rejeté",
@@ -662,7 +662,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Responsable Stock",
     "condition": null,
     "next_state": "Rejeté",
@@ -736,7 +736,7 @@
   "transitions": [
    {
     "action": "Soumettre",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Employee",
     "condition": "not doc.chef_absent",
     "next_state": "En attente Chef",
@@ -744,7 +744,7 @@
    },
    {
     "action": "Approuver",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Chef Service",
     "condition": null,
     "next_state": "En attente RH",
@@ -752,7 +752,7 @@
    },
    {
     "action": "Approuver",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Supérieur Immédiat",
     "condition": null,
     "next_state": "En attente RH",
@@ -760,7 +760,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Chef Service",
     "condition": null,
     "next_state": "Rejeté",
@@ -768,7 +768,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Supérieur Immédiat",
     "condition": null,
     "next_state": "Rejeté",
@@ -776,7 +776,7 @@
    },
    {
     "action": "Valider (Absence Chef)",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Chef Service",
     "condition": null,
     "next_state": "En attente RH",
@@ -784,7 +784,7 @@
    },
    {
     "action": "Valider (Absence Chef)",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Supérieur Immédiat",
     "condition": null,
     "next_state": "En attente RH",
@@ -792,7 +792,7 @@
    },
    {
     "action": "Approuver",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Responsable RH",
     "condition": null,
     "next_state": "En attente Direction",
@@ -800,7 +800,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Responsable RH",
     "condition": null,
     "next_state": "Rejeté",
@@ -808,7 +808,7 @@
    },
    {
     "action": "Approuver",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "DGA",
     "condition": null,
     "next_state": "Approuvé",
@@ -816,7 +816,7 @@
    },
    {
     "action": "Approuver",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Directeur Général",
     "condition": null,
     "next_state": "Approuvé",
@@ -824,7 +824,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "DGA",
     "condition": null,
     "next_state": "Rejeté",
@@ -832,7 +832,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Directeur Général",
     "condition": null,
     "next_state": "Rejeté",
@@ -840,7 +840,7 @@
    },
    {
     "action": "Valider (Absence DGA)",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "DGA",
     "condition": null,
     "next_state": "Approuvé",
@@ -848,7 +848,7 @@
    },
    {
     "action": "Valider (Absence DGA)",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Directeur Général",
     "condition": null,
     "next_state": "Approuvé",
@@ -856,7 +856,7 @@
    },
    {
     "action": "Soumettre",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Employee",
     "condition": "doc.chef_absent",
     "next_state": "En attente RH",
@@ -922,7 +922,7 @@
   "transitions": [
    {
     "action": "Soumettre",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Employee",
     "condition": null,
     "next_state": "En attente Chef de Service",
@@ -930,7 +930,7 @@
    },
    {
     "action": "Approuver",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Supérieur Immédiat",
     "condition": "frappe.session.user == (doc.report_to_user or '')",
     "next_state": "En attente DG",
@@ -938,7 +938,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Supérieur Immédiat",
     "condition": "frappe.session.user == (doc.report_to_user or '')",
     "next_state": "Rejeté",
@@ -946,7 +946,7 @@
    },
    {
     "action": "Approuver (RH)",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Responsable RH",
     "condition": null,
     "next_state": "En attente DG",
@@ -954,7 +954,7 @@
    },
    {
     "action": "Rejeter (RH)",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Responsable RH",
     "condition": null,
     "next_state": "Rejeté",
@@ -962,7 +962,7 @@
    },
    {
     "action": "Approuver",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Directeur Général",
     "condition": null,
     "next_state": "Approuvé",
@@ -970,7 +970,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Directeur Général",
     "condition": null,
     "next_state": "Rejeté",
@@ -1044,7 +1044,7 @@
   "transitions": [
    {
     "action": "Soumettre",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Employee",
     "condition": null,
     "next_state": "En attente Chef",
@@ -1052,7 +1052,7 @@
    },
    {
     "action": "Approuver",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Chef Service",
     "condition": null,
     "next_state": "En attente DAAF",
@@ -1060,7 +1060,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Chef Service",
     "condition": null,
     "next_state": "Rejeté",
@@ -1068,7 +1068,7 @@
    },
    {
     "action": "Approuver",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "DAAF",
     "condition": "doc.montant_total <= 100000 and (doc.urgence or 'Normal') == 'Normal'",
     "next_state": "Approuvé",
@@ -1076,7 +1076,7 @@
    },
    {
     "action": "Approuver",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "DAAF",
     "condition": "doc.montant_total > 100000 or (doc.urgence and doc.urgence != 'Normal')",
     "next_state": "En attente DG",
@@ -1084,7 +1084,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "DAAF",
     "condition": null,
     "next_state": "Rejeté",
@@ -1092,7 +1092,7 @@
    },
    {
     "action": "Approuver",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Directeur Général",
     "condition": null,
     "next_state": "Approuvé",
@@ -1100,7 +1100,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Directeur Général",
     "condition": null,
     "next_state": "Rejeté",
@@ -1188,7 +1188,7 @@
    },
    {
     "action": "Valider Réception Stock",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Chargé des Stocks",
     "condition": null,
     "next_state": "En attente Comptable",
@@ -1196,7 +1196,7 @@
    },
    {
     "action": "Valider Réception Stock",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Responsable Achats",
     "condition": null,
     "next_state": "En attente Comptable",
@@ -1204,7 +1204,7 @@
    },
    {
     "action": "Valider Réception Stock",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Stock Manager",
     "condition": null,
     "next_state": "En attente Comptable",
@@ -1212,7 +1212,7 @@
    },
    {
     "action": "Valider Réception Stock",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "System Manager",
     "condition": null,
     "next_state": "En attente Comptable",
@@ -1220,7 +1220,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Chargé des Stocks",
     "condition": null,
     "next_state": "Rejeté",
@@ -1228,7 +1228,7 @@
    },
    {
     "action": "Valider Comptabilité",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Comptable",
     "condition": null,
     "next_state": "En attente Audit",
@@ -1236,7 +1236,7 @@
    },
    {
     "action": "Valider Comptabilité",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Accounts Manager",
     "condition": null,
     "next_state": "En attente Audit",
@@ -1244,7 +1244,7 @@
    },
    {
     "action": "Valider Comptabilité",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "System Manager",
     "condition": null,
     "next_state": "En attente Audit",
@@ -1252,7 +1252,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Comptable",
     "condition": null,
     "next_state": "Rejeté",
@@ -1260,7 +1260,7 @@
    },
    {
     "action": "Approuver",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Auditeur Interne",
     "condition": null,
     "next_state": "Approuvé",
@@ -1268,7 +1268,7 @@
    },
    {
     "action": "Approuver",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "System Manager",
     "condition": null,
     "next_state": "Approuvé",
@@ -1276,7 +1276,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Auditeur Interne",
     "condition": null,
     "next_state": "Rejeté",
@@ -1346,7 +1346,7 @@
    },
    {
     "action": "Valider",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Chargé des Stocks",
     "condition": null,
     "next_state": "Approuvé",
@@ -1354,7 +1354,7 @@
    },
    {
     "action": "Valider",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Responsable Stock",
     "condition": null,
     "next_state": "Approuvé",
@@ -1362,7 +1362,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Chargé des Stocks",
     "condition": null,
     "next_state": "Rejeté",
@@ -1370,7 +1370,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Responsable Stock",
     "condition": null,
     "next_state": "Rejeté",
@@ -1559,7 +1559,7 @@
   "is_active": 1,
   "name": "Flux Brouillard Caisse",
   "override_status": 0,
-  "send_email_alert": 1,
+  "send_email_alert": 0,
   "states": [
    {
     "allow_edit": "Caissier",
@@ -1618,7 +1618,7 @@
   "transitions": [
    {
     "action": "Soumettre au Comptable",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Caissier",
     "condition": null,
     "next_state": "En attente Comptable",
@@ -1634,7 +1634,7 @@
    },
    {
     "action": "Viser (Comptable)",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Comptable",
     "condition": null,
     "next_state": "En attente DFC",
@@ -1650,7 +1650,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Comptable",
     "condition": null,
     "next_state": "Rejeté",
@@ -1658,7 +1658,7 @@
    },
    {
     "action": "Approuver (DFC)",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "DFC",
     "condition": null,
     "next_state": "Approuvé",
@@ -1674,7 +1674,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "DFC",
     "condition": null,
     "next_state": "Rejeté",
@@ -1682,7 +1682,7 @@
    },
    {
     "action": "Soumettre au Comptable",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Caissier",
     "condition": null,
     "next_state": "En attente Comptable",
@@ -1690,7 +1690,7 @@
    },
    {
     "action": "Soumettre au Comptable",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Comptable",
     "condition": null,
     "next_state": "En attente Comptable",
@@ -1706,7 +1706,7 @@
   "is_active": 1,
   "name": "Flux Etat Recap Cheques",
   "override_status": 0,
-  "send_email_alert": 1,
+  "send_email_alert": 0,
   "states": [
    {
     "allow_edit": "Comptable",
@@ -1757,7 +1757,7 @@
   "transitions": [
    {
     "action": "Soumettre au DFC",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Comptable",
     "condition": null,
     "next_state": "En attente Validation DFC",
@@ -1781,7 +1781,7 @@
    },
    {
     "action": "Valider",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "DFC",
     "condition": null,
     "next_state": "Validé DFC",
@@ -1797,7 +1797,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "DFC",
     "condition": null,
     "next_state": "Rejeté",
@@ -1805,7 +1805,7 @@
    },
    {
     "action": "Soumettre au DFC",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Comptable",
     "condition": null,
     "next_state": "En attente Validation DFC",
@@ -1874,7 +1874,7 @@
    },
    {
     "action": "Réceptionner Retour",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Chargé des Stocks",
     "condition": null,
     "next_state": "Approuvé",
@@ -1882,7 +1882,7 @@
    },
    {
     "action": "Réceptionner Retour",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Responsable Stock",
     "condition": null,
     "next_state": "Approuvé",
@@ -1890,7 +1890,7 @@
    },
    {
     "action": "Réceptionner Retour",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "System Manager",
     "condition": null,
     "next_state": "Approuvé",
@@ -1898,7 +1898,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Chargé des Stocks",
     "condition": null,
     "next_state": "Rejeté",
@@ -1906,7 +1906,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "System Manager",
     "condition": null,
     "next_state": "Rejeté",
@@ -1926,7 +1926,7 @@
   "modified": "2026-06-20 12:00:00",
   "name": "Flux Bon Commande KYA",
   "override_status": 0,
-  "send_email_alert": 1,
+  "send_email_alert": 0,
   "states": [
    {
     "allow_edit": "Responsable Achats",
@@ -1980,7 +1980,7 @@
    },
    {
     "action": "Viser",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Auditeur Interne",
     "condition": null,
     "next_state": "En attente Autorisation",
@@ -1988,7 +1988,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Auditeur Interne",
     "condition": null,
     "next_state": "Annulé",
@@ -1996,7 +1996,7 @@
    },
    {
     "action": "Autoriser",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "DGA",
     "condition": "doc.total_ttc <= 100000",
     "next_state": "Émis",
@@ -2004,7 +2004,7 @@
    },
    {
     "action": "Autoriser",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Directeur Général",
     "condition": null,
     "next_state": "Émis",
@@ -2012,7 +2012,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "DGA",
     "condition": "doc.total_ttc <= 100000",
     "next_state": "Annulé",
@@ -2020,7 +2020,7 @@
    },
    {
     "action": "Rejeter",
-    "allow_self_approval": 0,
+    "allow_self_approval": 1,
     "allowed": "Directeur Général",
     "condition": null,
     "next_state": "Annulé",

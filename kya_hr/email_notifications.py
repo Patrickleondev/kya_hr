@@ -70,6 +70,26 @@ DOCTYPE_CONFIG = {
         "employee_field": "employee",
         "icon": "📊",
     },
+    # Circuits comptabilité & bons de commande : oubliés jusqu'ici — le caissier
+    # ne recevait AUCUN mail sur son brouillard (retour terrain 07/2026).
+    "Brouillard Caisse": {
+        "label": "Brouillard de Caisse",
+        "route": "brouillard-caisse",
+        "employee_field": "caissiere",
+        "icon": "🪙",
+    },
+    "Etat Recap Cheques": {
+        "label": "État Récapitulatif des Chèques",
+        "route": "etat-recap",
+        "employee_field": "redacteur",
+        "icon": "🧾",
+    },
+    "Bon Commande KYA": {
+        "label": "Bon de Commande",
+        "route": "bon-commande",
+        "employee_field": "employee",
+        "icon": "📄",
+    },
 }
 
 

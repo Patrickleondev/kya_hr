@@ -40,15 +40,12 @@ BANDEAU = MARQUEUR + """
 </div>
 """
 
-# Print Formats à brander (ceux qui n'ont pas déjà le logo).
-CIBLES = [
-    "Demande Achat KYA Officiel",
-    "PV Sortie Matériel Officiel",
-    "Ticket Sortie Matériel",
-    "Ticket Entrée Matériel KYA",
-    "Brouillard Caisse KYA Officiel",
-    "Fiche Inventaire KYA",
-]
+# Print Formats à brander : UNIQUEMENT ceux sans en-tête propre. Les brander
+# quand ils ont déjà leur bandeau (logo base64 + titre + coordonnées) faisait
+# un DOUBLE en-tête sur les PDF (constaté sur le brouillard de caisse, 07/2026).
+# Depuis la refonte de 07/2026, TOUS les formats officiels ont leur en-tête ->
+# liste vide ; le garde-fou (data:image / kya-doc-header) protège en plus.
+CIBLES = []
 
 
 def execute() -> dict:
@@ -58,8 +55,9 @@ def execute() -> dict:
             out["absents"].append(name)
             continue
         html = frappe.db.get_value("Print Format", name, "html") or ""
-        # Déjà branché (marqueur) OU déjà un logo KYA d'origine → on ne double pas.
-        if MARQUEUR in html or "logo_kya" in html.lower():
+        # Déjà branché (marqueur) OU en-tête propre (logo/bandeau) → on ne double pas.
+        if (MARQUEUR in html or "logo_kya" in html.lower()
+                or "kya-doc-header" in html or "data:image" in html):
             out["deja_ok"].append(name)
             continue
         frappe.db.set_value("Print Format", name, "html", BANDEAU + html,
