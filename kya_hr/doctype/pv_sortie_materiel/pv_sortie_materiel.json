@@ -403,5 +403,6 @@
   "statut",
   "workflow_state",
   "amended_from"
- ]
+ ],
+ "default_print_format": "PV Sortie Matériel Officiel"
 }

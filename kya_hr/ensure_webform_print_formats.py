@@ -34,6 +34,48 @@ WEBFORM_PRINT_FORMATS = {
 }
 
 
+# DocType -> Print Format par défaut : le bouton Imprimer du DESK (et toute
+# génération PDF sans format explicite) doit sortir le format officiel, pas le
+# « Standard » (retour terrain : PDF Brouillard Caisse illisible en prod).
+# Pour les doctypes custom=0 le JSON du doctype porte aussi default_print_format ;
+# pour les custom=1 (non resyncés par migrate) ce set DB est la seule source.
+DOCTYPE_DEFAULT_PRINT_FORMATS = {
+    "Brouillard Caisse": "Brouillard Caisse KYA Officiel",
+    "Etat Recap Cheques": "Etat Recap Cheques Officiel",
+    "Demande Achat KYA": "Demande Achat KYA Officiel",
+    "Bon Commande KYA": "Bon Commande KYA Officiel",
+    "PV Sortie Materiel": "PV Sortie Matériel Officiel",
+    "PV Entree Materiel": "Ticket Entrée Matériel KYA",
+    "Retour Materiel KYA": "Retour Materiel KYA Officiel",
+    "Inventaire KYA": "Fiche Inventaire KYA",
+    "KYA Contrat": "KYA Contrat PDF",
+}
+
+
+def ensure_doctype_defaults() -> dict:
+    out = {"set": [], "unchanged": 0, "skipped": []}
+    for dt, pf in DOCTYPE_DEFAULT_PRINT_FORMATS.items():
+        if not frappe.db.exists("DocType", dt) or not frappe.db.exists("Print Format", pf):
+            out["skipped"].append(dt)
+            continue
+        if frappe.db.get_value("DocType", dt, "default_print_format") == pf:
+            out["unchanged"] += 1
+            continue
+        frappe.db.set_value("DocType", dt, "default_print_format", pf,
+                            update_modified=False)
+        out["set"].append(f"{dt} -> {pf}")
+    try:
+        frappe.db.commit()
+        frappe.clear_cache()
+    except Exception:
+        pass
+    print(f"[ensure_doctype_defaults] set={len(out['set'])} unchanged={out['unchanged']} "
+          f"skipped={len(out['skipped'])}")
+    if out["set"]:
+        print("  " + " | ".join(out["set"]))
+    return out
+
+
 def execute() -> dict:
     summary = {"set": [], "skipped": [], "unchanged": 0}
     for webform, pf in WEBFORM_PRINT_FORMATS.items():
@@ -79,4 +121,5 @@ def execute() -> dict:
         print("  " + " | ".join(summary["set"]))
     if summary["skipped"]:
         print("  SKIP: " + " | ".join(summary["skipped"]))
+    summary["doctype_defaults"] = ensure_doctype_defaults()
     return summary

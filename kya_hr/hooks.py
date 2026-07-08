@@ -110,13 +110,18 @@ doc_events = {
         "after_insert": "kya_hr.dashboard_realtime.notify_dashboard_change",
         "on_update": "kya_hr.dashboard_realtime.notify_dashboard_change",
     },
-    # Tache Equipe : notification des attributaires (creation + ajout d'un membre)
+    # Tache Equipe : notification des attributaires + statut auto depuis
+    # taux_effectif (custom:1 -> controller Python inactif).
+    # NB : cette clé était définie DEUX FOIS dans ce dict ; la seconde écrasait
+    # silencieusement la première et les mails d'attribution ne partaient jamais.
     "Tache Equipe": {
+        "validate": "kya_hr.auto_calc_logic.compute_tache_equipe",
         "after_insert": "kya_hr.email_notifications.send_task_assignment_email",
         "on_update": "kya_hr.email_notifications.send_task_assignment_email",
     },
     # Chef routing + notifications demandeur (confirmation soumission + mises à jour état)
     "Demande Achat KYA": {
+        "on_change": "kya_hr.api.pdf_final.attach_final_pdf",
         "before_save": "kya_hr.chef_routing.populate_chef",
         "validate": "kya_hr.auto_calc_logic.compute_demande_achat",
         "after_insert": [
@@ -130,6 +135,8 @@ doc_events = {
     },
     "Bon Commande KYA": {
         "validate": "kya_hr.auto_calc_logic.compute_bon_commande",
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_change": "kya_hr.api.pdf_final.attach_final_pdf",
     },
     "Permission Sortie Employe": {
         "before_save": "kya_hr.chef_routing.populate_chef",
@@ -190,6 +197,7 @@ doc_events = {
     },
     # PV et Bilan : pas de chef_routing (employee_field suffit)
     "PV Sortie Materiel": {
+        "on_change": "kya_hr.api.pdf_final.attach_final_pdf",
         "after_insert": [
             "kya_hr.email_notifications.send_submission_recap",
             "kya_hr.dashboard_realtime.notify_dashboard_change",
@@ -204,6 +212,7 @@ doc_events = {
     # doc_events, sinon le Material Receipt / Stock Reconciliation n'est jamais
     # créé (réception et inventaire n'impactaient pas le stock réel).
     "PV Entree Materiel": {
+        "on_change": "kya_hr.api.pdf_final.attach_final_pdf",
         "validate": "kya_hr.kya_hr.doctype.pv_entree_materiel.pv_entree_materiel.validate",
         "after_insert": "kya_hr.email_notifications.send_submission_recap",
         "on_update": "kya_hr.email_notifications.send_workflow_update",
@@ -212,6 +221,7 @@ doc_events = {
         "on_cancel": "kya_hr.kya_hr.doctype.pv_entree_materiel.pv_entree_materiel.on_cancel",
     },
     "Retour Materiel KYA": {
+        "on_change": "kya_hr.api.pdf_final.attach_final_pdf",
         "validate": "kya_hr.kya_hr.doctype.retour_materiel_kya.retour_materiel_kya.validate",
         "after_insert": "kya_hr.email_notifications.send_submission_recap",
         "on_update": "kya_hr.email_notifications.send_workflow_update",
@@ -220,6 +230,7 @@ doc_events = {
         "on_cancel": "kya_hr.kya_hr.doctype.retour_materiel_kya.retour_materiel_kya.on_cancel",
     },
     "Inventaire KYA": {
+        "on_change": "kya_hr.api.pdf_final.attach_final_pdf",
         "validate": "kya_hr.kya_hr.doctype.inventaire_kya.inventaire_kya.validate",
         "after_insert": "kya_hr.email_notifications.send_submission_recap",
         "on_update": "kya_hr.email_notifications.send_workflow_update",
@@ -231,9 +242,15 @@ doc_events = {
         "after_insert": "kya_hr.email_notifications.send_submission_recap",
         "on_update": "kya_hr.email_notifications.send_workflow_update",
     },
-    # Tache Equipe : statut auto depuis taux_effectif (custom:1 -> controller Python inactif)
-    "Tache Equipe": {
-        "validate": "kya_hr.auto_calc_logic.compute_tache_equipe",
+    # Circuits comptabilité & bon de commande : récap soumission + PDF final
+    # signé à la clôture (retour terrain : le caissier ne recevait AUCUN mail).
+    "Brouillard Caisse": {
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_change": "kya_hr.api.pdf_final.attach_final_pdf",
+    },
+    "Etat Recap Cheques": {
+        "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_change": "kya_hr.api.pdf_final.attach_final_pdf",
     },
     # Circuit Formation : notifications email + cloche in-app aux acteurs (RH, DG)
     "Besoin de Formation": {

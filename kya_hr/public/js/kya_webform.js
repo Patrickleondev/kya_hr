@@ -867,6 +867,60 @@
     window.open(url, "_blank");
   }
 
+  /* États de FIN de circuit par route : quand le document y est, on affiche
+     une bannière verte « circuit terminé » avec le téléchargement direct de
+     la version finale signée (retour terrain compta : personne ne savait où
+     récupérer le brouillard de caisse validé par le DFC). */
+  var KYA_FINAL_STATES = {
+    "brouillard-caisse": ["Approuvé"],
+    "etat-recap": ["Validé DFC"],
+    "demande-achat": ["Approuvé"],
+    "bon-commande": ["Émis"],
+    "pv-sortie-materiel": ["Approuvé"],
+    "pv-entree-materiel": ["Approuvé"],
+    "retour-materiel": ["Approuvé"],
+    "inventaire-kya": ["Approuvé"],
+    "planning-conge": ["Approuvé"],
+    "permission-sortie-employe": ["Approuvé", "Approuvée"],
+    "permission-sortie-stagiaire": ["Approuvé", "Approuvée"]
+  };
+
+  function injectFinalPdfBanner(container) {
+    try {
+      if (document.getElementById("kya-final-banner")) return;
+      var d = _kyaDocRef();
+      if (!d) return;
+      var route = getRoute();
+      var finals = KYA_FINAL_STATES[route];
+      if (!finals) return;
+      var state = getWorkflowState();
+      if (finals.indexOf(state) === -1) return;
+      var banner = document.createElement("div");
+      banner.id = "kya-final-banner";
+      banner.setAttribute("style",
+        "display:flex;align-items:center;gap:14px;flex-wrap:wrap;" +
+        "background:linear-gradient(100deg,#e8f5e9,#f1f8e9);border:1px solid #a5d6a7;" +
+        "border-left:6px solid #2e7d32;border-radius:12px;padding:14px 18px;margin:10px 0 14px;");
+      banner.innerHTML =
+        '<div style="flex:1;min-width:220px;">' +
+          '<div style="font-weight:800;color:#1b5e20;font-size:15px;">✅ Circuit terminé — ' + state + '</div>' +
+          '<div style="font-size:12.5px;color:#33691e;margin-top:2px;">' +
+            'Toutes les signatures sont posées. Téléchargez la version finale officielle.</div>' +
+        '</div>' +
+        '<button type="button" id="kya-final-dl" style="background:#2e7d32;color:#fff;border:none;' +
+          'border-radius:10px;padding:12px 20px;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap;">' +
+          '📄 Télécharger le PDF signé</button>';
+      var host = container ||
+        document.querySelector(".kya-decorated") ||
+        document.querySelector(".web-form-container .web-form-body") ||
+        document.querySelector(".web-form-container");
+      if (!host) return;
+      host.insertBefore(banner, host.firstChild);
+      var btn = banner.querySelector("#kya-final-dl");
+      if (btn) btn.addEventListener("click", printPDF);
+    } catch (e) { /* jamais bloquant */ }
+  }
+
   /* Rôles réels du user. Sur les pages portal/web form, frappe.user_roles et
      frappe.boot.user.roles sont VIDES → on s'appuie en priorité sur le
      contexte chargé via kya_hr.api.get_session_context (window._kyaCtx). */
@@ -1237,6 +1291,7 @@
     /* Insertion : header + toolbar + info en haut, footer en bas */
     var anchor = formBody.firstChild;
     formBody.insertBefore(header, anchor);
+    injectFinalPdfBanner(formBody);
     formBody.insertBefore(toolbar, anchor);
     formBody.insertBefore(info, anchor);
     formBody.appendChild(footer);
@@ -1370,6 +1425,7 @@
       (meta.subtitle ? '<b>' + meta.subtitle + '</b> &mdash; ' : '') +
       'Circuit d\u2019approbation : <b>' + meta.workflow + '</b>';
     wrapper.appendChild(info);
+    injectFinalPdfBanner(wrapper);
 
     /* Build sections */
     var sectionIdx = 0;
@@ -1964,6 +2020,10 @@
   } else {
     waitForForm(); setupAdminPreviewButton();
   }
+  // Bannière « circuit terminé » : filets tardifs (le state du doc peut charger
+  // après les décorations ; injectFinalPdfBanner est idempotente).
+  setTimeout(function () { injectFinalPdfBanner(); }, 1800);
+  setTimeout(function () { injectFinalPdfBanner(); }, 4000);
 
   /* hideEmptyKyaSections retiré sur demande utilisateur (15/05/2026) :
    * "il faut faire les mêmes choses comme pour brouillard de caisse, pourquoi cacher ?"

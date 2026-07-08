@@ -79,17 +79,25 @@
     </tbody>
   </table>
 
-  <table style="width:100%; margin-top:30px;">
+  {# Visas du circuit réel : Achats & Stock -> Comptable -> Audit
+     (les anciens champs signature_livreur/signature_magasin n'existent plus :
+     le PDF final sortait SANS signatures). #}
+  <table style="width:100%; margin-top:30px; table-layout:fixed;">
     <tr>
-      <td style="width:50%; text-align:center; border-top:1px solid #333; padding-top:5px;">
-        <strong>Livreur</strong><br/>
-        {{ doc.signature_livreur_nom or '' }}<br/>
-        {% if doc.signature_livreur %}<img src="{{ doc.signature_livreur }}" style="max-height:60px;"/>{% endif %}
+      <td style="width:33%; text-align:center; border-top:1px solid #333; padding-top:5px;">
+        <strong>Achats &amp; Stock</strong><br/>
+        {% if doc.signature_achats_stock %}<img src="{{ doc.signature_achats_stock }}" style="max-height:60px;"/>{% else %}<div style="height:60px;"></div>{% endif %}
+        {% if doc.get('signataire_achats_stock') %}<div style="font-size:10px;">{{ doc.signataire_achats_stock }}</div>{% endif %}
       </td>
-      <td style="width:50%; text-align:center; border-top:1px solid #333; padding-top:5px;">
-        <strong>Magasinier</strong><br/>
-        {{ doc.signature_magasin_nom or '' }}<br/>
-        {% if doc.signature_magasin %}<img src="{{ doc.signature_magasin }}" style="max-height:60px;"/>{% endif %}
+      <td style="width:33%; text-align:center; border-top:1px solid #333; padding-top:5px;">
+        <strong>Comptable</strong><br/>
+        {% if doc.signature_comptable %}<img src="{{ doc.signature_comptable }}" style="max-height:60px;"/>{% else %}<div style="height:60px;"></div>{% endif %}
+        {% if doc.get('signataire_comptable') %}<div style="font-size:10px;">{{ doc.signataire_comptable }}</div>{% endif %}
+      </td>
+      <td style="width:33%; text-align:center; border-top:1px solid #333; padding-top:5px;">
+        <strong>Audit Interne</strong><br/>
+        {% if doc.signature_audit %}<img src="{{ doc.signature_audit }}" style="max-height:60px;"/>{% else %}<div style="height:60px;"></div>{% endif %}
+        {% if doc.get('signataire_audit') %}<div style="font-size:10px;">{{ doc.signataire_audit }}</div>{% endif %}
       </td>
     </tr>
   </table>

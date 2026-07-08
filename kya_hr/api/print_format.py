@@ -124,6 +124,13 @@ def download_pdf(
             if (doc.contract_type or "").lower().startswith("stage")
             else "KYA Contrat PDF"
         )
+    # Filet de sécurité : sans format explicite (ou en "Standard"), retomber sur
+    # le format OFFICIEL du doctype — jamais sur le rendu Standard illisible.
+    if not print_format or print_format == "Standard":
+        from kya_hr.ensure_webform_print_formats import DOCTYPE_DEFAULT_PRINT_FORMATS
+        official = DOCTYPE_DEFAULT_PRINT_FORMATS.get(doctype)
+        if official and frappe.db.exists("Print Format", official):
+            print_format = official
 
     with print_language(language):
         html = frappe.get_print(
