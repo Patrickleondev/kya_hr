@@ -40,14 +40,12 @@ BANDEAU = MARQUEUR + """
 </div>
 """
 
-# Print Formats à brander : UNIQUEMENT ceux sans en-tête propre. Brouillard,
-# Demande Achat, PV Sortie et Ticket Sortie ont leur propre bandeau complet
-# (logo base64 + titre + coordonnées) : les brander faisait un DOUBLE en-tête
-# sur les PDF (constaté sur le brouillard de caisse, 07/2026).
-CIBLES = [
-    "Ticket Entrée Matériel KYA",
-    "Fiche Inventaire KYA",
-]
+# Print Formats à brander : UNIQUEMENT ceux sans en-tête propre. Les brander
+# quand ils ont déjà leur bandeau (logo base64 + titre + coordonnées) faisait
+# un DOUBLE en-tête sur les PDF (constaté sur le brouillard de caisse, 07/2026).
+# Depuis la refonte de 07/2026, TOUS les formats officiels ont leur en-tête ->
+# liste vide ; le garde-fou (data:image / kya-doc-header) protège en plus.
+CIBLES = []
 
 
 def execute() -> dict:

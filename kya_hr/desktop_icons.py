@@ -344,6 +344,18 @@ def _build_default_layout() -> list[dict]:
     return layout
 
 
+def _norm_label(value) -> str:
+    """Comparaison SANS accents ni casse. MariaDB (collation *_ci) considère
+    « Gestion Equipe » == « Gestion Équipe » mais Python non : le get_value SQL
+    retrouvait l'icône (label accentué en base) tandis que le dédoublonnage
+    Python ne la reconnaissait pas dans le layout -> une tuile de PLUS était
+    appendée à chaque migrate (constaté en prod : ~24 tuiles « Gestion Équipe »
+    dans le Desktop Layout d'Administrator)."""
+    import unicodedata
+    s = unicodedata.normalize("NFD", str(value or ""))
+    return "".join(c for c in s if not unicodedata.combining(c)).strip().lower()
+
+
 def _sync_layout_doc(layout_doc) -> bool:
     layout = json.loads(layout_doc.layout or "[]")
     changed = False
@@ -359,7 +371,8 @@ def _sync_layout_doc(layout_doc) -> bool:
             continue
 
         serialized = _serialize_icon(icon)
-        existing_items = [item for item in layout if item.get("label") == config["label"]]
+        wanted = _norm_label(config["label"])
+        existing_items = [item for item in layout if _norm_label(item.get("label")) == wanted]
         if existing_items:
             keep = existing_items[0]
             for field in LAYOUT_FIELDS:

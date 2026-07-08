@@ -76,6 +76,53 @@ def ensure_doctype_defaults() -> dict:
     return out
 
 
+def sync_print_format_html() -> dict:
+    """Recharge le HTML de chaque Print Format depuis son fichier du repo.
+
+    Piège v16 : nos formats sont custom_format=1 (HTML dans le champ `html`),
+    mais migrate ne recharge PAS le .html du dossier -> champ parfois vide
+    (rendu = TemplateNotFoundError car repli disque sur un chemin ACCENTUÉ
+    inexistant), et surtout les retouches UI faites en prod divergent du repo.
+    Ici : LE FICHIER DU REPO EST LA SOURCE DE VÉRITÉ, rechargée à chaque
+    migrate. Toute évolution de design passe par le repo, jamais par l'UI.
+    """
+    import os
+    out = {"set": [], "unchanged": 0, "skipped": []}
+    base = frappe.get_app_path("kya_hr", "print_format")
+    for folder in sorted(os.listdir(base)):
+        d = os.path.join(base, folder)
+        jpath = os.path.join(d, folder + ".json")
+        hpath = os.path.join(d, folder + ".html")
+        if not (os.path.isdir(d) and os.path.exists(jpath) and os.path.exists(hpath)):
+            continue
+        import json as _json
+        try:
+            name = _json.load(open(jpath, encoding="utf-8")).get("name")
+            if not name or not frappe.db.exists("Print Format", name):
+                out["skipped"].append(folder)
+                continue
+            html = open(hpath, encoding="utf-8").read()
+            if (frappe.db.get_value("Print Format", name, "html") or "") == html:
+                out["unchanged"] += 1
+                continue
+            frappe.db.set_value("Print Format", name, "html", html,
+                                update_modified=False)
+            out["set"].append(name)
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), f"sync_print_format_html: {folder}")
+            out["skipped"].append(folder)
+    try:
+        frappe.db.commit()
+        frappe.clear_cache()
+    except Exception:
+        pass
+    print(f"[sync_print_format_html] set={len(out['set'])} unchanged={out['unchanged']} "
+          f"skipped={out['skipped'] or 0}")
+    if out["set"]:
+        print("  " + " | ".join(out["set"]))
+    return out
+
+
 def execute() -> dict:
     summary = {"set": [], "skipped": [], "unchanged": 0}
     for webform, pf in WEBFORM_PRINT_FORMATS.items():
@@ -122,4 +169,5 @@ def execute() -> dict:
     if summary["skipped"]:
         print("  SKIP: " + " | ".join(summary["skipped"]))
     summary["doctype_defaults"] = ensure_doctype_defaults()
+    summary["html_sync"] = sync_print_format_html()
     return summary
