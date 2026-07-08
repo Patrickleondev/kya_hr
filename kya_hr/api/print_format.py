@@ -36,6 +36,14 @@ _DL_ANCHOR_RE = re.compile(
     r'<a[^>]+href=["\']/api/method/[^"\']*download_pdf[^"\']*["\'][^>]*>.*?</a>',
     re.I | re.S,
 )
+# Bandeau d'actions de la page d'impression (« Impression » / « Get PDF ») :
+# ses classes print-hide ne sont plus masquées une fois les CSS externes
+# retirés -> les libellés apparaissaient EN HAUT du PDF final.
+_ACTION_BANNER_RE = re.compile(
+    r'<div[^>]+class=["\'][^"\']*action-banner[^"\']*["\'][^>]*>.*?</div>',
+    re.I | re.S,
+)
+_PRINT_HIDE_CSS = "<style>.action-banner,.print-hide,.no-print,.hidden-print{display:none!important}</style>"
 
 
 def _local_path_for_url(url: str):
@@ -90,9 +98,10 @@ def _sanitize_print_html(html: str) -> str:
     html = html or ""
     html = _LINK_RE.sub("", html)
     html = _SCRIPT_RE.sub("", html)
+    html = _ACTION_BANNER_RE.sub("", html)
     html = _DL_ANCHOR_RE.sub("", html)
     html = _inline_images(html)
-    return html
+    return _PRINT_HIDE_CSS + html
 
 
 @frappe.whitelist(allow_guest=True)
