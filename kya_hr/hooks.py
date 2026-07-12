@@ -195,8 +195,11 @@ doc_events = {
             "kya_hr.planning_conge_equipe_logic.generate_individual_plannings",
         ],
     },
-    # PV et Bilan : pas de chef_routing (employee_field suffit)
+    # PV Sortie : chef_routing pour que la notif « En attente Chef » trouve le
+    # chef (report_to_user résolu depuis le créateur — la web form ne saisit pas
+    # de champ employee).
     "PV Sortie Materiel": {
+        "before_save": "kya_hr.chef_routing.populate_chef",
         "on_change": "kya_hr.api.pdf_final.attach_final_pdf",
         "after_insert": [
             "kya_hr.email_notifications.send_submission_recap",
