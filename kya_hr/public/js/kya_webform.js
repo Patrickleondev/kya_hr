@@ -618,8 +618,8 @@
       workflow: "Saisie directe (Gestionnaire de Flotte / RH)"
     },
     "inventaire-kya": {
-      title: "FICHE D\u2019INVENTAIRE",
-      subtitle: "Stock & Inventaire",
+      title: "FICHE D\u2019INVENTAIRE NUM\u00c9RIQUE",
+      subtitle: "Inventaire syst\u00e8me (distinct du comptage physique magasin)",
       workflow: "Responsable Inventaire \u2192 Responsable Magasin"
     },
     "besoin-formation": {
