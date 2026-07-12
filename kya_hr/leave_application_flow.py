@@ -46,9 +46,48 @@ ADMIN_ROLES = {"System Manager"}
 
 
 def before_validate(doc, method=None):
+    _install_leave_access_bypass()
+    if _current_user_is_kya_approver(doc):
+        # Neutralise la re-vérification d'accès HRMS pour CE save : l'approbation
+        # est déjà gardée par le workflow KYA + le rôle (voir bypass ci-dessous).
+        frappe.flags.kya_leave_bypass_access = True
     _populate_employee_context(doc)
     _ensure_default_holiday_list(doc)
     _ensure_flexible_leave_allocation(doc)
+
+
+def _current_user_is_kya_approver(doc) -> bool:
+    """Vrai si l'utilisateur courant agit comme APPROBATEUR d'un congé d'autrui
+    (pas le demandeur). Le circuit KYA est multi-niveaux (Sup→RH→DG) alors
+    qu'HRMS n'admet qu'un `leave_approver` unique : on doit lever la barrière
+    d'accès HRMS pour ces approbateurs, le contrôle réel restant workflow+rôle."""
+    user = frappe.session.user
+    if user in ("Administrator", "Guest") or user == _requester_user(doc):
+        return False
+    return bool((RH_ROLES | DG_ROLES | SUPERIOR_ROLES | ADMIN_ROLES) & _current_roles(user))
+
+
+def _install_leave_access_bypass() -> None:
+    """Enveloppe (idempotent) HRMS `validate_leave_access` : quand le flag
+    `kya_leave_bypass_access` est posé (transition d'un approbateur KYA), on
+    SAUTE la vérification « Not permitted ». HRMS n'admet qu'un approbateur
+    unique + lecture Employee, incompatible avec le circuit KYA Sup→RH→DG. Le
+    contrôle d'accès réel reste le WORKFLOW + le RÔLE (Custom DocPerm)."""
+    try:
+        from hrms.hr.doctype.leave_application import leave_application as _la
+    except Exception:
+        return
+    if getattr(_la.validate_leave_access, "_kya_wrapped", False):
+        return
+    _original = _la.validate_leave_access
+
+    def _wrapped(employee, *args, **kwargs):
+        if frappe.flags.get("kya_leave_bypass_access"):
+            return
+        return _original(employee, *args, **kwargs)
+
+    _wrapped._kya_wrapped = True
+    _la.validate_leave_access = _wrapped
 
 
 def before_save(doc, method=None):
@@ -161,6 +200,11 @@ def _populate_employee_context(doc) -> None:
 def _validate_employee_scope(doc) -> None:
     user = frappe.session.user
     if user in ("Administrator", "Guest") or _can_select_any_employee(user):
+        return
+    # Un APPROBATEUR agit sur un congé existant sans toucher au champ employee :
+    # la garde « pas de congé pour autrui » ne concerne QUE le demandeur à la
+    # création/édition. Sans ce garde-fou, les approbations (Sup→RH→DG) planteraient.
+    if not doc.is_new() and not doc.has_value_changed("employee"):
         return
     current_employee = _current_employee(user)
     if not current_employee:
