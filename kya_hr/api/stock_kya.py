@@ -139,7 +139,11 @@ def _raw_sums(magasin=None, item=None):
 
 @frappe.whitelist()
 def solde_item_magasin(item, magasin):
-    _guard()
+    # Helper de CALCUL interne (non whitelisté) : utilisé par les contrôleurs
+    # (inventaire, PV sortie) pendant le cycle de vie du document. On NE garde
+    # PAS ici — sinon un employé que le workflow autorise à soumettre un
+    # inventaire (« Soumettre au Magasin » = rôle Employee) est bloqué dès le
+    # validate. Les API publiques (soldes/dashboard_overview) gardent déjà.
     agg = _bucketize(_raw_sums(magasin=magasin, item=item))
     return agg.get((item, magasin), {"item": item, "magasin": magasin,
                                      "bon_etat": 0, "reparation": 0, "total": 0})
