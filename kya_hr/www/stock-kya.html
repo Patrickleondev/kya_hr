@@ -29,6 +29,29 @@
 .ks-trend.up{background:#dcfce7;color:#166534}.ks-trend.down{background:#fee2e2;color:#991b1b}
 .ks-trend.flat{background:#f1f5f9;color:#64748b}
 .ks-spark{display:block;margin-top:6px;width:100%;height:26px;}
+/* Graphiques SVG/CSS (aucune dépendance externe — rendu garanti hors-ligne) */
+.ks-charts{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:6px;}
+@media(max-width:760px){.ks-charts{grid-template-columns:1fr;}}
+.ks-chart-t{font-size:.78rem;font-weight:800;color:#334155;text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px;}
+.ks-chart-b{min-height:180px;}
+.ks-cl{color:#94a3b8;font-size:.82rem;padding:20px;text-align:center;}
+/* Donut statut */
+.ks-donut{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.ks-donut svg{width:150px;height:150px;flex:0 0 auto;}
+.ks-donut .dc{font-size:1.5rem;font-weight:900;fill:#0f172a;}
+.ks-donut .dl{font-size:.5rem;font-weight:700;fill:#64748b;text-transform:uppercase;letter-spacing:.5px;}
+.ks-leg{display:flex;flex-direction:column;gap:7px;font-size:.8rem;}
+.ks-leg .li{display:flex;align-items:center;gap:8px;}
+.ks-leg .sw{width:12px;height:12px;border-radius:3px;flex:0 0 auto;}
+.ks-leg .lv{font-weight:800;margin-left:auto;color:#0f172a;}
+.ks-leg .ln{color:#475569;}
+/* Barres horizontales par magasin */
+.ks-hbars{display:flex;flex-direction:column;gap:9px;}
+.ks-hb{display:grid;grid-template-columns:120px 1fr auto;align-items:center;gap:8px;font-size:.78rem;}
+.ks-hb .hbn{font-weight:700;color:#334155;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ks-hb .hbt{background:#eef2f7;border-radius:6px;height:16px;overflow:hidden;}
+.ks-hb .hbi{height:100%;border-radius:6px;background:linear-gradient(90deg,#0e7c4a,#16a34a);}
+.ks-hb .hbv{font-weight:800;color:#0f172a;white-space:nowrap;}
 /* Jauge semi-circulaire (taux bon état) */
 .ks-gauge{display:flex;flex-direction:column;align-items:center;justify-content:center;}
 .ks-gauge svg{width:104px;height:60px;display:block;}
@@ -176,6 +199,19 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
 
   <!-- MAGASINS -->
   <div id="pane-mag" class="ks-hide">
+    <div class="ks-card">
+      <h3>📊 Vue d'ensemble</h3>
+      <div class="ks-charts">
+        <div class="ks-chart">
+          <div class="ks-chart-t">Répartition des références par statut</div>
+          <div id="ks-chart-statut" class="ks-chart-b"><div class="ks-cl">Chargement…</div></div>
+        </div>
+        <div class="ks-chart">
+          <div class="ks-chart-t">Quantité totale en stock par magasin</div>
+          <div id="ks-chart-mag" class="ks-chart-b"><div class="ks-cl">Chargement…</div></div>
+        </div>
+      </div>
+    </div>
     <div class="ks-card">
       <h3>Synthèse par magasin</h3>
       <div class="ks-scroll"><table class="ks-tbl"><thead><tr><th>Magasin</th><th>Articles</th><th>Bon état</th><th>À réparer</th><th>Défectueux</th><th>Total unités</th></tr></thead>
@@ -351,7 +387,8 @@ function render(){
       ${sparkline(hebdoSort,'#d97706')}</div>
     <div class="ks-kpi warn"><span class="ico2">🔧</span><div class="n">${k.en_reparation}</div><div class="l">À réparer (réf.)</div></div>
     <div class="ks-kpi violet"><span class="ico2">🗑️</span><div class="n">${k.defectueux!=null?k.defectueux:0}</div><div class="l">Défectueux (u.)</div></div>
-    <div class="ks-kpi red"><span class="ico2">🚫</span><div class="n">${k.ruptures_stock!=null?k.ruptures_stock:k.ruptures}</div><div class="l">Ruptures</div></div>`;
+    <div class="ks-kpi red"><span class="ico2">🚫</span><div class="n">${k.ruptures_stock!=null?k.ruptures_stock:k.ruptures}</div><div class="l">Ruptures</div></div>
+    <div class="ks-kpi" style="border-left-color:#94a3b8"><span class="ico2" style="background:rgba(148,163,184,.15)">🈳</span><div class="n" style="color:#64748b">${k.references_vides!=null?k.references_vides:0}</div><div class="l">Références vides</div></div>`;
 
   // filtre magasins
   const sel=document.getElementById('ks-mag-filter');
@@ -418,6 +455,46 @@ async function renderSyn(){
     <td class="num" style="color:${c.a_commander?'#d97706':'#94a3b8'}">${c.a_commander||0}</td>
     <td class="num" style="color:${c.ruptures?'#dc2626':'#94a3b8'}">${c.ruptures||0}</td></tr>`).join('')
     || `<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:14px;">Aucun stock.</td></tr>`;
+  renderStockCharts();
+}
+
+// ── Graphiques d'ensemble (SVG/CSS pur, aucune dépendance externe) ──────────
+function donutChart(segs, centerVal, centerLbl){
+  const total = segs.reduce((s,x)=>s+(x.v||0),0)||1;
+  const r=54, C=2*Math.PI*r; let off=0;
+  const arcs = segs.filter(s=>s.v>0).map(s=>{
+    const len=C*s.v/total;
+    const a=`<circle cx="75" cy="75" r="${r}" fill="none" stroke="${s.c}" stroke-width="20"
+      stroke-dasharray="${len.toFixed(2)} ${(C-len).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}"/>`;
+    off+=len; return a;
+  }).join('');
+  const leg = segs.map(s=>`<div class="li"><span class="sw" style="background:${s.c}"></span>
+    <span class="ln">${s.n}</span><span class="lv">${s.v}</span></div>`).join('');
+  return `<div class="ks-donut"><svg viewBox="0 0 150 150"><g transform="rotate(-90 75 75)">${arcs}</g>
+    <text class="dc" x="75" y="72" text-anchor="middle">${centerVal}</text>
+    <text class="dl" x="75" y="90" text-anchor="middle">${centerLbl}</text></svg>
+    <div class="ks-leg">${leg}</div></div>`;
+}
+function hbarsChart(rows){
+  const max=Math.max(1,...rows.map(r=>r.qte_totale||0));
+  return `<div class="ks-hbars">`+rows.map(r=>{
+    const w=Math.max(2,100*(r.qte_totale||0)/max);
+    return `<div class="ks-hb"><span class="hbn" title="${r.cle}">${r.cle}</span>
+      <div class="hbt"><div class="hbi" style="width:${w.toFixed(1)}%"></div></div>
+      <span class="hbv">${(r.qte_totale||0).toLocaleString('fr-FR')}</span></div>`;
+  }).join('')+`</div>`;
+}
+function renderStockCharts(){
+  const kp=SYN.kpi||{}, pm=SYN.par_magasin||[];
+  const ok=Math.max(0,(kp.references||0)-(kp.a_commander||0)-(kp.ruptures||0));
+  document.getElementById('ks-chart-statut').innerHTML = donutChart([
+    {n:'OK / suffisant', v:ok, c:'#16a34a'},
+    {n:'À commander', v:kp.a_commander||0, c:'#d97706'},
+    {n:'Rupture', v:kp.ruptures||0, c:'#dc2626'},
+    {n:'Références vides', v:kp.references_vides||0, c:'#94a3b8'}
+  ], (kp.references||0)+(kp.references_vides||0), 'références');
+  document.getElementById('ks-chart-mag').innerHTML = pm.length
+    ? hbarsChart(pm) : `<div class="ks-cl">Aucune donnée.</div>`;
 }
 
 // ── Rapport de période (stats + export pour le responsable stock) ──────────

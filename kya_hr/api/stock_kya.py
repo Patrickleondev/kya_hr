@@ -295,6 +295,19 @@ def reapprovisionnement(magasin=None, only_alertes=0):
     return out
 
 
+def _count_references_vides(magasin=None):
+    """Références « vides » (quantité 0) au sens de la fiche AEA-ENG-13. Elles
+    n'ont aucun mouvement (rien à stocker), donc invisibles au grand livre :
+    on les compte à part. Global = articles jamais mouvementés ; par magasin =
+    articles ayant transité par le magasin mais au solde nul."""
+    if magasin:
+        rows = frappe.db.sql("""SELECT item FROM `tabMouvement Stock KYA`
+            WHERE magasin=%s GROUP BY item HAVING ROUND(SUM(quantite),3) <= 0""", (magasin,))
+        return len(rows)
+    return frappe.db.sql("""SELECT COUNT(*) FROM `tabArticle KYA` a
+        WHERE NOT EXISTS (SELECT 1 FROM `tabMouvement Stock KYA` m WHERE m.item = a.name)""")[0][0]
+
+
 @frappe.whitelist()
 def synthese_stock(magasin=None):
     """« Synthèse statistique du stock » façon AEA-ENG-13 : indicateurs globaux
@@ -340,7 +353,7 @@ def synthese_stock(magasin=None):
             "taux_bon_etat": round(100 * bon / qte, 1) if qte else 0.0,
             "a_commander": sum(1 for r in reap if r["statut"] == "A COMMANDER"),
             "ruptures": sum(1 for r in reap if r["statut"] == "RUPTURE"),
-            "references_vides": sum(1 for r in reap if r["statut"] == "REFERENCE VIDE"),
+            "references_vides": _count_references_vides(magasin),
         },
         "par_magasin": _finalise(par_mag),
         "par_categorie": _finalise(par_cat),
@@ -860,7 +873,8 @@ def dashboard_overview():
                 "defectueux": defect_total, "defectueux_refs": defectueux_refs,
                 # Indicateurs alignés sur la fiche officielle (dispo = bon état).
                 "taux_bon_etat": taux_bon_etat, "a_commander": a_commander,
-                "ruptures_stock": ruptures_stock},
+                "ruptures_stock": ruptures_stock,
+                "references_vides": _count_references_vides()},
         "tendances": {"delta_30j": delta_30j, "entrees_30j": entrees_30j,
                       "sorties_30j": sorties_30j, "hebdo": hebdo},
         "par_magasin": sorted(par_mag.values(), key=lambda x: x["magasin"]),
