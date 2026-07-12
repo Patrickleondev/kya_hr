@@ -36,6 +36,13 @@
     .kya-badge-ok { background: #e8f5e9; color: #2e7d32; border: 2px solid #4caf50; }
     .kya-badge-wait { background: #fff3e0; color: #e65100; border: 2px solid #ff9800; }
     .kya-sigs { display: table; width: 100%; table-layout: fixed; margin-top: 10px; border-collapse: separate; border-spacing: 10px 0; page-break-inside: avoid; }
+    /* Anti-page-orpheline : l'état + les signatures voyagent ENSEMBLE et ne se
+       scindent jamais -> impossible qu'une page ne contienne que des signatures
+       (risque de détachement/réutilisation sur une pièce comptable). */
+    .kya-sign-block { page-break-inside: avoid; }
+    .kya-sig-recall { font-size: 9px; color: #555; text-align: center; margin: 0 0 8px;
+      padding: 5px 8px; background: #f5f7f8; border: 1px solid #e2e6e9; border-radius: 5px; }
+    .kya-sig-recall strong { color: #009B77; }
     .kya-sig { display: table-cell; text-align: center; vertical-align: top; }
     .kya-sig img { max-height: 50px; display: block; margin: 0 auto 4px; }
     .kya-sig .sig-line { border-top: 1px solid #333; margin-top: 28px; padding-top: 4px; font-size: 9px; font-weight: 600; }
@@ -111,6 +118,7 @@
     {% endif %}
   </div>
 
+  <div class="kya-sign-block">
   <div class="kya-status">
     {% if doc.workflow_state == "Validé" or doc.workflow_state == "Approuvé" %}
       <span class="kya-badge kya-badge-ok">{{ doc.workflow_state }}</span>
@@ -121,6 +129,13 @@
 
   <div class="kya-sec-header">4. SIGNATURES</div>
   <div class="kya-sec-body">
+    {#- Rappel d'identification : une page de signatures ne doit JAMAIS être
+        anonyme (pièce comptable). N° + solde + état rappelés ici. -#}
+    <div class="kya-sig-recall">
+      Brouillard <strong>N° {{ doc.name }}</strong> du {{ frappe.utils.format_date(doc.date_brouillard) }}
+      — Solde final : <strong>{{ frappe.utils.fmt_money(doc.solde_final or 0, currency='XOF') }}</strong>
+      — État : <strong>{{ doc.workflow_state or doc.statut or '—' }}</strong>
+    </div>
     {#- ============================================================= -#}
     {#-  LIBELLÉS DES RÔLES — MODIFIABLES ICI (une seule ligne chacun). -#}
     {#-  Libellés neutres par défaut. Modifiez simplement le texte      -#}
@@ -152,6 +167,7 @@
       </div>
     </div>
   </div>
+  </div>{#- /kya-sign-block -#}
 
   <div class="kya-doc-footer">
     Généré le {{ frappe.utils.now_datetime().strftime('%d/%m/%Y à %H:%M') }} — KYA-Energy Group, Lomé, Togo
