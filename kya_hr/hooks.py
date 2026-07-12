@@ -92,6 +92,17 @@ on_session_creation = "kya_hr.link_employees_users.on_session_creation"
 
 # Grille indiciaire : calcul automatique de la valeur indiciaire (Employee)
 doc_events = {
+    # Leave Application (natif HRMS) piloté par le workflow KYA « Flux RH
+    # Unifié ». Ce module (guardrails) était présent mais JAMAIS câblé : sans
+    # lui, leave_approver n'était pas rempli (→ HRMS validate_leave_access
+    # « Not permitted » pour le supérieur), l'allocation n'était pas provisionnée
+    # et les signatures/état n'étaient pas synchronisés.
+    "Leave Application": {
+        "before_validate": "kya_hr.leave_application_flow.before_validate",
+        "before_save": "kya_hr.leave_application_flow.before_save",
+        "validate": "kya_hr.leave_application_flow.validate",
+        "on_update": "kya_hr.leave_application_flow.on_update",
+    },
     "Employee": {
         "before_validate": "kya_hr.matricule.auto_generate_matricule",
         "before_save": "kya_hr.grille_indiciaire.calculer_indice_employee",

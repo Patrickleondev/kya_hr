@@ -24,19 +24,26 @@ import frappe
 # Types de lien concernés par les User Permissions gênantes.
 _CIBLE_OPTIONS = {"Employee", "Company"}
 
+# Doctypes NATIFS (module non-KYA) pilotés par un workflow KYA : eux aussi
+# subissent le blocage User Permission sur les approbateurs. Ex. Leave
+# Application (module HR) porte le workflow « Flux RH Unifié » — sans ce
+# correctif, un Supérieur/RH/DG limité à sa propre fiche Employee ne peut pas
+# viser le congé d'un autre (PermissionError alors que le rôle est bon).
+_NATIFS_A_TRAITER = {"Leave Application"}
+
 
 def _doctypes_a_traiter() -> list[str]:
-    """Toutes les fiches KYA à workflow actif (celles où des approbateurs de
-    rôles différents doivent agir sur les documents d'autrui)."""
+    """Toutes les fiches à workflow actif où des approbateurs de rôles
+    différents doivent agir sur les documents d'autrui : fiches KYA + natifs
+    explicitement pilotés par un workflow KYA."""
     dts = set()
     for wf in frappe.get_all("Workflow", filters={"is_active": 1},
                              fields=["document_type"]):
         dt = wf.document_type
         if not dt:
             continue
-        # On ne cible que les doctypes KYA (module KYA HR), pas les natifs.
         module = frappe.db.get_value("DocType", dt, "module")
-        if module and "KYA" in module:
+        if (module and "KYA" in module) or dt in _NATIFS_A_TRAITER:
             dts.add(dt)
     return sorted(dts)
 
