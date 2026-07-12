@@ -661,8 +661,8 @@
     "bcc": null,
     "cc": null,
     "condition": null,
-    "receiver_by_document_field": "notif_rh_email",
-    "receiver_by_role": null
+    "receiver_by_document_field": null,
+    "receiver_by_role": "Responsable RH"
    }
   ],
   "send_system_notification": 0,
@@ -1078,10 +1078,17 @@
   "recipients": [
    {
     "bcc": null,
-    "cc": "{{ doc.notif_dg_email }}",
+    "cc": null,
     "condition": null,
-    "receiver_by_document_field": "notif_dga_email",
-    "receiver_by_role": null
+    "receiver_by_document_field": null,
+    "receiver_by_role": "DGA"
+   },
+   {
+    "bcc": null,
+    "cc": null,
+    "condition": null,
+    "receiver_by_document_field": null,
+    "receiver_by_role": "Directeur Général"
    }
   ],
   "send_system_notification": 0,
