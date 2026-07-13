@@ -1,0 +1,157 @@
+{
+ "custom": 1,
+ "doctype": "DocType",
+ "issingle": 1,
+ "module": "KYA HR",
+ "name": "Parametres Paie KYA",
+ "fields": [
+  {
+   "fieldname": "intro",
+   "fieldtype": "HTML",
+   "options": "<div style='padding:10px 14px;background:#eef5fb;border-left:4px solid #0E5C8A;border-radius:6px;margin-bottom:8px'><b>Paramètres de paie KYA</b> — configurez ici les taux et barèmes utilisés par les bulletins (État de Salaire KYA). Toute modification s'applique aux nouveaux bulletins. Montants en francs CFA.</div>"
+  },
+  {
+   "fieldname": "section_cnss",
+   "fieldtype": "Section Break",
+   "label": "1. Cotisations sociales (CNSS)"
+  },
+  {
+   "default": "4",
+   "fieldname": "cnss_taux_salarie",
+   "fieldtype": "Percent",
+   "label": "Taux CNSS part salariale %",
+   "description": "Retenue sur le salaire de l'employé"
+  },
+  {
+   "default": "0",
+   "fieldname": "cnss_plafond",
+   "fieldtype": "Currency",
+   "label": "Plafond CNSS mensuel",
+   "description": "0 = aucun plafond"
+  },
+  {
+   "fieldname": "col_cnss",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "17.5",
+   "fieldname": "cnss_taux_patronal",
+   "fieldtype": "Percent",
+   "label": "Taux CNSS part patronale %",
+   "description": "Charge employeur (coût, non retenu au salarié)"
+  },
+  {
+   "fieldname": "section_irpp",
+   "fieldtype": "Section Break",
+   "label": "2. Impôt sur le revenu (IRPP / IRTS)"
+  },
+  {
+   "default": "0",
+   "fieldname": "abattement_taux",
+   "fieldtype": "Percent",
+   "label": "Abattement forfaitaire %",
+   "description": "Abattement appliqué sur le revenu imposable avant barème (0 si aucun)"
+  },
+  {
+   "default": "0",
+   "fieldname": "abattement_plafond",
+   "fieldtype": "Currency",
+   "label": "Plafond de l'abattement",
+   "description": "0 = pas de plafond"
+  },
+  {
+   "fieldname": "col_irpp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "cnss_deductible_irpp",
+   "fieldtype": "Check",
+   "label": "Déduire la CNSS de la base imposable",
+   "description": "Coché : la CNSS salariale est retranchée du revenu imposable avant l'IRPP"
+  },
+  {
+   "fieldname": "section_bareme",
+   "fieldtype": "Section Break",
+   "label": "Barème IRPP (tranches progressives)"
+  },
+  {
+   "fieldname": "irpp_bareme",
+   "fieldtype": "Table",
+   "label": "Tranches",
+   "options": "Tranche IRPP KYA",
+   "description": "Barème progressif : l'impôt est calculé tranche par tranche sur le revenu imposable mensuel."
+  },
+  {
+   "fieldname": "section_charges",
+   "fieldtype": "Section Break",
+   "label": "3. Charges de famille (réduction pour personnes à charge)"
+  },
+  {
+   "default": "0",
+   "fieldname": "montant_par_charge",
+   "fieldtype": "Currency",
+   "label": "Montant par personne à charge",
+   "description": "Réduction accordée par personne à charge"
+  },
+  {
+   "default": "6",
+   "fieldname": "plafond_nb_charges",
+   "fieldtype": "Int",
+   "label": "Nombre maximum de personnes à charge"
+  },
+  {
+   "fieldname": "col_charges",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Réduction de l'impôt",
+   "fieldname": "charge_mode",
+   "fieldtype": "Select",
+   "label": "Mode d'application",
+   "options": "Réduction de l'impôt\nRéduction de la base imposable",
+   "description": "Réduction de l'impôt : soustrait du montant IRPP. Réduction de la base : soustrait du revenu imposable avant barème."
+  },
+  {
+   "fieldname": "section_retenues",
+   "fieldtype": "Section Break",
+   "label": "4. Retenues complémentaires (AMU, syndicat, etc.)"
+  },
+  {
+   "fieldname": "retenues",
+   "fieldtype": "Table",
+   "label": "Retenues",
+   "options": "Retenue Paie KYA"
+  },
+  {
+   "fieldname": "section_primes",
+   "fieldtype": "Section Break",
+   "label": "5. Catalogue des primes & indemnités"
+  },
+  {
+   "fieldname": "primes",
+   "fieldtype": "Table",
+   "label": "Primes / indemnités",
+   "options": "Prime Paie KYA",
+   "description": "Ces primes sont proposées automatiquement à la création d'un bulletin. Cochez si elles sont imposables et/ou soumises à la CNSS."
+  }
+ ],
+ "permissions": [
+  {
+   "create": 1, "delete": 1, "email": 1, "print": 1, "read": 1,
+   "role": "System Manager", "share": 1, "write": 1
+  },
+  {
+   "create": 1, "print": 1, "read": 1, "role": "Comptable", "share": 1, "write": 1
+  },
+  {
+   "create": 1, "print": 1, "read": 1, "role": "Accounts Manager", "write": 1
+  },
+  {
+   "read": 1, "role": "DFC"
+  },
+  {
+   "read": 1, "role": "Direction"
+  }
+ ]
+}

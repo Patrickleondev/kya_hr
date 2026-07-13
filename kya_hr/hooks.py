@@ -152,6 +152,10 @@ doc_events = {
     "Facture KYA": {
         "validate": "kya_hr.auto_calc_logic.compute_facture",
     },
+    "Bulletin Paie KYA": {
+        "autoname": "kya_hr.auto_calc_logic.name_bulletin",
+        "validate": "kya_hr.auto_calc_logic.compute_bulletin",
+    },
     "Permission Sortie Employe": {
         "before_save": "kya_hr.chef_routing.populate_chef",
         "after_insert": [

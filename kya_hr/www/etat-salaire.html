@@ -1,0 +1,117 @@
+<style>
+  :root { --kya-blue:#0E5C8A; --kya-blue2:#1976D2; --kya-orange:#F77F00; --kya-green:#2e7d32; }
+  body { background:#f4f6f9; }
+  .es-wrap { max-width:1180px; margin:0 auto; padding:18px; font-family:Arial,Helvetica,sans-serif; color:#1a1a1a; }
+  .es-head { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+             background:#fff; border-radius:12px; padding:16px 20px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+  .es-head h1 { margin:0; color:var(--kya-blue); font-size:22px; letter-spacing:1px; }
+  .es-head .sub { color:#666; font-size:12px; margin-top:2px; }
+  .es-filters { display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; }
+  .es-filters label { display:block; font-size:11px; color:#666; margin-bottom:3px; }
+  .es-filters select { padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; }
+  .es-btn { background:var(--kya-blue); color:#fff; border:none; padding:8px 16px; border-radius:8px;
+            font-weight:700; cursor:pointer; font-size:13px; text-decoration:none; display:inline-block; }
+  .es-btn.print { background:var(--kya-orange); }
+  .es-btn.add { background:var(--kya-green); }
+  .es-kpis { display:flex; gap:14px; flex-wrap:wrap; margin:16px 0; }
+  .es-kpi { flex:1; min-width:180px; background:#fff; border-radius:12px; padding:14px 18px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+  .es-kpi .lbl { font-size:11px; color:#888; text-transform:uppercase; letter-spacing:1px; }
+  .es-kpi .val { font-size:21px; font-weight:800; color:var(--kya-blue); margin-top:4px; }
+  .es-kpi.orange .val { color:var(--kya-orange); }
+  .es-kpi.green .val { color:var(--kya-green); }
+  .es-card { background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+  .es-card-h { background:linear-gradient(135deg,var(--kya-blue),var(--kya-blue2)); color:#fff; padding:10px 16px; font-weight:700;
+               display:flex; justify-content:space-between; align-items:center; }
+  table.es-t { width:100%; border-collapse:collapse; font-size:12px; }
+  table.es-t th { background:#eef3f8; color:#334; text-align:left; padding:7px 10px; font-size:11px; text-transform:uppercase; }
+  table.es-t th.r, table.es-t td.r { text-align:right; }
+  table.es-t td { padding:7px 10px; border-bottom:1px solid #eef0f3; }
+  table.es-t tr:nth-child(even) td { background:#fafbfc; }
+  .es-tot td { font-weight:800; background:#f1f8e9 !important; border-top:2px solid var(--kya-blue); }
+  .es-badge { font-size:10px; padding:2px 7px; border-radius:10px; font-weight:700; }
+  .es-badge.ok { background:#e8f5e9; color:#2e7d32; }
+  .es-badge.dr { background:#fff3e0; color:#e65100; }
+  .es-empty { padding:40px; text-align:center; color:#888; }
+  a.es-emp { color:var(--kya-blue2); text-decoration:none; font-weight:600; }
+  @media print { .es-filters, .es-btn { display:none !important; } body { background:#fff; } }
+</style>
+
+<div class="es-wrap">
+  <div class="es-head">
+    <div>
+      <h1>État de Salaire KYA</h1>
+      <div class="sub">KYA-ENERGY GROUP — Livre de paie · {{ annee }}{% if mois %} · {{ mois }}{% endif %} · montants en FCFA</div>
+    </div>
+    <form class="es-filters" method="get">
+      <div><label>Année</label><select name="annee">
+        {% for y in annees %}<option value="{{ y }}" {% if y == annee %}selected{% endif %}>{{ y }}</option>{% endfor %}
+      </select></div>
+      <div><label>Mois</label><select name="mois">
+        <option value="">Toute l'année</option>
+        {% for m in mois_dispo %}<option value="{{ m }}" {% if m == mois %}selected{% endif %}>{{ m }}</option>{% endfor %}
+      </select></div>
+      <button class="es-btn" type="submit">Filtrer</button>
+      <a class="es-btn add" href="/app/bulletin-paie-kya/new">＋ Bulletin</a>
+      <button class="es-btn print" type="button" onclick="window.print()">Imprimer</button>
+    </form>
+  </div>
+
+  <div class="es-kpis">
+    <div class="es-kpi"><div class="lbl">Effectif payé ({{ annee }})</div><div class="val">{{ kpis.effectif }}</div></div>
+    <div class="es-kpi green"><div class="lbl">Masse salariale nette</div><div class="val">{{ "{:,.0f}".format(kpis.masse_net).replace(",", " ") }}</div></div>
+    <div class="es-kpi orange"><div class="lbl">Charges patronales</div><div class="val">{{ "{:,.0f}".format(kpis.charges_patronales).replace(",", " ") }}</div></div>
+    <div class="es-kpi"><div class="lbl">Coût total employeur</div><div class="val">{{ "{:,.0f}".format(kpis.cout_employeur).replace(",", " ") }}</div></div>
+  </div>
+
+  <div class="es-card">
+    <div class="es-card-h">
+      <span>Registre de paie — {{ data.nb }} bulletin(s)</span>
+      <a class="es-btn" style="background:rgba(255,255,255,.2)" href="/app/parametres-paie-kya">⚙ Paramètres de paie</a>
+    </div>
+    {% if data.lignes %}
+    <div style="overflow-x:auto">
+    <table class="es-t">
+      <thead>
+        <tr>
+          <th style="width:8%">Mois</th><th>Employé</th><th>Poste</th>
+          <th class="r">Brut</th><th class="r">CNSS</th><th class="r">IRPP</th>
+          <th class="r">Autres</th><th class="r">Total ret.</th><th class="r">Net à payer</th>
+          <th class="r">Coût empl.</th><th style="width:6%">Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for l in data.lignes %}
+        <tr>
+          <td>{{ l.mois }}</td>
+          <td><a class="es-emp" href="/app/bulletin-paie-kya/{{ l.name }}">{{ l.employee_name }}</a></td>
+          <td>{{ l.poste or "" }}</td>
+          <td class="r">{{ "{:,.0f}".format(l.brut_total).replace(",", " ") }}</td>
+          <td class="r">{{ "{:,.0f}".format(l.cnss_salarie).replace(",", " ") }}</td>
+          <td class="r">{{ "{:,.0f}".format(l.irpp).replace(",", " ") }}</td>
+          <td class="r">{{ "{:,.0f}".format(l.autres_retenues).replace(",", " ") }}</td>
+          <td class="r">{{ "{:,.0f}".format(l.total_retenues).replace(",", " ") }}</td>
+          <td class="r"><b>{{ "{:,.0f}".format(l.net_a_payer).replace(",", " ") }}</b></td>
+          <td class="r">{{ "{:,.0f}".format(l.cout_employeur).replace(",", " ") }}</td>
+          <td><span class="es-badge {{ 'ok' if l.docstatus == 1 else 'dr' }}">{{ l.statut_libelle }}</span></td>
+        </tr>
+        {% endfor %}
+        <tr class="es-tot">
+          <td colspan="3">TOTAL ({{ data.nb }})</td>
+          <td class="r">{{ "{:,.0f}".format(data.totaux.brut).replace(",", " ") }}</td>
+          <td class="r">{{ "{:,.0f}".format(data.totaux.cnss).replace(",", " ") }}</td>
+          <td class="r">{{ "{:,.0f}".format(data.totaux.irpp).replace(",", " ") }}</td>
+          <td class="r">{{ "{:,.0f}".format(data.totaux.autres).replace(",", " ") }}</td>
+          <td class="r">{{ "{:,.0f}".format(data.totaux.retenues).replace(",", " ") }}</td>
+          <td class="r">{{ "{:,.0f}".format(data.totaux.net).replace(",", " ") }}</td>
+          <td class="r">{{ "{:,.0f}".format(data.totaux.cout).replace(",", " ") }}</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+    {% else %}
+    <div class="es-empty">Aucun bulletin pour cette période.<br>
+      Créez un bulletin avec le bouton <b>＋ Bulletin</b>, puis configurez les taux via <b>⚙ Paramètres de paie</b>.</div>
+    {% endif %}
+  </div>
+</div>

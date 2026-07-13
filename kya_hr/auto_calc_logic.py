@@ -300,3 +300,174 @@ def _set_employee_name(doc):
         doc.employee_name = frappe.db.get_value(
             "Employee", doc.employee, "employee_name"
         )
+
+
+# ════════════════════════════════════════════════════════════════════
+#  Bulletin Paie KYA  (moteur de paie lisant « Parametres Paie KYA »)
+# ════════════════════════════════════════════════════════════════════
+
+_MOIS_NUM = {
+    "Janvier": "01", "Février": "02", "Mars": "03", "Avril": "04",
+    "Mai": "05", "Juin": "06", "Juillet": "07", "Août": "08",
+    "Septembre": "09", "Octobre": "10", "Novembre": "11", "Décembre": "12",
+}
+
+
+def _irpp_progressif(base, tranches):
+    """Applique un barème progressif (liste de tranches min/max/taux) au revenu
+    imposable mensuel `base`. L'impôt de chaque tranche ne porte que sur la
+    fraction du revenu comprise dans la tranche."""
+    impot = 0.0
+    for t in tranches:
+        tmin = flt(t.get("tranche_min"))
+        tmax = flt(t.get("tranche_max"))
+        taux = flt(t.get("taux"))
+        if base <= tmin:
+            continue
+        borne_haute = base if (not tmax or tmax <= 0) else min(base, tmax)
+        assiette = borne_haute - tmin
+        if assiette > 0:
+            impot += assiette * taux / 100.0
+    return impot
+
+
+def name_bulletin(doc, method=None):
+    """Nomme le bulletin BP-<année>-<n°mois>-<matricule> (l'autoname du JSON
+    référence mois_num, calculé seulement au validate qui court APRÈS le
+    nommage → on force le nom ici)."""
+    mn = _MOIS_NUM.get(doc.get("mois") or "", "00")
+    doc.mois_num = mn
+    doc.name = f"BP-{doc.get('annee')}-{mn}-{doc.get('employee')}"
+
+
+def compute_bulletin(doc, method=None):
+    """Calcule un Bulletin Paie KYA à partir des « Parametres Paie KYA ».
+
+    Chaîne de calcul (toutes les valeurs de taux/barème viennent de la config
+    saisie par le Comptable — aucune règle codée en dur) :
+        brut_total      = salaire_base + Σ primes
+        base_cnss       = (salaire_base + Σ primes soumises CNSS) plafonnée
+        cnss_salarie    = base_cnss × taux CNSS salarié
+        base_imposable  = (salaire_base + Σ primes imposables)
+                          − abattement − CNSS (si déductible)
+                          [− réduction charges si mode « base »]
+        irpp            = barème progressif(base_imposable)
+                          [− réduction charges si mode « impôt »]
+        total_retenues  = cnss_salarie + irpp + autres_retenues
+        net_a_payer     = brut_total − total_retenues
+        cout_employeur  = brut_total + cnss_patronal
+    """
+    block_self_approval(doc)
+    _set_employee_name(doc)
+
+    # N° de mois + titre (sert à l'autoname et à l'affichage)
+    doc.mois_num = _MOIS_NUM.get(doc.get("mois") or "", "00")
+    if doc.get("employee_name"):
+        doc.titre = f"{doc.employee_name} — {doc.get('mois')} {doc.get('annee')}"
+
+    cfg = frappe.get_single("Parametres Paie KYA")
+
+    base_sal = flt(doc.get("salaire_base"))
+
+    # ── Gains ────────────────────────────────────────────────────────
+    total_primes = 0.0
+    primes_cnss = 0.0
+    primes_imposables = 0.0
+    for row in (doc.get("primes") or []):
+        m = flt(row.get("montant"))
+        total_primes += m
+        if row.get("soumis_cnss"):
+            primes_cnss += m
+        if row.get("imposable"):
+            primes_imposables += m
+    doc.brut_total = base_sal + total_primes
+
+    # ── CNSS (part salariale) ────────────────────────────────────────
+    base_cnss = base_sal + primes_cnss
+    plafond = flt(cfg.get("cnss_plafond"))
+    if plafond > 0 and base_cnss > plafond:
+        base_cnss = plafond
+    doc.base_cnss = base_cnss
+    doc.cnss_salarie = base_cnss * flt(cfg.get("cnss_taux_salarie")) / 100.0
+    doc.cnss_patronal = base_cnss * flt(cfg.get("cnss_taux_patronal")) / 100.0
+
+    # ── Abattement forfaitaire ───────────────────────────────────────
+    brut_imposable = base_sal + primes_imposables
+    abt = brut_imposable * flt(cfg.get("abattement_taux")) / 100.0
+    abt_plafond = flt(cfg.get("abattement_plafond"))
+    if abt_plafond > 0 and abt > abt_plafond:
+        abt = abt_plafond
+    doc.abattement_montant = abt
+
+    # ── Réduction pour charges de famille ────────────────────────────
+    nb = int(doc.get("nb_charges") or 0)
+    nb_max = int(cfg.get("plafond_nb_charges") or 0)
+    if nb_max > 0:
+        nb = min(nb, nb_max)
+    reduction = nb * flt(cfg.get("montant_par_charge"))
+    mode_base = (cfg.get("charge_mode") == "Réduction de la base imposable")
+
+    # ── Base imposable ───────────────────────────────────────────────
+    base_imp = brut_imposable - abt
+    if cfg.get("cnss_deductible_irpp"):
+        base_imp -= flt(doc.cnss_salarie)
+    if mode_base:
+        base_imp -= reduction
+    if base_imp < 0:
+        base_imp = 0.0
+    doc.base_imposable = base_imp
+
+    # ── IRPP (barème progressif) ─────────────────────────────────────
+    irpp = _irpp_progressif(base_imp, cfg.get("irpp_bareme") or [])
+    if not mode_base:
+        irpp -= reduction
+    if irpp < 0:
+        irpp = 0.0
+    doc.irpp = irpp
+    doc.reduction_charges = reduction
+
+    # ── Retenues complémentaires ─────────────────────────────────────
+    autres = 0.0
+    for r in (cfg.get("retenues") or []):
+        if not r.get("actif"):
+            continue
+        taux = flt(r.get("taux"))
+        if taux:
+            base_ret = doc.brut_total
+            if r.get("base") == "Brut imposable":
+                base_ret = brut_imposable
+            elif r.get("base") == "Salaire de base":
+                base_ret = base_sal
+            autres += base_ret * taux / 100.0
+        else:
+            autres += flt(r.get("montant_fixe"))
+    doc.autres_retenues = autres
+
+    # ── Net & coût employeur ─────────────────────────────────────────
+    doc.total_retenues = flt(doc.cnss_salarie) + flt(doc.irpp) + autres
+    doc.net_a_payer = flt(doc.brut_total) - flt(doc.total_retenues)
+    doc.cout_employeur = flt(doc.brut_total) + flt(doc.cnss_patronal)
+
+    try:
+        net = int(round(flt(doc.net_a_payer)))
+        lettres = fr_number_in_words(net)
+        montant_fmt = "{:,.0f}".format(net).replace(",", " ")
+        doc.net_en_lettres = f"{lettres} ({montant_fmt}) francs CFA"
+    except Exception:
+        pass
+
+
+@frappe.whitelist()
+def prefill_primes_bulletin(bulletin_name=None):
+    """Renvoie le catalogue de primes configuré, pour pré-remplir un bulletin
+    côté client (bouton « Charger les primes du catalogue »)."""
+    cfg = frappe.get_single("Parametres Paie KYA")
+    out = []
+    for p in (cfg.get("primes") or []):
+        out.append({
+            "libelle": p.get("libelle"),
+            "montant": flt(p.get("montant_defaut")),
+            "imposable": 1 if p.get("imposable") else 0,
+            "soumis_cnss": 1 if p.get("soumis_cnss") else 0,
+        })
+    return out

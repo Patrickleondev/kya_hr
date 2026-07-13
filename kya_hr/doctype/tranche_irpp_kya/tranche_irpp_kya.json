@@ -1,0 +1,35 @@
+{
+ "custom": 1,
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "istable": 1,
+ "module": "KYA HR",
+ "name": "Tranche IRPP KYA",
+ "fields": [
+  {
+   "fieldname": "tranche_min",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "columns": 3,
+   "label": "Tranche de (>=)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tranche_max",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "columns": 3,
+   "label": "Tranche à (<=)",
+   "description": "0 = jusqu'à l'infini (dernière tranche)"
+  },
+  {
+   "fieldname": "taux",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "columns": 2,
+   "label": "Taux %",
+   "reqd": 1
+  }
+ ],
+ "permissions": []
+}

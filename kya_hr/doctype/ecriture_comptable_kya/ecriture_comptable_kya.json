@@ -1,0 +1,126 @@
+{
+ "autoname": "format:ECR-{YYYY}-{#####}",
+ "custom": 1,
+ "doctype": "DocType",
+ "fields": [
+  {
+   "fieldname": "section_ecriture",
+   "fieldtype": "Section Break",
+   "label": "Écriture comptable"
+  },
+  {
+   "default": "Today",
+   "fieldname": "date_ecriture",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "description": "Code journal : OD (opérations diverses), CAI (caisse), BQ (banque), AC (achats), VT (ventes)…",
+   "fieldname": "journal",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Journal (C.j)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "numero_piece",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "N° pièce"
+  },
+  {
+   "fieldname": "col_ecr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Numéro de compte (plan comptable SYSCOHADA), ex. 401100, 6611…",
+   "fieldname": "compte_numero",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Compte",
+   "reqd": 1
+  },
+  {
+   "fieldname": "compte_libelle",
+   "fieldtype": "Data",
+   "label": "Libellé du compte"
+  },
+  {
+   "fieldname": "section_montants",
+   "fieldtype": "Section Break",
+   "label": "Détail"
+  },
+  {
+   "fieldname": "libelle",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Libellé de l'écriture",
+   "reqd": 1
+  },
+  {
+   "fieldname": "col_mnt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "debit",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Mouvement débit"
+  },
+  {
+   "default": "0",
+   "fieldname": "credit",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Mouvement crédit"
+  },
+  {
+   "fieldname": "lettrage",
+   "fieldtype": "Data",
+   "label": "Lettrage (Let)"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Modifié depuis",
+   "no_copy": 1,
+   "options": "Ecriture Comptable KYA",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "module": "KYA HR",
+ "name": "Ecriture Comptable KYA",
+ "permissions": [
+  {
+   "amend": 1, "cancel": 1, "create": 1, "delete": 1, "email": 1, "export": 1,
+   "print": 1, "read": 1, "report": 1, "role": "System Manager", "share": 1,
+   "submit": 1, "write": 1
+  },
+  {
+   "amend": 1, "cancel": 1, "create": 1, "email": 1, "export": 1, "print": 1,
+   "read": 1, "report": 1, "role": "Comptable", "submit": 1, "write": 1
+  },
+  {
+   "amend": 1, "cancel": 1, "create": 1, "email": 1, "export": 1, "print": 1,
+   "read": 1, "report": 1, "role": "Accounts Manager", "submit": 1, "write": 1
+  },
+  {
+   "print": 1, "read": 1, "report": 1, "export": 1, "role": "DFC"
+  },
+  {
+   "print": 1, "read": 1, "report": 1, "role": "Direction"
+  }
+ ],
+ "search_fields": "compte_numero, journal, numero_piece, libelle",
+ "sort_field": "date_ecriture",
+ "sort_order": "ASC",
+ "track_changes": 1
+}

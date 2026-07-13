@@ -98,6 +98,23 @@ function render(D){
     if(c.sub) card.appendChild(el('span','sub',c.sub)); g.appendChild(card); });
   root.appendChild(g);
 
+  // ── Opérations maison KYA : Facturation · Grand Livre · Paie ──
+  if(D.ops){
+    root.appendChild(band('receipt','Opérations KYA — Facturation · Grand Livre · Paie','Modules maison',(D.ops.annee?'année '+D.ops.annee:''),'linear-gradient(100deg,#0E5C8A,#1976D2)'));
+    const go=el('div','cpx-cards');
+    (D.ops.cards||[]).forEach(c=>{ const card=el('div','cpx-card'); card.style.cursor='pointer'; if(c.url) card.onclick=()=>{location.href=c.url;};
+      const ch=el('div','ch'); ch.appendChild(el('span','lbl',c.label)); ch.appendChild(chip(c.icon,c.accent)); card.appendChild(ch);
+      const v=el('div'); v.style.cssText='display:flex;align-items:baseline;'; v.appendChild(el('span','val',c.value)); if(c.unit) v.appendChild(el('span','un',c.unit)); card.appendChild(v);
+      if(c.sub) card.appendChild(el('span','sub',c.sub)); go.appendChild(card); });
+    root.appendChild(go);
+    // raccourcis rapides
+    const rw=el('div'); rw.style.cssText='display:flex;flex-wrap:wrap;gap:9px;margin:10px 0 4px;';
+    (D.ops.raccourcis||[]).forEach(r=>{ const a=document.createElement('a'); a.href=r.url;
+      a.style.cssText='text-decoration:none;background:#fff;border:1px solid #e2e8f0;border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:600;color:#0E5C8A;box-shadow:0 1px 3px rgba(0,0,0,.05);';
+      a.textContent='＋ '+r.label; rw.appendChild(a); });
+    root.appendChild(rw);
+  }
+
   const t1=el('div','cpx-table'); t1.style.marginTop='12px';
   const cap=el('div'); cap.style.cssText='padding:11px 16px;border-bottom:1px solid #f1f4f7;display:flex;justify-content:space-between;align-items:center;';
   cap.appendChild(el('span',null,'<b style="font-size:13.5px;">Derniers brouillards de caisse</b>')); cap.appendChild(el('span',null,'<span style="font-size:11.5px;color:#98a2b3;">récents</span>')); t1.appendChild(cap);
