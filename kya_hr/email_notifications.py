@@ -65,7 +65,7 @@ DOCTYPE_CONFIG = {
         "icon": "↩️",
     },
     "Inventaire KYA": {
-        "label": "Fiche d'Inventaire",
+        "label": "Fiche d'Inventaire numérique",
         "route": "inventaire-kya",
         "employee_field": "employee",
         "icon": "📊",

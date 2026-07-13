@@ -1,0 +1,135 @@
+<style>
+  :root { --kya-blue:#0E5C8A; --kya-blue2:#1976D2; --kya-orange:#F77F00; }
+  body { background:#f4f6f9; }
+  .gl-wrap { max-width:1100px; margin:0 auto; padding:18px; font-family:Arial,Helvetica,sans-serif; color:#1a1a1a; }
+  .gl-head { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+             background:#fff; border-radius:12px; padding:16px 20px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+  .gl-head h1 { margin:0; color:var(--kya-blue); font-size:22px; letter-spacing:1px; }
+  .gl-head .sub { color:#666; font-size:12px; margin-top:2px; }
+  .gl-filters { display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; }
+  .gl-filters label { display:block; font-size:11px; color:#666; margin-bottom:3px; }
+  .gl-filters input, .gl-filters select { padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; }
+  .gl-btn { background:var(--kya-blue); color:#fff; border:none; padding:8px 16px; border-radius:8px;
+            font-weight:700; cursor:pointer; font-size:13px; }
+  .gl-btn.print { background:var(--kya-orange); }
+  .gl-kpis { display:flex; gap:14px; flex-wrap:wrap; margin:16px 0; }
+  .gl-kpi { flex:1; min-width:170px; background:#fff; border-radius:12px; padding:14px 18px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+  .gl-kpi .lbl { font-size:11px; color:#888; text-transform:uppercase; letter-spacing:1px; }
+  .gl-kpi .val { font-size:22px; font-weight:800; color:var(--kya-blue); margin-top:4px; }
+  .gl-kpi.orange .val { color:var(--kya-orange); }
+  .gl-compte { background:#fff; border-radius:12px; margin-bottom:16px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+  .gl-compte-h { background:linear-gradient(135deg,var(--kya-blue),var(--kya-blue2)); color:#fff; padding:10px 16px; font-weight:700; }
+  table.gl-t { width:100%; border-collapse:collapse; font-size:12px; }
+  table.gl-t th { background:#eef3f8; color:#334; text-align:left; padding:7px 10px; font-size:11px; text-transform:uppercase; }
+  table.gl-t th.r, table.gl-t td.r { text-align:right; }
+  table.gl-t td { padding:7px 10px; border-bottom:1px solid #eef0f3; }
+  table.gl-t tr:nth-child(even) td { background:#fafbfc; }
+  .gl-tot td { font-weight:800; background:#f1f8e9 !important; border-top:2px solid var(--kya-blue); }
+  .gl-empty { background:#fff; border-radius:12px; padding:40px; text-align:center; color:#888; }
+  .gl-import { background:#fff; border-radius:12px; padding:12px 16px; margin:12px 0; box-shadow:0 1px 4px rgba(0,0,0,.06);
+               display:flex; gap:12px; align-items:center; flex-wrap:wrap; border-left:4px solid #2e7d32; }
+  .gl-imp-lbl { font-weight:700; color:#2e7d32; font-size:13px; }
+  @media print { .gl-filters, .gl-btn, .gl-import { display:none !important; } body { background:#fff; } }
+</style>
+
+<div class="gl-wrap">
+  <div class="gl-head">
+    <div>
+      <h1>Grand Livre KYA</h1>
+      <div class="sub">KYA-ENERGY GROUP — Grand-livre des comptes · Tenue de compte : CFA</div>
+    </div>
+    <form class="gl-filters" method="get">
+      <div><label>Du</label><input type="date" name="from" value="{{ from_date }}"></div>
+      <div><label>Au</label><input type="date" name="to" value="{{ to_date }}"></div>
+      <div><label>Compte</label><select name="compte">
+        <option value="">Tous</option>
+        {% for c in comptes_dispo %}<option value="{{ c.compte_numero }}" {% if c.compte_numero == compte %}selected{% endif %}>{{ c.compte_numero }} — {{ c.compte_libelle }}</option>{% endfor %}
+      </select></div>
+      <button class="gl-btn" type="submit">Filtrer</button>
+      <button class="gl-btn print" type="button" onclick="window.print()">Imprimer</button>
+    </form>
+  </div>
+
+  <div class="gl-import">
+    <span class="gl-imp-lbl">📥 Importer des écritures (export Sage / CSV)</span>
+    <button class="gl-btn" type="button" onclick="glModele()">Télécharger le modèle</button>
+    <label class="gl-btn" style="background:#2e7d32;cursor:pointer;margin:0">
+      Importer un CSV <input type="file" accept=".csv" style="display:none" onchange="glImporter(this)">
+    </label>
+    <label style="font-size:12px;color:#555;display:flex;align-items:center;gap:5px">
+      <input type="checkbox" id="gl-submit"> valider (soumettre) à l'import</label>
+    <span id="gl-imp-res" style="font-size:12px;color:#0E5C8A;"></span>
+  </div>
+
+  <div class="gl-kpis">
+    <div class="gl-kpi"><div class="lbl">Comptes mouvementés</div><div class="val">{{ gl.nb_comptes }}</div></div>
+    <div class="gl-kpi"><div class="lbl">Total débit</div><div class="val">{{ "{:,.0f}".format(gl.total_debit).replace(",", " ") }}</div></div>
+    <div class="gl-kpi"><div class="lbl">Total crédit</div><div class="val">{{ "{:,.0f}".format(gl.total_credit).replace(",", " ") }}</div></div>
+    <div class="gl-kpi orange"><div class="lbl">Solde général</div><div class="val">{{ "{:,.0f}".format(gl.solde_general).replace(",", " ") }}</div></div>
+  </div>
+
+  {% if gl.comptes %}
+    {% for c in gl.comptes %}
+    <div class="gl-compte">
+      <div class="gl-compte-h">{{ c.compte_numero }} &nbsp;—&nbsp; {{ c.compte_libelle or "Compte" }}</div>
+      <table class="gl-t">
+        <thead>
+          <tr>
+            <th style="width:10%">Date</th><th style="width:6%">C.j</th><th style="width:8%">N° pièce</th>
+            <th style="width:36%">Libellé écriture</th>
+            <th class="r" style="width:13%">Débit</th><th class="r" style="width:13%">Crédit</th>
+            <th class="r" style="width:14%">Solde progressif</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for l in c.lignes %}
+          <tr>
+            <td>{{ frappe.utils.formatdate(l.date, "dd/MM/yyyy") }}</td>
+            <td>{{ l.journal }}</td><td>{{ l.piece }}</td>
+            <td>{{ l.libelle }}</td>
+            <td class="r">{{ ("{:,.0f}".format(l.debit).replace(",", " ")) if l.debit else "" }}</td>
+            <td class="r">{{ ("{:,.0f}".format(l.credit).replace(",", " ")) if l.credit else "" }}</td>
+            <td class="r">{{ "{:,.0f}".format(l.solde).replace(",", " ") }}</td>
+          </tr>
+          {% endfor %}
+          <tr class="gl-tot">
+            <td colspan="4">TOTAL {{ c.compte_numero }}</td>
+            <td class="r">{{ "{:,.0f}".format(c.total_debit).replace(",", " ") }}</td>
+            <td class="r">{{ "{:,.0f}".format(c.total_credit).replace(",", " ") }}</td>
+            <td class="r">{{ "{:,.0f}".format(c.solde).replace(",", " ") }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="gl-empty">Aucune écriture sur la période sélectionnée.<br>Saisissez des écritures (Ecriture Comptable KYA) ou importez-les via le bouton ci-dessus.</div>
+  {% endif %}
+</div>
+
+<script>
+function glDl(b64,name){
+  const bin=atob(b64); const arr=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+  const u=URL.createObjectURL(new Blob([arr],{type:'text/csv'}));
+  const a=document.createElement('a'); a.href=u; a.download=name; a.click(); URL.revokeObjectURL(u);
+}
+function glModele(){
+  frappe.call({method:'kya_hr.api.compta_import.download_template_ecritures'}).then(res=>{
+    const r=res.message; if(r) glDl(r.content_base64, r.filename);
+  });
+}
+async function glImporter(inp){
+  const f=inp.files[0]; if(!f) return;
+  const res=document.getElementById('gl-imp-res'); res.textContent='Import en cours…';
+  const b64=await new Promise(ok=>{const rd=new FileReader(); rd.onload=e=>ok(e.target.result.split(',')[1]); rd.readAsDataURL(f);});
+  const submit=document.getElementById('gl-submit').checked?1:0;
+  try{
+    const r=(await frappe.call({method:'kya_hr.api.compta_import.import_ecritures',
+      args:{content_base64:b64, submit}})).message;
+    res.textContent=`✅ ${r.crees} écriture(s) créée(s)`+(submit?`, ${r.valides} validée(s)`:'')+(r.ignores?`, ${r.ignores} ignorée(s)`:'')+(r.erreurs&&r.erreurs.length?` — ${r.erreurs.length} erreur(s): `+r.erreurs.slice(0,3).join(' | '):'');
+    setTimeout(()=>location.reload(), 1500);
+  }catch(e){ res.textContent='❌ Erreur import (rôle Comptabilité requis).'; }
+  inp.value='';
+}
+</script>

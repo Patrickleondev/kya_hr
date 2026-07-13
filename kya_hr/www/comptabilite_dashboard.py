@@ -262,9 +262,86 @@ def get_compta_overview() -> dict:
                "br_autres": max(0, br_attente - br_comptable - br_dfc),
                "cheques": cheques_attente}
 
+    # ── Opérations maison KYA (Factures / Grand Livre / Paie) ──
+    ops = _ops_maison_kya()
+
     return {
         "date_str": formatdate(today(), "EEEE d MMMM y"),
         "hero": hero, "treso_cards": treso_cards, "brouillard_rows": brouillard_rows,
         "flux": flux, "doc_etats": doc_etats, "alertes": alertes,
         "solde_label": _fmt_m(solde_actuel) + " M FCFA",
+        "ops": ops,
+    }
+
+
+def _ops_maison_kya() -> dict:
+    """Cartes synthèse des modules comptables maison : Facturation, Grand Livre
+    et Paie. 100 % réel, défensif si un doctype est absent. Année en cours."""
+    from frappe.utils import getdate, today
+    year = getdate(today()).year
+    fd, td = f"{year}-01-01", f"{year}-12-31"
+
+    # Facturation (Facture KYA)
+    nb_fac = ca_fac = fac_brouillon = 0
+    if _exists("Facture KYA"):
+        try:
+            facs = frappe.get_all("Facture KYA",
+                                  filters={"date_facture": ["between", [fd, td]]},
+                                  fields=["total_ttc", "docstatus"])
+            nb_fac = len(facs)
+            ca_fac = sum(flt(f.total_ttc) for f in facs if f.docstatus == 1)
+            fac_brouillon = sum(1 for f in facs if f.docstatus == 0)
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), "compta-ops: factures")
+
+    # Grand Livre (Ecriture Comptable KYA)
+    nb_ecr = gl_debit = gl_credit = 0
+    if _exists("Ecriture Comptable KYA"):
+        try:
+            ecrs = frappe.get_all("Ecriture Comptable KYA",
+                                  filters={"date_ecriture": ["between", [fd, td]],
+                                           "docstatus": 1},
+                                  fields=["debit", "credit"])
+            nb_ecr = len(ecrs)
+            gl_debit = sum(flt(e.debit) for e in ecrs)
+            gl_credit = sum(flt(e.credit) for e in ecrs)
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), "compta-ops: grand livre")
+
+    # Paie (Bulletin Paie KYA)
+    masse_net = charges_pat = 0
+    effectif = set()
+    if _exists("Bulletin Paie KYA"):
+        try:
+            bp = frappe.get_all("Bulletin Paie KYA",
+                                filters={"annee": year, "docstatus": 1},
+                                fields=["net_a_payer", "cnss_patronal", "employee"])
+            masse_net = sum(flt(b.net_a_payer) for b in bp)
+            charges_pat = sum(flt(b.cnss_patronal) for b in bp)
+            effectif = {b.employee for b in bp}
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), "compta-ops: paie")
+
+    return {
+        "annee": year,
+        "cards": [
+            {"label": "Facturation", "value": _fmt_m(ca_fac), "unit": "M FCFA",
+             "sub": f"{nb_fac} facture(s) · {fac_brouillon} brouillon(s)",
+             "icon": "file", "accent": "blue", "url": "/app/facture-kya"},
+            {"label": "Grand Livre (débit)", "value": _fmt_m(gl_debit), "unit": "M FCFA",
+             "sub": f"{nb_ecr} écriture(s) · crédit {_fmt_m(gl_credit)} M",
+             "icon": "book", "accent": "teal", "url": "/grand-livre"},
+            {"label": "Masse salariale nette", "value": _fmt_m(masse_net), "unit": "M FCFA",
+             "sub": f"{len(effectif)} salarié(s) · charges {_fmt_m(charges_pat)} M",
+             "icon": "coins", "accent": "green", "url": "/etat-salaire"},
+        ],
+        "raccourcis": [
+            {"label": "Nouvelle facture", "url": "/app/facture-kya/new", "icon": "file"},
+            {"label": "Grand Livre", "url": "/grand-livre", "icon": "book"},
+            {"label": "État de salaire", "url": "/etat-salaire", "icon": "bar-chart"},
+            {"label": "Nouveau bulletin", "url": "/app/bulletin-paie-kya/new", "icon": "receipt"},
+            {"label": "Paramètres de paie", "url": "/app/parametres-paie-kya", "icon": "setting"},
+            {"label": "Brouillard de caisse", "url": "/brouillard-caisse/new", "icon": "coins"},
+            {"label": "État récap chèques", "url": "/etat-recap/new", "icon": "filecheck"},
+        ],
     }

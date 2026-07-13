@@ -440,7 +440,16 @@ def run_achats():
             created.append(("Appel Offre KYA", name))
             _pdf_as(rep, "achats", "Appel Offre KYA", name)
 
-        # 6. Un caissier ne crée PAS de demande d'achat (rôle sans droit)
+        # 6. Un caissier ne crée PAS de demande d'achat (rôle sans droit).
+        # HRMS ré-ajoute automatiquement le rôle « Employee » aux comptes liés à
+        # une fiche Employee ; ce rôle donne le droit de créer une DA. Pour que
+        # l'assertion « le rôle Caissier SEUL ne suffit pas » reste valable, on
+        # remet le compte de test à son rôle pur avant le test négatif.
+        frappe.set_user("Administrator")
+        _cu = frappe.get_doc("User", _email("caissier"))
+        _cu.set("roles", [r for r in _cu.roles if r.role == "Caissier"])
+        _cu.save(ignore_permissions=True)
+        frappe.db.commit()
         _as("caissier")
         try:
             d = frappe.get_doc({"doctype": "Demande Achat KYA", "employee": emp,
@@ -669,10 +678,18 @@ def run_rh():
 
         # 4. BESOIN DE FORMATION : chef d'équipe soumet → RH prend en revue → clôture
         eq = frappe.get_all("Equipe KYA", pluck="name", limit=1)
-        chef_emp = frappe.db.get_value("Employee", {"user_id": _email("chef")}, "name")
         if eq:
-            # le chef de test doit porter le rôle Chef Equipe pour soumettre
+            # le chef de test doit porter le rôle Chef Equipe pour soumettre.
+            # On (re)crée SA fiche employé AVANT de lire chef_emp : un run
+            # précédent a pu la supprimer (teardown), et lire chef_emp trop tôt
+            # donnait None -> « chef_equipe obligatoire » à la création.
             _ensure_role_user("chef", ["Chef Service", "Chef Equipe", "Employee"], as_employee=True)
+            chef_emp = frappe.db.get_value("Employee", {"user_id": _email("chef")}, "name")
+            # chef_equipe de Besoin de Formation est fetch_from equipe.chef_equipe :
+            # on repose donc le chef courant sur l'Equipe (un teardown a pu le
+            # détacher), sinon le fetch ramène un chef vide/pendant.
+            frappe.db.set_value("Equipe KYA", eq[0], "chef_equipe", chef_emp)
+            frappe.db.commit()
             name = _insert_as(rep, "chef", "Besoin de Formation", {
                 "equipe": eq[0], "chef_equipe": chef_emp, "annee": int(today()[:4]),
                 "lignes": [{"intitule": "Sécurité électrique",
@@ -724,7 +741,15 @@ def run_rh():
                 frappe.delete_doc("User", em, ignore_permissions=True, force=True)
         # L'Employee créé pour le compte « chef » (Besoin de Formation) est
         # supprimé pour ne pas polluer d'autres harnais (ex. _ref_employee).
+        # IMPORTANT : détacher d'abord tout lien `reports_to` / `chef_equipe`
+        # pointant vers lui, sinon on laisse un lien PENDANT et les créations
+        # DA / Permission / Planning d'un run ultérieur échouent avec
+        # « Could not find Responsable direct » (validation de lien Frappe).
         for e in frappe.get_all("Employee", filters={"user_id": _email("chef")}, pluck="name"):
+            for sub in frappe.get_all("Employee", filters={"reports_to": e}, pluck="name"):
+                frappe.db.set_value("Employee", sub, "reports_to", None)
+            for eq in frappe.get_all("Equipe KYA", filters={"chef_equipe": e}, pluck="name"):
+                frappe.db.set_value("Equipe KYA", eq, "chef_equipe", None)
             try:
                 frappe.delete_doc("Employee", e, ignore_permissions=True, force=True)
             except Exception:

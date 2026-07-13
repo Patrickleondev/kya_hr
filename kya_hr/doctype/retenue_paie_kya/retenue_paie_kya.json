@@ -1,0 +1,51 @@
+{
+ "custom": 1,
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "istable": 1,
+ "module": "KYA HR",
+ "name": "Retenue Paie KYA",
+ "fields": [
+  {
+   "fieldname": "libelle",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "columns": 3,
+   "label": "Libellé",
+   "reqd": 1
+  },
+  {
+   "fieldname": "base",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "columns": 2,
+   "label": "Base de calcul",
+   "options": "Brut total\nBrut imposable\nSalaire de base",
+   "default": "Brut total"
+  },
+  {
+   "fieldname": "taux",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "columns": 2,
+   "label": "Taux %"
+  },
+  {
+   "fieldname": "montant_fixe",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "columns": 2,
+   "label": "Montant fixe",
+   "description": "Utilisé si le taux est à 0"
+  },
+  {
+   "default": "1",
+   "fieldname": "actif",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "columns": 1,
+   "label": "Actif"
+  }
+ ],
+ "permissions": []
+}

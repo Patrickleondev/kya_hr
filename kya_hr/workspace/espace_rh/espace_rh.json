@@ -120,6 +120,13 @@
    "icon": "calendar"
   },
   {
+   "label": "🌴 Congés à valider",
+   "type": "URL",
+   "url": "/app/leave-application?workflow_state=En%20attente%20RH",
+   "color": "#f57c00",
+   "icon": "calendar"
+  },
+  {
    "label": "Plannings Congé",
    "type": "DocType",
    "link_to": "Planning Conge",
@@ -296,7 +303,7 @@
   },
   {
    "type": "Link",
-   "label": "Demande de Congé (Leave Application)",
+   "label": "Demande de Congé",
    "link_to": "Leave Application",
    "link_type": "DocType",
    "hidden": 0,
@@ -418,7 +425,7 @@
   },
   {
    "type": "Link",
-   "label": "Employee",
+   "label": "Employés",
    "link_to": "Employee",
    "link_type": "DocType",
    "hidden": 0,
@@ -428,7 +435,7 @@
   },
   {
    "type": "Link",
-   "label": "Attendance",
+   "label": "Présences",
    "link_to": "Attendance",
    "link_type": "DocType",
    "hidden": 0,
@@ -438,7 +445,7 @@
   },
   {
    "type": "Link",
-   "label": "Department",
+   "label": "Départements",
    "link_to": "Department",
    "link_type": "DocType",
    "hidden": 0,
@@ -448,7 +455,7 @@
   },
   {
    "type": "Link",
-   "label": "Designation",
+   "label": "Fonctions",
    "link_to": "Designation",
    "link_type": "DocType",
    "hidden": 0,

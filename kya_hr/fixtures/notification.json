@@ -661,8 +661,8 @@
     "bcc": null,
     "cc": null,
     "condition": null,
-    "receiver_by_document_field": "notif_rh_email",
-    "receiver_by_role": null
+    "receiver_by_document_field": null,
+    "receiver_by_role": "Responsable RH"
    }
   ],
   "send_system_notification": 0,
@@ -1078,10 +1078,17 @@
   "recipients": [
    {
     "bcc": null,
-    "cc": "{{ doc.notif_dg_email }}",
+    "cc": null,
     "condition": null,
-    "receiver_by_document_field": "notif_dga_email",
-    "receiver_by_role": null
+    "receiver_by_document_field": null,
+    "receiver_by_role": "DGA"
+   },
+   {
+    "bcc": null,
+    "cc": null,
+    "condition": null,
+    "receiver_by_document_field": null,
+    "receiver_by_role": "Directeur Général"
    }
   ],
   "send_system_notification": 0,
@@ -2235,6 +2242,141 @@
   "set_property_after_alert": null,
   "slack_webhook_url": null,
   "subject": "❌ Bon de commande {{ doc.name }} — Annulé",
+  "value_changed": "workflow_state"
+ },
+ {
+  "attach_files": null,
+  "attach_print": 0,
+  "channel": "Email",
+  "condition": "doc.workflow_state == 'En attente RH'",
+  "condition_type": "Python",
+  "date_changed": null,
+  "datetime_changed": null,
+  "datetime_last_run": null,
+  "days_in_advance": 0,
+  "docstatus": 0,
+  "doctype": "Notification",
+  "document_type": "Planning Conge Equipe",
+  "enabled": 1,
+  "event": "Value Change",
+  "filters": null,
+  "from_attach_field": null,
+  "is_standard": 0,
+  "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#009688,#00bcd4);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='{{ frappe.utils.get_url() }}/assets/kya_hr/images/kya_logo.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>Validation RH requise</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><div style='background:#f1f8e9;padding:10px;margin-bottom:15px;border-radius:6px;border-left:4px solid #8bc34a;color:#33691e;font-size:14px;'><b>Réf. Dossier :</b> {{ doc.name }} &nbsp;·&nbsp; <b>Équipe :</b> {{ doc.equipe }} &nbsp;·&nbsp; <b>Année :</b> {{ doc.annee }}</div><p>Bonjour,</p><p>Le chef d'équipe a soumis le <b>planning de congé de l'équipe {{ doc.equipe }}</b> pour {{ doc.annee }}. Merci de le viser.</p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url() }}/planning-equipe' style='display:inline-block;padding:12px 32px;background:#00897b;color:white;text-decoration:none;border-radius:8px;font-weight:bold;'>Ouvrir le planning d'équipe</a></div><div style='text-align:center;'><a href='{{ frappe.utils.get_url_to_form(doc.doctype, doc.name) }}' style='display:inline-block;margin-top:6px;padding:8px 20px;background:#f5f5f5;color:#333;text-decoration:none;border-radius:6px;font-size:13px;border:1px solid #ddd;'>💻 Ouvrir dans le Bureau ERPNext</a></div></div>{{ get_kya_email_footer() }}</div>",
+  "message_type": "HTML",
+  "method": null,
+  "minutes_offset": 0,
+  "modified": "2026-04-23 19:28:37.328114",
+  "module": null,
+  "name": "KYA - Planning Équipe: En attente RH",
+  "print_format": null,
+  "property_value": null,
+  "recipients": [
+   {
+    "bcc": null,
+    "cc": null,
+    "condition": null,
+    "receiver_by_document_field": null,
+    "receiver_by_role": "Responsable RH"
+   }
+  ],
+  "send_system_notification": 0,
+  "send_to_all_assignees": 0,
+  "sender": null,
+  "sender_email": null,
+  "set_property_after_alert": null,
+  "slack_webhook_url": null,
+  "subject": "Planning congé équipe {{ doc.equipe }} — Validation RH requise",
+  "value_changed": "workflow_state"
+ },
+ {
+  "attach_files": null,
+  "attach_print": 0,
+  "channel": "Email",
+  "condition": "doc.workflow_state == 'En attente DG'",
+  "condition_type": "Python",
+  "date_changed": null,
+  "datetime_changed": null,
+  "datetime_last_run": null,
+  "days_in_advance": 0,
+  "docstatus": 0,
+  "doctype": "Notification",
+  "document_type": "Planning Conge Equipe",
+  "enabled": 1,
+  "event": "Value Change",
+  "filters": null,
+  "from_attach_field": null,
+  "is_standard": 0,
+  "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#009688,#00bcd4);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='{{ frappe.utils.get_url() }}/assets/kya_hr/images/kya_logo.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>Approbation DG requise</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><div style='background:#f1f8e9;padding:10px;margin-bottom:15px;border-radius:6px;border-left:4px solid #8bc34a;color:#33691e;font-size:14px;'><b>Réf. Dossier :</b> {{ doc.name }} &nbsp;·&nbsp; <b>Équipe :</b> {{ doc.equipe }} &nbsp;·&nbsp; <b>Année :</b> {{ doc.annee }}</div><p>Bonjour,</p><p>Le planning de congé de l'équipe <b>{{ doc.equipe }}</b> ({{ doc.annee }}) a été visé par les RH et nécessite votre approbation finale.</p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url() }}/planning-equipe' style='display:inline-block;padding:12px 32px;background:#009688;color:white;text-decoration:none;border-radius:8px;font-weight:bold;'>Ouvrir le planning d'équipe</a></div><div style='text-align:center;'><a href='{{ frappe.utils.get_url_to_form(doc.doctype, doc.name) }}' style='display:inline-block;margin-top:6px;padding:8px 20px;background:#f5f5f5;color:#333;text-decoration:none;border-radius:6px;font-size:13px;border:1px solid #ddd;'>💻 Ouvrir dans le Bureau ERPNext</a></div></div>{{ get_kya_email_footer() }}</div>",
+  "message_type": "HTML",
+  "method": null,
+  "minutes_offset": 0,
+  "modified": "2026-04-23 19:28:37.328114",
+  "module": null,
+  "name": "KYA - Planning Équipe: En attente DG",
+  "print_format": null,
+  "property_value": null,
+  "recipients": [
+   {
+    "bcc": null,
+    "cc": null,
+    "condition": null,
+    "receiver_by_document_field": null,
+    "receiver_by_role": "Directeur Général"
+   }
+  ],
+  "send_system_notification": 0,
+  "send_to_all_assignees": 0,
+  "sender": null,
+  "sender_email": null,
+  "set_property_after_alert": null,
+  "slack_webhook_url": null,
+  "subject": "Planning congé équipe {{ doc.equipe }} — Approbation DG",
+  "value_changed": "workflow_state"
+ },
+ {
+  "attach_files": null,
+  "attach_print": 0,
+  "channel": "Email",
+  "condition": "doc.workflow_state == 'Approuvé'",
+  "condition_type": "Python",
+  "date_changed": null,
+  "datetime_changed": null,
+  "datetime_last_run": null,
+  "days_in_advance": 0,
+  "docstatus": 0,
+  "doctype": "Notification",
+  "document_type": "Planning Conge Equipe",
+  "enabled": 1,
+  "event": "Value Change",
+  "filters": null,
+  "from_attach_field": null,
+  "is_standard": 0,
+  "message": "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'><div style='background:linear-gradient(135deg,#009688,#00bcd4);padding:24px;border-radius:12px 12px 0 0;text-align:center;'><img src='{{ frappe.utils.get_url() }}/assets/kya_hr/images/kya_logo.png' width='60' style='margin-bottom:8px;'><h2 style='color:white;margin:0;'>Planning d'équipe approuvé</h2></div><div style='background:white;padding:24px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;'><div style='background:#f1f8e9;padding:10px;margin-bottom:15px;border-radius:6px;border-left:4px solid #8bc34a;color:#33691e;font-size:14px;'><b>Réf. Dossier :</b> {{ doc.name }} &nbsp;·&nbsp; <b>Équipe :</b> {{ doc.equipe }} &nbsp;·&nbsp; <b>Année :</b> {{ doc.annee }}</div><p>Bonjour,</p><p>Le planning de congé de l'équipe <b>{{ doc.equipe }}</b> pour {{ doc.annee }} a été <b>approuvé</b>. Les plannings individuels ont été générés.</p><div style='text-align:center;margin:20px 0;'><a href='{{ frappe.utils.get_url() }}/planning-equipe' style='display:inline-block;padding:12px 32px;background:#43a047;color:white;text-decoration:none;border-radius:8px;font-weight:bold;'>Ouvrir le planning d'équipe</a></div><div style='text-align:center;'><a href='{{ frappe.utils.get_url_to_form(doc.doctype, doc.name) }}' style='display:inline-block;margin-top:6px;padding:8px 20px;background:#f5f5f5;color:#333;text-decoration:none;border-radius:6px;font-size:13px;border:1px solid #ddd;'>💻 Ouvrir dans le Bureau ERPNext</a></div></div>{{ get_kya_email_footer() }}</div>",
+  "message_type": "HTML",
+  "method": null,
+  "minutes_offset": 0,
+  "modified": "2026-04-23 19:28:37.328114",
+  "module": null,
+  "name": "KYA - Planning Équipe: Approuvé",
+  "print_format": null,
+  "property_value": null,
+  "recipients": [
+   {
+    "bcc": null,
+    "cc": null,
+    "condition": null,
+    "receiver_by_document_field": "owner",
+    "receiver_by_role": null
+   }
+  ],
+  "send_system_notification": 0,
+  "send_to_all_assignees": 0,
+  "sender": null,
+  "sender_email": null,
+  "set_property_after_alert": null,
+  "slack_webhook_url": null,
+  "subject": "✅ Planning congé équipe {{ doc.equipe }} approuvé",
   "value_changed": "workflow_state"
  }
 ]

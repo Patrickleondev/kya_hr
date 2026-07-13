@@ -92,6 +92,17 @@ on_session_creation = "kya_hr.link_employees_users.on_session_creation"
 
 # Grille indiciaire : calcul automatique de la valeur indiciaire (Employee)
 doc_events = {
+    # Leave Application (natif HRMS) piloté par le workflow KYA « Flux RH
+    # Unifié ». Ce module (guardrails) était présent mais JAMAIS câblé : sans
+    # lui, leave_approver n'était pas rempli (→ HRMS validate_leave_access
+    # « Not permitted » pour le supérieur), l'allocation n'était pas provisionnée
+    # et les signatures/état n'étaient pas synchronisés.
+    "Leave Application": {
+        "before_validate": "kya_hr.leave_application_flow.before_validate",
+        "before_save": "kya_hr.leave_application_flow.before_save",
+        "validate": "kya_hr.leave_application_flow.validate",
+        "on_update": "kya_hr.leave_application_flow.on_update",
+    },
     "Employee": {
         "before_validate": "kya_hr.matricule.auto_generate_matricule",
         "before_save": "kya_hr.grille_indiciaire.calculer_indice_employee",
@@ -137,6 +148,13 @@ doc_events = {
         "validate": "kya_hr.auto_calc_logic.compute_bon_commande",
         "after_insert": "kya_hr.email_notifications.send_submission_recap",
         "on_change": "kya_hr.api.pdf_final.attach_final_pdf",
+    },
+    "Facture KYA": {
+        "validate": "kya_hr.auto_calc_logic.compute_facture",
+    },
+    "Bulletin Paie KYA": {
+        "autoname": "kya_hr.auto_calc_logic.name_bulletin",
+        "validate": "kya_hr.auto_calc_logic.compute_bulletin",
     },
     "Permission Sortie Employe": {
         "before_save": "kya_hr.chef_routing.populate_chef",
@@ -195,8 +213,11 @@ doc_events = {
             "kya_hr.planning_conge_equipe_logic.generate_individual_plannings",
         ],
     },
-    # PV et Bilan : pas de chef_routing (employee_field suffit)
+    # PV Sortie : chef_routing pour que la notif « En attente Chef » trouve le
+    # chef (report_to_user résolu depuis le créateur — la web form ne saisit pas
+    # de champ employee).
     "PV Sortie Materiel": {
+        "before_save": "kya_hr.chef_routing.populate_chef",
         "on_change": "kya_hr.api.pdf_final.attach_final_pdf",
         "after_insert": [
             "kya_hr.email_notifications.send_submission_recap",

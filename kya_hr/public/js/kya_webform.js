@@ -619,8 +619,8 @@
       workflow: "Saisie directe (Gestionnaire de Flotte / RH)"
     },
     "inventaire-kya": {
-      title: "FICHE D\u2019INVENTAIRE",
-      subtitle: "Stock & Inventaire",
+      title: "FICHE D\u2019INVENTAIRE NUM\u00c9RIQUE",
+      subtitle: "Inventaire syst\u00e8me (distinct du comptage physique magasin)",
       workflow: "Responsable Inventaire \u2192 Responsable Magasin"
     },
     "besoin-formation": {
@@ -828,6 +828,40 @@
     if (nm.indexOf("new-") === 0 || d.__islocal) return null; // pas encore enregistré
     return d;
   }
+
+  /* Nom RÉEL du document (après enregistrement), ou "" tant qu'il est provisoire.
+     On lit en priorité frappe.web_form.doc.name (LIVE, mis à jour au save) puis
+     le contexte serveur initial (frappe.web_form_doc, figé au chargement). */
+  function _kyaRealDocName() {
+    var route = getRoute();
+    var cands = [];
+    try { if (frappe.web_form && frappe.web_form.doc) cands.push(frappe.web_form.doc.name); } catch (e) {}
+    try { if (frappe.web_form_doc) { cands.push(frappe.web_form_doc.doc_name); cands.push(frappe.web_form_doc.name); } } catch (e) {}
+    for (var i = 0; i < cands.length; i++) {
+      var nm = cands[i];
+      if (!nm) continue;
+      nm = String(nm);
+      if (nm.indexOf("new-") === 0) continue;                       // brouillon local
+      if (nm === route || nm.toLowerCase() === route.toLowerCase()) continue; // slug de route
+      return nm;
+    }
+    return "";
+  }
+
+  /* Remplace « PROVISOIRE » par le vrai N° dès qu'il est connu. L'en-tête est
+     bâti une seule fois (au chargement, sans nom) ; après le 1er enregistrement
+     le nom existe mais l'en-tête n'était jamais rafraîchi -> « PROVISOIRE »
+     restait affiché malgré une fiche numérotée. Idempotent, jamais bloquant. */
+  function syncDocNumber() {
+    try {
+      var real = _kyaRealDocName();
+      if (!real) return;
+      var spans = document.querySelectorAll(".kya-doc-name");
+      for (var i = 0; i < spans.length; i++) {
+        if (spans[i].textContent !== real) spans[i].textContent = real;
+      }
+    } catch (e) { /* jamais bloquant */ }
+  }
   function _kyaPrintFormat() {
     try {
       if (frappe.web_form && frappe.web_form.print_format) return frappe.web_form.print_format;
@@ -1007,6 +1041,22 @@
     });
   }
 
+  /* Bascule le read_only d'un champ Frappe DANS la web form (et re-rend le
+     contrôle) pour que la signature soit réellement dessinable — le simple CSS
+     ne suffit pas, le pad n'attache son crayon que si read_only=0. Idempotent :
+     ne re-rend que si l'état change réellement. */
+  function _kyaSetFieldReadOnly(fieldname, ro) {
+    try {
+      if (!(window.frappe && frappe.web_form && frappe.web_form.fields_dict)) return;
+      var f = frappe.web_form.fields_dict[fieldname];
+      if (!f || !f.df) return;
+      var cur = f.df.read_only ? 1 : 0;
+      if (cur === ro) return;                 // déjà dans le bon état → ne rien casser
+      f.df.read_only = ro;
+      if (typeof f.refresh === "function") f.refresh();
+    } catch (e) { /* jamais bloquant */ }
+  }
+
   function setupSignaturePermissions(route) {
     var sigMap = SIGNATURE_ROLES[route];
     if (!sigMap) return;
@@ -1028,6 +1078,13 @@
       } else {
         canSign = userHasAnyRole(allowedRoles) && stateAllowsSignature(route, fieldname);
       }
+      // CLÉ DU CORRECTIF (12/07/2026) : basculer réellement le read_only du CHAMP
+      // Frappe (comme le fait le client script du desk), pas seulement le CSS.
+      // Frappe n'attache le crayon du pad de signature QUE si le champ n'est pas
+      // read_only ; sans ça le pad était visuellement dégrisé mais inerte → le
+      // signataire légitime ne pouvait pas signer dans la web form (il le pouvait
+      // dans le desk car pv_sortie_materiel.js s'y exécute, pas ici).
+      _kyaSetFieldReadOnly(fieldname, canSign ? 0 : 1);
       if (canSign) {
         el.classList.remove("read-only");
         el.removeAttribute("data-read-only");
@@ -2021,10 +2078,10 @@
   } else {
     waitForForm(); setupAdminPreviewButton();
   }
-  // Bannière « circuit terminé » : filets tardifs (le state du doc peut charger
-  // après les décorations ; injectFinalPdfBanner est idempotente).
-  setTimeout(function () { injectFinalPdfBanner(); }, 1800);
-  setTimeout(function () { injectFinalPdfBanner(); }, 4000);
+  // Bannière « circuit terminé » + synchro du N° : filets tardifs (le state et
+  // le nom du doc peuvent charger après les décorations ; les 2 sont idempotents).
+  setTimeout(function () { injectFinalPdfBanner(); syncDocNumber(); }, 1800);
+  setTimeout(function () { injectFinalPdfBanner(); syncDocNumber(); }, 4000);
 
   /* hideEmptyKyaSections retiré sur demande utilisateur (15/05/2026) :
    * "il faut faire les mêmes choses comme pour brouillard de caisse, pourquoi cacher ?"
@@ -2044,6 +2101,13 @@
     frappe.web_form.after_load = function() {
       if (_origAfterLoad) _origAfterLoad.apply(this, arguments);
       setTimeout(waitForForm, 150);
+    };
+    // Après enregistrement, le doc reçoit son vrai N° -> remplacer « PROVISOIRE ».
+    var _origAfterSave = frappe.web_form.after_save;
+    frappe.web_form.after_save = function() {
+      if (_origAfterSave) _origAfterSave.apply(this, arguments);
+      setTimeout(syncDocNumber, 200);
+      setTimeout(syncDocNumber, 1200);
     };
   }
 })();

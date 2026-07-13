@@ -7,11 +7,22 @@ import frappe
 
 
 def populate_chef(doc, method=None):
-    """Remplit doc.report_to_user depuis Employee.reports_to.user_id"""
-    if not getattr(doc, "employee", None):
+    """Remplit doc.report_to_user depuis Employee.reports_to.user_id.
+
+    L'employé est résolu depuis `doc.employee` s'il existe, sinon depuis le
+    créateur de la fiche (`owner`) — indispensable pour les PV de sortie, dont
+    la web form ne renseigne pas de champ `employee` : sans ce repli, la notif
+    « En attente Chef » ne trouvait aucun destinataire (le chef n'était jamais
+    prévenu)."""
+    emp = getattr(doc, "employee", None)
+    if not emp:
+        creator = doc.get("owner") or frappe.session.user
+        if creator and creator not in ("Administrator", "Guest"):
+            emp = frappe.db.get_value("Employee", {"user_id": creator}, "name")
+    if not emp:
         return
     try:
-        chef_emp = frappe.db.get_value("Employee", doc.employee, "reports_to")
+        chef_emp = frappe.db.get_value("Employee", emp, "reports_to")
         if not chef_emp:
             return
         chef_user = frappe.db.get_value("Employee", chef_emp, "user_id")

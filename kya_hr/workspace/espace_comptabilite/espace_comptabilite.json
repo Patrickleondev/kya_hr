@@ -1,7 +1,7 @@
 {
  "app": "kya_hr",
  "charts": [],
- "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Comptabilité'>💰 Comptabilité & Finance KYA</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"sub\", \"type\": \"paragraph\", \"data\": {\"text\": \"<i>Caisse hebdomadaire • Chèques • Imports Excel • Clients SoP • Marchés • Reporting DG / DAAF</i>\", \"level\": 4, \"col\": 12}}, {\"id\": \"sp0\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_act\", \"type\": \"header\", \"data\": {\"text\": \"<b>⚡ Actions Rapides</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s11\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dashboard Comptabilité\", \"col\": 3}}, {\"id\": \"s12\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Importer Excel Comptabilité\", \"col\": 3}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Brouillards de Caisse\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"États Récap Chèques\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Récap Hebdo (DG)\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Plan Comptable\", \"col\": 3}}, {\"id\": \"sp1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_sop\", \"type\": \"header\", \"data\": {\"text\": \"<b>☀️ Portefeuille Clients SoP</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s9\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Clients SoP KYA\", \"col\": 3}}, {\"id\": \"s10\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Marchés KYA\", \"col\": 3}}, {\"id\": \"sp2\", \"type\": \"spacer\", \"data\": {\"col\": 6}}, {\"id\": \"sp3\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_erp\", \"type\": \"header\", \"data\": {\"text\": \"<b>📊 Comptabilité ERPNext</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Journaux\", \"col\": 3}}, {\"id\": \"s6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Paiements\", \"col\": 3}}, {\"id\": \"s7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Factures Achat\", \"col\": 3}}, {\"id\": \"s8\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Bilan & Compte de Résultat\", \"col\": 3}}]",
+ "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace Comptabilité'>💰 Comptabilité & Finance KYA</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"sub\", \"type\": \"paragraph\", \"data\": {\"text\": \"<i>Caisse hebdomadaire • Chèques • Imports Excel • Clients SoP • Marchés • Reporting DG / DAAF</i>\", \"level\": 4, \"col\": 12}}, {\"id\": \"sp0\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_act\", \"type\": \"header\", \"data\": {\"text\": \"<b>⚡ Actions Rapides</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s11\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dashboard Comptabilité\", \"col\": 3}}, {\"id\": \"s12\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Importer Excel Comptabilité\", \"col\": 3}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Brouillards de Caisse\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"États Récap Chèques\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Récap Hebdo (DG)\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Plan Comptable\", \"col\": 3}}, {\"id\": \"sp1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_gl\", \"type\": \"header\", \"data\": {\"text\": \"<b>🧾 Grand Livre & Paie (Maison KYA)</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"g1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Grand Livre\", \"col\": 3}}, {\"id\": \"g2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Écritures Comptables KYA\", \"col\": 3}}, {\"id\": \"g3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Factures KYA\", \"col\": 3}}, {\"id\": \"g4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"État de Salaire\", \"col\": 3}}, {\"id\": \"g5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Bulletins de Paie\", \"col\": 3}}, {\"id\": \"g6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Paramètres de Paie\", \"col\": 3}}, {\"id\": \"spg\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_sop\", \"type\": \"header\", \"data\": {\"text\": \"<b>☀️ Portefeuille Clients SoP</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s9\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Clients SoP KYA\", \"col\": 3}}, {\"id\": \"s10\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Marchés KYA\", \"col\": 3}}, {\"id\": \"sp2\", \"type\": \"spacer\", \"data\": {\"col\": 6}}, {\"id\": \"sp3\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_erp\", \"type\": \"header\", \"data\": {\"text\": \"<b>📊 Comptabilité ERPNext</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Journaux\", \"col\": 3}}, {\"id\": \"s6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Paiements\", \"col\": 3}}, {\"id\": \"s7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Factures Achat\", \"col\": 3}}, {\"id\": \"s8\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Bilan & Compte de Résultat\", \"col\": 3}}]",
  "creation": "2026-01-01 00:00:00.000000",
  "custom_blocks": [],
  "docstatus": 0,
@@ -45,6 +45,48 @@
   }
  ],
  "shortcuts": [
+  {
+   "label": "Factures KYA",
+   "type": "DocType",
+   "link_to": "Facture KYA",
+   "color": "#0E5C8A",
+   "icon": "file"
+  },
+  {
+   "label": "Grand Livre",
+   "type": "URL",
+   "url": "/grand-livre",
+   "color": "#0E5C8A",
+   "icon": "book"
+  },
+  {
+   "label": "Écritures Comptables KYA",
+   "type": "DocType",
+   "link_to": "Ecriture Comptable KYA",
+   "color": "#1976D2",
+   "icon": "list"
+  },
+  {
+   "label": "État de Salaire",
+   "type": "URL",
+   "url": "/etat-salaire",
+   "color": "#2e7d32",
+   "icon": "bar-chart"
+  },
+  {
+   "label": "Bulletins de Paie",
+   "type": "DocType",
+   "link_to": "Bulletin Paie KYA",
+   "color": "#43a047",
+   "icon": "file-text"
+  },
+  {
+   "label": "Paramètres de Paie",
+   "type": "DocType",
+   "link_to": "Parametres Paie KYA",
+   "color": "#546e7a",
+   "icon": "setting"
+  },
   {
    "label": "Dashboard Comptabilité",
    "type": "URL",
@@ -156,6 +198,15 @@
   },
   {
    "type": "Link",
+   "label": "Factures KYA",
+   "link_type": "DocType",
+   "link_to": "Facture KYA",
+   "hidden": 0,
+   "is_query_report": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
    "label": "Imports Comptabilité",
    "link_to": "KYA Compta Import",
    "link_type": "DocType",
@@ -183,6 +234,45 @@
    "is_query_report": 0,
    "link_count": 0,
    "onboard": 1
+  },
+  {
+   "type": "Card Break",
+   "label": "Grand Livre & Paie (Maison KYA)",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Écritures Comptables KYA",
+   "link_to": "Ecriture Comptable KYA",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Bulletins de Paie",
+   "link_to": "Bulletin Paie KYA",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Paramètres de Paie",
+   "link_to": "Parametres Paie KYA",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 0
   },
   {
    "type": "Card Break",

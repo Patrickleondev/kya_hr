@@ -1,0 +1,43 @@
+{
+ "custom": 1,
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "istable": 1,
+ "module": "KYA HR",
+ "name": "Ligne Prime Bulletin KYA",
+ "fields": [
+  {
+   "fieldname": "libelle",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "columns": 4,
+   "label": "Prime / Indemnité",
+   "reqd": 1
+  },
+  {
+   "fieldname": "montant",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "columns": 3,
+   "label": "Montant",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "imposable",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "columns": 2,
+   "label": "Imposable"
+  },
+  {
+   "default": "1",
+   "fieldname": "soumis_cnss",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "columns": 2,
+   "label": "Soumis CNSS"
+  }
+ ],
+ "permissions": []
+}

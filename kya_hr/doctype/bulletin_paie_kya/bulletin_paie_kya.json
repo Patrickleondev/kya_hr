@@ -1,0 +1,251 @@
+{
+ "allow_import": 1,
+ "autoname": "format:BP-{annee}-{mois_num}-{employee}",
+ "custom": 1,
+ "doctype": "DocType",
+ "is_submittable": 1,
+ "module": "KYA HR",
+ "name": "Bulletin Paie KYA",
+ "default_print_format": "Bulletin Paie KYA Officiel",
+ "title_field": "titre",
+ "fields": [
+  {
+   "fieldname": "section_ident",
+   "fieldtype": "Section Break",
+   "label": "Identification"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "ignore_user_permissions": 1,
+   "label": "Employé",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nom",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.designation",
+   "fieldname": "poste",
+   "fieldtype": "Data",
+   "label": "Poste",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.department",
+   "fieldname": "departement",
+   "fieldtype": "Data",
+   "label": "Département",
+   "read_only": 1
+  },
+  {
+   "fieldname": "matricule",
+   "fieldtype": "Data",
+   "label": "Matricule",
+   "fetch_from": "employee.name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_ident",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "2026",
+   "fieldname": "annee",
+   "fieldtype": "Int",
+   "in_standard_filter": 1,
+   "label": "Année",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mois",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Mois",
+   "options": "Janvier\nFévrier\nMars\nAvril\nMai\nJuin\nJuillet\nAoût\nSeptembre\nOctobre\nNovembre\nDécembre",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mois_num",
+   "fieldtype": "Data",
+   "label": "N° mois",
+   "read_only": 1,
+   "hidden": 1
+  },
+  {
+   "fieldname": "titre",
+   "fieldtype": "Data",
+   "label": "Titre",
+   "read_only": 1,
+   "hidden": 1
+  },
+  {
+   "fieldname": "nb_charges",
+   "fieldtype": "Int",
+   "label": "Personnes à charge",
+   "default": "0"
+  },
+  {
+   "fieldname": "section_gains",
+   "fieldtype": "Section Break",
+   "label": "Gains"
+  },
+  {
+   "fieldname": "salaire_base",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Salaire de base",
+   "reqd": 1
+  },
+  {
+   "fieldname": "primes",
+   "fieldtype": "Table",
+   "label": "Primes & indemnités",
+   "options": "Ligne Prime Bulletin KYA"
+  },
+  {
+   "fieldname": "brut_total",
+   "fieldtype": "Currency",
+   "label": "Salaire brut total",
+   "read_only": 1,
+   "bold": 1
+  },
+  {
+   "fieldname": "section_retenues",
+   "fieldtype": "Section Break",
+   "label": "Retenues"
+  },
+  {
+   "fieldname": "base_cnss",
+   "fieldtype": "Currency",
+   "label": "Base CNSS",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cnss_salarie",
+   "fieldtype": "Currency",
+   "label": "CNSS part salariale",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_imposable",
+   "fieldtype": "Currency",
+   "label": "Revenu imposable",
+   "read_only": 1
+  },
+  {
+   "fieldname": "irpp",
+   "fieldtype": "Currency",
+   "label": "IRPP",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_ret",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "abattement_montant",
+   "fieldtype": "Currency",
+   "label": "Abattement appliqué",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reduction_charges",
+   "fieldtype": "Currency",
+   "label": "Réduction charges de famille",
+   "read_only": 1
+  },
+  {
+   "fieldname": "autres_retenues",
+   "fieldtype": "Currency",
+   "label": "Autres retenues",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_retenues",
+   "fieldtype": "Currency",
+   "label": "Total des retenues",
+   "read_only": 1,
+   "bold": 1
+  },
+  {
+   "fieldname": "section_net",
+   "fieldtype": "Section Break",
+   "label": "Net à payer"
+  },
+  {
+   "fieldname": "net_a_payer",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "NET À PAYER",
+   "read_only": 1,
+   "bold": 1
+  },
+  {
+   "fieldname": "net_en_lettres",
+   "fieldtype": "Small Text",
+   "label": "Net en lettres",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_net",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cnss_patronal",
+   "fieldtype": "Currency",
+   "label": "CNSS part patronale",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cout_employeur",
+   "fieldtype": "Currency",
+   "label": "Coût total employeur",
+   "read_only": 1,
+   "bold": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Modifié depuis",
+   "no_copy": 1,
+   "options": "Bulletin Paie KYA",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "permissions": [
+  {
+   "amend": 1, "cancel": 1, "create": 1, "delete": 1, "email": 1, "export": 1,
+   "print": 1, "read": 1, "report": 1, "role": "System Manager", "share": 1,
+   "submit": 1, "write": 1
+  },
+  {
+   "amend": 1, "cancel": 1, "create": 1, "email": 1, "export": 1, "print": 1,
+   "read": 1, "report": 1, "role": "Comptable", "submit": 1, "write": 1
+  },
+  {
+   "amend": 1, "cancel": 1, "create": 1, "email": 1, "export": 1, "print": 1,
+   "read": 1, "report": 1, "role": "Accounts Manager", "submit": 1, "write": 1
+  },
+  {
+   "print": 1, "read": 1, "report": 1, "export": 1, "role": "DFC"
+  },
+  {
+   "print": 1, "read": 1, "report": 1, "role": "Direction"
+  }
+ ],
+ "search_fields": "employee_name, mois, annee",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
