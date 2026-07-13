@@ -2,42 +2,43 @@
 KYA HR — Rappels automatiques (anniversaires de naissance et d'ancienneté).
 
 Envoi quotidien a l'equipe RH + Direction. Les stagiaires sont exclus.
-Destinataires : HR Manager, HR User, Responsable RH, Directeur General,
-                DGA, System Manager.
+Destinataires : la RH (HR Manager, HR User, Responsable RH) et la Direction
+(Directeur Général, DGA). On NE précise PAS l'âge de la personne.
 """
 
 import frappe
-from frappe.utils import today, getdate, get_url
+from frappe.utils import today, getdate
 
-# Roles qui recoivent les rappels (RH + Direction seulement)
+# Roles qui recoivent les rappels : la RH et le DG uniquement (pas System
+# Manager, pour ne pas arroser les comptes techniques/admin).
 REMINDER_ROLES = (
     "HR Manager",
     "HR User",
     "Responsable RH",
-    "Directeur Général",  # Directeur Général
+    "Directeur Général",  # DG
     "DGA",
-    "System Manager",
 )
 
 # Types d'emploi exclus (stagiaires)
 EXCLUDED_TYPES = ("Stage", "Intern", "Apprentice")
 
 
-def _logo_url():
-    return "{}/assets/kya_hr/images/kya_logo.png".format(get_url())
-
-
 def _email_header(bg, emoji, title):
+    # Logo embarqué INLINE (CID) via `embed=` : Frappe lit le fichier sur le
+    # disque et l'attache à l'e-mail. Robuste derrière le SSO Pangolin et non
+    # bloqué par Gmail (contrairement à une URL <img src> vers le site, que les
+    # clients mail ne peuvent pas charger → image cassée).
     return (
         "<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'>"
         "<div style='background:{bg};padding:24px;border-radius:12px 12px 0 0;text-align:center;'>"
-        "<img src='{logo}' alt='KYA-Energy Group' width='60' height='60' border='0'"
+        "<img embed='assets/kya_hr/images/kya_logo.png' alt='KYA-Energy Group'"
+        " width='60' height='60' border='0'"
         " style='display:block;margin:0 auto 10px;background:#fff;padding:6px;border-radius:4px;'>"
         "<h2 style='color:white;margin:0;'>{emoji} {title}</h2>"
         "</div>"
         "<div style='background:#fff;padding:24px;border:1px solid #e0e0e0;"
         "border-radius:0 0 12px 12px;'>"
-    ).format(bg=bg, logo=_logo_url(), emoji=emoji, title=title)
+    ).format(bg=bg, emoji=emoji, title=title)
 
 
 def _email_close():
@@ -70,18 +71,17 @@ def send_kya_birthday_reminders():
         return
 
     for emp in employees:
-        age = today_date.year - emp.date_of_birth.year
+        # NB : on ne précise PAS l'âge de la personne (règle KYA).
         subject = "Anniversaire — {}".format(emp.employee_name)
         body = (
             _email_header("#ff8f00", "\U0001f382", "Joyeux Anniversaire !")
             + "<p>Chers coll&egrave;gues,</p>"
             + "<p>Aujourd&rsquo;hui, <b>{name}</b>"
             " ({desig} &mdash; {dept})"
-            " f&ecirc;te ses <b>{age} ans</b> !</p>".format(
+            " f&ecirc;te son anniversaire !</p>".format(
                 name=frappe.utils.escape_html(emp.employee_name),
                 desig=frappe.utils.escape_html(emp.designation or ""),
                 dept=frappe.utils.escape_html(emp.department or ""),
-                age=age,
             )
             + "<p>Toute l&rsquo;&eacute;quipe KYA-Energy Group lui souhaite un "
             "<b>tr&egrave;s joyeux anniversaire</b> \U0001f389</p>"

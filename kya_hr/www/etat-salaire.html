@@ -60,10 +60,10 @@
   </div>
 
   <div class="es-import">
-    <span class="es-imp-lbl">📥 Importer des bulletins (CSV)</span>
+    <span class="es-imp-lbl">📥 Importer des bulletins (modèle Excel)</span>
     <button class="es-btn" type="button" onclick="esModele()">Télécharger le modèle</button>
     <label class="es-btn add" style="cursor:pointer;margin:0">
-      Importer un CSV <input type="file" accept=".csv" style="display:none" onchange="esImporter(this)">
+      Importer un fichier <input type="file" accept=".xlsx,.csv" style="display:none" onchange="esImporter(this)">
     </label>
     <label style="font-size:12px;color:#555;display:flex;align-items:center;gap:5px">
       <input type="checkbox" id="es-submit"> valider (soumettre) à l'import</label>
@@ -134,7 +134,7 @@
 function esDl(b64,name){
   const bin=atob(b64); const arr=new Uint8Array(bin.length);
   for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
-  const u=URL.createObjectURL(new Blob([arr],{type:'text/csv'}));
+  const u=URL.createObjectURL(new Blob([arr],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
   const a=document.createElement('a'); a.href=u; a.download=name; a.click(); URL.revokeObjectURL(u);
 }
 function esModele(){

@@ -66,6 +66,7 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.ensure_chef_capabilities.execute", "Aligne capacites chef (Chef Service=Chef Equipe=Chef d'Equipe : approbation + assignation taches)"),
     ("kya_hr.link_employees_users.link_by_email", "Lie Employees aux Users par email (racine 'Nom du Demandeur vide')"),
     ("kya_hr.ensure_employee_roles.execute", "Ensure Employee/Stagiaire roles on linked Users"),
+    ("kya_hr.employee_access.execute", "Accès Espace Employés : pose le rôle Employee ET débloque le module « KYA HR » (Block Modules) pour tout employé actif — sinon get_workspace_sidebar_items masque l'Espace Employés (module bloqué) et l'employé ne voit pas « Mon Espace »"),
     ("kya_hr.setup_native_parents.execute", "Cree workspaces parents Frappe HR + Comptabilite (groupent natifs v16)"),
     ("kya_hr.fix_duplicate_desktop_icons.execute", "Purge icones/links dupliques (Direction Generale x3, etc.)"),
     ("kya_hr.fix_workspace_labels_fr.execute", "Labels FR avec accents (Comptabilite, Employes, Generale)"),
@@ -89,6 +90,7 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.ensure_webform_table_columns.execute", "Re-cale la largeur des colonnes des tables web forms après ajout des champs état/défectueux (PV Entrée, Inventaire)"),
     ("kya_hr.maintenance.setup_rh_effectifs.execute", "Socle module RH Effectifs : départements (DST/DSS/DSC) + Paramètres RH KYA (barèmes Convention : licenciement/ancienneté/retraite/permissions) configurables, sans paie ERPNext"),
     ("kya_hr.maintenance.setup_compta_maison.execute", "Comptabilité MAISON : installe les DocTypes custom=1 (Facture KYA, Ecriture Comptable KYA/Grand Livre, Bulletin Paie KYA + Parametres Paie KYA/barèmes) + formats d'impression (custom=1 non resynchronisés par migrate) ; pose le barème IRPP par défaut si vide"),
+    ("kya_hr.maintenance.disable_native_birthday.execute", "Éteint le rappel d'anniversaire NATIF ERPNext (HR Settings) : KYA garde son propre rappel maison (RH+DG, sans âge) ; évite le doublon"),
 ]
 
 AFTER_INSTALL: list[tuple[str, str]] = [
