@@ -89,6 +89,7 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.ensure_webform_table_columns.execute", "Re-cale la largeur des colonnes des tables web forms après ajout des champs état/défectueux (PV Entrée, Inventaire)"),
     ("kya_hr.maintenance.setup_rh_effectifs.execute", "Socle module RH Effectifs : départements (DST/DSS/DSC) + Paramètres RH KYA (barèmes Convention : licenciement/ancienneté/retraite/permissions) configurables, sans paie ERPNext"),
     ("kya_hr.maintenance.setup_compta_maison.execute", "Comptabilité MAISON : installe les DocTypes custom=1 (Facture KYA, Ecriture Comptable KYA/Grand Livre, Bulletin Paie KYA + Parametres Paie KYA/barèmes) + formats d'impression (custom=1 non resynchronisés par migrate) ; pose le barème IRPP par défaut si vide"),
+    ("kya_hr.maintenance.disable_native_birthday.execute", "Éteint le rappel d'anniversaire NATIF ERPNext (HR Settings) : KYA garde son propre rappel maison (RH+DG, sans âge) ; évite le doublon"),
 ]
 
 AFTER_INSTALL: list[tuple[str, str]] = [
