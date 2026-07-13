@@ -149,6 +149,9 @@ doc_events = {
         "after_insert": "kya_hr.email_notifications.send_submission_recap",
         "on_change": "kya_hr.api.pdf_final.attach_final_pdf",
     },
+    "Facture KYA": {
+        "validate": "kya_hr.auto_calc_logic.compute_facture",
+    },
     "Permission Sortie Employe": {
         "before_save": "kya_hr.chef_routing.populate_chef",
         "after_insert": [

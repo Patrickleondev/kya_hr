@@ -46,6 +46,13 @@
  ],
  "shortcuts": [
   {
+   "label": "Factures KYA",
+   "type": "DocType",
+   "link_to": "Facture KYA",
+   "color": "#0E5C8A",
+   "icon": "file"
+  },
+  {
    "label": "Dashboard Comptabilité",
    "type": "URL",
    "url": "/comptabilite-dashboard",
@@ -152,6 +159,15 @@
    "is_query_report": 0,
    "link_count": 0,
    "link_type": "DocType",
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Factures KYA",
+   "link_type": "DocType",
+   "link_to": "Facture KYA",
+   "hidden": 0,
+   "is_query_report": 0,
    "onboard": 0
   },
   {

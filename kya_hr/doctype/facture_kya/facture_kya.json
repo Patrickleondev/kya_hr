@@ -1,0 +1,281 @@
+{
+ "autoname": "format:FAC-{YYYY}-{#####}",
+ "custom": 1,
+ "default_print_format": "Facture KYA Officiel",
+ "doctype": "DocType",
+ "fields": [
+  {
+   "fieldname": "section_entete",
+   "fieldtype": "Section Break",
+   "label": "Identification"
+  },
+  {
+   "description": "ex: 015/KEG/DG/03/2025",
+   "fieldname": "numero_facture",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "N° de la Facture",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "date_facture",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Date de la Facture",
+   "reqd": 1
+  },
+  {
+   "fieldname": "col_entete",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Lomé",
+   "fieldname": "lieu",
+   "fieldtype": "Data",
+   "label": "Lieu d'établissement"
+  },
+  {
+   "fieldname": "section_client",
+   "fieldtype": "Section Break",
+   "label": "Client (destinataire de la facture)"
+  },
+  {
+   "description": "Sélectionnez le client depuis la base. Les informations seront pré-remplies.",
+   "fieldname": "client",
+   "fieldtype": "Link",
+   "label": "Client (référence)",
+   "options": "Customer"
+  },
+  {
+   "fetch_from": "client.customer_name",
+   "fetch_if_empty": 1,
+   "fieldname": "client_nom",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nom du Client",
+   "reqd": 1
+  },
+  {
+   "fieldname": "client_adresse",
+   "fieldtype": "Data",
+   "label": "Adresse"
+  },
+  {
+   "fieldname": "col_client",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Lomé",
+   "fieldname": "client_ville",
+   "fieldtype": "Data",
+   "label": "Ville"
+  },
+  {
+   "fieldname": "client_telephone",
+   "fieldtype": "Data",
+   "label": "Téléphone"
+  },
+  {
+   "fieldname": "client_email",
+   "fieldtype": "Data",
+   "label": "Email"
+  },
+  {
+   "fieldname": "section_objet",
+   "fieldtype": "Section Break",
+   "label": "Objet de la facture"
+  },
+  {
+   "fieldname": "objet",
+   "fieldtype": "Small Text",
+   "label": "Objet",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_articles",
+   "fieldtype": "Section Break",
+   "label": "Articles facturés"
+  },
+  {
+   "fieldname": "articles",
+   "fieldtype": "Table",
+   "label": "Articles",
+   "options": "Facture KYA Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_totaux",
+   "fieldtype": "Section Break",
+   "label": "Montants"
+  },
+  {
+   "fieldname": "total_ht_brut",
+   "fieldtype": "Currency",
+   "label": "TOTAL HT BRUT (XOF)",
+   "read_only": 1
+  },
+  {
+   "default": 0,
+   "description": "Remise en pourcentage du total HT brut",
+   "fieldname": "remise_taux",
+   "fieldtype": "Percent",
+   "label": "Remise (%)"
+  },
+  {
+   "fieldname": "remise_montant",
+   "fieldtype": "Currency",
+   "label": "Remise (XOF)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_apres_remise",
+   "fieldtype": "Currency",
+   "label": "TOTAL APRÈS REMISE (XOF)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_totaux",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": 18,
+   "fieldname": "tva_taux",
+   "fieldtype": "Percent",
+   "label": "TVA (%)"
+  },
+  {
+   "fieldname": "tva_montant",
+   "fieldtype": "Currency",
+   "label": "TVA (XOF)",
+   "read_only": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "total_ttc",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "TOTAL TTC (XOF)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "montant_en_lettres",
+   "fieldtype": "Small Text",
+   "label": "Montant arrêté en lettres",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_etablissement",
+   "fieldtype": "Section Break",
+   "label": "Établissement"
+  },
+  {
+   "fieldname": "etabli_par_nom",
+   "fieldtype": "Data",
+   "label": "Établi par (nom)"
+  },
+  {
+   "default": "Directeur Général",
+   "fieldname": "etabli_par_fonction",
+   "fieldtype": "Data",
+   "label": "Fonction"
+  },
+  {
+   "fieldname": "signature",
+   "fieldtype": "Signature",
+   "label": "Signature / Cachet"
+  },
+  {
+   "fieldname": "col_etab",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "date_etablissement",
+   "fieldtype": "Date",
+   "label": "Date d'établissement"
+  },
+  {
+   "fieldname": "section_statut",
+   "fieldtype": "Section Break",
+   "label": "Statut"
+  },
+  {
+   "default": "Brouillon",
+   "fieldname": "statut",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Statut",
+   "options": "Brouillon\nÉmise\nEnvoyée\nPayée\nAnnulée"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Modifié depuis",
+   "no_copy": 1,
+   "options": "Facture KYA",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "module": "KYA HR",
+ "name": "Facture KYA",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Comptable",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "print": 1,
+   "read": 1,
+   "role": "DFC",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "print": 1,
+   "read": 1,
+   "role": "Direction",
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "numero_facture, client_nom, objet, date_facture",
+ "title_field": "client_nom",
+ "track_changes": 1
+}

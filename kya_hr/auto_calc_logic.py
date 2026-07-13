@@ -106,6 +106,112 @@ def compute_bon_commande(doc, method=None):
 
 
 # ════════════════════════════════════════════════════════════════════
+#  Facture KYA
+# ════════════════════════════════════════════════════════════════════
+
+_FR_UNITS = ["zéro", "un", "deux", "trois", "quatre", "cinq", "six", "sept",
+             "huit", "neuf", "dix", "onze", "douze", "treize", "quatorze",
+             "quinze", "seize", "dix-sept", "dix-huit", "dix-neuf"]
+_FR_TENS = ["", "", "vingt", "trente", "quarante", "cinquante", "soixante",
+            "soixante", "quatre-vingt", "quatre-vingt"]
+
+
+def _fr_below_100(n):
+    if n < 20:
+        return _FR_UNITS[n]
+    ten, unit = divmod(n, 10)
+    if ten in (7, 9):                       # 70-79, 90-99 : base 60/80 + 10-19
+        base = _FR_TENS[ten]
+        return base + ("-" if base else "") + _FR_UNITS[10 + unit]
+    word = _FR_TENS[ten]
+    if unit == 0:
+        # quatre-vingts prend un s ; vingt/... non
+        return word + ("s" if ten == 8 else "")
+    if unit == 1 and ten in (2, 3, 4, 5, 6):
+        return word + " et un"
+    return word + "-" + _FR_UNITS[unit]
+
+
+def _fr_below_1000(n):
+    if n < 100:
+        return _fr_below_100(n)
+    cent, rest = divmod(n, 100)
+    if cent == 1:
+        prefix = "cent"
+    else:
+        prefix = _FR_UNITS[cent] + " cent" + ("s" if rest == 0 else "")
+    return prefix if rest == 0 else prefix + " " + _fr_below_100(rest)
+
+
+def fr_number_in_words(n):
+    """Entier positif -> mots français (jusqu'aux milliards). Ex. 4455326 ->
+    'quatre millions quatre cent cinquante-cinq mille trois cent vingt-six'."""
+    n = int(n)
+    if n == 0:
+        return "zéro"
+    parts = []
+    for value, singular, plural in ((10**9, "milliard", "milliards"),
+                                    (10**6, "million", "millions"),
+                                    (1000, "mille", "mille")):
+        q, n = divmod(n, value)
+        if q:
+            if value == 1000 and q == 1:
+                parts.append("mille")          # « mille » sans « un »
+            else:
+                word = _fr_below_1000(q)
+                label = singular if q == 1 else plural
+                # « mille » est invariable
+                parts.append(word + " " + (label if value != 1000 else "mille"))
+    if n:
+        parts.append(_fr_below_1000(n))
+    return " ".join(parts)
+
+
+def compute_facture(doc, method=None):
+    """Recalcule les totaux d'une Facture KYA (HT brut → remise % → TVA → TTC)
+    + le montant en toutes lettres + le nom du client.
+
+    Modèle métier (cf. FACTURE INFO) :
+        total_ht_brut     = Σ (quantité × PU HT)
+        remise_montant    = total_ht_brut × remise_taux / 100
+        total_apres_remise= total_ht_brut − remise_montant
+        tva_montant       = total_apres_remise × tva_taux / 100
+        total_ttc         = total_apres_remise + tva_montant
+    """
+    block_self_approval(doc)
+    total_ht_brut = 0.0
+    for row in (doc.get("articles") or []):
+        row.total = flt(row.quantite) * flt(row.prix_unitaire)
+        total_ht_brut += row.total
+    doc.total_ht_brut = total_ht_brut
+    doc.remise_montant = total_ht_brut * flt(doc.get("remise_taux")) / 100.0
+    doc.total_apres_remise = total_ht_brut - flt(doc.remise_montant)
+    doc.tva_montant = flt(doc.total_apres_remise) * flt(doc.get("tva_taux")) / 100.0
+    doc.total_ttc = flt(doc.total_apres_remise) + flt(doc.tva_montant)
+
+    # Montant en toutes lettres (français, FCFA) — recalculé à chaque save.
+    # money_in_words de Frappe est anglophone ; on produit le français au format
+    # officiel « quatre millions … (4 455 326) francs CFA ».
+    try:
+        ttc = int(round(flt(doc.total_ttc)))
+        lettres = fr_number_in_words(ttc)
+        montant_fmt = "{:,.0f}".format(ttc).replace(",", " ")
+        doc.montant_en_lettres = f"{lettres} ({montant_fmt}) francs CFA"
+    except Exception:
+        pass
+
+    if doc.get("client") and not doc.get("client_nom"):
+        doc.client_nom = frappe.db.get_value(
+            "Customer", doc.client, "customer_name"
+        )
+
+    # Date d'établissement : posée quand une signature est apposée.
+    if doc.get("signature"):
+        if not doc.get("date_etablissement"):
+            doc.date_etablissement = today()
+
+
+# ════════════════════════════════════════════════════════════════════
 #  Tache Equipe
 # ════════════════════════════════════════════════════════════════════
 
