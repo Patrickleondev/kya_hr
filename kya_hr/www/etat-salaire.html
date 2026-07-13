@@ -33,7 +33,10 @@
   .es-badge.dr { background:#fff3e0; color:#e65100; }
   .es-empty { padding:40px; text-align:center; color:#888; }
   a.es-emp { color:var(--kya-blue2); text-decoration:none; font-weight:600; }
-  @media print { .es-filters, .es-btn { display:none !important; } body { background:#fff; } }
+  .es-import { background:#fff; border-radius:12px; padding:12px 16px; margin:12px 0; box-shadow:0 1px 4px rgba(0,0,0,.06);
+               display:flex; gap:12px; align-items:center; flex-wrap:wrap; border-left:4px solid var(--kya-green); }
+  .es-imp-lbl { font-weight:700; color:var(--kya-green); font-size:13px; }
+  @media print { .es-filters, .es-btn, .es-import { display:none !important; } body { background:#fff; } }
 </style>
 
 <div class="es-wrap">
@@ -54,6 +57,17 @@
       <a class="es-btn add" href="/app/bulletin-paie-kya/new">＋ Bulletin</a>
       <button class="es-btn print" type="button" onclick="window.print()">Imprimer</button>
     </form>
+  </div>
+
+  <div class="es-import">
+    <span class="es-imp-lbl">📥 Importer des bulletins (CSV)</span>
+    <button class="es-btn" type="button" onclick="esModele()">Télécharger le modèle</button>
+    <label class="es-btn add" style="cursor:pointer;margin:0">
+      Importer un CSV <input type="file" accept=".csv" style="display:none" onchange="esImporter(this)">
+    </label>
+    <label style="font-size:12px;color:#555;display:flex;align-items:center;gap:5px">
+      <input type="checkbox" id="es-submit"> valider (soumettre) à l'import</label>
+    <span id="es-imp-res" style="font-size:12px;color:#0E5C8A;"></span>
   </div>
 
   <div class="es-kpis">
@@ -115,3 +129,30 @@
     {% endif %}
   </div>
 </div>
+
+<script>
+function esDl(b64,name){
+  const bin=atob(b64); const arr=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+  const u=URL.createObjectURL(new Blob([arr],{type:'text/csv'}));
+  const a=document.createElement('a'); a.href=u; a.download=name; a.click(); URL.revokeObjectURL(u);
+}
+function esModele(){
+  frappe.call({method:'kya_hr.api.compta_import.download_template_bulletins'}).then(res=>{
+    const r=res.message; if(r) esDl(r.content_base64, r.filename);
+  });
+}
+async function esImporter(inp){
+  const f=inp.files[0]; if(!f) return;
+  const res=document.getElementById('es-imp-res'); res.textContent='Import en cours…';
+  const b64=await new Promise(ok=>{const rd=new FileReader(); rd.onload=e=>ok(e.target.result.split(',')[1]); rd.readAsDataURL(f);});
+  const submit=document.getElementById('es-submit').checked?1:0;
+  try{
+    const r=(await frappe.call({method:'kya_hr.api.compta_import.import_bulletins',
+      args:{content_base64:b64, submit}})).message;
+    res.textContent=`✅ ${r.crees} bulletin(s) créé(s)`+(submit?`, ${r.valides} validé(s)`:'')+(r.ignores?`, ${r.ignores} ignoré(s)`:'')+(r.erreurs&&r.erreurs.length?` — ${r.erreurs.length} erreur(s): `+r.erreurs.slice(0,3).join(' | '):'');
+    setTimeout(()=>location.reload(), 1500);
+  }catch(e){ res.textContent='❌ Erreur import (rôle Comptabilité requis).'; }
+  inp.value='';
+}
+</script>

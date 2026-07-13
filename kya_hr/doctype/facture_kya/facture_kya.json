@@ -1,4 +1,5 @@
 {
+ "allow_import": 1,
  "autoname": "format:FAC-{YYYY}-{#####}",
  "custom": 1,
  "default_print_format": "Facture KYA Officiel",
