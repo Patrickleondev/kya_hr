@@ -66,9 +66,17 @@ def on_session_creation(login_manager=None) -> None:
         if not user or user in ("Guest", "Administrator"):
             return
 
-        # Deja lie a une fiche Employee ? -> rien a faire
+        # Deja lie a une fiche Employee ? -> on garantit quand meme l'acces
+        # (role Employee + module KYA HR non bloque : cf. employee_access).
         already = frappe.db.get_value("Employee", {"user_id": user}, "name")
         if already:
+            try:
+                from kya_hr.employee_access import ensure_access_for_user
+                ensure_access_for_user(user)
+                frappe.db.commit()
+            except Exception:
+                frappe.log_error(frappe.get_traceback(),
+                                 "on_session_creation ensure_access")
             return
 
         # Chercher une fiche Employee active dont un email == user (ou son email)
@@ -91,6 +99,14 @@ def on_session_creation(login_manager=None) -> None:
             frappe.db.set_value("Employee", candidates[0][0], "user_id", user,
                                 update_modified=False)
             frappe.db.commit()
+            # Nouveau lien -> poser role + debloquer les modules KYA
+            try:
+                from kya_hr.employee_access import ensure_access_for_user
+                ensure_access_for_user(user)
+                frappe.db.commit()
+            except Exception:
+                frappe.log_error(frappe.get_traceback(),
+                                 "on_session_creation ensure_access (new link)")
     except Exception:
         # Ne jamais bloquer le login
         try:
