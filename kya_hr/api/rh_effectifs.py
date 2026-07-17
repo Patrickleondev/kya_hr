@@ -608,6 +608,78 @@ def retraite_data(departement=None):
 
 
 @frappe.whitelist()
+def export_retraite_excel(departement=None):
+    """Classeur AUTONOME de gestion de la retraite (« fichier à part » demandé
+    par la RH) : une feuille dédiée avec l'âge de départ, les dates
+    prévisionnelles, années restantes et alertes, triée du départ le plus
+    proche. Régénéré à chaque export, donc toujours à jour."""
+    import base64
+    import io
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+
+    data = retraite_data(departement)
+    KYA, KYA_DARK, WHITE = "0F766E", "0B4F49", "FFFFFF"
+    thin = Side(style="thin", color="CBD5E1")
+    border = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Gestion Retraite"
+    ws.sheet_view.showGridLines = False
+
+    ws.merge_cells("A1:H1")
+    t = ws["A1"]
+    t.value = "KYA ENERGY GROUP — GESTION DES DÉPARTS À LA RETRAITE"
+    t.font = Font(bold=True, size=13, color=WHITE)
+    t.fill = PatternFill("solid", fgColor=KYA)
+    t.alignment = Alignment(horizontal="center", vertical="center")
+    ws.row_dimensions[1].height = 24
+    ws["A2"] = "Âge de départ : {0} ans · Situation au {1}".format(
+        data["age_retraite"], frappe.utils.formatdate(today()))
+    ws["A2"].font = Font(italic=True, size=9, color="64748B")
+
+    entetes = [("Matricule", 12), ("Nom & Prénoms", 30), ("Poste", 26),
+               ("Département", 13), ("Âge", 7), ("Date départ prévue", 17),
+               ("Années restantes", 14), ("Alerte", 22)]
+    hr = 4
+    for i, (lib, w) in enumerate(entetes, start=1):
+        cell = ws.cell(row=hr, column=i, value=lib)
+        cell.font = Font(bold=True, size=9, color=WHITE)
+        cell.fill = PatternFill("solid", fgColor=KYA_DARK)
+        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        cell.border = border
+        ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = w
+    ws.row_dimensions[hr].height = 24
+    ws.freeze_panes = "A5"
+
+    _ALERT_FILL = {"atteint": ("FEE2E2", "991B1B"), "proche": ("FFEDD5", "9A3412"),
+                   "anticiper": ("FEF9C3", "854D0E"), "retraite": ("E2E8F0", "334155")}
+    for idx, x in enumerate(data["lignes"]):
+        r = hr + 1 + idx
+        vals = [x["matricule"], x["nom_complet"], x["poste"], x["departement"],
+                x["age"], x["date_retraite"], x["annees_avant"], x["alerte"] or "OK"]
+        for col, v in enumerate(vals, start=1):
+            cell = ws.cell(row=r, column=col, value=v)
+            cell.border = border
+            if col in (1, 5, 6, 7, 8):
+                cell.alignment = Alignment(horizontal="center")
+        badge = ws.cell(row=r, column=8)
+        if x["cle"] and x["cle"] in _ALERT_FILL:
+            bg, fg = _ALERT_FILL[x["cle"]]
+            badge.fill = PatternFill("solid", fgColor=bg)
+            badge.font = Font(bold=True, color=fg)
+        else:
+            badge.fill = PatternFill("solid", fgColor="DCFCE7")
+            badge.font = Font(bold=True, color="166534")
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    return {"filename": "gestion-retraite-kya-{0}.xlsx".format(today()),
+            "content_base64": base64.b64encode(buf.getvalue()).decode("ascii")}
+
+
+@frappe.whitelist()
 def export_excel(departement=None):
     """Exporte le classeur RH : feuille Personnel (données + champs calculés),
     feuille Indicateurs, feuille Répartitions AVEC graphiques Excel natifs."""

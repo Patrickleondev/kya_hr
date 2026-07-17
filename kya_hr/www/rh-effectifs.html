@@ -83,8 +83,11 @@
   </div>
 
   <div class="rh-card wide rh-ret">
-    <h3>🕰️ Départs à la retraite <span id="ret-age" style="font-weight:500;color:#94a3b8;font-size:.78rem;"></span></h3>
-    <div class="alerts" id="ret-alerts"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+      <h3 style="margin:0;">🕰️ Départs à la retraite <span id="ret-age" style="font-weight:500;color:#94a3b8;font-size:.78rem;"></span></h3>
+      <button class="rh-btn sec" onclick="exportRetraite()">⬇️ Classeur retraite</button>
+    </div>
+    <div class="alerts" id="ret-alerts" style="margin-top:12px;"></div>
     <div class="rh-scroll"><table class="rh-tbl" id="ret-tbl"><thead><tr>
       <th>Matricule</th><th>Nom &amp; Prénoms</th><th>Poste</th><th>Département</th>
       <th>Âge</th><th>Départ prévu</th><th>Années restantes</th><th>Alerte</th>
@@ -227,6 +230,16 @@ async function exportExcel(){
       a.href='data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'+r.content_base64;
       a.download=r.filename||'effectifs-kya.xlsx'; a.click(); }
   }catch(e){ alert("Export indisponible."); }
+}
+
+async function exportRetraite(){
+  try{
+    const r=await apiCall('kya_hr.api.rh_effectifs.export_retraite_excel',
+      {departement:document.getElementById('f-dept').value||null});
+    if(r&&r.content_base64){ const a=document.createElement('a');
+      a.href='data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'+r.content_base64;
+      a.download=r.filename||'gestion-retraite-kya.xlsx'; a.click(); }
+  }catch(e){ alert("Export retraite indisponible."); }
 }
 
 render();
