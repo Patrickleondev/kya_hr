@@ -24,6 +24,22 @@
   .rh-card .cbox{position:relative;height:250px;}
   .rh-card.wide{grid-column:1 / -1;}
   .rh-note{color:#94a3b8;font-size:.78rem;text-align:center;padding:26px;}
+  .rh-ret{margin-top:16px;}
+  .rh-ret .alerts{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+  .rh-ret .alerts .a{border-radius:10px;padding:6px 12px;font-size:.78rem;font-weight:700;border:1px solid transparent;}
+  .rh-ret .a.atteint{background:#fee2e2;color:#991b1b;border-color:#fecaca;}
+  .rh-ret .a.proche{background:#ffedd5;color:#9a3412;border-color:#fed7aa;}
+  .rh-ret .a.anticiper{background:#fef9c3;color:#854d0e;border-color:#fde68a;}
+  .rh-ret .a.retraite{background:#e2e8f0;color:#334155;border-color:#cbd5e1;}
+  .rh-tbl{width:100%;border-collapse:collapse;font-size:.82rem;}
+  .rh-tbl th{text-align:left;background:#f8fafc;color:#475569;font-weight:700;padding:8px 10px;border-bottom:2px solid #e2e8f0;font-size:.72rem;text-transform:uppercase;letter-spacing:.02em;}
+  .rh-tbl td{padding:8px 10px;border-bottom:1px solid #f1f5f9;}
+  .rh-tbl tr:hover td{background:#f8fafc;}
+  .rh-tbl .badge{display:inline-block;padding:2px 8px;border-radius:9px;font-size:.7rem;font-weight:700;}
+  .rh-tbl .b-atteint{background:#fee2e2;color:#991b1b;} .rh-tbl .b-proche{background:#ffedd5;color:#9a3412;}
+  .rh-tbl .b-anticiper{background:#fef9c3;color:#854d0e;} .rh-tbl .b-retraite{background:#e2e8f0;color:#334155;}
+  .rh-tbl .b-ok{background:#dcfce7;color:#166534;}
+  .rh-scroll{overflow-x:auto;}
   @media(max-width:1024px){.rh-kpis{grid-template-columns:repeat(3,1fr);}.rh-grid{grid-template-columns:1fr;}}
   @media(max-width:560px){.rh-kpis{grid-template-columns:repeat(2,1fr);}}
 </style>
@@ -64,6 +80,15 @@
     <div class="rh-card"><h3>Répartition par tranche d'âge</h3><div class="cbox"><canvas id="c-tranche"></canvas></div></div>
     <div class="rh-card wide"><h3>Évolution de l'effectif dans le temps</h3><div class="cbox"><canvas id="c-effectif"></canvas></div></div>
     <div class="rh-card wide"><h3>Évolution de la masse salariale (M FCFA)</h3><div class="cbox"><canvas id="c-masse"></canvas></div></div>
+  </div>
+
+  <div class="rh-card wide rh-ret">
+    <h3>🕰️ Départs à la retraite <span id="ret-age" style="font-weight:500;color:#94a3b8;font-size:.78rem;"></span></h3>
+    <div class="alerts" id="ret-alerts"></div>
+    <div class="rh-scroll"><table class="rh-tbl" id="ret-tbl"><thead><tr>
+      <th>Matricule</th><th>Nom &amp; Prénoms</th><th>Poste</th><th>Département</th>
+      <th>Âge</th><th>Départ prévu</th><th>Années restantes</th><th>Alerte</th>
+    </tr></thead><tbody id="ret-body"></tbody></table></div>
   </div>
 </div>
 
@@ -134,7 +159,35 @@ function render(){
   bar('c-tranche', RH.par_tranche, false);
   line('c-effectif', RH.evolution.labels, RH.evolution.effectif, 'Effectif', '#0f766e');
   line('c-masse', RH.evolution.labels, RH.evolution.masse, 'Masse (M FCFA)', '#7c3aed');
+  loadRetraite();
 }
+
+const RET_LABELS={atteint:'Âge de départ atteint',proche:'Proche (< 2 ans)',anticiper:'À anticiper (< 5 ans)',retraite:'Déjà retraité(s)'};
+async function loadRetraite(){
+  const body=document.getElementById('ret-body'); if(!body) return;
+  let r;
+  try{ r=await apiCall('kya_hr.api.rh_effectifs.retraite_data',
+        {departement:document.getElementById('f-dept').value||null}); }
+  catch(e){ body.innerHTML='<tr><td colspan="8" class="rh-note">Suivi retraite indisponible.</td></tr>'; return; }
+  document.getElementById('ret-age').textContent='(âge de départ : '+(r.age_retraite||60)+' ans)';
+  const c=r.compteurs||{}; const al=document.getElementById('ret-alerts');
+  al.innerHTML=['atteint','proche','anticiper','retraite']
+    .filter(k=>c[k]>0)
+    .map(k=>'<span class="a '+k+'">'+c[k]+' — '+RET_LABELS[k]+'</span>').join('')
+    || '<span class="a" style="background:#dcfce7;color:#166534;">Aucun départ à anticiper à court terme ✔</span>';
+  const lig=r.lignes||[];
+  if(!lig.length){ body.innerHTML='<tr><td colspan="8" class="rh-note">Aucune date de naissance renseignée — impossible de calculer les départs.</td></tr>'; return; }
+  body.innerHTML=lig.map(function(x){
+    const cls=x.cle?('b-'+x.cle):'b-ok';
+    const lbl=x.alerte||'OK';
+    return '<tr><td><b>'+esc(x.matricule)+'</b></td><td>'+esc(x.nom_complet)+'</td>'+
+      '<td>'+esc(x.poste)+'</td><td>'+esc(x.departement)+'</td>'+
+      '<td>'+x.age+'</td><td>'+esc(x.date_retraite)+'</td>'+
+      '<td>'+x.annees_avant+'</td>'+
+      '<td><span class="badge '+cls+'">'+esc(lbl)+'</span></td></tr>';
+  }).join('');
+}
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 
 function destroy(id){ if(CHARTS[id]){ CHARTS[id].destroy(); delete CHARTS[id]; } }
 function empty(d){ return !d || !d.data || d.data.reduce((a,b)=>a+b,0)===0; }

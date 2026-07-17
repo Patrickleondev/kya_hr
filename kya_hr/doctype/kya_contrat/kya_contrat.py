@@ -17,9 +17,21 @@ class KYAContrat(Document):
     # ----- LIFECYCLE -----
     def validate(self):
         self._autofill_from_employee()
+        self._default_civilite()
         self._select_template()
         self._compute_date_fin()
         self._validate_signatures()
+
+    def _default_civilite(self):
+        """Propose la civilité (Sexe + Situation de famille) si la RH ne l'a pas
+        renseignée. S'applique même sans Employee lié (le contrat précède la
+        fiche). Jamais réécrite si déjà saisie/corrigée."""
+        if self.get("civilite") or not self.sexe:
+            return
+        from kya_hr.kya_hr.doctype.kya_contract_template.kya_contract_template import (
+            compute_civilite,
+        )
+        self.civilite = compute_civilite(self.sexe, self.situation_famille)
 
     # ----- AUTO-FILL DEPUIS EMPLOYEE -----
     def _autofill_from_employee(self):
@@ -160,12 +172,15 @@ class KYAContrat(Document):
             self.template = tpl
             return
 
-        # 3. Fallback ultime : n'importe quel template actif pour ce type
-        tpl = frappe.db.get_value(
-            "KYA Contract Template",
-            {"contract_type": self.contract_type, "is_active": 1},
-            "name",
-        )
+        # 3. Fallback ultime : n'importe quel template actif pour ce type,
+        # SAUF un modèle rédigé pour le genre opposé. Mieux vaut laisser la RH
+        # choisir que de sortir « Monsieur » sur le contrat d'une femme : c'est
+        # ce repli silencieux qui a produit les contrats au mauvais genre.
+        filtres = {"contract_type": self.contract_type, "is_active": 1}
+        if self.sexe in ("Masculin", "Féminin"):
+            genre_oppose = "Féminin" if self.sexe == "Masculin" else "Masculin"
+            filtres["genre_cible"] = ["!=", genre_oppose]
+        tpl = frappe.db.get_value("KYA Contract Template", filtres, "name")
         if tpl:
             self.template = tpl
 

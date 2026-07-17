@@ -386,8 +386,8 @@
       {
         title: "INFORMATIONS DE LA CAISSE",
         icon: "\u{1F4B0}",
-        fields: ["date_brouillard", "caissiere", "solde_precedent"],
-        grid: { date_brouillard: "col", caissiere: "col", solde_precedent: "span 2" }
+        fields: ["date_brouillard", "caissiere", "solde_precedent", "comptable_absent", "comptable_absent_note"],
+        grid: { date_brouillard: "col", caissiere: "col", solde_precedent: "span 2", comptable_absent: "col", comptable_absent_note: "span 2" }
       },
       {
         title: "MOUVEMENTS",
@@ -1194,27 +1194,55 @@
 
   function applyWorkflowAction(doctype, docname, action, nextState) {
     if (!confirm("Confirmer l\u2019action : " + action + " ?\n(\u2192 " + nextState + ")")) return;
-    frappe.call({
-      method: "kya_hr.api.apply_kya_workflow_action",
-      args: { doctype: doctype, docname: docname, action: action },
-      callback: function (r) {
-        if (r && r.message && r.message.status === "success") {
+
+    function doApply() {
+      frappe.call({
+        method: "kya_hr.api.apply_kya_workflow_action",
+        args: { doctype: doctype, docname: docname, action: action },
+        callback: function (r) {
+          if (r && r.message && r.message.status === "success") {
+            frappe.msgprint({
+              title: "Action effectu\u00e9e",
+              message: "Le document est maintenant : <b>" + r.message.workflow_state + "</b>",
+              indicator: "green"
+            });
+            setTimeout(function () { window.location.reload(); }, 1500);
+          }
+        },
+        error: function () {
           frappe.msgprint({
-            title: "Action effectu\u00e9e",
-            message: "Le document est maintenant : <b>" + r.message.workflow_state + "</b>",
-            indicator: "green"
+            title: "Erreur",
+            message: "Impossible d\u2019effectuer cette action.",
+            indicator: "red"
           });
-          setTimeout(function () { window.location.reload(); }, 1500);
         }
-      },
-      error: function () {
-        frappe.msgprint({
-          title: "Erreur",
-          message: "Impossible d\u2019effectuer cette action.",
-          indicator: "red"
+      });
+    }
+
+    // UN SEUL GESTE \u00ab signer puis transmettre \u00bb : on ENREGISTRE d'abord le
+    // formulaire (persiste la signature que l'utilisateur vient de tracer),
+    // PUIS on applique l'action. Sans \u00e7a, il fallait signer \u2192 Enregistrer \u2192
+    // Action (3 \u00e9tapes d\u00e9routantes) et la signature partait non enregistr\u00e9e.
+    // D\u00e9fensif : si l'enregistrement \u00e9choue (validation), on N'AVANCE PAS ;
+    // si l'API save du web form n'est pas dispo, on retombe sur l'ancien
+    // comportement (l'utilisateur aura enregistr\u00e9 manuellement avant).
+    var wf = window.frappe && frappe.web_form;
+    if (wf && typeof wf.save === "function") {
+      var p;
+      try { p = wf.save(); } catch (e) { p = null; }
+      if (p && typeof p.then === "function") {
+        p.then(function () { doApply(); }).catch(function () {
+          frappe.msgprint({
+            title: "Enregistrement requis",
+            message: "La fiche n\u2019a pas pu \u00eatre enregistr\u00e9e (champ manquant ?). "
+              + "Corrigez les champs signal\u00e9s puis r\u00e9essayez \u2014 rien n\u2019a \u00e9t\u00e9 transmis.",
+            indicator: "orange"
+          });
         });
+        return;
       }
-    });
+    }
+    doApply();
   }
 
   /* ===== ADMIN PREVIEW BUTTON ======================== */
@@ -1529,9 +1557,104 @@
     });
   }
 
+  // Recherche par NOM pour les fiches compta (redacteur / caissiere). Les
+  // agents connaissent mal les IDs Employee (HR-EMP-000xx) : même widget que
+  // celui des permissions de sortie, branché sur le champ Link idoine.
+  var COMPTA_PICKERS = {
+    "etat-recap":        { field: "redacteur", nameField: "redacteur_name" },
+    "brouillard-caisse": { field: "caissiere", nameField: "caissiere_name" }
+  };
+  function setupComptaEmployeePicker(route) {
+    var cfg = COMPTA_PICKERS[route];
+    if (!cfg) return;
+    var fieldEl = findFieldEl(cfg.field);
+    if (!fieldEl || !fieldEl.querySelector("input")) return;
+    if (fieldEl.querySelector(".kya-fuzzy-wrap")) return; // idempotent
+
+    function setInput(fieldName, value) {
+      var el = findFieldEl(fieldName);
+      if (!el) return;
+      var input = el.querySelector("input");
+      if (!input) return;
+      input.value = value || "";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+    function applyEmployee(emp) {
+      if (!emp || !emp.name) return;
+      setInput(cfg.field, emp.name);
+      if (cfg.nameField) setInput(cfg.nameField, emp.employee_name);
+    }
+
+    var wrap = document.createElement("div");
+    wrap.className = "kya-fuzzy-wrap";
+    wrap.style.cssText = "margin-top:6px;position:relative;";
+    wrap.innerHTML =
+      '<button type="button" class="kya-fuzzy-toggle" style="background:none;border:none;color:#0066cc;cursor:pointer;padding:0;font-size:0.85em;text-decoration:underline;">' +
+      '🔍 Rechercher par nom (je ne connais pas l’ID)</button>' +
+      '<div class="kya-fuzzy-box" style="display:none;margin-top:6px;">' +
+      '  <input type="text" class="form-control kya-fuzzy-input" placeholder="Tapez le nom ou le matricule…" autocomplete="off" />' +
+      '  <ul class="kya-fuzzy-results" style="list-style:none;padding:0;margin:4px 0 0;border:1px solid #ddd;border-radius:4px;max-height:200px;overflow-y:auto;background:#fff;display:none;position:absolute;left:0;right:0;z-index:50;"></ul>' +
+      '</div>';
+    fieldEl.appendChild(wrap);
+
+    var toggle = wrap.querySelector(".kya-fuzzy-toggle");
+    var box = wrap.querySelector(".kya-fuzzy-box");
+    var input = wrap.querySelector(".kya-fuzzy-input");
+    var results = wrap.querySelector(".kya-fuzzy-results");
+
+    toggle.addEventListener("click", function () {
+      var visible = box.style.display !== "none";
+      box.style.display = visible ? "none" : "block";
+      if (!visible) setTimeout(function () { input.focus(); }, 50);
+    });
+
+    var debounce = null;
+    input.addEventListener("input", function () {
+      var q = input.value.trim();
+      if (debounce) clearTimeout(debounce);
+      if (q.length < 2) { results.style.display = "none"; results.innerHTML = ""; return; }
+      debounce = setTimeout(function () {
+        frappe.call({
+          method: "kya_hr.api.webform_helpers.search_employees",
+          args: { query: q, limit: 10 },
+          callback: function (r) {
+            var rows = (r && r.message) || [];
+            results.innerHTML = "";
+            if (!rows.length) {
+              results.innerHTML = '<li style="padding:8px;color:#888;">Aucune correspondance. Vérifiez la saisie.</li>';
+              results.style.display = "block"; return;
+            }
+            rows.forEach(function (emp) {
+              var li = document.createElement("li");
+              li.style.cssText = "padding:8px;cursor:pointer;border-bottom:1px solid #eee;";
+              li.innerHTML = '<strong>' + (emp.employee_name || "") + '</strong> ' +
+                '<span style="color:#666;font-size:0.9em;">— ' + (emp.name || "") +
+                (emp.department ? ' · ' + emp.department : '') + '</span>';
+              li.addEventListener("mouseenter", function () { li.style.background = "#f5f7fa"; });
+              li.addEventListener("mouseleave", function () { li.style.background = ""; });
+              li.addEventListener("click", function () {
+                applyEmployee(emp);
+                results.style.display = "none";
+                box.style.display = "none";
+              });
+              results.appendChild(li);
+            });
+            results.style.display = "block";
+          }
+        });
+      }, 250);
+    });
+
+    document.addEventListener("click", function (e) {
+      if (!wrap.contains(e.target)) { results.style.display = "none"; }
+    });
+  }
+
   function setupEmployeeAutoFill() {
     var route = getRoute();
     if (!FORM_SECTIONS[route]) return;
+    setupComptaEmployeePicker(route);
     var empField = findFieldEl("employee");
     if (!empField) return;
     var empInput = empField.querySelector("input");

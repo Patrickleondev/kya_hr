@@ -167,6 +167,11 @@ ALLOWED_DOCTYPES = {
     "Bilan Fin de Stage",
     "Bon Commande KYA",
     "Appel Offre KYA",
+    # Circuits comptabilité : sans ça, get_kya_workflow_actions fait un no-op
+    # silencieux → aucun bouton d'action sur le web form (fiche coincée en
+    # Brouillon). La caissière/rédactrice ne pouvait pas soumettre son état.
+    "Etat Recap Cheques",
+    "Brouillard Caisse",
 }
 
 

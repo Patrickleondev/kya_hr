@@ -1620,7 +1620,7 @@
     "action": "Soumettre au Comptable",
     "allow_self_approval": 1,
     "allowed": "Caissier",
-    "condition": null,
+    "condition": "not doc.comptable_absent",
     "next_state": "En attente Comptable",
     "state": "Brouillon"
    },
@@ -1628,8 +1628,40 @@
     "action": "Soumettre au Comptable",
     "allow_self_approval": 1,
     "allowed": "Accounts Manager",
-    "condition": null,
+    "condition": "not doc.comptable_absent",
     "next_state": "En attente Comptable",
+    "state": "Brouillon"
+   },
+   {
+    "action": "Soumettre au Comptable",
+    "allow_self_approval": 1,
+    "allowed": "Comptable",
+    "condition": "not doc.comptable_absent",
+    "next_state": "En attente Comptable",
+    "state": "Brouillon"
+   },
+   {
+    "action": "Soumettre au DFC (comptable absent)",
+    "allow_self_approval": 1,
+    "allowed": "Caissier",
+    "condition": "doc.comptable_absent",
+    "next_state": "En attente DFC",
+    "state": "Brouillon"
+   },
+   {
+    "action": "Soumettre au DFC (comptable absent)",
+    "allow_self_approval": 1,
+    "allowed": "Accounts Manager",
+    "condition": "doc.comptable_absent",
+    "next_state": "En attente DFC",
+    "state": "Brouillon"
+   },
+   {
+    "action": "Soumettre au DFC (comptable absent)",
+    "allow_self_approval": 1,
+    "allowed": "Comptable",
+    "condition": "doc.comptable_absent",
+    "next_state": "En attente DFC",
     "state": "Brouillon"
    },
    {
@@ -1687,14 +1719,6 @@
     "condition": null,
     "next_state": "En attente Comptable",
     "state": "Rejeté"
-   },
-   {
-    "action": "Soumettre au Comptable",
-    "allow_self_approval": 1,
-    "allowed": "Comptable",
-    "condition": null,
-    "next_state": "En attente Comptable",
-    "state": "Brouillon"
    }
   ],
   "workflow_name": "Flux Brouillard Caisse",
@@ -1708,6 +1732,13 @@
   "override_status": 0,
   "send_email_alert": 0,
   "states": [
+   {
+    "allow_edit": "Caissier",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "send_email": 0,
+    "state": "Brouillon"
+   },
    {
     "allow_edit": "Comptable",
     "doc_status": "0",
@@ -1758,6 +1789,14 @@
    {
     "action": "Soumettre au DFC",
     "allow_self_approval": 1,
+    "allowed": "Caissier",
+    "condition": null,
+    "next_state": "En attente Validation DFC",
+    "state": "Brouillon"
+   },
+   {
+    "action": "Soumettre au DFC",
+    "allow_self_approval": 1,
     "allowed": "Comptable",
     "condition": null,
     "next_state": "En attente Validation DFC",
@@ -1802,6 +1841,14 @@
     "condition": null,
     "next_state": "Rejeté",
     "state": "En attente Validation DFC"
+   },
+   {
+    "action": "Soumettre au DFC",
+    "allow_self_approval": 1,
+    "allowed": "Caissier",
+    "condition": null,
+    "next_state": "En attente Validation DFC",
+    "state": "Rejeté"
    },
    {
     "action": "Soumettre au DFC",

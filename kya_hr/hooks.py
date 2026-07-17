@@ -25,6 +25,7 @@ fixtures = [
     {"dt": "Workflow"},
     {"dt": "Workflow State"},
     {"dt": "Workflow Action"},
+    {"dt": "Workflow Action Master"},
     {"dt": "Role"},
     {"dt": "Custom Field"},
     {"dt": "Property Setter"},
@@ -267,6 +268,7 @@ doc_events = {
     # signé à la clôture (retour terrain : le caissier ne recevait AUCUN mail).
     "Brouillard Caisse": {
         "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_update": "kya_hr.compta_routing.notify_comptable_absent",
         "on_change": "kya_hr.api.pdf_final.attach_final_pdf",
     },
     "Etat Recap Cheques": {

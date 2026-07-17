@@ -4,8 +4,9 @@
 La RH compose un contrat article par article (table `articles`), en texte
 libre, avec deux mécanismes SIMPLES (pas de Jinja, pas de code) :
 
-  • Variables entre accolades :  {employe} {civilite} {poste} {type_contrat}
-    {date_debut} {date_fin} {date_jour} {entreprise} {dg}
+  • Variables entre accolades :  {employe} {civilite} {civilite_longue} {poste}
+    {type_contrat} {date_debut} {date_fin} {date_jour} {entreprise} {dg}
+    ({civilite} = M./Mme/Mlle ; {civilite_longue} = Monsieur/Madame/Mademoiselle)
   • Accord masculin/féminin avec une barre :  {Le|La}  embauché{|e}  {il|elle}
     (avant la barre = masculin, après = féminin ; selon le Sexe du contrat)
 
@@ -48,12 +49,15 @@ _VAR_RE = re.compile(r"\{([a-zA-Z_][a-zA-Z0-9_]*)\}")
 class KYAContractTemplate(Document):
     def validate(self):
         if self.is_active:
-            # Désactiver les autres templates du même type
+            # Un seul template actif par (type de contrat, genre visé).
+            # Le genre DOIT entrer dans la clé : sans lui, installer
+            # « CDD — Masculin » éteignait « CDD — Féminin », et toutes les
+            # femmes recevaient un contrat au masculin (« Monsieur <nom> »).
             frappe.db.sql(
                 """UPDATE `tabKYA Contract Template`
                    SET is_active = 0
-                   WHERE contract_type = %s AND name != %s""",
-                (self.contract_type, self.name),
+                   WHERE contract_type = %s AND genre_cible = %s AND name != %s""",
+                (self.contract_type, self.genre_cible, self.name),
             )
 
     # ── Rendu ────────────────────────────────────────────────────────────
@@ -99,6 +103,30 @@ class KYAContractTemplate(Document):
         return self.render_for(sample)
 
 
+# Situations de famille impliquant « Madame » (femme non célibataire).
+_SITUATIONS_MADAME = ("Marié(e)", "Divorcé(e)", "Veuf/Veuve", "Union libre")
+
+
+def compute_civilite(sexe, situation=None):
+    """Civilité française à partir du sexe et de la situation de famille.
+
+    - Masculin                       → « Monsieur »
+    - Féminin + mariée/veuve/div/UL  → « Madame »
+    - Féminin + célibataire (ou inconnu) → « Mademoiselle »
+
+    Sert de valeur PAR DÉFAUT : la RH peut toujours forcer une autre civilité
+    sur le contrat (une dame célibataire à qui on veut dire « Madame »)."""
+    if str(sexe or "").lower().startswith("m"):
+        return "Monsieur"
+    if situation in _SITUATIONS_MADAME:
+        return "Madame"
+    return "Mademoiselle"
+
+
+# Forme abrégée pour l'en-tête de contrat (M. / Mme / Mlle).
+_CIVILITE_ABR = {"Monsieur": "M.", "Madame": "Mme", "Mademoiselle": "Mlle"}
+
+
 def _build_context(ctx_doc):
     """Construit le dictionnaire de variables conviviales depuis un KYA Contrat."""
     def g(field):
@@ -108,9 +136,13 @@ def _build_context(ctx_doc):
 
     sexe = g("sexe") or "Masculin"
     is_masc = str(sexe).lower().startswith("m")
+    # Civilité : valeur saisie/corrigée par la RH en priorité, sinon calculée
+    # depuis sexe + situation de famille (contrats antérieurs au champ civilite).
+    civilite_longue = g("civilite") or compute_civilite(sexe, g("situation_famille"))
     return {
         "employe": g("employee_name") or "",
-        "civilite": "M." if is_masc else "Mme",
+        "civilite": _CIVILITE_ABR.get(civilite_longue, "M." if is_masc else "Mme"),
+        "civilite_longue": civilite_longue,
         "poste": g("poste") or "",
         "type_contrat": g("contract_type") or "",
         "date_debut": _date_fr(g("date_debut")),

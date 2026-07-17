@@ -40,6 +40,33 @@ def _anciennete(de, fin=None):
     return round((fin - getdate(de)).days / 365.25, 1)
 
 
+def _file_data_uri(file_url):
+    """Convertit une pièce jointe (/files/... ou /private/files/...) en data URI
+    base64 pour l'embarquer dans un PDF sans fetch réseau. None si introuvable."""
+    if not file_url:
+        return None
+    try:
+        import base64
+        content = None
+        # Fichier public : lecture directe sur disque du site.
+        if file_url.startswith("/files/"):
+            path = frappe.get_site_path("public", file_url.lstrip("/"))
+            with open(path, "rb") as f:
+                content = f.read()
+        else:
+            # Privé ou nommé : passer par le File doctype.
+            fname = frappe.db.get_value("File", {"file_url": file_url}, "name")
+            if fname:
+                content = frappe.get_doc("File", fname).get_content()
+        if not content:
+            return None
+        import mimetypes
+        mime = mimetypes.guess_type(file_url)[0] or "image/jpeg"
+        return "data:%s;base64,%s" % (mime, base64.b64encode(content).decode("ascii"))
+    except Exception:
+        return None
+
+
 def _statut(row):
     if not row.get("date_debauchage"):
         return "Actif"
@@ -447,6 +474,14 @@ def parcours_pdf(salarie):
     logo = _logo_data_uri()
     logo_img = "<img src='{0}' style='max-height:70px'>".format(logo) if logo else ""
 
+    # Photo du salarié embarquée en base64 (comme le logo) → s'affiche dans le
+    # PDF sans dépendre d'un fetch réseau. Absente tant que la RH n'a pas
+    # téléversé de photo sur la fiche (champ Attach Image « Photo »).
+    photo_uri = _file_data_uri(s.get("photo"))
+    photo_img = ("<img src='{0}' style='width:74px;height:74px;border-radius:50%;"
+                 "object-fit:cover;border:2px solid #009B77'>".format(photo_uri)
+                 if photo_uri else "")
+
     def esc(v):
         return frappe.utils.escape_html(str(v)) if v not in (None, "") else "—"
 
@@ -484,7 +519,12 @@ def parcours_pdf(salarie):
       <div class='line'></div>
       <div class='sec'>Informations personnelles</div>
       <div class='box'>
-        <div style='font-size:15px;font-weight:800'>{nom} <span class='badge' style='background:{bgc};color:#fff'>{statut}</span></div>
+        <div style='display:table;width:100%'>
+          <div style='display:table-cell;width:84px;vertical-align:middle'>{photo}</div>
+          <div style='display:table-cell;vertical-align:middle;padding-left:12px'>
+            <div style='font-size:15px;font-weight:800'>{nom} <span class='badge' style='background:{bgc};color:#fff'>{statut}</span></div>
+          </div>
+        </div>
         <div class='kv'>
           <div><div class='lbl'>Matricule</div>{mat}</div>
           <div><div class='lbl'>Poste actuel</div>{poste}</div>
@@ -506,7 +546,7 @@ def parcours_pdf(salarie):
       <div style='margin-top:16px;text-align:center;font-size:9px;color:#999;border-top:2px solid #009B77;padding-top:8px'>
         KYA-Energy Group — fiche générée le {today}</div>
     </body></html>""".format(
-        logo=logo_img, nom=esc(s["nom_complet"]),
+        logo=logo_img, photo=photo_img, nom=esc(s["nom_complet"]),
         bgc="#16a34a" if s["statut"] == "Actif" else ("#7c3aed" if s["statut"] == "Retraité" else "#64748b"),
         statut=esc(s["statut"]), mat=esc(s["matricule"]), poste=esc(s["poste_occupe"]),
         dept=esc(s["departement"]), emb=esc(frappe.utils.format_date(s["date_embauche"]) if s["date_embauche"] else ""),
@@ -517,6 +557,54 @@ def parcours_pdf(salarie):
 
     return {"filename": "parcours-{0}.pdf".format(s["matricule"]),
             "content_base64": base64.b64encode(get_pdf(html)).decode("ascii")}
+
+
+@frappe.whitelist()
+def retraite_data(departement=None):
+    """Suivi des départs à la retraite pour l'espace RH (même calcul que la
+    feuille « Gestion Retraite » de l'export Excel) : liste triée du départ le
+    plus proche au plus lointain + compteurs d'alerte."""
+    _guard()
+    try:
+        age_ret = int(frappe.db.get_single_value("Parametres RH KYA", "age_retraite") or 60)
+    except Exception:
+        age_ret = 60
+
+    filters = {"departement": departement} if departement else {}
+    rows = frappe.get_all(
+        "Salarie KYA", filters=filters,
+        fields=["matricule", "nom_complet", "sexe", "poste_occupe", "departement",
+                "date_naissance", "date_embauche", "date_debauchage", "motif_debauchage"],
+        limit_page_length=0)
+
+    today_d = getdate(today())
+    out = []
+    compteurs = {"retraite": 0, "atteint": 0, "proche": 0, "anticiper": 0}
+    for r in rows:
+        if not r.date_naissance:
+            continue
+        d_ret = frappe.utils.add_years(getdate(r.date_naissance), age_ret)
+        annees_avant = round((getdate(d_ret) - today_d).days / 365.25, 1)
+        statut = _statut(r)
+        if statut == "Retraité":
+            alerte, cle = "Retraité", "retraite"
+        elif annees_avant <= 0:
+            alerte, cle = "Âge de départ atteint", "atteint"
+        elif annees_avant <= 2:
+            alerte, cle = "Proche (< 2 ans)", "proche"
+        elif annees_avant <= 5:
+            alerte, cle = "À anticiper (< 5 ans)", "anticiper"
+        else:
+            alerte, cle = "", None
+        if cle:
+            compteurs[cle] += 1
+        out.append({
+            "matricule": r.matricule, "nom_complet": r.nom_complet or r.matricule,
+            "poste": r.poste_occupe or "—", "departement": r.departement or "—",
+            "age": _age(r.date_naissance), "date_retraite": str(d_ret),
+            "annees_avant": annees_avant, "statut": statut, "alerte": alerte, "cle": cle})
+    out.sort(key=lambda x: x["date_retraite"])
+    return {"age_retraite": age_ret, "compteurs": compteurs, "lignes": out}
 
 
 @frappe.whitelist()
@@ -649,6 +737,67 @@ def export_excel(departement=None):
                     str(p.date_debut_contrat or ""), str(p.date_fin_contrat or ""),
                     p.duree, flt(p.montant_contrat), p.mode_paiement, p.statut,
                     p.reference_contrat, p.observation])
+
+    # ── Feuille Évolution carrière (le parcours de chacun) ──
+    # Fusionne le fichier « Suivi Évolution Carrière » : chaque étape avec son
+    # type de contrat (Stage → CDD → CDI…), poste, catégorie, salaire, motif.
+    noms = {s.matricule: ("{0} {1}".format(s.nom or "", s.prenoms or "")).strip()
+            for s in sal}
+    wev = wb.create_sheet("Évolution carrière")
+    wev.append(["Matricule", "Nom & Prénoms", "Date début", "Date fin", "Durée",
+                "Type de contrat", "Nb renouvellements", "Département", "Poste occupé",
+                "Catégorie", "Classe & Échelon", "Salaire de base",
+                "Nature de l'évolution", "Motif", "Observation"])
+    for e in frappe.get_all(
+            "Evolution Carriere KYA",
+            fields=["salarie", "date_debut", "date_fin", "duree", "type_contrat",
+                    "nombre_renouvellements", "departement", "poste_occupe", "categorie",
+                    "classe_echelon", "salaire_base", "nature_evolution",
+                    "motif_evolution", "observation"],
+            order_by="salarie asc, date_debut asc", limit_page_length=0):
+        wev.append([e.salarie, noms.get(e.salarie, ""), str(e.date_debut or ""),
+                    str(e.date_fin or ""), e.duree, e.type_contrat,
+                    e.nombre_renouvellements, e.departement, e.poste_occupe, e.categorie,
+                    e.classe_echelon, flt(e.salaire_base), e.nature_evolution,
+                    e.motif_evolution, e.observation])
+
+    # ── Feuille Gestion Retraite (demande RH : suivi dédié des départs) ──
+    try:
+        age_ret = int(frappe.db.get_single_value("Parametres RH KYA", "age_retraite") or 60)
+    except Exception:
+        age_ret = 60
+    wret = wb.create_sheet("Gestion Retraite")
+    wret.append(["Matricule", "Nom & Prénoms", "Date de naissance", "Âge",
+                 "Date d'embauche", "Ancienneté (ans)",
+                 "Date prévisionnelle de départ", "Années avant départ",
+                 "Statut", "Alerte"])
+    lignes_ret = []
+    today_d = getdate(today())
+    for r in sal:
+        if not r.date_naissance:
+            continue
+        d_ret = frappe.utils.add_years(getdate(r.date_naissance), age_ret)
+        annees_avant = round((getdate(d_ret) - today_d).days / 365.25, 1)
+        statut = _statut(r)
+        if statut == "Retraité":
+            alerte = "Retraité"
+        elif annees_avant <= 0:
+            alerte = "Âge de départ atteint"
+        elif annees_avant <= 2:
+            alerte = "Proche (< 2 ans)"
+        elif annees_avant <= 5:
+            alerte = "À anticiper (< 5 ans)"
+        else:
+            alerte = ""
+        lignes_ret.append((
+            d_ret, [r.matricule, ("{0} {1}".format(r.nom or "", r.prenoms or "")).strip(),
+                    str(r.date_naissance or ""), _age(r.date_naissance),
+                    str(r.date_embauche or ""),
+                    _anciennete(r.date_embauche, r.date_debauchage),
+                    str(d_ret), annees_avant, statut, alerte]))
+    # Tri par date de départ la plus proche (les urgences en haut).
+    for _d, ligne in sorted(lignes_ret, key=lambda x: x[0]):
+        wret.append(ligne)
 
     buf = io.BytesIO()
     wb.save(buf)

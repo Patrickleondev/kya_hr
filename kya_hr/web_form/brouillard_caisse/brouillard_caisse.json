@@ -59,6 +59,18 @@
    "label": "Date solde précédent"
   },
   {
+   "fieldname": "comptable_absent",
+   "fieldtype": "Check",
+   "label": "Comptable absent (viser directement par le DFC)",
+   "default": "0"
+  },
+  {
+   "fieldname": "comptable_absent_note",
+   "fieldtype": "Small Text",
+   "label": "Comptable intérimaire / précision (si comptable absent)",
+   "depends_on": "comptable_absent"
+  },
+  {
    "fieldname": "lignes",
    "fieldtype": "Table",
    "label": "Opérations du Jour",
