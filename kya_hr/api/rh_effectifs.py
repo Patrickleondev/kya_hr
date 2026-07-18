@@ -47,17 +47,27 @@ def _file_data_uri(file_url):
         return None
     try:
         import base64
+        import os
         content = None
-        # Fichier public : lecture directe sur disque du site.
-        if file_url.startswith("/files/"):
-            path = frappe.get_site_path("public", file_url.lstrip("/"))
+        # Lecture DIRECTE sur disque (public ET privé). On n'utilise pas
+        # File.get_content() en premier : il renvoie une `str` mal décodée pour
+        # du binaire (image), ce qui fait échouer base64 → photo vide.
+        parts = file_url.lstrip("/").split("/")
+        if file_url.startswith("/private/"):
+            path = frappe.get_site_path(*parts)          # private/files/x.png
+        elif file_url.startswith("/files/"):
+            path = frappe.get_site_path("public", *parts)  # public/files/x.png
+        else:
+            path = None
+        if path and os.path.exists(path):
             with open(path, "rb") as f:
                 content = f.read()
-        else:
-            # Privé ou nommé : passer par le File doctype.
+        if content is None:
+            # Repli : File doctype (en re-encodant si on reçoit une str).
             fname = frappe.db.get_value("File", {"file_url": file_url}, "name")
             if fname:
-                content = frappe.get_doc("File", fname).get_content()
+                c = frappe.get_doc("File", fname).get_content()
+                content = c.encode("latin-1", "ignore") if isinstance(c, str) else c
         if not content:
             return None
         import mimetypes
@@ -453,12 +463,79 @@ def parcours(salarie):
             "classe_echelon": s.classe_echelon, "salaire_base": flt(s.salaire_base),
             "statut": _statut(s), "date_debauchage": str(s.date_debauchage or ""),
             "motif_debauchage": s.motif_debauchage, "photo": s.photo,
+            # Photo servie en data-URI : s'affiche même si le fichier est privé
+            # (pas de 403 sur /private/files) → zéro bug d'affichage.
+            "photo_uri": _file_data_uri(s.get("photo")),
         },
         "evolutions": evs,
         "promotions": _of("Promotion"),
         "mutations": _of("Mutation"),
         "retrogradations": _of("Rétrogradation"),
     }
+
+
+@frappe.whitelist()
+def televerser_photo(salarie, filename, content_base64):
+    """Téléverse la photo d'identité d'un salarié depuis le portail RH.
+
+    Garanties « pas de mauvaise étiquette » :
+    - le fichier est **rattaché** à la fiche (attached_to_doctype/name/field) ;
+    - il est **nommé avec le matricule** (photo-<matricule>.jpg) ;
+    - l'ancienne photo est supprimée (pas d'empilement de fichiers orphelins).
+    """
+    _guard()
+    if not frappe.db.exists("Salarie KYA", salarie):
+        frappe.throw(_("Salarié introuvable."))
+
+    import base64
+    import os
+    import re as _re
+
+    ext = (os.path.splitext(filename or "")[1] or ".jpg").lower()
+    if ext not in (".jpg", ".jpeg", ".png", ".webp"):
+        frappe.throw(_("Format non supporté : utilisez JPG, PNG ou WEBP."))
+    try:
+        content = base64.b64decode(content_base64)
+    except Exception:
+        frappe.throw(_("Fichier illisible."))
+    if not content:
+        frappe.throw(_("Fichier vide."))
+    if len(content) > 5 * 1024 * 1024:
+        frappe.throw(_("Photo trop lourde : 5 Mo maximum."))
+
+    mat = frappe.db.get_value("Salarie KYA", salarie, "matricule") or salarie
+    slug = _re.sub(r"[^A-Za-z0-9_-]", "", str(mat)) or "salarie"
+
+    # Purge des photos précédentes de CETTE fiche AVANT d'insérer la nouvelle.
+    # (On ne peut pas comparer les URL : Frappe réutilise le même nom de fichier
+    #  → l'ancienne et la nouvelle auraient la même URL et rien ne serait purgé.)
+    for old in frappe.get_all("File", filters={"attached_to_doctype": "Salarie KYA",
+                                               "attached_to_name": salarie,
+                                               "attached_to_field": "photo"}, pluck="name"):
+        try:
+            frappe.delete_doc("File", old, force=True, ignore_permissions=True)
+        except Exception:
+            pass
+
+    f = frappe.get_doc({
+        "doctype": "File",
+        "file_name": "photo-{0}{1}".format(slug, ext),
+        "attached_to_doctype": "Salarie KYA",
+        "attached_to_name": salarie,
+        "attached_to_field": "photo",
+        "is_private": 1,
+        "content": content,
+    })
+    f.flags.ignore_permissions = True
+    f.insert()
+
+    frappe.db.set_value("Salarie KYA", salarie, "photo", f.file_url)
+    # Indispensable : sans ça, une relecture de la fiche dans la même requête
+    # renvoie l'ANCIENNE valeur (cache document) → photo_uri vide à l'affichage.
+    frappe.clear_document_cache("Salarie KYA", salarie)
+    frappe.db.commit()
+    return {"file_url": f.file_url, "matricule": mat,
+            "photo_uri": _file_data_uri(f.file_url)}
 
 
 @frappe.whitelist()

@@ -12,7 +12,14 @@
   .ps-head{display:flex;align-items:center;gap:16px;margin-bottom:12px;}
   .ps-photo{width:84px;height:84px;border-radius:50%;object-fit:cover;border:3px solid #009B77;flex-shrink:0;background:#f1f5f9;}
   .ps-noph{display:flex;align-items:center;justify-content:center;font-size:1.9rem;font-weight:800;color:#009B77;background:#e6f4f1;}
+  .ps-photo-btn{background:#e6f4f1;color:#0f766e;border:1px solid #0f766e;border-radius:8px;padding:4px 10px;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;}
+  .ps-photo-btn:hover{background:#0f766e;color:#fff;}
+  .ps-photo-msg{font-size:.68rem;color:#64748b;min-height:12px;text-align:center;}
+  .ps-photo-msg.ok{color:#16a34a;font-weight:700;}
+  .ps-photo-msg.err{color:#dc2626;font-weight:700;}
   .ctr-chip{display:inline-block;padding:2px 10px;border-radius:12px;color:#fff;font-size:.72rem;font-weight:700;vertical-align:middle;}
+  .ps-roadwrap{width:100%;overflow-x:auto;padding:6px 0 2px;}
+  .ps-roadsvg{width:100%;min-width:700px;height:auto;display:block;}
   .ps-road{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 4px 16px;}
   .ps-road .ctr-chip{font-size:.82rem;padding:5px 14px;}
   .road-arw{color:#94a3b8;font-weight:800;}
@@ -53,12 +60,25 @@
 
 <script>
 const SAL = {{ salaries_json | safe }};
+const CSRF = {{ (csrf_token or '') | tojson }};
 const NAT_COLOR = {Embauche:'#0f766e',Promotion:'#16a34a',Mutation:'#2563eb',Renouvellement:'#0891b2','Augmentation salariale':'#7c3aed','Rétrogradation':'#dc2626','Fin de contrat':'#64748b'};
 async function apiCall(method, args){
   const p = new URLSearchParams();
   Object.entries(args||{}).forEach(([k,v])=>{ if(v!==null&&v!==undefined&&v!=='') p.append(k,v); });
   const q = p.toString();
   const r = await fetch('/api/method/'+method+(q?('?'+q):''), {headers:{'Accept':'application/json'}, credentials:'same-origin'});
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  return (await r.json()).message;
+}
+// POST (charges lourdes : photo en base64). Le jeton CSRF est injecté par le
+// contrôleur car ces pages www ne chargent pas le bundle JS `frappe`.
+async function apiPost(method, args){
+  const r = await fetch('/api/method/'+method, {
+    method:'POST', credentials:'same-origin',
+    headers:{'Content-Type':'application/json','Accept':'application/json',
+             'X-Frappe-CSRF-Token': CSRF},
+    body: JSON.stringify(args||{})
+  });
   if(!r.ok) throw new Error('HTTP '+r.status);
   return (await r.json()).message;
 }
@@ -89,18 +109,143 @@ function ctrChip(t){
   const bg=CTR_BG[t]||'#0f766e';
   return `<span class="ctr-chip" style="background:${bg}">${CTR_ICON[t]||''} ${esc(CTR_LABEL[t]||t)}</span>`;
 }
-function buildRoad(evs){
-  // Chaîne de progression : phases de contrat successives (dédupliquées) +
-  // promotions, dans l'ordre chronologique. C'est la « route » de carrière.
+
+const PENDING_ROADS=[];
+function flushRoads(){ while(PENDING_ROADS.length){ const r=PENDING_ROADS.shift();
+  try{ drawRoad(r.uid, r.steps); }catch(e){ console && console.warn && console.warn('route:',e); } } }
+
+// Icônes SVG dessinées dans la page (aucun chargement externe : rien ne peut
+// échouer au déploiement, contrairement à une icône servie par un CDN).
+const ICON_PATHS = {
+  stage:  'M12 3 1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z',
+  cdd:    'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z',
+  cdi:    'M20 6h-4V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2zm-6-2v2h-4V4h4z',
+  presta: 'M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z',
+  promo:  'M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4-6.2-4.6-6.2 4.6 2.4-7.4L2 9.4h7.6z',
+  interim:'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 10.6 4 2.3-.8 1.4-5.2-3V6h2z'
+};
+const CTR_KIND = {'Stagiaire':'stage','CDD':'cdd','CDI':'cdi','Prestataire':'presta','Intérim':'interim'};
+const NS='http://www.w3.org/2000/svg';
+
+function roadSteps(evs){
   const steps=[]; let last=null;
   evs.forEach(e=>{
+    const an=(e.date_debut||'').slice(0,4);
     const t=e.type_contrat;
-    if(t && t!==last){ steps.push(ctrChip(t)); last=t; }
-    if((e.nature_evolution||'')==='Promotion'){ steps.push('<span class="ctr-chip" style="background:#16a34a">⭐ Promotion</span>'); }
+    if(t && t!==last){
+      steps.push({an, kind:CTR_KIND[t]||'cdd', couleur:CTR_BG[t]||'#0f766e',
+                  titre:CTR_LABEL[t]||t, detail:e.poste_occupe||''});
+      last=t;
+    }
+    if((e.nature_evolution||'')==='Promotion'){
+      steps.push({an, kind:'promo', couleur:'#16a34a', titre:'Promotion',
+                  detail:e.poste_occupe||''});
+    }
   });
-  if(!steps.length) return '';
-  return `<div class="ps-road">${steps.join('<span class="road-arw">→</span>')}</div>`;
+  return steps;
 }
+
+function buildRoad(evs){
+  const steps=roadSteps(evs);
+  if(!steps.length) return '';
+  const uid='rd'+Math.random().toString(36).slice(2,8);
+  const W=Math.max(820, steps.length*230), H=380;
+  PENDING_ROADS.push({uid, steps, W, H});
+  return `<div class="ps-roadwrap">
+    <svg id="${uid}" class="ps-roadsvg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>`;
+}
+
+// Dessine une route en PERSPECTIVE : on échantillonne la courbe centrale, on
+// décale de part et d'autre selon la normale avec une largeur qui décroît au
+// loin, ce qui donne un vrai ruban d'asphalte (impossible avec un simple trait).
+function drawRoad(uid, steps){
+  const svg=document.getElementById(uid);
+  if(!svg || !steps.length) return;
+  const W=+svg.viewBox.baseVal.width, H=+svg.viewBox.baseVal.height;
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+
+  const d=`M 50 ${H-45} C ${W*0.22} ${H-45}, ${W*0.18} ${H*0.52}, ${W*0.40} ${H*0.52}`
+        + ` S ${W*0.62} ${H-95}, ${W*0.74} ${H-95}`
+        + ` S ${W*0.94} ${H*0.30}, ${W-50} ${H*0.30}`;
+
+  // Courbe centrale (mesurée puis retirée du rendu final)
+  const guide=document.createElementNS(NS,'path');
+  guide.setAttribute('d', d); guide.setAttribute('fill','none'); guide.setAttribute('stroke','none');
+  svg.appendChild(guide);
+  const L=guide.getTotalLength();
+  if(!L){ return; }                       // sécurité : SVG non mesurable
+
+  const N=140, pts=[];
+  for(let i=0;i<=N;i++){ const t=i/N; pts.push({t, p:guide.getPointAtLength(L*t)}); }
+  const wNear=72, wFar=26;                 // largeur près / au loin
+  const halfW=t=>(wNear+(wFar-wNear)*t)/2;
+  const normal=i=>{
+    const a=pts[Math.max(0,i-1)].p, b=pts[Math.min(N,i+1)].p;
+    const dx=b.x-a.x, dy=b.y-a.y, l=Math.hypot(dx,dy)||1;
+    return {x:-dy/l, y:dx/l};
+  };
+  const left=[], right=[];
+  pts.forEach((q,i)=>{ const n=normal(i), h=halfW(q.t);
+    left.push([q.p.x+n.x*h, q.p.y+n.y*h]);
+    right.push([q.p.x-n.x*h, q.p.y-n.y*h]); });
+
+  const fmt=a=>a.map(c=>c[0].toFixed(1)+' '+c[1].toFixed(1)).join(' L ');
+  const add=(tag,attrs)=>{ const e=document.createElementNS(NS,tag);
+    for(const k in attrs) e.setAttribute(k,attrs[k]); svg.appendChild(e); return e; };
+
+  // 1) l'asphalte (polygone fermé bord gauche -> bord droit)
+  add('path',{d:'M '+fmt(left)+' L '+fmt(right.slice().reverse())+' Z',
+              fill:'#333b47'});
+  // 2) bandes blanches des deux bords
+  add('path',{d:'M '+fmt(left), fill:'none', stroke:'#fff', 'stroke-width':3.5, 'stroke-linecap':'round'});
+  add('path',{d:'M '+fmt(right), fill:'none', stroke:'#fff', 'stroke-width':3.5, 'stroke-linecap':'round'});
+  // 3) ligne centrale pointillée
+  add('path',{d:d, fill:'none', stroke:'#fff', 'stroke-width':3,
+              'stroke-dasharray':'20 16', 'stroke-linecap':'round', opacity:'.92'});
+  svg.removeChild(guide);
+
+  // 4) les repères, posés SUR la route, taille selon la profondeur
+  const n=steps.length;
+  steps.forEach((st,i)=>{
+    const t=(n===1)?0.5:(0.07+0.86*i/(n-1));
+    const idx=Math.round(t*N), q=pts[idx];
+    const s=0.72+0.5*(1-q.t);                     // perspective : plus gros devant
+    const g=document.createElementNS(NS,'g');
+    g.setAttribute('transform',`translate(${q.p.x.toFixed(1)},${q.p.y.toFixed(1)}) scale(${s.toFixed(3)})`);
+    // goutte (pointe en bas, sur la chaussée)
+    g.innerHTML=
+      `<path d="M0 0 C -9 -14 -15 -21 -15 -29 a15 15 0 1 1 30 0 C 15 -21 9 -14 0 0 Z"
+             fill="${st.couleur}" stroke="#fff" stroke-width="3"/>`+
+      `<circle cy="-29" r="10.5" fill="#fff"/>`+
+      `<svg x="-7" y="-36" width="14" height="14" viewBox="0 0 24 24">`+
+        `<path d="${ICON_PATHS[st.kind]||ICON_PATHS.cdd}" fill="${st.couleur}"/></svg>`;
+    svg.appendChild(g);
+
+    // Libellé au-dessus du repère, avec DÉGAGEMENT suffisant pour ne jamais
+    // reposer sur la chaussée, + pastille blanche de fond (lisible en toutes
+    // circonstances, même si la route remonte sous le texte).
+    const ly=q.p.y-(52*s)-halfW(q.t)-14;
+    const lab=document.createElementNS(NS,'g');
+    lab.setAttribute('transform',`translate(${q.p.x.toFixed(1)},${ly.toFixed(1)})`);
+    const cut=v=>String(v||'').replace(/[<>&]/g,'').slice(0,24);
+    lab.innerHTML=
+      `<text text-anchor="middle" y="-34" font-size="21" font-weight="800" fill="${st.couleur}">${cut(st.an)}</text>`+
+      `<text text-anchor="middle" y="-15" font-size="14" font-weight="700" fill="#0f172a">${cut(st.titre)}</text>`+
+      `<text text-anchor="middle" y="1" font-size="12" fill="#64748b">${cut(st.detail)}</text>`;
+    svg.appendChild(lab);
+    // fond blanc dimensionné au texte réel (getBBox après insertion)
+    try{
+      const bb=lab.getBBox();
+      const bg=document.createElementNS(NS,'rect');
+      bg.setAttribute('x',(bb.x-9).toFixed(1)); bg.setAttribute('y',(bb.y-6).toFixed(1));
+      bg.setAttribute('width',(bb.width+18).toFixed(1)); bg.setAttribute('height',(bb.height+12).toFixed(1));
+      bg.setAttribute('rx','9'); bg.setAttribute('fill','#fff'); bg.setAttribute('opacity','.93');
+      lab.insertBefore(bg, lab.firstChild);
+    }catch(e){}
+  });
+}
+
 function evCard(e){
   const c=NAT_COLOR[e.nature_evolution]||'#0f766e';
   const fin=e.date_fin?(' → '+e.date_fin):' → (en cours)';
@@ -115,18 +260,54 @@ function evCard(e){
 function subList(titre, arr){
   return `<div class="ps-sub"><h3>${titre} (${arr.length})</h3>${arr.length?arr.map(e=>`<div class="pill">${esc(e.date_debut)} · ${esc(e.poste_occupe||'—')}</div>`).join(''):'<div class="muted">Aucune</div>'}</div>`;
 }
+// Téléversement de la photo : rattachée à CETTE fiche, nommée par le matricule.
+async function uploadPhoto(input, matricule){
+  const f = input.files && input.files[0];
+  input.value = '';
+  if(!f) return;
+  const msg = document.getElementById('ps-photo-msg');
+  if(f.size > 5*1024*1024){ if(msg){msg.textContent='Photo trop lourde (5 Mo max).';msg.className='ps-photo-msg err';} return; }
+  if(msg){ msg.textContent='Envoi…'; msg.className='ps-photo-msg'; }
+  try{
+    const b64 = await new Promise((ok,ko)=>{
+      const rd = new FileReader();
+      rd.onload = e => ok(String(e.target.result).split(',')[1]);
+      rd.onerror = ko;
+      rd.readAsDataURL(f);
+    });
+    await apiPost('kya_hr.api.rh_effectifs.televerser_photo',
+                  {salarie: decodeURIComponent(matricule), filename: f.name, content_base64: b64});
+    if(msg){ msg.textContent='Photo enregistrée ✓'; msg.className='ps-photo-msg ok'; }
+    const d = await apiCall('kya_hr.api.rh_effectifs.parcours',
+                            {salarie: decodeURIComponent(matricule)});
+    render(d);   // recharge la fiche → photo à jour
+  }catch(e){
+    if(msg){ msg.textContent="Échec de l'envoi."; msg.className='ps-photo-msg err'; }
+  }
+}
+
 function render(d){
   const s=d.salarie;
   const bcls=s.statut==='Actif'?'b-actif':(s.statut==='Retraité'?'b-retraite':'b-sorti');
   const tl=d.evolutions.length?d.evolutions.map(evCard).join(''):'<div class="muted">Aucun évènement de carrière. Ajoutez-en depuis la fiche du salarié.</div>';
   const initials=(s.nom_complet||'?').trim().split(/\s+/).map(w=>w[0]||'').slice(0,2).join('').toUpperCase();
-  const photoHtml = s.photo
-    ? `<img class="ps-photo" src="${esc(s.photo)}" alt="" onerror="this.outerHTML='<div class=\\'ps-photo ps-noph\\'>${initials}</div>'">`
+  // photo_uri (data-URI servi par l'API) : s'affiche même si le fichier est privé.
+  const src = s.photo_uri || s.photo || '';
+  const photoHtml = src
+    ? `<img class="ps-photo" src="${src}" alt="" onerror="this.outerHTML='<div class=\\'ps-photo ps-noph\\'>${initials}</div>'">`
     : `<div class="ps-photo ps-noph" title="Aucune photo rattachée à cette fiche">${initials}</div>`;
   document.getElementById('ps-body').innerHTML=`
     <div class="ps-card">
       <div class="ps-head">
-        ${photoHtml}
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+          ${photoHtml}
+          <label class="ps-photo-btn" title="La photo est rattachée à la fiche et nommée avec le matricule">
+            ${src ? '🔄 Changer' : '📷 Ajouter'} la photo
+            <input type="file" accept="image/jpeg,image/png,image/webp" style="display:none"
+                   onchange="uploadPhoto(this,'${encodeURIComponent(s.matricule)}')">
+          </label>
+          <span id="ps-photo-msg" class="ps-photo-msg"></span>
+        </div>
         <div class="ps-name">${esc(s.nom_complet)} <span class="badge ${bcls}">${esc(s.statut)}</span></div>
       </div>
       <div class="ps-kv">
@@ -151,6 +332,7 @@ function render(d){
       ${subList('Mutations', d.mutations)}
       ${subList('Rétrogradations', d.retrogradations)}
     </div></div>`;
+  flushRoads();   // la route SVG se dessine une fois le DOM en place
 }
 async function pdf(id){
   try{ const r=await apiCall('kya_hr.api.rh_effectifs.parcours_pdf',{salarie:decodeURIComponent(id)});
