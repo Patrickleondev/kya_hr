@@ -233,7 +233,7 @@
    "label": "Écart Réalisé vs Avance",
    "options": "XOF",
    "read_only": 1,
-   "description": "Calculé : avance de démarrage moins coût total. S'il est négatif, l'avance ne couvre pas les dépenses déjà engagées."
+   "description": "Calculé : coût total MOINS avance de démarrage. Un écart POSITIF signifie que les dépenses engagées dépassent déjà l'avance encaissée — il faut relancer le client. Un écart négatif est confortable : l'avance couvre encore les dépenses."
   },
   {
    "fieldname": "ecart_budget_previsionnel",
@@ -241,7 +241,7 @@
    "label": "Écart Réalisé vs Prévisionnel",
    "options": "XOF",
    "read_only": 1,
-   "description": "Calculé : budget prévisionnel moins coût réel. S'il est négatif, le chantier a coûté plus cher que prévu."
+   "description": "Calculé : coût réel MOINS budget prévisionnel. Un écart POSITIF est un DÉPASSEMENT de budget. Un écart négatif signifie que le chantier a coûté moins cher que prévu."
   },
   {
    "fieldname": "marge_brute",
