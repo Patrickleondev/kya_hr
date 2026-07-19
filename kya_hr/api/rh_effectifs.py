@@ -637,6 +637,108 @@ def parcours_pdf(salarie):
 
 
 @frappe.whitelist()
+def contrats_data(departement=None):
+    """KPI et répartitions des contrats pour l'espace RH.
+
+    Trois questions auxquelles la RH doit pouvoir répondre d'un coup d'œil :
+    combien de contrats et de quel type, où en est chacun dans le circuit de
+    signature, et lesquels arrivent à échéance. Le calcul est fait en direct
+    sur `KYA Contrat` : aucune valeur figée.
+    """
+    _guard()
+    filters = {"departement": departement} if departement else {}
+    rows = frappe.get_all(
+        "KYA Contrat", filters=filters,
+        fields=["name", "contract_type", "workflow_state", "date_debut", "date_fin",
+                "employee_name", "departement", "salaire_mensuel", "indemnite_mensuelle",
+                "date_signature_employe", "date_signature_dg"],
+        limit_page_length=0) or []
+
+    auj = getdate(today())
+
+    # États du circuit considérés comme définitifs (contrat en vigueur).
+    ETATS_ACTIFS = ("Validé", "Archivé", "RH (revue)")
+    ETATS_ATTENTE = ("Brouillon", "Envoyé Signataire", "En attente Signature Salarié",
+                     "Signé Salarié", "En attente DG")
+
+    def _fin(r):
+        return getdate(r.date_fin) if r.date_fin else None
+
+    signes = [r for r in rows if r.workflow_state in ETATS_ACTIFS]
+    en_cours = [r for r in rows if r.workflow_state in ETATS_ATTENTE]
+    rejetes = [r for r in rows if r.workflow_state == "Rejeté"]
+
+    # Échéances : uniquement sur les contrats à durée déterminée effectivement
+    # en vigueur. Un CDI (sans date de fin) n'expire pas.
+    a_terme = [r for r in signes if _fin(r)]
+    expires, j30, j90 = [], [], []
+    for r in a_terme:
+        d = (_fin(r) - auj).days
+        if d < 0:
+            expires.append((r, d))
+        elif d <= 30:
+            j30.append((r, d))
+        elif d <= 90:
+            j90.append((r, d))
+
+    def _ligne(r, d):
+        return {
+            "nom": r.name, "employe": r.employee_name or "—",
+            "type": r.contract_type or "—", "departement": r.departement or "—",
+            "date_fin": str(r.date_fin) if r.date_fin else "",
+            "jours": d,
+            "alerte": ("Expiré" if d < 0 else "Expire sous 30 jours" if d <= 30
+                       else "Expire sous 3 mois"),
+        }
+
+    echeances = ([_ligne(r, d) for r, d in sorted(expires, key=lambda x: x[1])]
+                 + [_ligne(r, d) for r, d in sorted(j30, key=lambda x: x[1])]
+                 + [_ligne(r, d) for r, d in sorted(j90, key=lambda x: x[1])])
+
+    def _repartition(seq, key, ordre=None):
+        d = {}
+        for r in seq:
+            d[r.get(key) or "—"] = d.get(r.get(key) or "—", 0) + 1
+        if ordre:
+            libelles = [k for k in ordre if d.get(k)]
+            return {"labels": libelles, "data": [d[k] for k in libelles]}
+        items = sorted(d.items(), key=lambda kv: -kv[1])
+        return {"labels": [k for k, _ in items], "data": [v for _, v in items]}
+
+    ORDRE_TYPES = ["CDI", "CDD", "Stage Professionnel", "Stage Académique",
+                   "Stage d'Immersion", "Prestataire"]
+
+    # Contrats signés dans les 12 derniers mois, par mois (courbe d'activité RH).
+    par_mois = {}
+    for r in signes:
+        d = r.date_signature_dg or r.date_signature_employe or r.date_debut
+        if not d:
+            continue
+        cle = str(getdate(d))[:7]
+        par_mois[cle] = par_mois.get(cle, 0) + 1
+    mois = sorted(par_mois)[-12:]
+
+    return {
+        "kpi": {
+            "total": len(rows),
+            "en_vigueur": len(signes),
+            "en_cours_signature": len(en_cours),
+            "rejetes": len(rejetes),
+            "expires": len(expires),
+            "expire_30j": len(j30),
+            "expire_90j": len(j90),
+            "cdi": sum(1 for r in signes if r.contract_type == "CDI"),
+            "stages": sum(1 for r in signes if (r.contract_type or "").startswith("Stage")),
+        },
+        "par_type": _repartition(rows, "contract_type", ORDRE_TYPES),
+        "par_etat": _repartition(rows, "workflow_state"),
+        "par_departement": _repartition(signes, "departement"),
+        "signatures_par_mois": {"labels": mois, "data": [par_mois[m] for m in mois]},
+        "echeances": echeances,
+    }
+
+
+@frappe.whitelist()
 def retraite_data(departement=None):
     """Suivi des départs à la retraite pour l'espace RH (même calcul que la
     feuille « Gestion Retraite » de l'export Excel) : liste triée du départ le

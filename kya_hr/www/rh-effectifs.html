@@ -18,6 +18,7 @@
   .rh-kpi.green{border-left-color:#16a34a;} .rh-kpi.green .n{color:#16a34a;}
   .rh-kpi.amber{border-left-color:#d97706;} .rh-kpi.amber .n{color:#d97706;}
   .rh-kpi.violet{border-left-color:#7c3aed;} .rh-kpi.violet .n{color:#7c3aed;}
+  .rh-kpi.red{border-left-color:#dc2626;} .rh-kpi.red .n{color:#dc2626;}
   .rh-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:8px;}
   .rh-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px;box-shadow:0 1px 2px rgba(0,0,0,.03);}
   .rh-card h3{margin:0 0 10px;font-size:.9rem;font-weight:700;color:#334155;}
@@ -80,6 +81,22 @@
     <div class="rh-card"><h3>Répartition par tranche d'âge</h3><div class="cbox"><canvas id="c-tranche"></canvas></div></div>
     <div class="rh-card wide"><h3>Évolution de l'effectif dans le temps</h3><div class="cbox"><canvas id="c-effectif"></canvas></div></div>
     <div class="rh-card wide"><h3>Évolution de la masse salariale (M FCFA)</h3><div class="cbox"><canvas id="c-masse"></canvas></div></div>
+  </div>
+
+  <div class="rh-card wide rh-ret" id="ctr-bloc">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+      <h3 style="margin:0;">📄 Contrats <span id="ctr-sous" style="font-weight:500;color:#94a3b8;font-size:.78rem;"></span></h3>
+    </div>
+    <div class="rh-kpis" id="ctr-kpi" style="margin-top:12px;"></div>
+    <div class="rh-grid" style="margin-top:4px;">
+      <div class="rh-card"><h3>Tous les contrats par type <span style="font-weight:500;color:#94a3b8;">(brouillons inclus)</span></h3><div class="cbox"><canvas id="c-ctr-type"></canvas></div></div>
+      <div class="rh-card"><h3>Où en sont les signatures <span style="font-weight:500;color:#94a3b8;">(tous statuts)</span></h3><div class="cbox"><canvas id="c-ctr-etat"></canvas></div></div>
+    </div>
+    <div class="alerts" id="ctr-alerts" style="margin-top:4px;"></div>
+    <div class="rh-scroll"><table class="rh-tbl" id="ctr-tbl"><thead><tr>
+      <th>Contrat</th><th>Salarié</th><th>Type</th><th>Département</th>
+      <th>Fin</th><th>Jours restants</th><th>Alerte</th>
+    </tr></thead><tbody id="ctr-body"></tbody></table></div>
   </div>
 
   <div class="rh-card wide rh-ret">
@@ -163,6 +180,54 @@ function render(){
   line('c-effectif', RH.evolution.labels, RH.evolution.effectif, 'Effectif', '#0f766e');
   line('c-masse', RH.evolution.labels, RH.evolution.masse, 'Masse (M FCFA)', '#7c3aed');
   loadRetraite();
+  loadContrats();
+}
+
+/* ── Contrats : volumétrie, avancement des signatures, échéances ───────── */
+async function loadContrats(){
+  const body=document.getElementById('ctr-body'); if(!body) return;
+  let r;
+  try{ r=await apiCall('kya_hr.api.rh_effectifs.contrats_data',
+        {departement:document.getElementById('f-dept').value||null}); }
+  catch(e){
+    document.getElementById('ctr-bloc').style.display='none';   // module absent : on n'affiche rien de faux
+    return;
+  }
+  const k=r.kpi||{};
+  document.getElementById('ctr-sous').textContent='('+nf(k.total)+' au total)';
+  document.getElementById('ctr-kpi').innerHTML=
+      kpiCard(nf(k.en_vigueur),'En vigueur','green')
+    + kpiCard(nf(k.en_cours_signature),'En cours de signature', k.en_cours_signature?'amber':'')
+    + kpiCard(nf(k.cdi),'CDI en vigueur','blue')
+    + kpiCard(nf(k.stages),'Stages en vigueur','violet')
+    + kpiCard(nf(k.expires),'Expirés', k.expires?'red':'')
+    + kpiCard(nf(k.expire_30j),'Expirent sous 30 j', k.expire_30j?'amber':'');
+
+  pie('c-ctr-type', r.par_type, PALETTE);
+  pie('c-ctr-etat', r.par_etat, PALETTE);
+
+  const al=document.getElementById('ctr-alerts');
+  const parts=[];
+  if(k.expires)    parts.push('<span class="a atteint">'+k.expires+' — expiré(s)</span>');
+  if(k.expire_30j) parts.push('<span class="a proche">'+k.expire_30j+' — expirent sous 30 jours</span>');
+  if(k.expire_90j) parts.push('<span class="a anticiper">'+k.expire_90j+' — expirent sous 3 mois</span>');
+  if(k.rejetes)    parts.push('<span class="a retraite">'+k.rejetes+' — rejeté(s)</span>');
+  al.innerHTML=parts.join('') ||
+    '<span class="a" style="background:#dcfce7;color:#166534;">Aucun contrat à renouveler dans les 3 mois ✔</span>';
+
+  const lig=r.echeances||[];
+  if(!lig.length){
+    body.innerHTML='<tr><td colspan="7" class="rh-note">Aucune échéance dans les 3 mois. Les CDI, sans date de fin, n\'apparaissent pas ici.</td></tr>';
+    return;
+  }
+  body.innerHTML=lig.map(function(x){
+    const cls = x.jours<0 ? 'b-atteint' : (x.jours<=30 ? 'b-proche' : 'b-anticiper');
+    const j   = x.jours<0 ? ('en retard de '+(-x.jours)+' j') : (x.jours+' j');
+    return '<tr><td><b>'+esc(x.nom)+'</b></td><td>'+esc(x.employe)+'</td>'+
+      '<td>'+esc(x.type)+'</td><td>'+esc(x.departement)+'</td>'+
+      '<td>'+esc(x.date_fin)+'</td><td>'+j+'</td>'+
+      '<td><span class="badge '+cls+'">'+esc(x.alerte)+'</span></td></tr>';
+  }).join('');
 }
 
 const RET_LABELS={atteint:'Âge de départ atteint',proche:'Proche (< 2 ans)',anticiper:'À anticiper (< 5 ans)',retraite:'Déjà retraité(s)'};
