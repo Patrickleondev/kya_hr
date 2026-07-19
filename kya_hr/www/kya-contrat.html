@@ -105,14 +105,19 @@
   {% if role == 'employe' and not phone_confirmed and peut_signer_employe %}
     <div class="kya-alert alert-warn">
       <b>🔒 Vérification d'identité</b><br>
-      Pour accéder au contenu du contrat, veuillez confirmer votre numéro de téléphone (les 9 chiffres).
+      Pour accéder au contenu du contrat, veuillez confirmer votre numéro de téléphone.
       Numéro enregistré : <code>…{{ phone_hint }}</code>
     </div>
     <div class="kya-card">
       <h3>Confirmation du numéro de téléphone</h3>
       <div class="kya-field">
-        <label>Votre numéro de téléphone (9 chiffres)</label>
-        <input type="tel" id="phone-input" placeholder="Ex: 90123456" maxlength="15" autofocus>
+        <label>Votre numéro de téléphone (8 chiffres)</label>
+        <input type="tel" id="phone-input" placeholder="Ex : 90 12 34 56" maxlength="20" autofocus>
+        <div style="margin-top:6px; font-size:12.5px; color:#5a6470; line-height:1.6;">
+          Saisissez simplement vos <b>8 chiffres</b> — par exemple <code>90123456</code>.<br>
+          L'indicatif <b>+228</b> et les espaces sont facultatifs : <code>90123456</code>,
+          <code>90 12 34 56</code> et <code>+228 90 12 34 56</code> fonctionnent tous.
+        </div>
       </div>
       <button class="btn-kya" onclick="verifyPhone()">✓ Confirmer mon identité</button>
       <div id="phone-error" style="color:#c0392b; margin-top:12px; font-size:13px;"></div>

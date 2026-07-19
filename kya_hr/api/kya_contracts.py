@@ -47,9 +47,21 @@ def _load_contract_with_token(contract_id, token, role):
 
 
 def _normalize_phone(p):
+    """Ramène un numéro à ses 8 chiffres locaux (format togolais).
+
+    Le numéro peut être saisi/stocké de plusieurs façons : « 79072183 »,
+    « +228 79 07 21 83 », « 00228 79072183 », « 228-79072183 »… On retire
+    l'indicatif pays puis on compare sur les 8 derniers chiffres, pour que
+    le salarié n'ait PAS à deviner s'il doit ajouter 228 ou non.
+    """
     if not p:
         return ""
-    return "".join(c for c in str(p) if c.isdigit())[-9:]
+    d = "".join(c for c in str(p) if c.isdigit())
+    for indicatif in ("00228", "228"):
+        if d.startswith(indicatif) and len(d) > len(indicatif):
+            d = d[len(indicatif):]
+            break
+    return d[-8:]
 
 
 def _request_ip():
@@ -125,7 +137,7 @@ def send_signataire_email(doc):
 
     site = frappe.utils.get_url()
     portail_url = f"{site}/kya-contrat?name={doc.name}&token={doc.access_token_signataire}"
-    phone_hint = (doc.telephone or "")[-4:] if doc.telephone else "????"
+    phone_hint = _normalize_phone(doc.telephone)[-4:] or "????"
 
     message = f"""
     <div style="font-family:Arial,sans-serif; max-width:640px; margin:0 auto; border:1px solid #eee; border-radius:6px; overflow:hidden;">
@@ -151,7 +163,9 @@ def send_signataire_email(doc):
           <li><b>Si une page (souvent sombre) vous demande un « code » à 6 chiffres pour continuer</b>,
               tapez simplement <b><code style="background:#fff;padding:2px 6px;font-size:15px;">1 1 1 1 1 1</code></b>
               (le chiffre 1, six fois) puis cliquez sur le bouton pour continuer.</li>
-          <li><b>Confirmez votre numéro de téléphone</b> (les 9 chiffres)</li>
+          <li><b>Confirmez votre numéro de téléphone</b> : tapez vos <b>8 chiffres</b>
+              (ex. <code style="background:#fff;padding:2px 6px;">90123456</code>).
+              Inutile d'ajouter l'indicatif <b>+228</b> — avec ou sans, cela fonctionne.</li>
           <li>Complétez vos informations personnelles (Père, Mère, Domicile, Date de naissance)</li>
           <li>Lisez chaque section et cochez <b>« Lu et approuvé »</b> sur chacune</li>
           <li>Apposez votre signature (en la <b>dessinant</b> ou en <b>important une image</b> PNG/JPG)</li>
@@ -219,7 +233,9 @@ def verify_phone(contract_id, token, phone):
     given = _normalize_phone(phone)
     if not expected or not given or expected != given:
         time.sleep(1.5)  # anti-bruteforce léger
-        frappe.throw(_("Numéro de téléphone incorrect."))
+        frappe.throw(
+            _("Numéro de téléphone incorrect. Saisissez vos 8 chiffres (ex : 90123456), sans l'indicatif +228.")
+        )
     doc.db_set("phone_confirmed", 1, update_modified=False)
     frappe.db.commit()
     return {"ok": True}
@@ -414,10 +430,22 @@ def notify_dg_after_rh_gateway(doc, method=None):
             <p>La RH a transmis pour co-signature le contrat de <b>{doc.contract_type}</b>
             de <b>{doc.employee_name}</b>.</p>
             <p>Le salarié a déjà signé le {frappe.format_value(doc.date_signature_employe, {'fieldtype':'Datetime'})}.</p>
-            <p style="background:#f4f6f8; border-left:4px solid #1a5276; padding:10px 14px; font-size:13px; color:#333;">
-              <b>Astuce :</b> si une page vous demande un code à 6 chiffres pour continuer,
-              tapez simplement <b><code style="background:#fff;padding:2px 6px;">1 1 1 1 1 1</code></b> (le chiffre 1, six fois).
-            </p>
+            <div style="background:#f4f6f8; border-left:4px solid #1a5276; padding:12px 16px; font-size:13px; color:#333;">
+              <b>Si vous rencontrez une page intermédiaire avant d'arriver au contrat :</b>
+              <ol style="margin:10px 0 0 0; padding-left:20px; line-height:1.8;">
+                <li><b>Une page (souvent sombre) demandant un « code » à 6 chiffres</b> — c'est la page
+                    de sécurité d'accès à la plateforme. Tapez
+                    <b><code style="background:#fff;padding:2px 6px;font-size:15px;">1 1 1 1 1 1</code></b>
+                    (le chiffre 1, six fois), puis continuez.</li>
+                <li><b>Ensuite, la page de connexion habituelle</b> (votre e-mail + mot de passe).
+                    Si vous avez <b>oublié votre mot de passe</b>, cliquez sur
+                    <b>« Mot de passe oublié ? »</b> juste sous le bouton de connexion : vous recevrez
+                    un lien par e-mail pour en définir un nouveau.<br>
+                    <span style="color:#5a6470;">Le nouveau mot de passe doit contenir au minimum
+                    <b>8 caractères</b>, dont <b>une majuscule</b>, <b>un chiffre</b> et
+                    <b>un caractère spécial</b> (par exemple <code style="background:#fff;padding:1px 4px;">! ? @ # $ %</code>).</span></li>
+              </ol>
+            </div>
             <p style="text-align:center; margin:24px 0;">
               <a href="{url}" style="display:inline-block; background:#1a5276; color:#fff; padding:12px 26px; text-decoration:none; border-radius:5px; font-weight:600;">→ Accéder au contrat</a>
             </p>
