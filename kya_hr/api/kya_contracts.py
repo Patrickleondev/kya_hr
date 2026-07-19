@@ -46,22 +46,52 @@ def _load_contract_with_token(contract_id, token, role):
     return doc
 
 
-def _normalize_phone(p):
-    """Ramène un numéro à ses 8 chiffres locaux (format togolais).
+# Longueur exigée pour la partie commune à deux écritures d'un même numéro.
+# 8 = longueur d'un numéro local togolais : on refuse ainsi une saisie
+# TRONQUÉE (« 9072183 », les 7 derniers chiffres) qui serait sinon un suffixe
+# valide. Le seuil est plafonné par la longueur du numéro enregistré, pour ne
+# pas bloquer les pays à numérotation plus courte.
+_PHONE_MIN_COMMUN = 8
 
-    Le numéro peut être saisi/stocké de plusieurs façons : « 79072183 »,
-    « +228 79 07 21 83 », « 00228 79072183 », « 228-79072183 »… On retire
-    l'indicatif pays puis on compare sur les 8 derniers chiffres, pour que
-    le salarié n'ait PAS à deviner s'il doit ajouter 228 ou non.
+
+def _phone_digits(p):
+    """Chiffres significatifs d'un numéro, indépendamment de son écriture.
+
+    On retire les séparateurs, le préfixe international (« 00 » / « + ») et
+    les zéros de tête (préfixe national). Volontairement AUCUN indicatif pays
+    n'est codé en dur : le rapprochement se fait par suffixe (_phone_matches),
+    ce qui vaut pour le Togo (+228) comme pour le Bénin (+229), le Ghana,
+    le Nigeria, la France…
     """
     if not p:
         return ""
     d = "".join(c for c in str(p) if c.isdigit())
-    for indicatif in ("00228", "228"):
-        if d.startswith(indicatif) and len(d) > len(indicatif):
-            d = d[len(indicatif):]
-            break
-    return d[-8:]
+    if d.startswith("00"):
+        d = d[2:]
+    return d.lstrip("0")
+
+
+def _phone_matches(stocke, saisi):
+    """Deux écritures désignent-elles le même numéro ?
+
+    Règle : après nettoyage, le plus court doit être un suffixe du plus long
+    et compter au moins _PHONE_MIN_COMMUN chiffres. Ainsi « 79072183 »,
+    « +228 79 07 21 83 » et « 00228 79072183 » se correspondent, sans que le
+    signataire ait à deviner s'il doit ajouter l'indicatif de son pays.
+    """
+    a, b = _phone_digits(stocke), _phone_digits(saisi)
+    if not a or not b:
+        return False
+    if a == b:
+        return True
+    court, long_ = (a, b) if len(a) <= len(b) else (b, a)
+    seuil = min(_PHONE_MIN_COMMUN, len(a))
+    return len(court) >= seuil and long_.endswith(court)
+
+
+def _normalize_phone(p):
+    """Conservé pour l'indice affiché (4 derniers chiffres)."""
+    return _phone_digits(p)
 
 
 def _contact_rh(doc):
@@ -193,9 +223,14 @@ def send_signataire_email(doc):
           <li><b>Si une page (souvent sombre) vous demande un « code » à 6 chiffres pour continuer</b>,
               tapez simplement <b><code style="background:#fff;padding:2px 6px;font-size:15px;">1 1 1 1 1 1</code></b>
               (le chiffre 1, six fois) puis cliquez sur le bouton pour continuer.</li>
-          <li><b>Confirmez votre numéro de téléphone</b> : tapez vos <b>8 chiffres</b>
-              (ex. <code style="background:#fff;padding:2px 6px;">90123456</code>).
-              Inutile d'ajouter l'indicatif <b>+228</b> — avec ou sans, cela fonctionne.</li>
+          <li><b>Confirmez votre numéro de téléphone</b>, celui que vous avez communiqué aux RH.<br>
+              <span style="color:#5a6470;">Numéro togolais : vos <b>8 chiffres</b> suffisent
+              (ex. <code style="background:#fff;padding:2px 6px;">90123456</code>) — inutile
+              d'ajouter le <b>+228</b>, avec ou sans cela fonctionne.<br>
+              Numéro d'un autre pays : saisissez-le <b>avec son indicatif</b>
+              (ex. <code style="background:#fff;padding:2px 6px;">+229 …</code> pour le Bénin) ;
+              <code style="background:#fff;padding:2px 6px;">+229</code> et
+              <code style="background:#fff;padding:2px 6px;">00229</code> sont équivalents.</span></li>
           <li>Complétez vos informations personnelles (Père, Mère, Domicile, Date de naissance)</li>
           <li>Lisez chaque section et cochez <b>« Lu et approuvé »</b> sur chacune</li>
           <li>Apposez votre signature (en la <b>dessinant</b> ou en <b>important une image</b> PNG/JPG)</li>
@@ -267,12 +302,14 @@ def send_to_signataire(contract_id):
 @frappe.whitelist(allow_guest=True)
 def verify_phone(contract_id, token, phone):
     doc = _load_contract_with_token(contract_id, token, "employe")
-    expected = _normalize_phone(doc.telephone)
-    given = _normalize_phone(phone)
-    if not expected or not given or expected != given:
+    if not _phone_matches(doc.telephone, phone):
         time.sleep(1.5)  # anti-bruteforce léger
         frappe.throw(
-            _("Numéro de téléphone incorrect. Saisissez vos 8 chiffres (ex : 90123456), sans l'indicatif +228.")
+            _(
+                "Numéro de téléphone incorrect. Saisissez le numéro que vous avez communiqué "
+                "aux Ressources Humaines, par exemple 90123456. Si votre numéro est étranger, "
+                "ajoutez son indicatif (ex. +229 pour le Bénin)."
+            )
         )
     doc.db_set("phone_confirmed", 1, update_modified=False)
     frappe.db.commit()
