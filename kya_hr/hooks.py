@@ -14,6 +14,7 @@ app_include_css = ["/assets/kya_hr/css/kya_desk.css"]
 app_include_js = [
     "/assets/kya_hr/js/employee_list.js",
     "/assets/kya_hr/js/kya_desktop_fix.js",
+    "/assets/kya_hr/js/kya_breadcrumbs.js",
     "/assets/kya_hr/js/kya_new_doc_to_webform.js",
     "/assets/kya_hr/js/kya_sidebar_router.js",
     "/assets/kya_hr/js/kya_view_to_webform.js",
