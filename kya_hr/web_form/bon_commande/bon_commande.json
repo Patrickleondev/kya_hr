@@ -16,7 +16,7 @@
  "introduction_text": "<p>Enregistrez un Bon de Commande KYA. Renseignez les articles, le destinataire et validez. Le DG signera le document avant envoi.</p>",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-04-23 00:00:00.000000",
+ "modified": "2026-07-19 09:30:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "bon-commande",
@@ -38,19 +38,22 @@
    "fieldname": "date_bc",
    "fieldtype": "Date",
    "label": "Date du BC",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Date d'établissement du bon de commande."
   },
   {
    "fieldname": "demande_achat",
    "fieldtype": "Link",
    "label": "Demande d'Achat liée (optionnel)",
-   "options": "Demande Achat KYA"
+   "options": "Demande Achat KYA",
+   "description": "Demande d'achat validée à l'origine de cette commande. La renseigner permet de tracer le besoin jusqu'à la facture : ne la laissez vide que pour un achat hors demande."
   },
   {
    "fieldname": "objet",
    "fieldtype": "Small Text",
    "label": "Objet de la Commande",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Ce qui est commandé, en une phrase. C'est le libellé qui apparaît dans les états de suivi."
   },
   {
    "description": "Sélectionnez le fournisseur depuis la base. Les informations seront pré-remplies.",
@@ -63,97 +66,114 @@
    "fieldname": "fournisseur_nom",
    "fieldtype": "Data",
    "label": "Nom du Fournisseur",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Nom du contact chez le fournisseur, la personne à qui l'on s'adresse."
   },
   {
    "fieldname": "fournisseur_entreprise",
    "fieldtype": "Data",
-   "label": "Entreprise"
+   "label": "Entreprise",
+   "description": "Raison sociale du fournisseur. Écrivez-la à l'identique d'un bon à l'autre pour permettre le suivi des dépenses par fournisseur."
   },
   {
    "fieldname": "fournisseur_adresse",
    "fieldtype": "Data",
-   "label": "Adresse"
+   "label": "Adresse",
+   "description": "Adresse de facturation du fournisseur."
   },
   {
    "default": "Lomé",
    "fieldname": "fournisseur_ville",
    "fieldtype": "Data",
-   "label": "Ville"
+   "label": "Ville",
+   "description": "Ville du fournisseur."
   },
   {
    "fieldname": "fournisseur_telephone",
    "fieldtype": "Data",
-   "label": "Téléphone"
+   "label": "Téléphone",
+   "description": "Téléphone du contact, pour les relances de livraison."
   },
   {
    "fieldname": "fournisseur_email",
    "fieldtype": "Data",
-   "label": "Email"
+   "label": "Email",
+   "description": "E-mail du fournisseur : c'est à cette adresse que le bon signé pourra être envoyé."
   },
   {
    "fieldname": "articles",
    "fieldtype": "Table",
    "label": "Articles commandés",
    "options": "Bon Commande KYA Item",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Une ligne par article : désignation précise, quantité, prix unitaire. Une désignation vague (« matériel divers ») fait rejeter le bon par l'audit."
   },
   {
    "fieldname": "remise",
    "fieldtype": "Currency",
-   "label": "Remise (XOF)"
+   "label": "Remise (XOF)",
+   "description": "Remise accordée par le fournisseur, en FCFA. Laissez 0 s'il n'y en a pas."
   },
   {
    "default": 18,
    "fieldname": "tva_taux",
    "fieldtype": "Percent",
-   "label": "TVA (%)"
+   "label": "TVA (%)",
+   "description": "Taux de TVA en pourcentage (18 au Togo). Mettez 0 si le fournisseur n'est pas assujetti."
   },
   {
    "default": "12 mois",
    "fieldname": "garantie",
    "fieldtype": "Data",
-   "label": "Garantie"
+   "label": "Garantie",
+   "description": "Durée de garantie obtenue (ex : 12 mois pièces et main-d'œuvre). À renseigner : c'est le seul endroit où l'information est conservée."
   },
   {
    "default": "72 heures",
    "fieldname": "delai_livraison",
    "fieldtype": "Data",
-   "label": "Délai de livraison"
+   "label": "Délai de livraison",
+   "description": "Délai annoncé par le fournisseur (ex : 15 jours à compter de la commande)."
   },
   {
    "default": "30 jours",
    "fieldname": "validite",
    "fieldtype": "Data",
-   "label": "Validité"
+   "label": "Validité",
+   "description": "Durée de validité de l'offre du fournisseur (ex : 30 jours)."
   },
   {
    "default": "Lomé — Agoè Logopé",
    "fieldname": "lieu_livraison",
    "fieldtype": "Data",
-   "label": "Lieu de livraison"
+   "label": "Lieu de livraison",
+   "description": "Lieu exact où la marchandise doit être livrée : siège, magasin, ou chantier avec son nom."
   },
   {
    "default": "100% à la livraison",
    "fieldname": "modalites_paiement",
    "fieldtype": "Data",
-   "label": "Modalités de paiement"
+   "label": "Modalités de paiement",
+   "description": "Conditions convenues (ex : 50 % à la commande, solde à la livraison)."
   },
   {
    "fieldname": "reglement",
    "fieldtype": "Small Text",
-   "label": "Règlement / coordonnées"
+   "label": "Règlement / coordonnées",
+   "description": "Précisions sur le règlement : moyen de paiement, coordonnées bancaires, échéance."
   },
   {
    "fieldname": "autorise_par_nom",
    "fieldtype": "Data",
-   "label": "Autorisé par (nom)"
+   "label": "Autorisé par (nom)",
+   "description": "Nom du responsable qui autorise la commande. Rempli lors du visa, pas à la création."
   },
   {
    "fieldname": "autorise_par_fonction",
    "fieldtype": "Select",
    "label": "Fonction (autorisateur)",
-   "options": "DG\nDGA"
+   "options": "DG\nDGA",
+   "description": "Fonction du signataire autorisant la dépense. Le seuil de 100 000 FCFA détermine s'il faut le DGA ou le DG."
   },
   {
    "description": "Signe la personne qui a autorisé le bon — DG ou DGA selon le cas.",
@@ -164,7 +184,8 @@
   {
    "fieldname": "date_autorisation",
    "fieldtype": "Date",
-   "label": "Date d'autorisation"
+   "label": "Date d'autorisation",
+   "description": "Date de l'autorisation. Elle doit être postérieure ou égale à la date du bon."
   }
  ]
 }

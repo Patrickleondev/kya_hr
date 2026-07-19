@@ -15,7 +15,7 @@
  "introduction_text": "Enregistrez chaque entretien ou réparation. Renseignez la prochaine échéance pour recevoir un rappel dans le tableau de bord logistique.",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-06-16 10:00:00.000000",
+ "modified": "2026-07-19 09:30:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "entretien-vehicule",
@@ -27,18 +27,86 @@
  "title": "Entretien / Réparation Véhicule",
  "client_script": "frappe.web_form.after_load = function() {\n  var doc = frappe.web_form.doc;\n  if (doc && !doc.date_entretien) { frappe.web_form.set_value('date_entretien', frappe.datetime.get_today()); }\n  if (doc && doc.name && !String(doc.name).startsWith('new')) {\n    var refEl = document.createElement('div');\n    refEl.innerHTML = '<div style=\"margin-bottom:12px;padding:8px 16px;background:#e8f5e9;color:#2e7d32;border-left:4px solid #43a047;border-radius:6px;display:inline-block;font-weight:700;font-size:14px;\">\\uD83D\\uDD27 R\\u00e9f. : ' + doc.name + (doc.statut ? '  \\u2014  ' + doc.statut : '') + '</div>';\n    var w = document.querySelector('.web-form-wrapper') || document.querySelector('.container');\n    if (w) w.prepend(refEl);\n  }\n};",
  "web_form_fields": [
-  {"fieldname": "vehicle", "fieldtype": "Link", "label": "Véhicule", "options": "Vehicle", "reqd": 1},
-  {"fieldname": "license_plate", "fieldtype": "Data", "label": "Immatriculation", "read_only": 1},
-  {"fieldname": "date_entretien", "fieldtype": "Date", "label": "Date de l'entretien", "reqd": 1},
-  {"fieldname": "statut", "fieldtype": "Select", "label": "Statut", "options": "Planifié\nEn cours\nTerminé"},
-  {"fieldname": "type_entretien", "fieldtype": "Select", "label": "Type d'entretien", "options": "Vidange\nPneus\nFreins\nRévision générale\nRéparation\nLavage\nBatterie\nClimatisation\nAutre", "reqd": 1},
-  {"fieldname": "description", "fieldtype": "Small Text", "label": "Description des travaux", "reqd": 1},
-  {"fieldname": "km_actuel", "fieldtype": "Int", "label": "Kilométrage au compteur"},
-  {"fieldname": "cout", "fieldtype": "Currency", "label": "Coût (FCFA)"},
-  {"fieldname": "garage", "fieldtype": "Data", "label": "Garage / Prestataire"},
-  {"fieldname": "prochaine_echeance_date", "fieldtype": "Date", "label": "Prochain entretien (date)"},
-  {"fieldname": "prochaine_echeance_km", "fieldtype": "Int", "label": "Prochain entretien (km)"},
-  {"fieldname": "observations", "fieldtype": "Small Text", "label": "Observations"}
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "label": "Véhicule",
+   "options": "Vehicle",
+   "reqd": 1,
+   "description": "Véhicule concerné. Choisissez-le dans la liste : la plaque se remplit toute seule."
+  },
+  {
+   "fieldname": "license_plate",
+   "fieldtype": "Data",
+   "label": "Immatriculation",
+   "read_only": 1,
+   "description": "Rempli automatiquement à partir du véhicule. Ne le saisissez pas à la main."
+  },
+  {
+   "fieldname": "date_entretien",
+   "fieldtype": "Date",
+   "label": "Date de l'entretien",
+   "reqd": 1,
+   "description": "Date de l'intervention : la date prévue pour un entretien planifié, la date réelle pour une réparation."
+  },
+  {
+   "fieldname": "statut",
+   "fieldtype": "Select",
+   "label": "Statut",
+   "options": "Planifié\nEn cours\nTerminé",
+   "description": "Planifié = pas encore fait. En cours = véhicule immobilisé. Terminé = véhicule rendu au service. Pensez à repasser la fiche en Terminé, sinon le véhicule reste affiché comme indisponible."
+  },
+  {
+   "fieldname": "type_entretien",
+   "fieldtype": "Select",
+   "label": "Type d'entretien",
+   "options": "Vidange\nPneus\nFreins\nRévision générale\nRéparation\nLavage\nBatterie\nClimatisation\nAutre",
+   "reqd": 1,
+   "description": "Nature de l'intervention. Si plusieurs opérations ont lieu le même jour, retenez la principale et détaillez le reste dans la description."
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description des travaux",
+   "reqd": 1,
+   "description": "Ce qui a été fait, et pourquoi. Mentionnez les pièces remplacées : c'est ce qui permet de repérer un véhicule qui coûte trop cher."
+  },
+  {
+   "fieldname": "km_actuel",
+   "fieldtype": "Int",
+   "label": "Kilométrage au compteur",
+   "description": "Kilométrage relevé au compteur le jour de l'intervention. Il sert à calculer la prochaine échéance : un chiffre approximatif fausse tout le suivi."
+  },
+  {
+   "fieldname": "cout",
+   "fieldtype": "Currency",
+   "label": "Coût (FCFA)",
+   "description": "Montant réellement payé, en FCFA, toutes taxes comprises. Laissez 0 si l'intervention est sous garantie."
+  },
+  {
+   "fieldname": "garage",
+   "fieldtype": "Data",
+   "label": "Garage / Prestataire",
+   "description": "Nom du garage ou du prestataire. Écrivez toujours le même nom pour un même garage, sinon le suivi des dépenses par prestataire devient inexploitable."
+  },
+  {
+   "fieldname": "prochaine_echeance_date",
+   "fieldtype": "Date",
+   "label": "Prochain entretien (date)",
+   "description": "Date de la prochaine intervention prévue. C'est elle qui déclenche les rappels : ne la laissez pas vide sur un entretien périodique."
+  },
+  {
+   "fieldname": "prochaine_echeance_km",
+   "fieldtype": "Int",
+   "label": "Prochain entretien (km)",
+   "description": "Kilométrage auquel la prochaine intervention sera due (ex : kilométrage actuel + 5 000 pour une vidange)."
+  },
+  {
+   "fieldname": "observations",
+   "fieldtype": "Small Text",
+   "label": "Observations",
+   "description": "Anomalies constatées mais non traitées, ou recommandations du garage à anticiper."
+  }
  ],
  "no_sidebar": 1
 }

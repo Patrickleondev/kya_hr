@@ -15,7 +15,7 @@
  "introduction_text": "<p>Saisie quotidienne du brouillard de caisse. La chaîne de validation: <b>Caissière</b> → <b>Comptable</b> → <b>DFC</b>. Un point hebdomadaire est automatiquement envoyé au DG.</p>",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-07-18 21:05:28.179055",
+ "modified": "2026-07-19 09:30:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "brouillard-caisse",
@@ -46,7 +46,8 @@
    "fieldname": "caissiere_name",
    "fieldtype": "Data",
    "label": "Nom Caissier(ère)",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Rempli automatiquement avec le nom du caissier ou de la caissière connecté(e)."
   },
   {
    "fieldname": "solde_precedent",

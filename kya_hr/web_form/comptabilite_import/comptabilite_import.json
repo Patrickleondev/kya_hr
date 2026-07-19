@@ -15,7 +15,7 @@
  "introduction_text": "<p>Import comptable KYA depuis les modèles Excel existants: <b>Etat de Salaire</b>, <b>Grand Livre Général</b> ou <b>Facture</b>. Le fichier source reste attaché et chaque ligne importée conserve sa trace brute.</p>",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-05-08 00:00:00.000000",
+ "modified": "2026-07-19 09:30:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "comptabilite-import",
@@ -32,7 +32,8 @@
    "fieldtype": "Select",
    "label": "Type de document",
    "options": "Etat de Salaire\nGrand Livre Général\nFacture",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Nature du fichier importé. Il détermine la façon dont les colonnes sont lues : un mauvais choix ici fait échouer tout l'import."
   },
   {
    "fieldname": "periode",
@@ -44,12 +45,14 @@
    "fieldname": "source_file",
    "fieldtype": "Attach",
    "label": "Fichier Excel source",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Fichier Excel ou CSV à importer. Respectez le modèle fourni : ne renommez pas les colonnes et ne supprimez pas la ligne d'en-tête."
   },
   {
    "fieldname": "notes_import",
    "fieldtype": "Small Text",
-   "label": "Notes / contexte"
+   "label": "Notes / contexte",
+   "description": "Contexte de l'import : période concernée, origine du fichier, retraitements effectués avant l'envoi."
   }
  ],
  "no_sidebar": 1

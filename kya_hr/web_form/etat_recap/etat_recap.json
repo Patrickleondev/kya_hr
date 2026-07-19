@@ -15,7 +15,7 @@
  "introduction_text": "<p>État récapitulatif hebdomadaire des chèques émis. Peut être saisi par le <b>Comptable</b> ou le <b>DFC/DAAF</b>. Une fois validé, il est envoyé automatiquement au <b>DG</b> et au <b>DGA</b>.</p>",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-07-18 21:05:28.179055",
+ "modified": "2026-07-19 09:30:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "etat-recap",
@@ -46,7 +46,8 @@
    "fieldname": "redacteur_name",
    "fieldtype": "Data",
    "label": "Nom Rédacteur",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Rempli automatiquement avec le nom du rédacteur connecté."
   },
   {
    "fieldname": "semaine_du",

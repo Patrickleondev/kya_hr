@@ -15,7 +15,7 @@
  "introduction_text": "<p>Déclarez le retour de matériels au magasin depuis un chantier ou un client. Indiquez le PV de Sortie d'origine pour assurer la traçabilité complète. Le responsable magasin validera la réception et les stocks seront réincrémentés automatiquement.</p><p><strong>État au retour :</strong> pour chaque article, précisez <em>Bon état</em> (replacé directement dans le magasin choisi, disponible), <em>À réparer</em> (immobilisé, récupérable) ou <em>Défectueux</em> (hors stock utile ; le Responsable Magasin décidera ensuite : retour fournisseur ou rebut).</p>",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-05-13 00:00:00.000000",
+ "modified": "2026-07-19 09:30:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "retour-materiel",
@@ -38,7 +38,8 @@
    "fieldname": "date_retour",
    "fieldtype": "Date",
    "label": "Date du Retour",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Date à laquelle le matériel revient physiquement au magasin."
   },
   {
    "fieldname": "objet",
@@ -58,25 +59,29 @@
    "fieldname": "customer",
    "fieldtype": "Link",
    "options": "Customer",
-   "label": "Client (optionnel)"
+   "label": "Client (optionnel)",
+   "description": "Client concerné, s'il est déjà enregistré dans le système."
   },
   {
    "fieldname": "customer_libre",
    "fieldtype": "Data",
-   "label": "Client (saisie manuelle)"
+   "label": "Client (saisie manuelle)",
+   "description": "À utiliser uniquement si le client n'existe pas dans la liste ci-dessus. Écrivez son nom complet."
   },
   {
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Articles Retournés",
    "options": "Retour Materiel KYA Item",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Une ligne par référence retournée, avec la quantité et son état réel : Bon état, À réparer, Défectueux. C'est cet état qui décide si l'article redevient disponible : ne déclarez jamais en bon état un matériel abîmé."
   },
   {
    "fieldname": "statut",
    "fieldtype": "Data",
    "label": "État du Retour",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Calculé automatiquement selon l'avancement des signatures."
   },
   {
    "fieldname": "retourneur_nom",
@@ -88,18 +93,21 @@
   {
    "fieldname": "signature_retourneur",
    "fieldtype": "Signature",
-   "label": "Signature Employé Retourneur"
+   "label": "Signature Employé Retourneur",
+   "description": "Signature de la personne qui rapporte le matériel."
   },
   {
    "fieldname": "magasin_nom",
    "fieldtype": "Data",
    "label": "Nom Responsable Magasin",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Rempli automatiquement avec le magasinier qui réceptionne."
   },
   {
    "fieldname": "signature_magasin",
    "fieldtype": "Signature",
-   "label": "Signature Responsable Magasin"
+   "label": "Signature Responsable Magasin",
+   "description": "Réservée au magasinier réceptionnant. Ne signez pas à sa place : chaque signature engage la responsabilité de son auteur."
   }
  ]
 }

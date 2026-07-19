@@ -15,7 +15,7 @@
  "introduction_text": "Déclarez les entrées de matériel (livraisons fournisseurs, retours chantier, etc.). Le responsable magasin validera la réception et les stocks seront mis à jour automatiquement.",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-04-10 00:00:00.000000",
+ "modified": "2026-07-19 09:30:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "pv-entree-materiel",
@@ -38,7 +38,8 @@
    "fieldname": "date_entree",
    "fieldtype": "Date",
    "label": "Date d'Entrée",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Date de réception physique du matériel au magasin."
   },
   {
    "fieldname": "fournisseur",
@@ -70,26 +71,30 @@
   {
    "fieldname": "customer_libre",
    "fieldtype": "Data",
-   "label": "Client (saisie manuelle)"
+   "label": "Client (saisie manuelle)",
+   "description": "Fournisseur ou provenance du matériel, si aucun bon de commande n'est rattaché."
   },
   {
    "fieldname": "purchase_order",
    "fieldtype": "Link",
    "options": "Purchase Order",
-   "label": "Bon de Commande lié (optionnel)"
+   "label": "Bon de Commande lié (optionnel)",
+   "description": "Bon de commande d'origine. Le renseigner permet de contrôler que ce qui est livré correspond à ce qui a été commandé."
   },
   {
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Articles Reçus",
    "options": "PV Entree Materiel Item",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Une ligne par référence reçue, avec la quantité pour chaque état : Bon état, À réparer, Défectueux. Comptez le matériel avant de signer : le stock est mis à jour à partir de ces quantités."
   },
   {
    "fieldname": "statut",
    "fieldtype": "Data",
    "label": "État",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Calculé automatiquement selon l'avancement des signatures."
   },
   {
    "fieldname": "achats_stock_nom",
@@ -101,30 +106,34 @@
   {
    "fieldname": "signature_achats_stock",
    "fieldtype": "Signature",
-   "label": "Signature Achats & Stock"
+   "label": "Signature Achats & Stock",
+   "description": "Signature du responsable Achats / Stocks qui réceptionne."
   },
   {
    "fieldname": "comptable_nom",
    "fieldtype": "Data",
    "label": "Nom — Service Comptabilité",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Rempli automatiquement lors du visa comptable."
   },
   {
    "fieldname": "signature_comptable",
    "fieldtype": "Signature",
-   "label": "Signature Comptabilité"
+   "label": "Signature Comptabilité",
+   "description": "Réservée à la comptabilité. Ne signez pas à sa place : chaque signature engage la responsabilité de son auteur."
   },
   {
    "fieldname": "audit_nom",
    "fieldtype": "Data",
    "label": "Nom — Audit Interne",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Rempli automatiquement lors du visa d'audit."
   },
   {
    "fieldname": "signature_audit",
    "fieldtype": "Signature",
-   "label": "Signature Audit Interne"
+   "label": "Signature Audit Interne",
+   "description": "Réservée à l'audit interne. Ne signez pas à sa place : chaque signature engage la responsabilité de son auteur."
   }
- ],
- "show_sidebar": 1
+ ]
 }

@@ -785,6 +785,66 @@
     );
   }
 
+  /* ===== AIDE AU REMPLISSAGE ==========================================
+     Frappe affiche la `description` de la plupart des champs, mais PAS celle
+     des signatures — or c'est justement là qu'il faut rappeler « ne signez pas
+     à la place d'un collègue ». On complète donc, sans jamais doublonner.
+
+     On ne se fie PAS aux classes CSS (elles varient selon le type de contrôle :
+     le tableau rend la sienne dans .grid-field) mais au TEXTE réellement
+     présent dans le bloc du champ. Et comme certains contrôles se rendent
+     après nous, cleanupFieldHelp() repasse pour retirer nos doublons. */
+  function _kyaHelpNodes(el) {
+    return [].slice.call(el.querySelectorAll(".kya-field-help"));
+  }
+
+  /* Texte du champ SANS nos propres injections : sert à savoir si Frappe
+     affiche déjà la description. */
+  function _texteSansAide(el) {
+    var txt = el.textContent || "";
+    _kyaHelpNodes(el).forEach(function (n) {
+      txt = txt.replace(n.textContent || "", "");
+    });
+    return txt;
+  }
+
+  function injectFieldHelp() {
+    if (!window.frappe || !frappe.web_form || !frappe.web_form.fields_dict) return;
+    var fd = frappe.web_form.fields_dict;
+    Object.keys(fd).forEach(function (fn) {
+      try {
+        var f = fd[fn];
+        var df = f && f.df;
+        if (!df || !df.description) return;
+        var el = (f.$wrapper && f.$wrapper[0]) || findFieldEl(fn);
+        if (!el) return;
+        if (_kyaHelpNodes(el).length) return;                       // déjà injecté
+        if (_texteSansAide(el).indexOf(df.description) !== -1) return;  // Frappe l'affiche
+
+        var help = document.createElement("div");
+        help.className = "kya-field-help";
+        help.textContent = df.description;
+        var label = el.querySelector(".control-label, .clearfix");
+        if (label && label.parentNode) label.parentNode.insertBefore(help, label.nextSibling);
+        else el.insertBefore(help, el.firstChild);
+      } catch (e) { /* un champ ne doit jamais casser le formulaire */ }
+    });
+  }
+
+  /* Retire nos injections devenues redondantes : cas d'un contrôle (grille,
+     par exemple) qui rend sa propre description APRÈS notre passage. */
+  function cleanupFieldHelp() {
+    try {
+      [].slice.call(document.querySelectorAll(".kya-field-help")).forEach(function (n) {
+        var el = n.closest("[data-fieldname]");
+        if (!el) return;
+        var txt = n.textContent || "";
+        var reste = (el.textContent || "").split(txt).length - 1;
+        if (reste > 1) n.parentNode.removeChild(n);   // le texte apparaît 2 fois
+      });
+    } catch (e) {}
+  }
+
   function createSection(cfg, idx) {
     var section = document.createElement("div");
     section.className = "kya-form-section";
@@ -1389,6 +1449,9 @@
     var defaultIntro = document.querySelector(".web-form-introduction");
     if (defaultIntro) defaultIntro.style.display = "none";
 
+    injectFieldHelp();
+    setTimeout(injectFieldHelp, 900);   // les grilles se rendent en différé
+    setTimeout(cleanupFieldHelp, 2200);
     console.log("[KYA] Mode décoratif simple appliqué pour " + route);
   }
 
@@ -1540,6 +1603,9 @@
     formBody.classList.add("kya-restructured");
 
     setupWorkflowActions(wrapper);
+    injectFieldHelp();
+    setTimeout(injectFieldHelp, 900);   // les grilles se rendent en différé
+    setTimeout(cleanupFieldHelp, 2200);
     setTimeout(function() {
       normalizeSignaturePads();
       setupSignaturePermissions(route);
@@ -2202,7 +2268,7 @@
   }
   // Bannière « circuit terminé » + synchro du N° : filets tardifs (le state et
   // le nom du doc peuvent charger après les décorations ; les 2 sont idempotents).
-  setTimeout(function () { injectFinalPdfBanner(); syncDocNumber(); }, 1800);
+  setTimeout(function () { injectFinalPdfBanner(); syncDocNumber(); injectFieldHelp(); cleanupFieldHelp(); }, 1800);
   setTimeout(function () { injectFinalPdfBanner(); syncDocNumber(); }, 4000);
 
   /* hideEmptyKyaSections retiré sur demande utilisateur (15/05/2026) :

@@ -1867,3 +1867,20 @@ button.kya-dt-add:hover {
   }
 }
 
+
+/* ===== Aide au remplissage ============================================
+   Réinjectée par injectFieldHelp() pour les types de champs dont Frappe
+   n'affiche pas la description (Table, Signature...). Volontairement
+   discrète : elle guide sans concurrencer le libellé du champ. */
+.kya-field-help {
+  margin: 2px 0 8px;
+  padding: 6px 10px;
+  border-left: 3px solid #f7a800;
+  background: #fffaf0;
+  color: #5a6470;
+  font-size: 12.5px;
+  line-height: 1.55;
+  border-radius: 0 4px 4px 0;
+}
+.kya-form-section .kya-field-help { background: #fff; }
+@media print { .kya-field-help { display: none !important; } }

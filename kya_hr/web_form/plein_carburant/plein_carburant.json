@@ -15,7 +15,7 @@
  "introduction_text": "Enregistrez chaque plein de carburant. Le prix au litre et le kilométrage du véhicule sont mis à jour automatiquement.",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-06-16 10:00:00.000000",
+ "modified": "2026-07-19 09:30:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "plein-carburant",
@@ -27,18 +27,87 @@
  "title": "Plein de Carburant",
  "client_script": "frappe.web_form.after_load = function() {\n  if (frappe.web_form.fields_dict.chauffeur) { frappe.web_form.fields_dict.chauffeur.get_query = function(){ return { query: 'kya_hr.api.delegataire_query' }; }; }\n  var doc = frappe.web_form.doc;\n  if (doc && !doc.date_plein) { frappe.web_form.set_value('date_plein', frappe.datetime.get_today()); }\n  if (doc && doc.name && !String(doc.name).startsWith('new')) {\n    var refEl = document.createElement('div');\n    refEl.innerHTML = '<div style=\"margin-bottom:12px;padding:8px 16px;background:#fff3e0;color:#e65100;border-left:4px solid #fb8c00;border-radius:6px;display:inline-block;font-weight:700;font-size:14px;\">\\u26FD R\\u00e9f. : ' + doc.name + (doc.prix_litre ? '  \\u2014  ' + doc.prix_litre + ' FCFA/L' : '') + '</div>';\n    var w = document.querySelector('.web-form-wrapper') || document.querySelector('.container');\n    if (w) w.prepend(refEl);\n  }\n};",
  "web_form_fields": [
-  {"fieldname": "vehicle", "fieldtype": "Link", "label": "Véhicule", "options": "Vehicle", "reqd": 1},
-  {"fieldname": "license_plate", "fieldtype": "Data", "label": "Immatriculation", "read_only": 1},
-  {"fieldname": "date_plein", "fieldtype": "Date", "label": "Date du plein", "reqd": 1},
-  {"fieldname": "chauffeur", "fieldtype": "Link", "label": "Chauffeur (Employé)", "options": "Employee"},
-  {"fieldname": "km_actuel", "fieldtype": "Int", "label": "Kilométrage au compteur", "description": "Relevé du compteur (met à jour le km du véhicule)."},
-  {"fieldname": "litres", "fieldtype": "Float", "label": "Litres", "reqd": 1},
-  {"fieldname": "montant", "fieldtype": "Currency", "label": "Montant payé (FCFA)", "reqd": 1},
-  {"fieldname": "prix_litre", "fieldtype": "Currency", "label": "Prix au litre (FCFA)", "read_only": 1},
-  {"fieldname": "plein_complet", "fieldtype": "Check", "label": "Plein complet"},
-  {"fieldname": "station", "fieldtype": "Data", "label": "Station-service"},
-  {"fieldname": "paye_par", "fieldtype": "Select", "label": "Moyen de paiement", "options": "Carte société\nEspèces\nBon de carburant\nRemboursement chauffeur\nAutre"},
-  {"fieldname": "observations", "fieldtype": "Small Text", "label": "Observations"}
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "label": "Véhicule",
+   "options": "Vehicle",
+   "reqd": 1,
+   "description": "Véhicule ravitaillé. La plaque se remplit automatiquement."
+  },
+  {
+   "fieldname": "license_plate",
+   "fieldtype": "Data",
+   "label": "Immatriculation",
+   "read_only": 1,
+   "description": "Rempli automatiquement à partir du véhicule."
+  },
+  {
+   "fieldname": "date_plein",
+   "fieldtype": "Date",
+   "label": "Date du plein",
+   "reqd": 1,
+   "description": "Date figurant sur le reçu de la station, pas la date de saisie."
+  },
+  {
+   "fieldname": "chauffeur",
+   "fieldtype": "Link",
+   "label": "Chauffeur (Employé)",
+   "options": "Employee",
+   "description": "Personne qui a pris le carburant. Elle permet de rattacher la dépense à une mission en cas de contrôle."
+  },
+  {
+   "fieldname": "km_actuel",
+   "fieldtype": "Int",
+   "label": "Kilométrage au compteur",
+   "description": "Relevé du compteur (met à jour le km du véhicule)."
+  },
+  {
+   "fieldname": "litres",
+   "fieldtype": "Float",
+   "label": "Litres",
+   "reqd": 1,
+   "description": "Nombre de litres servis, tel qu'indiqué sur le reçu (ex : 32,5)."
+  },
+  {
+   "fieldname": "montant",
+   "fieldtype": "Currency",
+   "label": "Montant payé (FCFA)",
+   "reqd": 1,
+   "description": "Montant payé en FCFA, tel qu'indiqué sur le reçu."
+  },
+  {
+   "fieldname": "prix_litre",
+   "fieldtype": "Currency",
+   "label": "Prix au litre (FCFA)",
+   "read_only": 1,
+   "description": "Calculé automatiquement (montant ÷ litres). S'il s'écarte du prix à la pompe, c'est que les litres ou le montant sont erronés."
+  },
+  {
+   "fieldname": "plein_complet",
+   "fieldtype": "Check",
+   "label": "Plein complet",
+   "description": "À cocher si le réservoir a été rempli à ras bord. Sans plein complet, la consommation aux 100 km ne peut pas être calculée de façon fiable."
+  },
+  {
+   "fieldname": "station",
+   "fieldtype": "Data",
+   "label": "Station-service",
+   "description": "Nom de la station. Écrivez toujours le même nom pour une même station, sinon le suivi par fournisseur devient inexploitable."
+  },
+  {
+   "fieldname": "paye_par",
+   "fieldtype": "Select",
+   "label": "Moyen de paiement",
+   "options": "Carte société\nEspèces\nBon de carburant\nRemboursement chauffeur\nAutre",
+   "description": "Moyen de paiement utilisé. Choisissez Remboursement si le chauffeur a avancé l'argent : cela déclenche le suivi du remboursement."
+  },
+  {
+   "fieldname": "observations",
+   "fieldtype": "Small Text",
+   "label": "Observations",
+   "description": "Anomalies : écart de prix, réservoir qui se vide anormalement vite, incident à la station."
+  }
  ],
  "no_sidebar": 1
 }

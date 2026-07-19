@@ -15,7 +15,7 @@
  "introduction_text": "Recensez les besoins en formation de votre équipe (après concertation avec vos collègues). Ajoutez une ligne par formation souhaitée et indiquez surtout le « pourquoi ». La RH vous recontactera pour un entretien de revue.",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-06-16 12:00:00.000000",
+ "modified": "2026-07-19 09:30:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "besoin-formation",
@@ -32,14 +32,16 @@
    "fieldtype": "Link",
    "label": "Équipe",
    "options": "Equipe KYA",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Votre équipe. Le besoin sera rattaché à cette équipe pour la revue RH."
   },
   {
    "fieldname": "departement",
    "fieldtype": "Link",
    "options": "Department",
    "label": "Département",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Rempli automatiquement à partir de l'équipe. Corrigez-le seulement s'il est faux."
   },
   {
    "fieldname": "chef_equipe",
@@ -47,26 +49,30 @@
    "label": "Chef d'équipe (auto)",
    "options": "Employee",
    "reqd": 1,
-   "read_only": 1
+   "read_only": 1,
+   "description": "Le chef qui remonte le besoin, c'est-à-dire vous dans la plupart des cas."
   },
   {
    "fieldname": "annee",
    "fieldtype": "Int",
    "label": "Année",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Année sur laquelle porte le besoin, en 4 chiffres (ex : 2026). Ce n'est pas la date du jour."
   },
   {
    "fieldname": "trimestre",
    "fieldtype": "Select",
    "label": "Trimestre / Période",
-   "options": "\nT1\nT2\nT3\nT4\nAnnuel"
+   "options": "\nT1\nT2\nT3\nT4\nAnnuel",
+   "description": "Période souhaitée pour la formation. Choisissez Annuel si elle peut avoir lieu à n'importe quel moment de l'année."
   },
   {
    "fieldname": "lignes",
    "fieldtype": "Table",
    "label": "Formations souhaitées",
    "options": "Besoin Formation Item",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Une ligne PAR formation souhaitée : intitulé, employés concernés, objectif visé et priorité. Une demande vague est renvoyée par la RH — soyez précis sur ce que les participants devront savoir faire APRÈS la formation."
   }
  ],
  "no_sidebar": 1

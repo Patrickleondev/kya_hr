@@ -15,7 +15,7 @@
  "introduction_text": "",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-07-18 21:05:28.179055",
+ "modified": "2026-07-19 09:30:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "demande-achat",
@@ -39,7 +39,8 @@
    "fieldname": "employee_name",
    "fieldtype": "Data",
    "label": "Nom complet",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Rempli automatiquement à partir du matricule."
   },
   {
    "fieldname": "department",
@@ -120,7 +121,8 @@
   {
    "fieldname": "signature_dg",
    "fieldtype": "Signature",
-   "label": "Approbation DG (≥ 100 001 XOF)"
+   "label": "Approbation DG (≥ 100 001 XOF)",
+   "description": "Réservée à la Direction Générale, requise uniquement au-delà de 100 000 FCFA. En dessous de ce seuil, le visa de la DGA suffit."
   }
  ]
 }

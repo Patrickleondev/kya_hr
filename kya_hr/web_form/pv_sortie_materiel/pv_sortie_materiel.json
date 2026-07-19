@@ -15,7 +15,7 @@
  "introduction_text": "",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-03-24 00:00:00.000000",
+ "modified": "2026-07-19 09:30:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "pv-sortie-materiel",
@@ -38,7 +38,8 @@
    "fieldname": "date_sortie",
    "fieldtype": "Date",
    "label": "Date de Sortie",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Date à laquelle le matériel quitte physiquement le magasin."
   },
   {
    "fieldname": "destination_type",
@@ -78,7 +79,8 @@
   {
    "fieldname": "demandeur_nom",
    "fieldtype": "Data",
-   "label": "Nom du Demandeur"
+   "label": "Nom du Demandeur",
+   "description": "Personne qui reçoit le matériel et en devient responsable jusqu'à son retour."
   },
   {
    "fieldname": "au_nom_de",
@@ -92,38 +94,45 @@
    "fieldtype": "Table",
    "label": "Liste du Matériel",
    "options": "PV Sortie Materiel Item",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Une ligne par référence sortie, avec la quantité. Les quantités sont déduites du stock à la validation : vérifiez-les avant de signer."
   },
   {
    "fieldname": "statut",
    "fieldtype": "Data",
    "label": "État du PV",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Calculé automatiquement selon l'avancement des signatures."
   },
   {
    "fieldname": "signature_demandeur",
    "fieldtype": "Signature",
-   "label": "Signature Demandeur"
+   "label": "Signature Demandeur",
+   "description": "Signature du demandeur, qui reconnaît avoir reçu le matériel."
   },
   {
    "fieldname": "signature_chef",
    "fieldtype": "Signature",
-   "label": "Signature Chef de Service"
+   "label": "Signature Chef de Service",
+   "description": "Réservée au chef d'équipe du demandeur. Ne signez pas à sa place : chaque signature engage la responsabilité de son auteur."
   },
   {
    "fieldname": "signature_audit",
    "fieldtype": "Signature",
-   "label": "Signature Audit Interne"
+   "label": "Signature Audit Interne",
+   "description": "Réservée à l'audit interne. Ne signez pas à sa place : chaque signature engage la responsabilité de son auteur."
   },
   {
    "fieldname": "signature_dga",
    "fieldtype": "Signature",
-   "label": "Signature DG / DGA"
+   "label": "Signature DG / DGA",
+   "description": "Réservée à la Direction Générale Adjointe. Ne signez pas à sa place : chaque signature engage la responsabilité de son auteur."
   },
   {
    "fieldname": "signature_magasin",
    "fieldtype": "Signature",
-   "label": "Signature Responsable Magasin"
+   "label": "Signature Responsable Magasin",
+   "description": "Réservée au magasinier qui délivre le matériel. Ne signez pas à sa place : chaque signature engage la responsabilité de son auteur."
   }
  ]
 }

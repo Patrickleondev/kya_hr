@@ -15,7 +15,7 @@
  "introduction_text": "",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-03-12 00:00:00.000000",
+ "modified": "2026-07-19 09:30:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "permission-sortie-employe",
@@ -32,20 +32,23 @@
    "fieldtype": "Link",
    "label": "Employé",
    "options": "Employee",
-   "reqd": 1
+   "reqd": 1,
+   "description": "L'employé qui sort. Si vous saisissez pour vous-même, c'est votre propre matricule."
   },
   {
    "fieldname": "employee_name",
    "fieldtype": "Data",
    "label": "Nom",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Rempli automatiquement à partir du matricule."
   },
   {
    "fieldname": "department",
    "fieldtype": "Link",
    "label": "Département",
    "options": "Department",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Rempli automatiquement. Il détermine le chef qui recevra la demande."
   },
   {
    "fieldname": "equipe",
@@ -53,24 +56,28 @@
    "fieldtype": "Data",
    "read_only": 1,
    "reqd": 0,
-   "hidden": 0
+   "hidden": 0,
+   "description": "Rempli automatiquement à partir de votre fiche employé."
   },
   {
    "fieldname": "date_sortie",
    "fieldtype": "Date",
    "label": "Date de Sortie",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Jour de la sortie."
   },
   {
    "fieldname": "heure_depart",
    "fieldtype": "Time",
    "label": "Heure de Départ",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Heure à laquelle vous quittez les locaux."
   },
   {
    "fieldname": "heure_retour",
    "fieldtype": "Time",
-   "label": "Heure de Retour Prévue"
+   "label": "Heure de Retour Prévue",
+   "description": "Heure de retour prévue. Si vous ne revenez pas dans la journée, indiquez-le dans le motif."
   },
   {
    "fieldname": "type_permission",
@@ -91,13 +98,15 @@
   {
    "fieldname": "chef_absent",
    "fieldtype": "Check",
-   "label": "Mon chef de service est absent (traiter directement par la RH)"
+   "label": "Mon chef de service est absent (traiter directement par la RH)",
+   "description": "À cocher UNIQUEMENT si votre chef est absent ou injoignable. La demande passe alors directement à la RH, et votre chef en est informé par e-mail."
   },
   {
    "fieldname": "chef_absent_note",
    "fieldtype": "Small Text",
    "label": "Nom du chef intérimaire / précision",
-   "depends_on": "chef_absent"
+   "depends_on": "chef_absent",
+   "description": "Obligatoire si vous avez coché la case ci-dessus : précisez pourquoi le chef n'a pas pu viser (en mission, en congé, injoignable)."
   },
   {
    "fieldname": "justificatif",
@@ -108,22 +117,26 @@
   {
    "fieldname": "signature_employe",
    "fieldtype": "Signature",
-   "label": "Signature Employé"
+   "label": "Signature Employé",
+   "description": "Votre signature."
   },
   {
    "fieldname": "signature_chef",
    "fieldtype": "Signature",
-   "label": "Signature Chef de Service"
+   "label": "Signature Chef de Service",
+   "description": "Réservée à votre chef d'équipe. Ne signez pas à sa place : chaque signature engage la responsabilité de son auteur."
   },
   {
    "fieldname": "signature_rh",
    "fieldtype": "Signature",
-   "label": "Signature RH"
+   "label": "Signature RH",
+   "description": "Réservée aux Ressources Humaines. Ne signez pas à sa place : chaque signature engage la responsabilité de son auteur."
   },
   {
    "fieldname": "signature_dga",
    "fieldtype": "Signature",
-   "label": "Signature DGA"
+   "label": "Signature DGA",
+   "description": "Réservée à la Direction Générale Adjointe. Ne signez pas à sa place : chaque signature engage la responsabilité de son auteur."
   }
  ],
  "no_sidebar": 1
