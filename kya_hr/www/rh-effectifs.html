@@ -110,10 +110,29 @@
       <th>Âge</th><th>Départ prévu</th><th>Années restantes</th><th>Alerte</th>
     </tr></thead><tbody id="ret-body"></tbody></table></div>
   </div>
+
+  {% if peut_importer %}
+  <div class="rh-card wide rh-ret" id="imp-bloc">
+    <h3 style="margin:0;">📥 Importer le classeur RH</h3>
+    <p style="color:#64748b;font-size:.82rem;margin:8px 0 12px;">
+      Verse les feuilles <b>Personnel</b> et <b>Evolution carriere</b> de votre classeur Excel
+      dans le registre du personnel et le parcours de carrière.
+      Vos saisies déjà faites dans l'ERP ne sont <b>jamais écrasées</b> : seuls les champs vides
+      sont complétés. Vous pouvez réimporter le même fichier sans créer de doublon.
+    </p>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <input type="file" id="imp-fichier" accept=".xlsx,.xlsm">
+      <button class="btn" id="imp-simuler" type="button">Simuler</button>
+      <button class="btn" id="imp-lancer" type="button" disabled>Importer pour de vrai</button>
+    </div>
+    <div id="imp-res" style="margin-top:12px;font-size:.85rem;white-space:pre-line;"></div>
+  </div>
+  {% endif %}
 </div>
 
 <script>
 let RH = {{ overview_json | safe }};
+const CSRF = {{ (csrf_token or '') | tojson }};
 const PALETTE = ['#0f766e','#2563eb','#d97706','#7c3aed','#db2777','#16a34a','#0891b2','#dc2626','#65a30d','#9333ea'];
 // Ces pages www ne chargent pas le bundle JS `frappe` → on appelle l'API via fetch.
 async function apiCall(method, args){
@@ -305,6 +324,81 @@ async function exportRetraite(){
       a.href='data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'+r.content_base64;
       a.download=r.filename||'gestion-retraite-kya.xlsx'; a.click(); }
   }catch(e){ alert("Export retraite indisponible."); }
+}
+
+// ── Import du classeur RH ────────────────────────────────────────────────
+// Un POST, pas un GET : le classeur encodé pèse plus que ne le permet une URL.
+async function apiPost(method, args){
+  const r = await fetch('/api/method/'+method, {
+    method:'POST', credentials:'same-origin',
+    headers:{'Content-Type':'application/json','Accept':'application/json',
+             'X-Frappe-CSRF-Token':CSRF},
+    body:JSON.stringify(args||{})});
+  const t = await r.text();
+  let j = null; try{ j = JSON.parse(t); }catch(e){}
+  if(!r.ok){
+    // Frappe renvoie le message métier dans _server_messages ou exception.
+    let msg = 'HTTP '+r.status;
+    try{
+      const sm = j && j._server_messages ? JSON.parse(j._server_messages) : [];
+      if(sm.length) msg = JSON.parse(sm[0]).message;
+      else if(j && j.exception) msg = j.exception;
+    }catch(e){}
+    throw new Error(msg);
+  }
+  return j.message;
+}
+
+function lireFichier(){
+  const f = document.getElementById('imp-fichier').files[0];
+  if(!f){ throw new Error('Choisissez d’abord votre classeur Excel.'); }
+  return new Promise((ok,ko)=>{ const rd=new FileReader();
+    rd.onload=e=>ok({b64:e.target.result.split(',')[1], nom:f.name});
+    rd.onerror=()=>ko(new Error('Fichier illisible.')); rd.readAsDataURL(f); });
+}
+
+function rendreRapport(r, simule){
+  const l = [];
+  l.push((simule?'🔎 Simulation — rien n’a été enregistré.':'✅ Import terminé.'));
+  l.push(`Registre du personnel : ${r.salaries_crees} créé(s), ${r.salaries_completes} complété(s), ${r.salaries_inchanges} inchangé(s).`);
+  l.push(`Parcours de carrière : ${r.evenements_crees} évènement(s) ajouté(s), ${r.evenements_existants} déjà présent(s).`);
+  if(r.embauches_deduites) l.push(`Embauches déduites de la date d’embauche : ${r.embauches_deduites}.`);
+  if(r.ignorees && r.ignorees.length){
+    l.push(`\n${r.ignorees.length} ligne(s) ignorée(s) — il y manque une information :`);
+    r.ignorees.slice(0,12).forEach(x=>l.push('   • '+x));
+    if(r.ignorees.length>12) l.push(`   … et ${r.ignorees.length-12} autre(s).`);
+  }
+  if(r.erreurs && r.erreurs.length) l.push(`\n⚠️ ${r.erreurs.length} ligne(s) en erreur : ${r.erreurs.join(', ')}`);
+  return l.join('\n');
+}
+
+let IMP_PRET = null;   // classeur validé par une simulation
+async function importer(simule){
+  const res = document.getElementById('imp-res');
+  const bLancer = document.getElementById('imp-lancer');
+  try{
+    const f = await lireFichier();
+    res.textContent = simule ? 'Simulation en cours…' : 'Import en cours…';
+    const r = await apiPost('kya_hr.api.rh_parcours_import.importer_classeur_rh',
+      {content_base64:f.b64, filename:f.nom, dry_run:simule?1:0});
+    res.textContent = rendreRapport(r, simule);
+    // On n'autorise l'écriture qu'après une simulation du MÊME fichier.
+    if(simule){ IMP_PRET = f.nom; bLancer.disabled = false; }
+    else { IMP_PRET = null; bLancer.disabled = true; await reload(); }
+  }catch(e){
+    res.textContent = '❌ '+e.message;
+    if(simule){ IMP_PRET = null; bLancer.disabled = true; }
+  }
+}
+
+if(document.getElementById('imp-simuler')){
+  document.getElementById('imp-simuler').onclick = ()=>importer(true);
+  document.getElementById('imp-lancer').onclick = ()=>importer(false);
+  // Changer de fichier invalide la simulation précédente.
+  document.getElementById('imp-fichier').onchange = ()=>{
+    IMP_PRET = null; document.getElementById('imp-lancer').disabled = true;
+    document.getElementById('imp-res').textContent = '';
+  };
 }
 
 render();

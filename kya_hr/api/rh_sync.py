@@ -96,7 +96,7 @@ def _retrouver_salarie(emp, vals):
     Employee. Sans elle, le peuplement créerait un DOUBLON pour chaque
     personne déjà enregistrée.
     """
-    trouve = frappe.db.get_value("Salarie KYA", {"employee": emp.get("name")}, "name")
+    trouve = frappe.db.get_value("Salarie KYA", {"employee_link": emp.get("name")}, "name")
     if trouve:
         return trouve
     trouve = frappe.db.get_value("Salarie KYA", {"matricule": _matricule(emp)}, "name")
@@ -107,9 +107,9 @@ def _retrouver_salarie(emp, vals):
     if not cible:
         return None
     for row in frappe.get_all("Salarie KYA",
-                              fields=["name", "nom_complet", "nom", "prenoms", "employee"],
+                              fields=["name", "nom_complet", "nom", "prenoms", "employee_link"],
                               limit_page_length=0):
-        if row.get("employee"):
+        if row.get("employee_link"):
             continue  # déjà rattaché à un autre employé
         if _cle_nom(row.get("nom_complet")) == cible:
             return row["name"]
@@ -166,15 +166,15 @@ def _sync_un(emp, ecraser=False):
     if not nom_salarie:
         doc = frappe.get_doc(dict(
             doctype="Salarie KYA", matricule=_matricule(emp),
-            employee=emp.get("name"), **vals))
+            employee_link=emp.get("name"), **vals))
         doc.flags.ignore_permissions = True
         doc.insert()
         return "cree"
 
     sal = frappe.get_doc("Salarie KYA", nom_salarie)
     change = False
-    if not sal.get("employee"):
-        sal.employee = emp.get("name")
+    if not sal.get("employee_link"):
+        sal.employee_link = emp.get("name")
         change = True
     for champ, valeur in vals.items():
         actuel = sal.get(champ)

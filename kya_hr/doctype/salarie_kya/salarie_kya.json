@@ -30,14 +30,6 @@
    "columns": 1
   },
   {
-   "fieldname": "employee",
-   "fieldtype": "Link",
-   "label": "Fiche Employé liée",
-   "options": "Employee",
-   "read_only": 1,
-   "description": "Fiche Employee dont proviennent les informations. Renseignée automatiquement : ne la saisissez pas à la main."
-  },
-  {
    "fieldname": "nom",
    "label": "Nom",
    "fieldtype": "Data",
@@ -271,7 +263,7 @@
    "label": "Fiche Employé liée (ERPNext)",
    "fieldtype": "Link",
    "options": "Employee",
-   "description": "Lien optionnel vers la fiche Employee HRMS (congés, contrats…)."
+   "description": "Fiche Employee HRMS (congés, contrats…) dont proviennent les informations. Renseignée automatiquement par la synchronisation : inutile de la saisir à la main."
   }
  ],
  "permissions": [

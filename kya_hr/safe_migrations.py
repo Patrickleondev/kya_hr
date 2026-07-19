@@ -56,6 +56,7 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.setup_attendance_fields.execute", "Setup custom fields Attendance (KYA marked_by, lateness, etc.)"),
     ("kya_hr.normalize_departments.execute", "Arbre Department en français sous 4 macro-départements (DG/Supports/Techniques/Commerciaux) ; rename_doc propage les références"),
     ("kya_hr.fix_naming_series.execute", "Resync compteurs tabSeries (corrige l'ID employé en double : compteur en retard sur le max réel)"),
+    ("kya_hr.maintenance.fix_salarie_employee_link.execute", "Salarie KYA : recupere l'ancien champ 'employee' (doublon retire) vers 'employee_link'"),
     ("kya_hr.desktop_icons.execute", "Desktop icons (workaround Frappe v16)"),
     ("kya_hr.coherence_fixes.execute", "Coherence fixes (champs orphelins)"),
     ("kya_hr.fix_sidebar_equipe_kya.execute", "Fix sidebar : Equipe KYA -> Espace Stagiaires (mauvais link_to)"),
