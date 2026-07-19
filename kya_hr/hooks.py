@@ -112,11 +112,13 @@ doc_events = {
             "kya_hr.dashboard_realtime.notify_dashboard_change",
             "kya_hr.role_sync.sync_employee_role",
             "kya_hr.equipe_member_sync.sync_on_employee_change",
+            "kya_hr.api.rh_sync.sync_salarie_from_employee",
         ],
         "on_update": [
             "kya_hr.dashboard_realtime.notify_dashboard_change",
             "kya_hr.role_sync.sync_employee_role",
             "kya_hr.equipe_member_sync.sync_on_employee_change",
+            "kya_hr.api.rh_sync.sync_salarie_from_employee",
         ],
     },
     "Attendance": {
