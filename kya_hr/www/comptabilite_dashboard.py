@@ -337,6 +337,7 @@ def _ops_maison_kya() -> dict:
         ],
         "raccourcis": [
             {"label": "Nouvelle facture", "url": "/app/facture-kya/new", "icon": "file"},
+            {"label": "Marchés & Clients", "url": "/marche-dashboard", "icon": "chart"},
             {"label": "Grand Livre", "url": "/grand-livre", "icon": "book"},
             {"label": "État de salaire", "url": "/etat-salaire", "icon": "bar-chart"},
             {"label": "Nouveau bulletin", "url": "/app/bulletin-paie-kya/new", "icon": "receipt"},

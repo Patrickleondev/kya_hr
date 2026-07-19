@@ -157,6 +157,7 @@ def get_portail_tree() -> list:
                 ]},
                 {"name": "Comptabilité & Finances", "icon": "coins", "ops": [
                     _op("Dashboard Comptabilité", "/comptabilite-dashboard", "chart"),
+                    _op("Marchés & Clients", "/marche-dashboard", "chart"),
                     _op("Brouillard de caisse", "/brouillard-caisse", "file"),
                     _op("État récap. chèques", "/etat-recap", "file"),
                 ]},
