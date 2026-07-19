@@ -666,6 +666,20 @@ function dlB64(b64,name){
   const u=URL.createObjectURL(new Blob([arr],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
   const a=document.createElement('a'); a.href=u; a.download=name; a.click(); URL.revokeObjectURL(u);
 }
+// Un magasin mal orthographié crée bien les articles mais ne pose AUCUNE
+// quantité. Sans ce message on lisait « ✅ » en croyant l'import réussi.
+function msgImport(r){
+  const mi=r.magasins_introuvables||[];
+  let t=`${r.articles_crees} article(s) créé(s), ${r.lignes_stock} ligne(s) de stock`;
+  if(r.erreurs&&r.erreurs.length) t+=`, ${r.erreurs.length} erreur(s)`;
+  if(r.sans_magasin) t+=`, ${r.sans_magasin} ligne(s) sans magasin (aucune quantité posée)`;
+  if(mi.length){
+    const det=mi.map(m=>`« ${m.magasin} » (${m.lignes} ligne(s))`).join(', ');
+    return `⚠️ ${t}. Magasin introuvable ou ambigu : ${det}. `
+         + `Ces quantités n'ont PAS été enregistrées — corrigez le nom du magasin et réimportez.`;
+  }
+  return (r.lignes_stock?'✅ ':'⚠️ ')+t;
+}
 async function charger(inp){
   const f=inp.files[0]; if(!f) return;
   const res=document.getElementById('ks-imp-res'); res.textContent='Lecture du fichier…';
@@ -673,7 +687,7 @@ async function charger(inp){
   try{
     const r=(await frappe.call({method:'kya_hr.api.stock_kya.importer_stock_fichier',
       args:{content_base64:b64, filename:f.name}})).message;
-    res.textContent=`✅ ${r.articles_crees} article(s) créé(s), ${r.lignes_stock} ligne(s) de stock`+(r.erreurs&&r.erreurs.length?`, ${r.erreurs.length} erreur(s)`:'');
+    res.textContent=msgImport(r);
     await load(); tab('inv');
   }catch(e){ res.textContent='Erreur import fichier.'; }
   inp.value='';
@@ -701,8 +715,7 @@ async function importer(){
   const btn=document.getElementById('ks-imp-btn'); btn.disabled=true;
   try{
     const r=(await frappe.call({method:'kya_hr.api.stock_kya.importer_stock_initial',args:{rows:JSON.stringify(rows)}})).message;
-    document.getElementById('ks-imp-res').textContent=
-      `✅ ${r.articles_crees} article(s) créé(s), ${r.lignes_stock} ligne(s) de stock`+(r.erreurs&&r.erreurs.length?`, ${r.erreurs.length} erreur(s)`:'');
+    document.getElementById('ks-imp-res').textContent=msgImport(r);
     await load();
   } finally { btn.disabled=false; }
 }

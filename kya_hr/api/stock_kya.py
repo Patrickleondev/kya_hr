@@ -508,11 +508,22 @@ def importer_stock_initial(rows):
     from kya_hr.kya_hr.doctype.article_kya.article_kya import creer_ou_recuperer
     cree, lignes_stock, erreurs = 0, 0, []
     purges = set()
+    # Un magasin mal orthographié ne doit PAS passer inaperçu : sans ce relevé,
+    # l'écran affichait « ✅ 300 articles créés » alors qu'AUCUNE quantité
+    # n'avait été posée, et personne ne s'en rendait compte avant l'inventaire.
+    magasins_introuvables, sans_magasin = {}, 0
     for r in rows:
         design = " ".join((r.get("designation") or r.get("nom") or "").split())
-        magasin = _resolve_magasin(r.get("magasin")) or ""
+        saisi_magasin = (r.get("magasin") or "").strip()
+        magasin = _resolve_magasin(saisi_magasin) or ""
         if not design:
             continue
+        if not magasin:
+            if saisi_magasin:
+                magasins_introuvables[saisi_magasin] = \
+                    magasins_introuvables.get(saisi_magasin, 0) + 1
+            else:
+                sans_magasin += 1
         try:
             cat = _ensure_categorie(r.get("categorie") or r.get("groupe"))
             existed = frappe.db.exists("Article KYA", {"designation": design})
@@ -551,7 +562,10 @@ def importer_stock_initial(rows):
             frappe.log_error(frappe.get_traceback(), "stock_kya.importer_stock_initial")
     frappe.db.commit()
     return {"articles_crees": cree, "lignes_stock": lignes_stock,
-            "erreurs": erreurs, "total": len(rows)}
+            "erreurs": erreurs, "total": len(rows),
+            "magasins_introuvables": [{"magasin": m, "lignes": n}
+                                      for m, n in sorted(magasins_introuvables.items())],
+            "sans_magasin": sans_magasin}
 
 
 # ── Export « État d'inventaire » au format officiel KYA (AEA-ENG-13) ─────────
