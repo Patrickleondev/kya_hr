@@ -9,7 +9,7 @@
  "field_order": [
   "section_identite", "nom", "prenoms", "nom_complet", "sexe", "contact",
   "col_id2", "etablissement", "niveau_filiere",
-  "section_stage", "theme_stage", "departement_accueil", "encadreur",
+  "section_stage", "type_stage", "theme_stage", "departement_accueil", "encadreur",
   "col_st2", "date_debut", "date_fin", "duree", "statut",
   "section_admin", "convention_signee", "indemnite_stage", "observation"
  ],
@@ -24,6 +24,7 @@
   {"fieldname": "etablissement", "fieldtype": "Data", "label": "Établissement / École"},
   {"fieldname": "niveau_filiere", "fieldtype": "Data", "label": "Niveau d'études / Filière"},
   {"fieldname": "section_stage", "fieldtype": "Section Break", "label": "Stage"},
+  {"fieldname": "type_stage", "fieldtype": "Select", "label": "Type de stage", "options": "\nImmersion\nAcadémique\nProfessionnel", "in_list_view": 1, "in_standard_filter": 1, "description": "Immersion : découverte courte de l'entreprise. Académique : stage exigé par l'école (rapport ou mémoire). Professionnel : stage d'insertion, encadré comme un poste. Sert aux statistiques du tableau de bord."},
   {"fieldname": "theme_stage", "fieldtype": "Small Text", "label": "Thème / Sujet du stage"},
   {"fieldname": "departement_accueil", "fieldtype": "Link", "label": "Département d'accueil", "options": "Departement KYA", "in_list_view": 1},
   {"fieldname": "encadreur", "fieldtype": "Data", "label": "Encadreur (KYA-Energy)"},
