@@ -753,6 +753,13 @@ footer .web-footer, .powered-by, .footer-powered, [class*="powered"], .web-foote
 
 /* == LOGIN & GLOBAL BRANDING ============================== */
 .page-card .app-logo, .for-login .app-logo { max-height: 100px !important; width: auto !important; }
+/* Placeholders de connexion : le gris par défaut est si foncé qu'un champ vide
+   semble déjà rempli. On l'éclaircit (et on le met en italique) pour qu'il se
+   distingue nettement d'une vraie saisie. Scopé au login : n'affecte rien d'autre. */
+.for-login .form-control::placeholder,
+.login-content .form-control::placeholder { color: #9aa6b5 !important; opacity: 1 !important; font-style: italic; }
+.for-login .form-control:-ms-input-placeholder,
+.login-content .form-control:-ms-input-placeholder { color: #9aa6b5 !important; font-style: italic; }
 .page-card { border-top: 4px solid var(--kya-blue) !important; border-radius: var(--kya-r-lg) !important; }
 img[src*="erpnext-logo"], a[href*="erpnext"] img, .footer-logo-extension, footer .container a[href*="erpnext"] { display: none !important; }
 footer .web-footer-menu { display: none !important; }
