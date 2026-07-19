@@ -64,6 +64,34 @@ def _normalize_phone(p):
     return d[-8:]
 
 
+def _contact_rh(doc):
+    """(nom, email) de l'interlocuteur RH pour ce contrat.
+
+    On privilégie la personne qui a RÉELLEMENT créé/envoyé le contrat : c'est
+    elle que le signataire connaît. À défaut, le premier RH actif.
+    """
+    for user in (doc.get("owner"),):
+        if user and user not in ("Administrator", "Guest"):
+            d = frappe.db.get_value("User", user, ["email", "full_name", "enabled"], as_dict=True)
+            if d and d.enabled and d.email:
+                return d.full_name or "le service RH", d.email
+    for role in ("Responsable RH", "HR Manager", "Assistant(e) RH"):
+        for user in frappe.get_all("Has Role", filters={"role": role, "parenttype": "User"}, pluck="parent"):
+            if user in ("Administrator", "Guest"):
+                continue
+            d = frappe.db.get_value("User", user, ["email", "full_name", "enabled"], as_dict=True)
+            if d and d.enabled and d.email:
+                return d.full_name or "le service RH", d.email
+    return "le service RH", None
+
+
+def _mailto(nom, email):
+    """Rend « Nom (mail cliquable) » ou juste le nom si aucune adresse connue."""
+    if not email:
+        return f"<b>{nom}</b>"
+    return f'<b>{nom}</b> (<a href="mailto:{email}" style="color:#1a5276;">{email}</a>)'
+
+
 def _request_ip():
     try:
         return frappe.local.request.headers.get("X-Forwarded-For", "").split(",")[0].strip() or frappe.local.request.remote_addr
@@ -138,6 +166,8 @@ def send_signataire_email(doc):
     site = frappe.utils.get_url()
     portail_url = f"{site}/kya-contrat?name={doc.name}&token={doc.access_token_signataire}"
     phone_hint = _normalize_phone(doc.telephone)[-4:] or "????"
+    _rh_nom, _rh_email = _contact_rh(doc)
+    contact_rh_html = _mailto(_rh_nom, _rh_email or "rh@kya-energy.com")
 
     message = f"""
     <div style="font-family:Arial,sans-serif; max-width:640px; margin:0 auto; border:1px solid #eee; border-radius:6px; overflow:hidden;">
@@ -179,7 +209,15 @@ def send_signataire_email(doc):
         <p style="font-size:12px; color:#888; word-break:break-all;">Si le bouton ne fonctionne pas :<br>{portail_url}</p>
 
         <p style="font-size:13px; color:#666;">Une fois signé, le contrat sera transmis au Directeur Général. Vous recevrez la version finale en PDF par email.</p>
-        <p>Pour toute question : <a href="mailto:rh@kya-energy.com">rh@kya-energy.com</a></p>
+
+        <div style="background:#f4f6f8; border-left:4px solid #e07b00; padding:12px 16px; margin:18px 0; font-size:13px; color:#333;">
+          <b>🙋 Bloqué(e) à une étape ? Voici à qui vous adresser.</b><br>
+          Pour <b>toute difficulté</b> (page qui refuse de s'ouvrir, numéro de téléphone non reconnu,
+          signature qui ne s'enregistre pas, informations erronées dans le contrat),
+          contactez le <b>service des Ressources Humaines</b> : {contact_rh_html}.<br>
+          <span style="color:#5a6470;">Précisez la référence <b>{doc.name}</b> dans votre message,
+          cela permet de retrouver votre dossier immédiatement.</span>
+        </div>
         <p style="margin-top:30px;">Bien cordialement,<br><b>Le Service des Ressources Humaines</b><br>KYA-Energy Group</p>
       </div>
     </div>
