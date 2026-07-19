@@ -80,14 +80,14 @@
    "fieldtype": "Currency",
    "label": "Montant de l'Avance (1er décaissement)",
    "options": "XOF",
-   "description": "Somme déjà versée par le client à ce jour, tous versements confondus."
+   "description": "Somme déjà versée par le client. ATTENTION : en mode Tranche ou Location, ce champ est indicatif — le solde dû se calcule UNIQUEMENT à partir des paiements saisis dans le tableau plus bas. L'avance doit donc y figurer aussi, en première ligne. En mode Cash, elle est bien déduite."
   },
   {
    "fieldname": "solde_du",
    "fieldtype": "Currency",
    "label": "Solde Dû",
    "options": "XOF",
-   "description": "Reste à payer = montant total moins avance. Vérifiez la cohérence avant d'enregistrer."
+   "description": "Calculé automatiquement. En mode Cash : montant total moins avance. En mode Tranche ou Location : montant total moins la somme des paiements saisis dans le tableau. Si le solde vous paraît trop élevé, c'est en général qu'un versement n'a pas été enregistré dans le tableau."
   },
   {
    "fieldname": "date_prevue_solde",
@@ -114,7 +114,7 @@
    "label": "Échéancier des Paiements",
    "options": "KYA SoP Echeancier Ligne",
    "depends_on": "eval:doc.mode_paiement=='Tranche'",
-   "description": "À remplir uniquement en mode Tranche. Une ligne par échéance prévue, avec sa date et son montant. Le total doit correspondre au montant du contrat."
+   "description": "À remplir en mode Tranche. Une ligne par échéance, avec sa date, son montant et le montant réellement payé. C'est CE tableau qui pilote le solde dû : une avance déjà versée doit y apparaître comme première ligne payée."
   },
   {
    "fieldname": "montant_mensuel",
@@ -137,7 +137,7 @@
    "label": "État des Paiements Mensuels",
    "options": "KYA SoP Paiement Mensuel",
    "depends_on": "eval:doc.mode_paiement=='Location'",
-   "description": "À remplir uniquement en mode Location : une ligne par mois, pour marquer les loyers payés et ceux en retard."
+   "description": "À remplir en mode Location : une ligne par mois, avec le montant réellement payé. C'est CE tableau qui pilote le solde dû et le repérage des retards."
   }
  ],
  "no_sidebar": 1
