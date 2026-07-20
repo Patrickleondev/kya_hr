@@ -144,7 +144,11 @@ class PermissionSortieEmploye(Document):
 
     def before_insert(self):
         """When HR creates manually via Desk, start workflow at 'En attente RH'
-        to skip the Chef step (RH is the creator)."""
+        to skip the Chef step (RH is the creator).
+
+        NOTE : ce DocType est custom=1 → cette classe n'est PAS chargée par
+        Frappe. Le vrai démarrage du circuit se fait dans
+        kya_hr.chef_routing.route_start_state (doc_events before_insert)."""
         if not self.flags.via_web_form:
             user_roles = frappe.get_roles(frappe.session.user)
             if "HR Manager" in user_roles or "HR User" in user_roles:

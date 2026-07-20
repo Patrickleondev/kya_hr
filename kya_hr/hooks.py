@@ -161,6 +161,7 @@ doc_events = {
         "validate": "kya_hr.auto_calc_logic.compute_bulletin",
     },
     "Permission Sortie Employe": {
+        "before_insert": "kya_hr.chef_routing.route_start_state",
         "before_save": "kya_hr.chef_routing.populate_chef",
         "after_insert": [
             "kya_hr.email_notifications.send_submission_recap",
