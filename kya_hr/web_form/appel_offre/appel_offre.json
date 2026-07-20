@@ -15,7 +15,7 @@
  "introduction_text": "<p>Création d'un appel d'offre à destination des fournisseurs consultés. Après enregistrement, utilisez le bouton <strong>Envoyer aux fournisseurs</strong> dans l'espace de travail pour diffuser l'AO par email (les fournisseurs sans email seront listés pour un contact manuel).</p>",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-07-19 09:30:00",
+ "modified": "2026-07-20 12:00:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "appel-offre",
@@ -120,13 +120,13 @@
    "fieldname": "signature_daaf",
    "fieldtype": "Signature",
    "label": "Signature Responsable Comptable / DAAF",
-   "description": "Réservée à la Direction des Affaires Administratives et Financières. Ne signez pas à sa place : chaque signature engage la responsabilité de son auteur."
+   "description": "Réservée à la Direction des Affaires Administratives et Financières."
   },
   {
    "fieldname": "signature_dg",
    "fieldtype": "Signature",
    "label": "Signature DG",
-   "description": "Réservée à la Direction Générale. Ne signez pas à sa place : chaque signature engage la responsabilité de son auteur."
+   "description": "Réservée à la Direction Générale."
   }
  ],
  "no_sidebar": 1

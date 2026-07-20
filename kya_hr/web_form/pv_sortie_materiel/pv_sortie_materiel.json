@@ -15,7 +15,7 @@
  "introduction_text": "",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-07-19 09:30:00",
+ "modified": "2026-07-20 12:00:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "pv-sortie-materiel",
@@ -114,25 +114,25 @@
    "fieldname": "signature_chef",
    "fieldtype": "Signature",
    "label": "Signature Chef de Service",
-   "description": "Réservée au chef d'équipe du demandeur. Ne signez pas à sa place : chaque signature engage la responsabilité de son auteur."
+   "description": "Réservée au chef d'équipe du demandeur."
   },
   {
    "fieldname": "signature_audit",
    "fieldtype": "Signature",
    "label": "Signature Audit Interne",
-   "description": "Réservée à l'audit interne. Ne signez pas à sa place : chaque signature engage la responsabilité de son auteur."
+   "description": "Réservée à l'audit interne."
   },
   {
    "fieldname": "signature_dga",
    "fieldtype": "Signature",
    "label": "Signature DG / DGA",
-   "description": "Réservée à la Direction Générale Adjointe. Ne signez pas à sa place : chaque signature engage la responsabilité de son auteur."
+   "description": "Réservée à la Direction Générale Adjointe."
   },
   {
    "fieldname": "signature_magasin",
    "fieldtype": "Signature",
    "label": "Signature Responsable Magasin",
-   "description": "Réservée au magasinier qui délivre le matériel. Ne signez pas à sa place : chaque signature engage la responsabilité de son auteur."
+   "description": "Réservée au magasinier qui délivre le matériel."
   }
  ]
 }

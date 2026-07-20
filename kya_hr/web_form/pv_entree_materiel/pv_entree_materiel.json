@@ -15,7 +15,7 @@
  "introduction_text": "Déclarez les entrées de matériel (livraisons fournisseurs, retours chantier, etc.). Le responsable magasin validera la réception et les stocks seront mis à jour automatiquement.",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-07-19 09:30:00",
+ "modified": "2026-07-20 12:00:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "pv-entree-materiel",
@@ -120,7 +120,7 @@
    "fieldname": "signature_comptable",
    "fieldtype": "Signature",
    "label": "Signature Comptabilité",
-   "description": "Réservée à la comptabilité. Ne signez pas à sa place : chaque signature engage la responsabilité de son auteur."
+   "description": "Réservée à la comptabilité."
   },
   {
    "fieldname": "audit_nom",
@@ -133,7 +133,7 @@
    "fieldname": "signature_audit",
    "fieldtype": "Signature",
    "label": "Signature Audit Interne",
-   "description": "Réservée à l'audit interne. Ne signez pas à sa place : chaque signature engage la responsabilité de son auteur."
+   "description": "Réservée à l'audit interne."
   }
  ]
 }

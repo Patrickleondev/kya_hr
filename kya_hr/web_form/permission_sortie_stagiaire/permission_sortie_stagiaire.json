@@ -15,7 +15,7 @@
  "introduction_text": "",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-07-19 09:30:00",
+ "modified": "2026-07-20 12:00:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "permission-sortie-stagiaire",
@@ -128,19 +128,19 @@
    "fieldname": "signature_chef",
    "fieldtype": "Signature",
    "label": "Signature Chef",
-   "description": "Réservée à votre maître de stage. Ne signez pas à sa place : chaque signature engage la responsabilité de son auteur."
+   "description": "Réservée à votre maître de stage."
   },
   {
    "fieldname": "signature_resp_stagiaires",
    "fieldtype": "Signature",
    "label": "Signature Resp. Stagiaires",
-   "description": "Réservée au responsable des stagiaires. Ne signez pas à sa place : chaque signature engage la responsabilité de son auteur."
+   "description": "Réservée au responsable des stagiaires."
   },
   {
    "fieldname": "signature_dg",
    "fieldtype": "Signature",
    "label": "Signature DG",
-   "description": "Réservée à la Direction Générale. Ne signez pas à sa place : chaque signature engage la responsabilité de son auteur."
+   "description": "Réservée à la Direction Générale."
   }
  ],
  "no_sidebar": 1

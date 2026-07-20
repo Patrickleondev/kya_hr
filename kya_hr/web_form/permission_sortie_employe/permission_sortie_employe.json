@@ -15,7 +15,7 @@
  "introduction_text": "",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-07-19 09:30:00",
+ "modified": "2026-07-20 12:00:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "permission-sortie-employe",
@@ -124,19 +124,19 @@
    "fieldname": "signature_chef",
    "fieldtype": "Signature",
    "label": "Signature Chef de Service",
-   "description": "Réservée à votre chef d'équipe. Ne signez pas à sa place : chaque signature engage la responsabilité de son auteur."
+   "description": "Réservée à votre chef d'équipe."
   },
   {
    "fieldname": "signature_rh",
    "fieldtype": "Signature",
    "label": "Signature RH",
-   "description": "Réservée aux Ressources Humaines. Ne signez pas à sa place : chaque signature engage la responsabilité de son auteur."
+   "description": "Réservée aux Ressources Humaines."
   },
   {
    "fieldname": "signature_dga",
    "fieldtype": "Signature",
    "label": "Signature DGA",
-   "description": "Réservée à la Direction Générale Adjointe. Ne signez pas à sa place : chaque signature engage la responsabilité de son auteur."
+   "description": "Réservée à la Direction Générale Adjointe."
   }
  ],
  "no_sidebar": 1

@@ -15,7 +15,7 @@
  "introduction_text": "Enregistrez les comptages physiques d'inventaire. Les écarts constatés seront automatiquement régularisés dans le stock ERPNext après validation du responsable magasin.",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-07-19 09:30:00",
+ "modified": "2026-07-20 12:00:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "inventaire-kya",
@@ -82,7 +82,7 @@
    "fieldname": "signature_responsable",
    "fieldtype": "Signature",
    "label": "Signature Responsable",
-   "description": "Signature du responsable du magasin. Signez avec la souris, ou au doigt sur mobile."
+   "description": "Signature du responsable du magasin."
   },
   {
    "fieldname": "signature_magasin",

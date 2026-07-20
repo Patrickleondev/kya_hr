@@ -15,7 +15,7 @@
  "introduction_text": "",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-07-19 09:30:00",
+ "modified": "2026-07-20 12:00:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "demande-conge",
@@ -90,13 +90,13 @@
    "fieldname": "signature_employe_la",
    "fieldtype": "Signature",
    "label": "Signature Employé",
-   "description": "Votre signature. Elle vaut engagement sur les dates indiquées ci-dessus."
+   "description": "Votre signature."
   },
   {
    "fieldname": "signature_superieur_la",
    "fieldtype": "Signature",
    "label": "Signature Supérieur",
-   "description": "Réservée à votre supérieur hiérarchique. Ne signez pas à sa place."
+   "description": "Réservée à votre supérieur hiérarchique."
   },
   {
    "fieldname": "signature_rh_la",
