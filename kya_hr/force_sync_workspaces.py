@@ -322,6 +322,57 @@ def _rebuild_sidebar_items(sidebar_title, workspace_name, icon, items):
         )
 
 
+def _ensure_workspace_link(workspace_name, link_to, label, card_label=None):
+    """Garantit qu'un doctype est lié (Workspace Link type Link) à un espace.
+
+    C'est ce lien — pas les items de barre latérale — qui alimente
+    `meta.__workspaces`, donc le fil d'Ariane (kya_breadcrumbs.js s'appuie
+    dessus pour rattacher la fiche au bon espace au lieu du dernier visité).
+    Additif et idempotent : n'écrase jamais l'espace, ajoute juste le lien
+    manquant à la fin. Ne touche à rien si le doctype ou l'espace n'existe pas.
+    """
+    if not frappe.db.exists("Workspace", workspace_name):
+        return
+    if not frappe.db.exists("DocType", link_to):
+        return
+    if frappe.db.exists(
+        "Workspace Link",
+        {"parent": workspace_name, "link_to": link_to, "type": "Link"},
+    ):
+        return
+
+    max_idx = frappe.db.sql(
+        "select coalesce(max(idx), 0) from `tabWorkspace Link` where parent=%s",
+        (workspace_name,),
+    )[0][0]
+
+    def _add(values):
+        nonlocal max_idx
+        max_idx += 1
+        row = frappe.get_doc({
+            "doctype": "Workspace Link",
+            "parent": workspace_name,
+            "parenttype": "Workspace",
+            "parentfield": "links",
+            "idx": max_idx,
+            **values,
+        })
+        row.insert(ignore_permissions=True)
+
+    # Ouvre une carte dédiée si demandée et pas déjà présente.
+    if card_label and not frappe.db.exists(
+        "Workspace Link",
+        {"parent": workspace_name, "label": card_label, "type": "Card Break"},
+    ):
+        _add({"type": "Card Break", "label": card_label, "link_type": "DocType",
+              "hidden": 0, "onboard": 0, "is_query_report": 0, "link_count": 0})
+
+    _add({"type": "Link", "label": label, "link_to": link_to,
+          "link_type": "DocType", "hidden": 0, "onboard": 0,
+          "is_query_report": 0, "link_count": 0})
+    print(f"  [WS LINK] {workspace_name} -> {link_to}")
+
+
 def _restrict_workspace_roles(workspace_name, roles):
     if not frappe.db.exists("Workspace", workspace_name):
         return
@@ -741,6 +792,12 @@ def execute():
                 }, update_modified=False)
         _rebuild_sidebar_items(title, ws_name, cfg["icon"], cfg["items"])
         _link_desktop_icon_to_sidebar(title, [title], cfg["icon"], app=cfg["app"])
+
+    # 9ter. Rattacher les doctypes « orphelins » (sans Workspace Link) à leur
+    #       espace, sinon leur fil d'Ariane colle au dernier espace visité
+    #       (ex. « Espace Stagiaires » sur la fiche Paramètres Stock KYA).
+    _ensure_workspace_link("Espace Stock", "Parametres Stock KYA",
+                           "Paramètres Stock KYA", card_label="⚙️ Configuration")
 
     # 10. Fix setup_complete default value if needed
     try:
