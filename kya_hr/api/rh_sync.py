@@ -190,6 +190,32 @@ def _sync_un(emp, ecraser=False):
     return "complete"
 
 
+def backfill_all(inclure_inactifs=1):
+    """Backfill Employee -> Salarie KYA SANS garde de rôle, pour after_migrate.
+
+    À la différence de `seeder_depuis_employees`, ne vérifie pas les rôles de la
+    session : pendant `bench migrate` il n'y a pas d'utilisateur métier. Reste
+    non destructif (ne remplit que les cases vides) et idempotent.
+    """
+    filtres = {} if int(inclure_inactifs or 0) else {"status": "Active"}
+    champs = ["name", "employee_number", "employee_name", "first_name", "last_name",
+              "gender", "date_of_birth", "date_of_joining", "designation",
+              "department", "status", "cell_number", "employment_type",
+              "marital_status", "relieving_date"]
+    employes = frappe.get_all("Employee", filters=filtres, fields=champs,
+                              limit_page_length=0) or []
+    res = {"total": len(employes), "crees": 0, "completes": 0, "inchanges": 0}
+    for emp in employes:
+        try:
+            action = _sync_un(emp)
+            res[{"cree": "crees", "complete": "completes",
+                 "inchange": "inchanges"}[action]] += 1
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), "rh_sync.backfill_all")
+    frappe.db.commit()
+    return res
+
+
 @frappe.whitelist()
 def seeder_depuis_employees(dry_run=1, inclure_inactifs=1):
     """Alimente le registre `Salarie KYA` à partir de TOUS les Employee.

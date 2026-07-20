@@ -26,6 +26,8 @@ import frappe
 from frappe import _
 from frappe.utils import flt, getdate
 
+from kya_hr.api.rh_sync import _cle_nom  # clé nom normalisée (accent/casse/ordre)
+
 FEUILLE_PERSONNEL = "Personnel"
 FEUILLE_CARRIERE = "Evolution carriere"
 
@@ -194,9 +196,47 @@ def _valeurs_salarie(d):
     return {k: v for k, v in vals.items() if v not in (None, "")}
 
 
+def _trouver_par_nom(nom_complet):
+    """Salarié existant portant ce nom (accent/casse/ordre-insensible), ou None.
+
+    Indispensable : le déploiement crée les Salariés à partir des fiches Employee,
+    avec un matricule technique (HR-EMP-00001) puisque `employee_number` est vide
+    en prod. Quand la RH importe ensuite son classeur (matricule 10001), on doit
+    reconnaître la MÊME personne par son nom, sinon on la dupliquerait.
+    """
+    cible = _cle_nom(nom_complet)
+    if not cible:
+        return None
+    for row in frappe.get_all("Salarie KYA",
+                              fields=["name", "nom_complet", "nom", "prenoms"],
+                              limit_page_length=0):
+        if _cle_nom(row.get("nom_complet")) == cible:
+            return row["name"]
+        if _cle_nom("{0} {1}".format(row.get("nom") or "", row.get("prenoms") or "")) == cible:
+            return row["name"]
+    return None
+
+
 def _upsert_salarie(matricule, vals):
     """Retourne (nom du document, 'cree'|'complete'|'inchange')."""
     existant = frappe.db.get_value("Salarie KYA", {"matricule": matricule}, "name")
+    if not existant:
+        # Rapprochement par nom : évite de dupliquer un salarié déjà créé au
+        # déploiement (matricule technique) et adopte le matricule officiel du
+        # classeur. Le renommage est GARDÉ : s'il échoue, on garde la fiche
+        # trouvée sans renommer — on ne crée jamais de doublon, on ne casse rien.
+        par_nom = _trouver_par_nom(vals.get("nom_complet"))
+        if par_nom:
+            existant = par_nom
+            if par_nom != matricule and not frappe.db.exists("Salarie KYA", matricule):
+                try:
+                    frappe.rename_doc("Salarie KYA", par_nom, matricule,
+                                      force=True, show_alert=False)
+                    existant = matricule
+                except Exception:
+                    frappe.log_error(frappe.get_traceback(),
+                                     "rh_parcours_import: rename %s -> %s" % (par_nom, matricule))
+
     if not existant:
         doc = frappe.get_doc(dict(doctype="Salarie KYA", matricule=matricule, **vals))
         doc.flags.ignore_permissions = True
@@ -224,6 +264,12 @@ def _evenement_existe(salarie, date_debut, nature):
 
 def _creer_evenement(salarie, date_debut, nature, **champs):
     if _evenement_existe(salarie, date_debut, nature):
+        return False
+    # L'embauche est unique par salarié : le déploiement en crée déjà une
+    # (déduite de la date d'embauche). Si sa date diffère un peu de celle du
+    # classeur, on ne veut pas DEUX embauches -> on saute dès qu'il en existe une.
+    if nature == "Embauche" and frappe.db.exists(
+            "Evolution Carriere KYA", {"salarie": salarie, "nature_evolution": "Embauche"}):
         return False
     doc = frappe.get_doc(dict(
         doctype="Evolution Carriere KYA", salarie=salarie,
@@ -290,7 +336,11 @@ def importer_classeur_rh(content_base64, filename=None, dry_run=1):
             continue
         try:
             if dry_run:
-                existe = frappe.db.get_value("Salarie KYA", {"matricule": matricule}, "name")
+                # On reconnaît le salarié par matricule OU par nom (le déploiement
+                # a pu le créer avec un matricule technique) : la simulation
+                # annonce alors « complété », pas « créé », comme l'import réel.
+                existe = (frappe.db.get_value("Salarie KYA", {"matricule": matricule}, "name")
+                          or _trouver_par_nom(vals.get("nom_complet")))
                 if not existe:
                     res["salaries_crees"] += 1
                 else:
