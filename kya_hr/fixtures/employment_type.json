@@ -20,7 +20,13 @@
  {
   "docstatus": 0,
   "doctype": "Employment Type",
-  "name": "Prestataire",
-  "employee_type_name": "Prestataire"
+  "name": "Prestataire de services",
+  "employee_type_name": "Prestataire de services"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Employment Type",
+  "name": "Apprentissage",
+  "employee_type_name": "Apprentissage"
  }
 ]

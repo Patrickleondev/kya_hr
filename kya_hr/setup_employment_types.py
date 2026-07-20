@@ -33,6 +33,13 @@ KYA_EMPLOYMENT_TYPES: list[str] = [
     "Apprentissage",
 ]
 
+# Doublons/orphelins FR connus a fusionner vers le type canonique.
+# Cas historique : la fixture creait "Prestataire" (tout court), doublon de
+# "Prestataire de services". On rebascule ses Employees puis on le supprime.
+DUPLICATE_TO_CANONICAL: dict[str, str] = {
+    "Prestataire": "Prestataire de services",
+}
+
 # Mapping des types EN natifs Frappe vers le type FR equivalent.
 # Sert a basculer les Employees existants avant de purger les EN.
 EN_TO_FR: dict[str, str] = {
@@ -109,6 +116,64 @@ def _migrate_employees() -> dict:
     return stats
 
 
+def _merge_duplicates() -> dict:
+    """Fusionne les doublons FR connus vers leur type canonique.
+
+    Rebascule les Employees du doublon vers le canonique, puis supprime le
+    doublon SEULEMENT s'il ne porte plus aucun Employee. Jamais de perte de
+    donnee : si la bascule echoue, on garde le doublon.
+    """
+    stats = {"migrated_employees": 0, "deleted": 0, "kept_still_used": 0}
+    for dup_name, canonical in DUPLICATE_TO_CANONICAL.items():
+        if not frappe.db.exists("Employment Type", dup_name):
+            continue
+        # Le canonique doit exister avant de rebasculer quoi que ce soit.
+        if not frappe.db.exists("Employment Type", canonical):
+            continue
+
+        affected = frappe.db.get_all(
+            "Employee",
+            filters={"employment_type": dup_name},
+            fields=["name"],
+            limit=10000,
+        )
+        for emp in affected:
+            try:
+                frappe.db.set_value(
+                    "Employee", emp.name, "employment_type", canonical,
+                    update_modified=False,
+                )
+                stats["migrated_employees"] += 1
+            except Exception:
+                try:
+                    frappe.log_error(
+                        frappe.get_traceback(),
+                        f"setup_employment_types: merge {emp.name}",
+                    )
+                except Exception:
+                    pass
+
+        still_used = frappe.db.count("Employee", {"employment_type": dup_name})
+        if still_used > 0:
+            stats["kept_still_used"] += 1
+            continue
+        try:
+            frappe.delete_doc(
+                "Employment Type", dup_name,
+                force=1, ignore_permissions=True,
+            )
+            stats["deleted"] += 1
+        except Exception:
+            try:
+                frappe.log_error(
+                    frappe.get_traceback(),
+                    f"setup_employment_types: delete dup {dup_name}",
+                )
+            except Exception:
+                pass
+    return stats
+
+
 def _purge_orphan_en_types() -> dict:
     """Supprime les Employment Type EN qui n'ont plus aucun Employee."""
     stats = {"deleted": 0, "kept_still_used": 0}
@@ -142,6 +207,7 @@ def execute() -> dict:
     try:
         summary["ensure"] = _ensure_fr_types()
         summary["migrate"] = _migrate_employees()
+        summary["merge_dup"] = _merge_duplicates()
         summary["purge"] = _purge_orphan_en_types()
         frappe.db.commit()
         frappe.clear_cache(doctype="Employment Type")
