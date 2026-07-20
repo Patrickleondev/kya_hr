@@ -18,9 +18,33 @@ class KYAContrat(Document):
     def validate(self):
         self._autofill_from_employee()
         self._default_civilite()
+        self._default_civilite_maitres()
         self._select_template()
         self._compute_date_fin()
         self._validate_signatures()
+
+    def _default_civilite_maitres(self):
+        """Propose la civilité de chaque maître de stage (sexe + situation de
+        famille de sa fiche Employee) si la RH ne l'a pas choisie. Éditable :
+        jamais réécrite si déjà renseignée, comme pour le stagiaire."""
+        maitres = self.get("maitres_stage") or []
+        if not maitres:
+            return
+        from kya_hr.kya_hr.doctype.kya_contract_template.kya_contract_template import (
+            compute_civilite,
+        )
+        # Employee.marital_status est en anglais ; compute_civilite attend les
+        # libellés FR. On traduit pour que « Married » donne bien « Madame ».
+        vers_fr = {"married": "Marié(e)", "divorced": "Divorcé(e)",
+                   "widowed": "Veuf/Veuve"}
+        for m in maitres:
+            if m.get("civilite") or not m.get("employee"):
+                continue
+            infos = frappe.db.get_value(
+                "Employee", m.employee, ["gender", "marital_status"], as_dict=True) or {}
+            if infos.get("gender"):
+                situation = vers_fr.get((infos.get("marital_status") or "").strip().lower())
+                m.civilite = compute_civilite(infos.get("gender"), situation)
 
     def _default_civilite(self):
         """Propose la civilité (Sexe + Situation de famille) si la RH ne l'a pas

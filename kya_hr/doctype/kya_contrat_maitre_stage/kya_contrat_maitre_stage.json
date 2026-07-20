@@ -4,14 +4,15 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "istable": 1,
- "field_order": ["employee", "employee_name", "role_maitre"],
+ "field_order": ["employee", "civilite", "employee_name", "role_maitre"],
  "fields": [
-  {"fieldname": "employee", "fieldtype": "Link", "label": "Employé", "options": "Employee", "in_list_view": 1, "columns": 4, "reqd": 1},
+  {"fieldname": "employee", "fieldtype": "Link", "label": "Employé", "options": "Employee", "in_list_view": 1, "columns": 3, "reqd": 1},
+  {"fieldname": "civilite", "fieldtype": "Select", "label": "Civilité", "options": "\nMonsieur\nMadame\nMademoiselle", "in_list_view": 1, "columns": 2, "description": "Pré-remplie selon le sexe et la situation de famille de l'employé. Corrigez-la si besoin — c'est la civilité affichée sur le contrat (ex. « Madame » pour une dame célibataire)."},
   {"fieldname": "employee_name", "fieldtype": "Data", "label": "Nom", "fetch_from": "employee.employee_name", "in_list_view": 1, "columns": 4, "read_only": 1},
   {"fieldname": "role_maitre", "fieldtype": "Data", "label": "Rôle", "default": "Maître de Stage", "in_list_view": 1, "columns": 3}
  ],
  "links": [],
- "modified": "2026-04-24 12:00:00",
+ "modified": "2026-07-20 10:00:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "KYA Contrat Maitre Stage",
