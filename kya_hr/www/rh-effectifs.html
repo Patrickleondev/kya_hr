@@ -119,8 +119,11 @@
       dans le registre du personnel et le parcours de carrière.
       Vos saisies déjà faites dans l'ERP ne sont <b>jamais écrasées</b> : seuls les champs vides
       sont complétés. Vous pouvez réimporter le même fichier sans créer de doublon.
+      <br>Pas de fichier au bon format ? <b>Téléchargez le modèle</b>, remplissez-le, réimportez-le.
     </p>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <button class="rh-btn sec" id="imp-modele" type="button">⬇️ Télécharger le modèle</button>
+      <span style="color:#cbd5e1;">|</span>
       <input type="file" id="imp-fichier" accept=".xlsx,.xlsm">
       <button class="btn" id="imp-simuler" type="button">Simuler</button>
       <button class="btn" id="imp-lancer" type="button" disabled>Importer pour de vrai</button>
@@ -391,7 +394,21 @@ async function importer(simule){
   }
 }
 
+async function telechargerModele(){
+  const res = document.getElementById('imp-res');
+  try{
+    const r = await apiPost('kya_hr.api.rh_modele.telecharger_modele', {});
+    if(r && r.content_base64){
+      const a = document.createElement('a');
+      a.href = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'+r.content_base64;
+      a.download = r.filename || 'Modele_Import_RH_KYA.xlsx'; a.click();
+      res.textContent = '✅ Modèle téléchargé. Remplissez-le puis réimportez-le ici.';
+    }
+  }catch(e){ res.textContent = '❌ '+e.message; }
+}
+
 if(document.getElementById('imp-simuler')){
+  document.getElementById('imp-modele').onclick = telechargerModele;
   document.getElementById('imp-simuler').onclick = ()=>importer(true);
   document.getElementById('imp-lancer').onclick = ()=>importer(false);
   // Changer de fichier invalide la simulation précédente.
