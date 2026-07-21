@@ -313,19 +313,30 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
   <!-- IMPORT -->
   <div id="pane-imp" class="ks-hide">
     <div class="ks-card">
-      <h3>Importer des articles (classés par magasin)</h3>
-      <div class="ks-note">Charge ton fichier <b>Excel (.xlsx)</b> rempli — ou colle les lignes. Colonnes (avec en-tête), <b>sans code</b> :
+      <h3>Importer des articles (fichier Excel)</h3>
+      <div class="ks-note">Colonnes attendues (1ʳᵉ ligne = en-tête), <b>sans code</b> :
         <code>designation, categorie, unite, magasin, bon_etat, a_reparer, defectueux</code>.
-        La <b>désignation</b> est la clé (le nom du matériel). Trois colonnes de quantité : <i>bon_etat</i>, <i>a_reparer</i> et <i>defectueux</i>.
-        Ré-importer un article dans le même magasin <b>remplace</b> son ouverture (pas de cumul).
-        <a href="#" onclick="modele();return false;">⬇️ Télécharger le modèle Excel</a></div>
-      <input type="file" id="ks-file" accept=".xlsx" onchange="charger(this)">
-      <div style="font-size:.75rem;color:#94a3b8;margin:4px 0;">Charge directement ton fichier <b>Excel (.xlsx)</b> rempli. Ou colle des lignes ci-dessous.</div>
-      <textarea class="ks-ta" id="ks-csv" placeholder="designation,categorie,unite,magasin,bon_etat,a_reparer,defectueux&#10;MODULE PV 455Wc,Modules PV,Unité,Magasin KYA - KYA,12,0,0"></textarea>
-      <div style="margin-top:10px;display:flex;gap:8px;align-items:center;">
-        <button class="ks-btn" id="ks-imp-btn" onclick="importer()">⬆️ Importer</button>
-        <span id="ks-imp-res" style="font-size:.85rem;color:#475569;"></span>
+        La <b>désignation</b> est la clé (le nom du matériel). Trois colonnes de quantité : <i>bon_etat</i>, <i>a_reparer</i>, <i>defectueux</i>.
+        Ré-importer un article dans le même magasin <b>remplace</b> son ouverture (pas de cumul).</div>
+
+      <div style="display:flex;flex-direction:column;gap:6px;max-width:560px;">
+        <div><b>1.</b> <a href="#" onclick="modele();return false;">⬇️ Télécharger le modèle Excel</a> (contient les magasins valides).</div>
+        <div><b>2.</b> Le remplir dans Excel : une ligne par article.</div>
+        <div><b>3.</b> Le charger ici :</div>
+        <label for="ks-file" class="ks-btn" style="cursor:pointer;display:inline-block;width:max-content;">📁 Choisir mon fichier Excel (.xlsx)</label>
+        <input type="file" id="ks-file" accept=".xlsx" onchange="charger(this)" style="display:none;">
+        <div style="font-size:.75rem;color:#94a3b8;">L'import démarre <b>dès que le fichier est choisi</b> (pas d'autre bouton à cliquer).</div>
+        <span id="ks-imp-res" style="font-size:.9rem;font-weight:600;color:#0f766e;"></span>
       </div>
+
+      <details style="margin-top:16px;">
+        <summary style="cursor:pointer;color:#64748b;font-size:.82rem;">Autre méthode — coller du texte (avancé)</summary>
+        <div style="font-size:.75rem;color:#94a3b8;margin:6px 0;">Colle des lignes avec la même en-tête. ⚠️ Ne colle pas directement depuis Excel (tabulations) : utilise plutôt le fichier ci-dessus.</div>
+        <textarea class="ks-ta" id="ks-csv" placeholder="designation;categorie;unite;magasin;bon_etat;a_reparer;defectueux&#10;MODULE PV 455Wc;Modules PV;Unité;Magasin KYA - KYA;12;0;0"></textarea>
+        <div style="margin-top:10px;">
+          <button class="ks-btn sec" id="ks-imp-btn" onclick="importer()">Importer le texte collé</button>
+        </div>
+      </details>
     </div>
   </div>
 </div>
@@ -655,6 +666,20 @@ function dlB64(b64,name){
   const u=URL.createObjectURL(new Blob([arr],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
   const a=document.createElement('a'); a.href=u; a.download=name; a.click(); URL.revokeObjectURL(u);
 }
+// Un magasin mal orthographié crée bien les articles mais ne pose AUCUNE
+// quantité. Sans ce message on lisait « ✅ » en croyant l'import réussi.
+function msgImport(r){
+  const mi=r.magasins_introuvables||[];
+  let t=`${r.articles_crees} article(s) créé(s), ${r.lignes_stock} ligne(s) de stock`;
+  if(r.erreurs&&r.erreurs.length) t+=`, ${r.erreurs.length} erreur(s)`;
+  if(r.sans_magasin) t+=`, ${r.sans_magasin} ligne(s) sans magasin (aucune quantité posée)`;
+  if(mi.length){
+    const det=mi.map(m=>`« ${m.magasin} » (${m.lignes} ligne(s))`).join(', ');
+    return `⚠️ ${t}. Magasin introuvable ou ambigu : ${det}. `
+         + `Ces quantités n'ont PAS été enregistrées — corrigez le nom du magasin et réimportez.`;
+  }
+  return (r.lignes_stock?'✅ ':'⚠️ ')+t;
+}
 async function charger(inp){
   const f=inp.files[0]; if(!f) return;
   const res=document.getElementById('ks-imp-res'); res.textContent='Lecture du fichier…';
@@ -662,7 +687,7 @@ async function charger(inp){
   try{
     const r=(await frappe.call({method:'kya_hr.api.stock_kya.importer_stock_fichier',
       args:{content_base64:b64, filename:f.name}})).message;
-    res.textContent=`✅ ${r.articles_crees} article(s) créé(s), ${r.lignes_stock} ligne(s) de stock`+(r.erreurs&&r.erreurs.length?`, ${r.erreurs.length} erreur(s)`:'');
+    res.textContent=msgImport(r);
     await load(); tab('inv');
   }catch(e){ res.textContent='Erreur import fichier.'; }
   inp.value='';
@@ -670,10 +695,10 @@ async function charger(inp){
 function parseCSV(txt){
   const lines=txt.split(/\r?\n/).filter(l=>l.trim());
   if(!lines.length) return [];
-  const head=lines[0].split(/[;,]/).map(h=>h.trim().toLowerCase());
+  const head=lines[0].split(/[;,\t]/).map(h=>h.trim().toLowerCase());
   const idx=n=>head.indexOf(n);
   return lines.slice(1).map(l=>{
-    const c=l.split(/[;,]/);
+    const c=l.split(/[;,\t]/);
     const g=n=>{const i=idx(n); return i>=0?(c[i]||'').trim().replace(/^"|"$/g,''):'';};
     return {designation:g('designation')||g('désignation')||g('nom')||g('article'),
             categorie:g('categorie')||g('catégorie')||g('groupe'),
@@ -690,8 +715,7 @@ async function importer(){
   const btn=document.getElementById('ks-imp-btn'); btn.disabled=true;
   try{
     const r=(await frappe.call({method:'kya_hr.api.stock_kya.importer_stock_initial',args:{rows:JSON.stringify(rows)}})).message;
-    document.getElementById('ks-imp-res').textContent=
-      `✅ ${r.articles_crees} article(s) créé(s), ${r.lignes_stock} ligne(s) de stock`+(r.erreurs&&r.erreurs.length?`, ${r.erreurs.length} erreur(s)`:'');
+    document.getElementById('ks-imp-res').textContent=msgImport(r);
     await load();
   } finally { btn.disabled=false; }
 }

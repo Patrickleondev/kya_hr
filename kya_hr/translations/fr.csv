@@ -5769,7 +5769,7 @@ Interest Income Account,Compte de revenu d'intérêts
 Interest and/or dunning fee,Intérêts et/ou frais de relance
 Interested,Intéressé
 Intermediate,Intermédiaire
-Intern,Interne
+Intern,Stagiaire
 Internal Customer,Client interne
 Internal Customer for company {0} already exists,Le client interne pour l'entreprise {0} existe déjà
 Internal Purchase Order,Bon de commande interne
@@ -13711,3 +13711,5 @@ you must select Capital Work in Progress Account in accounts table,vous devez s�
 Direction Generale,Direction Générale
 Gestion Equipe,Gestion Équipe
 Espace Employes,Espace Employés
+Stage,Stage
+Internship,Stage

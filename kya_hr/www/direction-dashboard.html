@@ -282,8 +282,21 @@ function drawCharts(ch){
 }
 
 (function init(){
-  function go(){ if(DGX_DATA){ render(DGX_DATA); } else if(window.frappe){
-    frappe.call({method:'kya_hr.www.direction_dashboard.get_dg_overview'}).then(r=>{ if(r.message) render(r.message); }); } }
+  /* Les pages www ne chargent pas le bundle JS `frappe` : l'objet window.frappe
+     existe parfois, mais SANS frappe.call. La garde `else if (window.frappe)`
+     passait donc, puis levait « frappe.call is not a function » — et le
+     tableau de bord du DG restait vide. On appelle l'API en fetch. */
+  async function charger(){
+    const r = await fetch('/api/method/kya_hr.www.direction_dashboard.get_dg_overview',
+      {headers:{'Accept':'application/json'}, credentials:'same-origin'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return (await r.json()).message;
+  }
+  function go(){
+    if(DGX_DATA){ render(DGX_DATA); return; }
+    charger().then(d=>{ if(d) render(d); })
+             .catch(e=>{ console.error('[KYA] direction-dashboard :', e); });
+  }
   if(window.Chart) go(); else { let n=0; const iv=setInterval(()=>{ if(window.Chart||n++>60){ clearInterval(iv); go(); } },100); }
 })();
 </script>

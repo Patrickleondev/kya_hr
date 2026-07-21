@@ -15,7 +15,7 @@
  "introduction_text": "<p>Saisie quotidienne du brouillard de caisse. La chaîne de validation: <b>Caissière</b> → <b>Comptable</b> → <b>DFC</b>. Un point hebdomadaire est automatiquement envoyé au DG.</p>",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-04-23 00:00:00.000000",
+ "modified": "2026-07-19 09:30:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "brouillard-caisse",
@@ -31,20 +31,23 @@
    "fieldname": "date_brouillard",
    "fieldtype": "Date",
    "label": "Date du Brouillard",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Jour des opérations de caisse que vous enregistrez."
   },
   {
    "fieldname": "caissiere",
    "fieldtype": "Link",
    "label": "Caissier(ère)",
    "options": "Employee",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Vous-même : tapez votre NOM, l'identifiant se remplit tout seul."
   },
   {
    "fieldname": "caissiere_name",
    "fieldtype": "Data",
    "label": "Nom Caissier(ère)",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Rempli automatiquement avec le nom du caissier ou de la caissière connecté(e)."
   },
   {
    "fieldname": "solde_precedent",
@@ -56,58 +59,82 @@
   {
    "fieldname": "date_solde_precedent",
    "fieldtype": "Date",
-   "label": "Date solde précédent"
+   "label": "Date solde précédent",
+   "description": "Date du dernier brouillard clôturé (celui d'où vient le solde précédent)."
+  },
+  {
+   "fieldname": "comptable_absent",
+   "fieldtype": "Check",
+   "label": "Comptable absent (viser directement par le DFC)",
+   "default": "0",
+   "description": "À cocher UNIQUEMENT si le comptable est absent ou en congé : la fiche part alors directement au DFC."
+  },
+  {
+   "fieldname": "comptable_absent_note",
+   "fieldtype": "Small Text",
+   "label": "Comptable intérimaire / précision (si comptable absent)",
+   "depends_on": "comptable_absent",
+   "description": "Indiquez qui remplace le comptable et pourquoi (traçabilité)."
   },
   {
    "fieldname": "lignes",
    "fieldtype": "Table",
    "label": "Opérations du Jour",
    "options": "Brouillard Caisse Ligne",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Une ligne par opération : date, désignation, puis le montant en Entrée OU en Sortie."
   },
   {
    "fieldname": "total_entrees",
    "fieldtype": "Currency",
    "label": "Total Entrées",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Calculé automatiquement — ne pas modifier."
   },
   {
    "fieldname": "total_sorties",
    "fieldtype": "Currency",
    "label": "Total Sorties",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Calculé automatiquement — ne pas modifier."
   },
   {
    "fieldname": "solde_final",
    "fieldtype": "Currency",
    "label": "Solde Final Théorique",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Solde théorique = solde précédent + entrées − sorties. Calculé automatiquement."
   },
   {
    "fieldname": "total_reel_caisse",
    "fieldtype": "Currency",
    "label": "Total Réel de la Caisse (comptage physique)",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Montant réellement COMPTÉ dans la caisse en fin de journée. Tout écart avec le solde théorique doit être justifié en commentaire."
   },
   {
    "fieldname": "commentaires",
    "fieldtype": "Small Text",
-   "label": "Commentaires / Observations"
+   "label": "Commentaires / Observations",
+   "description": "Justifiez ici tout écart entre le solde théorique et le comptage réel."
   },
   {
    "fieldname": "signature_caissiere",
    "fieldtype": "Signature",
-   "label": "Signature Caissier(ère)"
+   "label": "Signature Caissier(ère)",
+   "description": "Signez ici, puis envoyez au comptable."
   },
   {
    "fieldname": "signature_comptable",
    "fieldtype": "Signature",
-   "label": "Signature Comptable"
+   "label": "Signature Comptable",
+   "description": "Réservé au comptable — laissez vide."
   },
   {
    "fieldname": "signature_dfc",
    "fieldtype": "Signature",
-   "label": "Signature DFC"
+   "label": "Signature DFC",
+   "description": "Réservé au DFC — laissez vide."
   }
  ],
  "no_sidebar": 1

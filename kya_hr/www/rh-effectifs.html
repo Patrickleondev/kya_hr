@@ -18,12 +18,29 @@
   .rh-kpi.green{border-left-color:#16a34a;} .rh-kpi.green .n{color:#16a34a;}
   .rh-kpi.amber{border-left-color:#d97706;} .rh-kpi.amber .n{color:#d97706;}
   .rh-kpi.violet{border-left-color:#7c3aed;} .rh-kpi.violet .n{color:#7c3aed;}
+  .rh-kpi.red{border-left-color:#dc2626;} .rh-kpi.red .n{color:#dc2626;}
   .rh-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:8px;}
   .rh-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px;box-shadow:0 1px 2px rgba(0,0,0,.03);}
   .rh-card h3{margin:0 0 10px;font-size:.9rem;font-weight:700;color:#334155;}
   .rh-card .cbox{position:relative;height:250px;}
   .rh-card.wide{grid-column:1 / -1;}
   .rh-note{color:#94a3b8;font-size:.78rem;text-align:center;padding:26px;}
+  .rh-ret{margin-top:16px;}
+  .rh-ret .alerts{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+  .rh-ret .alerts .a{border-radius:10px;padding:6px 12px;font-size:.78rem;font-weight:700;border:1px solid transparent;}
+  .rh-ret .a.atteint{background:#fee2e2;color:#991b1b;border-color:#fecaca;}
+  .rh-ret .a.proche{background:#ffedd5;color:#9a3412;border-color:#fed7aa;}
+  .rh-ret .a.anticiper{background:#fef9c3;color:#854d0e;border-color:#fde68a;}
+  .rh-ret .a.retraite{background:#e2e8f0;color:#334155;border-color:#cbd5e1;}
+  .rh-tbl{width:100%;border-collapse:collapse;font-size:.82rem;}
+  .rh-tbl th{text-align:left;background:#f8fafc;color:#475569;font-weight:700;padding:8px 10px;border-bottom:2px solid #e2e8f0;font-size:.72rem;text-transform:uppercase;letter-spacing:.02em;}
+  .rh-tbl td{padding:8px 10px;border-bottom:1px solid #f1f5f9;}
+  .rh-tbl tr:hover td{background:#f8fafc;}
+  .rh-tbl .badge{display:inline-block;padding:2px 8px;border-radius:9px;font-size:.7rem;font-weight:700;}
+  .rh-tbl .b-atteint{background:#fee2e2;color:#991b1b;} .rh-tbl .b-proche{background:#ffedd5;color:#9a3412;}
+  .rh-tbl .b-anticiper{background:#fef9c3;color:#854d0e;} .rh-tbl .b-retraite{background:#e2e8f0;color:#334155;}
+  .rh-tbl .b-ok{background:#dcfce7;color:#166534;}
+  .rh-scroll{overflow-x:auto;}
   @media(max-width:1024px){.rh-kpis{grid-template-columns:repeat(3,1fr);}.rh-grid{grid-template-columns:1fr;}}
   @media(max-width:560px){.rh-kpis{grid-template-columns:repeat(2,1fr);}}
 </style>
@@ -65,10 +82,60 @@
     <div class="rh-card wide"><h3>Évolution de l'effectif dans le temps</h3><div class="cbox"><canvas id="c-effectif"></canvas></div></div>
     <div class="rh-card wide"><h3>Évolution de la masse salariale (M FCFA)</h3><div class="cbox"><canvas id="c-masse"></canvas></div></div>
   </div>
+
+  <div class="rh-card wide rh-ret" id="ctr-bloc">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+      <h3 style="margin:0;">📄 Contrats <span id="ctr-sous" style="font-weight:500;color:#94a3b8;font-size:.78rem;"></span></h3>
+    </div>
+    <div class="rh-kpis" id="ctr-kpi" style="margin-top:12px;"></div>
+    <div class="rh-grid" style="margin-top:4px;">
+      <div class="rh-card"><h3>Tous les contrats par type <span style="font-weight:500;color:#94a3b8;">(brouillons inclus)</span></h3><div class="cbox"><canvas id="c-ctr-type"></canvas></div></div>
+      <div class="rh-card"><h3>Où en sont les signatures <span style="font-weight:500;color:#94a3b8;">(tous statuts)</span></h3><div class="cbox"><canvas id="c-ctr-etat"></canvas></div></div>
+    </div>
+    <div class="alerts" id="ctr-alerts" style="margin-top:4px;"></div>
+    <div class="rh-scroll"><table class="rh-tbl" id="ctr-tbl"><thead><tr>
+      <th>Contrat</th><th>Salarié</th><th>Type</th><th>Département</th>
+      <th>Fin</th><th>Jours restants</th><th>Alerte</th>
+    </tr></thead><tbody id="ctr-body"></tbody></table></div>
+  </div>
+
+  <div class="rh-card wide rh-ret">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+      <h3 style="margin:0;">🕰️ Départs à la retraite <span id="ret-age" style="font-weight:500;color:#94a3b8;font-size:.78rem;"></span></h3>
+      <button class="rh-btn sec" onclick="exportRetraite()">⬇️ Classeur retraite</button>
+    </div>
+    <div class="alerts" id="ret-alerts" style="margin-top:12px;"></div>
+    <div class="rh-scroll"><table class="rh-tbl" id="ret-tbl"><thead><tr>
+      <th>Matricule</th><th>Nom &amp; Prénoms</th><th>Poste</th><th>Département</th>
+      <th>Âge</th><th>Départ prévu</th><th>Années restantes</th><th>Alerte</th>
+    </tr></thead><tbody id="ret-body"></tbody></table></div>
+  </div>
+
+  {% if peut_importer %}
+  <div class="rh-card wide rh-ret" id="imp-bloc">
+    <h3 style="margin:0;">📥 Importer le classeur RH</h3>
+    <p style="color:#64748b;font-size:.82rem;margin:8px 0 12px;">
+      Verse les feuilles <b>Personnel</b> et <b>Evolution carriere</b> de votre classeur Excel
+      dans le registre du personnel et le parcours de carrière.
+      Vos saisies déjà faites dans l'ERP ne sont <b>jamais écrasées</b> : seuls les champs vides
+      sont complétés. Vous pouvez réimporter le même fichier sans créer de doublon.
+      <br>Pas de fichier au bon format ? <b>Téléchargez le modèle</b>, remplissez-le, réimportez-le.
+    </p>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <button class="rh-btn sec" id="imp-modele" type="button">⬇️ Télécharger le modèle</button>
+      <span style="color:#cbd5e1;">|</span>
+      <input type="file" id="imp-fichier" accept=".xlsx,.xlsm">
+      <button class="btn" id="imp-simuler" type="button">Simuler</button>
+      <button class="btn" id="imp-lancer" type="button" disabled>Importer pour de vrai</button>
+    </div>
+    <div id="imp-res" style="margin-top:12px;font-size:.85rem;white-space:pre-line;"></div>
+  </div>
+  {% endif %}
 </div>
 
 <script>
 let RH = {{ overview_json | safe }};
+const CSRF = {{ (csrf_token or '') | tojson }};
 const PALETTE = ['#0f766e','#2563eb','#d97706','#7c3aed','#db2777','#16a34a','#0891b2','#dc2626','#65a30d','#9333ea'];
 // Ces pages www ne chargent pas le bundle JS `frappe` → on appelle l'API via fetch.
 async function apiCall(method, args){
@@ -134,7 +201,83 @@ function render(){
   bar('c-tranche', RH.par_tranche, false);
   line('c-effectif', RH.evolution.labels, RH.evolution.effectif, 'Effectif', '#0f766e');
   line('c-masse', RH.evolution.labels, RH.evolution.masse, 'Masse (M FCFA)', '#7c3aed');
+  loadRetraite();
+  loadContrats();
 }
+
+/* ── Contrats : volumétrie, avancement des signatures, échéances ───────── */
+async function loadContrats(){
+  const body=document.getElementById('ctr-body'); if(!body) return;
+  let r;
+  try{ r=await apiCall('kya_hr.api.rh_effectifs.contrats_data',
+        {departement:document.getElementById('f-dept').value||null}); }
+  catch(e){
+    document.getElementById('ctr-bloc').style.display='none';   // module absent : on n'affiche rien de faux
+    return;
+  }
+  const k=r.kpi||{};
+  document.getElementById('ctr-sous').textContent='('+nf(k.total)+' au total)';
+  document.getElementById('ctr-kpi').innerHTML=
+      kpiCard(nf(k.en_vigueur),'En vigueur','green')
+    + kpiCard(nf(k.en_cours_signature),'En cours de signature', k.en_cours_signature?'amber':'')
+    + kpiCard(nf(k.cdi),'CDI en vigueur','blue')
+    + kpiCard(nf(k.stages),'Stages en vigueur','violet')
+    + kpiCard(nf(k.expires),'Expirés', k.expires?'red':'')
+    + kpiCard(nf(k.expire_30j),'Expirent sous 30 j', k.expire_30j?'amber':'');
+
+  pie('c-ctr-type', r.par_type, PALETTE);
+  pie('c-ctr-etat', r.par_etat, PALETTE);
+
+  const al=document.getElementById('ctr-alerts');
+  const parts=[];
+  if(k.expires)    parts.push('<span class="a atteint">'+k.expires+' — expiré(s)</span>');
+  if(k.expire_30j) parts.push('<span class="a proche">'+k.expire_30j+' — expirent sous 30 jours</span>');
+  if(k.expire_90j) parts.push('<span class="a anticiper">'+k.expire_90j+' — expirent sous 3 mois</span>');
+  if(k.rejetes)    parts.push('<span class="a retraite">'+k.rejetes+' — rejeté(s)</span>');
+  al.innerHTML=parts.join('') ||
+    '<span class="a" style="background:#dcfce7;color:#166534;">Aucun contrat à renouveler dans les 3 mois ✔</span>';
+
+  const lig=r.echeances||[];
+  if(!lig.length){
+    body.innerHTML='<tr><td colspan="7" class="rh-note">Aucune échéance dans les 3 mois. Les CDI, sans date de fin, n\'apparaissent pas ici.</td></tr>';
+    return;
+  }
+  body.innerHTML=lig.map(function(x){
+    const cls = x.jours<0 ? 'b-atteint' : (x.jours<=30 ? 'b-proche' : 'b-anticiper');
+    const j   = x.jours<0 ? ('en retard de '+(-x.jours)+' j') : (x.jours+' j');
+    return '<tr><td><b>'+esc(x.nom)+'</b></td><td>'+esc(x.employe)+'</td>'+
+      '<td>'+esc(x.type)+'</td><td>'+esc(x.departement)+'</td>'+
+      '<td>'+esc(x.date_fin)+'</td><td>'+j+'</td>'+
+      '<td><span class="badge '+cls+'">'+esc(x.alerte)+'</span></td></tr>';
+  }).join('');
+}
+
+const RET_LABELS={atteint:'Âge de départ atteint',proche:'Proche (< 2 ans)',anticiper:'À anticiper (< 5 ans)',retraite:'Déjà retraité(s)'};
+async function loadRetraite(){
+  const body=document.getElementById('ret-body'); if(!body) return;
+  let r;
+  try{ r=await apiCall('kya_hr.api.rh_effectifs.retraite_data',
+        {departement:document.getElementById('f-dept').value||null}); }
+  catch(e){ body.innerHTML='<tr><td colspan="8" class="rh-note">Suivi retraite indisponible.</td></tr>'; return; }
+  document.getElementById('ret-age').textContent='(âge de départ : '+(r.age_retraite||60)+' ans)';
+  const c=r.compteurs||{}; const al=document.getElementById('ret-alerts');
+  al.innerHTML=['atteint','proche','anticiper','retraite']
+    .filter(k=>c[k]>0)
+    .map(k=>'<span class="a '+k+'">'+c[k]+' — '+RET_LABELS[k]+'</span>').join('')
+    || '<span class="a" style="background:#dcfce7;color:#166534;">Aucun départ à anticiper à court terme ✔</span>';
+  const lig=r.lignes||[];
+  if(!lig.length){ body.innerHTML='<tr><td colspan="8" class="rh-note">Aucune date de naissance renseignée — impossible de calculer les départs.</td></tr>'; return; }
+  body.innerHTML=lig.map(function(x){
+    const cls=x.cle?('b-'+x.cle):'b-ok';
+    const lbl=x.alerte||'OK';
+    return '<tr><td><b>'+esc(x.matricule)+'</b></td><td>'+esc(x.nom_complet)+'</td>'+
+      '<td>'+esc(x.poste)+'</td><td>'+esc(x.departement)+'</td>'+
+      '<td>'+x.age+'</td><td>'+esc(x.date_retraite)+'</td>'+
+      '<td>'+x.annees_avant+'</td>'+
+      '<td><span class="badge '+cls+'">'+esc(lbl)+'</span></td></tr>';
+  }).join('');
+}
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 
 function destroy(id){ if(CHARTS[id]){ CHARTS[id].destroy(); delete CHARTS[id]; } }
 function empty(d){ return !d || !d.data || d.data.reduce((a,b)=>a+b,0)===0; }
@@ -174,6 +317,105 @@ async function exportExcel(){
       a.href='data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'+r.content_base64;
       a.download=r.filename||'effectifs-kya.xlsx'; a.click(); }
   }catch(e){ alert("Export indisponible."); }
+}
+
+async function exportRetraite(){
+  try{
+    const r=await apiCall('kya_hr.api.rh_effectifs.export_retraite_excel',
+      {departement:document.getElementById('f-dept').value||null});
+    if(r&&r.content_base64){ const a=document.createElement('a');
+      a.href='data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'+r.content_base64;
+      a.download=r.filename||'gestion-retraite-kya.xlsx'; a.click(); }
+  }catch(e){ alert("Export retraite indisponible."); }
+}
+
+// ── Import du classeur RH ────────────────────────────────────────────────
+// Un POST, pas un GET : le classeur encodé pèse plus que ne le permet une URL.
+async function apiPost(method, args){
+  const r = await fetch('/api/method/'+method, {
+    method:'POST', credentials:'same-origin',
+    headers:{'Content-Type':'application/json','Accept':'application/json',
+             'X-Frappe-CSRF-Token':CSRF},
+    body:JSON.stringify(args||{})});
+  const t = await r.text();
+  let j = null; try{ j = JSON.parse(t); }catch(e){}
+  if(!r.ok){
+    // Frappe renvoie le message métier dans _server_messages ou exception.
+    let msg = 'HTTP '+r.status;
+    try{
+      const sm = j && j._server_messages ? JSON.parse(j._server_messages) : [];
+      if(sm.length) msg = JSON.parse(sm[0]).message;
+      else if(j && j.exception) msg = j.exception;
+    }catch(e){}
+    throw new Error(msg);
+  }
+  return j.message;
+}
+
+function lireFichier(){
+  const f = document.getElementById('imp-fichier').files[0];
+  if(!f){ throw new Error('Choisissez d’abord votre classeur Excel.'); }
+  return new Promise((ok,ko)=>{ const rd=new FileReader();
+    rd.onload=e=>ok({b64:e.target.result.split(',')[1], nom:f.name});
+    rd.onerror=()=>ko(new Error('Fichier illisible.')); rd.readAsDataURL(f); });
+}
+
+function rendreRapport(r, simule){
+  const l = [];
+  l.push((simule?'🔎 Simulation — rien n’a été enregistré.':'✅ Import terminé.'));
+  l.push(`Registre du personnel : ${r.salaries_crees} créé(s), ${r.salaries_completes} complété(s), ${r.salaries_inchanges} inchangé(s).`);
+  l.push(`Parcours de carrière : ${r.evenements_crees} évènement(s) ajouté(s), ${r.evenements_existants} déjà présent(s).`);
+  if(r.embauches_deduites) l.push(`Embauches déduites de la date d’embauche : ${r.embauches_deduites}.`);
+  if(r.ignorees && r.ignorees.length){
+    l.push(`\n${r.ignorees.length} ligne(s) ignorée(s) — il y manque une information :`);
+    r.ignorees.slice(0,12).forEach(x=>l.push('   • '+x));
+    if(r.ignorees.length>12) l.push(`   … et ${r.ignorees.length-12} autre(s).`);
+  }
+  if(r.erreurs && r.erreurs.length) l.push(`\n⚠️ ${r.erreurs.length} ligne(s) en erreur : ${r.erreurs.join(', ')}`);
+  return l.join('\n');
+}
+
+let IMP_PRET = null;   // classeur validé par une simulation
+async function importer(simule){
+  const res = document.getElementById('imp-res');
+  const bLancer = document.getElementById('imp-lancer');
+  try{
+    const f = await lireFichier();
+    res.textContent = simule ? 'Simulation en cours…' : 'Import en cours…';
+    const r = await apiPost('kya_hr.api.rh_parcours_import.importer_classeur_rh',
+      {content_base64:f.b64, filename:f.nom, dry_run:simule?1:0});
+    res.textContent = rendreRapport(r, simule);
+    // On n'autorise l'écriture qu'après une simulation du MÊME fichier.
+    if(simule){ IMP_PRET = f.nom; bLancer.disabled = false; }
+    else { IMP_PRET = null; bLancer.disabled = true; await reload(); }
+  }catch(e){
+    res.textContent = '❌ '+e.message;
+    if(simule){ IMP_PRET = null; bLancer.disabled = true; }
+  }
+}
+
+async function telechargerModele(){
+  const res = document.getElementById('imp-res');
+  try{
+    const r = await apiPost('kya_hr.api.rh_modele.telecharger_modele', {});
+    if(r && r.content_base64){
+      const a = document.createElement('a');
+      a.href = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'+r.content_base64;
+      a.download = r.filename || 'Modele_Import_RH_KYA.xlsx'; a.click();
+      res.textContent = '✅ Modèle téléchargé. Remplissez-le puis réimportez-le ici.';
+    }
+  }catch(e){ res.textContent = '❌ '+e.message; }
+}
+
+if(document.getElementById('imp-simuler')){
+  document.getElementById('imp-modele').onclick = telechargerModele;
+  document.getElementById('imp-simuler').onclick = ()=>importer(true);
+  document.getElementById('imp-lancer').onclick = ()=>importer(false);
+  // Changer de fichier invalide la simulation précédente.
+  document.getElementById('imp-fichier').onchange = ()=>{
+    IMP_PRET = null; document.getElementById('imp-lancer').disabled = true;
+    document.getElementById('imp-res').textContent = '';
+  };
 }
 
 render();

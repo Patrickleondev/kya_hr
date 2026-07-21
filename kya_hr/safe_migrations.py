@@ -39,6 +39,7 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.ensure_webform_table_columns.execute", "Tables web forms <= 10 colonnes (BC/PV/Inventaire/Retour/Demande Achat) : plus de scroll horizontal"),
     ("kya_hr.fix_phantom_workflow_roles.execute", "Remap rôles fantômes des transitions (Responsable Comptable -> Comptable)"),
     ("kya_hr.ensure_workflow_states.execute", "Cree tout Workflow State manquant (fix 'État introuvable' : En attente Validation DFC, En attente Maitre de Stage...)"),
+    ("kya_hr.maintenance.ensure_workflow_action_masters.execute", "Cree tout Workflow Action Master manquant (fix UI 'Impossible de trouver Ligne #N: Action' au save d'un Workflow : ex. 'Soumettre au DFC' absent bloquait l'ajout du rôle Caissier)"),
     ("kya_hr.ensure_workflow_perms.execute", "Ensure perms approbateurs workflow (write sans if_owner: Chef/Audit/DG/RH...)"),
     ("kya_hr.force_resync_webform_fields.execute", "Force resync web form fields (Frappe v16 bug workaround)"),
     ("kya_hr.notification_fixes.execute", "Notification fixes"),
@@ -55,6 +56,9 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.setup_attendance_fields.execute", "Setup custom fields Attendance (KYA marked_by, lateness, etc.)"),
     ("kya_hr.normalize_departments.execute", "Arbre Department en français sous 4 macro-départements (DG/Supports/Techniques/Commerciaux) ; rename_doc propage les références"),
     ("kya_hr.fix_naming_series.execute", "Resync compteurs tabSeries (corrige l'ID employé en double : compteur en retard sur le max réel)"),
+    ("kya_hr.maintenance.fix_salarie_employee_link.execute", "Salarie KYA : recupere l'ancien champ 'employee' (doublon retire) vers 'employee_link'"),
+    ("kya_hr.maintenance.seed_rh_prod.execute", "Amorcage registre RH : backfill Salaries depuis Employee + etape Embauche par salarie (route visible des le deploiement, sans classeur)"),
+    ("kya_hr.reconcile_duplicate_roles.execute", "Roles en doublon : tout porteur d'un synonyme (Chef d'Equipe/Chef Equipe/Responsable Equipe, DG/Directeur General, DAAF/DFC) recoit les autres -> personne bloque a une etape"),
     ("kya_hr.desktop_icons.execute", "Desktop icons (workaround Frappe v16)"),
     ("kya_hr.coherence_fixes.execute", "Coherence fixes (champs orphelins)"),
     ("kya_hr.fix_sidebar_equipe_kya.execute", "Fix sidebar : Equipe KYA -> Espace Stagiaires (mauvais link_to)"),
@@ -91,6 +95,7 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.maintenance.setup_rh_effectifs.execute", "Socle module RH Effectifs : départements (DST/DSS/DSC) + Paramètres RH KYA (barèmes Convention : licenciement/ancienneté/retraite/permissions) configurables, sans paie ERPNext"),
     ("kya_hr.maintenance.setup_compta_maison.execute", "Comptabilité MAISON : installe les DocTypes custom=1 (Facture KYA, Ecriture Comptable KYA/Grand Livre, Bulletin Paie KYA + Parametres Paie KYA/barèmes) + formats d'impression (custom=1 non resynchronisés par migrate) ; pose le barème IRPP par défaut si vide"),
     ("kya_hr.maintenance.disable_native_birthday.execute", "Éteint le rappel d'anniversaire NATIF ERPNext (HR Settings) : KYA garde son propre rappel maison (RH+DG, sans âge) ; évite le doublon"),
+    ("kya_hr.maintenance.fix_contract_templates_genre.execute", "Rallume les modèles de contrat FÉMININS éteints par la règle d'unicité qui ignorait le genre (l'install de « CDD — Masculin » éteignait « CDD — Féminin » → les contrats de femmes sortaient au masculin, « Monsieur <nom> »)"),
 ]
 
 AFTER_INSTALL: list[tuple[str, str]] = [

@@ -1,0 +1,183 @@
+<script src="/assets/kya_hr/js/chart.umd.min.js"></script>
+<style>
+  .mk-wrap{max-width:1280px;margin:0 auto;padding:18px 16px 60px;font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#0f172a;}
+  .mk-head{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px;}
+  .mk-head h1{margin:0;font-size:1.4rem;font-weight:800;}
+  .mk-head .sub{color:#64748b;font-size:.82rem;}
+  .mk-btn{background:#0f766e;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-weight:700;font-size:.85rem;cursor:pointer;text-decoration:none;display:inline-block;}
+  .mk-btn.sec{background:#fff;color:#0f766e;border:1px solid #0f766e;}
+  .mk-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:14px;}
+  .mk-kpi{background:#fff;border:1px solid #e2e8f0;border-left:4px solid #0f766e;border-radius:12px;padding:12px 14px;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .mk-kpi .n{font-size:1.45rem;font-weight:800;line-height:1.1;}
+  .mk-kpi .u{font-size:.7rem;color:#94a3b8;font-weight:700;margin-left:3px;}
+  .mk-kpi .l{font-size:.72rem;color:#64748b;font-weight:600;margin-top:3px;text-transform:uppercase;letter-spacing:.02em;}
+  .mk-kpi .s{font-size:.72rem;color:#94a3b8;margin-top:2px;}
+  .mk-kpi.blue{border-left-color:#2563eb;} .mk-kpi.blue .n{color:#2563eb;}
+  .mk-kpi.green{border-left-color:#16a34a;} .mk-kpi.green .n{color:#16a34a;}
+  .mk-kpi.amber{border-left-color:#d97706;} .mk-kpi.amber .n{color:#d97706;}
+  .mk-kpi.violet{border-left-color:#7c3aed;} .mk-kpi.violet .n{color:#7c3aed;}
+  .mk-kpi.teal{border-left-color:#0f766e;} .mk-kpi.teal .n{color:#0f766e;}
+  .mk-kpi.red{border-left-color:#dc2626;} .mk-kpi.red .n{color:#dc2626;}
+  .mk-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:8px;}
+  .mk-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .mk-card h3{margin:0 0 10px;font-size:.9rem;font-weight:700;color:#334155;}
+  .mk-card h3 .hint{font-weight:500;color:#94a3b8;font-size:.78rem;}
+  .mk-card .cbox{position:relative;height:250px;}
+  .mk-card.wide{grid-column:1 / -1;}
+  .mk-alerts{display:flex;flex-direction:column;gap:6px;margin:10px 0 4px;}
+  .mk-al{border-radius:10px;padding:8px 12px;font-size:.8rem;border:1px solid transparent;display:flex;gap:10px;flex-wrap:wrap;align-items:baseline;}
+  .mk-al.grave{background:#fee2e2;color:#991b1b;border-color:#fecaca;}
+  .mk-al.moyen{background:#ffedd5;color:#9a3412;border-color:#fed7aa;}
+  .mk-al.info{background:#fef9c3;color:#854d0e;border-color:#fde68a;}
+  .mk-al b{font-weight:800;}
+  .mk-tbl{width:100%;border-collapse:collapse;font-size:.82rem;}
+  .mk-tbl th{text-align:left;background:#f8fafc;color:#475569;font-weight:700;padding:8px 10px;border-bottom:2px solid #e2e8f0;font-size:.72rem;text-transform:uppercase;letter-spacing:.02em;}
+  .mk-tbl td{padding:8px 10px;border-bottom:1px solid #f1f5f9;}
+  .mk-tbl tr:hover td{background:#f8fafc;}
+  .mk-tbl .num{text-align:right;font-variant-numeric:tabular-nums;}
+  .mk-tbl .neg{color:#dc2626;font-weight:700;}
+  .mk-tbl .pos{color:#16a34a;font-weight:700;}
+  .mk-badge{display:inline-block;padding:2px 8px;border-radius:9px;font-size:.7rem;font-weight:700;background:#e2e8f0;color:#334155;}
+  .mk-badge.encours{background:#dbeafe;color:#1e40af;}
+  .mk-badge.termine{background:#dcfce7;color:#166534;}
+  .mk-badge.annule{background:#fee2e2;color:#991b1b;}
+  .mk-scroll{overflow-x:auto;}
+  .mk-note{color:#94a3b8;font-size:.8rem;text-align:center;padding:26px;}
+  @media(max-width:1024px){.mk-kpis{grid-template-columns:repeat(3,1fr);}.mk-grid{grid-template-columns:1fr;}}
+  @media(max-width:560px){.mk-kpis{grid-template-columns:repeat(2,1fr);}}
+</style>
+
+<div class="mk-wrap">
+  <div class="mk-head">
+    <div>
+      <h1>📊 Marchés &amp; Clients</h1>
+      <div class="sub">Rentabilité des chantiers, dérives budgétaires et encours clients</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <a class="mk-btn sec" href="/app/marche-kya" target="_blank">Liste des marchés ↗</a>
+      <a class="mk-btn sec" href="/app/kya-sop-client" target="_blank">Contrats SoP ↗</a>
+      <a class="mk-btn" href="/marche-kya/new">+ Nouveau marché</a>
+    </div>
+  </div>
+
+  <div class="mk-kpis" id="mk-kpi"></div>
+  <div class="mk-alerts" id="mk-alertes"></div>
+
+  <div class="mk-grid">
+    <div class="mk-card"><h3>Répartition des coûts <span class="hint">(tous marchés)</span></h3><div class="cbox"><canvas id="c-postes"></canvas></div></div>
+    <div class="mk-card"><h3>Chiffre d'affaires par type de client</h3><div class="cbox"><canvas id="c-type"></canvas></div></div>
+    <div class="mk-card"><h3>Marchés par statut</h3><div class="cbox"><canvas id="c-statut"></canvas></div></div>
+    <div class="mk-card"><h3>Marge nette par marché <span class="hint">(10 premiers)</span></h3><div class="cbox"><canvas id="c-marges"></canvas></div></div>
+
+    <div class="mk-card wide">
+      <h3>Détail des marchés <span class="hint">— triés de la marge la plus faible à la plus forte</span></h3>
+      <div class="mk-scroll"><table class="mk-tbl"><thead><tr>
+        <th>Marché</th><th>Client</th><th>Type</th><th>Statut</th>
+        <th class="num">CA facturé</th><th class="num">Coût réel</th>
+        <th class="num">Marge nette</th><th class="num">Taux</th><th class="num">Écart budget<div style="font-weight:500;text-transform:none;color:#94a3b8;">+ = dépassement</div></th>
+      </tr></thead><tbody id="mk-lignes"></tbody></table></div>
+    </div>
+
+    <div class="mk-card wide">
+      <h3>Suivi client <span class="hint">— marchés réalisés et encours SoP réunis</span></h3>
+      <div class="mk-scroll"><table class="mk-tbl"><thead><tr>
+        <th>Client</th><th class="num">Marchés</th><th class="num">CA marchés</th>
+        <th class="num">Marge</th><th class="num">Contrats SoP</th>
+        <th class="num">Montant SoP</th><th class="num">Solde dû</th><th>Retard</th>
+      </tr></thead><tbody id="mk-clients"></tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let MK = {{ overview_json | safe }};
+const PALETTE = ['#0f766e','#2563eb','#d97706','#7c3aed','#db2777','#16a34a','#0891b2','#dc2626','#65a30d','#9333ea','#0284c7','#ca8a04','#be123c','#4d7c0f','#6d28d9'];
+const CHARTS = {};
+
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function nf(v){ return (v==null?0:Math.round(v)).toLocaleString('fr-FR'); }
+function signe(v){ return (v>0?'+':'') + nf(v); }
+function destroy(id){ if(CHARTS[id]){ CHARTS[id].destroy(); delete CHARTS[id]; } }
+function vide(d){ return !d || !d.data || !d.data.length || d.data.reduce((a,b)=>a+b,0)===0; }
+function blank(el){ if(el && el.parentNode) el.parentNode.innerHTML='<div class="mk-note">Aucune donnée à afficher.</div>'; }
+
+function donut(id, d){
+  destroy(id); const el=document.getElementById(id); if(!el) return;
+  if(vide(d)){ blank(el); return; }
+  CHARTS[id]=new Chart(el,{type:'doughnut',
+    data:{labels:d.labels,datasets:[{data:d.data,backgroundColor:PALETTE,borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:11}}},
+        tooltip:{callbacks:{label:c=>c.label+' : '+nf(c.parsed)+' FCFA'}}}}});
+}
+function barres(id, d, horizontal){
+  destroy(id); const el=document.getElementById(id); if(!el) return;
+  if(vide(d)){ blank(el); return; }
+  const couleurs=d.data.map(v=> v<0 ? '#dc2626' : '#0f766e');
+  CHARTS[id]=new Chart(el,{type:'bar',
+    data:{labels:d.labels,datasets:[{data:d.data,backgroundColor:couleurs,borderRadius:4}]},
+    options:{indexAxis:horizontal?'y':'x',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>nf(c.parsed[horizontal?'x':'y'])+' FCFA'}}},
+      scales:{x:{ticks:{font:{size:10}}},y:{ticks:{font:{size:10}}}}}});
+}
+
+function render(){
+  document.getElementById('mk-kpi').innerHTML=(MK.kpis||[]).map(k=>
+    '<div class="mk-kpi '+(k.accent||'')+'">'+
+      '<div class="n">'+esc(k.value)+(k.unit?'<span class="u">'+esc(k.unit)+'</span>':'')+'</div>'+
+      '<div class="l">'+esc(k.label)+'</div>'+
+      (k.sub?'<div class="s">'+esc(k.sub)+'</div>':'')+
+    '</div>').join('');
+
+  const al=document.getElementById('mk-alertes');
+  const alertes=MK.alertes||[];
+  if(alertes.length){
+    al.innerHTML=alertes.map(a=>
+      '<div class="mk-al '+esc(a.niveau)+'"><b>'+esc(a.libelle)+'</b>'+
+      '<span>'+esc(a.nom)+' — '+esc(a.client)+'</span>'+
+      '<span style="margin-left:auto;">'+esc(a.detail)+'</span></div>').join('');
+  } else if((MK.lignes||[]).length){
+    al.innerHTML='<div class="mk-al" style="background:#dcfce7;color:#166534;border-color:#bbf7d0;">'+
+      '<b>Aucune alerte</b><span>tous les marchés tiennent leur budget et dégagent une marge positive.</span></div>';
+  } else {
+    al.innerHTML='';   // aucun marché : le tableau affiche déjà l'invitation à en créer un
+  }
+
+  donut('c-postes', MK.postes);
+  donut('c-type', MK.par_type);
+  donut('c-statut', MK.par_statut);
+  barres('c-marges', MK.top_marges, true);
+
+  const cls={'En cours':'encours','Terminé':'termine','Clôturé':'termine','Annulé':'annule'};
+  const tb=document.getElementById('mk-lignes');
+  tb.innerHTML=(MK.lignes||[]).map(l=>
+    '<tr>'+
+      '<td><a href="/app/marche-kya/'+encodeURIComponent(l.nom)+'" target="_blank"><b>'+esc(l.libelle)+'</b></a>'+
+        (l.numero?'<div style="color:#94a3b8;font-size:.72rem;">'+esc(l.numero)+'</div>':'')+'</td>'+
+      '<td>'+esc(l.client)+'</td><td>'+esc(l.type)+'</td>'+
+      '<td><span class="mk-badge '+(cls[l.statut]||'')+'">'+esc(l.statut)+'</span></td>'+
+      '<td class="num">'+nf(l.ca)+'</td>'+
+      '<td class="num">'+nf(l.cout)+'</td>'+
+      '<td class="num '+(l.marge_nette<0?'neg':'pos')+'">'+nf(l.marge_nette)+'</td>'+
+      '<td class="num '+(l.taux!=null&&l.taux<0?'neg':'')+'">'+(l.taux==null?'—':l.taux+' %')+'</td>'+
+      '<td class="num '+(l.ecart_budget>0?'neg':(l.ecart_budget<0?'pos':''))+'">'+(l.ecart_budget?signe(l.ecart_budget):'—')+'</td>'+
+    '</tr>').join('')
+    || '<tr><td colspan="9" class="mk-note">Aucun marché enregistré. Créez le premier avec « + Nouveau marché ».</td></tr>';
+
+  const tc=document.getElementById('mk-clients');
+  tc.innerHTML=(MK.clients||[]).map(c=>
+    '<tr>'+
+      '<td><b>'+esc(c.nom)+'</b></td>'+
+      '<td class="num">'+nf(c.nb_marches)+'</td>'+
+      '<td class="num">'+nf(c.ca)+'</td>'+
+      '<td class="num '+(c.marge<0?'neg':'pos')+'">'+nf(c.marge)+'</td>'+
+      '<td class="num">'+nf(c.nb_sop)+'</td>'+
+      '<td class="num">'+nf(c.sop_total)+'</td>'+
+      '<td class="num '+(c.solde_du>0?'neg':'')+'">'+nf(c.solde_du)+'</td>'+
+      '<td>'+(c.retard?'<span class="mk-badge annule">'+c.retard+' en retard</span>':'<span class="mk-badge">à jour</span>')+'</td>'+
+    '</tr>').join('')
+    || '<tr><td colspan="8" class="mk-note">Aucun client à suivre pour l\'instant.</td></tr>';
+}
+
+render();
+</script>

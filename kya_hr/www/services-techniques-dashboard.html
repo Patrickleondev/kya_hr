@@ -82,7 +82,7 @@ function render(D){
   if(window.KYAKPI){ const al=D.alertes||{}; KYAKPI.prio(root,{chips:[
       {icon:'⚠️',count:al.sav_non_resolus,label:'système(s) laissé(s) Partiel / En panne (30 j) — à re-visiter'},
       {icon:'🧳',count:al.missions_attente,label:'mission(s) en attente DGA / DG'},
-      {icon:'⛔',count:al.taches_bloquees,label:'tâche(s) d'équipe bloquée(s)'}],
+      {icon:'⛔',count:al.taches_bloquees,label:"tâche(s) d'équipe bloquée(s)"}],
     okLabel:'Aucune intervention à reprendre ni mission en attente'}); }
 
   if(D.sav_note){ const n=el('div','stx-note'); n.appendChild(svg('ticket','#9a3412',18)); n.appendChild(el('span',null,D.sav_note)); root.appendChild(n); }

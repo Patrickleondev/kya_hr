@@ -150,6 +150,58 @@ def cdd_body() -> str:
     return SET_M + "\n".join([TRAVAILLEUR, CDD_ART1_2, ART3, ART4_5, ART6, ART7_13, CDD_ART14, ART15_17])
 
 
+# ── Prestataire (AEA-ENG-12) — corps genre-aware, valeurs = champs KYA Contrat ─
+# Chaîne LITTÉRALE (pas f-string) : les {{ }} / {% %} sont du vrai Jinja.
+# Le corps s'arrête avant les signatures (ajoutées par le print format).
+PRESTA_BODY = """{%- set m = (doc.sexe == 'Masculin') -%}
+{%- set civ = doc.civilite or ('Monsieur' if m else 'Madame') -%}
+<p><strong>Entre :</strong></p>
+<p><strong>L'entreprise KYA-Energy Group</strong>, 08 BP 81101 AGOE-NYIVE, LOGOPE, Tél. : +228 22 37 69 96 / 91 50 21 49, e-mail : <a href="mailto:info@kya-energy.com">info@kya-energy.com</a>, représentée par son Directeur Général, Prof. Yao K. AZOUMAH, ci-après désignée « KYA-Energy Group », d'une part,</p>
+<p><strong>Et</strong></p>
+<p><strong>{{ doc.employee_name }}</strong>{% if doc.employee_email %}, e-mail : {{ doc.employee_email }}{% endif %}{% if doc.telephone %}, contact : {{ doc.telephone }}{% endif %}, ci-après désigné{{ '' if m else 'e' }} « Le Prestataire », d'autre part,</p>
+<p><strong>Il est arrêté ce qui suit :</strong></p>
+
+<p><strong>Article 1 : Objet de la mission</strong></p>
+<p>KYA-Energy Group, agissant aux diligences de son Directeur Général, a sollicité les services de {{ civ }} <strong>{{ doc.employee_name }}</strong>, qui a accepté, pour la durée précisée à l'article 2 du présent contrat{% if doc.mission_principale %}, afin d'assurer <strong>{{ doc.mission_principale }}</strong>{% endif %}.</p>
+{% if doc.taches %}<p>Cette mission vise notamment à :</p><ul>{% for t in doc.taches %}<li>{{ t.description }}</li>{% endfor %}</ul>{% endif %}
+<p>Le Prestataire pourra également intervenir sur toute activité stratégique, organisationnelle ou opérationnelle jugée pertinente par la Direction Générale.</p>
+
+<p><strong>Article 2 : Durée</strong></p>
+<p>Le présent contrat est établi pour une durée déterminée de {{ doc.duree_mois or '…' }} ({{ nombre_en_lettres(doc.duree_mois or 0, '') }}) mois, soit du <strong>{{ frappe.utils.formatdate(doc.date_debut, 'dd MMMM yyyy') if doc.date_debut else '__________' }}</strong> au <strong>{{ frappe.utils.formatdate(doc.date_fin, 'dd MMMM yyyy') if doc.date_fin else '__________' }}</strong>.</p>
+
+<p><strong>Article 3 : Obligations des parties</strong></p>
+<p><strong>3.1 &mdash; Obligations du Prestataire.</strong> Le Prestataire s'engage à : exécuter les missions avec professionnalisme ; respecter les instructions de la Direction et les règles de fonctionnement interne de la société ; utiliser les moyens humains et matériels mis à sa disposition exclusivement dans le cadre de ses fonctions ; préserver la confidentialité des informations de KYA-Energy Group ; fournir ses prestations en toute indépendance et dans les règles de l'art ; produire les livrables convenus ; assumer ses obligations sociales et fiscales.</p>
+<p><strong>3.2 &mdash; Obligations de KYA-Energy Group.</strong> KYA-Energy Group s'engage à : mettre à disposition les informations nécessaires à l'exécution de la mission ; faciliter l'accès aux outils, documents et ressources utiles ; désigner un interlocuteur ou point focal pour le suivi ; communiquer les besoins prioritaires ; valider ou commenter les livrables dans des délais raisonnables ; fournir les moyens matériels requis ; assurer le paiement des prestations conformément au présent contrat.</p>
+
+<p><strong>Article 4 : Modalités d'exécution de la mission</strong></p>
+<p>Le travail se fera sur site, au siège de KYA-Energy Group, du lundi au vendredi, de 7h30 à 17h30.</p>
+
+<p><strong>Article 5 : Livrables</strong></p>
+<p>Les priorités seront définies mensuellement. Les livrables incluent les rapports d'activité, les procédures, les outils de pilotage et l'appui documentaire convenus.</p>
+
+<p><strong>Article 6 : Planification et délais d'exécution</strong></p>
+<p>Le Prestataire établira au début de chaque mois un programme d'activités. Les délais seront fixés d'un commun accord.</p>
+
+<p><strong>Article 7 : Suivi et contrôle de la prestation</strong></p>
+<p>Le suivi et le contrôle de la prestation seront assurés en interne par le responsable désigné par la Direction ou son représentant. De façon générale, le Directeur Général de KYA-Energy Group se réserve le droit d'effectuer un suivi direct auprès du Prestataire.</p>
+
+<p><strong>Article 8 : Conditions financières</strong></p>
+<p>KYA-Energy Group versera au Prestataire une rémunération forfaitaire mensuelle de <strong>{{ '{:,.0f}'.format(doc.montant_mission or 0).replace(',', ' ') }} ({{ nombre_en_lettres(doc.montant_mission or 0, '') }}) francs CFA TTC</strong>, sur présentation d'une facture.</p>
+
+<p><strong>Article 9 : Confidentialité</strong></p>
+<p>Le Prestataire s'engage à une confidentialité absolue sur les informations obtenues, pendant et après la durée du présent contrat.</p>
+
+<p><strong>Article 10 : Résiliation</strong></p>
+<p>En cas de non-respect, par l'une ou l'autre des parties, des engagements réciproques du présent contrat, et à l'issue de l'envoi d'un courrier recommandé ou porté avec avis de réception valant mise en demeure restée infructueuse à l'expiration d'un délai de trente (30) jours, le présent contrat pourra être résilié par l'une ou l'autre des parties.</p>
+
+<p><strong>Article 11 : Droit applicable et règlement des litiges</strong></p>
+<p>Le présent contrat est régi par le droit applicable au Togo. Tout litige lié à son interprétation ou à son exécution fera l'objet d'un règlement amiable ; à défaut, les parties conviennent de porter le litige devant la juridiction togolaise compétente.</p>"""
+
+
+def presta_body() -> str:
+    return PRESTA_BODY
+
+
 # ── Patches stages (sur les corps existants) ─────────────────────────────────
 def patch_stage(html: str) -> str:
     # 1) Dates de l'article 2 : "compter du <strong>……</strong>et arrive à échéance le<strong>……</strong>"
@@ -183,21 +235,32 @@ def patch_stage(html: str) -> str:
 SPECS = [
     ("Stage Académique — Standard", "Stage Académique", "Tous", "stage"),
     ("Stage Professionnel — Standard", "Stage Professionnel", "Tous", "stage"),
+    ("Stage d'Immersion — Standard", "Stage d'Immersion", "Tous", "immersion"),
     ("CDD — Féminin", "CDD", "Féminin", "cdd"),
     ("CDD — Masculin", "CDD", "Masculin", "cdd"),
     ("CDI — Féminin", "CDI", "Féminin", "cdi"),
     ("CDI — Masculin", "CDI", "Masculin", "cdi"),
+    ("Prestataire — Standard", "Prestataire", "Tous", "presta"),
 ]
 
 
 def build_records(old_by_name: dict) -> list:
-    cdi, cdd = cdi_body(), cdd_body()
+    cdi, cdd, presta = cdi_body(), cdd_body(), presta_body()
+    # Stage d'immersion = même corps que le stage académique, seul le titre change
+    # (« académique » → « d'immersion »). On part du corps académique déjà patché.
+    aca = patch_stage(old_by_name.get("Stage Académique — Standard", {}).get("html_body", ""))
+    immersion = (aca.replace("Académique", "d'Immersion").replace("académique", "d'immersion")
+                 .replace("Acadmique", "d'Immersion"))
     records = []
     for name, ctype, genre, kind in SPECS:
         if kind == "cdi":
             body = cdi
         elif kind == "cdd":
             body = cdd
+        elif kind == "presta":
+            body = presta
+        elif kind == "immersion":
+            body = immersion
         else:  # stage : patch de l'existant
             body = patch_stage(old_by_name.get(name, {}).get("html_body", ""))
         records.append({

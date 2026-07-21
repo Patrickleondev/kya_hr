@@ -6,6 +6,66 @@ trouvent toujours le bon destinataire.
 import frappe
 
 
+# Rôles qui gouvernent l'étape « En attente Chef » du workflow. Un demandeur qui
+# porte l'un d'eux EST le chef : il ne peut pas valider sa propre étape chef, donc
+# on la saute directement vers la RH. Choix RH du 20/07/2026.
+_CHEF_ROLES = {
+    "Chef Service",
+    "Supérieur Immédiat",
+    "Chef Equipe",
+    "Chef d'Équipe",
+    "Responsable Equipe",
+    "Responsable d'Équipe",
+}
+
+
+def route_start_state(doc, method=None):
+    """Pré-remplit le visa chef à la CRÉATION quand l'étape chef doit être sautée.
+
+    Ce DocType est custom=1 → sa classe Python n'est pas chargée par Frappe ;
+    ce point d'entrée (doc_events before_insert) EST le vrai contrôleur.
+
+    On NE force PAS `workflow_state` ici : Frappe refuse une transition directe
+    Brouillon → En attente RH à l'insertion. On pose seulement le SIGNAL
+    (`date_signature_chef` + `signataire_chef`) ; c'est une transition dédiée du
+    workflow (condition `doc.date_signature_chef`) qui envoie la demande à la RH
+    au moment du « Soumettre » — exactement comme le fait la case « chef absent ».
+
+    Cas couverts :
+    - RH crée pour autrui via Desk (l'étape chef est couverte par la RH).
+    - Le demandeur EST lui-même chef/responsable (il ne peut pas se valider ;
+      sinon la demande reste bloquée à « En attente Chef »). Choix RH 20/07/2026.
+
+    On ne touche à rien si « chef absent » est coché (ce chemin a sa propre
+    transition) ni si un visa chef est déjà présent.
+    """
+    if doc.get("chef_absent") or doc.get("date_signature_chef"):
+        return
+    user = frappe.session.user
+    if user in ("Administrator", "Guest"):
+        return
+    roles = set(frappe.get_roles(user))
+    is_hr = bool({"HR Manager", "HR User"} & roles)
+    is_chef = bool(_CHEF_ROLES & roles)
+
+    mention = None
+    via_web_form = bool(getattr(doc, "flags", None) and doc.flags.get("via_web_form"))
+    if is_hr and not via_web_form:
+        mention = "Créé par RH"
+    elif is_chef and not is_hr:
+        # Un non-RH ne peut créer QUE pour lui-même → un chef qui crée demande
+        # pour lui-même : bypass légitime de l'étape chef.
+        mention = "Demandeur est chef — étape chef non requise"
+
+    if not mention:
+        return
+
+    name = frappe.db.get_value("Employee", {"user_id": user}, "employee_name") \
+        or frappe.utils.get_fullname(user)
+    doc.signataire_chef = (name or "") + f" ({mention})"
+    doc.date_signature_chef = frappe.utils.today()
+
+
 def populate_chef(doc, method=None):
     """Remplit doc.report_to_user depuis Employee.reports_to.user_id.
 

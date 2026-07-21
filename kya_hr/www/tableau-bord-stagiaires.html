@@ -87,6 +87,7 @@
     <div class="kya-sec-h">Stagiaires actifs</div>
     <div class="kya-cols" style="margin-bottom:16px">
       <div class="card"><h3>Répartition par département</h3><div class="chart-box"><canvas id="chartDept"></canvas></div></div>
+      <div class="card"><h3>Répartition par type de stage <span id="tsNote" style="font-weight:400;color:#8a94a6;font-size:.78rem;"></span></h3><div class="chart-box"><canvas id="chartTypeStage"></canvas></div></div>
       <div class="card"><h3>Mentions des bilans de stage</h3><div class="chart-box"><canvas id="chartMentions"></canvas></div></div>
     </div>
     <div class="kya-tabletools">
@@ -180,6 +181,29 @@
       type: "doughnut",
       data: { labels: repK.length ? repK : ["—"], datasets: [{ data: repK.length ? repK.map(k=>rep[k]) : [1], backgroundColor: ["#6a1b9a","#1565c0","#c77700","#00A651","#00897b","#c0392b","#5c6bc0","#9aa6b2"], borderWidth: 2 }] },
       options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:"right",labels:{boxWidth:12,font:{size:11}}}} }
+    });
+
+    // Type de stage : immersion / académique / professionnel.
+    destroy("chartTypeStage");
+    const ts = d.repartition_type_stage || {}; const tsK = Object.keys(ts);
+    const tsManque = d.type_stage_non_renseigne || 0;
+    const tsSansDate = d.type_stage_sans_date || 0;
+    const tsNote = $("tsNote");
+    if (tsNote) {
+      const parts = [];
+      if (tsManque) parts.push(tsManque + " sans type renseigné");
+      // Sans date de début, impossible de rattacher le stage à une année :
+      // on le signale au lieu de le faire disparaître du graphique.
+      if (tsSansDate) parts.push(tsSansDate + " hors décompte (date de début absente)");
+      tsNote.textContent = parts.length ? "— " + parts.join(", ") : "";
+    }
+    charts.chartTypeStage = new Chart($("chartTypeStage"), {
+      type: "doughnut",
+      data: { labels: tsK.length ? tsK : ["Aucun type renseigné"],
+              datasets: [{ data: tsK.length ? tsK.map(k=>ts[k]) : [1],
+                           backgroundColor: ["#1565c0","#00A651","#c77700","#9aa6b2"],
+                           borderWidth: 2 }] },
+      options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:"bottom",labels:{boxWidth:12,font:{size:11}}}} }
     });
 
     destroy("chartMentions");

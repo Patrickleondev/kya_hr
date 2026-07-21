@@ -15,7 +15,7 @@
  "introduction_text": "",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-04-01 00:00:00.000000",
+ "modified": "2026-07-20 12:00:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "demande-conge",
@@ -32,71 +32,83 @@
    "fieldtype": "Link",
    "label": "Employe",
    "options": "Employee",
-   "reqd": 1
+   "reqd": 1,
+   "description": "L'employé qui prend le congé. Si vous saisissez pour vous-même, c'est votre propre matricule."
   },
   {
    "fieldname": "employee_name",
    "fieldtype": "Data",
    "label": "Nom complet",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Rempli automatiquement à partir du matricule."
   },
   {
    "fieldname": "department",
    "fieldtype": "Link",
    "label": "Departement",
    "options": "Department",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Rempli automatiquement. Il détermine le chef qui recevra la demande pour validation."
   },
   {
    "fieldname": "leave_type",
    "fieldtype": "Link",
    "label": "Type de conge",
    "options": "Leave Type",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Type de congé : annuel, maladie, maternité, exceptionnel… Le type choisi décide du solde qui sera décompté : choisissez-le avec soin."
   },
   {
    "fieldname": "from_date",
    "fieldtype": "Date",
    "label": "Date de debut",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Premier jour NON travaillé. Si vous partez le vendredi soir, le premier jour est le lundi suivant."
   },
   {
    "fieldname": "to_date",
    "fieldtype": "Date",
    "label": "Date de fin",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Dernier jour non travaillé. N'indiquez pas ici le jour de REPRISE : celui-ci doit être le lendemain de cette date."
   },
   {
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "label": "Date de la demande",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Date de la demande. Laissez la date du jour."
   },
   {
    "fieldname": "description",
    "fieldtype": "Small Text",
    "label": "Motif",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Motif du congé et, surtout, qui assure l'intérim pendant votre absence. Une demande sans solution de continuité est souvent refusée par le chef."
   },
   {
    "fieldname": "signature_employe_la",
    "fieldtype": "Signature",
-   "label": "Signature Employé"
+   "label": "Signature Employé",
+   "description": "Votre signature."
   },
   {
    "fieldname": "signature_superieur_la",
    "fieldtype": "Signature",
-   "label": "Signature Supérieur"
+   "label": "Signature Supérieur",
+   "description": "Réservée à votre supérieur hiérarchique."
   },
   {
    "fieldname": "signature_rh_la",
    "fieldtype": "Signature",
-   "label": "Signature RH"
+   "label": "Signature RH",
+   "description": "Réservée aux Ressources Humaines, après contrôle de votre solde de congés."
   },
   {
    "fieldname": "signature_dg_la",
    "fieldtype": "Signature",
-   "label": "Signature DG"
+   "label": "Signature DG",
+   "description": "Réservée à la Direction Générale."
   }
  ],
  "no_sidebar": 1

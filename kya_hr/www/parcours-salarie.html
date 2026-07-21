@@ -9,6 +9,20 @@
   .ps-btn.sec{background:#fff;color:#0f766e;border:1px solid #0f766e;}
   .ps-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;box-shadow:0 1px 2px rgba(0,0,0,.03);margin-bottom:16px;}
   .ps-name{font-size:1.3rem;font-weight:800;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .ps-head{display:flex;align-items:center;gap:16px;margin-bottom:12px;}
+  .ps-photo{width:84px;height:84px;border-radius:50%;object-fit:cover;border:3px solid #009B77;flex-shrink:0;background:#f1f5f9;}
+  .ps-noph{display:flex;align-items:center;justify-content:center;font-size:1.9rem;font-weight:800;color:#009B77;background:#e6f4f1;}
+  .ps-photo-btn{background:#e6f4f1;color:#0f766e;border:1px solid #0f766e;border-radius:8px;padding:4px 10px;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;}
+  .ps-photo-btn:hover{background:#0f766e;color:#fff;}
+  .ps-photo-msg{font-size:.68rem;color:#64748b;min-height:12px;text-align:center;}
+  .ps-photo-msg.ok{color:#16a34a;font-weight:700;}
+  .ps-photo-msg.err{color:#dc2626;font-weight:700;}
+  .ctr-chip{display:inline-block;padding:2px 10px;border-radius:12px;color:#fff;font-size:.72rem;font-weight:700;vertical-align:middle;}
+  .ps-roadwrap{width:100%;overflow-x:auto;padding:6px 0 2px;}
+  .ps-roadsvg{width:100%;min-width:520px;max-width:820px;height:auto;display:block;margin:0 auto;}
+  .ps-road{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 4px 16px;}
+  .ps-road .ctr-chip{font-size:.82rem;padding:5px 14px;}
+  .road-arw{color:#94a3b8;font-weight:800;}
   .badge{display:inline-block;padding:3px 12px;border-radius:12px;font-weight:700;font-size:.78rem;color:#fff;}
   .b-actif{background:#16a34a;} .b-retraite{background:#7c3aed;} .b-sorti{background:#64748b;}
   .ps-kv{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px;}
@@ -46,12 +60,25 @@
 
 <script>
 const SAL = {{ salaries_json | safe }};
+const CSRF = {{ (csrf_token or '') | tojson }};
 const NAT_COLOR = {Embauche:'#0f766e',Promotion:'#16a34a',Mutation:'#2563eb',Renouvellement:'#0891b2','Augmentation salariale':'#7c3aed','Rétrogradation':'#dc2626','Fin de contrat':'#64748b'};
 async function apiCall(method, args){
   const p = new URLSearchParams();
   Object.entries(args||{}).forEach(([k,v])=>{ if(v!==null&&v!==undefined&&v!=='') p.append(k,v); });
   const q = p.toString();
   const r = await fetch('/api/method/'+method+(q?('?'+q):''), {headers:{'Accept':'application/json'}, credentials:'same-origin'});
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  return (await r.json()).message;
+}
+// POST (charges lourdes : photo en base64). Le jeton CSRF est injecté par le
+// contrôleur car ces pages www ne chargent pas le bundle JS `frappe`.
+async function apiPost(method, args){
+  const r = await fetch('/api/method/'+method, {
+    method:'POST', credentials:'same-origin',
+    headers:{'Content-Type':'application/json','Accept':'application/json',
+             'X-Frappe-CSRF-Token': CSRF},
+    body: JSON.stringify(args||{})
+  });
   if(!r.ok) throw new Error('HTTP '+r.status);
   return (await r.json()).message;
 }
@@ -74,13 +101,162 @@ async function choisir(){
   catch(e){ box.innerHTML='<div class="muted">Erreur de chargement.</div>'; }
 }
 
+const CTR_ICON={'Stagiaire':'🚩','CDD':'📄','CDI':'📄','Prestataire':'🤝','Intérim':'⏳'};
+const CTR_LABEL={'Stagiaire':"Stage d'immersion",'CDD':'CDD','CDI':'CDI','Prestataire':'Prestation','Intérim':'Intérim'};
+const CTR_BG={'Stagiaire':'#f59e0b','CDD':'#2563eb','CDI':'#16a34a','Prestataire':'#7c3aed','Intérim':'#64748b'};
+function ctrChip(t){
+  if(!t) return '';
+  const bg=CTR_BG[t]||'#0f766e';
+  return `<span class="ctr-chip" style="background:${bg}">${CTR_ICON[t]||''} ${esc(CTR_LABEL[t]||t)}</span>`;
+}
+
+const PENDING_ROADS=[];
+function flushRoads(){ while(PENDING_ROADS.length){ const r=PENDING_ROADS.shift();
+  try{ drawRoad(r.uid, r.steps); }catch(e){ console && console.warn && console.warn('route:',e); } } }
+
+// Icônes SVG dessinées dans la page (aucun chargement externe : rien ne peut
+// échouer au déploiement, contrairement à une icône servie par un CDN).
+const ICON_PATHS = {
+  stage:  'M12 3 1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z',
+  cdd:    'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z',
+  cdi:    'M20 6h-4V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2zm-6-2v2h-4V4h4z',
+  presta: 'M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z',
+  promo:  'M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4-6.2-4.6-6.2 4.6 2.4-7.4L2 9.4h7.6z',
+  interim:'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 10.6 4 2.3-.8 1.4-5.2-3V6h2z'
+};
+const CTR_KIND = {'Stagiaire':'stage','CDD':'cdd','CDI':'cdi','Prestataire':'presta','Intérim':'interim'};
+const NS='http://www.w3.org/2000/svg';
+
+// Une étape = un évènement de carrière. La route porte donc TOUTE la
+// progression (embauche, mutations, promotions…), pas seulement les
+// changements de contrat : même un salarié à un seul évènement voit sa balise.
+function roadSteps(evs){
+  const steps=[];
+  (evs||[]).forEach(e=>{
+    const an=(e.date_debut||'').slice(0,4);
+    const nat=e.nature_evolution||'';
+    const t=e.type_contrat;
+    const kind = nat==='Promotion' ? 'promo' : (CTR_KIND[t]||'cdd');
+    const couleur = NAT_COLOR[nat] || CTR_BG[t] || '#0f766e';
+    const titre = nat || CTR_LABEL[t] || 'Étape';
+    const st={an, kind, couleur, titre, detail:e.poste_occupe||''};
+    // On évite deux balises rigoureusement identiques qui se chevaucheraient.
+    const prev=steps[steps.length-1];
+    if(!prev || prev.an!==st.an || prev.titre!==st.titre || prev.detail!==st.detail){
+      steps.push(st);
+    }
+  });
+  return steps;
+}
+
+function buildRoad(evs){
+  const steps=roadSteps(evs);
+  if(!steps.length) return '';
+  const uid='rd'+Math.random().toString(36).slice(2,8);
+  const n=steps.length;
+  // La route MONTE : on donne assez de hauteur pour que la pente se voie
+  // (sinon, sur une page large, la courbe s'aplatit et « paraît horizontale »).
+  const W=Math.round(Math.min(1180, Math.max(660, 260+n*150)));
+  const H=Math.round(Math.min(680, Math.max(380, 240+n*95)));
+  PENDING_ROADS.push({uid, steps, W, H});
+  return `<div class="ps-roadwrap">
+    <svg id="${uid}" class="ps-roadsvg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>`;
+}
+
+// Route qui MONTE, comme une carte routière : elle part en bas à gauche (le
+// plus ancien) et grimpe vers le haut à droite (le plus récent), en serpentant.
+// La ligne centrale est calculée : une diagonale ascendante + une oscillation
+// perpendiculaire (les virages). On en déduit un vrai ruban d'asphalte en
+// décalant de part et d'autre selon la normale. Chaque étape porte une balise
+// avec son année ; la légende (nature + poste) est posée à côté, alternée.
+function drawRoad(uid, steps){
+  const svg=document.getElementById(uid);
+  if(!svg || !steps.length) return;
+  const W=+svg.viewBox.baseVal.width, H=+svg.viewBox.baseVal.height;
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  const add=(tag,attrs,parent)=>{ const e=document.createElementNS(NS,tag);
+    for(const k in attrs) e.setAttribute(k,attrs[k]); (parent||svg).appendChild(e); return e; };
+
+  const n=steps.length;
+  // Marges asymétriques : plus d'air en HAUT (la balise + sa pointe montent de
+  // ~55 px au-dessus de la chaussée) et sur les côtés pour les légendes.
+  const mL=74, mR=74, mT=96, mB=82;
+  const P0={x:mL, y:H-mB}, P1={x:W-mR, y:mT};   // bas-gauche -> haut-droite
+  const dx=P1.x-P0.x, dy=P1.y-P0.y;
+  const dl=Math.hypot(dx,dy)||1;
+  const nx=-dy/dl, ny=dx/dl;                    // normale à la diagonale
+  const waves=Math.max(1.0, Math.min(2.8, n*0.55));  // nombre de virages
+  const amp=Math.min(W,H)*0.15;                 // amplitude des virages
+
+  // Ligne centrale échantillonnée (amortie aux extrémités pour un départ net).
+  const N=200, pts=[];
+  for(let i=0;i<=N;i++){
+    const t=i/N;
+    const env=Math.sin(t*Math.PI);              // 0 aux bouts, 1 au milieu
+    const off=Math.sin(t*Math.PI*waves)*amp*(0.5+0.5*env);
+    pts.push({t, x:P0.x+dx*t+nx*off, y:P0.y+dy*t+ny*off});
+  }
+  const normalAt=i=>{ const a=pts[Math.max(0,i-1)], b=pts[Math.min(N,i+1)];
+    const ex=b.x-a.x, ey=b.y-a.y, el=Math.hypot(ex,ey)||1; return {x:-ey/el, y:ex/el}; };
+  const halfW=42;                               // demi-largeur de la chaussée
+  const left=[], right=[];
+  pts.forEach((q,i)=>{ const nn=normalAt(i);
+    left.push([q.x+nn.x*halfW, q.y+nn.y*halfW]);
+    right.push([q.x-nn.x*halfW, q.y-nn.y*halfW]); });
+
+  const fmt=a=>a.map(c=>c[0].toFixed(1)+' '+c[1].toFixed(1)).join(' L ');
+  const centerD='M '+pts.map(q=>q.x.toFixed(1)+' '+q.y.toFixed(1)).join(' L ');
+
+  // 1) asphalte  2) bords blancs  3) axe pointillé
+  add('path',{d:'M '+fmt(left)+' L '+fmt(right.slice().reverse())+' Z', fill:'#333b47'});
+  add('path',{d:'M '+fmt(left),  fill:'none', stroke:'#fff','stroke-width':3.5,'stroke-linejoin':'round','stroke-linecap':'round'});
+  add('path',{d:'M '+fmt(right), fill:'none', stroke:'#fff','stroke-width':3.5,'stroke-linejoin':'round','stroke-linecap':'round'});
+  add('path',{d:centerD, fill:'none', stroke:'#fff','stroke-width':3,'stroke-dasharray':'20 15','stroke-linecap':'round',opacity:'.9'});
+
+  // 4) balises + légendes
+  const cut=(v,k)=>String(v||'').replace(/[<>&]/g,'').slice(0,k||24);
+  steps.forEach((st,i)=>{
+    const t=(n===1)?0.5:(0.06+0.88*i/(n-1));
+    const q=pts[Math.round(t*N)];
+    const nn=normalAt(Math.round(t*N));
+
+    // Balise (goutte, pointe sur la chaussée) avec l'année DANS le disque.
+    const g=add('g',{transform:`translate(${q.x.toFixed(1)},${q.y.toFixed(1)})`});
+    g.innerHTML=
+      `<path d="M0 0 C -11 -17 -19 -26 -19 -36 a19 19 0 1 1 38 0 C 19 -26 11 -17 0 0 Z"
+             fill="${st.couleur}" stroke="#fff" stroke-width="3"/>`+
+      `<circle cy="-37" r="14.5" fill="#fff"/>`+
+      `<text y="-32.5" text-anchor="middle" font-size="13" font-weight="800" fill="${st.couleur}">${cut(st.an,4)}</text>`;
+
+    // Légende posée du côté qui s'éloigne le plus de la route, alternée pour
+    // limiter les chevauchements, et bornée à l'intérieur du cadre.
+    const side=(i%2===0)?1:-1;
+    let cx=q.x+nn.x*side*70, cy=q.y+nn.y*side*70-4;
+    cx=Math.max(84, Math.min(W-84, cx));
+    cy=Math.max(32, Math.min(H-34, cy));
+    const lab=add('g',{transform:`translate(${cx.toFixed(1)},${cy.toFixed(1)})`});
+    lab.innerHTML=
+      `<text text-anchor="middle" y="-4" font-size="13.5" font-weight="700" fill="${st.couleur}">${cut(st.titre,24)}</text>`+
+      `<text text-anchor="middle" y="13" font-size="11.5" fill="#475569">${cut(st.detail,32)}</text>`;
+    try{
+      const bb=lab.getBBox();
+      const bg=document.createElementNS(NS,'rect');
+      bg.setAttribute('x',(bb.x-8).toFixed(1)); bg.setAttribute('y',(bb.y-5).toFixed(1));
+      bg.setAttribute('width',(bb.width+16).toFixed(1)); bg.setAttribute('height',(bb.height+10).toFixed(1));
+      bg.setAttribute('rx','8'); bg.setAttribute('fill','#fff'); bg.setAttribute('opacity','.94');
+      lab.insertBefore(bg, lab.firstChild);
+    }catch(e){}
+  });
+}
+
 function evCard(e){
   const c=NAT_COLOR[e.nature_evolution]||'#0f766e';
   const fin=e.date_fin?(' → '+e.date_fin):' → (en cours)';
   const sal=e.salaire_base?(' · '+nf(e.salaire_base)+' F'):'';
   return `<div class="ps-ev" style="color:${c}"><div class="card">
     <div class="date">${esc(e.date_debut)}${esc(fin)} · <span style="color:#0f766e">${esc(e.duree||'')}</span></div>
-    <div class="nat" style="color:${c}">${esc(e.nature_evolution)}</div>
+    <div class="nat" style="color:${c}">${esc(e.nature_evolution)} ${ctrChip(e.type_contrat)}</div>
     <div class="meta" style="color:#334155">${esc(e.poste_occupe||'—')} · ${esc(e.departement||'—')} · ${esc(e.categorie||'')} ${esc(e.classe_echelon||'')}${sal}</div>
     ${e.motif_evolution?`<div class="meta">📝 ${esc(e.motif_evolution)}</div>`:''}
   </div></div>`;
@@ -88,13 +264,56 @@ function evCard(e){
 function subList(titre, arr){
   return `<div class="ps-sub"><h3>${titre} (${arr.length})</h3>${arr.length?arr.map(e=>`<div class="pill">${esc(e.date_debut)} · ${esc(e.poste_occupe||'—')}</div>`).join(''):'<div class="muted">Aucune</div>'}</div>`;
 }
+// Téléversement de la photo : rattachée à CETTE fiche, nommée par le matricule.
+async function uploadPhoto(input, matricule){
+  const f = input.files && input.files[0];
+  input.value = '';
+  if(!f) return;
+  const msg = document.getElementById('ps-photo-msg');
+  if(f.size > 5*1024*1024){ if(msg){msg.textContent='Photo trop lourde (5 Mo max).';msg.className='ps-photo-msg err';} return; }
+  if(msg){ msg.textContent='Envoi…'; msg.className='ps-photo-msg'; }
+  try{
+    const b64 = await new Promise((ok,ko)=>{
+      const rd = new FileReader();
+      rd.onload = e => ok(String(e.target.result).split(',')[1]);
+      rd.onerror = ko;
+      rd.readAsDataURL(f);
+    });
+    await apiPost('kya_hr.api.rh_effectifs.televerser_photo',
+                  {salarie: decodeURIComponent(matricule), filename: f.name, content_base64: b64});
+    if(msg){ msg.textContent='Photo enregistrée ✓'; msg.className='ps-photo-msg ok'; }
+    const d = await apiCall('kya_hr.api.rh_effectifs.parcours',
+                            {salarie: decodeURIComponent(matricule)});
+    render(d);   // recharge la fiche → photo à jour
+  }catch(e){
+    if(msg){ msg.textContent="Échec de l'envoi."; msg.className='ps-photo-msg err'; }
+  }
+}
+
 function render(d){
   const s=d.salarie;
   const bcls=s.statut==='Actif'?'b-actif':(s.statut==='Retraité'?'b-retraite':'b-sorti');
   const tl=d.evolutions.length?d.evolutions.map(evCard).join(''):'<div class="muted">Aucun évènement de carrière. Ajoutez-en depuis la fiche du salarié.</div>';
+  const initials=(s.nom_complet||'?').trim().split(/\s+/).map(w=>w[0]||'').slice(0,2).join('').toUpperCase();
+  // photo_uri (data-URI servi par l'API) : s'affiche même si le fichier est privé.
+  const src = s.photo_uri || s.photo || '';
+  const photoHtml = src
+    ? `<img class="ps-photo" src="${src}" alt="" onerror="this.outerHTML='<div class=\\'ps-photo ps-noph\\'>${initials}</div>'">`
+    : `<div class="ps-photo ps-noph" title="Aucune photo rattachée à cette fiche">${initials}</div>`;
   document.getElementById('ps-body').innerHTML=`
     <div class="ps-card">
-      <div class="ps-name">${esc(s.nom_complet)} <span class="badge ${bcls}">${esc(s.statut)}</span></div>
+      <div class="ps-head">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+          ${photoHtml}
+          <label class="ps-photo-btn" title="La photo est rattachée à la fiche et nommée avec le matricule">
+            ${src ? '🔄 Changer' : '📷 Ajouter'} la photo
+            <input type="file" accept="image/jpeg,image/png,image/webp" style="display:none"
+                   onchange="uploadPhoto(this,'${encodeURIComponent(s.matricule)}')">
+          </label>
+          <span id="ps-photo-msg" class="ps-photo-msg"></span>
+        </div>
+        <div class="ps-name">${esc(s.nom_complet)} <span class="badge ${bcls}">${esc(s.statut)}</span></div>
+      </div>
       <div class="ps-kv">
         <div><div class="lbl">Matricule</div><div class="val">${esc(s.matricule)}</div></div>
         <div><div class="lbl">Poste actuel</div><div class="val">${esc(s.poste_occupe||'—')}</div></div>
@@ -111,12 +330,13 @@ function render(d){
         <button class="ps-btn" onclick="pdf('${encodeURIComponent(s.matricule)}')">📄 Générer la fiche PDF</button>
       </div>
     </div>
-    <div class="ps-card"><h3 style="margin-top:0">Historique de carrière</h3><div class="ps-tl">${tl}</div></div>
+    <div class="ps-card"><h3 style="margin-top:0">Historique de carrière</h3>${buildRoad(d.evolutions)}<div class="ps-tl">${tl}</div></div>
     <div class="ps-card"><div class="ps-grid">
       ${subList('Promotions', d.promotions)}
       ${subList('Mutations', d.mutations)}
       ${subList('Rétrogradations', d.retrogradations)}
     </div></div>`;
+  flushRoads();   // la route SVG se dessine une fois le DOM en place
 }
 async function pdf(id){
   try{ const r=await apiCall('kya_hr.api.rh_effectifs.parcours_pdf',{salarie:decodeURIComponent(id)});

@@ -18,5 +18,11 @@ def get_context(context):
     except Exception:
         context.salaries_json = "[]"
         frappe.log_error(frappe.get_traceback(), "parcours-salarie: liste")
+    # Jeton CSRF : la page fait des POST (téléversement de la photo) via fetch,
+    # sans le bundle JS `frappe` → on l'injecte nous-mêmes.
+    try:
+        context.csrf_token = frappe.sessions.get_csrf_token()
+    except Exception:
+        context.csrf_token = ""
     context.no_breadcrumbs = True
     return context

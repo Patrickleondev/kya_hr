@@ -246,7 +246,12 @@
   <p>Durant la période définie à l'article 2,
     {%- set tuteurs = [] -%}
     {%- for m in (doc.maitres_stage or []) -%}
-         {%- if m.employee_name -%}{%- set _ = tuteurs.append("M. " + m.employee_name) -%}{%- endif -%}
+         {%- if m.employee_name -%}
+           {#- Civilité CHOISIE par la RH en priorité ; sinon repli sur le sexe. -#}
+           {%- if m.civilite -%}{%- set _civ = m.civilite -%}
+           {%- else -%}{%- set _g = frappe.db.get_value("Employee", m.employee, "gender") if m.employee else None -%}{%- set _civ = "Madame" if (_g and _g != "Male") else "Monsieur" -%}{%- endif -%}
+           {%- set _ = tuteurs.append(_civ ~ " " ~ m.employee_name) -%}
+         {%- endif -%}
     {%- endfor -%}
     {#- ne PAS trimmer à droite (-%}) ici : ça avalait l'espace après
         « l'article 2, » et collait le nom du maître de stage à la virgule -#}

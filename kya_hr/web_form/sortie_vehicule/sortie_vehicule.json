@@ -15,7 +15,7 @@
  "introduction_text": "Enregistrez une sortie de véhicule (mission). À la fin de la mission, rouvrez la fiche pour saisir le kilométrage et le carburant de retour.",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-06-16 10:00:00.000000",
+ "modified": "2026-07-19 09:30:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "sortie-vehicule",
@@ -27,20 +27,102 @@
  "title": "Sortie / Mission Véhicule",
  "client_script": "frappe.web_form.after_load = function() {\n  if (frappe.web_form.fields_dict.chauffeur) { frappe.web_form.fields_dict.chauffeur.get_query = function(){ return { query: 'kya_hr.api.delegataire_query' }; }; }\n  var doc = frappe.web_form.doc;\n  if (doc && doc.name && !String(doc.name).startsWith('new')) {\n    var st = doc.statut || 'Brouillon';\n    var cm = {'Brouillon':'#757575','Approuv\\u00e9e':'#1565c0','En mission':'#e65100','Retour confirm\\u00e9':'#2e7d32','Annul\\u00e9e':'#c62828'};\n    var c = cm[st] || '#1565c0';\n    var refEl = document.createElement('div');\n    refEl.innerHTML = '<div style=\"margin-bottom:12px;padding:8px 16px;background:'+c+';color:#fff;border-radius:6px;display:inline-block;font-weight:700;font-size:14px;\">\\uD83D\\uDE97 ' + doc.name + '  \\u2014  ' + st + '</div>';\n    var w = document.querySelector('.web-form-wrapper') || document.querySelector('.container');\n    if (w) w.prepend(refEl);\n  }\n};",
  "web_form_fields": [
-  {"fieldname": "vehicle", "fieldtype": "Link", "label": "Véhicule", "options": "Vehicle", "reqd": 1},
-  {"fieldname": "license_plate", "fieldtype": "Data", "label": "Immatriculation", "read_only": 1},
-  {"fieldname": "chauffeur", "fieldtype": "Link", "label": "Chauffeur (Employé)", "options": "Employee", "reqd": 1},
-  {"fieldname": "demandeur", "fieldtype": "Link", "label": "Demandeur", "options": "User", "reqd": 1},
-  {"fieldname": "motif_mission", "fieldtype": "Small Text", "label": "Motif / Objet de la mission", "reqd": 1},
-  {"fieldname": "destination", "fieldtype": "Data", "label": "Destination", "reqd": 1},
-  {"fieldname": "date_depart", "fieldtype": "Datetime", "label": "Date & Heure de départ", "reqd": 1},
-  {"fieldname": "date_retour_prevue", "fieldtype": "Datetime", "label": "Retour prévu", "reqd": 1},
-  {"fieldname": "passagers", "fieldtype": "Table", "label": "Passagers", "options": "Sortie Vehicule Passager"},
-  {"fieldname": "km_depart", "fieldtype": "Int", "label": "Km au départ"},
-  {"fieldname": "carburant_depart_pourcent", "fieldtype": "Percent", "label": "Carburant départ (%)"},
-  {"fieldname": "km_retour", "fieldtype": "Int", "label": "Km au retour"},
-  {"fieldname": "carburant_retour_pourcent", "fieldtype": "Percent", "label": "Carburant retour (%)"},
-  {"fieldname": "observations", "fieldtype": "Small Text", "label": "Observations / Incidents"}
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "label": "Véhicule",
+   "options": "Vehicle",
+   "reqd": 1,
+   "description": "Véhicule demandé. La plaque se remplit automatiquement."
+  },
+  {
+   "fieldname": "license_plate",
+   "fieldtype": "Data",
+   "label": "Immatriculation",
+   "read_only": 1,
+   "description": "Rempli automatiquement à partir du véhicule."
+  },
+  {
+   "fieldname": "chauffeur",
+   "fieldtype": "Link",
+   "label": "Chauffeur (Employé)",
+   "options": "Employee",
+   "reqd": 1,
+   "description": "Personne qui CONDUIT. Ce n'est pas forcément vous : si un chauffeur de la société conduit, indiquez-le lui."
+  },
+  {
+   "fieldname": "demandeur",
+   "fieldtype": "Link",
+   "label": "Demandeur",
+   "options": "User",
+   "reqd": 1,
+   "description": "Personne qui demande la sortie, donc responsable de la mission. Pré-rempli avec votre compte."
+  },
+  {
+   "fieldname": "motif_mission",
+   "fieldtype": "Small Text",
+   "label": "Motif / Objet de la mission",
+   "reqd": 1,
+   "description": "Objet précis de la mission (ex : livraison de 4 lampadaires sur le chantier de Kara). Un motif vague comme « course » ou « mission » bloque la validation."
+  },
+  {
+   "fieldname": "destination",
+   "fieldtype": "Data",
+   "label": "Destination",
+   "reqd": 1,
+   "description": "Lieu précis à atteindre : ville et, si possible, quartier ou nom du site. Pour plusieurs étapes, listez-les dans l'ordre."
+  },
+  {
+   "fieldname": "date_depart",
+   "fieldtype": "Datetime",
+   "label": "Date & Heure de départ",
+   "reqd": 1,
+   "description": "Date ET heure de départ prévues. L'heure sert à détecter les conflits entre deux missions sur le même véhicule."
+  },
+  {
+   "fieldname": "date_retour_prevue",
+   "fieldtype": "Datetime",
+   "label": "Retour prévu",
+   "reqd": 1,
+   "description": "Date ET heure de retour prévues. Le véhicule reste réservé jusqu'à cette heure : ne surestimez pas, vous bloqueriez les autres équipes."
+  },
+  {
+   "fieldname": "passagers",
+   "fieldtype": "Table",
+   "label": "Passagers",
+   "options": "Sortie Vehicule Passager",
+   "description": "Personnes transportées en plus du chauffeur. À remplir pour des raisons d'assurance et de sécurité en cas d'accident."
+  },
+  {
+   "fieldname": "km_depart",
+   "fieldtype": "Int",
+   "label": "Km au départ",
+   "description": "Kilométrage au compteur au moment du départ. À relever AVANT de partir."
+  },
+  {
+   "fieldname": "carburant_depart_pourcent",
+   "fieldtype": "Percent",
+   "label": "Carburant départ (%)",
+   "description": "Niveau de carburant au départ, en pourcentage de la jauge (ex : 50 pour une demi-jauge)."
+  },
+  {
+   "fieldname": "km_retour",
+   "fieldtype": "Int",
+   "label": "Km au retour",
+   "description": "Kilométrage au retour. À remplir APRÈS la mission : c'est la différence avec le kilométrage de départ qui justifie la consommation."
+  },
+  {
+   "fieldname": "carburant_retour_pourcent",
+   "fieldtype": "Percent",
+   "label": "Carburant retour (%)",
+   "description": "Niveau de carburant au retour, en pourcentage. L'écart avec le niveau de départ permet de contrôler la consommation réelle."
+  },
+  {
+   "fieldname": "observations",
+   "fieldtype": "Small Text",
+   "label": "Observations / Incidents",
+   "description": "Incidents, pannes, retards, dégâts constatés sur le véhicule. À signaler même si cela paraît mineur."
+  }
  ],
  "no_sidebar": 1
 }

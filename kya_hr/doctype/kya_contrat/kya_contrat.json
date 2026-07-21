@@ -78,6 +78,7 @@
   {"fieldname": "column_emp", "fieldtype": "Column Break"},
   {"fieldname": "date_naissance", "fieldtype": "Date", "label": "Date de Naissance"},
   {"fieldname": "sexe", "fieldtype": "Select", "label": "Sexe", "options": "\nMasculin\nFéminin\nAutre", "reqd": 1, "description": "Détermine la version (FEM/MASC) du template appliqué lors de la génération du contrat."},
+  {"fieldname": "civilite", "fieldtype": "Select", "label": "Civilité", "options": "\nMonsieur\nMadame\nMademoiselle", "description": "Pré-remplie automatiquement (Sexe + Situation de famille) : Monsieur / Madame (mariée, veuve, divorcée) / Mademoiselle (célibataire). Corrigez-la si besoin — c'est la valeur affichée sur le contrat."},
   {"fieldname": "domicile", "fieldtype": "Data", "label": "Domicile"},
   {"fieldname": "filiation_pere", "fieldtype": "Data", "label": "Fils/Fille de (Père)"},
   {"fieldname": "filiation_mere", "fieldtype": "Data", "label": "Et de (Mère)"},

@@ -15,7 +15,7 @@
  "introduction_text": "Fiche de suivi d'un marché KYA : facturation, coûts de réalisation, frais de mission, et synthèse financière (coût total, écarts, marge brute et nette) calculée automatiquement.",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-06-16 12:00:00.000000",
+ "modified": "2026-07-19 09:30:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "marche-kya",
@@ -27,41 +27,251 @@
  "title": "Fiche Marché KYA",
  "client_script": "var COUT=['cout_supports_pv','cout_supports_batteries','cout_modules_pv','cout_batteries','cout_onduleurs','cout_cables','cout_terre','cout_protection','cout_accessoires_cablage','cout_gestionnaire','frais_carburant','frais_location_camion','frais_perdiems','frais_hebergement','frais_autres'];\nfunction gv(f){var v=frappe.web_form.get_value(f);return parseFloat(v)||0;}\nfunction recompute(){try{var total=0;COUT.forEach(function(f){total+=gv(f);});frappe.web_form.set_value('cout_total_realisation',total);var facture=gv('montant_total_facture'),avance=gv('montant_avance_demarrage'),budget=gv('budget_previsionnel'),taxes=gv('taxes');frappe.web_form.set_value('ecart_avance',total-avance);frappe.web_form.set_value('ecart_budget_previsionnel',total-budget);var mb=facture-total;frappe.web_form.set_value('marge_brute',mb);frappe.web_form.set_value('marge_nette',mb-taxes);}catch(e){}}\nfrappe.web_form.after_load=function(){COUT.concat(['montant_total_facture','montant_avance_demarrage','budget_previsionnel','taxes']).forEach(function(f){try{frappe.web_form.on(f,recompute);}catch(e){}});recompute();var doc=frappe.web_form.doc;if(doc&&doc.name&&!String(doc.name).startsWith('new')){var refEl=document.createElement('div');refEl.innerHTML='<div style=\"margin-bottom:12px;padding:8px 16px;background:#e8f5e9;color:#2e7d32;border-left:4px solid #43a047;border-radius:6px;display:inline-block;font-weight:700;font-size:14px;\">R\\u00e9f. : '+doc.name+(doc.statut?'  \\u2014  '+doc.statut:'')+'</div>';var w=document.querySelector('.web-form-wrapper')||document.querySelector('.container');if(w)w.prepend(refEl);}};",
  "web_form_fields": [
-  {"fieldname": "nom_marche", "fieldtype": "Data", "label": "Nom du Marché / Client", "reqd": 1},
-  {"fieldname": "type_marche", "fieldtype": "Select", "label": "Type de Marché", "options": "Ménage\nInstitution", "reqd": 1},
-  {"fieldname": "statut", "fieldtype": "Select", "label": "Statut du Marché", "options": "En cours\nTerminé\nClôturé\nAnnulé", "default": "En cours"},
-  {"fieldname": "numero_marche", "fieldtype": "Data", "label": "N° Marché"},
-  {"fieldname": "client_beneficiaire", "fieldtype": "Data", "label": "Client / Bénéficiaire"},
-  {"fieldname": "objet_marche", "fieldtype": "Small Text", "label": "Objet du Marché"},
-  {"fieldname": "date_debut", "fieldtype": "Date", "label": "Date de Début"},
-  {"fieldname": "date_fin", "fieldtype": "Date", "label": "Date de Fin"},
-  {"fieldname": "duree_jours", "fieldtype": "Int", "label": "Durée (jours)", "read_only": 1},
-  {"fieldname": "puissance_kwc", "fieldtype": "Data", "label": "Puissance (kWc)"},
-  {"fieldname": "montant_total_facture", "fieldtype": "Currency", "label": "Montant Total de la Facture", "options": "XOF"},
-  {"fieldname": "montant_avance_demarrage", "fieldtype": "Currency", "label": "Avance de Démarrage (1er décaissement)", "options": "XOF"},
-  {"fieldname": "budget_previsionnel", "fieldtype": "Currency", "label": "Budget Prévisionnel des Achats", "options": "XOF"},
-  {"fieldname": "cout_supports_pv", "fieldtype": "Currency", "label": "Supports PV", "options": "XOF"},
-  {"fieldname": "cout_supports_batteries", "fieldtype": "Currency", "label": "Supports Batteries", "options": "XOF"},
-  {"fieldname": "cout_modules_pv", "fieldtype": "Currency", "label": "Modules PV", "options": "XOF"},
-  {"fieldname": "cout_batteries", "fieldtype": "Currency", "label": "Batteries", "options": "XOF"},
-  {"fieldname": "cout_onduleurs", "fieldtype": "Currency", "label": "Onduleurs", "options": "XOF"},
-  {"fieldname": "cout_cables", "fieldtype": "Currency", "label": "Câbles Électriques", "options": "XOF"},
-  {"fieldname": "cout_terre", "fieldtype": "Currency", "label": "Mise à la Terre", "options": "XOF"},
-  {"fieldname": "cout_protection", "fieldtype": "Currency", "label": "Éléments de Protection", "options": "XOF"},
-  {"fieldname": "cout_accessoires_cablage", "fieldtype": "Currency", "label": "Accessoires Câblage", "options": "XOF"},
-  {"fieldname": "cout_gestionnaire", "fieldtype": "Currency", "label": "Composants Gestionnaire", "options": "XOF"},
-  {"fieldname": "frais_carburant", "fieldtype": "Currency", "label": "Carburant (Transport)", "options": "XOF"},
-  {"fieldname": "frais_location_camion", "fieldtype": "Currency", "label": "Location de Camion", "options": "XOF"},
-  {"fieldname": "frais_perdiems", "fieldtype": "Currency", "label": "Perdiems", "options": "XOF"},
-  {"fieldname": "frais_hebergement", "fieldtype": "Currency", "label": "Hébergement", "options": "XOF"},
-  {"fieldname": "frais_autres", "fieldtype": "Currency", "label": "Autres Frais", "options": "XOF"},
-  {"fieldname": "cout_total_realisation", "fieldtype": "Currency", "label": "Coût Total de Réalisation", "options": "XOF", "read_only": 1},
-  {"fieldname": "ecart_avance", "fieldtype": "Currency", "label": "Écart Réalisé vs Avance", "options": "XOF", "read_only": 1},
-  {"fieldname": "ecart_budget_previsionnel", "fieldtype": "Currency", "label": "Écart Réalisé vs Prévisionnel", "options": "XOF", "read_only": 1},
-  {"fieldname": "marge_brute", "fieldtype": "Currency", "label": "Marge Bénéficiaire Brute", "options": "XOF", "read_only": 1},
-  {"fieldname": "taxes", "fieldtype": "Currency", "label": "Taxes à Payer", "options": "XOF"},
-  {"fieldname": "marge_nette", "fieldtype": "Currency", "label": "Marge Bénéficiaire Nette", "options": "XOF", "read_only": 1},
-  {"fieldname": "commentaires", "fieldtype": "Small Text", "label": "Commentaires"}
+  {
+   "fieldname": "nom_marche",
+   "fieldtype": "Data",
+   "label": "Nom du Marché / Client",
+   "reqd": 1,
+   "description": "Intitulé court et reconnaissable du marché (ex : Électrification CEG Agoè). C'est ce nom qui apparaît dans les tableaux de bord."
+  },
+  {
+   "fieldname": "type_marche",
+   "fieldtype": "Select",
+   "label": "Type de Marché",
+   "options": "Ménage\nInstitution",
+   "reqd": 1,
+   "description": "Ménage = client particulier. Institution = entreprise, administration, ONG, école."
+  },
+  {
+   "fieldname": "statut",
+   "fieldtype": "Select",
+   "label": "Statut du Marché",
+   "options": "En cours\nTerminé\nClôturé\nAnnulé",
+   "default": "En cours",
+   "description": "En cours = chantier actif. Terminé = travaux achevés. Clôturé = terminé ET soldé financièrement. Annulé = marché abandonné."
+  },
+  {
+   "fieldname": "numero_marche",
+   "fieldtype": "Data",
+   "label": "N° Marché",
+   "description": "Référence officielle du marché ou du contrat signé. À reprendre à l'identique du document papier."
+  },
+  {
+   "fieldname": "client_beneficiaire",
+   "fieldtype": "Data",
+   "label": "Client / Bénéficiaire",
+   "description": "Nom du client ou de la structure bénéficiaire. Écrivez-le de la même façon d'un marché à l'autre pour permettre le suivi par client."
+  },
+  {
+   "fieldname": "objet_marche",
+   "fieldtype": "Small Text",
+   "label": "Objet du Marché",
+   "description": "Ce qui est à réaliser, en une ou deux phrases (ex : fourniture et pose de 12 lampadaires solaires)."
+  },
+  {
+   "fieldname": "date_debut",
+   "fieldtype": "Date",
+   "label": "Date de Début",
+   "description": "Date de démarrage effectif des travaux."
+  },
+  {
+   "fieldname": "date_fin",
+   "fieldtype": "Date",
+   "label": "Date de Fin",
+   "description": "Date de fin réelle ou prévue. Elle sert à calculer la durée et à repérer les chantiers qui dérapent."
+  },
+  {
+   "fieldname": "duree_jours",
+   "fieldtype": "Int",
+   "label": "Durée (jours)",
+   "read_only": 1,
+   "description": "Calculée automatiquement entre les deux dates. Rien à saisir."
+  },
+  {
+   "fieldname": "puissance_kwc",
+   "fieldtype": "Data",
+   "label": "Puissance (kWc)",
+   "description": "Puissance installée, en kWc (ex : 4,5). Indiquez uniquement le nombre."
+  },
+  {
+   "fieldname": "montant_total_facture",
+   "fieldtype": "Currency",
+   "label": "Montant Total de la Facture",
+   "options": "XOF",
+   "description": "Montant total facturé au client, en FCFA. C'est la RECETTE du marché : toutes les marges en découlent."
+  },
+  {
+   "fieldname": "montant_avance_demarrage",
+   "fieldtype": "Currency",
+   "label": "Avance de Démarrage (1er décaissement)",
+   "options": "XOF",
+   "description": "Avance encaissée avant le démarrage des travaux."
+  },
+  {
+   "fieldname": "budget_previsionnel",
+   "fieldtype": "Currency",
+   "label": "Budget Prévisionnel des Achats",
+   "options": "XOF",
+   "description": "Budget estimé AVANT le chantier. Conservez-le tel quel même si le réel dérape : c'est la comparaison prévu / réalisé qui a de la valeur."
+  },
+  {
+   "fieldname": "cout_supports_pv",
+   "fieldtype": "Currency",
+   "label": "Supports PV",
+   "options": "XOF",
+   "description": "Coût des supports et structures des modules photovoltaïques."
+  },
+  {
+   "fieldname": "cout_supports_batteries",
+   "fieldtype": "Currency",
+   "label": "Supports Batteries",
+   "options": "XOF",
+   "description": "Coût des supports, coffrets ou armoires abritant les batteries."
+  },
+  {
+   "fieldname": "cout_modules_pv",
+   "fieldtype": "Currency",
+   "label": "Modules PV",
+   "options": "XOF",
+   "description": "Coût d'achat des panneaux solaires."
+  },
+  {
+   "fieldname": "cout_batteries",
+   "fieldtype": "Currency",
+   "label": "Batteries",
+   "options": "XOF",
+   "description": "Coût d'achat des batteries."
+  },
+  {
+   "fieldname": "cout_onduleurs",
+   "fieldtype": "Currency",
+   "label": "Onduleurs",
+   "options": "XOF",
+   "description": "Coût d'achat des onduleurs et régulateurs."
+  },
+  {
+   "fieldname": "cout_cables",
+   "fieldtype": "Currency",
+   "label": "Câbles Électriques",
+   "options": "XOF",
+   "description": "Coût des câbles électriques."
+  },
+  {
+   "fieldname": "cout_terre",
+   "fieldtype": "Currency",
+   "label": "Mise à la Terre",
+   "options": "XOF",
+   "description": "Coût de la mise à la terre : piquets, câbles de terre, accessoires."
+  },
+  {
+   "fieldname": "cout_protection",
+   "fieldtype": "Currency",
+   "label": "Éléments de Protection",
+   "options": "XOF",
+   "description": "Coût des protections électriques : disjoncteurs, parafoudres, fusibles, coffrets."
+  },
+  {
+   "fieldname": "cout_accessoires_cablage",
+   "fieldtype": "Currency",
+   "label": "Accessoires Câblage",
+   "options": "XOF",
+   "description": "Coût des petits accessoires de câblage : cosses, gaines, colliers, connecteurs."
+  },
+  {
+   "fieldname": "cout_gestionnaire",
+   "fieldtype": "Currency",
+   "label": "Composants Gestionnaire",
+   "options": "XOF",
+   "description": "Coût du système de gestion ou de supervision, s'il y en a un."
+  },
+  {
+   "fieldname": "frais_carburant",
+   "fieldtype": "Currency",
+   "label": "Carburant (Transport)",
+   "options": "XOF",
+   "description": "Carburant consommé pour ce chantier : trajets et groupe électrogène."
+  },
+  {
+   "fieldname": "frais_location_camion",
+   "fieldtype": "Currency",
+   "label": "Location de Camion",
+   "options": "XOF",
+   "description": "Location de camion, grue ou engin de levage pour ce chantier."
+  },
+  {
+   "fieldname": "frais_perdiems",
+   "fieldtype": "Currency",
+   "label": "Perdiems",
+   "options": "XOF",
+   "description": "Indemnités versées aux équipes sur le terrain."
+  },
+  {
+   "fieldname": "frais_hebergement",
+   "fieldtype": "Currency",
+   "label": "Hébergement",
+   "options": "XOF",
+   "description": "Hébergement des équipes en mission pour ce chantier."
+  },
+  {
+   "fieldname": "frais_autres",
+   "fieldtype": "Currency",
+   "label": "Autres Frais",
+   "options": "XOF",
+   "description": "Autres dépenses directement liées au chantier. Détaillez-les dans les commentaires, sinon la ligne devient inexploitable."
+  },
+  {
+   "fieldname": "cout_total_realisation",
+   "fieldtype": "Currency",
+   "label": "Coût Total de Réalisation",
+   "options": "XOF",
+   "read_only": 1,
+   "description": "Somme automatique de tous les coûts et frais ci-dessus. Rien à saisir."
+  },
+  {
+   "fieldname": "ecart_avance",
+   "fieldtype": "Currency",
+   "label": "Écart Réalisé vs Avance",
+   "options": "XOF",
+   "read_only": 1,
+   "description": "Calculé : coût total MOINS avance de démarrage. Un écart POSITIF signifie que les dépenses engagées dépassent déjà l'avance encaissée — il faut relancer le client. Un écart négatif est confortable : l'avance couvre encore les dépenses."
+  },
+  {
+   "fieldname": "ecart_budget_previsionnel",
+   "fieldtype": "Currency",
+   "label": "Écart Réalisé vs Prévisionnel",
+   "options": "XOF",
+   "read_only": 1,
+   "description": "Calculé : coût réel MOINS budget prévisionnel. Un écart POSITIF est un DÉPASSEMENT de budget. Un écart négatif signifie que le chantier a coûté moins cher que prévu."
+  },
+  {
+   "fieldname": "marge_brute",
+   "fieldtype": "Currency",
+   "label": "Marge Bénéficiaire Brute",
+   "options": "XOF",
+   "read_only": 1,
+   "description": "Calculée : montant facturé moins coût total de réalisation, avant taxes."
+  },
+  {
+   "fieldname": "taxes",
+   "fieldtype": "Currency",
+   "label": "Taxes à Payer",
+   "options": "XOF",
+   "description": "Taxes applicables au marché, en FCFA."
+  },
+  {
+   "fieldname": "marge_nette",
+   "fieldtype": "Currency",
+   "label": "Marge Bénéficiaire Nette",
+   "options": "XOF",
+   "read_only": 1,
+   "description": "Calculée : marge brute moins taxes. C'est le gain réel du marché."
+  },
+  {
+   "fieldname": "commentaires",
+   "fieldtype": "Small Text",
+   "label": "Commentaires",
+   "description": "Tout ce qui explique les chiffres : aléas du chantier, avenants, retards du client, dépenses exceptionnelles. C'est ce qui permet de comprendre un écart six mois plus tard."
+  }
  ],
  "no_sidebar": 1
 }

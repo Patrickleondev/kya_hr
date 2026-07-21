@@ -15,7 +15,7 @@
  "introduction_text": "Fiche client SoP (Solar-on-Plan) : installation, suivi du solde, et selon le mode de paiement, l'échéancier par tranche ou l'état des paiements mensuels (location).",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-06-16 12:00:00.000000",
+ "modified": "2026-07-19 09:30:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "sop-client",
@@ -27,22 +27,118 @@
  "title": "Fiche Client SoP",
  "client_script": "frappe.web_form.after_load=function(){var doc=frappe.web_form.doc;if(doc&&doc.name&&!String(doc.name).startsWith('new')){var refEl=document.createElement('div');refEl.innerHTML='<div style=\"margin-bottom:12px;padding:8px 16px;background:#e3f2fd;color:#0d47a1;border-left:4px solid #1976d2;border-radius:6px;display:inline-block;font-weight:700;font-size:14px;\">R\\u00e9f. : '+doc.name+(doc.statut?'  \\u2014  '+doc.statut:'')+'</div>';var w=document.querySelector('.web-form-wrapper')||document.querySelector('.container');if(w)w.prepend(refEl);}};",
  "web_form_fields": [
-  {"fieldname": "nom_client", "fieldtype": "Data", "label": "Nom du Client", "reqd": 1},
-  {"fieldname": "type_client", "fieldtype": "Select", "label": "Type de Client", "options": "Ménage\nInstitution"},
-  {"fieldname": "mode_paiement", "fieldtype": "Select", "label": "Mode de Paiement", "options": "Cash\nTranche\nLocation", "reqd": 1},
-  {"fieldname": "statut", "fieldtype": "Select", "label": "Statut", "options": "En cours\nSoldé\nEn retard\nAnnulé"},
-  {"fieldname": "date_installation", "fieldtype": "Date", "label": "Date d'Installation"},
-  {"fieldname": "puissance_kw", "fieldtype": "Data", "label": "Puissance Crête Solaire"},
-  {"fieldname": "montant_total", "fieldtype": "Currency", "label": "Montant Total Installation", "options": "XOF"},
-  {"fieldname": "montant_avance", "fieldtype": "Currency", "label": "Montant de l'Avance (1er décaissement)", "options": "XOF"},
-  {"fieldname": "solde_du", "fieldtype": "Currency", "label": "Solde Dû", "options": "XOF"},
-  {"fieldname": "date_prevue_solde", "fieldtype": "Date", "label": "Date Prévue pour le Solde"},
-  {"fieldname": "statut_paiement", "fieldtype": "Select", "label": "Statut Paiement", "options": "Non soldé\nSoldé\nPartiel"},
-  {"fieldname": "observations", "fieldtype": "Small Text", "label": "Observations / Commentaires"},
-  {"fieldname": "echeancier", "fieldtype": "Table", "label": "Échéancier des Paiements", "options": "KYA SoP Echeancier Ligne", "depends_on": "eval:doc.mode_paiement=='Tranche'"},
-  {"fieldname": "montant_mensuel", "fieldtype": "Currency", "label": "Montant Mensuel Dû", "options": "XOF", "depends_on": "eval:doc.mode_paiement=='Location'"},
-  {"fieldname": "date_fin_location", "fieldtype": "Date", "label": "Date de Fin de Paiement Mensuel", "depends_on": "eval:doc.mode_paiement=='Location'"},
-  {"fieldname": "etat_paiement_location", "fieldtype": "Table", "label": "État des Paiements Mensuels", "options": "KYA SoP Paiement Mensuel", "depends_on": "eval:doc.mode_paiement=='Location'"}
+  {
+   "fieldname": "nom_client",
+   "fieldtype": "Data",
+   "label": "Nom du Client",
+   "reqd": 1,
+   "description": "Nom complet du client tel qu'il figure sur le contrat. Écrivez-le toujours à l'identique d'une fiche à l'autre, sinon le suivi par client est faussé."
+  },
+  {
+   "fieldname": "type_client",
+   "fieldtype": "Select",
+   "label": "Type de Client",
+   "options": "Ménage\nInstitution",
+   "description": "Ménage = particulier. Institution = entreprise, école, centre de santé, administration."
+  },
+  {
+   "fieldname": "mode_paiement",
+   "fieldtype": "Select",
+   "label": "Mode de Paiement",
+   "options": "Cash\nTranche\nLocation",
+   "reqd": 1,
+   "description": "Cash = paiement intégral immédiat. Tranche = paiement échelonné (remplissez alors l'échéancier). Location = loyer mensuel (remplissez alors le montant mensuel et le suivi des paiements)."
+  },
+  {
+   "fieldname": "statut",
+   "fieldtype": "Select",
+   "label": "Statut",
+   "options": "En cours\nSoldé\nEn retard\nAnnulé",
+   "description": "État du dossier. En cours = client actif. Soldé = tout est payé. En retard = échéance dépassée sans paiement. Annulé = contrat rompu."
+  },
+  {
+   "fieldname": "date_installation",
+   "fieldtype": "Date",
+   "label": "Date d'Installation",
+   "description": "Date de mise en service chez le client. C'est elle qui fait courir les échéances de paiement."
+  },
+  {
+   "fieldname": "puissance_kw",
+   "fieldtype": "Data",
+   "label": "Puissance Crête Solaire",
+   "description": "Puissance de l'installation, en kW (ex : 1,5). Indiquez uniquement le nombre, sans l'unité."
+  },
+  {
+   "fieldname": "montant_total",
+   "fieldtype": "Currency",
+   "label": "Montant Total Installation",
+   "options": "XOF",
+   "description": "Montant total du contrat en FCFA, avance comprise. C'est le prix de vente complet, pas le reste à payer."
+  },
+  {
+   "fieldname": "montant_avance",
+   "fieldtype": "Currency",
+   "label": "Montant de l'Avance (1er décaissement)",
+   "options": "XOF",
+   "description": "Somme déjà versée par le client. ATTENTION : en mode Tranche ou Location, ce champ est indicatif — le solde dû se calcule UNIQUEMENT à partir des paiements saisis dans le tableau plus bas. L'avance doit donc y figurer aussi, en première ligne. En mode Cash, elle est bien déduite."
+  },
+  {
+   "fieldname": "solde_du",
+   "fieldtype": "Currency",
+   "label": "Solde Dû",
+   "options": "XOF",
+   "description": "Calculé automatiquement. En mode Cash : montant total moins avance. En mode Tranche ou Location : montant total moins la somme des paiements saisis dans le tableau. Si le solde vous paraît trop élevé, c'est en général qu'un versement n'a pas été enregistré dans le tableau."
+  },
+  {
+   "fieldname": "date_prevue_solde",
+   "fieldtype": "Date",
+   "label": "Date Prévue pour le Solde",
+   "description": "Date à laquelle le client doit avoir tout payé. Elle sert au suivi des retards."
+  },
+  {
+   "fieldname": "statut_paiement",
+   "fieldtype": "Select",
+   "label": "Statut Paiement",
+   "options": "Non soldé\nSoldé\nPartiel",
+   "description": "Non soldé = rien ou presque n'a été payé. Partiel = des versements sont en cours. Soldé = plus rien dû."
+  },
+  {
+   "fieldname": "observations",
+   "fieldtype": "Small Text",
+   "label": "Observations / Commentaires",
+   "description": "Contexte utile au suivi : difficultés du client, accord particulier, relances déjà faites, engagement pris."
+  },
+  {
+   "fieldname": "echeancier",
+   "fieldtype": "Table",
+   "label": "Échéancier des Paiements",
+   "options": "KYA SoP Echeancier Ligne",
+   "depends_on": "eval:doc.mode_paiement=='Tranche'",
+   "description": "À remplir en mode Tranche. Une ligne par échéance, avec sa date, son montant et le montant réellement payé. C'est CE tableau qui pilote le solde dû : une avance déjà versée doit y apparaître comme première ligne payée."
+  },
+  {
+   "fieldname": "montant_mensuel",
+   "fieldtype": "Currency",
+   "label": "Montant Mensuel Dû",
+   "options": "XOF",
+   "depends_on": "eval:doc.mode_paiement=='Location'",
+   "description": "À remplir uniquement en mode Location : loyer dû chaque mois, en FCFA."
+  },
+  {
+   "fieldname": "date_fin_location",
+   "fieldtype": "Date",
+   "label": "Date de Fin de Paiement Mensuel",
+   "depends_on": "eval:doc.mode_paiement=='Location'",
+   "description": "À remplir uniquement en mode Location : date de fin du contrat de location."
+  },
+  {
+   "fieldname": "etat_paiement_location",
+   "fieldtype": "Table",
+   "label": "État des Paiements Mensuels",
+   "options": "KYA SoP Paiement Mensuel",
+   "depends_on": "eval:doc.mode_paiement=='Location'",
+   "description": "À remplir en mode Location : une ligne par mois, avec le montant réellement payé. C'est CE tableau qui pilote le solde dû et le repérage des retards."
+  }
  ],
  "no_sidebar": 1
 }

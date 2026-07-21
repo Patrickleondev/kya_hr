@@ -15,7 +15,7 @@
  "introduction_text": "",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-03-12 00:00:00.000000",
+ "modified": "2026-07-20 12:00:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "permission-sortie-stagiaire",
@@ -32,20 +32,23 @@
    "fieldtype": "Link",
    "label": "Stagiaire (Employé)",
    "options": "Employee",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Le stagiaire qui sort. Si vous saisissez pour vous-même, c'est votre propre matricule."
   },
   {
    "fieldname": "employee_name",
    "fieldtype": "Data",
    "label": "Nom",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Rempli automatiquement à partir du matricule."
   },
   {
    "fieldname": "department",
    "fieldtype": "Link",
    "label": "Département",
    "options": "Department",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Rempli automatiquement. Il détermine le chef qui recevra la demande."
   },
   {
    "fieldname": "equipe",
@@ -53,13 +56,15 @@
    "fieldtype": "Data",
    "read_only": 1,
    "reqd": 0,
-   "hidden": 0
+   "hidden": 0,
+   "description": "Rempli automatiquement à partir de votre fiche."
   },
   {
    "fieldname": "date_sortie",
    "fieldtype": "Date",
    "label": "Date de Début",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Jour de la sortie, ou premier jour si l'absence dure plusieurs jours."
   },
   {
    "fieldname": "date_fin",
@@ -71,7 +76,8 @@
    "fieldname": "nombre_jours",
    "fieldtype": "Int",
    "label": "Nombre de Jours",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Calculé automatiquement. Rien à saisir."
   },
   {
    "fieldname": "heure_depart",
@@ -83,7 +89,8 @@
   {
    "fieldname": "heure_retour",
    "fieldtype": "Time",
-   "label": "Heure de Retour Prévue"
+   "label": "Heure de Retour Prévue",
+   "description": "Heure de retour prévue."
   },
   {
    "fieldname": "motif",
@@ -95,13 +102,15 @@
   {
    "fieldname": "chef_absent",
    "fieldtype": "Check",
-   "label": "Mon chef de service est absent (traiter directement par la RH)"
+   "label": "Mon chef de service est absent (traiter directement par la RH)",
+   "description": "À cocher UNIQUEMENT si votre maître de stage est absent ou injoignable. La demande passe alors directement au responsable des stagiaires, qui en est informé."
   },
   {
    "fieldname": "chef_absent_note",
    "fieldtype": "Small Text",
    "label": "Nom du chef intérimaire / précision",
-   "depends_on": "chef_absent"
+   "depends_on": "chef_absent",
+   "description": "Obligatoire si vous avez coché la case ci-dessus : précisez pourquoi le maître de stage n'a pas pu viser."
   },
   {
    "fieldname": "justificatif",
@@ -112,22 +121,26 @@
   {
    "fieldname": "signature_stagiaire",
    "fieldtype": "Signature",
-   "label": "Signature Stagiaire"
+   "label": "Signature Stagiaire",
+   "description": "Votre signature."
   },
   {
    "fieldname": "signature_chef",
    "fieldtype": "Signature",
-   "label": "Signature Chef"
+   "label": "Signature Chef",
+   "description": "Réservée à votre maître de stage."
   },
   {
    "fieldname": "signature_resp_stagiaires",
    "fieldtype": "Signature",
-   "label": "Signature Resp. Stagiaires"
+   "label": "Signature Resp. Stagiaires",
+   "description": "Réservée au responsable des stagiaires."
   },
   {
    "fieldname": "signature_dg",
    "fieldtype": "Signature",
-   "label": "Signature DG"
+   "label": "Signature DG",
+   "description": "Réservée à la Direction Générale."
   }
  ],
  "no_sidebar": 1

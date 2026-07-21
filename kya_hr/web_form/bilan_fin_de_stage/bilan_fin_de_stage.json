@@ -15,7 +15,7 @@
  "introduction_text": "Remplissez ce formulaire pour soumettre votre bilan de fin de stage. Votre encadrant complétera l'évaluation et la note par la suite.",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-03-15 00:00:00.000000",
+ "modified": "2026-07-19 09:30:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "bilan-fin-de-stage",
@@ -31,20 +31,23 @@
    "fieldtype": "Link",
    "label": "Stagiaire (Employé)",
    "options": "Employee",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Le stagiaire évalué."
   },
   {
    "fieldname": "employee_name",
    "fieldtype": "Data",
    "label": "Nom",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Rempli automatiquement à partir du matricule."
   },
   {
    "fieldname": "department",
    "fieldtype": "Link",
    "label": "Département",
    "options": "Department",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Rempli automatiquement à partir de la fiche du stagiaire."
   },
   {
    "fieldname": "encadrant",
@@ -57,13 +60,15 @@
    "fieldname": "date_debut",
    "fieldtype": "Date",
    "label": "Date Début de Stage",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Premier jour du stage, tel qu'il figure sur la convention."
   },
   {
    "fieldname": "date_fin",
    "fieldtype": "Date",
    "label": "Date Fin de Stage",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Dernier jour du stage. Ces deux dates doivent correspondre à la convention signée : elles figureront sur l'attestation."
   },
   {
    "fieldname": "evaluation",
@@ -83,7 +88,8 @@
    "fieldtype": "Select",
    "label": "Mention",
    "options": "Insuffisant\nPassable\nAssez Bien\nBien\nTrès Bien",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Calculée automatiquement à partir des notes attribuées ci-dessous. Pour la faire évoluer, modifiez les notes, pas la mention."
   }
  ],
  "no_sidebar": 1

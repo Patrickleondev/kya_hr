@@ -65,6 +65,10 @@ CREATE_GRANTS: dict[str, list[str]] = {
     # (caissier absent/indisponible). Un Custom DocPerm existant à create=0
     # neutralisait le create=1 du JSON → on le rétablit ici, source de vérité.
     "Brouillard Caisse": ["Comptable"],
+    # État récap chèques : la CAISSIÈRE est la rédactrice (elle crée et soumet
+    # au DFC). Le doctype ne lui donnait aucun droit (que Comptable/DFC/DAAF)
+    # → fiche coincée en Brouillon sans bouton. On l'aligne sur Brouillard.
+    "Etat Recap Cheques": ["Caissier"],
 }
 
 

@@ -15,7 +15,7 @@
  "introduction_text": "",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-03-24 00:00:00.000000",
+ "modified": "2026-07-19 09:30:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "demande-achat",
@@ -32,20 +32,23 @@
    "fieldtype": "Link",
    "label": "Employé Demandeur",
    "options": "Employee",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Le demandeur : tapez votre NOM, l'identifiant employé se remplit tout seul."
   },
   {
    "fieldname": "employee_name",
    "fieldtype": "Data",
    "label": "Nom complet",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Rempli automatiquement à partir du matricule."
   },
   {
    "fieldname": "department",
    "fieldtype": "Link",
    "label": "Département",
    "options": "Department",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Se remplit automatiquement depuis votre fiche employé."
   },
   {
    "fieldname": "au_nom_de",
@@ -58,7 +61,8 @@
    "fieldname": "date_demande",
    "fieldtype": "Date",
    "label": "Date de la demande",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Date de la demande (aujourd'hui par défaut)."
   },
   {
    "fieldname": "objet",
@@ -72,45 +76,53 @@
    "fieldtype": "Select",
    "label": "Niveau d'urgence",
    "options": "Normal\nUrgent\nTrès Urgent",
-   "default": "Normal"
+   "default": "Normal",
+   "description": "Normale = besoin planifié · Urgente = bloque une activité en cours."
   },
   {
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Articles demandés",
    "options": "Demande Achat Item",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Un article par ligne : désignation PRÉCISE, quantité et prix unitaire estimé."
   },
   {
    "fieldname": "montant_total",
    "fieldtype": "Currency",
-   "label": "Montant Total (XOF)"
+   "label": "Montant Total (XOF)",
+   "description": "Calculé automatiquement d'après les lignes — ne pas modifier."
   },
   {
    "fieldname": "statut",
    "fieldtype": "Data",
    "label": "État de la Demande",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Suit l'avancement du circuit de validation — non modifiable."
   },
   {
    "fieldname": "signature_demandeur",
    "fieldtype": "Signature",
-   "label": "Signature Demandeur"
+   "label": "Signature Demandeur",
+   "description": "Signez ici, puis soumettez à votre chef de service."
   },
   {
    "fieldname": "signature_chef",
    "fieldtype": "Signature",
-   "label": "Visa Chef Service"
+   "label": "Visa Chef Service",
+   "description": "Réservé au chef de service — laissez vide."
   },
   {
    "fieldname": "signature_dga",
    "fieldtype": "Signature",
-   "label": "Visa Responsable Comptable / DAAF"
+   "label": "Visa Responsable Comptable / DAAF",
+   "description": "Réservé au Responsable Comptable / DAAF — laissez vide."
   },
   {
    "fieldname": "signature_dg",
    "fieldtype": "Signature",
-   "label": "Approbation DG (≥ 100 001 XOF)"
+   "label": "Approbation DG (≥ 100 001 XOF)",
+   "description": "Réservée à la Direction Générale, requise uniquement au-delà de 100 000 FCFA. En dessous de ce seuil, le visa de la DGA suffit."
   }
  ]
 }

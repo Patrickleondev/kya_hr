@@ -122,7 +122,11 @@ def get_context(context):
     context.total_sections = len(sections)
     context.sections_signed = sections_signed_for_role
     context.phone_confirmed = bool(doc.phone_confirmed)
-    context.phone_hint = (doc.telephone or "")[-4:] if doc.telephone else "????"
+    # Indice = 4 derniers chiffres du numéro NORMALISÉ (sinon un numéro stocké
+    # « +228 79 07 21 83 » affichait « 1 83 », espace compris.)
+    from kya_hr.api.kya_contracts import _normalize_phone
+
+    context.phone_hint = _normalize_phone(doc.telephone)[-4:] or "????"
     context.peut_signer_employe = peut_signer_employe
     context.peut_signer_dg = peut_signer_dg
     context.peut_editer_perso = peut_editer_perso

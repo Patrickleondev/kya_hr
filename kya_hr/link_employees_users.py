@@ -66,6 +66,17 @@ def on_session_creation(login_manager=None) -> None:
         if not user or user in ("Guest", "Administrator"):
             return
 
+        # Rôles en doublon : si la RH a assigné « Responsable Equipe » là où le
+        # système attend « Chef d'Équipe », on complète au login pour que
+        # l'utilisateur ne soit bloqué à aucune étape. Purement additif.
+        try:
+            from kya_hr.reconcile_duplicate_roles import reconcilier_utilisateur
+            if reconcilier_utilisateur(user):
+                frappe.db.commit()
+        except Exception:
+            frappe.log_error(frappe.get_traceback(),
+                             "on_session_creation reconcile_roles")
+
         # Deja lie a une fiche Employee ? -> on garantit quand meme l'acces
         # (role Employee + module KYA HR non bloque : cf. employee_access).
         already = frappe.db.get_value("Employee", {"user_id": user}, "name")

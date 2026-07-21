@@ -46,10 +46,80 @@ def _load_contract_with_token(contract_id, token, role):
     return doc
 
 
-def _normalize_phone(p):
+# Longueur exigée pour la partie commune à deux écritures d'un même numéro.
+# 8 = longueur d'un numéro local togolais : on refuse ainsi une saisie
+# TRONQUÉE (« 9072183 », les 7 derniers chiffres) qui serait sinon un suffixe
+# valide. Le seuil est plafonné par la longueur du numéro enregistré, pour ne
+# pas bloquer les pays à numérotation plus courte.
+_PHONE_MIN_COMMUN = 8
+
+
+def _phone_digits(p):
+    """Chiffres significatifs d'un numéro, indépendamment de son écriture.
+
+    On retire les séparateurs, le préfixe international (« 00 » / « + ») et
+    les zéros de tête (préfixe national). Volontairement AUCUN indicatif pays
+    n'est codé en dur : le rapprochement se fait par suffixe (_phone_matches),
+    ce qui vaut pour le Togo (+228) comme pour le Bénin (+229), le Ghana,
+    le Nigeria, la France…
+    """
     if not p:
         return ""
-    return "".join(c for c in str(p) if c.isdigit())[-9:]
+    d = "".join(c for c in str(p) if c.isdigit())
+    if d.startswith("00"):
+        d = d[2:]
+    return d.lstrip("0")
+
+
+def _phone_matches(stocke, saisi):
+    """Deux écritures désignent-elles le même numéro ?
+
+    Règle : après nettoyage, le plus court doit être un suffixe du plus long
+    et compter au moins _PHONE_MIN_COMMUN chiffres. Ainsi « 79072183 »,
+    « +228 79 07 21 83 » et « 00228 79072183 » se correspondent, sans que le
+    signataire ait à deviner s'il doit ajouter l'indicatif de son pays.
+    """
+    a, b = _phone_digits(stocke), _phone_digits(saisi)
+    if not a or not b:
+        return False
+    if a == b:
+        return True
+    court, long_ = (a, b) if len(a) <= len(b) else (b, a)
+    seuil = min(_PHONE_MIN_COMMUN, len(a))
+    return len(court) >= seuil and long_.endswith(court)
+
+
+def _normalize_phone(p):
+    """Conservé pour l'indice affiché (4 derniers chiffres)."""
+    return _phone_digits(p)
+
+
+def _contact_rh(doc):
+    """(nom, email) de l'interlocuteur RH pour ce contrat.
+
+    On privilégie la personne qui a RÉELLEMENT créé/envoyé le contrat : c'est
+    elle que le signataire connaît. À défaut, le premier RH actif.
+    """
+    for user in (doc.get("owner"),):
+        if user and user not in ("Administrator", "Guest"):
+            d = frappe.db.get_value("User", user, ["email", "full_name", "enabled"], as_dict=True)
+            if d and d.enabled and d.email:
+                return d.full_name or "le service RH", d.email
+    for role in ("Responsable RH", "HR Manager", "Assistant(e) RH"):
+        for user in frappe.get_all("Has Role", filters={"role": role, "parenttype": "User"}, pluck="parent"):
+            if user in ("Administrator", "Guest"):
+                continue
+            d = frappe.db.get_value("User", user, ["email", "full_name", "enabled"], as_dict=True)
+            if d and d.enabled and d.email:
+                return d.full_name or "le service RH", d.email
+    return "le service RH", None
+
+
+def _mailto(nom, email):
+    """Rend « Nom (mail cliquable) » ou juste le nom si aucune adresse connue."""
+    if not email:
+        return f"<b>{nom}</b>"
+    return f'<b>{nom}</b> (<a href="mailto:{email}" style="color:#1a5276;">{email}</a>)'
 
 
 def _request_ip():
@@ -125,7 +195,9 @@ def send_signataire_email(doc):
 
     site = frappe.utils.get_url()
     portail_url = f"{site}/kya-contrat?name={doc.name}&token={doc.access_token_signataire}"
-    phone_hint = (doc.telephone or "")[-4:] if doc.telephone else "????"
+    phone_hint = _normalize_phone(doc.telephone)[-4:] or "????"
+    _rh_nom, _rh_email = _contact_rh(doc)
+    contact_rh_html = _mailto(_rh_nom, _rh_email or "rh@kya-energy.com")
 
     message = f"""
     <div style="font-family:Arial,sans-serif; max-width:640px; margin:0 auto; border:1px solid #eee; border-radius:6px; overflow:hidden;">
@@ -151,7 +223,14 @@ def send_signataire_email(doc):
           <li><b>Si une page (souvent sombre) vous demande un « code » à 6 chiffres pour continuer</b>,
               tapez simplement <b><code style="background:#fff;padding:2px 6px;font-size:15px;">1 1 1 1 1 1</code></b>
               (le chiffre 1, six fois) puis cliquez sur le bouton pour continuer.</li>
-          <li><b>Confirmez votre numéro de téléphone</b> (les 9 chiffres)</li>
+          <li><b>Confirmez votre numéro de téléphone</b>, celui que vous avez communiqué aux RH.<br>
+              <span style="color:#5a6470;">Numéro togolais : vos <b>8 chiffres</b> suffisent
+              (ex. <code style="background:#fff;padding:2px 6px;">90123456</code>) — inutile
+              d'ajouter le <b>+228</b>, avec ou sans cela fonctionne.<br>
+              Numéro d'un autre pays : saisissez-le <b>avec son indicatif</b>
+              (ex. <code style="background:#fff;padding:2px 6px;">+229 …</code> pour le Bénin) ;
+              <code style="background:#fff;padding:2px 6px;">+229</code> et
+              <code style="background:#fff;padding:2px 6px;">00229</code> sont équivalents.</span></li>
           <li>Complétez vos informations personnelles (Père, Mère, Domicile, Date de naissance)</li>
           <li>Lisez chaque section et cochez <b>« Lu et approuvé »</b> sur chacune</li>
           <li>Apposez votre signature (en la <b>dessinant</b> ou en <b>important une image</b> PNG/JPG)</li>
@@ -165,7 +244,15 @@ def send_signataire_email(doc):
         <p style="font-size:12px; color:#888; word-break:break-all;">Si le bouton ne fonctionne pas :<br>{portail_url}</p>
 
         <p style="font-size:13px; color:#666;">Une fois signé, le contrat sera transmis au Directeur Général. Vous recevrez la version finale en PDF par email.</p>
-        <p>Pour toute question : <a href="mailto:rh@kya-energy.com">rh@kya-energy.com</a></p>
+
+        <div style="background:#f4f6f8; border-left:4px solid #e07b00; padding:12px 16px; margin:18px 0; font-size:13px; color:#333;">
+          <b>🙋 Bloqué(e) à une étape ? Voici à qui vous adresser.</b><br>
+          Pour <b>toute difficulté</b> (page qui refuse de s'ouvrir, numéro de téléphone non reconnu,
+          signature qui ne s'enregistre pas, informations erronées dans le contrat),
+          contactez le <b>service des Ressources Humaines</b> : {contact_rh_html}.<br>
+          <span style="color:#5a6470;">Précisez la référence <b>{doc.name}</b> dans votre message,
+          cela permet de retrouver votre dossier immédiatement.</span>
+        </div>
         <p style="margin-top:30px;">Bien cordialement,<br><b>Le Service des Ressources Humaines</b><br>KYA-Energy Group</p>
       </div>
     </div>
@@ -215,11 +302,15 @@ def send_to_signataire(contract_id):
 @frappe.whitelist(allow_guest=True)
 def verify_phone(contract_id, token, phone):
     doc = _load_contract_with_token(contract_id, token, "employe")
-    expected = _normalize_phone(doc.telephone)
-    given = _normalize_phone(phone)
-    if not expected or not given or expected != given:
+    if not _phone_matches(doc.telephone, phone):
         time.sleep(1.5)  # anti-bruteforce léger
-        frappe.throw(_("Numéro de téléphone incorrect."))
+        frappe.throw(
+            _(
+                "Numéro de téléphone incorrect. Saisissez le numéro que vous avez communiqué "
+                "aux Ressources Humaines, par exemple 90123456. Si votre numéro est étranger, "
+                "ajoutez son indicatif (ex. +229 pour le Bénin)."
+            )
+        )
     doc.db_set("phone_confirmed", 1, update_modified=False)
     frappe.db.commit()
     return {"ok": True}
@@ -414,10 +505,22 @@ def notify_dg_after_rh_gateway(doc, method=None):
             <p>La RH a transmis pour co-signature le contrat de <b>{doc.contract_type}</b>
             de <b>{doc.employee_name}</b>.</p>
             <p>Le salarié a déjà signé le {frappe.format_value(doc.date_signature_employe, {'fieldtype':'Datetime'})}.</p>
-            <p style="background:#f4f6f8; border-left:4px solid #1a5276; padding:10px 14px; font-size:13px; color:#333;">
-              <b>Astuce :</b> si une page vous demande un code à 6 chiffres pour continuer,
-              tapez simplement <b><code style="background:#fff;padding:2px 6px;">1 1 1 1 1 1</code></b> (le chiffre 1, six fois).
-            </p>
+            <div style="background:#f4f6f8; border-left:4px solid #1a5276; padding:12px 16px; font-size:13px; color:#333;">
+              <b>Si vous rencontrez une page intermédiaire avant d'arriver au contrat :</b>
+              <ol style="margin:10px 0 0 0; padding-left:20px; line-height:1.8;">
+                <li><b>Une page (souvent sombre) demandant un « code » à 6 chiffres</b> — c'est la page
+                    de sécurité d'accès à la plateforme. Tapez
+                    <b><code style="background:#fff;padding:2px 6px;font-size:15px;">1 1 1 1 1 1</code></b>
+                    (le chiffre 1, six fois), puis continuez.</li>
+                <li><b>Ensuite, la page de connexion habituelle</b> (votre e-mail + mot de passe).
+                    Si vous avez <b>oublié votre mot de passe</b>, cliquez sur
+                    <b>« Mot de passe oublié ? »</b> juste sous le bouton de connexion : vous recevrez
+                    un lien par e-mail pour en définir un nouveau.<br>
+                    <span style="color:#5a6470;">Le nouveau mot de passe doit contenir au minimum
+                    <b>8 caractères</b>, dont <b>une majuscule</b>, <b>un chiffre</b> et
+                    <b>un caractère spécial</b> (par exemple <code style="background:#fff;padding:1px 4px;">! ? @ # $ %</code>).</span></li>
+              </ol>
+            </div>
             <p style="text-align:center; margin:24px 0;">
               <a href="{url}" style="display:inline-block; background:#1a5276; color:#fff; padding:12px 26px; text-decoration:none; border-radius:5px; font-weight:600;">→ Accéder au contrat</a>
             </p>

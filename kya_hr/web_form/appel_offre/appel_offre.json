@@ -15,7 +15,7 @@
  "introduction_text": "<p>Création d'un appel d'offre à destination des fournisseurs consultés. Après enregistrement, utilisez le bouton <strong>Envoyer aux fournisseurs</strong> dans l'espace de travail pour diffuser l'AO par email (les fournisseurs sans email seront listés pour un contact manuel).</p>",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-04-24 00:00:00.000000",
+ "modified": "2026-07-20 12:00:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "appel-offre",
@@ -31,7 +31,8 @@
    "fieldname": "date_ao",
    "fieldtype": "Date",
    "label": "Date de l'AO",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Date de lancement de l'appel d'offre."
   },
   {
    "fieldname": "date_limite",
@@ -45,37 +46,43 @@
    "fieldtype": "Link",
    "options": "Employee",
    "label": "Demandeur",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Employé à l'origine du besoin. Il recevra les questions des fournisseurs."
   },
   {
    "fieldname": "demandeur_name",
    "fieldtype": "Data",
    "label": "Nom du Demandeur",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Rempli automatiquement à partir du matricule."
   },
   {
    "fieldname": "service",
    "fieldtype": "Data",
-   "label": "Service"
+   "label": "Service",
+   "description": "Service ou équipe demandeuse, pour l'imputation du besoin."
   },
   {
    "fieldname": "objet",
    "fieldtype": "Small Text",
    "label": "Objet de l'appel d'offre",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Ce qui est mis en concurrence, en une phrase claire : c'est le titre que verront les fournisseurs."
   },
   {
    "fieldname": "demande_achat",
    "fieldtype": "Link",
    "options": "Demande Achat KYA",
-   "label": "Demande d'Achat liée (optionnel)"
+   "label": "Demande d'Achat liée (optionnel)",
+   "description": "Demande d'achat à l'origine de la consultation, pour garder la traçabilité du besoin."
   },
   {
    "fieldname": "items",
    "fieldtype": "Table",
    "options": "Appel Offre KYA Item",
    "label": "Articles",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Une ligne par article ou prestation demandée, avec quantité et spécifications. Plus la description est précise, plus les offres seront comparables entre elles."
   },
   {
    "fieldname": "fournisseurs",
@@ -88,32 +95,38 @@
   {
    "fieldname": "modalites",
    "fieldtype": "Text Editor",
-   "label": "Modalités"
+   "label": "Modalités",
+   "description": "Conditions de la consultation : date limite de remise, mode d'envoi des offres, pièces à fournir, conditions de livraison."
   },
   {
    "fieldname": "criteres_selection",
    "fieldtype": "Small Text",
-   "label": "Critères de sélection"
+   "label": "Critères de sélection",
+   "description": "Critères de choix et leur importance relative (prix, délai, garantie, références). Les annoncer à l'avance protège l'entreprise en cas de contestation."
   },
   {
    "fieldname": "message_fournisseur",
    "fieldtype": "Text Editor",
-   "label": "Message accompagnant l'envoi"
+   "label": "Message accompagnant l'envoi",
+   "description": "Texte du message envoyé aux fournisseurs consultés. Restez factuel et identique pour tous : c'est une exigence d'équité."
   },
   {
    "fieldname": "signature_demandeur",
    "fieldtype": "Signature",
-   "label": "Signature Demandeur"
+   "label": "Signature Demandeur",
+   "description": "Votre signature en tant que demandeur."
   },
   {
    "fieldname": "signature_daaf",
    "fieldtype": "Signature",
-   "label": "Signature Responsable Comptable / DAAF"
+   "label": "Signature Responsable Comptable / DAAF",
+   "description": "Réservée à la Direction des Affaires Administratives et Financières."
   },
   {
    "fieldname": "signature_dg",
    "fieldtype": "Signature",
-   "label": "Signature DG"
+   "label": "Signature DG",
+   "description": "Réservée à la Direction Générale."
   }
  ],
  "no_sidebar": 1

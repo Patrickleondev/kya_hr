@@ -14,6 +14,7 @@ app_include_css = ["/assets/kya_hr/css/kya_desk.css"]
 app_include_js = [
     "/assets/kya_hr/js/employee_list.js",
     "/assets/kya_hr/js/kya_desktop_fix.js",
+    "/assets/kya_hr/js/kya_breadcrumbs.js",
     "/assets/kya_hr/js/kya_new_doc_to_webform.js",
     "/assets/kya_hr/js/kya_sidebar_router.js",
     "/assets/kya_hr/js/kya_view_to_webform.js",
@@ -25,6 +26,7 @@ fixtures = [
     {"dt": "Workflow"},
     {"dt": "Workflow State"},
     {"dt": "Workflow Action"},
+    {"dt": "Workflow Action Master"},
     {"dt": "Role"},
     {"dt": "Custom Field"},
     {"dt": "Property Setter"},
@@ -110,11 +112,13 @@ doc_events = {
             "kya_hr.dashboard_realtime.notify_dashboard_change",
             "kya_hr.role_sync.sync_employee_role",
             "kya_hr.equipe_member_sync.sync_on_employee_change",
+            "kya_hr.api.rh_sync.sync_salarie_from_employee",
         ],
         "on_update": [
             "kya_hr.dashboard_realtime.notify_dashboard_change",
             "kya_hr.role_sync.sync_employee_role",
             "kya_hr.equipe_member_sync.sync_on_employee_change",
+            "kya_hr.api.rh_sync.sync_salarie_from_employee",
         ],
     },
     "Attendance": {
@@ -157,6 +161,7 @@ doc_events = {
         "validate": "kya_hr.auto_calc_logic.compute_bulletin",
     },
     "Permission Sortie Employe": {
+        "before_insert": "kya_hr.chef_routing.route_start_state",
         "before_save": "kya_hr.chef_routing.populate_chef",
         "after_insert": [
             "kya_hr.email_notifications.send_submission_recap",
@@ -267,6 +272,7 @@ doc_events = {
     # signé à la clôture (retour terrain : le caissier ne recevait AUCUN mail).
     "Brouillard Caisse": {
         "after_insert": "kya_hr.email_notifications.send_submission_recap",
+        "on_update": "kya_hr.compta_routing.notify_comptable_absent",
         "on_change": "kya_hr.api.pdf_final.attach_final_pdf",
     },
     "Etat Recap Cheques": {

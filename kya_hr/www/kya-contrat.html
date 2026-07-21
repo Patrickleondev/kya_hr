@@ -105,14 +105,24 @@
   {% if role == 'employe' and not phone_confirmed and peut_signer_employe %}
     <div class="kya-alert alert-warn">
       <b>🔒 Vérification d'identité</b><br>
-      Pour accéder au contenu du contrat, veuillez confirmer votre numéro de téléphone (les 9 chiffres).
+      Pour accéder au contenu du contrat, veuillez confirmer votre numéro de téléphone.
       Numéro enregistré : <code>…{{ phone_hint }}</code>
     </div>
     <div class="kya-card">
       <h3>Confirmation du numéro de téléphone</h3>
       <div class="kya-field">
-        <label>Votre numéro de téléphone (9 chiffres)</label>
-        <input type="tel" id="phone-input" placeholder="Ex: 90123456" maxlength="15" autofocus>
+        <label>Votre numéro de téléphone</label>
+        <input type="tel" id="phone-input" placeholder="Ex : 90 12 34 56" maxlength="25" autofocus>
+        <div style="margin-top:6px; font-size:12.5px; color:#5a6470; line-height:1.6;">
+          Saisissez le numéro que vous avez communiqué aux Ressources Humaines.<br>
+          <b>Numéro togolais :</b> vos <b>8 chiffres</b> suffisent — <code>90123456</code>.
+          Les espaces et l'indicatif <b>+228</b> sont facultatifs : <code>90 12 34 56</code>
+          et <code>+228 90 12 34 56</code> fonctionnent aussi.<br>
+          <b>Numéro d'un autre pays :</b> saisissez-le <b>avec son indicatif</b> —
+          <code>+229 …</code> (Bénin), <code>+233 …</code> (Ghana), <code>+234 …</code> (Nigeria),
+          <code>+33 …</code> (France). Les écritures <code>+229</code> et <code>00229</code>
+          sont équivalentes.
+        </div>
       </div>
       <button class="btn-kya" onclick="verifyPhone()">✓ Confirmer mon identité</button>
       <div id="phone-error" style="color:#c0392b; margin-top:12px; font-size:13px;"></div>

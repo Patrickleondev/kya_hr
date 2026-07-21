@@ -167,6 +167,11 @@ ALLOWED_DOCTYPES = {
     "Bilan Fin de Stage",
     "Bon Commande KYA",
     "Appel Offre KYA",
+    # Circuits comptabilité : sans ça, get_kya_workflow_actions fait un no-op
+    # silencieux → aucun bouton d'action sur le web form (fiche coincée en
+    # Brouillon). La caissière/rédactrice ne pouvait pas soumettre son état.
+    "Etat Recap Cheques",
+    "Brouillard Caisse",
 }
 
 
@@ -1231,6 +1236,36 @@ def get_dashboard_stagiaires(annee=None):
     except Exception:
         stats["stagiaires"] = []
         stats["repartition_departement"] = {}
+
+    # Répartition par type de stage (immersion / académique / professionnel).
+    # L'information vit dans le registre `Stagiaire RH KYA`. On se cale sur
+    # l'année choisie en haut du tableau, comme le reste des statistiques : un
+    # stage compte pour l'année où il commence. Les fiches sans date de début
+    # sont comptées à part plutôt que rattachées arbitrairement à une année.
+    try:
+        par_type = {}
+        non_renseignes = 0
+        sans_date = 0
+        for r in frappe.get_all("Stagiaire RH KYA",
+                                fields=["type_stage", "date_debut"],
+                                limit_page_length=0):
+            debut = r.get("date_debut")
+            if not debut:
+                sans_date += 1
+                continue
+            if getdate(debut).year != annee:
+                continue
+            if r.get("type_stage"):
+                par_type[r["type_stage"]] = par_type.get(r["type_stage"], 0) + 1
+            else:
+                non_renseignes += 1
+        stats["repartition_type_stage"] = par_type
+        stats["type_stage_non_renseigne"] = non_renseignes
+        stats["type_stage_sans_date"] = sans_date
+    except Exception:
+        stats["repartition_type_stage"] = {}
+        stats["type_stage_non_renseigne"] = 0
+        stats["type_stage_sans_date"] = 0
 
     return stats
 

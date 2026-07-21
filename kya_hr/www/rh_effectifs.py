@@ -19,5 +19,11 @@ def get_context(context):
     except Exception:
         context.overview_json = "null"
         frappe.log_error(frappe.get_traceback(), "rh-effectifs: dashboard_data")
+    # Les pages www ne chargent pas le bundle JS `frappe` : sans ce jeton
+    # injecté à la main, tout appel POST (l'import du classeur) serait rejeté.
+    context.csrf_token = frappe.sessions.get_csrf_token()
+    context.peut_importer = bool(
+        {"System Manager", "Responsable RH", "HR Manager", "Assistant(e) RH"}
+        & set(frappe.get_roles(frappe.session.user)))
     context.no_breadcrumbs = True
     return context

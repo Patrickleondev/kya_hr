@@ -15,6 +15,7 @@ DocTypes couverts (tous custom=1) :
 - Permission Sortie Stagiaire : nombre_jours, validation employee scope
 """
 import frappe
+from frappe import _
 from frappe.utils import flt, date_diff, today, get_fullname
 
 from kya_hr.utils.approval_guards import block_self_approval
@@ -425,6 +426,17 @@ def compute_bulletin(doc, method=None):
         irpp = 0.0
     doc.irpp = irpp
     doc.reduction_charges = reduction
+
+    # Le nombre de charges de famille est saisi bulletin par bulletin, mais son
+    # effet dépend d'un paramètre GLOBAL. Si celui-ci vaut 0, la saisie n'a
+    # aucune conséquence sur le net : sans alerte, le comptable croit accorder
+    # une réduction qui n'est jamais appliquée.
+    if nb > 0 and not flt(cfg.get("montant_par_charge")):
+        frappe.msgprint(
+            _("{0} charge(s) de famille sont saisies, mais le « Montant par charge » "
+              "vaut 0 dans les Paramètres de Paie : aucune réduction n'est appliquée. "
+              "Renseignez ce montant si la réduction pour charges de famille doit jouer.").format(nb),
+            title=_("Réduction pour charges sans effet"), indicator="orange")
 
     # ── Retenues complémentaires ─────────────────────────────────────
     autres = 0.0

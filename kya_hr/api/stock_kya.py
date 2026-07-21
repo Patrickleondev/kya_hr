@@ -469,6 +469,32 @@ def _ensure_categorie(nom):
 _REF_IMPORT = "Import Stock Initial"
 
 
+def _resolve_magasin(saisi):
+    """Retrouve le `name` du Warehouse à partir de ce que l'utilisateur a écrit,
+    pour ne PAS imposer le suffixe société (« - KYA », « - D »). Ordre :
+    1) nom exact (identifiant ERPNext) ;
+    2) libellé exact (warehouse_name, insensible à la casse) ;
+    3) correspondance partielle unique sur le nom ou le libellé.
+    Retourne None si rien de sûr (0 ou plusieurs candidats ambigus)."""
+    saisi = (saisi or "").strip()
+    if not saisi:
+        return None
+    if frappe.db.exists("Warehouse", saisi):
+        return saisi
+    # Libellé exact (insensible à la casse), magasins réels seulement.
+    exact = frappe.get_all("Warehouse", filters={"warehouse_name": saisi, "is_group": 0},
+                           pluck="name")
+    if len(exact) == 1:
+        return exact[0]
+    like = "%{0}%".format(saisi)
+    cand = frappe.db.sql("""
+        SELECT name FROM `tabWarehouse`
+        WHERE is_group = 0 AND disabled = 0
+          AND (name LIKE %(l)s OR IFNULL(warehouse_name,'') LIKE %(l)s)
+    """, {"l": like}, as_dict=False)
+    return cand[0][0] if len(cand) == 1 else None
+
+
 @frappe.whitelist()
 def importer_stock_initial(rows):
     """Import « template » SANS code : crée les articles (par désignation) ET pose
@@ -482,11 +508,22 @@ def importer_stock_initial(rows):
     from kya_hr.kya_hr.doctype.article_kya.article_kya import creer_ou_recuperer
     cree, lignes_stock, erreurs = 0, 0, []
     purges = set()
+    # Un magasin mal orthographié ne doit PAS passer inaperçu : sans ce relevé,
+    # l'écran affichait « ✅ 300 articles créés » alors qu'AUCUNE quantité
+    # n'avait été posée, et personne ne s'en rendait compte avant l'inventaire.
+    magasins_introuvables, sans_magasin = {}, 0
     for r in rows:
         design = " ".join((r.get("designation") or r.get("nom") or "").split())
-        magasin = (r.get("magasin") or "").strip()
+        saisi_magasin = (r.get("magasin") or "").strip()
+        magasin = _resolve_magasin(saisi_magasin) or ""
         if not design:
             continue
+        if not magasin:
+            if saisi_magasin:
+                magasins_introuvables[saisi_magasin] = \
+                    magasins_introuvables.get(saisi_magasin, 0) + 1
+            else:
+                sans_magasin += 1
         try:
             cat = _ensure_categorie(r.get("categorie") or r.get("groupe"))
             existed = frappe.db.exists("Article KYA", {"designation": design})
@@ -525,7 +562,10 @@ def importer_stock_initial(rows):
             frappe.log_error(frappe.get_traceback(), "stock_kya.importer_stock_initial")
     frappe.db.commit()
     return {"articles_crees": cree, "lignes_stock": lignes_stock,
-            "erreurs": erreurs, "total": len(rows)}
+            "erreurs": erreurs, "total": len(rows),
+            "magasins_introuvables": [{"magasin": m, "lignes": n}
+                                      for m, n in sorted(magasins_introuvables.items())],
+            "sans_magasin": sans_magasin}
 
 
 # ── Export « État d'inventaire » au format officiel KYA (AEA-ENG-13) ─────────
@@ -698,16 +738,42 @@ def modele_import_xlsx():
     designation, categorie, unite, magasin, bon_etat, en_reparation."""
     _guard()
     import base64
-    from frappe.utils.xlsxutils import make_xlsx
-    mag = frappe.db.get_value("Warehouse", {"is_group": 0, "disabled": 0}, "name") or ""
+    import io
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment
+
+    # Magasins réels de l'instance (exclut les entrepôts techniques ERPNext).
+    mags = magasins()
+    mag = mags[0]["name"] if mags else ""
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Import Stock"
     headers = ["designation", "categorie", "unite", "magasin",
                "bon_etat", "a_reparer", "defectueux"]
-    ex1 = ["MODULE PV 455Wc", "Modules PV", "Unité", mag, 12, 0, 0]
-    ex2 = ["BALAIS TELESCOPIQUE", "Outillage", "Unité", mag, 2, 3, 1]
-    ex3 = ["CABLE 1X25mm² (m)", "Câbles", "m", mag, 6376, 0, 0]
-    xlsx = make_xlsx([headers, ex1, ex2, ex3], "Modele import")
+    ws.append(headers)
+    for c in ws[1]:
+        c.font = Font(bold=True, color="FFFFFF")
+        c.fill = PatternFill("solid", fgColor="0B4F49")
+    ws.append(["MODULE PV 455Wc", "Modules PV", "Unité", mag, 12, 0, 0])
+    ws.append(["BALAIS TELESCOPIQUE", "Outillage", "Unité", mag, 2, 3, 1])
+    ws.append(["CABLE 1X25mm² (m)", "Câbles", "m", mag, 6376, 0, 0])
+    for col, w in zip("ABCDEFG", (40, 22, 10, 26, 10, 10, 11)):
+        ws.column_dimensions[col].width = w
+    ws.freeze_panes = "A2"
+
+    # Feuille d'aide : la liste EXACTE des magasins à recopier dans la colonne « magasin ».
+    wm = wb.create_sheet("Magasins valides")
+    wm.append(["À recopier tel quel dans la colonne « magasin » :"])
+    wm["A1"].font = Font(bold=True, color="0B4F49")
+    for m in mags:
+        wm.append([m["name"]])
+    wm.column_dimensions["A"].width = 40
+
+    buf = io.BytesIO()
+    wb.save(buf)
     return {"filename": "modele-import-stock-kya.xlsx",
-            "content_base64": base64.b64encode(xlsx.getvalue()).decode("ascii")}
+            "content_base64": base64.b64encode(buf.getvalue()).decode("ascii")}
 
 
 # Normalisation des libellés d'état vers le vocabulaire UNIQUE (Bon état / À
@@ -789,7 +855,8 @@ def importer_stock_fichier(content_base64, filename=None):
         import csv
         txt = raw.decode("utf-8-sig", errors="replace")
         sample = txt.splitlines()[0] if txt.splitlines() else ""
-        delim = ";" if sample.count(";") >= sample.count(",") else ","
+        # Détecte le séparateur : point-virgule, tabulation (collage Excel) ou virgule.
+        delim = max((";", "\t", ","), key=lambda d: sample.count(d))
         for d in csv.DictReader(io.StringIO(txt), delimiter=delim):
             d = {(k or "").strip().lower(): v for k, v in d.items()}
             row = _map_import_row(d)

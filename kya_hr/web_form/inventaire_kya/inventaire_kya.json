@@ -15,7 +15,7 @@
  "introduction_text": "Enregistrez les comptages physiques d'inventaire. Les écarts constatés seront automatiquement régularisés dans le stock ERPNext après validation du responsable magasin.",
  "is_standard": 1,
  "login_required": 1,
- "modified": "2026-04-10 00:00:00.000000",
+ "modified": "2026-07-20 12:00:00",
  "modified_by": "Administrator",
  "module": "KYA HR",
  "name": "inventaire-kya",
@@ -31,55 +31,64 @@
    "fieldname": "objet",
    "fieldtype": "Small Text",
    "label": "Libellé de l'Inventaire",
-   "reqd": 1
+   "reqd": 1,
+   "description": "En une phrase, le motif du comptage (ex : inventaire annuel du magasin principal, contrôle après sinistre)."
   },
   {
    "fieldname": "date_inventaire",
    "fieldtype": "Date",
    "label": "Date d'Inventaire",
    "reqd": 1,
-   "default": "Today"
+   "default": "Today",
+   "description": "Jour où le comptage physique a RÉELLEMENT eu lieu, pas la date de saisie."
   },
   {
    "fieldname": "type_inventaire",
    "fieldtype": "Select",
    "options": "Complet\nPartiel\nCyclique",
    "label": "Type",
-   "default": "Partiel"
+   "default": "Partiel",
+   "description": "Complet = tout le magasin. Partiel = une zone ou une famille d'articles. Cyclique = comptage tournant régulier sur une partie du stock."
   },
   {
    "fieldname": "warehouse_filter",
    "fieldtype": "Link",
    "options": "Warehouse",
-   "label": "Magasin concerné"
+   "label": "Magasin concerné",
+   "description": "Magasin inventorié. Il filtre les articles proposés dans le tableau ci-dessous : choisissez-le AVANT de remplir les lignes."
   },
   {
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Lignes d'Inventaire",
    "options": "Inventaire KYA Item",
-   "reqd": 1
+   "reqd": 1,
+   "description": "Une ligne par référence comptée. Indiquez la quantité RÉELLEMENT trouvée dans chaque état : Bon état, À réparer, Défectueux. L'écart avec le stock théorique est calculé automatiquement ; n'ajustez jamais une quantité pour ramener l'écart à zéro — c'est justement l'écart qui intéresse la direction."
   },
   {
    "fieldname": "statut",
    "fieldtype": "Data",
    "label": "État",
-   "read_only": 1
+   "read_only": 1,
+   "description": "Calculé automatiquement selon l'avancement. Rien à saisir ici."
   },
   {
    "fieldname": "responsable_nom",
    "fieldtype": "Data",
-   "label": "Responsable Inventaire"
+   "label": "Responsable Inventaire",
+   "description": "Nom du responsable présent pendant le comptage, celui qui engage sa responsabilité sur les quantités."
   },
   {
    "fieldname": "signature_responsable",
    "fieldtype": "Signature",
-   "label": "Signature Responsable"
+   "label": "Signature Responsable",
+   "description": "Signature du responsable du magasin."
   },
   {
    "fieldname": "signature_magasin",
    "fieldtype": "Signature",
-   "label": "Signature Responsable Magasin"
+   "label": "Signature Responsable Magasin",
+   "description": "Signature du second témoin du comptage (magasinier ou contrôleur). Un inventaire ne doit jamais être signé par une seule personne."
   }
  ],
  "no_sidebar": 1
