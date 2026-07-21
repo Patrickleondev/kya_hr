@@ -32,8 +32,12 @@ def _set_employee_details(doc):
 
 
 def _calculate_total_days(doc):
+    """Calcule nb_jours de chaque ligne + auto-remplit type_conge depuis leave_type_par_defaut."""
+    default_type = doc.get("leave_type_par_defaut") or "Congé Annuel"
     total = 0
     for row in doc.get("periodes") or []:
+        if not row.get("type_conge"):
+            row.type_conge = default_type
         if row.date_debut and row.date_fin:
             days = date_diff(row.date_fin, row.date_debut) + 1
             row.nb_jours = max(days, 0)
