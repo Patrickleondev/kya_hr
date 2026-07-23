@@ -38,57 +38,68 @@ class AvenantContratKYA(Document):
         self.autofill()
         if not self.date_document:
             self.date_document = today()
-        if not (self.visas_json or self.articles_json):
+        if not (self.visas or self.get("articles")):
             self.generer_corps(force=False)
 
     def validate(self):
+        self.autofill()
         self._stamp_signatures()
 
-    # Exposés au print format (le bac à sable Jinja n'expose pas frappe.parse_json).
+    # Exposés au print format.
     def get_visas(self):
-        try:
-            return json.loads(self.visas_json or "[]")
-        except Exception:
-            return []
+        return [l.strip() for l in (self.visas or "").split("\n") if l.strip()]
 
     def get_articles(self):
-        try:
-            return json.loads(self.articles_json or "[]")
-        except Exception:
-            return []
+        return [{"titre": a.titre, "corps": a.corps} for a in (self.articles or [])]
 
     def fait_le(self):
         return date_fr(self.date_document)
-
-    def render_corps_line(self, s):
-        """Échappe une ligne du corps puis convertit **gras** -> <b>gras</b>
-        (mise en forme fidèle des montants/labels ; entrée RH = de confiance)."""
-        import re
-        from markupsafe import Markup
-        esc = frappe.utils.escape_html(s or "")
-        esc = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", esc)
-        return Markup(esc)
 
     def autofill(self):
         if not self.employee:
             return
         emp = frappe.db.get_value(
             "Employee", self.employee,
-            ["employee_name", "gender", "designation"], as_dict=True) or {}
+            ["employee_name", "gender", "designation",
+             "personal_email", "company_email", "user_id",
+             "cell_number", "current_address", "permanent_address"],
+            as_dict=True) or {}
         if not self.beneficiaire_nom:
             self.beneficiaire_nom = emp.get("employee_name")
         if not self.gender:
             self.gender = emp.get("gender")
         if not self.civilite:
             self.civilite = civilite_defaut(emp.get("gender"))
+        # Coordonnées pour la signature en ligne (uniquement si vides : n'écrase
+        # jamais une saisie manuelle de la RH).
+        if not self.employee_email:
+            self.employee_email = (
+                emp.get("personal_email") or emp.get("company_email") or emp.get("user_id") or "")
+        if not self.telephone:
+            self.telephone = emp.get("cell_number") or ""
+        if not self.domicile:
+            self.domicile = emp.get("current_address") or emp.get("permanent_address") or ""
 
     # ── Génération du corps par défaut (fidèle au modèle, puis éditable) ──────
     def generer_corps(self, force=True):
+        """Pré-remplit VU + préambule + articles fidèles au modèle KYA. Le corps
+        des articles est du HTML (gras/puces natifs), directement éditable ensuite
+        par la RH dans la grille. Réservé à la promotion/mutation/rémunération ;
+        la RH peut ajouter/retirer des articles pour tout autre objet."""
         acc = accords(gender=self.gender, civilite=self.civilite)
         emp = acc["employe"]                    # « Employé » / « Employée »
         emp_min = acc["employe_min"]
         promue = acc["promu"]
         ref = self.ref_contrat or "……"
+        fonction = self.nouvelle_fonction or "……"
+        lieu = self.nouveau_lieu or "……"
+        pds = date_fr(self.date_prise_service) or "……"
+
+        def P(t):
+            return "<p>{0}</p>".format(t)
+
+        def UL(items):
+            return "<ul>" + "".join("<li>{0}</li>".format(i) for i in items) + "</ul>"
 
         visas = [
             "la Loi n° 2021-012 du 18 juin 2021 portant Code du travail togolais ;",
@@ -105,79 +116,61 @@ class AvenantContratKYA(Document):
             "rémunération. Il est annexé au contrat de travail {ref} dont il fait partie intégrante."
         ).format(emp=emp, ref=ref)
 
-        fonction = self.nouvelle_fonction or "……"
-        lieu = self.nouveau_lieu or "……"
-        pds = date_fr(self.date_prise_service) or "……"
-
         articles = []
-        articles.append({
-            "titre": "Article 1 — Nouvelle fonction et classification professionnelle",
-            "corps": ("À compter de la date d'effet définie ci-après, l'{emp} est {promue} aux fonctions de "
-                      "{fonction}. {Il} exerce ses fonctions sous l'autorité de la Direction Générale et "
-                      "conserve l'intégralité de l'ancienneté acquise au titre du contrat de travail {ref}."
-                      ).format(emp=emp, promue=promue, fonction=fonction, Il=acc["Il_Elle"], ref=ref),
-        })
-        articles.append({
-            "titre": "Article 2 — Lieu de travail (mutation)",
-            "corps": ("En application du présent avenant, le lieu de travail de l'{emp} est désormais fixé à "
-                      "{lieu}. {Il} prendra effectivement service à son nouveau poste le {pds}. Un délai de "
-                      "prévenance raisonnable lui est accordé pour organiser son installation."
-                      ).format(emp=emp, lieu=lieu, Il=acc["Il_Elle"], pds=pds),
-        })
-        # Article 3 — rémunération (montants en lettres si fournis)
-        rem_lignes = []
+        articles.append(("Article 1 — Nouvelle fonction et classification professionnelle",
+            P("À compter de la date d'effet définie ci-après, l'{emp} est {promue} aux fonctions de "
+              "{fonction}. {Il} exerce ses fonctions sous l'autorité de la Direction Générale et conserve "
+              "l'intégralité de l'ancienneté acquise au titre du contrat de travail {ref}."
+              ).format(emp=emp, promue=promue, fonction=fonction, Il=acc["Il_Elle"], ref=ref)))
+        articles.append(("Article 2 — Lieu de travail (mutation)",
+            P("En application du présent avenant, le lieu de travail de l'{emp} est désormais fixé à {lieu}. "
+              "{Il} prendra effectivement service à son nouveau poste le {pds}. Un délai de prévenance "
+              "raisonnable lui est accordé pour organiser son installation."
+              ).format(emp=emp, lieu=lieu, Il=acc["Il_Elle"], pds=pds)))
+        # Article 3 — rémunération (montants en lettres si fournis, en gras)
+        rem = []
         if self.salaire_fixe:
-            rem_lignes.append("- **Part fixe :** salaire de base fixé, conformément à la nouvelle grille salariale, "
-                              "**à {0}**, payable mensuellement.".format(_montant(self.salaire_fixe)))
+            rem.append("<b>Part fixe :</b> salaire de base fixé, conformément à la nouvelle grille "
+                       "salariale, <b>à {0}</b>, payable mensuellement.".format(_montant(self.salaire_fixe)))
         if self.prime_affectation:
-            rem_lignes.append("- **Prime d'affectation : {0}**, versée mensuellement. Elle couvre les primes de "
-                              "fonction et d'hébergement et est attachée à l'exercice effectif de la fonction "
-                              "visée à l'article 1.".format(_montant(self.prime_affectation)))
-        rem_lignes.append("- **Part variable :** indexée sur le chiffre d'affaires et sur les performances "
-                          "individuelles et collectives, perçue sur une base trimestrielle, selon les "
-                          "modalités du guide de l'employé.")
-        articles.append({
-            "titre": "Article 3 — Rémunération",
-            "corps": ("En application du présent avenant, la rémunération de l'{emp} comprend désormais une part "
-                      "fixe, une prime de fonction et une part variable. Cette révision n'entraîne aucune "
-                      "diminution de la rémunération globale antérieurement perçue.\n{lignes}"
-                      ).format(emp=emp, lignes="\n".join(rem_lignes)),
-        })
+            rem.append("<b>Prime d'affectation : {0}</b>, versée mensuellement. Elle couvre les primes de "
+                       "fonction et d'hébergement et est attachée à l'exercice effectif de la fonction visée "
+                       "à l'article 1.".format(_montant(self.prime_affectation)))
+        rem.append("<b>Part variable :</b> indexée sur le chiffre d'affaires et sur les performances "
+                   "individuelles et collectives, perçue sur une base trimestrielle, selon les modalités du "
+                   "guide de l'employé.")
+        articles.append(("Article 3 — Rémunération",
+            P("En application du présent avenant, la rémunération de l'{emp} comprend désormais une part fixe, "
+              "une prime de fonction et une part variable. Cette révision n'entraîne aucune diminution de la "
+              "rémunération globale antérieurement perçue.".format(emp=emp)) + UL(rem)))
         if self.frais_installation:
-            articles.append({
-                "titre": "Article 4 — Frais d'installation, logement et transport liés à la mutation",
-                "corps": ("- **Frais d'installation :** une indemnité d'installation de **{0}** est versée en une seule "
-                          "fois au début de l'affectation, au titre du remboursement forfaitaire des frais "
-                          "professionnels engagés à l'occasion de la mutation.\n"
-                          "- **Transport / déménagement :** les frais de transport de l'{1} et de déménagement de "
-                          "ses effets sont pris en charge par l'Employeur, sur justificatifs, dans les "
-                          "conditions de l'article 34 de la CCIT.").format(_montant(self.frais_installation), emp_min),
-            })
-        articles.append({
-            "titre": "Article — Maintien de l'ancienneté et des droits acquis",
-            "corps": ("L'{emp} conserve l'ancienneté acquise au titre du contrat de travail {ref}. La présente "
-                      "promotion et la mutation ne portent atteinte à aucun des droits acquis, sous réserve des "
-                      "modifications expressément prévues par le présent avenant.").format(emp=emp, ref=ref),
-        })
-        articles.append({
-            "titre": "Article — Dispositions non modifiées",
-            "corps": ("Toutes les autres dispositions du contrat de travail {ref} non modifiées par le présent "
-                      "avenant demeurent pleinement applicables et continuent de produire leurs effets."
-                      ).format(ref=ref),
-        })
-        articles.append({
-            "titre": "Article — Exemplaires et conservation",
-            "corps": ("Le présent avenant est établi en trois (03) exemplaires originaux : un pour l'{emp}, un "
-                      "pour l'Employeur et un destiné au dossier du personnel. Chaque page est paraphée par les "
-                      "parties.").format(emp=emp),
-        })
+            articles.append(("Article 4 — Frais d'installation, logement et transport liés à la mutation",
+                UL(["<b>Frais d'installation :</b> une indemnité d'installation de <b>{0}</b> est versée en une "
+                    "seule fois au début de l'affectation, au titre du remboursement forfaitaire des frais "
+                    "professionnels engagés à l'occasion de la mutation.".format(_montant(self.frais_installation)),
+                    "<b>Transport / déménagement :</b> les frais de transport de l'{0} et de déménagement de ses "
+                    "effets sont pris en charge par l'Employeur, sur justificatifs, dans les conditions de "
+                    "l'article 34 de la CCIT.".format(emp_min)])))
+        articles.append(("Article — Maintien de l'ancienneté et des droits acquis",
+            P("L'{emp} conserve l'ancienneté acquise au titre du contrat de travail {ref}. La présente promotion "
+              "et la mutation ne portent atteinte à aucun des droits acquis, sous réserve des modifications "
+              "expressément prévues par le présent avenant.").format(emp=emp, ref=ref)))
+        articles.append(("Article — Dispositions non modifiées",
+            P("Toutes les autres dispositions du contrat de travail {ref} non modifiées par le présent avenant "
+              "demeurent pleinement applicables et continuent de produire leurs effets.").format(ref=ref)))
+        articles.append(("Article — Exemplaires et conservation",
+            P("Le présent avenant est établi en trois (03) exemplaires originaux : un pour l'{emp}, un pour "
+              "l'Employeur et un destiné au dossier du personnel. Chaque page est paraphée par les parties."
+              ).format(emp=emp)))
 
         if force or not self.preambule:
             self.preambule = preambule
-        if force or not self.visas_json:
-            self.visas_json = json.dumps(visas, ensure_ascii=False)
-        if force or not self.articles_json:
-            self.articles_json = json.dumps(articles, ensure_ascii=False)
+        if force or not (self.visas or "").strip():
+            self.visas = "\n".join(visas)
+        if force or not self.get("articles"):
+            self.set("articles", [])
+            for titre, corps in articles:
+                self.append("articles", {"titre": titre, "corps": corps})
 
     # ── Signatures ────────────────────────────────────────────────────────────
     def _stamp_signatures(self):
@@ -195,126 +188,132 @@ class AvenantContratKYA(Document):
         if not self.date_signature:
             self.date_signature = now_datetime()
 
-    def on_update_after_submit(self):
-        self._notify_if_signed()
+    def on_update(self):
+        # États 0 (avant submit) : notifie le salarié à l'envoi, le DG au relais RH.
+        self._maybe_notify_signataire()
+        self._maybe_notify_dg()
 
     def on_submit(self):
-        self._notify_if_signed()
+        self._maybe_generate_pdf()
 
-    def _notify_if_signed(self):
-        if (self.workflow_state or "") not in SIGNED_STATES:
+    def on_update_after_submit(self):
+        self._maybe_generate_pdf()
+
+    def _maybe_notify_signataire(self):
+        """À l'ENTRÉE dans 'En attente Signature Salarié' (action « Envoyer au
+        salarié » ou bouton RH), envoie au signataire le lien magique. Une seule
+        fois, à la transition."""
+        if self.workflow_state != "En attente Signature Salarié":
             return
-        if self.flags.get("_notified"):
+        if self.flags.get("signataire_email_sent"):
+            return
+        before = self.get_doc_before_save()
+        if before and before.workflow_state == "En attente Signature Salarié":
             return
         try:
-            user = frappe.db.get_value("Employee", self.employee, "user_id") if self.employee else None
-            if not user or user in ("Administrator", "Guest"):
-                return
-            frappe.sendmail(
-                recipients=[user],
-                subject="[KYA] Votre avenant au contrat est disponible",
-                message=(
-                    "<p>Bonjour,</p><p>Votre <b>avenant au contrat de travail</b> "
-                    "({0}) a été signé par la Direction et est disponible.</p>"
-                    "<p>— Ressources Humaines, KYA-Energy Group</p>"
-                ).format(self.objet or self.name),
-                reference_doctype=self.doctype, reference_name=self.name, now=False,
-            )
-            self.flags._notified = True
+            from kya_hr.api.avenant_signature import send_signataire_email
+            send_signataire_email(self)
         except Exception:
-            frappe.log_error(frappe.get_traceback(), "Avenant KYA: notif")
+            frappe.log_error(frappe.get_traceback(), "Avenant KYA — Notification signataire")
+
+    def _maybe_notify_dg(self):
+        """À l'entrée dans 'En attente DG' (RH a cliqué « Soumettre au DG »),
+        envoie le lien magique de co-signature au DG."""
+        if self.workflow_state != "En attente DG":
+            return
+        before = self.get_doc_before_save()
+        if before and before.workflow_state == "En attente DG":
+            return
+        try:
+            from kya_hr.api.avenant_signature import notify_dg_after_rh_gateway
+            notify_dg_after_rh_gateway(self)
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), "Avenant KYA — Notification DG")
+
+    def _maybe_generate_pdf(self):
+        """Quand l'avenant est signé (Signé), génère + attache le PDF final et
+        envoie l'exemplaire signé par email (salarié + RH + DG). Une seule fois."""
+        if (self.workflow_state or "") not in SIGNED_STATES:
+            return
+        if self.pdf_final:
+            return
+        if not (self.signature_finale and (self.signature_employe or self.signature_employe_finale)):
+            # Cas « sans portail » (signature papier) : pas de signature employé
+            # numérique — on génère quand même le PDF (visas/articles/DG estampillé).
+            if not self.signature_finale:
+                return
+        try:
+            self._generate_and_attach_pdf()
+            self._send_final_emails()
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), "Avenant KYA — Génération PDF")
+
+    def _generate_and_attach_pdf(self):
+        from frappe.utils.pdf import get_pdf
+        from kya_hr.api.avenant_signature import render_avenant_pdf_html
+
+        html = render_avenant_pdf_html(self)
+        pdf_bytes = get_pdf(html)
+        file_doc = frappe.get_doc({
+            "doctype": "File",
+            "file_name": f"Avenant_{self.name}.pdf",
+            "attached_to_doctype": self.doctype,
+            "attached_to_name": self.name,
+            "content": pdf_bytes,
+            "is_private": 1,
+        }).insert(ignore_permissions=True)
+        self.db_set("pdf_final", file_doc.file_url)
+
+    def _send_final_emails(self):
+        recipients = []
+        if self.employee_email:
+            recipients.append(self.employee_email)
+        if self.rh_sender_email and self.rh_sender_email not in recipients:
+            recipients.append(self.rh_sender_email)
+        try:
+            rh_email = frappe.db.get_single_value("KYA Dashboard Settings", "rh_email")
+            if rh_email and rh_email not in recipients:
+                recipients.append(rh_email)
+        except Exception:
+            pass
+        for u in frappe.get_all("Has Role", filters={"role": "Directeur Général", "parenttype": "User"}, fields=["parent"]):
+            em = frappe.db.get_value("User", u.parent, "email")
+            if em and em not in recipients:
+                recipients.append(em)
+        if not recipients:
+            return
+        attachments = []
+        if self.pdf_final:
+            fid = frappe.db.get_value("File", {"file_url": self.pdf_final}, "name")
+            if fid:
+                attachments.append({"fid": fid})
+        objet = self.objet or "avenant à votre contrat de travail"
+        frappe.sendmail(
+            recipients=recipients,
+            subject=f"📄 Avenant finalisé — {self.beneficiaire_nom} — {self.name}",
+            message=(
+                "<div style='font-family:Arial,sans-serif;max-width:640px;margin:0 auto;'>"
+                "<p>Bonjour <b>{nom}</b>,</p>"
+                "<p>Votre <b>avenant au contrat de travail</b> ({objet}) est désormais "
+                "signé par les deux parties et archivé.</p>"
+                "<p>Vous trouverez en <b>pièce jointe</b> votre exemplaire signé (PDF).</p>"
+                "<p>Référence : <b>{ref}</b></p>"
+                "<p style='margin-top:18px;'>Bien cordialement,<br>"
+                "<b>Direction des Ressources Humaines</b><br>KYA-Energy Group</p></div>"
+            ).format(nom=self.beneficiaire_nom or "", objet=objet, ref=self.name),
+            attachments=attachments,
+            reference_doctype=self.doctype, reference_name=self.name, now=False,
+        )
 
 
-# ── API page RH ───────────────────────────────────────────────────────────────
-_RH_ROLES = {"Responsable RH", "HR Manager", "HR User", "Directeur Général", "DGA", "System Manager"}
-
-
-def _guard():
-    if frappe.session.user == "Guest":
-        frappe.throw(_("Veuillez vous connecter."), frappe.AuthenticationError)
-    if not _RH_ROLES.intersection(set(frappe.get_roles(frappe.session.user))):
-        frappe.throw(_("Accès réservé à la RH et à la Direction."), frappe.PermissionError)
-
-
-def _apply_champs(d, data):
-    for k in ("num_avenant", "reference", "objet", "ref_contrat", "matricule_cnss",
-              "domicile", "civilite", "nouvelle_fonction", "nouveau_lieu",
-              "date_prise_service", "salaire_fixe", "prime_affectation",
-              "frais_installation", "lieu", "date_effet", "date_document",
-              "preambule", "visas_json", "articles_json"):
-        if data.get(k) not in (None, ""):
-            d.set(k, data.get(k))
-
-
+# ── API desk (bouton « Générer le corps par défaut ») ─────────────────────────
 @frappe.whitelist()
-def apercu(data):
-    """Rendu HTML de l'avenant tel qu'il sortira (aperçu live), sans enregistrer."""
-    _guard()
-    if isinstance(data, str):
-        data = json.loads(data)
-    if not data.get("employee"):
-        return ""
-    d = frappe.new_doc("Avenant Contrat KYA")
-    d.employee = data["employee"]
-    d.autofill()
-    _apply_champs(d, data)
-    if not d.date_document:
-        d.date_document = today()
-    if not (d.visas_json or d.articles_json):
-        d.generer_corps(force=False)
-    if int(data.get("utiliser_signature_enregistree") or 0):
-        from kya_hr.kya_hr.doctype.document_rh_kya.document_rh_kya import signature_dg_data_uri
-        d.signature_finale = signature_dg_data_uri() or None
-    d.name = d.name or "APERÇU"
-    from frappe.translate import print_language
-    with print_language("fr"):
-        return frappe.get_print("Avenant Contrat KYA", d.name, "Avenant Contrat KYA", doc=d)
-
-
-@frappe.whitelist()
-def generer_corps_defaut(data):
-    """(Re)génère le corps par défaut (visas + préambule + articles) fidèle au
-    modèle, à partir des éléments saisis, pour que la RH parte d'une base propre."""
-    _guard()
-    if isinstance(data, str):
-        data = json.loads(data)
-    d = frappe.new_doc("Avenant Contrat KYA")
-    if data.get("employee"):
-        d.employee = data["employee"]
-        d.autofill()
-    _apply_champs(d, data)
-    d.generer_corps(force=True)
-    return {"preambule": d.preambule, "visas_json": d.visas_json, "articles_json": d.articles_json}
-
-
-@frappe.whitelist()
-def creer(data):
-    """Crée l'avenant (brouillon) depuis la page RH."""
-    _guard()
-    if isinstance(data, str):
-        data = json.loads(data)
-    if not data.get("employee") or not frappe.db.exists("Employee", data["employee"]):
-        frappe.throw(_("Employé introuvable."))
-    d = frappe.new_doc("Avenant Contrat KYA")
-    d.employee = data["employee"]
-    d.autofill()
-    _apply_champs(d, data)
-    d.utiliser_signature_enregistree = int(data.get("utiliser_signature_enregistree") or 0)
-    d.insert()
-    return {"name": d.name, "workflow_state": d.workflow_state or "Brouillon"}
-
-
-@frappe.whitelist()
-def liste(limit=60):
-    _guard()
-    from urllib.parse import quote
-    rows = frappe.get_all(
-        "Avenant Contrat KYA",
-        fields=["name", "objet", "beneficiaire_nom", "employee", "workflow_state",
-                "date_document", "modified"],
-        order_by="modified desc", limit_page_length=int(limit or 60))
-    for r in rows:
-        r["pdf_url"] = ("/api/method/kya_hr.api.print_format.download_pdf"
-                        "?doctype=Avenant%20Contrat%20KYA&name=" + quote(r["name"])
-                        + "&format=Avenant%20Contrat%20KYA&language=fr")
-    return rows
+def generer_corps_doc(name, force=1):
+    """Depuis la fiche desk : (re)génère VU + préambule + articles fidèles au
+    modèle à partir des éléments saisis, puis enregistre. `force=0` ne remplit que
+    ce qui est vide (ne remplace pas les articles déjà édités)."""
+    doc = frappe.get_doc("Avenant Contrat KYA", name)
+    doc.check_permission("write")
+    doc.generer_corps(force=int(force))
+    doc.save()
+    return {"articles": len(doc.articles or []), "workflow_state": doc.workflow_state}
