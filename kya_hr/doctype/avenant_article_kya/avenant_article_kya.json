@@ -1,0 +1,42 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "creation": "2026-07-23 16:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "istable": 1,
+ "field_order": [
+  "titre",
+  "corps"
+ ],
+ "fields": [
+  {
+   "columns": 3,
+   "fieldname": "titre",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Titre de l'article",
+   "reqd": 1
+  },
+  {
+   "columns": 8,
+   "fieldname": "corps",
+   "fieldtype": "Text Editor",
+   "in_list_view": 1,
+   "label": "Contenu"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-23 16:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "KYA HR",
+ "name": "Avenant Article KYA",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "istable": 1
+}

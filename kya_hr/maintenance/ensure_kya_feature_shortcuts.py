@@ -19,7 +19,7 @@ FEATURE_SHORTCUTS = {
     # ── RH : documents dynamiques + effectifs d'équipe ────────────────────────
     "Espace RH": [
         {"type": "URL", "label": "📄 Documents RH (certificats/attestations)", "url": "/documents-rh", "color": "Green"},
-        {"type": "URL", "label": "📝 Avenants au contrat", "url": "/avenants-rh", "color": "Blue"},
+        {"type": "DocType", "label": "📝 Avenants au contrat", "link_to": "Avenant Contrat KYA"},
         {"type": "URL", "label": "🎓 Contrats de stage d'immersion", "url": "/contrats-immersion", "color": "Blue"},
         {"type": "URL", "label": "👥 Effectifs des équipes (détail)", "url": "/equipe-effectifs", "color": "Green"},
         {"type": "DocType", "label": "🗂️ Journal des modifications (fiches)", "link_to": "Modification Info Employe KYA"},
@@ -33,7 +33,7 @@ FEATURE_SHORTCUTS = {
         {"type": "URL", "label": "🧭 Synthèse Direction", "url": "/direction-dashboard", "color": "Blue"},
         {"type": "URL", "label": "📊 Tableau de bord global", "url": "/kya-tableau-de-bord", "color": "Blue"},
         {"type": "URL", "label": "📄 Documents RH (à signer)", "url": "/documents-rh", "color": "Green"},
-        {"type": "URL", "label": "📝 Avenants au contrat (à signer)", "url": "/avenants-rh", "color": "Green"},
+        {"type": "DocType", "label": "📝 Avenants au contrat (à signer)", "link_to": "Avenant Contrat KYA"},
         {"type": "URL", "label": "🎓 Contrats de stage d'immersion (à signer)", "url": "/contrats-immersion", "color": "Green"},
         {"type": "URL", "label": "👥 Effectifs des équipes", "url": "/equipe-effectifs", "color": "Blue"},
     ],
@@ -51,12 +51,22 @@ FEATURE_SHORTCUTS = {
 
 _VALID_LINK_TYPES = ("DocType", "Page", "Report")
 
+# Raccourcis devenus obsolètes (page/URL retirée) : à supprimer partout.
+# L'avenant est passé d'une page web (/avenants-rh) au DocType (comme le contrat).
+OBSOLETE_URLS = {"/avenants-rh"}
+
 
 def _add_to_workspace(ws_name, shortcuts, out):
     if not frappe.db.exists("Workspace", ws_name):
         out["absents"].append(ws_name)
         return
     ws = frappe.get_doc("Workspace", ws_name)
+
+    # Retrait des raccourcis obsolètes (URL supprimée).
+    kept = [s for s in ws.shortcuts if (getattr(s, "url", "") or "") not in OBSOLETE_URLS]
+    if len(kept) != len(ws.shortcuts):
+        out["obsoletes_retires"][ws_name] = len(ws.shortcuts) - len(kept)
+        ws.set("shortcuts", kept)
 
     # Certains espaces contiennent d'anciens LIENS de sidebar de type « URL »,
     # invalides sous le schéma actuel (Link Type ∈ DocType/Page/Report) : ils font
@@ -69,13 +79,14 @@ def _add_to_workspace(ws_name, shortcuts, out):
         ws.set("links", valides)
         out["liens_url_nettoyes"][ws_name] = nettoyes
 
+    obsoletes = out["obsoletes_retires"].get(ws_name, 0)
     have = {(s.type, s.label) for s in ws.shortcuts}
     added = 0
     for sc in shortcuts:
         if (sc["type"], sc["label"]) not in have:
             ws.append("shortcuts", sc)
             added += 1
-    if added or nettoyes:
+    if added or nettoyes or obsoletes:
         ws.flags.ignore_permissions = True
         ws.flags.ignore_links = True  # raccourcis URL : sauter la validation Dynamic Link
         ws.save(ignore_permissions=True)
@@ -85,7 +96,7 @@ def _add_to_workspace(ws_name, shortcuts, out):
 
 def execute():
     frappe.set_user("Administrator")
-    out = {"ajoutes": {}, "absents": [], "liens_url_nettoyes": {}}
+    out = {"ajoutes": {}, "absents": [], "liens_url_nettoyes": {}, "obsoletes_retires": {}}
     for ws_name, shortcuts in FEATURE_SHORTCUTS.items():
         try:
             _add_to_workspace(ws_name, shortcuts, out)
