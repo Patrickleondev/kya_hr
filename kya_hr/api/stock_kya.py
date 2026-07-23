@@ -119,7 +119,7 @@ def _bucketize(rows):
     return agg
 
 
-def _raw_sums(magasin=None, item=None):
+def _raw_sums(magasin=None, item=None, date_max=None):
     conds = ["1=1"]
     params = {}
     if magasin:
@@ -128,6 +128,10 @@ def _raw_sums(magasin=None, item=None):
     if item:
         conds.append("m.item = %(it)s")
         params["it"] = item
+    if date_max:
+        # Solde « à une date » : on ne somme que les mouvements postés jusque-là.
+        conds.append("m.date_mouvement <= %(dmax)s")
+        params["dmax"] = date_max
     return frappe.db.sql(f"""
         SELECT m.item AS item, MAX(m.item_name) AS item_name, m.magasin AS magasin,
                m.etat AS etat, SUM(m.quantite) AS q
@@ -299,6 +303,238 @@ def reapprovisionnement(magasin=None, only_alertes=0):
     return out
 
 
+# ── Rapport de stock hebdomadaire (revue direction du vendredi) ─────────────
+# Vue par magasin demandée par la Responsable Stock : pour chaque référence on
+# compare le DISPONIBLE actuel à celui d'une date de référence (par défaut il y
+# a 7 jours → « état de la semaine passée ») pour faire ressortir la variation.
+# Colonnes : Désignation · Qté Total (physique, tous états) · Qté avant
+# (disponible à date_ref) · Qté actuelle (disponible) · Écart · Stock de
+# sécurité · Seuil de commande. Exportable en Excel.
+def _rapport_lignes(magasin=None, date_ref=None, type_stock=None):
+    from frappe.utils import add_days, getdate
+    if not date_ref:
+        date_ref = add_days(today(), -7)
+    date_ref = getdate(date_ref)
+    tf = type_stock if type_stock in ("Ingénierique", "Industriel") else None
+
+    agg_now = _bucketize(_raw_sums(magasin=magasin))
+    agg_ref = _bucketize(_raw_sums(magasin=magasin, date_max=date_ref))
+    arts = {a["name"]: a for a in frappe.get_all(
+        "Article KYA", fields=["name", "categorie", "type_stock"])}
+
+    lignes = []
+    for key, d in agg_now.items():
+        if abs(d["total"]) <= 1e-9:
+            continue
+        a = arts.get(d["item"], {})
+        t = a.get("type_stock") or "Ingénierique"
+        if tf and t != tf:
+            continue
+        dispo_now = d["bon_etat"]
+        ref = agg_ref.get(key)
+        dispo_avant = ref["bon_etat"] if ref else 0.0
+        ev = evaluer_ligne(d["bon_etat"], d["reparation"], d.get("defectueux", 0),
+                           categorie=a.get("categorie") or "Non classé")
+        lignes.append({
+            "item": d["item"], "designation": d["item_name"],
+            "magasin": d["magasin"], "magasin_label": _mag_label(d["magasin"]),
+            "type_stock": t,
+            "qte_totale": round(d["total"], 3),
+            "qte_avant": round(dispo_avant, 3),
+            "qte_actuelle": round(dispo_now, 3),
+            "ecart": round(dispo_now - dispo_avant, 3),
+            "stock_securite": ev["plancher"],
+            "seuil_commande": ev["seuil_mini"],
+            "statut": ev["statut"],
+        })
+    lignes.sort(key=lambda r: (r["magasin_label"], r["designation"]))
+    return lignes, str(date_ref)
+
+
+@frappe.whitelist()
+def rapport_hebdomadaire(magasin=None, date_ref=None, type_stock=None):
+    """Rapport de stock par magasin pour la revue hebdomadaire. Renvoie les
+    lignes + la date de référence + des totaux d'en-tête (nb références, total
+    physique, nb à commander, écart net de la semaine). Filtrable par type_stock."""
+    _guard()
+    lignes, dref = _rapport_lignes(magasin, date_ref, type_stock)
+    a_commander = sum(1 for l in lignes if l["statut"] in ("RUPTURE", "A COMMANDER"))
+    return {
+        "date_ref": dref, "genere_le": str(today()), "magasin": magasin,
+        "magasin_label": _mag_label(magasin) if magasin else "TOUS LES MAGASINS",
+        "lignes": lignes,
+        "totaux": {
+            "references": len(lignes),
+            "qte_totale": round(sum(l["qte_totale"] for l in lignes), 3),
+            "qte_actuelle": round(sum(l["qte_actuelle"] for l in lignes), 3),
+            "ecart_net": round(sum(l["ecart"] for l in lignes), 3),
+            "a_commander": a_commander,
+        },
+    }
+
+
+@frappe.whitelist()
+def export_rapport_hebdo_xlsx(magasin=None, date_ref=None, type_stock=None):
+    """Exporte le rapport de stock hebdomadaire en Excel STYLÉ (bandeau titre,
+    bandeau KPI coloré Références/OK/À commander/Rupture, statuts en couleur),
+    prêt pour la présentation du vendredi."""
+    _guard()
+    import base64, io
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    lignes, dref = _rapport_lignes(magasin, date_ref, type_stock)
+    mag_lbl = _mag_label(magasin) if magasin else "TOUS LES MAGASINS"
+    if type_stock in ("Ingénierique", "Industriel"):
+        mag_lbl += " — STOCK " + type_stock.upper()
+    dref_fr = frappe.utils.formatdate(dref, "dd/MM/yyyy")
+    today_fr = frappe.utils.formatdate(today(), "dd/MM/yyyy")
+
+    GREEN = "0E7C4A"
+    KPI = [("Références totales", len(lignes), "34495E"),
+           ("En stock (OK)", sum(1 for l in lignes if l["statut"] == "OK"), "16A34A"),
+           ("À commander", sum(1 for l in lignes if l["statut"] == "A COMMANDER"), "D97706"),
+           ("Rupture de stock", sum(1 for l in lignes if l["statut"] == "RUPTURE"), "DC2626")]
+    ST_FILL = {"OK": ("DCFCE7", "166534"), "A COMMANDER": ("FEF3C7", "92400E"),
+               "RUPTURE": ("FEE2E2", "991B1B"), "REFERENCE VIDE": ("E2E8F0", "475569")}
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Rapport stock"
+    white = Font(bold=True, color="FFFFFF")
+    center = Alignment(horizontal="center", vertical="center")
+    thin = Side(style="thin", color="D9D9D9")
+    border = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+    def fill_range(rng, color):
+        for row in ws[rng]:
+            for c in row:
+                c.fill = PatternFill("solid", fgColor=color)
+
+    # Bandeau titre
+    ws.merge_cells("A1:I1"); ws["A1"] = "RAPPORT DE STOCK — REVUE HEBDOMADAIRE"
+    ws["A1"].font = Font(bold=True, color="FFFFFF", size=15); ws["A1"].alignment = center
+    fill_range("A1:I1", GREEN); ws.row_dimensions[1].height = 26
+    ws.merge_cells("A2:I2"); ws["A2"] = mag_lbl
+    ws["A2"].font = Font(bold=True, color="FFFFFF", size=11); ws["A2"].alignment = Alignment(vertical="center")
+    fill_range("A2:I2", "16694A"); ws.row_dimensions[2].height = 18
+    ws.merge_cells("A3:I3")
+    ws["A3"] = "Édité le : {0}   |   Comparé à l'état du : {1}".format(today_fr, dref_fr)
+    ws["A3"].font = Font(italic=True, color="555555")
+
+    # Bandeau KPI (numéro ligne 5, libellé ligne 6), 4 blocs de 2 colonnes
+    blocks = [("A5", "A6", "A5:B5", "A6:B6"), ("C5", "C6", "C5:D5", "C6:D6"),
+              ("E5", "E6", "E5:F5", "E6:F6"), ("G5", "G6", "G5:H5", "G6:H6")]
+    for (ncell, lcell, nrng, lrng), (lbl, val, color) in zip(blocks, KPI):
+        ws.merge_cells(nrng); ws.merge_cells(lrng)
+        ws[ncell] = val; ws[ncell].font = Font(bold=True, color="FFFFFF", size=18); ws[ncell].alignment = center
+        ws[lcell] = lbl; ws[lcell].font = Font(bold=True, color="FFFFFF", size=9); ws[lcell].alignment = center
+        fill_range(nrng, color); fill_range(lrng, color)
+    ws.row_dimensions[5].height = 30; ws.row_dimensions[6].height = 18
+
+    # En-tête tableau (ligne 8)
+    headers = ["N°", "DESIGNATION", "QTE TOTAL", "QTE AVANT (sem. passée)", "QTE ACTUELLE",
+               "ECART", "STOCK DE SECURITE", "SEUIL DE COMMANDE", "STATUT"]
+    ws.append([]) if False else None
+    hr = 8
+    for j, h in enumerate(headers, start=1):
+        c = ws.cell(row=hr, column=j, value=h)
+        c.font = white; c.alignment = center; c.fill = PatternFill("solid", fgColor=GREEN); c.border = border
+    ws.row_dimensions[hr].height = 24
+
+    r = hr + 1
+    for i, l in enumerate(lignes, start=1):
+        vals = [i, l["designation"], l["qte_totale"], l["qte_avant"], l["qte_actuelle"],
+                l["ecart"], l["stock_securite"], l["seuil_commande"], l["statut"]]
+        for j, v in enumerate(vals, start=1):
+            c = ws.cell(row=r, column=j, value=v); c.border = border
+            if j in (1, 3, 4, 5, 6, 7, 8):
+                c.alignment = Alignment(horizontal="center")
+        # Statut coloré
+        sc = ws.cell(row=r, column=9)
+        bg, fg = ST_FILL.get(l["statut"], ("FFFFFF", "000000"))
+        sc.fill = PatternFill("solid", fgColor=bg); sc.font = Font(bold=True, color=fg)
+        sc.alignment = center
+        r += 1
+    if not lignes:
+        ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=9)
+        ws.cell(row=r, column=1, value="Aucun stock pour ce filtre.").alignment = center
+
+    for col, w in zip("ABCDEFGHI", (5, 40, 12, 16, 13, 9, 15, 15, 14)):
+        ws.column_dimensions[col].width = w
+    ws.freeze_panes = "A9"
+
+    buf = io.BytesIO(); wb.save(buf)
+    tag = (magasin or "tous").split(" - ")[0].replace(" ", "-").lower()
+    if type_stock in ("Ingénierique", "Industriel"):
+        tag += "-" + type_stock.lower()[:4]
+    return {"filename": "rapport-stock-{0}-{1}.xlsx".format(tag, today()),
+            "content_base64": base64.b64encode(buf.getvalue()).decode("ascii"),
+            "rows": len(lignes)}
+
+
+# ── Éditeur de classification (revue + reclassement par le magasin) ──────────
+# La Responsable Stock peut corriger le type/famille/groupe d'un article
+# directement sur la plateforme (au cas où le seed s'est trompé), article par
+# article, en filtrant par magasin. Rien de figé : dynamique et modifiable.
+@frappe.whitelist()
+def articles_classification(magasin=None, type_stock=None, q=None):
+    """Liste des articles avec leur classification, pour la revue/reclassement.
+    Filtrable par magasin (articles présents dans ce magasin, avec leur solde),
+    par type de stock, et par recherche texte sur la désignation."""
+    _guard()
+    soldes_map = None
+    if magasin:
+        soldes_map = {d["item"]: d for d in soldes(magasin=magasin, only_nonzero=0)}
+    filters = {}
+    if type_stock in ("Ingénierique", "Industriel"):
+        filters["type_stock"] = type_stock
+    arts = frappe.get_all(
+        "Article KYA", filters=filters,
+        fields=["name", "designation", "categorie", "type_stock",
+                "famille", "groupe", "unite"],
+        order_by="designation asc")
+    ql = (q or "").strip().lower()
+    out = []
+    for a in arts:
+        if soldes_map is not None and a["name"] not in soldes_map:
+            continue
+        if ql and ql not in (a["designation"] or "").lower():
+            continue
+        if soldes_map is not None:
+            s = soldes_map.get(a["name"], {})
+            a["qte_totale"] = s.get("total", 0)
+            a["bon_etat"] = s.get("bon_etat", 0)
+        out.append(a)
+    return out
+
+
+@frappe.whitelist()
+def reclasser_article(name, type_stock=None, famille=None, groupe=None, categorie=None):
+    """Reclasse UN article (type/famille/groupe/catégorie) depuis la plateforme.
+    Réservé au magasin (droit d'écriture). Une valeur vide efface le champ
+    (famille/groupe) ; le type reste contraint aux deux valeurs autorisées."""
+    _guard(write=True)
+    if not frappe.db.exists("Article KYA", name):
+        frappe.throw(_("Article introuvable."))
+    vals = {}
+    if type_stock is not None:
+        if type_stock not in ("Ingénierique", "Industriel"):
+            frappe.throw(_("Type de stock invalide : {0}").format(type_stock))
+        vals["type_stock"] = type_stock
+    if famille is not None:
+        if famille and famille not in ("Matière première", "Produit fini"):
+            frappe.throw(_("Famille invalide : {0}").format(famille))
+        vals["famille"] = famille or None
+    if groupe is not None:
+        vals["groupe"] = (groupe or "").strip() or None
+    if categorie is not None:
+        vals["categorie"] = _ensure_categorie(categorie) if categorie else None
+    if vals:
+        frappe.db.set_value("Article KYA", name, vals)
+        frappe.db.commit()
+    return {"name": name, **vals}
+
+
 def _count_references_vides(magasin=None):
     """Références « vides » (quantité 0) au sens de la fiche AEA-ENG-13. Elles
     n'ont aucun mouvement (rien à stocker), donc invisibles au grand livre :
@@ -415,18 +651,22 @@ def categories():
 
 
 @frappe.whitelist()
-def saisir_stock_direct(magasin, lignes, date_saisie=None):
+def saisir_stock_direct(magasin, lignes, date_saisie=None, type_stock=None):
     """Saisie directe depuis la page /stock-kya (onglet « Saisie directe »).
 
     Crée + valide UNE fiche « Saisie Stock KYA » (source unique de vérité,
     auditable, annulable) à partir des lignes saisies. `lignes` =
     [{designation, categorie, unite, bon_etat, en_reparation, defectueux}]. Les
-    catégories libres sont créées au besoin ; les articles manquants aussi (sans code)."""
+    catégories libres sont créées au besoin ; les articles manquants aussi (sans
+    code). `type_stock` (Ingénierique/Industriel) classe les articles créés à
+    cette saisie — corrigeable ensuite dans l'éditeur de classement."""
     _guard(write=True)
     if isinstance(lignes, str):
         lignes = frappe.parse_json(lignes)
     if not magasin or not frappe.db.exists("Warehouse", magasin):
         frappe.throw(_("Choisissez un magasin valide."))
+    ts = type_stock if type_stock in ("Ingénierique", "Industriel") else None
+    from kya_hr.kya_hr.doctype.article_kya.article_kya import creer_ou_recuperer
     doc = frappe.new_doc("Saisie Stock KYA")
     doc.magasin = magasin
     doc.date_saisie = date_saisie or today()
@@ -435,6 +675,11 @@ def saisir_stock_direct(magasin, lignes, date_saisie=None):
         if not design:
             continue
         cat = l.get("categorie")
+        # Pré-crée/classe l'article avec le type choisi pour cette saisie (le
+        # _poster_stock de la fiche récupérera ensuite le même article).
+        if ts:
+            creer_ou_recuperer(design, _ensure_categorie(cat) if cat else None,
+                               l.get("unite") or "Unité", type_stock=ts)
         doc.append("lignes", {
             "designation": design,
             "categorie": _ensure_categorie(cat) if cat else None,
@@ -508,6 +753,10 @@ def importer_stock_initial(rows):
     from kya_hr.kya_hr.doctype.article_kya.article_kya import creer_ou_recuperer
     cree, lignes_stock, erreurs = 0, 0, []
     purges = set()
+    # Doublons de désignation dans le MÊME import : la désignation étant unique,
+    # deux lignes de même nom fusionnent (quantités cumulées, classification =
+    # dernière ligne). On le SIGNALE pour ne pas fausser les stats en silence.
+    vus_designation = {}
     # Un magasin mal orthographié ne doit PAS passer inaperçu : sans ce relevé,
     # l'écran affichait « ✅ 300 articles créés » alors qu'AUCUNE quantité
     # n'avait été posée, et personne ne s'en rendait compte avant l'inventaire.
@@ -518,6 +767,11 @@ def importer_stock_initial(rows):
         magasin = _resolve_magasin(saisi_magasin) or ""
         if not design:
             continue
+        # Collision RÉELLE = même désignation ET même magasin (quantités cumulées
+        # sur le même article). Le même article dans 2 magasins différents est
+        # normal et n'est PAS signalé.
+        _kdup = (design, saisi_magasin)
+        vus_designation[_kdup] = vus_designation.get(_kdup, 0) + 1
         if not magasin:
             if saisi_magasin:
                 magasins_introuvables[saisi_magasin] = \
@@ -525,10 +779,14 @@ def importer_stock_initial(rows):
             else:
                 sans_magasin += 1
         try:
-            cat = _ensure_categorie(r.get("categorie") or r.get("groupe"))
+            # Catégorie métier seulement (le groupe d'assemblage a son propre champ).
+            cat = _ensure_categorie(r.get("categorie")) if r.get("categorie") else None
             existed = frappe.db.exists("Article KYA", {"designation": design})
             art = creer_ou_recuperer(
-                design, cat, r.get("unite") or r.get("uom") or "Unité", r.get("type"))
+                design, cat, r.get("unite") or r.get("uom") or "Unité", r.get("type"),
+                type_stock=r.get("type_stock") or None,
+                famille=r.get("famille") or None,
+                groupe=r.get("groupe") or None)
             if not existed:
                 cree += 1
 
@@ -561,11 +819,14 @@ def importer_stock_initial(rows):
             erreurs.append(design)
             frappe.log_error(frappe.get_traceback(), "stock_kya.importer_stock_initial")
     frappe.db.commit()
+    doublons = [{"designation": d, "magasin": m, "occurrences": n}
+                for (d, m), n in sorted(vus_designation.items()) if n > 1]
     return {"articles_crees": cree, "lignes_stock": lignes_stock,
             "erreurs": erreurs, "total": len(rows),
             "magasins_introuvables": [{"magasin": m, "lignes": n}
                                       for m, n in sorted(magasins_introuvables.items())],
-            "sans_magasin": sans_magasin}
+            "sans_magasin": sans_magasin,
+            "doublons_designation": doublons}
 
 
 # ── Export « État d'inventaire » au format officiel KYA (AEA-ENG-13) ─────────
@@ -755,20 +1016,54 @@ def modele_import_xlsx():
     for c in ws[1]:
         c.font = Font(bold=True, color="FFFFFF")
         c.fill = PatternFill("solid", fgColor="0B4F49")
+    # Stock d'ingénierie (le plus courant) : une ligne = un article, avec catégorie.
     ws.append(["MODULE PV 455Wc", "Modules PV", "Unité", mag, 12, 0, 0])
     ws.append(["BALAIS TELESCOPIQUE", "Outillage", "Unité", mag, 2, 3, 1])
     ws.append(["CABLE 1X25mm² (m)", "Câbles", "m", mag, 6376, 0, 0])
+    # Stock INDUSTRIEL : une LIGNE-TITRE (désignation seule, reste vide) classe
+    # automatiquement toutes les lignes en dessous (matières premières / produits
+    # finis d'assemblage). La fabrication ajoute ses sections quand elle veut.
+    section_rows = []
+
+    def _section(title):
+        ws.append([title, "", "", "", "", "", ""])
+        section_rows.append(ws.max_row)
+
+    _section("MATERIEL D'ASSEMBLAGE DE BATTERIES")
+    ws.append(["BMS", "", "Unité", mag, 2, 0, 0])
+    ws.append(["Caisson vide de batterie", "", "Unité", mag, 6, 0, 0])
+    _section("COMPOSANTES LUMINAIRE ALL IN ONE TYPE-2")
+    ws.append(["LED TYPE-2", "", "Unité", mag, 36, 0, 0])
+    _section("PRODUITS FINIS")
+    ws.append(["BATTERIE 51,2V 100Ah", "", "Unité", mag, 4, 0, 0])
+    for r in section_rows:
+        for c in ws[r]:
+            c.font = Font(bold=True, color="5B21B6")
+            c.fill = PatternFill("solid", fgColor="EDE9FE")
     for col, w in zip("ABCDEFG", (40, 22, 10, 26, 10, 10, 11)):
         ws.column_dimensions[col].width = w
     ws.freeze_panes = "A2"
 
-    # Feuille d'aide : la liste EXACTE des magasins à recopier dans la colonne « magasin ».
-    wm = wb.create_sheet("Magasins valides")
-    wm.append(["À recopier tel quel dans la colonne « magasin » :"])
+    # Feuille d'aide : magasins valides + explication des lignes-titres.
+    wm = wb.create_sheet("Aide")
+    wm.append(["MAGASINS VALIDES — à recopier tel quel dans la colonne « magasin » :"])
     wm["A1"].font = Font(bold=True, color="0B4F49")
     for m in mags:
         wm.append([m["name"]])
-    wm.column_dimensions["A"].width = 40
+    wm.append([])
+    wm.append(["LIGNES-TITRES DE SECTION (stock industriel) :"])
+    wm[wm.max_row][0].font = Font(bold=True, color="5B21B6")
+    for txt in [
+        "• Une ligne avec SEULEMENT la désignation (autres colonnes vides) = un titre de section.",
+        "• Elle classe automatiquement les articles listés EN DESSOUS :",
+        "   - « MATERIEL D'ASSEMBLAGE… » ou « COMPOSANTES… » → Industriel / Matière première.",
+        "   - « PRODUITS FINIS » → Industriel / Produit fini.",
+        "   - « MAGASIN … » → simple séparateur (retour au stock d'ingénierie).",
+        "• Le groupe (Assemblage Batteries, Luminaire Type 2…) est déduit du titre.",
+        "• Tout le reste (avec une catégorie) = stock d'Ingénierie.",
+    ]:
+        wm.append([txt])
+    wm.column_dimensions["A"].width = 90
 
     buf = io.BytesIO()
     wb.save(buf)
@@ -808,10 +1103,17 @@ def _map_import_row(d):
     row = {
         "designation": g("designation", "désignation", "nom", "nom de l'article",
                          "article", "libelle", "libellé"),
-        "categorie": g("categorie", "catégorie", "groupe", "groupe d'article",
-                       "groupe d'articles", "famille"),
+        # Catégorie métier SEULEMENT (plus de confusion avec groupe/famille, qui
+        # ont désormais leurs propres champs).
+        "categorie": g("categorie", "catégorie", "categorie d'article",
+                       "groupe d'article", "groupe d'articles"),
         "unite": g("unite", "unité", "udm", "uom", "unité de mesure", "u.d.m"),
         "magasin": g("magasin", "entrepot", "entrepôt", "warehouse", "stock"),
+        # Classification additive (si colonnes explicites présentes ; sinon
+        # injectée par le contexte de section, voir _inject_sections).
+        "type_stock": g("type_stock", "type de stock", "type"),
+        "famille": g("famille"),
+        "groupe": g("groupe", "section"),
     }
     bon = g("bon_etat", "bon état", "bon etat", "bonetat")
     rep = g("a_reparer", "à réparer", "a reparer", "en_reparation", "reparation",
@@ -827,15 +1129,107 @@ def _map_import_row(d):
     return row
 
 
+# ── Classification par lignes-titres de section (format « Nouveau stock.xlsx ») ──
+# Le classeur remis par le magasin range les articles sous des titres de section
+# (« MATERIEL D'ASSEMBLAGE DE BATTERIES », « PRODUITS FINIS », « MAGASIN … »). On
+# lit ces titres pour affecter type_stock / famille / groupe aux articles qui
+# suivent, sans que le magasin ait à changer sa mise en page. Les nouvelles
+# sections (ex. fabrication) sont prises en charge automatiquement (repli
+# générique sur le libellé nettoyé).
+def _is_section_header(row):
+    """Ligne-titre = une désignation SEULE : ni magasin, ni catégorie, ni unité.
+    C'est le seul cas où magasin ET unité sont vides — tous les vrais articles du
+    classeur ont au moins un magasin et une unité."""
+    return bool(row.get("designation")) and not row.get("magasin") \
+        and not row.get("categorie") and not row.get("unite")
+
+
+def _clean_groupe(title):
+    """Libellé de groupe lisible à partir d'un titre de section."""
+    t = " ".join((title or "").split())
+    up = t.upper().replace("-", " ")
+    if "BATTERIE" in up and "ASSEMBLAGE" in up:
+        return "Assemblage Batteries"
+    if "TYPE 1" in up:
+        return "Luminaire Type 1"
+    if "TYPE 2" in up:
+        return "Luminaire Type 2"
+    if "TYPE 3" in up:
+        return "Luminaire Type 3"
+    if "COMMUN" in up:
+        return "Luminaire Communs"
+    if "LUMINAIRE" in up and "ASSEMBLAGE" in up:
+        return "Assemblage Luminaires"
+    return t.title()
+
+
+def _disambiguate_designation(design, groupe):
+    """Les composants de luminaires portent le même nom sous Type-1/2/3 mais sont
+    PHYSIQUEMENT distincts (décision KYA). Si le groupe indique un type précis et
+    que le nom ne le porte pas DÉJÀ, on suffixe « (Type N) » → articles distincts.
+    Les pièces déjà typées (Châssis TYPE 2, LED TYPE-2…) et les « Communs » ne sont
+    pas touchées."""
+    import re
+    m = re.search(r"TYPE\s*[- ]?\s*([123])", (groupe or "").upper())
+    if not m:
+        return design
+    n = m.group(1)
+    if re.search(r"TYPE\s*[- ]?\s*" + n, (design or "").upper()):
+        return design   # le type est déjà dans le nom
+    return "{0} (Type {1})".format(design, n)
+
+
+def _classify_section(title):
+    """(type_stock, famille, groupe) pour un titre de section, ou None si le titre
+    n'est pas une section reconnue (on ne change alors pas le contexte)."""
+    t = " ".join((title or "").split()).upper()
+    if t.startswith("MAGASIN "):
+        # Simple séparateur de magasin (le magasin vient de la colonne) → retour
+        # au stock d'ingénierie par défaut.
+        return ("Ingénierique", "", "")
+    if "PRODUIT" in t and "FINI" in t:
+        return ("Industriel", "Produit fini", "Produits finis")
+    if "ASSEMBLAGE" in t or "COMPOSANTE" in t or "FABRICATION" in t:
+        return ("Industriel", "Matière première", _clean_groupe(title))
+    return None
+
+
+def _inject_sections(dict_rows):
+    """`dict_rows` = liste ORDONNÉE de dicts {en-tête minuscule: valeur}. Détecte
+    les lignes-titres et injecte type_stock/famille/groupe sur les articles qui
+    suivent. Retourne la liste des lignes d'articles normalisées (sans les titres)."""
+    ctx = {"type_stock": "Ingénierique", "famille": "", "groupe": ""}
+    out = []
+    for d in dict_rows:
+        row = _map_import_row(d)
+        if not row["designation"]:
+            continue
+        if _is_section_header(row):
+            sec = _classify_section(row["designation"])
+            if sec:
+                ctx = {"type_stock": sec[0], "famille": sec[1], "groupe": sec[2]}
+            continue   # un titre n'est jamais un article
+        # La ligne ne précise pas sa classification → on applique le contexte.
+        if not row.get("type_stock"):
+            row["type_stock"] = ctx["type_stock"]
+            row["famille"] = ctx["famille"]
+            row["groupe"] = ctx["groupe"]
+        # Composants luminaires Type-1/2/3 : rendus distincts (suffixe « (Type N) »).
+        if row["type_stock"] == "Industriel" and row.get("famille") == "Matière première":
+            row["designation"] = _disambiguate_designation(row["designation"], row.get("groupe"))
+        out.append(row)
+    return out
+
+
 @frappe.whitelist()
 def importer_stock_fichier(content_base64, filename=None):
     """Import d'articles depuis un fichier **Excel (.xlsx)** ou CSV téléversé.
-    On travaille sur Excel ici : on lit directement le classeur rempli."""
+    Section-aware : lit les lignes-titres pour classer type_stock/famille/groupe."""
     _guard(write=True)
     import base64
     import io
     raw = base64.b64decode(content_base64)
-    rows = []
+    dict_rows = []
     name = (filename or "").lower()
     is_xlsx = name.endswith(".xlsx") or raw[:2] == b"PK"
     if is_xlsx:
@@ -847,10 +1241,7 @@ def importer_stock_fichier(content_base64, filename=None):
             if header is None:
                 header = [str(c).strip().lower() if c is not None else "" for c in r]
                 continue
-            d = {header[i]: r[i] for i in range(min(len(header), len(r)))}
-            row = _map_import_row(d)
-            if row["designation"]:
-                rows.append(row)
+            dict_rows.append({header[i]: r[i] for i in range(min(len(header), len(r)))})
     else:
         import csv
         txt = raw.decode("utf-8-sig", errors="replace")
@@ -858,12 +1249,10 @@ def importer_stock_fichier(content_base64, filename=None):
         # Détecte le séparateur : point-virgule, tabulation (collage Excel) ou virgule.
         delim = max((";", "\t", ","), key=lambda d: sample.count(d))
         for d in csv.DictReader(io.StringIO(txt), delimiter=delim):
-            d = {(k or "").strip().lower(): v for k, v in d.items()}
-            row = _map_import_row(d)
-            if row["designation"]:
-                rows.append(row)
+            dict_rows.append({(k or "").strip().lower(): v for k, v in d.items()})
+    rows = _inject_sections(dict_rows)
     if not rows:
-        frappe.throw(_("Aucune ligne valide trouvée (vérifiez l'en-tête : designation, categorie, unite, magasin, bon_etat, en_reparation)."))
+        frappe.throw(_("Aucune ligne valide trouvée (vérifiez l'en-tête : designation, categorie, unite, magasin, bon_etat, a_reparer, defectueux)."))
     return importer_stock_initial(rows)
 
 

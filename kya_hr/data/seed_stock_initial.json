@@ -1,0 +1,2909 @@
+[
+{
+"designation": "ATTACHE DE 6(BOITE)",
+"categorie": "Quincaillerie & fixation",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 39,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ATTACHE DE 8 (BOITE)",
+"categorie": "Quincaillerie & fixation",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 35,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "BALAIS TELESCOPIQUE",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "BARRE A MINE",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 6,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "BARRE DE RAIL",
+"categorie": "Structures & supports",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 3,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "KYA BAT",
+"categorie": "Batteries",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 4,
+"defectueux": 0
+},
+{
+"designation": "BATTERIE DEYE 5 KW",
+"categorie": "Batteries",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 1,
+"a_reparer": 4,
+"defectueux": 0
+},
+{
+"designation": "BARRETTE DE COUPURE DE TERRE",
+"categorie": "Mise à la terre",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "BATTERIE LITHIUM 24V 75Ah (GRISE)",
+"categorie": "Batteries",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "BATTERIE LITHIUM 24V 75Ah",
+"categorie": "Batteries",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "BATTERIE LITHIUM 48V 100Ah Hi-Tech",
+"categorie": "Batteries",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "BATTERIE LITHIUM 48V 100Ah Huawei",
+"categorie": "Batteries",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "BATTERIE LITHIUM KYA-BAT Z2 48V",
+"categorie": "Batteries",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "BOITE PLEXO 100X100",
+"categorie": "Coffrets & boîtiers",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 10,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "BOITIER CARRE",
+"categorie": "Coffrets & boîtiers",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "BORNIER DE TERRE",
+"categorie": "Mise à la terre",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 2,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "BOULON DE 13 AVEC ECROU",
+"categorie": "Quincaillerie & fixation",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 10,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "BURIN PLAT",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "BURIN POINTU",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CABLE 1X16mm² (m) VERT/JAUNE",
+"categorie": "Câbles électriques",
+"unite": "Metre",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 4645,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CABLE 1X25mm² (m)",
+"categorie": "Câbles électriques",
+"unite": "Metre",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 4500,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CABLE 1X35mm² (m)",
+"categorie": "Câbles électriques",
+"unite": "Metre",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 1311,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CABLE 1X50mm² (m)",
+"categorie": "Câbles électriques",
+"unite": "Metre",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CABLE 1X70mm² (m)",
+"categorie": "Câbles électriques",
+"unite": "Metre",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 577,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CABLE 2X1.5mm² (m)",
+"categorie": "Câbles électriques",
+"unite": "Metre",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 4462,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CABLE 3X10mm² (m)",
+"categorie": "Câbles électriques",
+"unite": "Metre",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 3131,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CABLE 3X2.5mm² (m)",
+"categorie": "Câbles électriques",
+"unite": "Metre",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 4606,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CABLE 3X6mm² (m)",
+"categorie": "Câbles électriques",
+"unite": "Metre",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 354,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CABLE 5X6mm²(m)",
+"categorie": "Câbles électriques",
+"unite": "Metre",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CABLE 5X16mm²(m)",
+"categorie": "Câbles électriques",
+"unite": "Metre",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CABLE PV 4mm² NOIR (m)",
+"categorie": "Câbles électriques",
+"unite": "Metre",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 600,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CABLE PV 4mm² ROUGE (m)",
+"categorie": "Câbles électriques",
+"unite": "Metre",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 900,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CABLE PV 6mm² NOIR (m)",
+"categorie": "Câbles électriques",
+"unite": "Metre",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 600,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CABLE PV 6mm² ROUGE (m)",
+"categorie": "Câbles électriques",
+"unite": "Metre",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CABLE PV 10mm² NOIR (m)",
+"categorie": "Câbles électriques",
+"unite": "Metre",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CABLE PV 10mm² ROUGE (m)",
+"categorie": "Câbles électriques",
+"unite": "Metre",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CABLE VERT/JAUNE 10mm² (m)",
+"categorie": "Câbles électriques",
+"unite": "Metre",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CABLE RJ45 (3m)",
+"categorie": "Câbles électriques",
+"unite": "Metre",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 6,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CABLE SERTIS DE MIS. EN PARALLELE",
+"categorie": "Connectique & raccordement",
+"unite": "Metre",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 20,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CABLE FLEX DE 50mm² BLEU (m)",
+"categorie": "Câbles électriques",
+"unite": "Metre",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CABLE FLEX DE 50mm² NOIR (m)",
+"categorie": "Câbles électriques",
+"unite": "Metre",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CABLE FLEX DE 70mm² ROUGE (m)",
+"categorie": "Câbles électriques",
+"unite": "Metre",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CAISSE A OUTILS",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 3,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CALE DOUBLE",
+"categorie": "Quincaillerie & fixation",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CALE SIMPLE",
+"categorie": "Quincaillerie & fixation",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 52,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CHARIOT TRANSPALETTE",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CHEMIN DE CABLE 3m/10cm",
+"categorie": "Tuyauterie, goulottes & cheminement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CHEVILLE METALLIQUE DE 12",
+"categorie": "Quincaillerie & fixation",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 16,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CHEVILLE METALLIQUE DE 8",
+"categorie": "Quincaillerie & fixation",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 14,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CHEVILLE PLASTIQUE DE 12(BOITE)",
+"categorie": "Quincaillerie & fixation",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 16,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CHEVILLE PLASTIQUE DE 8(BOITE)",
+"categorie": "Quincaillerie & fixation",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 2,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CLE DE VIS AUTOTARAUDE DE 10",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CLE DE VIS AUTOTARAUDE DE 8",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CLOTURE GRILLAGEE",
+"categorie": "Sécurité & protection",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "COFFRET DE 12",
+"categorie": "Coffrets & boîtiers",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 2,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "COFFRET DE24",
+"categorie": "Coffrets & boîtiers",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 6,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "COFFRET DE 32",
+"categorie": "Coffrets & boîtiers",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 3,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "COFFRET AC-DC (8 MODULES)",
+"categorie": "Coffrets & boîtiers",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 8,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "COFFRET ALU KYA-SOP",
+"categorie": "Coffrets & boîtiers",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "COLLIER ATLAS DE 32",
+"categorie": "Quincaillerie & fixation",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 78,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "COLLIER ATLAS DE 50",
+"categorie": "Quincaillerie & fixation",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 133,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "COLLIER DE SERRAGE",
+"categorie": "Quincaillerie & fixation",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 4,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "COMPTEUR D'ENERGIE MONOPHASE",
+"categorie": "Appareillage & mesure",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "COMPTEUR D'ENERGIE TRIPHASE",
+"categorie": "Appareillage & mesure",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CONNECTEUR MC4 FEMELLE",
+"categorie": "Connectique & raccordement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 2817,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CONNECTEUR MC4 MALE",
+"categorie": "Connectique & raccordement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 2817,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CONNECTEUR DE BATTERIE",
+"categorie": "Connectique & raccordement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CONNECTEUR DE DERIVATION FEM.",
+"categorie": "Connectique & raccordement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CONNECTEUR DE DERIVATION MALE",
+"categorie": "Connectique & raccordement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "COSSE DE 6",
+"categorie": "Connectique & raccordement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 13,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "COSSE DE 10mm²",
+"categorie": "Connectique & raccordement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "COSSE DE 16mm²",
+"categorie": "Connectique & raccordement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 3,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "COSSE DE 25mm²",
+"categorie": "Connectique & raccordement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "COSSE DE 35mm²/8",
+"categorie": "Connectique & raccordement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 29,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "COSSE DE 70mm²",
+"categorie": "Connectique & raccordement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 8,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "COSSE DE 95mm²",
+"categorie": "Connectique & raccordement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 11,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "COUDE DE 63",
+"categorie": "Tuyauterie, goulottes & cheminement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "COUDE DE 50",
+"categorie": "Tuyauterie, goulottes & cheminement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 19,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "COUDE EN L DE 25",
+"categorie": "Tuyauterie, goulottes & cheminement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 4,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "COUDE DE 32",
+"categorie": "Tuyauterie, goulottes & cheminement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 39,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "DISJONCTEUR DIFFERENTIEL 10A 30mA",
+"categorie": "Protection électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "DISJONCTEUR DIFFERENTIEL 16A 30mA",
+"categorie": "Protection électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 2,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "DISJONCTEUR DIFFERENTIEL 20A 30mA",
+"categorie": "Protection électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "DISJONCTEUR DC 20A 4P",
+"categorie": "Protection électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "DISJONCTEUR DIFFERENTIEL 25A 30mA",
+"categorie": "Protection électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "DISJONCTEUR DC 32A",
+"categorie": "Protection électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "DISJONCTEUR DC 32A 4P",
+"categorie": "Protection électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "DISJONCTEUR DC 40A 4P",
+"categorie": "Protection électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "DISJONCTEUR DC 63A 4P",
+"categorie": "Protection électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "DISQUE A BETON",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "DISQUE A COUPER",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "DOUILLE DROITE",
+"categorie": "Éclairage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 30,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "DOUILLE INCLINEE",
+"categorie": "Éclairage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 61,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "DPN 10A",
+"categorie": "Protection électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ECHELLE 7M",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 2,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "EMBOUT DE 6",
+"categorie": "Quincaillerie & fixation",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ENERGY METER",
+"categorie": "Appareillage & mesure",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ESCABEAU",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 3,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ETIQUETEUSE",
+"categorie": "Divers / Consommables",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "EXTINCTEUR",
+"categorie": "Sécurité & protection",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 6,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "FICHE FEMELLE",
+"categorie": "Appareillage électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "FICHE MALE",
+"categorie": "Appareillage électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "FILET AVERTISSEUR ROUGE",
+"categorie": "Sécurité & protection",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 5,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "FUSIBLE GPV 15A",
+"categorie": "Protection électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "FUSIBLE GPV 30A",
+"categorie": "Protection électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "GANTS (PAIRE)",
+"categorie": "Sécurité & protection",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "GAINE THERMO",
+"categorie": "Connectique & raccordement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "GOULOTTE 25X40 NON PERFOREE",
+"categorie": "Tuyauterie, goulottes & cheminement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "GOULOTTE 60X40 NON PERFOREE",
+"categorie": "Tuyauterie, goulottes & cheminement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 10,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "GOULOTTE 60X40 PERFOREE",
+"categorie": "Tuyauterie, goulottes & cheminement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 3,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "INTERRUPTEUR SIMPLE",
+"categorie": "Appareillage électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 42,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "INVERSEUR AUTOMATIQUE",
+"categorie": "Appareillage électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 3,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "INVERSEUR MANUEL",
+"categorie": "Appareillage électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ISOLATEUR DE JEU DE BARRE",
+"categorie": "Appareillage électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 8,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "JEU DE TOURNEVIS",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "JEU D'OUTIL COMPLET KYA",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 3,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "KYA-SOP 20 (314)",
+"categorie": "Onduleurs & régulateurs",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "KYA-SOP 5KW VMIII (BACK-UP)",
+"categorie": "Onduleurs & régulateurs",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "LAMPE LED DE 10W",
+"categorie": "Éclairage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 51,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "LAMPE 0.6",
+"categorie": "Éclairage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 13,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "REGLETTE",
+"categorie": "Éclairage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 17,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MARQUEUR",
+"categorie": "Divers / Consommables",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 10,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MARTEAU D’ATTACHE",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 2,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MARTEAU DE MASSE",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 20,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MATELAS",
+"categorie": "Divers / Consommables",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 5,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MECHE A BETON DE 6",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 18,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MECHE A BETON DE 8",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 4,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MECHE A BETON DE 20",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MECHE METALLIQUE DE 6",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 30,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MECHE METALLIQUE DE 10",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MESUREURE DE TERRE MS2302",
+"categorie": "Appareillage & mesure",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 5,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MEULEUSE",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 6,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MODULE PV 50Wc",
+"categorie": "Modules photovoltaïques",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 2,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MODULE PV 75Wc",
+"categorie": "Modules photovoltaïques",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 7,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MODULE PV 90Wc",
+"categorie": "Modules photovoltaïques",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 5,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MODULE PV 100Wc",
+"categorie": "Modules photovoltaïques",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MODULE PV 150Wc",
+"categorie": "Modules photovoltaïques",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MODULE PV 165Wc",
+"categorie": "Modules photovoltaïques",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 9,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MODULE PV 195Wc",
+"categorie": "Modules photovoltaïques",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 270,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MODULE PV 240Wc",
+"categorie": "Modules photovoltaïques",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MODULE PV 245Wc",
+"categorie": "Modules photovoltaïques",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MODULE PV 250Wc",
+"categorie": "Modules photovoltaïques",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 51,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MODULE PV 255Wc",
+"categorie": "Modules photovoltaïques",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 6,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MODULE PV 260Wc",
+"categorie": "Modules photovoltaïques",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 8,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MODULE PV 265Wc",
+"categorie": "Modules photovoltaïques",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MODULE PV 270Wc",
+"categorie": "Modules photovoltaïques",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 19,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MODULE PV 330Wc",
+"categorie": "Modules photovoltaïques",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 9,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MODULE PV 395Wc",
+"categorie": "Modules photovoltaïques",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 5,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MODULE PV 400Wc",
+"categorie": "Modules photovoltaïques",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 7,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MODULE PV 280",
+"categorie": "Modules photovoltaïques",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 41,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MODULE PV 455Wc",
+"categorie": "Modules photovoltaïques",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 550,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MULTIMETRE",
+"categorie": "Appareillage & mesure",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 19,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ONDULEUR DEYE  5KW",
+"categorie": "Onduleurs & régulateurs",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ONDULEUR DEYE  8KW",
+"categorie": "Onduleurs & régulateurs",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 5,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ONDULEUR DEYE 10 KW",
+"categorie": "Onduleurs & régulateurs",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ONDULEUR DEYE 12 KW",
+"categorie": "Onduleurs & régulateurs",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 2,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ONDULEUR DEYE  20 KW",
+"categorie": "Onduleurs & régulateurs",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ONDULEUR DEYE 50 KW",
+"categorie": "Onduleurs & régulateurs",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 2,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ONDULEUR 5 KW VMIII",
+"categorie": "Onduleurs & régulateurs",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ONDULEUR 5 KW VMII",
+"categorie": "Onduleurs & régulateurs",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ONDULEUR 5KW KING",
+"categorie": "Onduleurs & régulateurs",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ONDULEUR 08KVA FELICITY SOLAR",
+"categorie": "Onduleurs & régulateurs",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ONDULEUR 10KW",
+"categorie": "Onduleurs & régulateurs",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "PAQUET DE RIVET DE 6",
+"categorie": "Quincaillerie & fixation",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 5,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "PARAFOUDRE DC 40 KA",
+"categorie": "Protection électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "PARAFOUDRE DC 20KVA 1000V",
+"categorie": "Protection électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "PARAFOUDRE DC 40KVA 1500V",
+"categorie": "Protection électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "PELLE",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 5,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "PINCE AMPEREMETRIQUE (FLUKE)",
+"categorie": "Appareillage & mesure",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "PINCE A SERTIR LES COSSES",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "PIOCHE",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 7,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "PIQUET DE TERRE + COSSE (2M)",
+"categorie": "Mise à la terre",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 95,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "PIQUET DE TERRE + COSSE (1.5M)",
+"categorie": "Mise à la terre",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "PISTOLET DE SILICONE",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 70,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "PORTE FUSIBLE GPV",
+"categorie": "Protection électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "PRISE ETANCHE 2P+T",
+"categorie": "Appareillage électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 5,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "PROJECTEUR 200W (A. PORT DE PÊCHE)",
+"categorie": "Éclairage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "PROJECTEUR 600W AC",
+"categorie": "Éclairage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 2,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "PROJECTEUR 800W AC",
+"categorie": "Éclairage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "RALLONGE",
+"categorie": "Appareillage électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 3,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "REGLETTE COMPLET DE 9W (0.60)",
+"categorie": "Éclairage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 13,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "RELAIS 120A",
+"categorie": "Appareillage électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "REPARTISSEUR ETAGE 125A 4P",
+"categorie": "Appareillage électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ROULEAU DE FIL DE FER GALVA",
+"categorie": "Quincaillerie & fixation",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 5,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ROULEAU DE TUBE ANNELE DE 32",
+"categorie": "Tuyauterie, goulottes & cheminement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ROULEAU DE TUBE ANNELE DE 50",
+"categorie": "Tuyauterie, goulottes & cheminement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ROULETTE BLANCHE",
+"categorie": "Divers / Consommables",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 5,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ROULETTE GRISE",
+"categorie": "Divers / Consommables",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ROULETTE ORANGE",
+"categorie": "Divers / Consommables",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "SABA NOIR",
+"categorie": "Connectique & raccordement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "SABA ROUGE",
+"categorie": "Connectique & raccordement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 4,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "SABA VERT/JAUNE",
+"categorie": "Connectique & raccordement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "SCIE METALLIQUE",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "SILLICONE SIMPLE",
+"categorie": "Divers / Consommables",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 18,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "SOUFFLEUR ELECTRIQUE 1100W",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "SUPPORT KYA-SOP 314",
+"categorie": "Structures & supports",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "SUPPRESSEUR",
+"categorie": "Divers / Consommables",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "TE DE 32",
+"categorie": "Tuyauterie, goulottes & cheminement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 92,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "TE DE 50",
+"categorie": "Tuyauterie, goulottes & cheminement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 41,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "TOURNEVIS TESTEUR",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 64,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "TUYAUX PRESSION DE 110",
+"categorie": "Tuyauterie, goulottes & cheminement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 3,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "TUYAUX PRESSION DE 50",
+"categorie": "Tuyauterie, goulottes & cheminement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 13,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "TUYAU PRESSION DE 32",
+"categorie": "Tuyauterie, goulottes & cheminement",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 10,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "VALISE DE CLES A MOLETTES",
+"categorie": "Outillage",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "VIS AUTOTARAUDEE DE 8",
+"categorie": "Quincaillerie & fixation",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "VIS AUTOTARAUDEE DE 10",
+"categorie": "Quincaillerie & fixation",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "VIS CRUCIFORME DE 12(BOITE)",
+"categorie": "Quincaillerie & fixation",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 2,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "VIS CRUCIFORME DE 8(BOITE)",
+"categorie": "Quincaillerie & fixation",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 2,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "VOYANT ORANGE",
+"categorie": "Appareillage électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "VOYANT VERT",
+"categorie": "Appareillage électrique",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MATERIEL D'ASSEMBLAGE DE BATTERIES",
+"categorie": "",
+"unite": "",
+"magasin": "",
+"bon_etat": "",
+"a_reparer": "",
+"defectueux": ""
+},
+{
+"designation": "Barre bus",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "BMS",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 2,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Borne batterie négatif noir",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Borne batterie positif rouge",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Câble batterie sertie noir",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Câble batterie sertie rouge",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Caisson vide de batterie",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 6,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Cellule de batterie 51,2V 100Ah",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Connecteur d'écran",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Connecteur de BMS noir",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Connecteur de BMS blanc",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Ecran de batteries",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Poignet de caisson de batteries",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 2,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Port de communication",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MATERIEL D'ASSEMBLAGE DE LUMINAIRES",
+"categorie": "",
+"unite": "",
+"magasin": "",
+"bon_etat": "",
+"a_reparer": "",
+"defectueux": ""
+},
+{
+"designation": "COMPOSANTES LUMINAIRE ALL IN ONE TYPE-1",
+"categorie": "",
+"unite": "",
+"magasin": "",
+"bon_etat": "",
+"a_reparer": "",
+"defectueux": ""
+},
+{
+"designation": "Accessoire de poteaux",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Cadre largeur du module",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Cadre longueur du module droite",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Cadre longueur du module gauche",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Châssis TYPE 1",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Coudes de cadres (noir)",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Couvercle de luminaire",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "LED TYPE-1",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Module luminaire TYPE-1",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "COMPOSANTES LUMINAIRE ALL IN ONE TYPE-2",
+"categorie": "",
+"unite": "",
+"magasin": "",
+"bon_etat": "",
+"a_reparer": "",
+"defectueux": ""
+},
+{
+"designation": "Accessoire de poteaux",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 36,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Cadre largeur du module",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 72,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Cadre longueur du module droite",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 36,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Cadre longueur du module gauche",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 36,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Châssis TYPE 2",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 36,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Coudes de cadres (noir)",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 144,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Couvercle de luminaire",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 36,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "LED TYPE-2",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 36,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Module luminaire TYPE-2",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 36,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "COMPOSANTES LUMINAIRE ALL IN ONE TYPE-3",
+"categorie": "",
+"unite": "",
+"magasin": "",
+"bon_etat": "",
+"a_reparer": "",
+"defectueux": ""
+},
+{
+"designation": "Accessoire de poteaux",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 21,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Cadre largeur du module",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 42,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Cadre longueur du module droite",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 21,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Cadre longueur du module gauche",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 21,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Châssis TYPE 3",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 21,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Coudes de cadres (noir)",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 84,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Couvercle de luminaire",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 21,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "LED TYPE-3",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 21,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Module luminaire (bordure ronde)",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 21,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "COMPOSANTES EN COMMUN DE LUMINAIRES",
+"categorie": "",
+"unite": "",
+"magasin": "",
+"bon_etat": "",
+"a_reparer": "",
+"defectueux": ""
+},
+{
+"designation": "Bouton d'allumage",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 50,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Cartons d'emballage",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Cellule de batterie pour luminaire",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 63,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Cornière métallique (carton)",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Régulateur de charge",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 90,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Sachet de protection des produits finis",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 100,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "PRODUITS FINIS",
+"categorie": "",
+"unite": "",
+"magasin": "",
+"bon_etat": "",
+"a_reparer": "",
+"defectueux": ""
+},
+{
+"designation": "BATTERIES 51,2V 100Ah",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 4,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Luminaire all in one TYPE 1",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Luminaire all in one TYPE 2",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 6,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "Luminaire all in one TYPE 3",
+"categorie": "",
+"unite": "Unité",
+"magasin": "Magasin KYA - KYA",
+"bon_etat": 35,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MAGASIN SOGBOSSITO",
+"categorie": "",
+"unite": "",
+"magasin": "",
+"bon_etat": "",
+"a_reparer": "",
+"defectueux": ""
+},
+{
+"designation": "BATTERIE 50Ah ACE",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "BATTERIE 100Ah ACE",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "BATTERIE 12,8V 60Ah",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "BATTERIE 12V 200Ah PLOMB",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "BOITE DE VARIATEUR",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 12,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CAISSON VIDE DE BAT. 48V 100Ah",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 76,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CARTE DE CONTRÔLE 10KW",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 3,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CARTE DE MISE EN PARALLELE",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 2,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CARTE DE RELAIS",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CARTE PV",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 3,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CLE DE VIS AUTOTARAUDE DE 10",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 95,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CLE DE VIS AUTOTARAUDE DE 8",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 45,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "COFFRET ALU. KYA-SOP",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 23,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "CONTROLEUR DE POMPE",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 15,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "DC BORD",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "FUSIBLE A COUTEAU GG 63A",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 300,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "JEU D'OUTIL COMPLET KYA",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 2,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "LAVABO",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 3,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "LIT PICO",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "LUMINAIRE 24V 50Ah ANCIEN",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 87,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "LUMINAIRE 24V 50Ah ANCIEN REPARE",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 428,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MAIN BORD 10KW",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MAIN BORD 1KW",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MAIN BORD 2KW",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MAIN BORD 3KW",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MAIN BORD 5KW",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MARQUEUR",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 3769,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "MARQUEUR DE CABLE (ROULEAU)",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 34,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ONDULEUR 1 KVA 24V",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 3,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ONDULEUR 1 KVA 12V",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 5,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ONDULEUR 1KW",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 2,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ONDULEUR 3 KVA",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 17,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ONDULEUR 3 KW",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ONDULEUR 5 KVA AKS",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ONDULEUR 5 KW KING",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ONDULEUR 5 KW VMII",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ONDULEUR 5 KW VMIII",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ONDULEUR 4 KW",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ONDULEUR 2KVA",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ONDULEUR 6 KW",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "PORTE FUSIBLE GPV",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "POSTE DE CHARGEUR DE BATTERIE",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 1,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "PROJECTEUR 200W DC",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 13,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "PROJECTEUR 400W DC",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 16,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "PROJECTEUR 600W AC",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 16,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "PROJECTEUR 800W AC",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 18,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "REGULATEUR 12V-24V 10A (NOIR)",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 280,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "REGULATEUR DE CHARGE",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 4,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "ROBINET DE LAVE-MAIN AUTOMATIQUE",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 6,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "SECTIONNEUR DC PORTE FUSIBLE",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 140,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "SUPPORT BATTERIE ALU. 1BAT",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 4,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "SUPPORT BATTERIE ALU. 2BAT",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 7,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "TIGE FILETEE",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 15,
+"a_reparer": 0,
+"defectueux": 0
+},
+{
+"designation": "TUBE ANNELEE DE 32mm²",
+"categorie": "",
+"unite": "Unité",
+"magasin": "SOGBOSSITO - D",
+"bon_etat": 0,
+"a_reparer": 0,
+"defectueux": 0
+}
+]

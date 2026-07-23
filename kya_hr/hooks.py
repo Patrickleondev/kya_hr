@@ -119,6 +119,7 @@ doc_events = {
             "kya_hr.role_sync.sync_employee_role",
             "kya_hr.equipe_member_sync.sync_on_employee_change",
             "kya_hr.api.rh_sync.sync_salarie_from_employee",
+            "kya_hr.api.equipe_membres.journaliser_mutation",
         ],
     },
     "Attendance": {

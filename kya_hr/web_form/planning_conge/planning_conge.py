@@ -5,6 +5,14 @@ def get_context(context):
     """Controller Web Form Planning Congé.
     Circuit: Employé -> Chef de Service (Supérieur Immédiat) -> Directeur Général.
     La RH peut intervenir en override sur l'étape Chef de Service.
+
+    Restriction d'accès : la CRÉATION est réservée à l'encadrement + RH (le chef
+    saisit le planning de son équipe via /planning-equipe). Le web form ne peut
+    pas bloquer le rendu de /new via get_context (Frappe n'y vérifie les droits
+    que pour un document EXISTANT) ; le blocage réel se fait au SUBMIT par la
+    permission `create` du DocType Planning Conge, retirée au rôle Employee
+    (cf. kya_hr.ensure_workflow_perms) — la saisie d'équipe passe outre via
+    ignore_permissions.
     """
     user = frappe.session.user
     roles = frappe.get_roles(user)

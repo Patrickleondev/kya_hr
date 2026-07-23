@@ -1,0 +1,168 @@
+<div style="font-family:'Arial Narrow','Arial Nova Cond',Arial,sans-serif;color:#000;max-width:720px;margin:0 auto;font-size:11.5pt;line-height:1.45;text-align:justify;">
+  {% set a = doc.acc() %}
+  {% set blk = "………………………………" %}
+
+  {# ===================== EN-TÊTE OFFICIEL KYA ===================== #}
+  <table style="width:100%;border-collapse:collapse;margin-bottom:2px;">
+    <tr>
+      <td style="width:150px;vertical-align:middle;">
+        <img src="/assets/kya_hr/images/logo_kya.png" style="width:140px;height:auto;" alt="KYA-Energy Group">
+      </td>
+      <td style="text-align:right;vertical-align:middle;font-size:9.5pt;line-height:1.35;">
+        <div style="font-style:italic;font-weight:bold;color:#1c9e8e;font-size:11pt;">KYA, move beyond the sky!</div>
+        <div>info@kya-energy.com</div>
+        <div>N°&nbsp;RCCM&nbsp;: TG-LOM 2015 B 975</div>
+        <div>NIF&nbsp;: 1000430317 &nbsp;|&nbsp; CNSS&nbsp;: 48863</div>
+      </td>
+    </tr>
+  </table>
+  <div style="border-bottom:2.5px solid #1c9e8e;margin-bottom:16px;"></div>
+
+  {# ===================== TITRE ===================== #}
+  <div style="text-align:center;font-weight:bold;text-decoration:underline;font-size:15pt;text-transform:uppercase;margin:2px 0 2px;">
+    Contrat de stage d'immersion (découverte)
+  </div>
+  <div style="text-align:center;font-size:10pt;margin-bottom:2px;">Référence : RH-ENG-07-V03</div>
+  <div style="text-align:center;font-style:italic;font-size:10pt;margin-bottom:16px;">Régi par la Loi n° 2021-012 du 18 juin 2021 portant Code du travail togolais</div>
+
+  {# ===================== ENTRE LES SOUSSIGNÉS ===================== #}
+  <p style="font-weight:bold;margin:0 0 4px;">ENTRE LES SOUSSIGNÉS :</p>
+  <p style="margin:0 0 10px;">
+    <b>KYA-Energy&nbsp;Group</b>, société ayant son siège social à Lomé, quartier Agoè Anokui, 08 BP 81101,
+    Lomé – Togo, téléphone : (+228) 70 45 34 81 / 99 99 93 80, e-mail : info@kya-energy.com, représentée par
+    son Directeur Général, <b>{{ doc.signataire_nom or 'Prof. AZOUMAH Yao Kétowoglo' }}</b>, majeur non interdit
+    ayant pleine capacité aux fins des présentes,
+  </p>
+  <p style="font-style:italic;margin:0 0 8px;">Ci-après dénommée «&nbsp;<b>L'ENTREPRISE</b>&nbsp;» ou « la Société », d'une part ;</p>
+  <p style="font-weight:bold;margin:0 0 6px;">ET</p>
+  <p style="margin:0 0 3px;">{{ doc.civilite or 'M./Mme/Mlle' }} : <b>{{ doc.beneficiaire_nom or blk }}</b></p>
+  <p style="margin:0 0 3px;">{{ a.ne | capitalize }} le : {{ doc.d_naissance() or blk }} à : {{ doc.lieu_naissance or blk }}</p>
+  <p style="margin:0 0 3px;">Nationalité : {{ doc.nationalite or 'togolaise' }} — Pièce d'identité ({{ doc.piece_type or 'CNI/passeport' }}) n° : {{ doc.piece_numero or blk }}</p>
+  <p style="margin:0 0 3px;">Demeurant et {{ a.domicilie }} à : {{ doc.domicile or blk }}</p>
+  <p style="margin:0 0 3px;">{{ a.fils_fille }} de : {{ doc.pere or blk }} et de : {{ doc.mere or blk }}</p>
+  <p style="margin:0 0 3px;">Téléphone : {{ doc.telephone or blk }} — E-mail : {{ doc.email or blk }}</p>
+  <p style="margin:0 0 3px;">Établissement de formation (le cas échéant) : {{ doc.etablissement or blk }}</p>
+  <p style="margin:0 0 8px;">N° certificat de scolarité / attestation d'inscription : {{ doc.num_certificat_scolarite or blk }}</p>
+  <p style="font-style:italic;margin:0 0 8px;">Ci-après {{ a.denomme }} «&nbsp;<b>{{ a.Le_La | upper }} STAGIAIRE</b>&nbsp;», d'autre part ;</p>
+
+  {% if doc.type_garant == 'Établissement' and (doc.etablissement or doc.etablissement_represente_par) %}
+  <p style="margin:0 0 10px;"><i>Et, le cas échéant, lorsque {{ a.le_la }} stagiaire est élève ou étudiant(e) :</i><br>
+    <b>L'Établissement de formation</b> : {{ doc.etablissement or blk }}, représenté par {{ doc.etablissement_represente_par or blk }},
+    ci-après dénommé « L'ÉTABLISSEMENT », partie à la présente convention en application de l'article 125 du Code du travail togolais.</p>
+  {% endif %}
+
+  <p style="font-weight:bold;margin:8px 0 8px;">IL A ÉTÉ PRÉALABLEMENT EXPOSÉ ET CONVENU CE QUI SUIT :</p>
+  <p style="margin:0 0 12px;">Le présent contrat a pour objet d'organiser l'accueil {{ a.du_dela }} stagiaire au sein de l'Entreprise dans le cadre d'un stage d'immersion à visée de découverte. Conformément à l'article 124 du Code du travail togolais, le présent stage n'a pas pour objet de remplacer un travailleur absent ni de pourvoir un emploi permanent de l'Entreprise ; il ne crée aucun lien de subordination salariale ni aucun contrat de travail entre les parties.</p>
+
+  {% macro art(t) %}<p style="font-weight:bold;margin:12px 0 4px;">{{ t }}</p>{% endmacro %}
+
+  {{ art("Article 1 — Objet et nature du stage") }}
+  <p style="margin:0 0 6px;">Dans le cadre de ses activités, la Société accepte de faire bénéficier {{ a.au_ala }} stagiaire, sur sa demande, d'un stage d'immersion (découverte) lui permettant de découvrir le métier, le secteur d'activité et le fonctionnement de l'entreprise, sous l'encadrement d'un maître de stage.</p>
+  <p style="margin:0 0 4px;">Le stage a une finalité exclusivement pédagogique et d'observation. Les principaux objectifs pédagogiques sont :</p>
+  <ul style="margin:0 0 8px 18px;">
+    <li>observation du fonctionnement des services et des métiers de l'Entreprise ;</li>
+    <li>découverte des méthodes et outils de travail ;</li>
+    {% for o in doc.objectifs_list() %}<li>{{ o }}</li>{% endfor %}
+  </ul>
+
+  {{ art("Article 2 — Durée, lieu et horaires du stage") }}
+  <p style="margin:0 0 6px;">La présente convention est conclue pour une durée de <b>{{ doc.duree_texte or 'un (01) mois' }}</b>. Elle prend effet le <b>{{ doc.d_debut() or blk }}</b> et arrive à échéance le <b>{{ doc.d_fin() or blk }}</b>. Cette durée demeure très inférieure au plafond légal de douze (12) mois, renouvellement compris (articles 126 et 128 du Code du travail).</p>
+  <p style="margin:0 0 8px;">Le stage se déroule dans les locaux de l'Entreprise sis à {{ doc.lieu_stage or blk }}. Les jours et horaires de présence sont fixés comme suit : du {{ doc.jour_debut or blk[:12] }} au {{ doc.jour_fin or blk[:12] }}, de {{ doc.heure_debut or '…' }} à {{ doc.heure_fin or '…' }}, dans le respect du règlement intérieur.</p>
+
+  {{ art("Article 3 — Maître de stage et encadrement") }}
+  <p style="margin:0 0 8px;">Durant la période définie à l'article 2, {{ doc.maitre_stage_nom and ('M./Mme ' + doc.maitre_stage_nom) or ('M./Mme ' + blk) }} est {{ doc.maitre_designe() }} en qualité de maître de stage. Il/Elle assure l'accueil, l'encadrement et le suivi {{ a.du_dela }} stagiaire, veille à sa sécurité et facilite l'atteinte des objectifs pédagogiques.</p>
+
+  {{ art("Article 4 — Obligations de l'Entreprise") }}
+  <ul style="margin:0 0 8px 18px;">
+    <li>accueillir {{ a.le_la }} stagiaire et lui assurer un encadrement effectif par le maître de stage ;</li>
+    <li>mettre à sa disposition les moyens et informations nécessaires à la réalisation des objectifs de découverte ;</li>
+    <li>garantir des conditions de stage respectueuses des règles d'hygiène, de santé et de sécurité au travail ;</li>
+    <li>procéder à l'évaluation {{ a.du_dela }} stagiaire et lui délivrer une attestation de stage en fin de période (article 126 du Code du travail).</li>
+  </ul>
+
+  {{ art("Article 5 — Obligations du/de la stagiaire") }}
+  <ul style="margin:0 0 8px 18px;">
+    <li>respecter le règlement intérieur, les consignes de sécurité et les horaires de l'Entreprise ;</li>
+    <li>faire preuve d'assiduité, de ponctualité et adopter une conduite honorable, honnête et loyale ;</li>
+    <li>respecter le secret professionnel et la confidentialité des informations ;</li>
+    <li>prendre soin des matériels et biens mis à sa disposition et les restituer en fin de stage ;</li>
+    <li>informer sans délai le maître de stage de toute absence ou empêchement.</li>
+  </ul>
+
+  {{ art("Article 6 — Indemnité et prise en charge") }}
+  <p style="margin:0 0 8px;">S'agissant d'un stage d'immersion à finalité de découverte, non productif, aucune indemnité de stage n'est due, conformément à l'article 126 du Code du travail togolais.</p>
+
+  {{ art("Article 7 — Assurances") }}
+  <p style="margin:0 0 6px;">{{ a.Le_La }} stagiaire déclare être {{ a.couvert }} par une assurance responsabilité civile ({% if doc.type_garant == 'Tuteur Légal' %}personnelle souscrite par le tuteur légal{% else %}personnelle ou souscrite par l'Établissement{% endif %}) : police n° {{ doc.assurance_police or blk }}, compagnie {{ doc.assurance_compagnie or blk }}.</p>
+  <p style="margin:0 0 8px;">L'Entreprise garantit la couverture des accidents susceptibles de survenir {{ a.au_ala }} stagiaire du fait ou à l'occasion du stage dans ses locaux, dans les conditions de sa police d'assurance.</p>
+
+  {{ art("Article 8 — Évaluation et attestation") }}
+  <p style="margin:0 0 8px;">{{ a.Le_La }} stagiaire sera {{ a.evalue }} par le maître de stage et devra produire, au plus tard {{ doc.rapport_delai_jours or '……' }} jours après la fin du stage, un rapport entre cinq (05) et dix (10) pages relatant son expérience. Une attestation de stage lui sera délivrée à l'issue du stage.</p>
+
+  {{ art("Article 9 — Confidentialité") }}
+  <p style="margin:0 0 8px;">{{ a.Le_La }} stagiaire s'engage à ne pas divulguer, utiliser ou reproduire, à des fins autres que celles du stage, les informations confidentielles dont {{ a.il_elle }} aurait connaissance. Cet engagement s'applique pendant toute la durée du stage et pour une durée de cinq (05) ans à compter de son terme.</p>
+
+  {{ art("Article 10 — Propriété intellectuelle") }}
+  <p style="margin:0 0 8px;">Toute création, œuvre, invention, idée ou amélioration réalisée par {{ a.le_la }} stagiaire dans le cadre et à l'occasion du stage est et demeure la propriété exclusive de KYA-Energy Group. {{ a.Le_La }} stagiaire cède à ce titre à l'Entreprise l'ensemble des droits patrimoniaux attachés auxdites créations, pour le monde entier.</p>
+
+  {{ art("Article 11 — Protection des données à caractère personnel") }}
+  <p style="margin:0 0 8px;">Les données personnelles {{ a.du_dela }} stagiaire sont traitées aux seules fins de la gestion du stage, dans le respect de la loi togolaise n° 2019-014 du 29 octobre 2019. {{ a.Le_La }} stagiaire dispose d'un droit d'accès, de rectification et de suppression de ses données.</p>
+
+  {{ art("Article 12 — Droit à l'image et autorisation d'exploitation") }}
+  <p style="margin:0 0 6px;">{{ a.Le_La }} stagiaire autorise l'Entreprise à fixer, reproduire, communiquer et exploiter son image (photographies, vidéos, enregistrements) réalisée dans le cadre du stage, à des fins de communication institutionnelle et commerciale, pour le monde entier et pour une durée de cinq (05) ans, à titre gratuit.</p>
+  <p style="margin:0 0 8px;">{{ a.Le_La }} stagiaire
+    <b>{{ '☑' if doc.droit_image == 'Accepte' else '☐' }} accepte
+    {{ '☑' if doc.droit_image == 'Refuse' else '☐' }} refuse</b>
+    la présente cession de droit à l'image (cocher la case correspondante et parapher).</p>
+
+  {{ art("Article 13 — Discipline, santé et sécurité") }}
+  <p style="margin:0 0 8px;">{{ a.Le_La }} stagiaire est {{ a.soumis }} au règlement intérieur et aux règles d'hygiène, de santé et de sécurité en vigueur dans l'Entreprise, et s'engage à utiliser les équipements de protection requis.</p>
+
+  {{ art("Article 14 — Résiliation") }}
+  <p style="margin:0 0 8px;">Le présent contrat peut être résilié à tout moment, à l'initiative de l'une ou l'autre partie, notamment en cas d'abandon de poste, de faute ou de non-respect du règlement intérieur, sans indemnité. La résiliation est notifiée par écrit. {{ a.Le_La }} stagiaire restitue alors sans délai tout matériel, badge, document et bien appartenant à l'Entreprise.</p>
+
+  {{ art("Article 15 — Litiges et droit applicable") }}
+  <p style="margin:0 0 8px;">Le présent contrat est régi par le droit togolais. Tout différend sera d'abord réglé à l'amiable ; à défaut, il sera porté devant la juridiction togolaise compétente, conformément à la Loi n° 2021-012 portant Code du travail.</p>
+
+  {{ art("Article 16 — Élection de domicile et exemplaires") }}
+  <p style="margin:0 0 8px;">Les parties élisent domicile aux adresses indiquées en tête du contrat. Le présent contrat est établi en trois (03) exemplaires originaux — un pour chaque partie — chaque page étant paraphée par les signataires.</p>
+
+  <p style="margin:16px 0 0;">Fait à {{ doc.lieu or 'Lomé' }}, le {{ doc.fait_le() or blk }}.</p>
+  <p style="margin:3px 0 12px;font-style:italic;font-size:10pt;">(*) La signature {{ a.du_dela }} stagiaire est précédée de la mention manuscrite « lu et approuvé ».</p>
+
+  {# ===================== SIGNATURES ===================== #}
+  <table style="width:100%;border-collapse:collapse;margin-top:6px;">
+    <tr style="vertical-align:top;text-align:center;">
+      <td style="width:33%;padding:0 6px;">
+        <div style="font-weight:bold;">{{ a.Le_La }} Stagiaire</div>
+        <div style="font-style:italic;font-size:9.5pt;">(« lu et approuvé »)</div>
+        {% if doc.signature_stagiaire_finale %}<img src="{{ doc.signature_stagiaire_finale }}" style="max-height:70px;max-width:180px;object-fit:contain;margin:4px 0;">{% else %}<div style="height:48px;border-bottom:1px solid #000;margin:12px 14px 4px;"></div>{% endif %}
+        <div style="font-style:italic;font-size:9.5pt;">Signature</div>
+      </td>
+      <td style="width:33%;padding:0 6px;">
+        <div style="font-weight:bold;">Le Maître de stage</div>
+        <div style="font-size:9.5pt;">{{ doc.maitre_stage_nom or '' }}</div>
+        <div style="height:48px;border-bottom:1px solid #000;margin:12px 14px 4px;"></div>
+        <div style="font-style:italic;font-size:9.5pt;">Signature</div>
+      </td>
+      <td style="width:34%;padding:0 6px;">
+        <div style="font-weight:bold;">Pour l'Entreprise</div>
+        <div style="font-size:9.5pt;">Le {{ doc.signataire_titre or 'Directeur Général' }}<br>{{ doc.signataire_nom or 'Prof. Yao AZOUMAH' }}</div>
+        {% if doc.signature_finale %}<img src="{{ doc.signature_finale }}" style="max-height:70px;max-width:180px;object-fit:contain;margin:4px 0;">{% else %}<div style="height:48px;border-bottom:1px solid #000;margin:12px 14px 4px;"></div>{% endif %}
+        <div style="font-style:italic;font-size:9.5pt;">Signature</div>
+      </td>
+    </tr>
+  </table>
+
+  <div style="margin-top:16px;">
+    <div style="font-weight:bold;">Pour {% if doc.type_garant == 'Tuteur Légal' %}le Tuteur Légal{% else %}l'Établissement de formation{% endif %} (le cas échéant)</div>
+    <div style="font-size:9.5pt;">{{ doc.garant_nom or '' }}</div>
+    <div style="height:44px;border-bottom:1px solid #000;margin:10px 0 4px;max-width:320px;"></div>
+    <div style="font-style:italic;font-size:9.5pt;">Nom, qualité et signature</div>
+  </div>
+
+  {# ===================== PIED DE PAGE OFFICIEL ===================== #}
+  <div style="margin-top:26px;border-top:2.5px solid #f5a623;padding-top:6px;text-align:center;font-size:9pt;color:#1c9e8e;">
+    +228 70 45 34 81 / 99 99 93 80&nbsp;&nbsp;|&nbsp;&nbsp;08 BP 81101 Agoè-Logopé, Lomé-TOGO&nbsp;&nbsp;|&nbsp;&nbsp;www.kya-energy.com
+  </div>
+</div>

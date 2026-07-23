@@ -339,6 +339,7 @@
   <div class="me-quick-actions" style="margin-bottom:16px;">
     <button class="me-btn" onclick="loadTeamDashboard()">📊 Dashboard Équipe</button>
     <button class="me-btn blue" onclick="loadTeamMembers()">👥 Mes Membres</button>
+    <a href="/equipe-effectifs" class="me-btn" style="background:#0e7c4a;">🗂️ Effectifs (modifier les fiches)</a>
     <button class="me-btn orange" onclick="showImportDialog()">📥 Importer Excel Évaluation</button>
     <a href="/app/plan-trimestriel?equipe={{ mes_equipes[0].name if mes_equipes else '' }}" class="me-btn" style="background:#7b1fa2;">📋 Plans Trimestriels</a>
   </div>
@@ -359,6 +360,16 @@
       <div class="card-title">{{ mon_equipe.nom_equipe }}</div>
       <div class="card-desc">{{ mon_equipe.departement }}{% if mon_equipe.chef_equipe_name %} · Chef : {{ mon_equipe.chef_equipe_name }}{% endif %}</div>
     </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ═══ Section : Mises à jour de ma fiche (suivi employé) ═══ -->
+{% if emp %}
+<div class="me-section" id="sec-ma-fiche">
+  <h2>🗂️ Mises à jour de ma fiche</h2>
+  <div id="ma-fiche-container" class="me-panel">
+    <div class="me-empty">Chargement…</div>
   </div>
 </div>
 {% endif %}
@@ -546,6 +557,35 @@ document.addEventListener("DOMContentLoaded", function() {
           html += '<p style="font-size:.85rem;color:#666;">Progression globale : <b>' + (r.message.stats.taux_moyen || 0) + '%</b></p>';
         }
         tasksEl.innerHTML = html;
+      }
+    });
+  }
+
+  // ── Mises à jour de ma fiche (suivi employé) ──
+  var mfEl = document.getElementById("ma-fiche-container");
+  if (mfEl) {
+    frappe.call({
+      method: "kya_hr.api.equipe_membres.mes_modifications",
+      args: {},
+      callback: function(r) {
+        var rows = (r.message || []);
+        if (!rows.length) {
+          mfEl.innerHTML = '<div class="me-empty">Aucune modification récente sur votre fiche.</div>';
+          return;
+        }
+        function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+        function dfr(s){ if(!s) return ''; var p=String(s).slice(0,10).split('-'); return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:s; }
+        var html = '<div class="me-list">';
+        rows.forEach(function(m) {
+          var isMut = m.type_modif === "Mutation";
+          html += '<div class="me-row" style="cursor:default;">'
+            + '<div><div class="me-row-title">' + (isMut ? '🔀 ' : '✏️ ') + esc(m.champ) + ' → <b>' + esc(m.nouvelle_valeur || '—') + '</b></div>'
+            + '<div class="me-row-sub">par ' + esc(m.modifie_par_nom || '') + (m.date_modif ? ' · ' + dfr(m.date_modif) : '') + '</div></div>'
+            + '<span class="me-status ' + (isMut ? 'ko' : 'ok') + '">' + esc(m.type_modif) + '</span></div>';
+        });
+        html += '</div>';
+        mfEl.innerHTML = html;
+        frappe.call({ method: "kya_hr.api.equipe_membres.marquer_vu", args: {} });
       }
     });
   }

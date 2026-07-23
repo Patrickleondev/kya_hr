@@ -25,21 +25,52 @@ class ArticleKYA(Document):
 
 
 @frappe.whitelist()
-def creer_ou_recuperer(designation, categorie=None, unite=None, type_article=None):
+def creer_ou_recuperer(designation, categorie=None, unite=None, type_article=None,
+                       type_stock=None, famille=None, groupe=None):
     """Retourne le `name` de l'Article portant cette désignation, en le créant si
     besoin. Utilisé par les imports / saisies pour ne jamais dupliquer un article
     et ne jamais demander de code. Idempotent sur la désignation (unique).
-    `type_article` est accepté mais ignoré (champ retiré — la catégorie suffit)."""
+    `type_article` est accepté mais ignoré (champ retiré — la catégorie suffit).
+
+    Classification (additive) : `type_stock` (Ingénierique/Industriel), `famille`
+    (Matière première/Produit fini), `groupe`. Sur un article DÉJÀ existant, on met
+    à jour ces champs s'ils sont fournis (permet de reclasser sans dupliquer) ;
+    sur un nouvel article, le défaut du doctype (Ingénierique) s'applique si non
+    précisé — jamais de valeur nulle."""
     designation = " ".join((designation or "").split())
     if not designation:
         frappe.throw("Désignation vide.")
     existing = frappe.db.get_value("Article KYA", {"designation": designation}, "name")
     if existing:
+        # Réimport / re-saisie : on reclasse l'article existant si une classification
+        # est fournie (sans jamais l'effacer avec du vide).
+        maj = {}
+        if type_stock:
+            maj["type_stock"] = type_stock
+        if famille:
+            maj["famille"] = famille
+        if groupe:
+            maj["groupe"] = groupe
+        if categorie:
+            maj["categorie"] = categorie
+        if maj:
+            frappe.db.set_value("Article KYA", existing, maj, update_modified=False)
         return existing
     doc = frappe.new_doc("Article KYA")
     doc.designation = designation
-    doc.categorie = categorie or _categorie_par_defaut()
+    # Catégorie facultative à la création (les articles industriels du fichier
+    # n'en ont pas). On la laisse VIDE plutôt que d'inventer un « Non classé »
+    # trompeur → l'éditeur de classement signale les articles à renseigner, et
+    # le magasin la remplit sur la plateforme (elle sert aussi aux sorties).
+    if categorie:
+        doc.categorie = categorie
     doc.unite = unite or "Unité"
+    if type_stock:
+        doc.type_stock = type_stock   # sinon défaut doctype = « Ingénierique »
+    if famille:
+        doc.famille = famille
+    if groupe:
+        doc.groupe = groupe
     doc.flags.ignore_permissions = True
     doc.insert()
     return doc.name

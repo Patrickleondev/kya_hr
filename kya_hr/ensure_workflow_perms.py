@@ -69,6 +69,24 @@ CREATE_GRANTS: dict[str, list[str]] = {
     # au DFC). Le doctype ne lui donnait aucun droit (que Comptable/DFC/DAAF)
     # → fiche coincée en Brouillon sans bouton. On l'aligne sur Brouillard.
     "Etat Recap Cheques": ["Caissier"],
+    # Planning de congé : réservé aux chefs d'équipe + RH (décision RH 20/07/2026).
+    # Les chefs saisissent surtout via /planning-equipe, mais on leur donne aussi
+    # le droit sur le form individuel ; la RH KYA porte le rôle « Responsable RH »
+    # (absent des perms JSON qui ne listaient que HR Manager/User) → on l'ajoute.
+    "Planning Conge": [
+        "Chef Service", "Chef Equipe", "Chef d'Équipe", "Supérieur Immédiat",
+        "Responsable RH", "HR Manager", "HR User",
+    ],
+}
+
+# ── Créations RETIRÉES (décision RH 20/07/2026) ──
+# Le planning de congé est saisi par le CHEF d'équipe (flux /planning-equipe,
+# qui insère avec ignore_permissions) et la RH. Un employé lambda ne crée plus
+# son planning individuel : on retire `create`+`write` au rôle Employee sur
+# Planning Conge (on garde `read`). Le web form individuel ne peut pas bloquer
+# le rendu de /new, mais le SUBMIT est refusé faute de droit `create`.
+REVOKE_CREATE: dict[str, list[str]] = {
+    "Planning Conge": ["Employee"],
 }
 
 
@@ -236,6 +254,39 @@ def _ensure_create_perm(doctype: str, role: str) -> str:
         return "error"
 
 
+def _revoke_create_perm(doctype: str, role: str) -> str:
+    """Retire create+write à un rôle sur un doctype KYA (via Custom DocPerm),
+    en GARDANT read. Idempotent. Sert à réserver la création à d'autres profils
+    (le flux d'équipe crée avec ignore_permissions, donc n'est pas affecté)."""
+    if not frappe.db.exists("Role", role):
+        return "role_missing"
+
+    from frappe.permissions import add_permission, update_permission_property
+
+    custom = frappe.db.get_value(
+        "Custom DocPerm",
+        {"parent": doctype, "role": role, "permlevel": 0},
+        ["name", "read", "write", "create"],
+        as_dict=True,
+    )
+    if custom and not custom.create and not custom.write and custom.read:
+        return "unchanged"
+    try:
+        if not custom:
+            add_permission(doctype, role, 0)
+        update_permission_property(doctype, role, 0, "create", "0")
+        update_permission_property(doctype, role, 0, "write", "0")
+        update_permission_property(doctype, role, 0, "read", "1")
+        return "updated" if custom else "created"
+    except Exception:
+        try:
+            frappe.log_error(frappe.get_traceback(),
+                             f"ensure_workflow_perms(revoke): {doctype}/{role}")
+        except Exception:
+            pass
+        return "error"
+
+
 def _repair_invalid_perms(doctype: str) -> int:
     """Repare les perms incoherentes (submit/cancel/amend sans write)."""
     repaired = 0
@@ -315,6 +366,16 @@ def execute() -> dict:
             action = _ensure_create_perm(doctype, role)
             summary["actions"][action] = summary["actions"].get(action, 0) + 1
             summary["create_grants"].append(f"{doctype} <- {role}:{action}")
+
+    # ── Créations RETIRÉES (réserver la saisie à d'autres profils) ──
+    summary["revoke_create"] = []
+    for doctype, roles in REVOKE_CREATE.items():
+        if not frappe.db.exists("DocType", doctype):
+            continue
+        for role in roles:
+            action = _revoke_create_perm(doctype, role)
+            summary["actions"][action] = summary["actions"].get(action, 0) + 1
+            summary["revoke_create"].append(f"{doctype} -/-> {role}:{action}")
 
     try:
         frappe.db.commit()

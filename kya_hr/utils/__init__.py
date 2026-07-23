@@ -112,6 +112,26 @@ def _below_thousand(n: int, plural_ok: bool = True) -> str:
     return f"{prefix} {_below_hundred(rest)}"
 
 
+_MOIS_FR = {
+    1: "janvier", 2: "février", 3: "mars", 4: "avril", 5: "mai", 6: "juin",
+    7: "juillet", 8: "août", 9: "septembre", 10: "octobre", 11: "novembre",
+    12: "décembre",
+}
+
+
+def date_fr(d) -> str:
+    """« 01 juillet 2026 » — date en français, INDÉPENDANTE de la locale/contexte
+    d'impression (frappe.utils.formatdate rend « July » hors print_language('fr'))."""
+    if not d:
+        return ""
+    try:
+        from frappe.utils import getdate
+        dt = getdate(d)
+    except Exception:
+        return ""
+    return "%02d %s %d" % (dt.day, _MOIS_FR.get(dt.month, ""), dt.year)
+
+
 def nombre_en_lettres(n, devise: str = "francs CFA") -> str:
     """Convertit un nombre entier en lettres françaises (Togo / FCFA).
 

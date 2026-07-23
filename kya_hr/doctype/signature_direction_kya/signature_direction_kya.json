@@ -1,0 +1,39 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "creation": "2026-07-23 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "signataire_nom",
+  "signataire_titre",
+  "column_break_1",
+  "signature",
+  "note_html"
+ ],
+ "fields": [
+  {"fieldname": "signataire_nom", "fieldtype": "Data", "label": "Nom du signataire (DG)", "default": "Prof. Yao Kétowoglo AZOUMAH"},
+  {"fieldname": "signataire_titre", "fieldtype": "Data", "label": "Titre", "default": "Directeur Général"},
+  {"fieldname": "column_break_1", "fieldtype": "Column Break"},
+  {"fieldname": "signature", "fieldtype": "Attach Image", "label": "Signature du DG (image)", "description": "Importez ici la signature du DG (PNG à fond transparent de préférence). Elle sera apposée automatiquement sur les documents validés lorsque « Utiliser la signature enregistrée » est coché."},
+  {"fieldname": "note_html", "fieldtype": "HTML", "options": "<div style='color:#64748b;font-size:12px;padding:8px 0'>Astuce : un PNG à fond transparent évite tout cadre/fond visible sur le PDF. Cette signature est réservée à la Direction et n'est utilisée que sur les documents RH validés.</div>"}
+ ],
+ "issingle": 1,
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-07-23 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "KYA HR",
+ "name": "Signature Direction KYA",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "Directeur Général", "read": 1, "write": 1},
+  {"role": "DGA", "read": 1, "write": 1},
+  {"role": "Responsable RH", "read": 1, "write": 1},
+  {"role": "HR Manager", "read": 1, "write": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -27,9 +27,19 @@
    "label": "Catégorie",
    "fieldtype": "Link",
    "options": "Categorie Article KYA",
-   "reqd": 1,
    "in_list_view": 1,
-   "in_standard_filter": 1
+   "in_standard_filter": 1,
+   "description": "Catégorie métier (Câbles, Batteries, Outillage…), utilisée aussi lors des sorties. Facultative à l'import, mais À RENSEIGNER sur la plateforme (éditeur de classement) — un article sans catégorie y est signalé."
+  },
+  {
+   "fieldname": "type_stock",
+   "label": "Type de stock",
+   "fieldtype": "Select",
+   "options": "Ingénierique\nIndustriel",
+   "default": "Ingénierique",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "description": "Ingénierique = matériel d'installation / projets. Industriel = fabrication / assemblage (matières premières + produits finis)."
   },
   {
    "fieldname": "col_1",
@@ -42,6 +52,23 @@
    "default": "Unité",
    "in_list_view": 1,
    "description": "Ex. : Unité, m (mètre), Boîte, Rouleau, Carton…"
+  },
+  {
+   "fieldname": "famille",
+   "label": "Famille (stock industriel)",
+   "fieldtype": "Select",
+   "options": "\nMatière première\nProduit fini",
+   "in_standard_filter": 1,
+   "depends_on": "eval:doc.type_stock=='Industriel'",
+   "description": "Uniquement pour le stock industriel : matière première d'assemblage ou produit fini."
+  },
+  {
+   "fieldname": "groupe",
+   "label": "Groupe / Section",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "depends_on": "eval:doc.type_stock=='Industriel'",
+   "description": "Regroupement d'assemblage : ex. Assemblage Batteries, Luminaire Type 2, Luminaire Communs…"
   },
   {
    "fieldname": "actif",

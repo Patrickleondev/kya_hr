@@ -2299,6 +2299,39 @@
       setTimeout(syncDocNumber, 1200);
     };
   }
+
+  /* ===== CASES À COCHER : retour visuel + champ dépendant IMMÉDIATS =========
+     Bug v16 (retour terrain) : cocher une case (« Mon chef de service est
+     absent », « Comptable absent »…) met bien à jour le modèle, MAIS le champ
+     dépendant qui doit apparaître (« Nom du chef intérimaire / précision »)
+     n'est révélé qu'au clic HORS du formulaire — Frappe ne ré-évalue les
+     depends_on qu'au blur suivant. L'utilisateur croit alors que la case n'a
+     pas été prise en compte. On force ici, DÈS le changement d'état de la case :
+       1) l'écriture de la valeur dans le modèle du web form,
+       2) la ré-évaluation des depends_on (le champ dépendant s'affiche),
+       3) le re-rendu de la case (le coché/décoché reste bien affiché).
+     Délégation au niveau document = couvre TOUTES les cases de TOUS les forms.
+     Jamais bloquant. */
+  document.addEventListener("change", function (e) {
+    var inp = e.target;
+    if (!inp || inp.type !== "checkbox") return;
+    var wrap = inp.closest && inp.closest("[data-fieldname]");
+    if (!wrap) return;
+    var fn = wrap.getAttribute("data-fieldname");
+    if (!fn) return;
+    var wf = window.frappe && frappe.web_form;
+    if (!wf) return;
+    try {
+      var val = inp.checked ? 1 : 0;
+      if (typeof wf.set_value === "function") wf.set_value(fn, val);
+      else if (wf.doc) wf.doc[fn] = val;
+      if (typeof wf.refresh_dependency === "function") wf.refresh_dependency();
+      var f = wf.fields_dict && wf.fields_dict[fn];
+      if (f && typeof f.refresh_input === "function") f.refresh_input();
+      else if (f && typeof f.refresh === "function") f.refresh();
+      inp.checked = !!val;   // garde le visuel en phase avec le modèle
+    } catch (err) { /* une case ne doit jamais casser le formulaire */ }
+  }, false);
 })();
 
 /* ===================================================================

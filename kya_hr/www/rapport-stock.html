@@ -1,0 +1,246 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Rapport de stock — revue hebdomadaire{% endblock %}
+
+{% block page_content %}
+<link rel="stylesheet" href="/assets/kya_hr/css/kya_dashboard.css">
+<style>
+.rs { max-width: 1240px; margin: 18px auto 60px; padding: 0 16px; color:#0f172a; }
+.rs h1 { font-size: 1.35rem; font-weight: 900; margin: 0; color:#0e7c4a; display:flex; align-items:center; gap:10px; }
+.rs .sub { color:#64748b; font-size:.82rem; margin-top:4px; }
+/* Barre de contrôle */
+.rs-ctl { display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end; margin:16px 0 6px;
+  background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:14px 16px; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+.rs-f { display:flex; flex-direction:column; gap:4px; }
+.rs-f label { font-size:.66rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:.5px; }
+.rs-f select, .rs-f input { border:1px solid #cbd5e1; border-radius:9px; padding:8px 11px; font-size:.9rem; min-width:220px; background:#fff; color:#0f172a; }
+.rs-btn { border:none; border-radius:9px; padding:9px 16px; font-weight:800; font-size:.85rem; cursor:pointer; }
+.rs-btn.p { background:#0e7c4a; color:#fff; } .rs-btn.p:hover{ background:#0b6a3f; }
+.rs-btn.x { background:#166534; color:#fff; } .rs-btn.x:hover{ background:#14532d; }
+.rs-btn.g { background:#eef2f7; color:#334155; } .rs-btn.g:hover{ background:#e2e8f0; }
+.rs-btn:disabled{ opacity:.55; cursor:progress; }
+/* KPIs */
+.rs-kpis { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:14px 0; }
+.rs-kpi { background:#fff; border-radius:14px; padding:13px 15px; border-left:5px solid #0e7c4a; box-shadow:0 1px 2px rgba(0,0,0,.05); }
+.rs-kpi .n { font-size:1.7rem; font-weight:900; color:#0e7c4a; line-height:1; }
+.rs-kpi .l { font-size:.66rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:.4px; margin-top:5px; }
+.rs-kpi.blue{border-left-color:#2563eb}.rs-kpi.blue .n{color:#2563eb}
+.rs-kpi.amber{border-left-color:#d97706}.rs-kpi.amber .n{color:#d97706}
+.rs-kpi.red{border-left-color:#dc2626}.rs-kpi.red .n{color:#dc2626}
+/* Table */
+.rs-tw { background:#fff; border:1px solid #e2e8f0; border-radius:14px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.05); }
+.rs-scroll { overflow-x:auto; }
+table.rs-t { width:100%; border-collapse:collapse; font-size:.85rem; min-width:900px; }
+.rs-t thead th { background:#0e7c4a; color:#fff; text-align:left; padding:10px 12px; font-size:.7rem; text-transform:uppercase; letter-spacing:.4px; white-space:nowrap; }
+.rs-t thead th.num { text-align:right; }
+.rs-t tbody td { padding:9px 12px; border-bottom:1px solid #eef2f7; vertical-align:middle; }
+.rs-t tbody tr:nth-child(even){ background:#f8fafc; }
+.rs-t tbody tr:hover{ background:#f0fdf4; }
+.rs-t td.num { text-align:right; font-variant-numeric:tabular-nums; font-weight:700; }
+.rs-t td.des { font-weight:600; color:#1e293b; }
+.rs-t .rownum { color:#94a3b8; text-align:right; }
+.rs-ec { font-weight:800; font-variant-numeric:tabular-nums; }
+.rs-ec.up{ color:#166534; } .rs-ec.down{ color:#b91c1c; } .rs-ec.flat{ color:#94a3b8; }
+tr.alert td { background:#fff7ed !important; }
+.pill { display:inline-block; padding:2px 9px; border-radius:11px; font-size:.66rem; font-weight:800; text-transform:uppercase; letter-spacing:.3px; }
+.pill.ok{ background:#dcfce7; color:#166534; } .pill.cmd{ background:#fef3c7; color:#92400e; }
+.pill.rup{ background:#fee2e2; color:#991b1b; } .pill.vide{ background:#e2e8f0; color:#475569; }
+.rs-empty{ text-align:center; padding:30px; color:#94a3b8; }
+.rs-note{ font-size:.72rem; color:#94a3b8; margin-top:8px; }
+.rs-pager{ display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap;
+  padding:10px; border-top:1px solid #eef2f7; font-size:.82rem; }
+.rs-pager .info{ color:#475569; font-weight:600; font-variant-numeric:tabular-nums; }
+.rs-pg{ border:1px solid #cbd5e1; background:#fff; color:#0f172a; border-radius:8px; padding:7px 14px;
+  font-size:.82rem; font-weight:700; cursor:pointer; }
+.rs-pg:hover:not(:disabled){ background:#f1f5f9; } .rs-pg:disabled{ opacity:.45; cursor:default; }
+@media print { .rs-pager{ display:none !important; } }
+@media print {
+  .rs-ctl, .rs-note, .web-footer, .navbar, .page-header { display:none !important; }
+  .rs-tw { box-shadow:none; border:1px solid #cbd5e1; }
+  .rs-t thead th { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+}
+@media (max-width:640px){ .rs-kpis{ grid-template-columns:repeat(2,1fr); } .rs-f select,.rs-f input{ min-width:160px; } }
+</style>
+
+<div class="rs">
+  <h1><span>📊</span> Rapport de stock</h1>
+  <div class="sub">Revue hebdomadaire par magasin — comparaison avec l'état de la semaine précédente. Exportable en Excel.</div>
+
+  <div class="rs-ctl">
+    <div class="rs-f">
+      <label for="rs-mag">Magasin</label>
+      <select id="rs-mag" onchange="charger()"></select>
+    </div>
+    <div class="rs-f">
+      <label for="rs-date">Comparer à l'état du</label>
+      <input type="date" id="rs-date" onchange="charger()">
+    </div>
+    <div class="rs-f">
+      <label for="rs-type">Type de stock</label>
+      <select id="rs-type" onchange="charger()">
+        <option value="">Tous les types</option>
+        <option value="Ingénierique">Ingénierique</option>
+        <option value="Industriel">Industriel</option>
+      </select>
+    </div>
+    <button class="rs-btn p" onclick="charger()">🔄 Actualiser</button>
+    <button class="rs-btn x" id="rs-xls" onclick="exporter()">⬇ Export Excel</button>
+    <button class="rs-btn g" onclick="window.print()">🖨 Imprimer</button>
+  </div>
+
+  <div class="rs-kpis" id="rs-kpis"></div>
+
+  <div class="rs-tw">
+    <div class="rs-scroll">
+      <table class="rs-t">
+        <thead>
+          <tr>
+            <th class="num">N°</th>
+            <th>Désignation</th>
+            <th class="num">Qté Total</th>
+            <th class="num">Qté avant<br><small style="font-weight:600;opacity:.85">(sem. passée)</small></th>
+            <th class="num">Qté actuelle</th>
+            <th class="num">Écart</th>
+            <th class="num">Stock de sécurité</th>
+            <th class="num">Seuil de commande</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody id="rs-body">
+          <tr><td colspan="9" class="rs-empty">Chargement…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="rs-note" id="rs-note"></div>
+</div>
+
+<script>
+let LAST = null;
+
+function fmt(v){ if(v===null||v===undefined) return '0'; const n=Math.round(v*1000)/1000; return (n%1===0)? n.toLocaleString('fr-FR') : n.toLocaleString('fr-FR'); }
+function pill(s){
+  if(s==='RUPTURE') return '<span class="pill rup">Rupture</span>';
+  if(s==='A COMMANDER') return '<span class="pill cmd">À commander</span>';
+  if(s==='REFERENCE VIDE') return '<span class="pill vide">Vide</span>';
+  return '<span class="pill ok">OK</span>';
+}
+function kpi(cls,n,l){ return '<div class="rs-kpi '+cls+'"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>'; }
+
+async function initMagasins(){
+  const sel = document.getElementById('rs-mag');
+  let mags = [];
+  try { mags = (await frappe.call({method:'kya_hr.api.stock_kya.magasins'})).message || []; } catch(e){}
+  let opts = '<option value="">— Tous les magasins —</option>';
+  mags.forEach(m => { opts += '<option value="'+m.name+'">'+(m.warehouse_name||m.name)+'</option>'; });
+  sel.innerHTML = opts;
+  // Date de référence par défaut : il y a 7 jours.
+  const d = new Date(); d.setDate(d.getDate()-7);
+  document.getElementById('rs-date').value = d.toISOString().slice(0,10);
+}
+
+// Pagination de la table du rapport (50 lignes/page). rowFn(ligne, indexAbsolu).
+let RS_PAGE = 1;
+function rsPage(rows, rowFn){
+  const per = 50, body = document.getElementById('rs-body');
+  const total = rows.length, pages = Math.max(1, Math.ceil(total/per));
+  if(RS_PAGE > pages) RS_PAGE = pages; if(RS_PAGE < 1) RS_PAGE = 1;
+  const scroll = body.closest('.rs-scroll'), wrap = scroll.parentNode;
+  let pager = wrap.querySelector('.rs-pager');
+  function draw(){
+    if(!total){ body.innerHTML = '<tr><td colspan="9" class="rs-empty">Aucun stock pour ce magasin.</td></tr>'; }
+    else { const s=(RS_PAGE-1)*per; body.innerHTML = rows.slice(s, s+per).map((l,k)=>rowFn(l, s+k)).join(''); }
+    if(!pager){ pager = document.createElement('div'); pager.className = 'rs-pager'; wrap.appendChild(pager); }
+    if(total <= per){ pager.style.display='none'; pager.innerHTML=''; return; }
+    pager.style.display='';
+    const s=(RS_PAGE-1)*per, e=Math.min(total, s+per);
+    pager.innerHTML =
+      '<button class="rs-pg" '+(RS_PAGE<=1?'disabled':'')+' data-a="prev">‹ Précédent</button>'
+      + '<span class="info">'+(s+1)+'–'+e+' sur '+total+'</span>'
+      + '<button class="rs-pg" '+(RS_PAGE>=pages?'disabled':'')+' data-a="next">Suivant ›</button>';
+    pager.querySelectorAll('.rs-pg').forEach(b=>b.onclick=()=>{
+      if(b.dataset.a==='prev'&&RS_PAGE>1) RS_PAGE--;
+      else if(b.dataset.a==='next'&&RS_PAGE<pages) RS_PAGE++;
+      draw(); scroll.scrollIntoView({block:'nearest'});
+    });
+  }
+  draw();
+}
+
+async function charger(){
+  const magasin = document.getElementById('rs-mag').value;
+  const date_ref = document.getElementById('rs-date').value;
+  const type_stock = document.getElementById('rs-type').value;
+  const body = document.getElementById('rs-body');
+  RS_PAGE = 1;   // nouveau filtre → repartir de la 1re page
+  body.innerHTML = '<tr><td colspan="9" class="rs-empty">Chargement…</td></tr>';
+  let r;
+  try {
+    r = (await frappe.call({method:'kya_hr.api.stock_kya.rapport_hebdomadaire',
+          args:{magasin:magasin||undefined, date_ref:date_ref||undefined, type_stock:type_stock||undefined}})).message;
+  } catch(e){
+    body.innerHTML = '<tr><td colspan="9" class="rs-empty">Accès réservé au magasin / stock, ou erreur de chargement.</td></tr>';
+    return;
+  }
+  LAST = r;
+  const t = r.totaux || {};
+  const net = t.ecart_net || 0;
+  const netCls = net>0?'blue':(net<0?'red':'');
+  const netTxt = (net>0?'+':'')+fmt(net);
+  document.getElementById('rs-kpis').innerHTML =
+      kpi('', t.references||0, 'Références en stock')
+    + kpi('blue', fmt(t.qte_totale||0), 'Quantité totale (physique)')
+    + kpi(netCls, netTxt, 'Écart net de la semaine')
+    + kpi((t.a_commander>0?'amber':''), t.a_commander||0, 'À commander / rupture');
+
+  const lignes = r.lignes || [];
+  rsPage(lignes, (l, i) => {
+      const ec = l.ecart||0;
+      const ecCls = ec>0?'up':(ec<0?'down':'flat');
+      const ecTxt = (ec>0?'+':'')+fmt(ec);
+      const alert = (l.statut==='RUPTURE'||l.statut==='A COMMANDER') ? ' class="alert"' : '';
+      return '<tr'+alert+'>'
+        + '<td class="rownum">'+(i+1)+'</td>'
+        + '<td class="des">'+frappe.utils.escape_html(l.designation||l.item)+'</td>'
+        + '<td class="num">'+fmt(l.qte_totale)+'</td>'
+        + '<td class="num">'+fmt(l.qte_avant)+'</td>'
+        + '<td class="num">'+fmt(l.qte_actuelle)+'</td>'
+        + '<td class="num"><span class="rs-ec '+ecCls+'">'+ecTxt+'</span></td>'
+        + '<td class="num">'+fmt(l.stock_securite)+'</td>'
+        + '<td class="num">'+fmt(l.seuil_commande)+'</td>'
+        + '<td>'+pill(l.statut)+'</td>'
+        + '</tr>';
+    });
+  const dref = r.date_ref ? r.date_ref.split('-').reverse().join('/') : '';
+  document.getElementById('rs-note').textContent =
+    r.magasin_label + ' — édité le ' + (r.genere_le||'').split('-').reverse().join('/')
+    + ', comparé à l’état du ' + dref
+    + '. « Qté Total » = tout le physique (bon état + à réparer + défectueux). '
+    + '« Qté avant/actuelle » = disponible (bon état). « Écart » = actuelle − avant.';
+}
+
+async function exporter(){
+  const btn = document.getElementById('rs-xls'); btn.disabled = true;
+  try {
+    const magasin = document.getElementById('rs-mag').value;
+    const date_ref = document.getElementById('rs-date').value;
+    const type_stock = document.getElementById('rs-type').value;
+    const r = (await frappe.call({method:'kya_hr.api.stock_kya.export_rapport_hebdo_xlsx',
+          args:{magasin:magasin||undefined, date_ref:date_ref||undefined, type_stock:type_stock||undefined}})).message;
+    if(r && r.content_base64) dlB64(r.content_base64, r.filename);
+  } catch(e){ frappe.msgprint && frappe.msgprint('Export impossible.'); }
+  btn.disabled = false;
+}
+
+function dlB64(b64, name){
+  const bin = atob(b64); const arr = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) arr[i] = bin.charCodeAt(i);
+  const u = URL.createObjectURL(new Blob([arr],
+      {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+  const a = document.createElement('a'); a.href = u; a.download = name; a.click();
+  URL.revokeObjectURL(u);
+}
+
+frappe.ready(async function(){ await initMagasins(); await charger(); });
+</script>
+{% endblock %}

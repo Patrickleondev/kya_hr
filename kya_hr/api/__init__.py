@@ -172,6 +172,17 @@ ALLOWED_DOCTYPES = {
     # Brouillon). La caissière/rédactrice ne pouvait pas soumettre son état.
     "Etat Recap Cheques",
     "Brouillard Caisse",
+    # Fiche d'inventaire numérique : le responsable inventaire / magasin
+    # validait via le desk faute de boutons sur la fiche. Sans cette entrée,
+    # get_kya_workflow_actions renvoyait [] et la fiche restait en « Brouillon ».
+    "Inventaire KYA",
+    # Documents RH (certificats / attestations) : circuit RH → DG piloté depuis
+    # la page /documents-rh (boutons « Envoyer au DG » / « Signer »).
+    "Document RH KYA",
+    # Avenant au contrat de travail : circuit RH → DG (page /avenants-rh).
+    "Avenant Contrat KYA",
+    # Contrat de stage d'immersion : circuit RH → DG (page /contrats-immersion).
+    "Contrat Stage Immersion KYA",
 }
 
 

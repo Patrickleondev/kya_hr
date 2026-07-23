@@ -1,0 +1,123 @@
+<div style="font-family:'Arial Narrow','Arial Nova Cond',Arial,sans-serif;color:#000;max-width:720px;margin:0 auto;font-size:12pt;line-height:1.5;">
+
+  {# ===================== EN-TÊTE OFFICIEL KYA ===================== #}
+  <table style="width:100%;border-collapse:collapse;margin-bottom:2px;">
+    <tr>
+      <td style="width:150px;vertical-align:middle;">
+        <img src="/assets/kya_hr/images/logo_kya.png" style="width:140px;height:auto;" alt="KYA-Energy Group">
+      </td>
+      <td style="text-align:right;vertical-align:middle;font-size:9.5pt;line-height:1.35;color:#000;">
+        <div style="font-style:italic;font-weight:bold;color:#1c9e8e;font-size:11pt;">KYA, move beyond the sky!</div>
+        <div>info@kya-energy.com</div>
+        <div>N°&nbsp;RCCM&nbsp;: TG-LOM 2015 B 975</div>
+        <div>NIF&nbsp;: 1000430317 &nbsp;|&nbsp; CNSS&nbsp;: 48863</div>
+      </td>
+    </tr>
+  </table>
+  <div style="border-bottom:2.5px solid #1c9e8e;margin-bottom:24px;"></div>
+
+  {# ===================== accords en genre ===================== #}
+  {% set civl = (doc.civilite or '') | lower %}
+  {% set fem = (civl in ['mme','mme.','madame','mlle','mlle.','mademoiselle']) or ((doc.gender or '') | lower == 'female') %}
+  {% set CIV = doc.civilite or ('Mme' if fem else 'M.') %}
+  {% set EMP = 'Employée' if fem else 'Employé' %}
+  {% set DEN = 'dénommée' if fem else 'dénommé' %}
+
+  {# ===================== TITRE ===================== #}
+  <div style="text-align:center;font-weight:bold;text-decoration:underline;font-size:15pt;letter-spacing:.5px;margin:4px 0 6px;text-transform:uppercase;">
+    Avenant au contrat de travail
+  </div>
+  <div style="text-align:center;font-size:11pt;margin-bottom:2px;">
+    {% if doc.num_avenant %}{{ doc.num_avenant }}{% endif %}{% if doc.reference %} — Réf. {{ doc.reference }}{% endif %}
+  </div>
+  {% if doc.objet %}<div style="text-align:center;font-style:italic;margin-bottom:18px;">Objet : {{ doc.objet }}</div>{% else %}<div style="margin-bottom:14px;"></div>{% endif %}
+
+  {# ===================== VU ===================== #}
+  {% set visas = doc.get_visas() %}
+  {% if visas %}
+  <p style="margin:0 0 4px;font-weight:bold;">VU :</p>
+  <ul style="margin:0 0 16px 18px;">
+    {% for v in visas %}<li style="margin:2px 0;text-align:justify;">{{ v }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+
+  {# ===================== ENTRE LES SOUSSIGNÉS ===================== #}
+  <p style="margin:0 0 4px;font-weight:bold;">ENTRE LES SOUSSIGNÉS :</p>
+  <p style="text-align:justify;margin:0 0 12px;">
+    <b>KYA-Energy&nbsp;Group</b>, ayant son siège social à Lomé, quartier Agoè Anokui, 08 BP 81101,
+    Lomé – Togo, représentée par son Directeur Général, <b>{{ doc.signataire_nom or 'Prof. Yao K. AZOUMAH' }}</b>,
+    ci-après dénommée «&nbsp;<b><i>L'EMPLOYEUR</i></b>&nbsp;», d'une part ;
+  </p>
+  <p style="margin:0 0 8px;font-weight:bold;">ET</p>
+  <p style="text-align:justify;margin:0 0 14px;">
+    <b>{{ CIV }} {{ doc.beneficiaire_nom or '' }}</b>, matricule CNSS n°&nbsp;{{ doc.matricule_cnss or '……………………' }},
+    demeurant à {{ doc.domicile or '……………………' }}, ci-après dénommé{{ 'e' if fem else '' }} «&nbsp;<b><i>L'{{ EMP | upper }}</i></b>&nbsp;», d'autre part ;
+  </p>
+
+  {# ===================== PRÉAMBULE ===================== #}
+  {% if doc.preambule %}
+  <p style="margin:0 0 4px;font-weight:bold;">PRÉAMBULE</p>
+  {% for ln in doc.preambule.split('\n') %}{% if ln.strip() %}<p style="text-align:justify;margin:0 0 10px;">{{ doc.render_corps_line(ln.strip()) }}</p>{% endif %}{% endfor %}
+  <p style="margin:0 0 14px;">Il a été convenu ce qui suit :</p>
+  {% endif %}
+
+  {# ===================== ARTICLES ===================== #}
+  {% set articles = doc.get_articles() %}
+  {% for a in articles %}
+    <p style="margin:12px 0 4px;font-weight:bold;">{{ a.titre }}</p>
+    {% set lines = (a.corps or '').split('\n') %}
+    {% set ns = namespace(inlist=false) %}
+    {% for ln in lines %}
+      {% set s = ln.strip() %}
+      {% if s.startswith('- ') or s.startswith('• ') %}
+        {% if not ns.inlist %}<ul style="margin:4px 0 8px 18px;">{% set ns.inlist = true %}{% endif %}
+        <li style="margin:3px 0;text-align:justify;">{{ doc.render_corps_line(s[2:]) }}</li>
+      {% else %}
+        {% if ns.inlist %}</ul>{% set ns.inlist = false %}{% endif %}
+        {% if s %}<p style="text-align:justify;margin:0 0 8px;">{{ doc.render_corps_line(s) }}</p>{% endif %}
+      {% endif %}
+    {% endfor %}
+    {% if ns.inlist %}</ul>{% endif %}
+  {% endfor %}
+
+  {# ===================== LIEU / DATE ===================== #}
+  <p style="margin:22px 0 0;">
+    Fait à {{ doc.lieu or 'Lomé' }}, le {{ doc.fait_le() or "……………………" }}.
+  </p>
+  {% if doc.mention_lu_approuve %}
+  <p style="margin:4px 0 0;font-style:italic;font-size:10pt;">(*) La signature de l'{{ EMP }} est précédée de la mention manuscrite « lu et approuvé ».</p>
+  {% endif %}
+
+  {# ===================== SIGNATURES ===================== #}
+  <table style="width:100%;border-collapse:collapse;margin-top:18px;">
+    <tr style="vertical-align:top;">
+      <td style="width:50%;text-align:center;padding:0 10px;">
+        <div style="font-weight:bold;">L'{{ EMP }}</div>
+        <div>{{ CIV }} {{ doc.beneficiaire_nom or '' }}</div>
+        {% if doc.mention_lu_approuve %}<div style="font-style:italic;font-size:10pt;">(« lu et approuvé »)</div>{% endif %}
+        {% if doc.signature_employe_finale %}
+          <img src="{{ doc.signature_employe_finale }}" style="max-height:80px;max-width:220px;object-fit:contain;margin:4px 0;">
+        {% else %}
+          <div style="height:56px;border-bottom:1px solid #000;margin:14px 24px 4px;"></div>
+        {% endif %}
+        <div style="font-style:italic;font-size:10pt;">Signature</div>
+      </td>
+      <td style="width:50%;text-align:center;padding:0 10px;">
+        <div style="font-weight:bold;">Pour l'Employeur</div>
+        <div>Le {{ doc.signataire_titre or 'Directeur Général' }}</div>
+        <div>{{ doc.signataire_nom or 'Prof. Yao K. AZOUMAH' }}</div>
+        {% if doc.signature_finale %}
+          <img src="{{ doc.signature_finale }}" style="max-height:80px;max-width:220px;object-fit:contain;margin:4px 0;">
+        {% else %}
+          <div style="height:56px;border-bottom:1px solid #000;margin:14px 24px 4px;"></div>
+        {% endif %}
+        <div style="font-style:italic;font-size:10pt;">Signature</div>
+      </td>
+    </tr>
+  </table>
+
+  {# ===================== PIED DE PAGE OFFICIEL ===================== #}
+  <div style="margin-top:34px;border-top:2.5px solid #f5a623;padding-top:6px;text-align:center;font-size:9pt;color:#1c9e8e;">
+    +228 70 45 34 81 / 99 99 93 80&nbsp;&nbsp;|&nbsp;&nbsp;08 BP 81101 Agoè-Logopé, Lomé-TOGO&nbsp;&nbsp;|&nbsp;&nbsp;www.kya-energy.com
+  </div>
+</div>

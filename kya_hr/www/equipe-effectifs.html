@@ -1,0 +1,186 @@
+{% extends "templates/web.html" %}
+{% block title %}Effectifs de mon équipe — KYA Energy{% endblock %}
+
+{% block head_include %}
+<style>
+  .ee { max-width:1180px; margin:18px auto 70px; padding:0 16px; color:#0f172a; }
+  .ee h1 { font-size:1.4rem; font-weight:900; margin:0; color:#0e7c4a; display:flex; align-items:center; gap:10px; }
+  .ee .sub { color:#64748b; font-size:.84rem; margin-top:4px; }
+  .ee-top { display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap; margin-top:6px; }
+  .card { background:#fff; border:1px solid #e2e8f0; border-radius:16px; box-shadow:0 1px 3px rgba(0,0,0,.05); margin-top:18px; overflow:hidden; }
+  .team-head { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 18px; background:linear-gradient(135deg,#e7f5ee,#f0fdf7); border-bottom:1px solid #e2e8f0; }
+  .team-head h2 { font-size:1rem; font-weight:800; margin:0; color:#0f172a; }
+  .team-head .meta { font-size:.76rem; color:#64748b; }
+  .team-head .cnt { font-size:.68rem; font-weight:800; color:#0e7c4a; background:#fff; border:1px solid #cfe9dc; padding:3px 10px; border-radius:20px; }
+  table.tbl { width:100%; border-collapse:collapse; font-size:.85rem; }
+  .tbl thead th { background:#f8fafc; color:#374151; text-align:left; font-size:.66rem; text-transform:uppercase; letter-spacing:.4px; padding:9px 12px; border-bottom:1px solid #e5e7eb; }
+  .tbl tbody td { padding:10px 12px; border-bottom:1px solid #f1f3f2; vertical-align:top; }
+  .tbl tbody tr:hover { background:#f8fbff; }
+  .memb { display:flex; align-items:center; gap:9px; }
+  .memb .av { width:32px; height:32px; border-radius:50%; background:#e0f2f1; display:flex; align-items:center; justify-content:center; overflow:hidden; flex:0 0 auto; }
+  .memb .av img { width:100%; height:100%; object-fit:cover; }
+  .memb .nm { font-weight:700; } .memb .mx { font-size:.72rem; color:#94a3b8; font-family:monospace; }
+  .muted { color:#cbd5e1; }
+  .btn { border:none; border-radius:9px; padding:7px 13px; font-weight:800; font-size:.78rem; cursor:pointer; }
+  .btn.p { background:#0e7c4a; color:#fff; } .btn.p:hover{ background:#0b6a3f; }
+  .btn.edit { background:#eef6ff; color:#1d4ed8; border:1px solid #dbeafe; }
+  .btn.ghost { background:#fff; color:#0f172a; border:1px solid #cbd5e1; }
+  .empty { text-align:center; color:#94a3b8; padding:26px; }
+  /* modale */
+  .ov { position:fixed; inset:0; background:rgba(15,23,42,.45); display:none; align-items:flex-start; justify-content:center; z-index:9999; padding:40px 14px; overflow:auto; }
+  .ov.open { display:flex; }
+  .modal { background:#fff; border-radius:16px; width:100%; max-width:540px; box-shadow:0 20px 50px rgba(0,0,0,.3); }
+  .modal .mh { padding:16px 20px; border-bottom:1px solid #eef2f7; display:flex; justify-content:space-between; align-items:center; }
+  .modal .mh h3 { margin:0; font-size:1rem; font-weight:800; }
+  .modal .mb { padding:18px 20px; }
+  .modal .mf { padding:14px 20px; border-top:1px solid #eef2f7; display:flex; justify-content:flex-end; gap:8px; }
+  .fld { margin-bottom:13px; }
+  .fld label { display:block; font-size:.68rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:.4px; margin-bottom:4px; }
+  .fld input, .fld textarea { width:100%; border:1px solid #cbd5e1; border-radius:9px; padding:9px 11px; font-size:.9rem; }
+  .fld textarea { min-height:60px; resize:vertical; }
+  .ro { background:#f8fafc; border-radius:9px; padding:9px 11px; font-size:.85rem; color:#475569; }
+  .histo { margin-top:6px; max-height:160px; overflow:auto; border-top:1px dashed #e2e8f0; padding-top:8px; }
+  .histo .h { font-size:.76rem; color:#475569; padding:5px 0; border-bottom:1px solid #f1f5f9; }
+  .histo .h b { color:#0f172a; } .histo .tg { font-size:.62rem; font-weight:800; padding:1px 6px; border-radius:10px; }
+  .tg.info { background:#e7f5ee; color:#0e7c4a; } .tg.mut { background:#fef3c7; color:#92400e; }
+  .msg { font-size:.82rem; } .msg.ok{ color:#166534; } .msg.err{ color:#b91c1c; }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="ee">
+  {% if no_access %}
+    <h1>👥 Effectifs de mon équipe</h1>
+    <div class="card"><div class="empty">Cet espace est réservé aux chefs d'équipe, à la RH et à la Direction.</div></div>
+  {% else %}
+  <div class="ee-top">
+    <div>
+      <h1>👥 Effectifs {% if is_rh and not is_chef %}des équipes{% else %}de mon équipe{% endif %}</h1>
+      <div class="sub">
+        {% if is_rh %}Vue Direction/RH — détail par équipe et par employé. Le chef renseigne le rôle, les compétences et ses notes.
+        {% else %}Renseignez le rôle, les compétences et vos notes pour chaque membre. Chaque mise à jour notifie l'intéressé et remonte à la Direction.{% endif %}
+      </div>
+    </div>
+    {% if is_rh %}
+    <button class="btn ghost" id="ee-consignes">✉️ Envoyer les consignes aux chefs</button>
+    {% endif %}
+  </div>
+
+  <div id="ee-teams"><div class="card"><div class="empty">Chargement…</div></div></div>
+  {% endif %}
+</div>
+
+<!-- Modale d'édition -->
+<div class="ov" id="ee-ov">
+  <div class="modal">
+    <div class="mh"><h3 id="m-title">Fiche membre</h3><button class="btn ghost" onclick="closeModal()">✕</button></div>
+    <div class="mb">
+      <div class="fld"><label>Poste / Fonction (RH)</label><div class="ro" id="m-poste">—</div></div>
+      <div id="m-fields"></div>
+      <div class="histo" id="m-histo"></div>
+    </div>
+    <div class="mf">
+      <span class="msg" id="m-msg" style="margin-right:auto;"></span>
+      <button class="btn ghost" onclick="closeModal()">Annuler</button>
+      <button class="btn p" id="m-save">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var IS_RH = {{ 'true' if is_rh else 'false' }};
+var CHAMPS = [];
+var CUR = null;
+
+function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function dfr(s){ if(!s) return ''; var p=String(s).slice(0,10).split('-'); return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:s; }
+
+function loadBoard(){
+  frappe.call({method:'kya_hr.api.equipe_membres.get_board',
+    callback:function(r){
+      var d=r.message||{}; CHAMPS=d.champs||[]; var host=document.getElementById('ee-teams');
+      if(!d.teams||!d.teams.length){ host.innerHTML='<div class="card"><div class="empty">Aucune équipe à afficher.</div></div>'; return; }
+      host.innerHTML = d.teams.map(renderTeam).join('');
+    }});
+}
+
+function renderTeam(t){
+  var eq=t.equipe, membres=t.membres||[];
+  var head='<div class="team-head"><div><h2>🏢 '+esc(eq.nom_equipe||eq.name)+'</h2>'+
+    '<div class="meta">'+esc(eq.departement||'')+(eq.chef_equipe_name?(' · Chef : '+esc(eq.chef_equipe_name)):'')+'</div></div>'+
+    '<span class="cnt">'+membres.length+' membre'+(membres.length>1?'s':'')+'</span></div>';
+  if(!membres.length) return '<div class="card">'+head+'<div class="empty">Aucun membre actif.</div></div>';
+  var rows=membres.map(function(m){
+    var av=m.image?('<img src="'+esc(m.image)+'">'):'👤';
+    return '<tr>'+
+      '<td><div class="memb"><div class="av">'+av+'</div><div><div class="nm">'+esc(m.employee_name)+'</div>'+
+        '<div class="mx">'+esc(m.custom_matricule_kya||m.name)+'</div></div></div></td>'+
+      '<td>'+esc(m.designation||'')+'</td>'+
+      '<td>'+(m.custom_role_equipe?esc(m.custom_role_equipe):'<span class="muted">—</span>')+'</td>'+
+      '<td>'+(m.custom_competences?esc(m.custom_competences):'<span class="muted">—</span>')+'</td>'+
+      '<td>'+(m.custom_notes_chef?esc(m.custom_notes_chef):'<span class="muted">—</span>')+'</td>'+
+      '<td style="text-align:right;"><button class="btn edit" onclick="openModal(\''+esc(m.name)+'\')">✏️ Modifier</button></td>'+
+    '</tr>';
+  }).join('');
+  return '<div class="card">'+head+
+    '<div style="overflow-x:auto;"><table class="tbl"><thead><tr>'+
+    '<th>Membre</th><th>Poste</th><th>Rôle dans l\'équipe</th><th>Compétences</th><th>Notes du chef</th><th></th>'+
+    '</tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+}
+
+function openModal(emp){
+  document.getElementById('m-msg').textContent='';
+  frappe.call({method:'kya_hr.api.equipe_membres.get_membre_fiche', args:{employee:emp},
+    callback:function(r){
+      var d=r.message; if(!d) return; CUR=emp; var v=d.valeurs||{};
+      document.getElementById('m-title').textContent='Fiche : '+(v.employee_name||emp);
+      document.getElementById('m-poste').textContent=v.designation||'—';
+      document.getElementById('m-fields').innerHTML=(d.champs||CHAMPS).map(function(c){
+        var val=v[c.fieldname]||'';
+        var ctrl = c.type==='Data'
+          ? '<input id="f-'+c.fieldname+'" value="'+esc(val)+'">'
+          : '<textarea id="f-'+c.fieldname+'">'+esc(val)+'</textarea>';
+        return '<div class="fld"><label>'+esc(c.label)+'</label>'+ctrl+'</div>';
+      }).join('');
+      var h=d.historique||[];
+      document.getElementById('m-histo').innerHTML = h.length
+        ? ('<div style="font-size:.68rem;font-weight:800;color:#64748b;text-transform:uppercase;margin-bottom:4px;">Historique</div>'+
+           h.map(function(x){ return '<div class="h"><span class="tg '+(x.type_modif==='Mutation'?'mut':'info')+'">'+esc(x.type_modif)+'</span> '+
+             '<b>'+esc(x.champ)+'</b> → '+esc(x.nouvelle_valeur||'—')+' <span style="color:#94a3b8;">· '+esc(x.modifie_par_nom||'')+' · '+dfr(x.date_modif)+'</span></div>'; }).join(''))
+        : '';
+      document.getElementById('ee-ov').classList.add('open');
+    }});
+}
+function closeModal(){ document.getElementById('ee-ov').classList.remove('open'); CUR=null; }
+
+function saveModal(){
+  if(!CUR) return; var btn=document.getElementById('m-save'), msg=document.getElementById('m-msg');
+  var vals={}; (CHAMPS).forEach(function(c){ var el=document.getElementById('f-'+c.fieldname); if(el) vals[c.fieldname]=el.value; });
+  btn.disabled=true; msg.className='msg'; msg.textContent='Enregistrement…';
+  frappe.call({method:'kya_hr.api.equipe_membres.update_membre_info', args:{employee:CUR, values:JSON.stringify(vals)},
+    callback:function(r){ btn.disabled=false;
+      var m=r.message||{};
+      if(m.updated){ msg.className='msg ok'; msg.textContent='✔ '+m.updated+' champ(s) mis à jour — l\'employé est notifié.';
+        setTimeout(function(){ closeModal(); loadBoard(); }, 900); }
+      else { msg.className='msg ok'; msg.textContent='Aucun changement.'; }
+    },
+    error:function(){ btn.disabled=false; msg.className='msg err'; msg.textContent='Échec de l\'enregistrement.'; }});
+}
+
+function consignes(){
+  frappe.prompt([{fieldtype:'Small Text', fieldname:'note', label:'Message complémentaire (optionnel)'}],
+    function(v){ frappe.call({method:'kya_hr.api.equipe_membres.envoyer_consignes_chefs', args:{message_perso:v.note||''},
+      callback:function(r){ var n=(r.message||{}).envoyes||0; frappe.show_alert&&frappe.show_alert({message:'✉️ Consignes envoyées à '+n+' chef(s).', indicator:'green'}); }}); },
+    'Envoyer les consignes aux chefs', 'Envoyer');
+}
+
+frappe.ready(function(){
+  {% if not no_access %}
+  loadBoard();
+  document.getElementById('m-save').addEventListener('click', saveModal);
+  var c=document.getElementById('ee-consignes'); if(c) c.addEventListener('click', consignes);
+  document.getElementById('ee-ov').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
+  {% endif %}
+});
+</script>
+{% endblock %}

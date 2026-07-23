@@ -1,0 +1,160 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "format:MOD-{YYYY}-{#####}",
+ "creation": "2026-07-23 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "employee_name",
+  "equipe",
+  "column_break_1",
+  "type_modif",
+  "date_modif",
+  "vu_par_employe",
+  "section_detail",
+  "champ",
+  "ancienne_valeur",
+  "nouvelle_valeur",
+  "section_auteur",
+  "modifie_par",
+  "modifie_par_nom"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Employé",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nom",
+   "read_only": 1
+  },
+  {
+   "fieldname": "equipe",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Équipe",
+   "options": "Equipe KYA"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Info",
+   "fieldname": "type_modif",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Type",
+   "options": "Info\nMutation"
+  },
+  {
+   "fieldname": "date_modif",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Date"
+  },
+  {
+   "default": "0",
+   "fieldname": "vu_par_employe",
+   "fieldtype": "Check",
+   "label": "Vu par l'employé"
+  },
+  {
+   "fieldname": "section_detail",
+   "fieldtype": "Section Break",
+   "label": "Détail de la modification"
+  },
+  {
+   "fieldname": "champ",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Champ modifié"
+  },
+  {
+   "fieldname": "ancienne_valeur",
+   "fieldtype": "Small Text",
+   "label": "Ancienne valeur"
+  },
+  {
+   "fieldname": "nouvelle_valeur",
+   "fieldtype": "Small Text",
+   "label": "Nouvelle valeur"
+  },
+  {
+   "fieldname": "section_auteur",
+   "fieldtype": "Section Break",
+   "label": "Auteur"
+  },
+  {
+   "fieldname": "modifie_par",
+   "fieldtype": "Link",
+   "label": "Modifié par",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "modifie_par_nom",
+   "fieldtype": "Data",
+   "label": "Modifié par (nom)",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-23 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "KYA HR",
+ "name": "Modification Info Employe KYA",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Responsable RH"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "HR User"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Directeur Général"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "DGA"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 0
+}

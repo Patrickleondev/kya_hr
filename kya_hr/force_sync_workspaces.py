@@ -67,6 +67,8 @@ KYA_AUTO_SIDEBARS = [
             # Maison d'abord : « Stock KYA » gère soldes + ajout/import d'articles.
             # PAS de lien natif (Item/Stock Entry/...) : ça perdait la magasinière.
             {"label": "Stock KYA", "url": "/stock-kya", "link_type": "URL", "icon": "grid"},
+            {"label": "Rapport de stock (hebdo)", "url": "/rapport-stock", "link_type": "URL", "icon": "bar-chart-2"},
+            {"label": "Classement du stock", "url": "/classement-stock", "link_type": "URL", "icon": "layers"},
             {"label": "Saisie directe du stock", "link_to": "Saisie Stock KYA", "link_type": "DocType", "icon": "edit"},
             {"label": "PV Entrée Matériel", "link_to": "PV Entree Materiel", "link_type": "DocType", "icon": "download"},
             {"label": "PV Sortie Matériel", "link_to": "PV Sortie Materiel", "link_type": "DocType", "icon": "upload"},
@@ -89,6 +91,12 @@ KYA_AUTO_SIDEBARS = [
             {"label": "Plannings Congé", "link_to": "Planning Conge", "link_type": "DocType", "icon": "calendar"},
             {"label": "Contrats KYA", "link_to": "KYA Contrat", "link_type": "DocType", "icon": "file-text"},
             {"label": "Bilans de Stage", "link_to": "Bilan Fin de Stage", "link_type": "DocType", "icon": "clipboard-list"},
+            {"label": "Documents RH (certificats / attestations)", "url": "/documents-rh", "link_type": "URL", "icon": "file-text"},
+            {"label": "Documents RH KYA", "link_to": "Document RH KYA", "link_type": "DocType", "icon": "file"},
+            {"label": "Avenants au contrat", "url": "/avenants-rh", "link_type": "URL", "icon": "edit"},
+            {"label": "Contrats de stage d'immersion", "url": "/contrats-immersion", "link_type": "URL", "icon": "graduation-cap"},
+            {"label": "Effectifs des équipes (détail)", "url": "/equipe-effectifs", "link_type": "URL", "icon": "users"},
+            {"label": "Journal des modifications (fiches)", "link_to": "Modification Info Employe KYA", "link_type": "DocType", "icon": "list"},
         ],
     },
     {
