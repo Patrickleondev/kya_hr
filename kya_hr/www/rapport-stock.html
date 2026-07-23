@@ -47,6 +47,13 @@ tr.alert td { background:#fff7ed !important; }
 .pill.rup{ background:#fee2e2; color:#991b1b; } .pill.vide{ background:#e2e8f0; color:#475569; }
 .rs-empty{ text-align:center; padding:30px; color:#94a3b8; }
 .rs-note{ font-size:.72rem; color:#94a3b8; margin-top:8px; }
+.rs-pager{ display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap;
+  padding:10px; border-top:1px solid #eef2f7; font-size:.82rem; }
+.rs-pager .info{ color:#475569; font-weight:600; font-variant-numeric:tabular-nums; }
+.rs-pg{ border:1px solid #cbd5e1; background:#fff; color:#0f172a; border-radius:8px; padding:7px 14px;
+  font-size:.82rem; font-weight:700; cursor:pointer; }
+.rs-pg:hover:not(:disabled){ background:#f1f5f9; } .rs-pg:disabled{ opacity:.45; cursor:default; }
+@media print { .rs-pager{ display:none !important; } }
 @media print {
   .rs-ctl, .rs-note, .web-footer, .navbar, .page-header { display:none !important; }
   .rs-tw { box-shadow:none; border:1px solid #cbd5e1; }
@@ -132,11 +139,40 @@ async function initMagasins(){
   document.getElementById('rs-date').value = d.toISOString().slice(0,10);
 }
 
+// Pagination de la table du rapport (50 lignes/page). rowFn(ligne, indexAbsolu).
+let RS_PAGE = 1;
+function rsPage(rows, rowFn){
+  const per = 50, body = document.getElementById('rs-body');
+  const total = rows.length, pages = Math.max(1, Math.ceil(total/per));
+  if(RS_PAGE > pages) RS_PAGE = pages; if(RS_PAGE < 1) RS_PAGE = 1;
+  const scroll = body.closest('.rs-scroll'), wrap = scroll.parentNode;
+  let pager = wrap.querySelector('.rs-pager');
+  function draw(){
+    if(!total){ body.innerHTML = '<tr><td colspan="9" class="rs-empty">Aucun stock pour ce magasin.</td></tr>'; }
+    else { const s=(RS_PAGE-1)*per; body.innerHTML = rows.slice(s, s+per).map((l,k)=>rowFn(l, s+k)).join(''); }
+    if(!pager){ pager = document.createElement('div'); pager.className = 'rs-pager'; wrap.appendChild(pager); }
+    if(total <= per){ pager.style.display='none'; pager.innerHTML=''; return; }
+    pager.style.display='';
+    const s=(RS_PAGE-1)*per, e=Math.min(total, s+per);
+    pager.innerHTML =
+      '<button class="rs-pg" '+(RS_PAGE<=1?'disabled':'')+' data-a="prev">‹ Précédent</button>'
+      + '<span class="info">'+(s+1)+'–'+e+' sur '+total+'</span>'
+      + '<button class="rs-pg" '+(RS_PAGE>=pages?'disabled':'')+' data-a="next">Suivant ›</button>';
+    pager.querySelectorAll('.rs-pg').forEach(b=>b.onclick=()=>{
+      if(b.dataset.a==='prev'&&RS_PAGE>1) RS_PAGE--;
+      else if(b.dataset.a==='next'&&RS_PAGE<pages) RS_PAGE++;
+      draw(); scroll.scrollIntoView({block:'nearest'});
+    });
+  }
+  draw();
+}
+
 async function charger(){
   const magasin = document.getElementById('rs-mag').value;
   const date_ref = document.getElementById('rs-date').value;
   const type_stock = document.getElementById('rs-type').value;
   const body = document.getElementById('rs-body');
+  RS_PAGE = 1;   // nouveau filtre → repartir de la 1re page
   body.innerHTML = '<tr><td colspan="9" class="rs-empty">Chargement…</td></tr>';
   let r;
   try {
@@ -158,10 +194,7 @@ async function charger(){
     + kpi((t.a_commander>0?'amber':''), t.a_commander||0, 'À commander / rupture');
 
   const lignes = r.lignes || [];
-  if(!lignes.length){
-    body.innerHTML = '<tr><td colspan="9" class="rs-empty">Aucun stock pour ce magasin.</td></tr>';
-  } else {
-    body.innerHTML = lignes.map((l,i) => {
+  rsPage(lignes, (l, i) => {
       const ec = l.ecart||0;
       const ecCls = ec>0?'up':(ec<0?'down':'flat');
       const ecTxt = (ec>0?'+':'')+fmt(ec);
@@ -177,8 +210,7 @@ async function charger(){
         + '<td class="num">'+fmt(l.seuil_commande)+'</td>'
         + '<td>'+pill(l.statut)+'</td>'
         + '</tr>';
-    }).join('');
-  }
+    });
   const dref = r.date_ref ? r.date_ref.split('-').reverse().join('/') : '';
   document.getElementById('rs-note').textContent =
     r.magasin_label + ' — édité le ' + (r.genere_le||'').split('-').reverse().join('/')

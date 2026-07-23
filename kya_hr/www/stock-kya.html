@@ -93,6 +93,15 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
    (sinon la colonne refuse de rétrécir et TOUT déborde de la carte). */
 .ks-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;min-width:0;}
 .ks-tbl-wide{min-width:640px;}
+/* Pagination des listes longues */
+.ks-pager{display:flex;align-items:center;justify-content:center;gap:12px;
+  flex-wrap:wrap;margin:8px 0 4px;font-size:.8rem;}
+.ks-pager .ks-pg-info{color:#475569;font-weight:600;font-variant-numeric:tabular-nums;}
+.ks-pg-btn{border:1px solid #cbd5e1;background:#fff;color:#0f172a;border-radius:8px;
+  padding:7px 14px;font-size:.8rem;font-weight:700;cursor:pointer;}
+.ks-pg-btn:hover:not(:disabled){background:#f1f5f9;border-color:#94a3b8;}
+.ks-pg-btn:disabled{opacity:.45;cursor:default;}
+.ks-pg-sel{border:1px solid #cbd5e1;border-radius:8px;padding:6px 8px;font-size:.78rem;background:#fff;}
 #rap-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;}
 #rap-grid>div{min-width:0;}
 .rap-filtres{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin:8px 0 12px;}
@@ -425,26 +434,31 @@ function render(){
     <td class="num">${m.unites}</td></tr>`).join('') || `<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:16px;">Aucun stock.</td></tr>`;
 
   const tb={"Entrée":"b-e","Sortie":"b-s","Retour":"b-r","Inventaire":"b-i","Ajustement":"b-i"};
-  document.getElementById('ks-mvtbody').innerHTML = (DASH.recents||[]).map(r=>`<tr>
+  kpage('ks-mvtbody', DASH.recents||[], r=>`<tr>
     <td>${dfr(r.date_mouvement)}</td><td><span class="badge ${tb[r.type_mouvement]||'b-i'}">${r.type_mouvement}</span></td>
     <td>${r.item_name||''}</td><td>${r.magasin||''}</td>
     <td class="num" style="color:${r.quantite<0?'#991b1b':'#166534'}">${r.quantite}</td>
-    <td>${r.etat||''}</td><td style="font-size:.72rem;color:#64748b">${r.reference_name||''}</td></tr>`).join('')
-    || `<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:16px;">Aucun mouvement.</td></tr>`;
+    <td>${r.etat||''}</td><td style="font-size:.72rem;color:#64748b">${r.reference_name||''}</td></tr>`,
+    {per:50, cols:7, empty:'Aucun mouvement.'});
 }
 
+function invRow(l){ return `<tr><td>${l.n}</td><td>${l.designation}</td>
+  <td class="num">${l.qte_totale}</td><td class="num" style="color:#166534">${l.bon_etat}</td>
+  <td class="num" style="color:#92400e">${l.reparation}</td>
+  <td class="num" style="color:#7c3aed">${l.defectueux!=null?l.defectueux:0}</td></tr>`; }
 function renderInv(){
   const f=document.getElementById('ks-mag-filter').value;
   const secs = INV.sections.filter(s=>!f || s.magasin===f);
-  document.getElementById('ks-inv').innerHTML = secs.map(s=>`
+  // reset pagination des sections (le filtre magasin peut changer le nombre de sections)
+  Object.keys(_KP).forEach(k=>{ if(k.indexOf('ks-inv-b')===0) delete _KP[k]; });
+  const host=document.getElementById('ks-inv');
+  if(!secs.length){ host.innerHTML=`<div style="text-align:center;color:#94a3b8;padding:20px;">Aucun stock à afficher.</div>`; return; }
+  host.innerHTML = secs.map((s,i)=>`
     <div class="ks-mag">🏬 ${s.magasin} — ${s.total_lignes} article(s)</div>
     <div class="ks-scroll"><table class="ks-tbl ks-tbl-wide"><thead><tr><th style="width:5%">N°</th><th>Désignation</th>
       <th style="width:11%">Qté totale</th><th style="width:11%">Bon état</th><th style="width:11%">À réparer</th><th style="width:11%">Défectueux</th></tr></thead>
-    <tbody>${s.lignes.map(l=>`<tr><td>${l.n}</td><td>${l.designation}</td>
-      <td class="num">${l.qte_totale}</td><td class="num" style="color:#166534">${l.bon_etat}</td>
-      <td class="num" style="color:#92400e">${l.reparation}</td>
-      <td class="num" style="color:#7c3aed">${l.defectueux!=null?l.defectueux:0}</td></tr>`).join('')}</tbody></table></div>`).join('')
-    || `<div style="text-align:center;color:#94a3b8;padding:20px;">Aucun stock à afficher.</div>`;
+    <tbody id="ks-inv-b${i}"></tbody></table></div>`).join('');
+  secs.forEach((s,i)=>kpage('ks-inv-b'+i, s.lignes, invRow, {per:20, cols:6, empty:'Aucun article.'}));
 }
 
 function tab(t){
@@ -556,12 +570,13 @@ async function renderRap(force){
     <td><b>${m.magasin}</b></td><td class="num" style="color:#166534">${m.entrees}</td>
     <td class="num" style="color:#991b1b">${m.sorties}</td><td class="num" style="color:#92400e">${m.retours}</td></tr>`).join('')||vide(4);
   const tb={"Entrée":"b-e","Sortie":"b-s","Retour":"b-r","Inventaire":"b-i","Ajustement":"b-i"};
-  document.getElementById('rap-detail').innerHTML=(d.detail||[]).map(m=>`<tr>
+  kpage('rap-detail', d.detail||[], m=>`<tr>
     <td>${dfr(m.date)}</td><td><span class="badge ${tb[m.type]||'b-i'}">${m.type}</span></td>
     <td>${m.designation}</td><td style="font-size:.74rem;color:#64748b">${m.categorie}</td>
     <td style="font-size:.74rem">${m.magasin}</td>
     <td class="num" style="color:${m.quantite<0?'#991b1b':'#166534'}">${m.quantite}</td>
-    <td>${m.etat||''}</td><td style="font-size:.74rem">${m.equipe||''}</td></tr>`).join('')||vide(8);
+    <td>${m.etat||''}</td><td style="font-size:.74rem">${m.equipe||''}</td></tr>`,
+    {per:50, cols:8, empty:'Aucune donnée sur la période.'});
   const nd=(d.detail||[]).length;
   document.getElementById('rap-detail-n').textContent =
     nd ? `(${nd} affiché${nd>1?'s':''}${k.nb_mouvements>nd?' sur '+k.nb_mouvements:''}, du plus récent)` : '';
@@ -579,7 +594,7 @@ async function renderRea(){
   const rows = only ? REA.filter(r=>r.statut==='RUPTURE'||r.statut==='A COMMANDER') : REA;
   const dot={'RUPTURE':'🔴','A COMMANDER':'🟠','REFERENCE VIDE':'⚪','OK':'🟢'};
   const col={'RUPTURE':'#dc2626','A COMMANDER':'#d97706','REFERENCE VIDE':'#94a3b8','OK':'#166534'};
-  document.getElementById('ks-reabody').innerHTML = rows.map(r=>`<tr>
+  kpage('ks-reabody', rows, r=>`<tr>
     <td>${r.designation||''}</td><td style="font-size:.74rem">${r.magasin_label||''}</td>
     <td style="font-size:.74rem;color:#64748b">${r.categorie||''}</td>
     <td class="num" style="color:#166534">${r.bon_etat}</td>
@@ -588,8 +603,8 @@ async function renderRea(){
     <td style="text-align:center;font-weight:800">${r.classe}</td>
     <td class="num">${r.seuil_mini}</td>
     <td style="text-align:center;font-weight:800;color:${col[r.statut]||'#334155'};white-space:nowrap">${dot[r.statut]||''} ${r.statut}</td>
-    <td style="font-size:.76rem">${r.action}</td></tr>`).join('')
-    || `<tr><td colspan="10" style="text-align:center;color:#94a3b8;padding:16px;">Aucune ligne.</td></tr>`;
+    <td style="font-size:.76rem">${r.action}</td></tr>`,
+    {per:30, cols:10, empty:'Aucune ligne.'});
 }
 
 // ── Saisie directe ─────────────────────────────────────────────────────────
@@ -674,6 +689,45 @@ function modele(){
 // Date ISO (aaaa-mm-jj…) -> jj/mm/aaaa pour l'affichage.
 function dfr(s){ if(!s) return ''; const p=String(s).slice(0,10).split('-');
   return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : s; }
+
+/* ── Pagination réutilisable des listes longues ────────────────────────────
+   kpage(tbodyId, rows, rowFn, {per, cols, empty}) : rend une PAGE des lignes
+   dans le <tbody> et pose un pager (Précédent / x–y sur N / Suivant) juste
+   après le tableau. L'état (page courante) est mémorisé par tbody. Idempotent :
+   ré-appelable à chaque filtre/refresh. Si N ≤ per, aucun pager (liste courte).*/
+const _KP={};
+function kpage(tbodyId, rows, rowFn, opts){
+  opts=opts||{}; const per=opts.per||25, cols=opts.cols||1,
+        empty=opts.empty||'Aucune donnée.';
+  const tbody=document.getElementById(tbodyId); if(!tbody) return;
+  rows=rows||[]; const total=rows.length, pages=Math.max(1,Math.ceil(total/per));
+  const st=_KP[tbodyId]||(_KP[tbodyId]={page:1});
+  if(st.page>pages) st.page=pages; if(st.page<1) st.page=1;
+  const host=tbody.closest('.ks-scroll')||tbody.closest('table');
+  function draw(){
+    if(!total){ tbody.innerHTML=`<tr><td colspan="${cols}" style="text-align:center;color:#94a3b8;padding:16px;">${empty}</td></tr>`; }
+    else { const s=(st.page-1)*per; tbody.innerHTML=rows.slice(s,s+per).map(rowFn).join(''); }
+    let pager=host&&host.nextElementSibling;
+    if(!pager||!pager.classList||!pager.classList.contains('ks-pager')){
+      pager=document.createElement('div'); pager.className='ks-pager';
+      if(host&&host.parentNode) host.parentNode.insertBefore(pager,host.nextSibling);
+    }
+    if(!pager) return;
+    if(total<=per){ pager.innerHTML=''; pager.style.display='none'; return; }
+    pager.style.display='';
+    const s=(st.page-1)*per, e=Math.min(total,s+per);
+    pager.innerHTML=
+      `<button class="ks-pg-btn" ${st.page<=1?'disabled':''} data-a="prev">‹ Précédent</button>`+
+      `<span class="ks-pg-info">${s+1}–${e} sur ${total}</span>`+
+      `<button class="ks-pg-btn" ${st.page>=pages?'disabled':''} data-a="next">Suivant ›</button>`;
+    pager.querySelectorAll('.ks-pg-btn').forEach(b=>b.onclick=()=>{
+      if(b.dataset.a==='prev'&&st.page>1) st.page--;
+      else if(b.dataset.a==='next'&&st.page<pages) st.page++;
+      draw(); if(host&&host.scrollIntoView) host.scrollIntoView({block:'nearest'});
+    });
+  }
+  draw();
+}
 function dlB64(b64,name){
   const bin=atob(b64); const arr=new Uint8Array(bin.length);
   for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
