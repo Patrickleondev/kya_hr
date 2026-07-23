@@ -1,0 +1,131 @@
+{% extends "templates/web.html" %}
+{% block title %}Poste de garde — Guérite{% endblock %}
+
+{% block head_include %}
+<style>
+  :root {
+    --kya-green:#0E7C4A; --kya-green-d:#0b5c37; --kya-ink:#1f2937;
+    --kya-muted:#6b7280; --kya-line:#e5e7eb; --kya-bg:#f6f8f7;
+    --kya-today:#0E7C4A; --kya-today-bg:#e8f5ee;
+  }
+  body.guerite-page { background:var(--kya-bg); }
+  .g-wrap { max-width:1080px; margin:0 auto; padding:22px 16px 60px; }
+  .g-head {
+    background:linear-gradient(115deg,var(--kya-green),var(--kya-green-d));
+    color:#fff; border-radius:16px; padding:22px 24px;
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px;
+    box-shadow:0 8px 24px rgba(14,124,74,.18);
+  }
+  .g-head h1 { margin:0; font-size:22px; font-weight:800; letter-spacing:.2px; }
+  .g-head .g-sub { opacity:.92; font-size:13px; margin-top:3px; }
+  .g-kpis { display:flex; gap:12px; }
+  .g-kpi { background:rgba(255,255,255,.14); border-radius:12px; padding:10px 16px; text-align:center; min-width:92px; }
+  .g-kpi b { display:block; font-size:26px; font-weight:800; line-height:1; }
+  .g-kpi span { font-size:11px; opacity:.9; text-transform:uppercase; letter-spacing:.4px; }
+  .g-note { color:var(--kya-muted); font-size:12.5px; margin:16px 2px 6px; }
+  .g-group { margin-top:22px; }
+  .g-group-title {
+    font-size:14px; font-weight:800; color:var(--kya-ink); text-transform:uppercase;
+    letter-spacing:.5px; display:flex; align-items:center; gap:9px; margin:0 2px 10px;
+  }
+  .g-group-title .g-count { color:var(--kya-muted); font-weight:600; font-size:12px; }
+  .g-card {
+    background:#fff; border:1px solid var(--kya-line); border-radius:14px; overflow:hidden;
+    box-shadow:0 1px 3px rgba(0,0,0,.04);
+  }
+  table.g-tbl { width:100%; border-collapse:collapse; font-size:13.5px; }
+  table.g-tbl th {
+    background:#f3f6f4; color:#374151; text-align:left; font-weight:700; font-size:11.5px;
+    text-transform:uppercase; letter-spacing:.4px; padding:11px 14px; border-bottom:1px solid var(--kya-line);
+  }
+  table.g-tbl td { padding:12px 14px; border-bottom:1px solid #f1f3f2; vertical-align:middle; color:var(--kya-ink); }
+  table.g-tbl tr:last-child td { border-bottom:none; }
+  table.g-tbl tr.is-today td { background:var(--kya-today-bg); }
+  table.g-tbl tr.is-past td { opacity:.62; }
+  .g-emp { font-weight:700; }
+  .g-dep { color:var(--kya-muted); font-size:12px; }
+  .g-h { font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .g-badge { display:inline-block; font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:20px;
+             background:#eef2f0; color:#374151; text-transform:uppercase; letter-spacing:.3px; }
+  .g-today-tag { display:inline-block; font-size:10px; font-weight:800; color:#fff; background:var(--kya-today);
+                 padding:2px 8px; border-radius:20px; margin-left:6px; letter-spacing:.3px; }
+  .g-pdf {
+    display:inline-flex; align-items:center; gap:6px; text-decoration:none;
+    background:var(--kya-green); color:#fff; font-weight:700; font-size:12.5px;
+    padding:8px 13px; border-radius:9px; white-space:nowrap;
+  }
+  .g-pdf:hover { background:var(--kya-green-d); color:#fff; }
+  .g-empty { padding:26px 16px; text-align:center; color:var(--kya-muted); font-size:13.5px; }
+  .g-motif { max-width:260px; color:#4b5563; font-size:12.5px; }
+  @media (max-width:640px){
+    .g-head { flex-direction:column; align-items:flex-start; }
+    table.g-tbl th:nth-child(2), table.g-tbl td:nth-child(2){ display:none; } /* motif caché mobile */
+  }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<script>document.body.classList.add("guerite-page");</script>
+<div class="g-wrap">
+
+  <div class="g-head">
+    <div>
+      <h1>🛡️ Poste de garde — Guérite</h1>
+      <div class="g-sub">Permissions de sortie approuvées &middot; {{ date_str }}</div>
+    </div>
+    <div class="g-kpis">
+      <div class="g-kpi"><b>{{ total_today }}</b><span>Aujourd'hui</span></div>
+      <div class="g-kpi"><b>{{ total }}</b><span>Au total</span></div>
+    </div>
+  </div>
+
+  <div class="g-note">
+    Registre en lecture seule des sorties <b>définitivement approuvées</b> (toutes signatures posées).
+    Téléchargez le <b>PDF officiel signé</b> pour contrôle avant de laisser sortir la personne.
+  </div>
+
+  {% for grp in groupes %}
+  <div class="g-group">
+    <div class="g-group-title">
+      {{ grp.titre }} <span class="g-count">· {{ grp.lignes|length }}</span>
+    </div>
+    <div class="g-card">
+      {% if grp.lignes %}
+      <table class="g-tbl">
+        <thead>
+          <tr>
+            <th>Personne</th>
+            <th>Motif</th>
+            <th>Date de sortie</th>
+            <th>Départ → Retour</th>
+            <th style="text-align:right;">Fiche signée</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for l in grp.lignes %}
+          <tr class="{% if l.is_today %}is-today{% elif l.is_past %}is-past{% endif %}">
+            <td>
+              <div class="g-emp">{{ l.employe }}
+                {% if l.is_today %}<span class="g-today-tag">AUJOURD'HUI</span>{% endif %}
+              </div>
+              {% if l.departement %}<div class="g-dep">{{ l.departement }}</div>{% endif %}
+            </td>
+            <td class="g-motif">{{ l.motif }}</td>
+            <td>{{ l.date_label }}</td>
+            <td class="g-h">{{ l.heure_depart or "—" }} → {{ l.heure_retour or "—" }}</td>
+            <td style="text-align:right;">
+              <a class="g-pdf" href="{{ l.pdf_url }}" target="_blank" rel="noopener">📄 PDF signé</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="g-empty">Aucune sortie approuvée pour l'instant.</div>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+
+</div>
+{% endblock %}

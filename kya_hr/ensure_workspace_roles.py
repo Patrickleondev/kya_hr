@@ -58,6 +58,9 @@ WORKSPACE_ROLES: dict[str, list[str]] = {
                    "DST - Responsable Logistique", "Chef Service",
                    "Responsable RH", "HR Manager"],
 
+    # --- Poste de garde ---
+    "Guérite": ["Guérite"],
+
     # --- Direction : voit tout ---
     "Direction Generale": ["Directeur Général", "DG", "DGA", "DAAF"],
 }

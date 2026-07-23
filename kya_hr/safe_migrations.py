@@ -64,6 +64,7 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.fix_sidebar_equipe_kya.execute", "Fix sidebar : Equipe KYA -> Espace Stagiaires (mauvais link_to)"),
     ("kya_hr.fix_mes_approbations_scope.execute", "Purge 'Mes Approbations' des espaces metier mutualises"),
     ("kya_hr.ensure_visibility.execute", "Ensure workspaces visibility"),
+    ("kya_hr.maintenance.setup_guerite.execute", "Poste de garde (Guérite) : rôle + lecture seule sur les permissions de sortie (Custom DocPerm) + espace « Guérite » avec raccourci /guerite (registre des sorties approuvées + PDF signés)"),
     ("kya_hr.ensure_workspace_roles.execute", "Visibilite workspaces par role (Espace Employes<-Employee, Stagiaires<-Stagiaire, etc.)"),
     ("kya_hr.setup_logistique_access.execute", "Sortie Vehicule visible Direction (DG/DGA) + roles logistiques sur espace Logistique"),
     ("kya_hr.equipe_member_sync.recompute_all", "Recalcule nombre_membres des Equipes KYA (corrige compteurs perimes apres assignation employes)"),

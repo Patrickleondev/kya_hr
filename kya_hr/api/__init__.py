@@ -172,6 +172,10 @@ ALLOWED_DOCTYPES = {
     # Brouillon). La caissière/rédactrice ne pouvait pas soumettre son état.
     "Etat Recap Cheques",
     "Brouillard Caisse",
+    # Fiche d'inventaire numérique : le responsable inventaire / magasin
+    # validait via le desk faute de boutons sur la fiche. Sans cette entrée,
+    # get_kya_workflow_actions renvoyait [] et la fiche restait en « Brouillon ».
+    "Inventaire KYA",
 }
 
 
