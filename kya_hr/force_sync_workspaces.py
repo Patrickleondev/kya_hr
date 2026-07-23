@@ -94,6 +94,7 @@ KYA_AUTO_SIDEBARS = [
             {"label": "Documents RH (certificats / attestations)", "url": "/documents-rh", "link_type": "URL", "icon": "file-text"},
             {"label": "Documents RH KYA", "link_to": "Document RH KYA", "link_type": "DocType", "icon": "file"},
             {"label": "Avenants au contrat", "url": "/avenants-rh", "link_type": "URL", "icon": "edit"},
+            {"label": "Contrats de stage d'immersion", "url": "/contrats-immersion", "link_type": "URL", "icon": "graduation-cap"},
             {"label": "Effectifs des équipes (détail)", "url": "/equipe-effectifs", "link_type": "URL", "icon": "users"},
             {"label": "Journal des modifications (fiches)", "link_to": "Modification Info Employe KYA", "link_type": "DocType", "icon": "list"},
         ],
