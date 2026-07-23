@@ -4,6 +4,7 @@ import os
 import re
 
 import frappe
+from frappe import _
 from frappe.translate import print_language
 from frappe.utils.pdf import get_pdf
 from frappe.www.printview import validate_print_permission
@@ -123,6 +124,14 @@ def download_pdf(
 
     if isinstance(doc, str):
         doc = frappe._dict(frappe.parse_json(doc))
+    # Garde-fou : un nom inexistant (ex. « APERÇU » d'un aperçu non enregistré,
+    # ou document supprimé) donnait un traceback 404 brut. Message clair à la place.
+    if not doc and not frappe.db.exists(doctype, name):
+        frappe.throw(
+            _("Ce document n'est pas encore enregistré. Générez-le d'abord, "
+              "puis téléchargez le PDF depuis la liste des documents."),
+            frappe.DoesNotExistError,
+        )
     doc = doc or frappe.get_doc(doctype, name)
     validate_print_permission(doc)
 

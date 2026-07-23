@@ -92,8 +92,13 @@
     </div>
   </div>
 
-  {# ===================== PIED DE PAGE OFFICIEL ===================== #}
-  <div style="margin-top:40px;border-top:2.5px solid #f5a623;padding-top:6px;text-align:center;font-size:9pt;color:#1c9e8e;">
-    +228 70 45 34 81 / 99 99 93 80&nbsp;&nbsp;|&nbsp;&nbsp;08 BP 81101 Agoè-Logopé, Lomé-TOGO&nbsp;&nbsp;|&nbsp;&nbsp;www.kya-energy.com
-  </div>
+  {# Réserve d'espace pour que le contenu ne passe jamais sous la bande de pied de page. #}
+  <div style="height:70px;"></div>
+</div>
+
+{# ===================== PIED DE PAGE OFFICIEL — bande orange, collée en bas de page =====================
+   position:fixed + bottom:0 : wkhtmltopdf l'ancre en pied de CHAQUE page (comme le modèle KYA),
+   et dans l'aperçu (iframe) elle se pose en bas de la zone visible. Pleine largeur (left/right:0). #}
+<div style="position:fixed;bottom:0;left:0;right:0;background:#f5a623;color:#fff;font-weight:bold;text-align:center;padding:12px 6px;font-size:9pt;letter-spacing:.1px;white-space:nowrap;">
+  +228 70 45 34 81 / 99 99 93 80&nbsp;&nbsp;|&nbsp;&nbsp;08 BP 81101 Agoè-Logopé, Lomé-TOGO&nbsp;&nbsp;|&nbsp;&nbsp;www.kya-energy.com
 </div>

@@ -341,4 +341,9 @@ def apercu_document(type_document, employee=None, theme=None, poste=None, diplom
     from frappe.translate import print_language
     with print_language("fr"):
         html = frappe.get_print("Document RH KYA", d.name, "Document RH KYA", doc=d)
-    return html
+    # frappe.get_print renvoie la page printview COMPLÈTE (barre d'outils Frappe
+    # comprise), dont un bouton « Get PDF » pointant sur name=APERÇU — un document
+    # NON enregistré → clic = 404. On nettoie donc l'aperçu : retrait des liens de
+    # téléchargement/scripts/barre d'action + inline du logo (rendu fidèle en iframe).
+    from kya_hr.api.print_format import _sanitize_print_html
+    return _sanitize_print_html(html)
