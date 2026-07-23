@@ -70,6 +70,39 @@ class DocumentRHKYA(Document):
             from frappe.utils import now_datetime
             self.date_signature = now_datetime()
 
+    def on_update_after_submit(self):
+        self._notify_beneficiaire_if_signed()
+
+    def on_submit(self):
+        self._notify_beneficiaire_if_signed()
+
+    def _notify_beneficiaire_if_signed(self):
+        """À la signature, informe le bénéficiaire que son document est prêt
+        (mail + le doc apparaît dans son suivi). Défensif : n'échoue jamais la
+        transaction et n'envoie qu'une fois."""
+        if (self.workflow_state or "") not in self.SIGNED_STATES:
+            return
+        if self.flags.get("_benef_notified"):
+            return
+        try:
+            user = frappe.db.get_value("Employee", self.employee, "user_id") if self.employee else None
+            if not user or user == "Administrator":
+                return
+            frappe.sendmail(
+                recipients=[user],
+                subject="[KYA] Votre {0} est disponible".format(self.type_document or "document"),
+                message=(
+                    "<p>Bonjour,</p><p>Votre <b>{0}</b> a été signé par la Direction et "
+                    "est disponible.</p><p>Référence : <b>{1}</b>.</p>"
+                    "<p>— Ressources Humaines, KYA-Energy Group</p>"
+                ).format(self.type_document or "document", self.name),
+                reference_doctype=self.doctype, reference_name=self.name,
+                now=False,
+            )
+            self.flags._benef_notified = True
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), "Document RH KYA: notif bénéficiaire")
+
     def autofill(self):
         """Pré-remplit les champs variables depuis la fiche Employee (éditable ensuite)."""
         if not self.employee:
@@ -118,6 +151,75 @@ def prefill_from_employee(employee, type_document=None):
         "duree_texte": duree_en_lettres(emp.get("date_of_joining"), emp.get("relieving_date")),
         "nationalite": "togolaise",
     }
+
+
+_RH_ROLES = {"Responsable RH", "HR Manager", "HR User", "Directeur Général",
+             "DGA", "System Manager"}
+
+
+def _guard_rh():
+    if frappe.session.user == "Guest":
+        frappe.throw(_("Veuillez vous connecter."), frappe.AuthenticationError)
+    if not _RH_ROLES.intersection(set(frappe.get_roles(frappe.session.user))):
+        frappe.throw(_("Accès réservé à la RH et à la Direction."), frappe.PermissionError)
+
+
+@frappe.whitelist()
+def liste_employes(q=None):
+    """Employés actifs pour le sélecteur de la page (nom + type d'emploi)."""
+    _guard_rh()
+    filters = {"status": "Active"}
+    fields = ["name", "employee_name", "employment_type", "designation"]
+    rows = frappe.get_all("Employee", filters=filters, fields=fields,
+                          order_by="employee_name asc", limit_page_length=1000)
+    if q:
+        ql = q.lower()
+        rows = [r for r in rows if ql in (r.employee_name or "").lower()
+                or ql in (r.name or "").lower()]
+    return rows
+
+
+@frappe.whitelist()
+def creer_document(type_document, employee, theme=None, poste=None, diplome=None,
+                   nationalite=None, date_debut=None, date_fin=None, duree_texte=None,
+                   date_document=None, utiliser_signature_enregistree=1):
+    """Crée un Document RH KYA (brouillon) depuis la page RH ; auto-remplit puis
+    applique les valeurs éditées."""
+    _guard_rh()
+    if not frappe.db.exists("Employee", employee):
+        frappe.throw(_("Employé introuvable."))
+    d = frappe.new_doc("Document RH KYA")
+    d.type_document = type_document or "Certificat de Stage"
+    d.employee = employee
+    # auto-fill de base
+    d.autofill()
+    # champs édités par la RH (priment)
+    for k, v in {"theme": theme, "poste": poste, "diplome": diplome,
+                 "nationalite": nationalite, "date_debut": date_debut,
+                 "date_fin": date_fin, "duree_texte": duree_texte,
+                 "date_document": date_document}.items():
+        if v:
+            d.set(k, v)
+    d.utiliser_signature_enregistree = int(utiliser_signature_enregistree or 0)
+    d.insert()
+    return {"name": d.name, "workflow_state": d.workflow_state or "Brouillon"}
+
+
+@frappe.whitelist()
+def liste_documents(limit=60):
+    """Documents RH récents pour la page (avec état + lien PDF)."""
+    _guard_rh()
+    rows = frappe.get_all(
+        "Document RH KYA",
+        fields=["name", "type_document", "beneficiaire_nom", "employee",
+                "workflow_state", "date_document", "modified"],
+        order_by="modified desc", limit_page_length=int(limit or 60))
+    from urllib.parse import quote
+    for r in rows:
+        r["pdf_url"] = ("/api/method/frappe.utils.print_format.download_pdf"
+                        "?doctype=Document%20RH%20KYA&name=" + quote(r["name"])
+                        + "&format=Document%20RH%20KYA&_lang=fr")
+    return rows
 
 
 def signature_dg_data_uri():

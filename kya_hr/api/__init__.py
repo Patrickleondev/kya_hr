@@ -176,6 +176,9 @@ ALLOWED_DOCTYPES = {
     # validait via le desk faute de boutons sur la fiche. Sans cette entrée,
     # get_kya_workflow_actions renvoyait [] et la fiche restait en « Brouillon ».
     "Inventaire KYA",
+    # Documents RH (certificats / attestations) : circuit RH → DG piloté depuis
+    # la page /documents-rh (boutons « Envoyer au DG » / « Signer »).
+    "Document RH KYA",
 }
 
 
