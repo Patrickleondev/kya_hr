@@ -234,12 +234,21 @@ def envoyer_alertes_reappro():
             if r["statut"] == "RUPTURE" or cint(par.get("inclure_a_commander"))]
     if not rows:
         return
-    dests = [l.strip() for l in (par.get("destinataires") or "").splitlines() if l.strip()]
-    if not dests:
-        dests = [u["email"] for u in frappe.get_all(
-            "Has Role", filters={"role": "Responsable Stock", "parenttype": "User"},
-            fields=["parent as email"])
-            if frappe.db.get_value("User", u["email"], "enabled")]
+    # Destinataires = liste manuelle (Paramètres Stock KYA) UNION les rôles qui
+    # doivent TOUJOURS être alertés : Chargé des Stocks, Responsable Stock,
+    # Responsable Achats et le Directeur Général.
+    ROLES_ALERTE = ("Chargé des Stocks", "Responsable Stock",
+                    "Responsable Achats", "Directeur Général")
+    dests = set(l.strip() for l in (par.get("destinataires") or "").splitlines() if l.strip())
+    for role in ROLES_ALERTE:
+        for u in frappe.get_all("Has Role",
+                                filters={"role": role, "parenttype": "User"},
+                                fields=["parent as email"]):
+            email = u["email"]
+            if email not in ("Administrator", "Guest") \
+                    and frappe.db.get_value("User", email, "enabled"):
+                dests.add(email)
+    dests = sorted(d for d in dests if d)
     if not dests:
         return
     lignes = "".join(

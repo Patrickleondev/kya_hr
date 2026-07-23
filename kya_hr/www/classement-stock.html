@@ -1,0 +1,168 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Classement du stock — types & catégories{% endblock %}
+
+{% block page_content %}
+<link rel="stylesheet" href="/assets/kya_hr/css/kya_dashboard.css">
+<style>
+.cs { max-width: 1280px; margin: 18px auto 60px; padding: 0 16px; color:#0f172a; }
+.cs h1 { font-size:1.35rem; font-weight:900; margin:0; color:#0e7c4a; display:flex; align-items:center; gap:10px; }
+.cs .sub { color:#64748b; font-size:.82rem; margin-top:4px; }
+.cs-ctl { display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end; margin:16px 0 6px;
+  background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:14px 16px; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+.cs-f { display:flex; flex-direction:column; gap:4px; }
+.cs-f label { font-size:.66rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:.5px; }
+.cs-f select, .cs-f input { border:1px solid #cbd5e1; border-radius:9px; padding:8px 11px; font-size:.9rem; background:#fff; color:#0f172a; }
+.cs-f input.search { min-width:220px; }
+.cs-count { margin-left:auto; font-size:.8rem; color:#64748b; font-weight:700; align-self:center; }
+.cs-tw { background:#fff; border:1px solid #e2e8f0; border-radius:14px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.05); }
+.cs-scroll { overflow-x:auto; max-height:70vh; overflow-y:auto; }
+table.cs-t { width:100%; border-collapse:collapse; font-size:.84rem; min-width:1000px; }
+.cs-t thead th { position:sticky; top:0; background:#0e7c4a; color:#fff; text-align:left; padding:10px 10px; font-size:.68rem; text-transform:uppercase; letter-spacing:.4px; white-space:nowrap; z-index:2; }
+.cs-t tbody td { padding:6px 10px; border-bottom:1px solid #eef2f7; vertical-align:middle; }
+.cs-t tbody tr:hover { background:#f0fdf4; }
+.cs-t td.des { font-weight:600; color:#1e293b; min-width:230px; }
+.cs-t td.num { text-align:right; font-variant-numeric:tabular-nums; font-weight:700; color:#334155; white-space:nowrap; }
+.cs-t select, .cs-t input.grp { border:1px solid #cbd5e1; border-radius:7px; padding:5px 8px; font-size:.82rem; background:#fff; color:#0f172a; width:100%; min-width:130px; }
+.cs-t select.ind { border-color:#c4b5fd; } /* Industriel = teinte violette discrète */
+.cs-t select.miss { border-color:#dc2626; background:#fef2f2; color:#991b1b; font-weight:700; } /* catégorie à renseigner */
+.cs-t td.st { width:34px; text-align:center; }
+.dot { display:inline-block; width:14px; height:14px; border-radius:50%; transition:background .2s; }
+.dot.ok { background:#16a34a; } .dot.err { background:#dc2626; } .dot.saving { background:#f59e0b; }
+.cs-empty { text-align:center; padding:30px; color:#94a3b8; }
+.cs-note { font-size:.72rem; color:#94a3b8; margin-top:8px; }
+.badge-i { display:inline-block; font-size:.6rem; font-weight:800; color:#5b21b6; background:#ede9fe; border-radius:6px; padding:1px 6px; margin-left:6px; text-transform:uppercase; }
+@media (max-width:640px){ .cs-f input.search{ min-width:150px; } }
+</style>
+
+<div class="cs">
+  <h1><span>🗂️</span> Classement du stock</h1>
+  <div class="sub">Vérifier et corriger le <b>type</b>, la <b>catégorie</b>, la <b>famille</b> et le <b>groupe</b> de chaque article — article par article, par magasin. Chaque changement est enregistré immédiatement.</div>
+
+  <div class="cs-ctl">
+    <div class="cs-f">
+      <label for="cs-mag">Magasin</label>
+      <select id="cs-mag" onchange="charger()"></select>
+    </div>
+    <div class="cs-f">
+      <label for="cs-type">Type de stock</label>
+      <select id="cs-type" onchange="charger()">
+        <option value="">Tous les types</option>
+        <option value="Ingénierique">Ingénierique</option>
+        <option value="Industriel">Industriel</option>
+      </select>
+    </div>
+    <div class="cs-f">
+      <label for="cs-q">Rechercher</label>
+      <input type="text" id="cs-q" class="search" placeholder="désignation…" oninput="debClarger()">
+    </div>
+    <div class="cs-count" id="cs-count"></div>
+  </div>
+
+  <div class="cs-tw">
+    <div class="cs-scroll">
+      <table class="cs-t">
+        <thead>
+          <tr>
+            <th>Désignation</th>
+            <th class="num">Qté (magasin)</th>
+            <th>Catégorie</th>
+            <th>Type de stock</th>
+            <th>Famille</th>
+            <th>Groupe</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="cs-body"><tr><td colspan="7" class="cs-empty">Chargement…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="cs-note">« Ingénierique » = matériel d'installation / projets · « Industriel » = fabrication / assemblage (matières premières + produits finis). La <b>famille</b> et le <b>groupe</b> ne concernent que le stock industriel.</div>
+</div>
+
+<script>
+let CATS = [];
+let DEB = null;
+
+function esc(s){ const d=document.createElement('div'); d.textContent=s==null?'':s; return d.innerHTML; }
+function fmt(v){ if(v===null||v===undefined) return ''; const n=Math.round(v*1000)/1000; return n.toLocaleString('fr-FR'); }
+function debClarger(){ clearTimeout(DEB); DEB=setTimeout(charger, 350); }
+
+async function init(){
+  const sel = document.getElementById('cs-mag');
+  let mags=[]; try { mags=(await frappe.call({method:'kya_hr.api.stock_kya.magasins'})).message||[]; } catch(e){}
+  sel.innerHTML = '<option value="">— Tous les magasins —</option>' +
+    mags.map(m=>`<option value="${esc(m.name)}">${esc(m.warehouse_name||m.name)}</option>`).join('');
+  try { CATS=(await frappe.call({method:'kya_hr.api.stock_kya.categories'})).message||[]; } catch(e){}
+  await charger();
+}
+
+function catSelect(name, cur){
+  const empty = `<option value="" ${!cur?'selected':''}>— à renseigner —</option>`;
+  const opts = CATS.map(c=>`<option value="${esc(c)}" ${c===cur?'selected':''}>${esc(c)}</option>`).join('');
+  return `<select data-f="categorie" data-name="${esc(name)}" class="${!cur?'miss':''}" onchange="save(this)">${empty}${opts}</select>`;
+}
+function typeSelect(name, cur){
+  const v=['Ingénierique','Industriel'];
+  return `<select data-f="type_stock" data-name="${esc(name)}" class="${cur==='Industriel'?'ind':''}" onchange="save(this)">`+
+    v.map(x=>`<option value="${x}" ${x===cur?'selected':''}>${x}</option>`).join('')+`</select>`;
+}
+function familleSelect(name, cur){
+  const v=['','Matière première','Produit fini'];
+  return `<select data-f="famille" data-name="${esc(name)}" onchange="save(this)">`+
+    v.map(x=>`<option value="${x}" ${x===(cur||'')?'selected':''}>${x||'—'}</option>`).join('')+`</select>`;
+}
+
+async function charger(){
+  const magasin=document.getElementById('cs-mag').value;
+  const type_stock=document.getElementById('cs-type').value;
+  const q=document.getElementById('cs-q').value;
+  const body=document.getElementById('cs-body');
+  body.innerHTML='<tr><td colspan="7" class="cs-empty">Chargement…</td></tr>';
+  let rows;
+  try {
+    rows=(await frappe.call({method:'kya_hr.api.stock_kya.articles_classification',
+      args:{magasin:magasin||undefined, type_stock:type_stock||undefined, q:q||undefined}})).message||[];
+  } catch(e){
+    body.innerHTML='<tr><td colspan="7" class="cs-empty">Accès réservé au magasin / stock.</td></tr>'; return;
+  }
+  document.getElementById('cs-count').textContent = rows.length+' article'+(rows.length>1?'s':'');
+  if(!rows.length){ body.innerHTML='<tr><td colspan="7" class="cs-empty">Aucun article.</td></tr>'; return; }
+  body.innerHTML = rows.map(a=>{
+    const ind = a.type_stock==='Industriel';
+    const qte = (magasin && a.qte_totale!=null) ? fmt(a.qte_totale) : '';
+    return `<tr>
+      <td class="des">${esc(a.designation)}${ind?'<span class="badge-i">Ind</span>':''}</td>
+      <td class="num">${qte}</td>
+      <td>${catSelect(a.name, a.categorie)}</td>
+      <td>${typeSelect(a.name, a.type_stock)}</td>
+      <td>${familleSelect(a.name, a.famille)}</td>
+      <td><input class="grp" data-f="groupe" data-name="${esc(a.name)}" value="${esc(a.groupe||'')}"
+            placeholder="—" oninput="debSave(this)"></td>
+      <td class="st"><span class="dot" data-dot="${esc(a.name)}"></span></td>
+    </tr>`;
+  }).join('');
+}
+
+const SAVEDEB={};
+function debSave(el){
+  const n=el.dataset.name; clearTimeout(SAVEDEB[n]);
+  SAVEDEB[n]=setTimeout(()=>save(el), 600);
+}
+async function save(el){
+  const name=el.dataset.name, field=el.dataset.f, value=el.value;
+  const dot=document.querySelector(`[data-dot="${CSS.escape(name)}"]`);
+  if(dot){ dot.className='dot saving'; }
+  // Si on passe en Ingénierique, on efface famille/groupe côté visuel (cohérence).
+  if(field==='type_stock'){ el.classList.toggle('ind', value==='Industriel'); }
+  if(field==='categorie'){ el.classList.toggle('miss', !value); }
+  try {
+    await frappe.call({method:'kya_hr.api.stock_kya.reclasser_article',
+      args:{name, [field]: value}});
+    if(dot){ dot.className='dot ok'; }
+  } catch(e){ if(dot){ dot.className='dot err'; } }
+}
+
+frappe.ready(init);
+</script>
+{% endblock %}

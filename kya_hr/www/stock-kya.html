@@ -121,6 +121,7 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
       <a class="ks-btn sec" href="/pv-sortie-materiel/new">－ Sortie</a>
       <a class="ks-btn sec" href="/retour-materiel/new">🔄 Retour</a>
       <a class="ks-btn sec" href="/stock-catalogue" title="La vue que voient les demandeurs">📖 Catalogue</a>
+      <a class="ks-btn sec" href="/rapport-stock" title="Rapport hebdomadaire pour la revue du vendredi (exportable Excel)">📊 Rapport hebdo</a>
     </div>
   </div>
 
@@ -179,6 +180,11 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0;">
         <label style="font-weight:700;font-size:.85rem;">Magasin&nbsp;:</label>
         <select id="sai-mag" class="ks-btn sec" style="font-weight:600;min-width:220px;"></select>
+        <label style="font-weight:700;font-size:.85rem;">Type de stock&nbsp;:</label>
+        <select id="sai-type" class="ks-btn sec" style="font-weight:600;">
+          <option value="Ingénierique">Ingénierique</option>
+          <option value="Industriel">Industriel</option>
+        </select>
       </div>
       <datalist id="sai-cats"></datalist>
       <div class="ks-scroll"><table class="ks-tbl ks-tbl-wide" id="sai-tbl">
@@ -295,8 +301,8 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
       <div class="ks-mag">🏬 Par magasin</div>
       <div class="ks-scroll"><table class="ks-tbl"><thead><tr><th>Magasin</th><th style="text-align:right">Entrées</th><th style="text-align:right">Sorties</th><th style="text-align:right">Retours</th></tr></thead>
       <tbody id="rap-mag-body"></tbody></table></div>
-      <div class="ks-mag">🕑 Détail chronologique</div>
-      <div class="ks-scroll"><table class="ks-tbl ks-tbl-wide" style="font-size:.78rem;"><thead><tr><th>Date</th><th>Type</th><th>Désignation</th><th>Catégorie</th><th>Magasin</th><th style="text-align:right">Qté</th><th>État</th><th>Équipe</th></tr></thead>
+      <div class="ks-mag">🕑 Détail chronologique <span id="rap-detail-n" style="font-weight:400;font-size:.72rem;color:#94a3b8;"></span></div>
+      <div class="ks-scroll" style="max-height:52vh;overflow:auto;"><table class="ks-tbl ks-tbl-wide" style="font-size:.78rem;"><thead><tr><th>Date</th><th>Type</th><th>Désignation</th><th>Catégorie</th><th>Magasin</th><th style="text-align:right">Qté</th><th>État</th><th>Équipe</th></tr></thead>
       <tbody id="rap-detail"></tbody></table></div>
     </div>
   </div>
@@ -317,7 +323,8 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
       <div class="ks-note">Colonnes attendues (1ʳᵉ ligne = en-tête), <b>sans code</b> :
         <code>designation, categorie, unite, magasin, bon_etat, a_reparer, defectueux</code>.
         La <b>désignation</b> est la clé (le nom du matériel). Trois colonnes de quantité : <i>bon_etat</i>, <i>a_reparer</i>, <i>defectueux</i>.
-        Ré-importer un article dans le même magasin <b>remplace</b> son ouverture (pas de cumul).</div>
+        Ré-importer un article dans le même magasin <b>remplace</b> son ouverture (pas de cumul).
+        <br><b>Stock industriel</b> : une <b>ligne-titre</b> (désignation seule, ex. <i>MATERIEL D'ASSEMBLAGE DE BATTERIES</i>, <i>PRODUITS FINIS</i>) classe automatiquement les articles listés en dessous. Voir la feuille « Aide » du modèle.</div>
 
       <div style="display:flex;flex-direction:column;gap:6px;max-width:560px;">
         <div><b>1.</b> <a href="#" onclick="modele();return false;">⬇️ Télécharger le modèle Excel</a> (contient les magasins valides).</div>
@@ -419,7 +426,7 @@ function render(){
 
   const tb={"Entrée":"b-e","Sortie":"b-s","Retour":"b-r","Inventaire":"b-i","Ajustement":"b-i"};
   document.getElementById('ks-mvtbody').innerHTML = (DASH.recents||[]).map(r=>`<tr>
-    <td>${r.date_mouvement||''}</td><td><span class="badge ${tb[r.type_mouvement]||'b-i'}">${r.type_mouvement}</span></td>
+    <td>${dfr(r.date_mouvement)}</td><td><span class="badge ${tb[r.type_mouvement]||'b-i'}">${r.type_mouvement}</span></td>
     <td>${r.item_name||''}</td><td>${r.magasin||''}</td>
     <td class="num" style="color:${r.quantite<0?'#991b1b':'#166534'}">${r.quantite}</td>
     <td>${r.etat||''}</td><td style="font-size:.72rem;color:#64748b">${r.reference_name||''}</td></tr>`).join('')
@@ -538,7 +545,7 @@ async function renderRap(force){
     <div class="ks-kpi red"><div class="n">${k.sorties}</div><div class="l">Sorties (u.)</div></div>
     <div class="ks-kpi warn"><div class="n">${k.retours}</div><div class="l">Retours (u.)</div></div>
     <div class="ks-kpi blue"><div class="n">${k.nb_mouvements}</div><div class="l">Mouvements</div></div>
-    <div class="ks-kpi" style="border-left-color:#64748b"><div class="n" style="color:#64748b;font-size:1rem;line-height:1.4">${d.periode.debut}<br>→ ${d.periode.fin}</div><div class="l">Période</div></div>`;
+    <div class="ks-kpi" style="border-left-color:#64748b"><div class="n" style="color:#64748b;font-size:1rem;line-height:1.4">${dfr(d.periode.debut)}<br>→ ${dfr(d.periode.fin)}</div><div class="l">Période</div></div>`;
   const vide=c=>`<tr><td colspan="${c}" style="text-align:center;color:#94a3b8;padding:14px;">Aucune donnée sur la période.</td></tr>`;
   document.getElementById('rap-equipe').innerHTML=(d.par_equipe||[]).map(e=>`<tr>
     <td><b>${e.equipe}</b></td><td class="num" style="color:#991b1b">${e.sorties}</td><td class="num">${e.mouvements}</td></tr>`).join('')||vide(3);
@@ -550,11 +557,14 @@ async function renderRap(force){
     <td class="num" style="color:#991b1b">${m.sorties}</td><td class="num" style="color:#92400e">${m.retours}</td></tr>`).join('')||vide(4);
   const tb={"Entrée":"b-e","Sortie":"b-s","Retour":"b-r","Inventaire":"b-i","Ajustement":"b-i"};
   document.getElementById('rap-detail').innerHTML=(d.detail||[]).map(m=>`<tr>
-    <td>${m.date}</td><td><span class="badge ${tb[m.type]||'b-i'}">${m.type}</span></td>
+    <td>${dfr(m.date)}</td><td><span class="badge ${tb[m.type]||'b-i'}">${m.type}</span></td>
     <td>${m.designation}</td><td style="font-size:.74rem;color:#64748b">${m.categorie}</td>
     <td style="font-size:.74rem">${m.magasin}</td>
     <td class="num" style="color:${m.quantite<0?'#991b1b':'#166534'}">${m.quantite}</td>
     <td>${m.etat||''}</td><td style="font-size:.74rem">${m.equipe||''}</td></tr>`).join('')||vide(8);
+  const nd=(d.detail||[]).length;
+  document.getElementById('rap-detail-n').textContent =
+    nd ? `(${nd} affiché${nd>1?'s':''}${k.nb_mouvements>nd?' sur '+k.nb_mouvements:''}, du plus récent)` : '';
 }
 async function exportRap(){
   const r=(await frappe.call({method:'kya_hr.kya_hr.api.stock_catalogue.rapport_periode_xlsx',args:rapArgs()})).message;
@@ -617,6 +627,7 @@ function saiCollect(){
 }
 async function saiSave(){
   const mag=document.getElementById('sai-mag').value;
+  const type_stock=document.getElementById('sai-type').value;
   const res=document.getElementById('sai-res');
   if(!mag){ frappe.msgprint("Choisissez d'abord un magasin."); return; }
   const rows=saiCollect();
@@ -624,7 +635,7 @@ async function saiSave(){
   const btn=document.getElementById('sai-btn'); btn.disabled=true; res.textContent='Enregistrement…';
   try{
     const r=(await frappe.call({method:'kya_hr.api.stock_kya.saisir_stock_direct',
-      args:{magasin:mag, lignes:JSON.stringify(rows)}})).message;
+      args:{magasin:mag, lignes:JSON.stringify(rows), type_stock:type_stock||undefined}})).message;
     res.textContent=`✅ Fiche ${r.name} enregistrée (${r.lignes} ligne(s)).`;
     document.getElementById('sai-body').innerHTML=''; saiAddRow(); saiAddRow(); saiAddRow();
     await load();
@@ -660,6 +671,9 @@ function modele(){
     const r=res.message; if(r) dlB64(r.content_base64, r.filename);
   });
 }
+// Date ISO (aaaa-mm-jj…) -> jj/mm/aaaa pour l'affichage.
+function dfr(s){ if(!s) return ''; const p=String(s).slice(0,10).split('-');
+  return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : s; }
 function dlB64(b64,name){
   const bin=atob(b64); const arr=new Uint8Array(bin.length);
   for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
