@@ -6,8 +6,14 @@
   .dr { max-width:1180px; margin:18px auto 70px; padding:0 16px; color:#0f172a; }
   .dr h1 { font-size:1.4rem; font-weight:900; margin:0; color:#0e7c4a; display:flex; align-items:center; gap:10px; }
   .dr .sub { color:#64748b; font-size:.83rem; margin-top:4px; }
-  .dr-grid { display:grid; grid-template-columns:minmax(0,380px) minmax(0,1fr); gap:20px; margin-top:18px; }
-  @media(max-width:820px){ .dr-grid{ grid-template-columns:1fr; } }
+  .dr-grid { display:grid; grid-template-columns:minmax(0,380px) minmax(0,1fr); gap:20px; margin-top:18px; align-items:start; }
+  @media(max-width:920px){ .dr-grid{ grid-template-columns:1fr; } }
+  .card.prev { padding:12px; position:sticky; top:12px; }
+  .prev-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .prev-head .tag { font-size:.62rem; font-weight:800; color:#0e7c4a; background:#e7f5ee; padding:3px 9px; border-radius:20px; text-transform:uppercase; letter-spacing:.4px; }
+  .prev-paper { width:100%; height:600px; border:1px solid #e2e8f0; border-radius:10px; background:#f8fafc; }
+  .prev-hint { text-align:center; color:#94a3b8; font-size:.8rem; padding:60px 20px; }
+  .list-wrap { margin-top:20px; }
   .card { background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:18px; box-shadow:0 1px 3px rgba(0,0,0,.05); }
   .card h2 { font-size:.95rem; font-weight:800; margin:0 0 14px; color:#0f172a; text-transform:uppercase; letter-spacing:.4px; }
   .f { margin-bottom:12px; }
@@ -91,15 +97,25 @@
       <div class="msg" id="d-msg"></div>
     </div>
 
-    <!-- Liste -->
-    <div class="card">
-      <h2>Documents récents</h2>
-      <div style="overflow-x:auto;">
-        <table class="tbl">
-          <thead><tr><th>Type</th><th>Bénéficiaire</th><th>Date</th><th>État</th><th>Actions</th></tr></thead>
-          <tbody id="d-list"><tr><td colspan="5" class="empty">Chargement…</td></tr></tbody>
-        </table>
+    <!-- Aperçu live -->
+    <div class="card prev">
+      <div class="prev-head">
+        <h2 style="margin:0;">Aperçu</h2>
+        <span class="tag" id="prev-tag">temps réel</span>
       </div>
+      <div id="prev-hint" class="prev-hint">Choisissez un employé — l'aperçu du document s'affiche ici, exactement comme il sera imprimé.</div>
+      <iframe id="prev-frame" class="prev-paper" style="display:none;" title="Aperçu du document"></iframe>
+    </div>
+  </div>
+
+  <!-- Liste -->
+  <div class="card list-wrap">
+    <h2>Documents récents</h2>
+    <div style="overflow-x:auto;">
+      <table class="tbl">
+        <thead><tr><th>Type</th><th>Bénéficiaire</th><th>Date</th><th>État</th><th>Actions</th></tr></thead>
+        <tbody id="d-list"><tr><td colspan="5" class="empty">Chargement…</td></tr></tbody>
+      </table>
     </div>
   </div>
 </div>
@@ -115,6 +131,7 @@ function toggleType(){
   var t=document.getElementById('d-type').value;
   document.getElementById('wrap-theme').style.display = (t==='Certificat de Stage')?'':'none';
   document.getElementById('wrap-poste').style.display = (t!=='Certificat de Stage')?'':'none';
+  schedulePreview();
 }
 
 function fillEmpSelect(list){
@@ -125,7 +142,7 @@ function fillEmpSelect(list){
 }
 
 function prefill(){
-  var emp=document.getElementById('d-emp').value; if(!emp) return;
+  var emp=document.getElementById('d-emp').value; if(!emp){ schedulePreview(); return; }
   frappe.call({method:'kya_hr.kya_hr.doctype.document_rh_kya.document_rh_kya.prefill_from_employee',
     args:{employee:emp, type_document:document.getElementById('d-type').value},
     callback:function(r){ var m=r.message||{};
@@ -134,8 +151,35 @@ function prefill(){
       if(m.date_debut) document.getElementById('d-debut').value=m.date_debut;
       if(m.date_fin) document.getElementById('d-fin').value=m.date_fin;
       if(m.duree_texte) document.getElementById('d-duree').value=m.duree_texte;
+      renderPreview();
     }});
 }
+
+// ── Aperçu live ───────────────────────────────────────────────────────────────
+var PREV_TIMER=null;
+function collectArgs(){
+  return { type_document:document.getElementById('d-type').value,
+    employee:document.getElementById('d-emp').value,
+    theme:document.getElementById('d-theme').value, poste:document.getElementById('d-poste').value,
+    diplome:document.getElementById('d-diplome').value, date_debut:document.getElementById('d-debut').value,
+    date_fin:document.getElementById('d-fin').value, duree_texte:document.getElementById('d-duree').value,
+    date_document:document.getElementById('d-date').value,
+    utiliser_signature_enregistree:document.querySelector('input[name=sig]:checked').value };
+}
+function renderPreview(){
+  var emp=document.getElementById('d-emp').value;
+  var frame=document.getElementById('prev-frame'), hint=document.getElementById('prev-hint');
+  if(!emp){ frame.style.display='none'; hint.style.display=''; return; }
+  frappe.call({method:'kya_hr.kya_hr.doctype.document_rh_kya.document_rh_kya.apercu_document',
+    args:collectArgs(),
+    callback:function(r){
+      if(r.message){ hint.style.display='none'; frame.style.display='';
+        frame.srcdoc='<!doctype html><html><head><meta charset="utf-8">'+
+          '<style>html,body{margin:0;background:#fff;} body{padding:26px 30px;}</style></head><body>'+
+          r.message+'</body></html>'; }
+    }});
+}
+function schedulePreview(){ clearTimeout(PREV_TIMER); PREV_TIMER=setTimeout(renderPreview, 400); }
 
 function generer(){
   var btn=document.getElementById('d-gen'), msg=document.getElementById('d-msg');
@@ -191,6 +235,13 @@ frappe.ready(function(){
   document.getElementById('d-emp-search').addEventListener('input', function(){
     var q=this.value.toLowerCase();
     fillEmpSelect(EMPS.filter(function(e){ return (e.employee_name||'').toLowerCase().indexOf(q)!==-1; }));
+  });
+  // toute édition rafraîchit l'aperçu (débounce)
+  ['d-theme','d-poste','d-diplome','d-debut','d-fin','d-duree','d-date'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.addEventListener('input', schedulePreview);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('input[name=sig]'), function(el){
+    el.addEventListener('change', schedulePreview);
   });
   frappe.call({method:'kya_hr.kya_hr.doctype.document_rh_kya.document_rh_kya.liste_employes',
     callback:function(r){ EMPS=r.message||[]; fillEmpSelect(EMPS); }});

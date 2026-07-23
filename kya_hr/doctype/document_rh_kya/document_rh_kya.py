@@ -223,9 +223,55 @@ def liste_documents(limit=60):
     return rows
 
 
+def _detourer_signature(content, ext):
+    """Retire le « support » (fond blanc/uni) d'une signature scannée pour qu'elle
+    s'incruste proprement sur le document (l'encre seule, plus de rectangle blanc
+    visible). Rend un PNG transparent. Si le traitement échoue ou si l'image est
+    déjà un PNG à fond transparent, on renvoie l'original inchangé.
+
+    Le fond est détecté depuis les 4 coins : si les coins ne sont pas uniformément
+    clairs (photo, tampon coloré…), on n'y touche pas pour éviter d'abîmer l'image.
+    """
+    try:
+        import io
+        from PIL import Image
+    except Exception:
+        return None, ext
+    try:
+        img = Image.open(io.BytesIO(content))
+        # PNG déjà transparent : ne rien faire (le support est déjà retiré)
+        if img.mode in ("RGBA", "LA") and ext == "png":
+            alpha = img.getchannel("A")
+            if alpha.getextrema()[0] < 255:
+                return None, ext
+        img = img.convert("RGBA")
+        w, h = img.size
+        px = img.load()
+        # échantillon des 4 coins pour confirmer un fond clair uniforme
+        coins = [px[0, 0], px[w - 1, 0], px[0, h - 1], px[w - 1, h - 1]]
+        clairs = [c for c in coins if c[0] > 205 and c[1] > 205 and c[2] > 205]
+        if len(clairs) < 3:
+            return None, ext  # fond non uniforme → on ne détoure pas
+        SEUIL = 200
+        for y in range(h):
+            for x in range(w):
+                r, g, b, a = px[x, y]
+                if r >= SEUIL and g >= SEUIL and b >= SEUIL:
+                    px[x, y] = (r, g, b, 0)          # fond → transparent
+                elif r > 150 and g > 150 and b > 150:
+                    # anti-crénelage : bords clairs → semi-transparents
+                    px[x, y] = (r, g, b, 90)
+        out = io.BytesIO()
+        img.save(out, format="PNG")
+        return out.getvalue(), "png"
+    except Exception:
+        return None, ext
+
+
 def signature_dg_data_uri():
     """Signature enregistrée du DG (data URI) depuis le Single « Signature Direction
-    KYA », prête pour le print format. '' si non configurée."""
+    KYA », prête pour le print format. '' si non configurée. Le fond (support) de
+    l'image importée est retiré pour un rendu propre sur le document."""
     try:
         sig = frappe.db.get_single_value("Signature Direction KYA", "signature")
     except Exception:
@@ -242,7 +288,57 @@ def signature_dg_data_uri():
         if isinstance(content, str):
             content = content.encode("latin-1", errors="ignore")
         ext = (sig.rsplit(".", 1)[-1] or "png").lower()
+        # Détourage du support (fond blanc) → signature « encre seule »
+        detoure, ext2 = _detourer_signature(content, ext)
+        if detoure:
+            content, ext = detoure, ext2
         mime = "image/png" if ext == "png" else ("image/jpeg" if ext in ("jpg", "jpeg") else "image/png")
         return "data:%s;base64,%s" % (mime, base64.b64encode(content).decode())
     except Exception:
         return ""
+
+
+def _build_apercu_doc(type_document, employee, theme=None, poste=None, diplome=None,
+                      nationalite=None, date_debut=None, date_fin=None, duree_texte=None,
+                      date_document=None, utiliser_signature_enregistree=1):
+    """Construit un Document RH KYA NON enregistré, prêt à rendre (aperçu)."""
+    d = frappe.new_doc("Document RH KYA")
+    d.type_document = type_document or "Certificat de Stage"
+    d.employee = employee
+    if employee and frappe.db.exists("Employee", employee):
+        d.autofill()
+    for k, v in {"theme": theme, "poste": poste, "diplome": diplome,
+                 "nationalite": nationalite, "date_debut": date_debut,
+                 "date_fin": date_fin, "duree_texte": duree_texte,
+                 "date_document": date_document}.items():
+        if v:
+            d.set(k, v)
+    if not d.date_document:
+        d.date_document = today()
+    if not d.duree_texte and d.date_debut and d.date_fin:
+        d.duree_texte = duree_en_lettres(d.date_debut, d.date_fin)
+    d.utiliser_signature_enregistree = int(utiliser_signature_enregistree or 0)
+    return d
+
+
+@frappe.whitelist()
+def apercu_document(type_document, employee=None, theme=None, poste=None, diplome=None,
+                    nationalite=None, date_debut=None, date_fin=None, duree_texte=None,
+                    date_document=None, utiliser_signature_enregistree=1):
+    """Rendu HTML du document tel qu'il sortira (aperçu live sur la page RH), sans
+    rien enregistrer. La signature est apposée dans l'aperçu quand l'option « image
+    enregistrée » est retenue (le DG en ligne signera au moment voulu)."""
+    _guard_rh()
+    if not employee:
+        return ""
+    d = _build_apercu_doc(type_document, employee, theme, poste, diplome, nationalite,
+                          date_debut, date_fin, duree_texte, date_document,
+                          utiliser_signature_enregistree)
+    # Aperçu « tel que signé » : on appose la signature image si elle est choisie.
+    if int(utiliser_signature_enregistree or 0):
+        d.signature_finale = signature_dg_data_uri() or None
+    d.name = d.name or "APERÇU"
+    from frappe.translate import print_language
+    with print_language("fr"):
+        html = frappe.get_print("Document RH KYA", d.name, "Document RH KYA", doc=d)
+    return html
