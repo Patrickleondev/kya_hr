@@ -48,8 +48,8 @@
         'Retour Materiel KYA': 'Espace Stock',
         'Item': 'Espace Stock',
 
-        'Brouillard Caisse': 'Espace Comptabilité',
-        'Etat Recap Cheques': 'Espace Comptabilité',
+        'Brouillard Caisse': 'Espace Comptabilite',
+        'Etat Recap Cheques': 'Espace Comptabilite',
 
         'Sortie Vehicule': 'Logistique',
         'Vehicle': 'Logistique',
