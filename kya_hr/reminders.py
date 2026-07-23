@@ -1,16 +1,22 @@
 """
 KYA HR — Rappels automatiques (anniversaires de naissance et d'ancienneté).
 
-Envoi quotidien a l'equipe RH + Direction. Les stagiaires sont exclus.
-Destinataires : la RH (HR Manager, HR User, Responsable RH) et la Direction
-(Directeur Général, DGA). On NE précise PAS l'âge de la personne.
+Envoi quotidien. Les stagiaires sont exclus. On NE précise PAS l'âge.
+- Anniversaire de NAISSANCE : envoyé à TOUT le personnel via la liste de
+  diffusion `personnel@kya-energy.com` (plus de restriction RH/DG).
+- Anniversaire d'ANCIENNETÉ (service) : envoyé à la RH + Direction.
 """
 
 import frappe
 from frappe.utils import today, getdate
 
-# Roles qui recoivent les rappels : la RH et le DG uniquement (pas System
-# Manager, pour ne pas arroser les comptes techniques/admin).
+# Boîte de diffusion de TOUT le personnel KYA : cette adresse groupe redistribue
+# le message à l'ensemble des salariés. Les rappels d'anniversaire (naissance)
+# y sont envoyés → toute l'entreprise reçoit, sans filtrer par rôle.
+STAFF_MAILING_LIST = "personnel@kya-energy.com"
+
+# Roles qui recoivent les rappels d'ancienneté : la RH et le DG uniquement (pas
+# System Manager, pour ne pas arroser les comptes techniques/admin).
 REMINDER_ROLES = (
     "HR Manager",
     "HR User",
@@ -66,9 +72,8 @@ def send_kya_birthday_reminders():
     if not employees:
         return
 
-    recipients = _get_reminder_recipients()
-    if not recipients:
-        return
+    # Rappel de NAISSANCE : envoyé à TOUT le personnel via la liste de diffusion.
+    recipients = [STAFF_MAILING_LIST]
 
     for emp in employees:
         # NB : on ne précise PAS l'âge de la personne (règle KYA).
