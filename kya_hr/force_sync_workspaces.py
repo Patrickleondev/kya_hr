@@ -93,6 +93,8 @@ KYA_AUTO_SIDEBARS = [
             {"label": "Bilans de Stage", "link_to": "Bilan Fin de Stage", "link_type": "DocType", "icon": "clipboard-list"},
             {"label": "Documents RH (certificats / attestations)", "url": "/documents-rh", "link_type": "URL", "icon": "file-text"},
             {"label": "Documents RH KYA", "link_to": "Document RH KYA", "link_type": "DocType", "icon": "file"},
+            {"label": "Effectifs des équipes (détail)", "url": "/equipe-effectifs", "link_type": "URL", "icon": "users"},
+            {"label": "Journal des modifications (fiches)", "link_to": "Modification Info Employe KYA", "link_type": "DocType", "icon": "list"},
         ],
     },
     {
