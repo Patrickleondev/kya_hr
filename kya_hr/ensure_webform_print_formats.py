@@ -49,6 +49,9 @@ DOCTYPE_DEFAULT_PRINT_FORMATS = {
     "Retour Materiel KYA": "Retour Materiel KYA Officiel",
     "Inventaire KYA": "Fiche Inventaire KYA",
     "KYA Contrat": "KYA Contrat PDF",
+    "Document RH KYA": "Document RH KYA",
+    "Avenant Contrat KYA": "Avenant Contrat KYA",
+    "Contrat Stage Immersion KYA": "Contrat Stage Immersion KYA",
 }
 
 

@@ -179,6 +179,10 @@ ALLOWED_DOCTYPES = {
     # Documents RH (certificats / attestations) : circuit RH → DG piloté depuis
     # la page /documents-rh (boutons « Envoyer au DG » / « Signer »).
     "Document RH KYA",
+    # Avenant au contrat de travail : circuit RH → DG (page /avenants-rh).
+    "Avenant Contrat KYA",
+    # Contrat de stage d'immersion : circuit RH → DG (page /contrats-immersion).
+    "Contrat Stage Immersion KYA",
 }
 
 
