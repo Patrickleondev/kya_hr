@@ -57,7 +57,7 @@
   {# ===================== PRÉAMBULE ===================== #}
   {% if doc.preambule %}
   <p style="margin:0 0 4px;font-weight:bold;">PRÉAMBULE</p>
-  {% for ln in doc.preambule.split('\n') %}{% if ln.strip() %}<p style="text-align:justify;margin:0 0 10px;">{{ ln.strip() }}</p>{% endif %}{% endfor %}
+  {% for ln in doc.preambule.split('\n') %}{% if ln.strip() %}<p style="text-align:justify;margin:0 0 10px;">{{ doc.render_corps_line(ln.strip()) }}</p>{% endif %}{% endfor %}
   <p style="margin:0 0 14px;">Il a été convenu ce qui suit :</p>
   {% endif %}
 
@@ -71,10 +71,10 @@
       {% set s = ln.strip() %}
       {% if s.startswith('- ') or s.startswith('• ') %}
         {% if not ns.inlist %}<ul style="margin:4px 0 8px 18px;">{% set ns.inlist = true %}{% endif %}
-        <li style="margin:3px 0;text-align:justify;">{{ s[2:] }}</li>
+        <li style="margin:3px 0;text-align:justify;">{{ doc.render_corps_line(s[2:]) }}</li>
       {% else %}
         {% if ns.inlist %}</ul>{% set ns.inlist = false %}{% endif %}
-        {% if s %}<p style="text-align:justify;margin:0 0 8px;">{{ s }}</p>{% endif %}
+        {% if s %}<p style="text-align:justify;margin:0 0 8px;">{{ doc.render_corps_line(s) }}</p>{% endif %}
       {% endif %}
     {% endfor %}
     {% if ns.inlist %}</ul>{% endif %}

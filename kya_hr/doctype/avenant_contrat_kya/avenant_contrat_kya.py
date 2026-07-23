@@ -60,6 +60,15 @@ class AvenantContratKYA(Document):
     def fait_le(self):
         return date_fr(self.date_document)
 
+    def render_corps_line(self, s):
+        """Échappe une ligne du corps puis convertit **gras** -> <b>gras</b>
+        (mise en forme fidèle des montants/labels ; entrée RH = de confiance)."""
+        import re
+        from markupsafe import Markup
+        esc = frappe.utils.escape_html(s or "")
+        esc = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", esc)
+        return Markup(esc)
+
     def autofill(self):
         if not self.employee:
             return
@@ -118,13 +127,13 @@ class AvenantContratKYA(Document):
         # Article 3 — rémunération (montants en lettres si fournis)
         rem_lignes = []
         if self.salaire_fixe:
-            rem_lignes.append("- Part fixe : salaire de base fixé, conformément à la nouvelle grille salariale, "
-                              "à {0}, payable mensuellement.".format(_montant(self.salaire_fixe)))
+            rem_lignes.append("- **Part fixe :** salaire de base fixé, conformément à la nouvelle grille salariale, "
+                              "**à {0}**, payable mensuellement.".format(_montant(self.salaire_fixe)))
         if self.prime_affectation:
-            rem_lignes.append("- Prime d'affectation : {0}, versée mensuellement. Elle couvre les primes de "
+            rem_lignes.append("- **Prime d'affectation : {0}**, versée mensuellement. Elle couvre les primes de "
                               "fonction et d'hébergement et est attachée à l'exercice effectif de la fonction "
                               "visée à l'article 1.".format(_montant(self.prime_affectation)))
-        rem_lignes.append("- Part variable : indexée sur le chiffre d'affaires et sur les performances "
+        rem_lignes.append("- **Part variable :** indexée sur le chiffre d'affaires et sur les performances "
                           "individuelles et collectives, perçue sur une base trimestrielle, selon les "
                           "modalités du guide de l'employé.")
         articles.append({
@@ -137,10 +146,10 @@ class AvenantContratKYA(Document):
         if self.frais_installation:
             articles.append({
                 "titre": "Article 4 — Frais d'installation, logement et transport liés à la mutation",
-                "corps": ("- Frais d'installation : une indemnité d'installation de {0} est versée en une seule "
+                "corps": ("- **Frais d'installation :** une indemnité d'installation de **{0}** est versée en une seule "
                           "fois au début de l'affectation, au titre du remboursement forfaitaire des frais "
                           "professionnels engagés à l'occasion de la mutation.\n"
-                          "- Transport / déménagement : les frais de transport de l'{1} et de déménagement de "
+                          "- **Transport / déménagement :** les frais de transport de l'{1} et de déménagement de "
                           "ses effets sont pris en charge par l'Employeur, sur justificatifs, dans les "
                           "conditions de l'article 34 de la CCIT.").format(_montant(self.frais_installation), emp_min),
             })
