@@ -42,6 +42,7 @@ class AvenantContratKYA(Document):
             self.generer_corps(force=False)
 
     def validate(self):
+        self.autofill()
         self._stamp_signatures()
 
     # Exposés au print format.
@@ -59,13 +60,25 @@ class AvenantContratKYA(Document):
             return
         emp = frappe.db.get_value(
             "Employee", self.employee,
-            ["employee_name", "gender", "designation"], as_dict=True) or {}
+            ["employee_name", "gender", "designation",
+             "personal_email", "company_email", "user_id",
+             "cell_number", "current_address", "permanent_address"],
+            as_dict=True) or {}
         if not self.beneficiaire_nom:
             self.beneficiaire_nom = emp.get("employee_name")
         if not self.gender:
             self.gender = emp.get("gender")
         if not self.civilite:
             self.civilite = civilite_defaut(emp.get("gender"))
+        # Coordonnées pour la signature en ligne (uniquement si vides : n'écrase
+        # jamais une saisie manuelle de la RH).
+        if not self.employee_email:
+            self.employee_email = (
+                emp.get("personal_email") or emp.get("company_email") or emp.get("user_id") or "")
+        if not self.telephone:
+            self.telephone = emp.get("cell_number") or ""
+        if not self.domicile:
+            self.domicile = emp.get("current_address") or emp.get("permanent_address") or ""
 
     # ── Génération du corps par défaut (fidèle au modèle, puis éditable) ──────
     def generer_corps(self, force=True):
@@ -175,34 +188,122 @@ class AvenantContratKYA(Document):
         if not self.date_signature:
             self.date_signature = now_datetime()
 
-    def on_update_after_submit(self):
-        self._notify_if_signed()
+    def on_update(self):
+        # États 0 (avant submit) : notifie le salarié à l'envoi, le DG au relais RH.
+        self._maybe_notify_signataire()
+        self._maybe_notify_dg()
 
     def on_submit(self):
-        self._notify_if_signed()
+        self._maybe_generate_pdf()
 
-    def _notify_if_signed(self):
-        if (self.workflow_state or "") not in SIGNED_STATES:
+    def on_update_after_submit(self):
+        self._maybe_generate_pdf()
+
+    def _maybe_notify_signataire(self):
+        """À l'ENTRÉE dans 'En attente Signature Salarié' (action « Envoyer au
+        salarié » ou bouton RH), envoie au signataire le lien magique. Une seule
+        fois, à la transition."""
+        if self.workflow_state != "En attente Signature Salarié":
             return
-        if self.flags.get("_notified"):
+        if self.flags.get("signataire_email_sent"):
+            return
+        before = self.get_doc_before_save()
+        if before and before.workflow_state == "En attente Signature Salarié":
             return
         try:
-            user = frappe.db.get_value("Employee", self.employee, "user_id") if self.employee else None
-            if not user or user in ("Administrator", "Guest"):
-                return
-            frappe.sendmail(
-                recipients=[user],
-                subject="[KYA] Votre avenant au contrat est disponible",
-                message=(
-                    "<p>Bonjour,</p><p>Votre <b>avenant au contrat de travail</b> "
-                    "({0}) a été signé par la Direction et est disponible.</p>"
-                    "<p>— Ressources Humaines, KYA-Energy Group</p>"
-                ).format(self.objet or self.name),
-                reference_doctype=self.doctype, reference_name=self.name, now=False,
-            )
-            self.flags._notified = True
+            from kya_hr.api.avenant_signature import send_signataire_email
+            send_signataire_email(self)
         except Exception:
-            frappe.log_error(frappe.get_traceback(), "Avenant KYA: notif")
+            frappe.log_error(frappe.get_traceback(), "Avenant KYA — Notification signataire")
+
+    def _maybe_notify_dg(self):
+        """À l'entrée dans 'En attente DG' (RH a cliqué « Soumettre au DG »),
+        envoie le lien magique de co-signature au DG."""
+        if self.workflow_state != "En attente DG":
+            return
+        before = self.get_doc_before_save()
+        if before and before.workflow_state == "En attente DG":
+            return
+        try:
+            from kya_hr.api.avenant_signature import notify_dg_after_rh_gateway
+            notify_dg_after_rh_gateway(self)
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), "Avenant KYA — Notification DG")
+
+    def _maybe_generate_pdf(self):
+        """Quand l'avenant est signé (Signé), génère + attache le PDF final et
+        envoie l'exemplaire signé par email (salarié + RH + DG). Une seule fois."""
+        if (self.workflow_state or "") not in SIGNED_STATES:
+            return
+        if self.pdf_final:
+            return
+        if not (self.signature_finale and (self.signature_employe or self.signature_employe_finale)):
+            # Cas « sans portail » (signature papier) : pas de signature employé
+            # numérique — on génère quand même le PDF (visas/articles/DG estampillé).
+            if not self.signature_finale:
+                return
+        try:
+            self._generate_and_attach_pdf()
+            self._send_final_emails()
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), "Avenant KYA — Génération PDF")
+
+    def _generate_and_attach_pdf(self):
+        from frappe.utils.pdf import get_pdf
+        from kya_hr.api.avenant_signature import render_avenant_pdf_html
+
+        html = render_avenant_pdf_html(self)
+        pdf_bytes = get_pdf(html)
+        file_doc = frappe.get_doc({
+            "doctype": "File",
+            "file_name": f"Avenant_{self.name}.pdf",
+            "attached_to_doctype": self.doctype,
+            "attached_to_name": self.name,
+            "content": pdf_bytes,
+            "is_private": 1,
+        }).insert(ignore_permissions=True)
+        self.db_set("pdf_final", file_doc.file_url)
+
+    def _send_final_emails(self):
+        recipients = []
+        if self.employee_email:
+            recipients.append(self.employee_email)
+        if self.rh_sender_email and self.rh_sender_email not in recipients:
+            recipients.append(self.rh_sender_email)
+        try:
+            rh_email = frappe.db.get_single_value("KYA Dashboard Settings", "rh_email")
+            if rh_email and rh_email not in recipients:
+                recipients.append(rh_email)
+        except Exception:
+            pass
+        for u in frappe.get_all("Has Role", filters={"role": "Directeur Général", "parenttype": "User"}, fields=["parent"]):
+            em = frappe.db.get_value("User", u.parent, "email")
+            if em and em not in recipients:
+                recipients.append(em)
+        if not recipients:
+            return
+        attachments = []
+        if self.pdf_final:
+            fid = frappe.db.get_value("File", {"file_url": self.pdf_final}, "name")
+            if fid:
+                attachments.append({"fid": fid})
+        objet = self.objet or "avenant à votre contrat de travail"
+        frappe.sendmail(
+            recipients=recipients,
+            subject=f"📄 Avenant finalisé — {self.beneficiaire_nom} — {self.name}",
+            message=(
+                "<div style='font-family:Arial,sans-serif;max-width:640px;margin:0 auto;'>"
+                "<p>Bonjour <b>{nom}</b>,</p>"
+                "<p>Votre <b>avenant au contrat de travail</b> ({objet}) est désormais "
+                "signé par les deux parties et archivé.</p>"
+                "<p>Vous trouverez en <b>pièce jointe</b> votre exemplaire signé (PDF).</p>"
+                "<p>Référence : <b>{ref}</b></p>"
+                "<p style='margin-top:18px;'>Bien cordialement,<br>"
+                "<b>Direction des Ressources Humaines</b><br>KYA-Energy Group</p></div>"
+            ).format(nom=self.beneficiaire_nom or "", objet=objet, ref=self.name),
+            attachments=attachments,
+            reference_doctype=self.doctype, reference_name=self.name, now=False,
+        )
 
 
 # ── API desk (bouton « Générer le corps par défaut ») ─────────────────────────
