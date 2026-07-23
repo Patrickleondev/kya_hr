@@ -51,6 +51,7 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.setup_pv_extensions.run", "Setup PV extensions"),
     ("kya_hr.setup_retour_materiel.run", "Setup Retour Matériel + fournisseurs KYA"),
     ("kya_hr.setup_kya_stocks.execute", "Setup stock KYA (5 groupes + 36 items + opening 2026-06-05)"),
+    ("kya_hr.maintenance.setup_stock_seed.execute", "Seed initial du stock depuis le classeur fourni par l'équipe (data/seed_stock_initial.json) : 315 articles classés (sections type_stock/famille/groupe) + ouverture par magasin ; IDEMPOTENT (drapeau + ne clobbère jamais un stock existant) ; mapping magasin vers les noms cible « - KYA »"),
     ("kya_hr.setup_inventaire_dashboard.run", "Setup inventaire dashboard"),
     ("kya_hr.setup_rh_dashboard.run", "Setup dashboard RH"),
     ("kya_hr.setup_attendance_fields.execute", "Setup custom fields Attendance (KYA marked_by, lateness, etc.)"),
