@@ -1,29 +1,28 @@
-<div style="font-family:'Times New Roman',Georgia,serif;color:#111;max-width:720px;margin:0 auto;font-size:13.5pt;line-height:1.7;">
+<div style="font-family:'Arial Narrow','Arial Nova Cond',Arial,sans-serif;color:#000;max-width:720px;margin:0 auto;font-size:12pt;line-height:1.55;">
 
-  {# ---------- En-tête KYA ---------- #}
-  <table style="width:100%;border-collapse:collapse;margin-bottom:6px;">
+  {# ===================== EN-TÊTE OFFICIEL KYA ===================== #}
+  <table style="width:100%;border-collapse:collapse;margin-bottom:2px;">
     <tr>
-      <td style="width:120px;vertical-align:top;">
-        <img src="/assets/kya_hr/images/logo_kya.png" style="width:110px;height:auto;" alt="KYA-Energy Group">
+      <td style="width:150px;vertical-align:middle;">
+        <img src="/assets/kya_hr/images/logo_kya.png" style="width:140px;height:auto;" alt="KYA-Energy Group">
       </td>
-      <td style="text-align:right;vertical-align:top;font-size:10pt;color:#0b4f49;line-height:1.35;">
-        <div style="font-weight:bold;font-size:12pt;color:#0e7c4a;">KYA-Energy Group</div>
-        <div style="font-style:italic;">Move beyond the sky!</div>
-        <div>08 BP 81 101 &mdash; Lomé (TOGO)</div>
-        <div>Tél. : +228 70 45 34 81 &middot; info@kya-energy.com</div>
-        <div>N° RCCM : TG-LOM 2015 B 975 &middot; NIF : 1000430317</div>
+      <td style="text-align:right;vertical-align:middle;font-size:9.5pt;line-height:1.35;color:#000;">
+        <div style="font-style:italic;font-weight:bold;color:#1c9e8e;font-size:11pt;">KYA, move beyond the sky!</div>
+        <div>info@kya-energy.com</div>
+        <div>N°&nbsp;RCCM&nbsp;: TG-LOM 2015 B 975</div>
+        <div>NIF&nbsp;: 1000430317 &nbsp;|&nbsp; CNSS&nbsp;: 48863</div>
       </td>
     </tr>
   </table>
-  <div style="border-bottom:2px solid #0e7c4a;margin-bottom:26px;"></div>
+  <div style="border-bottom:2.5px solid #1c9e8e;margin-bottom:34px;"></div>
 
-  {# ---------- Titre ---------- #}
+  {# ===================== TITRE ===================== #}
   {% set t = doc.type_document or "Certificat de Stage" %}
-  <h1 style="text-align:center;text-transform:uppercase;letter-spacing:1px;font-size:17pt;margin:10px 0 30px;">
+  <div style="text-align:center;font-weight:bold;text-decoration:underline;font-size:16pt;letter-spacing:.5px;margin:6px 0 34px;text-transform:uppercase;">
     {% if t == "Certificat de Stage" %}Certificat de Stage
     {% elif t == "Attestation de Travail" %}Attestation de Travail
     {% else %}Attestation de Prestation{% endif %}
-  </h1>
+  </div>
 
   {% set civ = doc.civilite or "M." %}
   {% set nom = doc.beneficiaire_nom or "" %}
@@ -31,69 +30,70 @@
   {% set d2 = frappe.utils.formatdate(doc.date_fin, "dd MMMM yyyy") if doc.date_fin else "…" %}
   {% set duree = doc.duree_texte or "…" %}
 
-  {# ---------- Corps ---------- #}
-  <p style="text-align:justify;">
-    Je soussigné, <b>{{ doc.signataire_nom or "le Directeur Général" }}</b>,
+  {# ===================== CORPS ===================== #}
+  <p style="text-align:justify;margin:0 0 16px;">
+    Je soussigné, <b>{{ doc.signataire_nom or "Prof. Yao Kétowoglo AZOUMAH" }}</b>,
     <b>{{ doc.signataire_titre or "Directeur Général" }}</b> de l'entreprise
-    <b>KYA-Energy Group</b>, 08 BP 81 101, Tél : 70 45 34 81 à Lomé (TOGO), certifie que&nbsp;:
+    <b>KYA-Energy&nbsp;Group</b> 08 BP 81 101 Tél&nbsp;: 70 45 34 81 à Lomé (TOGO), certifie que&nbsp;:
   </p>
 
   {% if t == "Certificat de Stage" %}
-  <p style="text-align:justify;">
-    <b>{{ civ }} {{ nom }}</b>{% if doc.telephone %} ; Tél : {{ doc.telephone }}{% endif %}{% if doc.email %}, mail : {{ doc.email }}{% endif %},
+  <p style="text-align:justify;margin:0 0 16px;">
+    <b>{{ civ }} {{ nom }}</b>{% if doc.telephone %} ; Tél : {{ doc.telephone }}{% endif %}{% if doc.email %}, mail : ({{ doc.email }}){% endif %}
     de nationalité {{ doc.nationalite or "togolaise" }}{% if doc.diplome %} et titulaire d'une {{ doc.diplome }}{% endif %},
     a effectué un stage de <b>{{ duree }}</b>, du <b>{{ d1 }}</b> au <b>{{ d2 }}</b>, au sein de mon entreprise.
   </p>
   {% if doc.theme %}
-  <p style="text-align:justify;">
-    Au cours dudit stage, <b>{{ civ }} {{ nom }}</b> a eu à travailler avec satisfaction sur le thème&nbsp;:
+  <p style="text-align:justify;margin:0 0 16px;">
+    Au cours dudit stage <b>{{ civ }} {{ nom }}</b> a eu à travailler avec satisfaction sur le thème&nbsp;:
   </p>
-  <p style="text-align:justify;font-style:italic;padding:0 18px;">« {{ doc.theme }} »</p>
+  <p style="text-align:justify;margin:0 0 16px;font-weight:bold;">« {{ doc.theme }} »</p>
   {% endif %}
-  <p style="text-align:justify;">
+  <p style="text-align:justify;margin:0 0 16px;">
     Le présent certificat est délivré à l'intéressé(e), sur sa demande, pour servir et valoir ce que de droit.
   </p>
 
   {% elif t == "Attestation de Travail" %}
-  <p style="text-align:justify;">
-    <b>{{ civ }} {{ nom }}</b>{% if doc.telephone %} ; Tél : {{ doc.telephone }}{% endif %}{% if doc.email %}, mail : {{ doc.email }}{% endif %},
-    de nationalité {{ doc.nationalite or "togolaise" }}, est employé(e) au sein de <b>KYA-Energy Group</b>
-    {% if doc.poste %}en qualité de <b>{{ doc.poste }}</b>{% endif %},
-    {% if doc.date_debut %}depuis le <b>{{ d1 }}</b>{% endif %}{% if doc.date_fin %} jusqu'au <b>{{ d2 }}</b>{% endif %}.
+  <p style="text-align:justify;margin:0 0 16px;">
+    <b>{{ civ }} {{ nom }}</b>{% if doc.telephone %} ; Tél : {{ doc.telephone }}{% endif %}{% if doc.email %}, mail : ({{ doc.email }}){% endif %}
+    de nationalité {{ doc.nationalite or "togolaise" }}, est employé(e) au sein de <b>KYA-Energy&nbsp;Group</b>
+    {% if doc.poste %}en qualité de <b>{{ doc.poste }}</b>{% endif %}{% if doc.date_debut %}, depuis le <b>{{ d1 }}</b>{% endif %}{% if doc.date_fin %} jusqu'au <b>{{ d2 }}</b>{% endif %}.
   </p>
-  <p style="text-align:justify;">
+  <p style="text-align:justify;margin:0 0 16px;">
     La présente attestation est délivrée à l'intéressé(e), sur sa demande, pour servir et valoir ce que de droit.
   </p>
 
   {% else %}
-  <p style="text-align:justify;">
+  <p style="text-align:justify;margin:0 0 16px;">
     <b>{{ civ }} {{ nom }}</b>{% if doc.telephone %} ; Tél : {{ doc.telephone }}{% endif %},
     a effectué une prestation{% if doc.poste %} en qualité de <b>{{ doc.poste }}</b>{% endif %}
-    au profit de <b>KYA-Energy Group</b>{% if doc.date_debut %}, du <b>{{ d1 }}</b>{% endif %}{% if doc.date_fin %} au <b>{{ d2 }}</b>{% endif %}.
+    au profit de <b>KYA-Energy&nbsp;Group</b>{% if doc.date_debut %}, du <b>{{ d1 }}</b>{% endif %}{% if doc.date_fin %} au <b>{{ d2 }}</b>{% endif %}.
   </p>
-  <p style="text-align:justify;">
+  <p style="text-align:justify;margin:0 0 16px;">
     La présente attestation est délivrée à l'intéressé(e), sur sa demande, pour servir et valoir ce que de droit.
   </p>
   {% endif %}
 
-  {# ---------- Lieu / date + signature ---------- #}
-  <p style="margin-top:34px;">
-    Fait à {{ doc.lieu or "Lomé" }}, le {{ frappe.utils.formatdate(doc.date_document, "dd MMMM yyyy") if doc.date_document else "…" }}.
+  {# ===================== LIEU / DATE ===================== #}
+  <p style="margin:30px 0 0;">
+    Fait à {{ doc.lieu or "Lomé" }} le {{ frappe.utils.formatdate(doc.date_document, "dd MMMM yyyy") if doc.date_document else "…" }}.
   </p>
 
-  <div style="margin-top:20px;text-align:right;">
+  {# ===================== SIGNATURE ===================== #}
+  <div style="margin-top:14px;text-align:right;">
     <div style="display:inline-block;text-align:center;min-width:260px;">
       <div style="font-weight:bold;">{{ doc.signataire_titre or "Le Directeur Général" }}</div>
       {% if doc.signature_finale %}
-        <img src="{{ doc.signature_finale }}" style="max-height:90px;max-width:240px;object-fit:contain;margin:6px 0;">
+        <img src="{{ doc.signature_finale }}" style="max-height:95px;max-width:250px;object-fit:contain;margin:4px 0;">
       {% else %}
-        <div style="height:70px;"></div>
+        <div style="height:72px;"></div>
       {% endif %}
-      <div style="font-weight:bold;">{{ doc.signataire_nom or "" }}</div>
+      <div style="font-weight:bold;">{{ doc.signataire_nom or "Prof. Yao AZOUMAH" }}</div>
     </div>
   </div>
 
-  <div style="margin-top:24px;font-size:8.5pt;color:#94a3b8;text-align:center;">
-    Document {{ doc.name }} &middot; KYA-Energy Group
+  {# ===================== PIED DE PAGE OFFICIEL ===================== #}
+  <div style="margin-top:40px;border-top:2.5px solid #f5a623;padding-top:6px;text-align:center;font-size:9pt;color:#1c9e8e;">
+    +228 70 45 34 81 / 99 99 93 80&nbsp;&nbsp;|&nbsp;&nbsp;08 BP 81101 Agoè-Logopé, Lomé-TOGO&nbsp;&nbsp;|&nbsp;&nbsp;www.kya-energy.com
   </div>
 </div>

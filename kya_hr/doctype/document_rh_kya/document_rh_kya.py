@@ -216,9 +216,10 @@ def liste_documents(limit=60):
         order_by="modified desc", limit_page_length=int(limit or 60))
     from urllib.parse import quote
     for r in rows:
-        r["pdf_url"] = ("/api/method/frappe.utils.print_format.download_pdf"
+        # download_pdf KYA : inline le logo /assets (wkhtmltopdf ne résout pas les URLs)
+        r["pdf_url"] = ("/api/method/kya_hr.api.print_format.download_pdf"
                         "?doctype=Document%20RH%20KYA&name=" + quote(r["name"])
-                        + "&format=Document%20RH%20KYA&_lang=fr")
+                        + "&format=Document%20RH%20KYA&language=fr")
     return rows
 
 

@@ -91,6 +91,8 @@ KYA_AUTO_SIDEBARS = [
             {"label": "Plannings Congé", "link_to": "Planning Conge", "link_type": "DocType", "icon": "calendar"},
             {"label": "Contrats KYA", "link_to": "KYA Contrat", "link_type": "DocType", "icon": "file-text"},
             {"label": "Bilans de Stage", "link_to": "Bilan Fin de Stage", "link_type": "DocType", "icon": "clipboard-list"},
+            {"label": "Documents RH (certificats / attestations)", "url": "/documents-rh", "link_type": "URL", "icon": "file-text"},
+            {"label": "Documents RH KYA", "link_to": "Document RH KYA", "link_type": "DocType", "icon": "file"},
         ],
     },
     {
