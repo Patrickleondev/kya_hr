@@ -326,6 +326,11 @@ scheduler_events = {
         "0 6 28 12 *": [
             "kya_hr.planning_equipe_scheduler.relancer_campagne",
         ],
+        # Lundi 08h00 : rappel RH des fiches Salarié actives incomplètes
+        # (n'envoie rien si tout est complet). Encourage la tenue à jour.
+        "0 8 * * 1": [
+            "kya_hr.reminders.rappel_completude_rh",
+        ],
     },
 }
 

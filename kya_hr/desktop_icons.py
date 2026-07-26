@@ -14,7 +14,7 @@ WORKSPACE_ICONS = [
     {"label": "Espace RH", "link_to": "Espace RH", "icon": "👥", "app": "kya_hr", "idx": 11},
     {"label": "Espace Achats", "link_to": "Espace Achats", "icon": "🛒", "app": "kya_hr", "idx": 12},
     {"label": "Espace Stock", "link_to": "Espace Stock", "icon": "📦", "app": "kya_hr", "idx": 13},
-    {"label": "Espace Comptabilité", "link_to": "Espace Comptabilité", "icon": "💰", "app": "kya_hr", "idx": 14},
+    {"label": "Espace Comptabilite", "link_to": "Espace Comptabilite", "icon": "💰", "app": "kya_hr", "idx": 14},
     {"label": "Logistique", "link_to": "Logistique", "icon": "🚚", "app": "kya_hr", "idx": 15},
     {"label": "Espace Employes", "link_to": "Espace Employes", "icon": "👤", "app": "kya_hr", "idx": 16},
     {"label": "Espace Stagiaires", "link_to": "Espace Stagiaires", "icon": "🎓", "app": "kya_hr", "idx": 17},
@@ -53,7 +53,7 @@ RESTRICTED_LAYOUT_ROLES = {
         "DGA",
         "System Manager",
     ],
-    "Espace Comptabilité": [
+    "Espace Comptabilite": [
         "Accounts Manager",
         "Accounts User",
         "Responsable Comptable",
@@ -400,9 +400,22 @@ def _sync_layout_doc(layout_doc) -> bool:
 def _sync_all_desktop_layouts() -> bool:
     changed = False
 
-    for row in frappe.get_all("Desktop Layout", fields=["name"]):
-        layout_doc = frappe.get_doc("Desktop Layout", row.name)
-        changed = _sync_layout_doc(layout_doc) or changed
+    for row in frappe.get_all("Desktop Layout", fields=["name", "user"]):
+        # Layout orphelin : le User a été supprimé/renommé. Personne ne le charge
+        # et son `user` (Link) casse le save() -> LinkValidationError qui ferait
+        # ÉCHOUER after_migrate. On purge silencieusement plutôt que crasher.
+        owner = row.get("user") or row.name
+        if owner and owner != "Administrator" and not frappe.db.exists("User", owner):
+            frappe.delete_doc("Desktop Layout", row.name,
+                              ignore_permissions=True, force=True, delete_permanently=True)
+            changed = True
+            continue
+        try:
+            layout_doc = frappe.get_doc("Desktop Layout", row.name)
+            changed = _sync_layout_doc(layout_doc) or changed
+        except Exception:
+            # Un layout corrompu ne doit jamais bloquer la migration globale.
+            frappe.log_error(frappe.get_traceback(), f"desktop_layout sync: {row.name}")
 
     # Ensure Administrator has a layout in fresh sites, then sync it too.
     if not frappe.db.exists("Desktop Layout", "Administrator"):
@@ -563,12 +576,73 @@ def _sync_administrator_layout() -> bool:
 
 
 @frappe.whitelist()
+def _ascii(value: str) -> str:
+    import unicodedata
+    s = unicodedata.normalize("NFD", str(value or ""))
+    return "".join(c for c in s if not unicodedata.combining(c))
+
+
+def _heal_accented_workspaces():
+    """Invariant des routes bureau : Workspace.name == label/title == Workspace
+    Sidebar.name, TOUS en ASCII (l'accent d'affichage vient de fr.csv, comme
+    « Direction Générale »). Un workspace créé avec un label/title ACCENTÉ (ex.
+    « Espace Comptabilité ») engendre un Workspace Sidebar accentué → route slug
+    accentuée introuvable → 404 « Page introuvable ». On réaligne en ASCII.
+
+    Idempotent : ne touche que ce qui est encore accentué. MariaDB étant
+    accent-insensible (utf8mb4_general_ci), on cible la forme accentuée par
+    `COLLATE utf8mb4_bin` (sinon un DELETE/UPDATE frapperait aussi la forme ASCII).
+    """
+    has_sidebar = frappe.db.has_table("Workspace Sidebar")
+    for cfg in WORKSPACE_ICONS:
+        ws = cfg["link_to"]                       # nom ASCII = identité
+        if ws != _ascii(ws) or not frappe.db.exists("Workspace", ws):
+            continue
+        try:
+            # 1) label/title du workspace en ASCII (== name)
+            cur = frappe.db.get_value("Workspace", ws, ["label", "title"], as_dict=True) or {}
+            upd = {}
+            if cur.get("label") and cur["label"] != ws:
+                upd["label"] = ws
+            if cur.get("title") and cur["title"] != ws:
+                upd["title"] = ws
+            if upd:
+                frappe.db.set_value("Workspace", ws, upd, update_modified=False)
+            # 2) Workspace Sidebar : renommer la forme accentuée en ASCII (ou la
+            #    supprimer si l'ASCII existe déjà).
+            if has_sidebar:
+                names = frappe.db.sql(
+                    "SELECT name FROM `tabWorkspace Sidebar` WHERE name = %s", (ws,), pluck=True)
+                ascii_present = any(n == ws for n in names)
+                for n in [x for x in names if x != ws]:   # formes accentuées
+                    if ascii_present:
+                        frappe.db.sql(
+                            "DELETE FROM `tabWorkspace Sidebar` WHERE name COLLATE utf8mb4_bin = %s", (n,))
+                    else:
+                        frappe.db.sql(
+                            "UPDATE `tabWorkspace Sidebar` SET name=%s, title=%s "
+                            "WHERE name COLLATE utf8mb4_bin = %s", (ws, ws, n))
+                        ascii_present = True
+            # 3) Desktop Icon accentué → ASCII (label + link_to)
+            for r in frappe.db.sql(
+                    "SELECT name, label FROM `tabDesktop Icon` WHERE label = %s", (ws,), as_dict=True):
+                if r.label != ws:
+                    frappe.db.set_value(
+                        "Desktop Icon", r.name, {"label": ws, "link_to": ws}, update_modified=False)
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), f"desktop_icons: heal {ws}")
+
+
 def execute():
     """Sync KYA Desktop Icons. Defensive: never raise to avoid breaking install/migrate."""
     # Skip if Desktop Icon table doesn't exist (fresh install before frappe.desk migration)
     if not frappe.db.has_table("Desktop Icon") or not frappe.db.has_table("Desktop Layout"):
         print("[kya_hr.desktop_icons] Desktop Icon/Layout tables missing, skipping.")
         return {"skipped": True}
+
+    # Répare d'abord l'invariant ASCII (sinon l'icône se recale sur un sidebar
+    # accentué → 404). Doit précéder la synchro des icônes.
+    _heal_accented_workspaces()
 
     changed = False
     errors = []

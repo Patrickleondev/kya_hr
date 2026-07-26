@@ -41,6 +41,11 @@
   .rh-tbl .b-anticiper{background:#fef9c3;color:#854d0e;} .rh-tbl .b-retraite{background:#e2e8f0;color:#334155;}
   .rh-tbl .b-ok{background:#dcfce7;color:#166534;}
   .rh-scroll{overflow-x:auto;}
+  .rh-pager{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:10px;font-size:.8rem;color:#64748b;}
+  .rh-pager button{border:1px solid #cbd5e1;background:#fff;border-radius:7px;padding:3px 10px;cursor:pointer;color:#334155;font-weight:600;}
+  .rh-pager button:disabled{opacity:.45;cursor:default;}
+  .rh-miss{display:inline-block;padding:1px 7px;border-radius:8px;font-size:.68rem;font-weight:700;background:#fef3c7;color:#92400e;margin:1px 3px 1px 0;}
+  .rh-editlink{color:#0f766e;text-decoration:none;font-weight:700;font-size:.78rem;white-space:nowrap;}
   @media(max-width:1024px){.rh-kpis{grid-template-columns:repeat(3,1fr);}.rh-grid{grid-template-columns:1fr;}}
   @media(max-width:560px){.rh-kpis{grid-template-columns:repeat(2,1fr);}}
 </style>
@@ -99,6 +104,18 @@
     </tr></thead><tbody id="ctr-body"></tbody></table></div>
   </div>
 
+  <div class="rh-card wide rh-ret" id="dq-card" style="display:none;">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+      <h3 style="margin:0;">🧩 Complétude des fiches employés <span id="dq-sum" style="font-weight:500;color:#94a3b8;font-size:.78rem;"></span></h3>
+    </div>
+    <div id="dq-note" style="color:#64748b;font-size:.82rem;margin:8px 0;"></div>
+    <div class="alerts" id="dq-champs" style="margin:6px 0;"></div>
+    <div class="rh-scroll"><table class="rh-tbl" id="dq-tbl"><thead><tr>
+      <th>Matricule</th><th>Nom &amp; Prénoms</th><th>Champs à renseigner</th><th></th>
+    </tr></thead><tbody id="dq-body"></tbody></table></div>
+    <div id="dq-pager" class="rh-pager"></div>
+  </div>
+
   <div class="rh-card wide rh-ret">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
       <h3 style="margin:0;">🕰️ Départs à la retraite <span id="ret-age" style="font-weight:500;color:#94a3b8;font-size:.78rem;"></span></h3>
@@ -109,6 +126,7 @@
       <th>Matricule</th><th>Nom &amp; Prénoms</th><th>Poste</th><th>Département</th>
       <th>Âge</th><th>Départ prévu</th><th>Années restantes</th><th>Alerte</th>
     </tr></thead><tbody id="ret-body"></tbody></table></div>
+    <div id="ret-pager" class="rh-pager"></div>
   </div>
 
   {% if peut_importer %}
@@ -164,11 +182,11 @@ function render(){
     if(v<0) return ' <span style="font-size:.68rem;font-weight:800;background:#fee2e2;color:#991b1b;padding:1px 7px;border-radius:10px;white-space:nowrap;">▼ '+v+suf+'</span>';
     return ' <span style="font-size:.68rem;font-weight:800;background:#f1f5f9;color:#64748b;padding:1px 7px;border-radius:10px;white-space:nowrap;">= stable</span>';};
   document.getElementById('rh-kpi1').innerHTML =
-    kpiCard(nf(k.effectif_total)+chip(dEff,' vs mois préc.'),'Effectif total (actifs)','green')+
+    kpiCard(nf(k.effectif_total)+chip(dEff,' vs mois préc.'),'Effectif permanent (CDI/CDD)','green')+
     kpiCard(nf(k.hommes),'Hommes','blue')+
     kpiCard(nf(k.femmes),'Femmes','pink')+
     kpiCard(nf(k.cdi),'Permanents (CDI)')+
-    kpiCard(nf(k.temporaires),'Temporaires (hors CDI)','amber')+
+    kpiCard(nf(k.temporaires),'Temporaires (CDD)','amber')+
     kpiCard(fcfa(k.masse_salariale)+chip(dMasse,' M vs mois préc.'),'Masse salariale mensuelle','violet');
   document.getElementById('rh-kpi2').innerHTML =
     kpiCard(nf(k.cadres),'Cadres (C)','blue')+
@@ -177,11 +195,12 @@ function render(){
     kpiCard(k.age_moyen,'Âge moyen','green')+
     kpiCard(k.age_median,'Âge médian','green')+
     kpiCard(k.anciennete_moyenne,'Ancienneté moyenne (ans)','violet');
-  // ligne 3 du classeur : stagiaires / prestataires en cours (hors effectif)
+  // ligne 3 : stagiaires / prestataires en cours (hors effectif permanent).
+  // Comptés depuis le registre Salarié (type de contrat) → liens filtrés dessus.
   document.getElementById('rh-kpi3').innerHTML =
-    '<a href="/app/stagiaire-rh-kya" target="_blank" style="text-decoration:none;">'+
+    '<a href="/app/salarie-kya?type_contrat=Stagiaire" target="_blank" style="text-decoration:none;">'+
       kpiCard(nf(k.stagiaires_en_cours||0),'Stagiaires en cours','blue')+'</a>'+
-    '<a href="/app/prestataire-kya" target="_blank" style="text-decoration:none;">'+
+    '<a href="/app/salarie-kya?type_contrat=Prestataire" target="_blank" style="text-decoration:none;">'+
       kpiCard(nf(k.prestataires_en_cours||0),'Prestataires en cours','amber')+'</a>';
 
   // remplir le filtre département une seule fois
@@ -203,6 +222,7 @@ function render(){
   line('c-masse', RH.evolution.labels, RH.evolution.masse, 'Masse (M FCFA)', '#7c3aed');
   loadRetraite();
   loadContrats();
+  loadQualite();
 }
 
 /* ── Contrats : volumétrie, avancement des signatures, échéances ───────── */
@@ -252,22 +272,47 @@ async function loadContrats(){
   }).join('');
 }
 
-const RET_LABELS={atteint:'Âge de départ atteint',proche:'Proche (< 2 ans)',anticiper:'À anticiper (< 5 ans)',retraite:'Déjà retraité(s)'};
+// Pagination client réutilisable : découpe `items`, rend chaque page dans `tbody`
+// et pilote `pager`. Masque le pager si tout tient sur une page.
+function paginate(items, tbody, pager, rowFn, pageSize){
+  pageSize = pageSize || 15;
+  let page = 1;
+  const pages = Math.max(1, Math.ceil(items.length / pageSize));
+  function draw(){
+    const s = (page-1)*pageSize;
+    tbody.innerHTML = items.slice(s, s+pageSize).map(rowFn).join('');
+    if(!pager) return;
+    if(items.length <= pageSize){ pager.innerHTML=''; return; }
+    pager.innerHTML =
+      '<span>'+items.length+' lignes · page '+page+'/'+pages+'</span>'+
+      '<button data-a="prev"'+(page<=1?' disabled':'')+'>‹ Préc.</button>'+
+      '<button data-a="next"'+(page>=pages?' disabled':'')+'>Suiv. ›</button>';
+    pager.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+      if(b.dataset.a==='prev'&&page>1) page--;
+      if(b.dataset.a==='next'&&page<pages) page++;
+      draw();
+    });
+  }
+  draw();
+}
+
+const RET_LABELS={atteint:'Âge de départ atteint',proche:'Proche (< 2 ans)',anticiper:'À anticiper (< 5 ans)'};
 async function loadRetraite(){
   const body=document.getElementById('ret-body'); if(!body) return;
+  const pager=document.getElementById('ret-pager');
   let r;
   try{ r=await apiCall('kya_hr.api.rh_effectifs.retraite_data',
         {departement:document.getElementById('f-dept').value||null}); }
-  catch(e){ body.innerHTML='<tr><td colspan="8" class="rh-note">Suivi retraite indisponible.</td></tr>'; return; }
+  catch(e){ body.innerHTML='<tr><td colspan="8" class="rh-note">Suivi retraite indisponible.</td></tr>'; if(pager)pager.innerHTML=''; return; }
   document.getElementById('ret-age').textContent='(âge de départ : '+(r.age_retraite||60)+' ans)';
   const c=r.compteurs||{}; const al=document.getElementById('ret-alerts');
-  al.innerHTML=['atteint','proche','anticiper','retraite']
+  al.innerHTML=['atteint','proche','anticiper']
     .filter(k=>c[k]>0)
     .map(k=>'<span class="a '+k+'">'+c[k]+' — '+RET_LABELS[k]+'</span>').join('')
     || '<span class="a" style="background:#dcfce7;color:#166534;">Aucun départ à anticiper à court terme ✔</span>';
   const lig=r.lignes||[];
-  if(!lig.length){ body.innerHTML='<tr><td colspan="8" class="rh-note">Aucune date de naissance renseignée — impossible de calculer les départs.</td></tr>'; return; }
-  body.innerHTML=lig.map(function(x){
+  if(!lig.length){ body.innerHTML='<tr><td colspan="8" class="rh-note">Aucun salarié permanent actif avec date de naissance renseignée.</td></tr>'; if(pager)pager.innerHTML=''; return; }
+  paginate(lig, body, pager, function(x){
     const cls=x.cle?('b-'+x.cle):'b-ok';
     const lbl=x.alerte||'OK';
     return '<tr><td><b>'+esc(x.matricule)+'</b></td><td>'+esc(x.nom_complet)+'</td>'+
@@ -275,7 +320,37 @@ async function loadRetraite(){
       '<td>'+x.age+'</td><td>'+esc(x.date_retraite)+'</td>'+
       '<td>'+x.annees_avant+'</td>'+
       '<td><span class="badge '+cls+'">'+esc(lbl)+'</span></td></tr>';
-  }).join('');
+  }, 15);
+}
+
+async function loadQualite(){
+  const card=document.getElementById('dq-card'); if(!card) return;
+  const body=document.getElementById('dq-body'), pager=document.getElementById('dq-pager');
+  let r;
+  try{ r=await apiCall('kya_hr.api.rh_effectifs.data_quality',
+        {departement:document.getElementById('f-dept').value||null}); }
+  catch(e){ card.style.display='none'; return; }
+  const inc=(r&&r.incompletes)||[];
+  const sum=document.getElementById('dq-sum'), note=document.getElementById('dq-note'), champs=document.getElementById('dq-champs');
+  if(!inc.length){
+    // Tout est complet : on félicite brièvement plutôt que de cacher.
+    card.style.display='';
+    sum.textContent='';
+    note.innerHTML='<span style="color:#166534;font-weight:700;">✔ Toutes les fiches actives ('+(r.actifs||0)+') sont complètes. Bravo !</span>';
+    champs.innerHTML=''; body.innerHTML=''; if(pager)pager.innerHTML='';
+    return;
+  }
+  card.style.display='';
+  sum.textContent='('+inc.length+' fiche(s) sur '+(r.actifs||0)+' à compléter)';
+  note.innerHTML='Complétez ces fiches sur la plateforme (surtout le <b>matricule</b> et les dates) '+
+    'pour fiabiliser les tableaux de bord. Cliquez sur « Compléter » pour ouvrir la fiche.';
+  champs.innerHTML=(r.par_champ||[]).map(x=>'<span class="rh-miss">'+esc(x.champ)+' : '+x.n+'</span>').join('');
+  paginate(inc, body, pager, function(x){
+    const tags=(x.manquants||[]).map(m=>'<span class="rh-miss">'+esc(m)+'</span>').join('');
+    return '<tr><td><b>'+esc(x.matricule)+'</b></td><td>'+esc(x.nom_complet)+'</td>'+
+      '<td>'+tags+'</td>'+
+      '<td><a class="rh-editlink" href="/app/salarie-kya/'+encodeURIComponent(x.name)+'" target="_blank">✏️ Compléter</a></td></tr>';
+  }, 15);
 }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 
