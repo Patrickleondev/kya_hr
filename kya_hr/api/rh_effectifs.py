@@ -128,11 +128,24 @@ def dashboard_data(departement=None, periode_debut=None, periode_fin=None):
                 "date_debauchage", "motif_debauchage"],
         limit_page_length=0)
 
-    # ── Population active (les indicateurs « photo » portent sur les actifs) ──
+    # ── Population active ──
     actifs = [r for r in rows if _statut(r) == "Actif"]
-    ages = [_age(r.date_naissance) for r in actifs]
+    # Les indicateurs « photo » (effectif, masse, catégories, âges…) portent sur
+    # le PERSONNEL PERMANENT : on retire les stagiaires / prestataires / intérim
+    # (comptés à part). Un type_contrat VIDE est traité comme permanent (défaut).
+    permanents = [r for r in actifs if (r.type_contrat or "") not in _CONTRATS_NON_PERMANENTS]
+    ages = [_age(r.date_naissance) for r in permanents]
     ages = [a for a in ages if a is not None]
-    anciennetes = [_anciennete(r.date_embauche, r.date_debauchage) for r in actifs]
+    anciennetes = [_anciennete(r.date_embauche, r.date_debauchage) for r in permanents]
+
+    # Stagiaires / prestataires ENCORE actifs, comptés depuis le registre Salarié
+    # (là où la RH les saisit). Repli sur les doctypes dédiés s'ils sont utilisés.
+    stagiaires_reg = sum(1 for r in actifs if (r.type_contrat or "") == "Stagiaire")
+    prestataires_reg = sum(1 for r in actifs if (r.type_contrat or "") == "Prestataire")
+    stagiaires_doc = (frappe.db.count("Stagiaire RH KYA", {"statut": "En cours"})
+                      if frappe.db.exists("DocType", "Stagiaire RH KYA") else 0)
+    prestataires_doc = (frappe.db.count("Prestataire KYA", {"statut": "En cours"})
+                        if frappe.db.exists("DocType", "Prestataire KYA") else 0)
 
     def _count_by(seq, key, order=None):
         d = {}
@@ -144,29 +157,28 @@ def dashboard_data(departement=None, periode_debut=None, periode_fin=None):
         items = sorted(d.items(), key=lambda kv: -kv[1])
         return {"labels": [k for k, _v in items], "data": [v for _k, v in items]}
 
-    masse = sum(flt(r.salaire_base) for r in actifs)
+    masse = sum(flt(r.salaire_base) for r in permanents)
 
     kpi = {
-        "effectif_total": len(actifs),
-        "hommes": sum(1 for r in actifs if r.sexe == "M"),
-        "femmes": sum(1 for r in actifs if r.sexe == "F"),
-        "cdi": sum(1 for r in actifs if r.type_contrat == "CDI"),
-        "temporaires": sum(1 for r in actifs if r.type_contrat and r.type_contrat != "CDI"),
+        "effectif_total": len(permanents),
+        "hommes": sum(1 for r in permanents if r.sexe == "M"),
+        "femmes": sum(1 for r in permanents if r.sexe == "F"),
+        "cdi": sum(1 for r in permanents if r.type_contrat == "CDI"),
+        "temporaires": sum(1 for r in permanents if r.type_contrat and r.type_contrat != "CDI"),
         "masse_salariale": round(masse, 0),
-        "cadres": sum(1 for r in actifs if r.categorie == "C"),
-        "maitrise": sum(1 for r in actifs if r.categorie == "AM"),
-        "execution": sum(1 for r in actifs if r.categorie == "AE"),
+        "cadres": sum(1 for r in permanents if r.categorie == "C"),
+        "maitrise": sum(1 for r in permanents if r.categorie == "AM"),
+        "execution": sum(1 for r in permanents if r.categorie == "AE"),
         "age_moyen": round(sum(ages) / len(ages), 1) if ages else 0,
         "age_median": _median(ages),
         "anciennete_moyenne": round(sum(anciennetes) / len(anciennetes), 1) if anciennetes else 0,
         # bonus (parcours / retraités)
         "retraites": sum(1 for r in rows if _statut(r) == "Retraité"),
         "sortis": sum(1 for r in rows if _statut(r) == "Sorti"),
-        # comme le classeur (ligne « STAGIAIRES EN COURS / PRESTATAIRES EN COURS »)
-        "stagiaires_en_cours": frappe.db.count("Stagiaire RH KYA", {"statut": "En cours"})
-        if frappe.db.exists("DocType", "Stagiaire RH KYA") else 0,
-        "prestataires_en_cours": frappe.db.count("Prestataire KYA", {"statut": "En cours"})
-        if frappe.db.exists("DocType", "Prestataire KYA") else 0,
+        # Stagiaires / prestataires : registre Salarié en priorité (là où c'est
+        # saisi), repli sur les doctypes dédiés. Évite le « 0 » trompeur.
+        "stagiaires_en_cours": stagiaires_reg or stagiaires_doc,
+        "prestataires_en_cours": prestataires_reg or prestataires_doc,
     }
 
     # ── Distributions (camemberts + barres) ──
@@ -188,7 +200,8 @@ def dashboard_data(departement=None, periode_debut=None, periode_fin=None):
     par_tranche = {"labels": _TRANCHES, "data": [tr[t] for t in _TRANCHES]}
 
     # ── Évolution effectif & masse salariale dans le temps (mois par mois) ──
-    evol = _evolution(rows, periode_debut, periode_fin)
+    # Évolution effectif & masse sur les PERMANENTS (cohérent avec les KPI photo).
+    evol = _evolution(permanents, periode_debut, periode_fin)
 
     return {
         "date_str": frappe.utils.formatdate(today(), "EEEE d MMMM y"),
