@@ -577,10 +577,22 @@ def synthese_stock(magasin=None):
             b["ruptures"] += 1 if r["statut"] == "RUPTURE" else 0
             b["vides"] += 1 if r["statut"] == "REFERENCE VIDE" else 0
 
+    def _taux(bon_q, qte_q):
+        """Taux de bon état (unités). Ne JAMAIS afficher 100 % tant qu'il reste
+        des unités hors bon état (à réparer / défectueuses) : l'arrondi masquerait
+        sinon 2 unités noyées dans des dizaines de milliers → incohérent avec les
+        compteurs de références « à réparer »/« défectueux ». On plafonne à 99,9 %."""
+        if not qte_q:
+            return 0.0
+        t = round(100 * bon_q / qte_q, 1)
+        if bon_q < qte_q and t >= 100:
+            t = 99.9
+        return t
+
     def _finalise(grp):
         rows = []
         for b in grp.values():
-            b["taux_bon_etat"] = round(100 * b["bon_etat"] / b["qte_totale"], 1) if b["qte_totale"] else 0.0
+            b["taux_bon_etat"] = _taux(b["bon_etat"], b["qte_totale"])
             rows.append(b)
         rows.sort(key=lambda x: -x["qte_totale"])
         return rows
@@ -590,7 +602,7 @@ def synthese_stock(magasin=None):
             "references": len(reap),
             "qte_totale": round(qte, 2),
             "defectueux": round(defe, 2),
-            "taux_bon_etat": round(100 * bon / qte, 1) if qte else 0.0,
+            "taux_bon_etat": _taux(bon, qte),
             "a_commander": sum(1 for r in reap if r["statut"] == "A COMMANDER"),
             "ruptures": sum(1 for r in reap if r["statut"] == "RUPTURE"),
             "references_vides": _count_references_vides(magasin),
@@ -1275,7 +1287,13 @@ def dashboard_overview():
     _stat = [evaluer_ligne(d["bon_etat"], d["reparation"], d.get("defectueux", 0),
                            categorie=_cats.get(d["item"], "Non classé"))["statut"]
              for d in lignes]
+    # Taux bon état (unités). Garde-fou anti-arrondi : tant qu'il reste des
+    # unités hors bon état (à réparer / défectueuses), on ne montre JAMAIS 100 %
+    # — sinon 2 unités noyées dans 40 000 afficheraient « 100 % » à côté de
+    # « 2 à réparer », ce qui semble incohérent. Plafond 99,9 %.
     taux_bon_etat = round(100 * bon_total / total_unites, 1) if total_unites else 0.0
+    if bon_total < total_unites and taux_bon_etat >= 100:
+        taux_bon_etat = 99.9
     a_commander = sum(1 for s in _stat if s == "A COMMANDER")
     ruptures_stock = sum(1 for s in _stat if s == "RUPTURE")
     # Par magasin : nb articles + unités
