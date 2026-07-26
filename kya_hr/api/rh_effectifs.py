@@ -818,7 +818,9 @@ _CHAMPS_ESSENTIELS = [
     ("poste_occupe", "Poste occupé"),
     ("departement", "Département"),
     ("type_contrat", "Type de contrat"),
-    ("categorie", "Catégorie"),
+    ("type_travail", "Mode de travail"),
+    ("categorie", "Catégorie (classification pro.)"),
+    ("classe_echelon", "Classe / échelon"),
 ]
 
 
