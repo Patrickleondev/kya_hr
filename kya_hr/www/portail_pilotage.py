@@ -130,10 +130,15 @@ def get_portail_tree() -> list:
                     _op("Dashboard Services Supports", "/services-supports-dashboard", "chart"),
                 ]},
                 {"name": "Ressources Humaines", "icon": "users", "ops": [
+                    _op("Effectifs & masse salariale", "/rh-effectifs", "chart"),
                     _op("Présences", "/rapport-presence", "clock"),
                     _op("Gestion des congés", "/gestion-conges", "calendar"),
                     _op("Permissions de sortie", "/permission-sortie-employe", "file"),
                     _op("Formations", "/formation-dashboard", "chart"),
+                    _op("Effectifs d'équipe", "/equipe-effectifs", "users"),
+                    _op("Documents RH (certificats / attestations)", "/documents-rh", "file"),
+                    _op("Contrats de stage immersion", "/contrats-immersion", "file"),
+                    _op("Fiches de poste", "/fiches-poste", "file"),
                 ]},
                 {"name": "Achats & Stocks", "icon": "cart", "ops": [
                     _op("Dashboard Achats", "/achats-dashboard", "chart"),
