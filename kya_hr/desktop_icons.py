@@ -400,9 +400,22 @@ def _sync_layout_doc(layout_doc) -> bool:
 def _sync_all_desktop_layouts() -> bool:
     changed = False
 
-    for row in frappe.get_all("Desktop Layout", fields=["name"]):
-        layout_doc = frappe.get_doc("Desktop Layout", row.name)
-        changed = _sync_layout_doc(layout_doc) or changed
+    for row in frappe.get_all("Desktop Layout", fields=["name", "user"]):
+        # Layout orphelin : le User a été supprimé/renommé. Personne ne le charge
+        # et son `user` (Link) casse le save() -> LinkValidationError qui ferait
+        # ÉCHOUER after_migrate. On purge silencieusement plutôt que crasher.
+        owner = row.get("user") or row.name
+        if owner and owner != "Administrator" and not frappe.db.exists("User", owner):
+            frappe.delete_doc("Desktop Layout", row.name,
+                              ignore_permissions=True, force=True, delete_permanently=True)
+            changed = True
+            continue
+        try:
+            layout_doc = frappe.get_doc("Desktop Layout", row.name)
+            changed = _sync_layout_doc(layout_doc) or changed
+        except Exception:
+            # Un layout corrompu ne doit jamais bloquer la migration globale.
+            frappe.log_error(frappe.get_traceback(), f"desktop_layout sync: {row.name}")
 
     # Ensure Administrator has a layout in fresh sites, then sync it too.
     if not frappe.db.exists("Desktop Layout", "Administrator"):
