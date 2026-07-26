@@ -15,6 +15,9 @@ _RH_ROLES = {"System Manager", "Responsable RH", "HR Manager", "HR User",
 _NIVEAUX = ["Sans diplôme", "CEPD/BEPC", "CAP/BEP", "Baccalauréat", "Bac",
             "BAC+2/BTS/DUT", "Licence", "Master", "Ingénieur", "Doctorat", "Postdoc"]
 _CONTRATS = ["CDI", "CDD", "Stagiaire", "Prestataire", "Intérim"]
+# Contrats NON permanents : hors périmètre du suivi retraite (un stagiaire ou un
+# prestataire ne « part pas à la retraite » de l'entreprise).
+_CONTRATS_NON_PERMANENTS = {"Stagiaire", "Prestataire", "Intérim"}
 _CATEGORIES = ["C", "AM", "AE"]
 _TRAVAIL = ["Présentiel", "Télétravail", "Hybride"]
 _TRANCHES = ["< 25 ans", "25 - 34 ans", "35 - 44 ans", "45 - 54 ans", "55 ans et +"]
@@ -753,21 +756,26 @@ def retraite_data(departement=None):
     rows = frappe.get_all(
         "Salarie KYA", filters=filters,
         fields=["matricule", "nom_complet", "sexe", "poste_occupe", "departement",
-                "date_naissance", "date_embauche", "date_debauchage", "motif_debauchage"],
+                "type_contrat", "date_naissance", "date_embauche",
+                "date_debauchage", "motif_debauchage"],
         limit_page_length=0)
 
     today_d = getdate(today())
     out = []
-    compteurs = {"retraite": 0, "atteint": 0, "proche": 0, "anticiper": 0}
+    compteurs = {"atteint": 0, "proche": 0, "anticiper": 0}
     for r in rows:
+        # Le suivi retraite ne concerne QUE le personnel permanent ENCORE actif :
+        # on exclut les sortis/retraités (déjà partis) et les stagiaires /
+        # prestataires / intérimaires (qui ne partent pas à la retraite ici).
+        if _statut(r) != "Actif":
+            continue
+        if (r.type_contrat or "") in _CONTRATS_NON_PERMANENTS:
+            continue
         if not r.date_naissance:
             continue
         d_ret = frappe.utils.add_years(getdate(r.date_naissance), age_ret)
         annees_avant = round((getdate(d_ret) - today_d).days / 365.25, 1)
-        statut = _statut(r)
-        if statut == "Retraité":
-            alerte, cle = "Retraité", "retraite"
-        elif annees_avant <= 0:
+        if annees_avant <= 0:
             alerte, cle = "Âge de départ atteint", "atteint"
         elif annees_avant <= 2:
             alerte, cle = "Proche (< 2 ans)", "proche"
@@ -781,9 +789,73 @@ def retraite_data(departement=None):
             "matricule": r.matricule, "nom_complet": r.nom_complet or r.matricule,
             "poste": r.poste_occupe or "—", "departement": r.departement or "—",
             "age": _age(r.date_naissance), "date_retraite": str(d_ret),
-            "annees_avant": annees_avant, "statut": statut, "alerte": alerte, "cle": cle})
+            "annees_avant": annees_avant, "statut": "Actif", "alerte": alerte, "cle": cle})
     out.sort(key=lambda x: x["date_retraite"])
     return {"age_retraite": age_ret, "compteurs": compteurs, "lignes": out}
+
+
+# Champs jugés essentiels à renseigner sur une fiche Salarié (libellé affiché).
+# L'ordre = priorité d'affichage. Le matricule est le plus critique (identité).
+_CHAMPS_ESSENTIELS = [
+    ("matricule", "Matricule"),
+    ("nom_complet", "Nom & prénoms"),
+    ("sexe", "Sexe"),
+    ("date_naissance", "Date de naissance"),
+    ("date_embauche", "Date d'embauche"),
+    ("poste_occupe", "Poste occupé"),
+    ("departement", "Département"),
+    ("type_contrat", "Type de contrat"),
+    ("categorie", "Catégorie"),
+]
+
+
+def _data_quality_rows(departement=None):
+    """Fiches Salarié ACTIVES dont un champ essentiel manque. Sans _guard (utilisé
+    aussi par le rappel programmé, hors session utilisateur)."""
+    filters = {"departement": departement} if departement else {}
+    champs = [f for f, _lbl in _CHAMPS_ESSENTIELS]
+    rows = frappe.get_all(
+        "Salarie KYA", filters=filters,
+        fields=["name", "date_debauchage", "motif_debauchage"] + champs,
+        limit_page_length=0)
+
+    incompletes = []
+    par_champ = {f: 0 for f, _lbl in _CHAMPS_ESSENTIELS}
+    actifs = 0
+    for r in rows:
+        if _statut(r) != "Actif":
+            continue
+        actifs += 1
+        manquants = []
+        for f, lbl in _CHAMPS_ESSENTIELS:
+            val = r.get(f)
+            if val is None or (isinstance(val, str) and not val.strip()):
+                manquants.append(lbl)
+                par_champ[f] += 1
+        if manquants:
+            incompletes.append({
+                "name": r.name,
+                "matricule": r.matricule or "—",
+                "nom_complet": r.nom_complet or r.matricule or r.name,
+                "manquants": manquants,
+                "nb_manquants": len(manquants),
+            })
+    incompletes.sort(key=lambda x: -x["nb_manquants"])
+    return {
+        "actifs": actifs,
+        "incompletes": incompletes,
+        "nb_incompletes": len(incompletes),
+        "par_champ": [{"champ": lbl, "n": par_champ[f]}
+                      for f, lbl in _CHAMPS_ESSENTIELS if par_champ[f]],
+    }
+
+
+@frappe.whitelist()
+def data_quality(departement=None):
+    """Complétude des fiches Salarié actives : liste des fiches incomplètes +
+    répartition des champs manquants (panneau « à compléter » du dashboard)."""
+    _guard()
+    return _data_quality_rows(departement)
 
 
 @frappe.whitelist()
