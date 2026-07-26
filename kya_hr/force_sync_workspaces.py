@@ -503,7 +503,10 @@ ESPACE_RH_SECTIONS = [
         "🗂️ Journal des modifications (fiches)", "Stagiaires (registre RH)",
         "Liste Stagiaires", "Bilans de Stage", "Prestataires externes",
     ]),
-    ("🎓 Formation — préparation", ["Besoin de Formation", "Plan de Formation"]),
+    ("🎓 Formation — préparation", [
+        "📝 Exprimer un besoin de formation",  # web form /besoin-formation (chefs)
+        "Besoin de Formation", "Plan de Formation",
+    ]),
     ("📥 Imports Excel", [
         "📥 Imports RH", "📤 Modèle Présences", "📤 Modèle Solde Congés",
         "📤 Modèle Planning Congés", "📤 Modèle Fiche Gestion",
@@ -529,6 +532,8 @@ def _ensure_espace_rh_content():
                                url="/campagne-conges", icon="calendar", color="#0d7377")
     _upsert_workspace_shortcut("Espace RH", "📆 Calendrier des congés", "URL",
                                url="/calendrier-conges", icon="calendar", color="#0d7377")
+    _upsert_workspace_shortcut("Espace RH", "📝 Exprimer un besoin de formation", "URL",
+                               url="/besoin-formation", icon="edit", color="#7c3aed")
 
     labels = set(frappe.get_all("Workspace Shortcut",
                                 filters={"parent": "Espace RH"}, pluck="label"))
