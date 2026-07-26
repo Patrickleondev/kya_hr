@@ -58,7 +58,7 @@
 
   {{ art("Article 1 — Objet et nature du stage") }}
   <p style="margin:0 0 6px;">Dans le cadre de ses activités, la Société accepte de faire bénéficier {{ a.au_ala }} stagiaire, sur sa demande, d'un stage d'immersion (découverte) lui permettant de découvrir le métier, le secteur d'activité et le fonctionnement de l'entreprise, sous l'encadrement d'un maître de stage.</p>
-  <p style="margin:0 0 4px;">Le stage a une finalité exclusivement pédagogique et d'observation. Les principaux objectifs pédagogiques sont :</p>
+  <p style="margin:0 0 4px;">Le stage a une finalité exclusivement pédagogique et d'observation. Les activités confiées {{ a.au_ala }} stagiaire visent la découverte et l'apprentissage, et non l'exécution de tâches productives relevant d'un emploi. Les principaux objectifs pédagogiques sont :</p>
   <ul style="margin:0 0 8px 18px;">
     <li>observation du fonctionnement des services et des métiers de l'Entreprise ;</li>
     <li>découverte des méthodes et outils de travail ;</li>
@@ -66,13 +66,14 @@
   </ul>
 
   {{ art("Article 2 — Durée, lieu et horaires du stage") }}
-  <p style="margin:0 0 6px;">La présente convention est conclue pour une durée de <b>{{ doc.duree_texte or 'un (01) mois' }}</b>. Elle prend effet le <b>{{ doc.d_debut() or blk }}</b> et arrive à échéance le <b>{{ doc.d_fin() or blk }}</b>. Cette durée demeure très inférieure au plafond légal de douze (12) mois, renouvellement compris (articles 126 et 128 du Code du travail).</p>
-  <p style="margin:0 0 8px;">Le stage se déroule dans les locaux de l'Entreprise sis à {{ doc.lieu_stage or blk }}. Les jours et horaires de présence sont fixés comme suit : du {{ doc.jour_debut or blk[:12] }} au {{ doc.jour_fin or blk[:12] }}, de {{ doc.heure_debut or '…' }} à {{ doc.heure_fin or '…' }}, dans le respect du règlement intérieur.</p>
+  <p style="margin:0 0 6px;">La présente convention est conclue pour une durée de <b>{{ doc.duree_texte or 'un (01) mois' }}</b>. Elle prend effet le <b>{{ doc.d_debut() or blk }}</b> et arrive à échéance le <b>{{ doc.d_fin() or blk }}</b>. Cette durée demeure, en tout état de cause, très inférieure au plafond légal de douze (12) mois, renouvellement compris (articles 126 et 128 du Code du travail).</p>
+  <p style="margin:0 0 8px;">Le stage se déroule dans les locaux de l'Entreprise sis à {{ doc.lieu_stage or blk }}. Les jours et horaires de présence sont fixés comme suit : du {{ doc.jour_debut or blk[:12] }} au {{ doc.jour_fin or blk[:12] }}, de {{ doc.heure_debut or '…' }} à {{ doc.heure_fin or '…' }}, dans le respect du règlement intérieur. Toute présence en dehors de ces plages doit être expressément autorisée par le maître de stage.</p>
 
   {{ art("Article 3 — Maître de stage et encadrement") }}
-  <p style="margin:0 0 8px;">Durant la période définie à l'article 2, {{ doc.maitre_stage_nom and ('M./Mme ' + doc.maitre_stage_nom) or ('M./Mme ' + blk) }} est {{ doc.maitre_designe() }} en qualité de maître de stage. Il/Elle assure l'accueil, l'encadrement et le suivi {{ a.du_dela }} stagiaire, veille à sa sécurité et facilite l'atteinte des objectifs pédagogiques.</p>
+  <p style="margin:0 0 8px;">Durant la période définie à l'article 2, {{ doc.maitre_stage_nom and ('M./Mme ' + doc.maitre_stage_nom) or ('M./Mme ' + blk) }} est {{ doc.maitre_designe() }} en qualité de maître de stage. Il/Elle assure l'accueil, l'encadrement et le suivi {{ a.du_dela }} stagiaire conformément aux dispositions arrêtées par la direction de la Société, veille à la sécurité {{ a.du_dela }} stagiaire et facilite l'atteinte des objectifs pédagogiques.</p>
 
   {{ art("Article 4 — Obligations de l'Entreprise") }}
+  <p style="margin:0 0 4px;">L'Entreprise s'engage à :</p>
   <ul style="margin:0 0 8px 18px;">
     <li>accueillir {{ a.le_la }} stagiaire et lui assurer un encadrement effectif par le maître de stage ;</li>
     <li>mettre à sa disposition les moyens et informations nécessaires à la réalisation des objectifs de découverte ;</li>
@@ -81,51 +82,60 @@
   </ul>
 
   {{ art("Article 5 — Obligations du/de la stagiaire") }}
+  <p style="margin:0 0 4px;">{{ a.Le_La }} stagiaire s'engage à :</p>
   <ul style="margin:0 0 8px 18px;">
     <li>respecter le règlement intérieur, les consignes de sécurité et les horaires de l'Entreprise ;</li>
-    <li>faire preuve d'assiduité, de ponctualité et adopter une conduite honorable, honnête et loyale ;</li>
-    <li>respecter le secret professionnel et la confidentialité des informations ;</li>
+    <li>faire preuve d'assiduité, de ponctualité et adopter une conduite honorable, honnête et loyale envers le personnel, les clients et les partenaires de l'Entreprise ;</li>
+    <li>respecter le secret professionnel et la confidentialité des informations dont {{ a.il_elle }} a connaissance ;</li>
     <li>prendre soin des matériels et biens mis à sa disposition et les restituer en fin de stage ;</li>
     <li>informer sans délai le maître de stage de toute absence ou empêchement.</li>
   </ul>
 
   {{ art("Article 6 — Indemnité et prise en charge") }}
-  <p style="margin:0 0 8px;">S'agissant d'un stage d'immersion à finalité de découverte, non productif, aucune indemnité de stage n'est due, conformément à l'article 126 du Code du travail togolais.</p>
+  <p style="margin:0 0 8px;">S'agissant d'un stage d'immersion à finalité de découverte, non productif, aucune indemnité de stage n'est due, conformément à l'article 126 du Code du travail togolais, qui n'impose pas la rémunération du stage-études.</p>
 
   {{ art("Article 7 — Assurances") }}
   <p style="margin:0 0 6px;">{{ a.Le_La }} stagiaire déclare être {{ a.couvert }} par une assurance responsabilité civile ({% if doc.type_garant == 'Tuteur Légal' %}personnelle souscrite par le tuteur légal{% else %}personnelle ou souscrite par l'Établissement{% endif %}) : police n° {{ doc.assurance_police or blk }}, compagnie {{ doc.assurance_compagnie or blk }}.</p>
-  <p style="margin:0 0 8px;">L'Entreprise garantit la couverture des accidents susceptibles de survenir {{ a.au_ala }} stagiaire du fait ou à l'occasion du stage dans ses locaux, dans les conditions de sa police d'assurance.</p>
+  <p style="margin:0 0 8px;">L'Entreprise garantit la couverture des accidents susceptibles de survenir {{ a.au_ala }} stagiaire du fait ou à l'occasion du stage dans ses locaux, dans les conditions de sa police d'assurance. {{ a.Le_La }} stagiaire s'engage à signaler immédiatement tout incident ou accident au maître de stage.</p>
 
   {{ art("Article 8 — Évaluation et attestation") }}
-  <p style="margin:0 0 8px;">{{ a.Le_La }} stagiaire sera {{ a.evalue }} par le maître de stage et devra produire, au plus tard {{ doc.rapport_delai_jours or '……' }} jours après la fin du stage, un rapport entre cinq (05) et dix (10) pages relatant son expérience. Une attestation de stage lui sera délivrée à l'issue du stage.</p>
+  <p style="margin:0 0 8px;">{{ a.Le_La }} stagiaire sera {{ a.evalue }} par le maître de stage et devra produire, au plus tard {{ doc.rapport_delai_jours or '……' }} jours après la fin du stage, un rapport entre cinq (05) et dix (10) pages maximum relatant son expérience de découverte. Une attestation de stage lui sera délivrée par la Société à l'issue du stage.</p>
 
   {{ art("Article 9 — Confidentialité") }}
-  <p style="margin:0 0 8px;">{{ a.Le_La }} stagiaire s'engage à ne pas divulguer, utiliser ou reproduire, à des fins autres que celles du stage, les informations confidentielles dont {{ a.il_elle }} aurait connaissance. Cet engagement s'applique pendant toute la durée du stage et pour une durée de cinq (05) ans à compter de son terme.</p>
+  <p style="margin:0 0 8px;">{{ a.Le_La }} stagiaire s'engage à ne pas divulguer, utiliser ou reproduire, à des fins autres que celles du stage, les informations confidentielles dont {{ a.il_elle }} aurait connaissance. Sont réputées confidentielles toutes informations techniques, commerciales, financières, stratégiques ou relatives au savoir-faire de l'Entreprise, quel qu'en soit le support. Cet engagement s'applique pendant toute la durée du stage et pour une durée de cinq (05) ans à compter de son terme.</p>
 
   {{ art("Article 10 — Propriété intellectuelle") }}
-  <p style="margin:0 0 8px;">Toute création, œuvre, invention, idée ou amélioration réalisée par {{ a.le_la }} stagiaire dans le cadre et à l'occasion du stage est et demeure la propriété exclusive de KYA-Energy Group. {{ a.Le_La }} stagiaire cède à ce titre à l'Entreprise l'ensemble des droits patrimoniaux attachés auxdites créations, pour le monde entier.</p>
+  <p style="margin:0 0 8px;">Toute création, œuvre, invention, idée ou amélioration réalisée par {{ a.le_la }} stagiaire dans le cadre et à l'occasion du stage est et demeure la propriété exclusive de KYA-Energy Group. {{ a.Le_La }} stagiaire cède à ce titre à l'Entreprise, à titre exclusif et pour la durée légale de protection, l'ensemble des droits patrimoniaux (notamment droits de reproduction, de représentation, d'adaptation et d'exploitation) attachés auxdites créations, pour tous modes d'exploitation et pour le monde entier. {{ a.Le_La }} stagiaire s'engage à signer tout document nécessaire à la formalisation de cette cession.</p>
 
   {{ art("Article 11 — Protection des données à caractère personnel") }}
-  <p style="margin:0 0 8px;">Les données personnelles {{ a.du_dela }} stagiaire sont traitées aux seules fins de la gestion du stage, dans le respect de la loi togolaise n° 2019-014 du 29 octobre 2019. {{ a.Le_La }} stagiaire dispose d'un droit d'accès, de rectification et de suppression de ses données.</p>
+  <p style="margin:0 0 8px;">Les données personnelles {{ a.du_dela }} stagiaire sont collectées et traitées par l'Entreprise aux seules fins de la gestion du stage, dans le respect de la loi togolaise n° 2019-014 du 29 octobre 2019 relative à la protection des données à caractère personnel. Ces données sont conservées pour une durée n'excédant pas ce qui est nécessaire à cette finalité. {{ a.Le_La }} stagiaire dispose d'un droit d'accès, de rectification et de suppression de ses données, qu'{{ a.il_elle }} peut exercer auprès de l'Entreprise.</p>
 
   {{ art("Article 12 — Droit à l'image et autorisation d'exploitation") }}
-  <p style="margin:0 0 6px;">{{ a.Le_La }} stagiaire autorise l'Entreprise à fixer, reproduire, communiquer et exploiter son image (photographies, vidéos, enregistrements) réalisée dans le cadre du stage, à des fins de communication institutionnelle et commerciale, pour le monde entier et pour une durée de cinq (05) ans, à titre gratuit.</p>
+  <p style="margin:0 0 6px;">{{ a.Le_La }} stagiaire autorise expressément l'Entreprise à fixer, reproduire, communiquer et exploiter son image (photographies, séquences vidéo et enregistrements sonores) réalisée dans le cadre ou à l'occasion du stage, à des fins de communication institutionnelle ainsi que pour les activités promotionnelles et commerciales de l'Entreprise.</p>
+  <p style="margin:0 0 4px;">Cette autorisation est consentie dans les conditions suivantes :</p>
+  <ul style="margin:0 0 8px 18px;">
+    <li><b>Supports :</b> site internet, réseaux sociaux, plaquettes, brochures, affiches, rapports d'activité, supports audiovisuels, presse et tout autre support de communication de l'Entreprise ;</li>
+    <li><b>Finalités :</b> promotion des activités, produits et services de l'Entreprise, communication institutionnelle et commerciale, à l'exclusion de tout usage portant atteinte à la dignité ou à la réputation {{ a.du_dela }} stagiaire ;</li>
+    <li><b>Territoire et durée :</b> pour le monde entier et pour une durée de cinq (05) ans à compter de la fin du stage, renouvelable par accord écrit ;</li>
+    <li><b>Rémunération :</b> la présente autorisation est consentie à titre gratuit, {{ a.le_la }} stagiaire renonçant à toute revendication de rémunération à ce titre.</li>
+  </ul>
+  <p style="margin:0 0 6px;">{{ a.Le_La }} stagiaire conserve le droit de retirer son consentement pour l'avenir, par demande écrite adressée à l'Entreprise, sans que ce retrait n'affecte les exploitations licitement réalisées antérieurement. Le traitement de l'image {{ a.du_dela }} stagiaire s'effectue dans le respect de la loi togolaise n° 2019-014 relative à la protection des données à caractère personnel.</p>
   <p style="margin:0 0 8px;">{{ a.Le_La }} stagiaire
     <b>{{ '☑' if doc.droit_image == 'Accepte' else '☐' }} accepte
     {{ '☑' if doc.droit_image == 'Refuse' else '☐' }} refuse</b>
     la présente cession de droit à l'image (cocher la case correspondante et parapher).</p>
 
   {{ art("Article 13 — Discipline, santé et sécurité") }}
-  <p style="margin:0 0 8px;">{{ a.Le_La }} stagiaire est {{ a.soumis }} au règlement intérieur et aux règles d'hygiène, de santé et de sécurité en vigueur dans l'Entreprise, et s'engage à utiliser les équipements de protection requis.</p>
+  <p style="margin:0 0 8px;">{{ a.Le_La }} stagiaire est {{ a.soumis }} au règlement intérieur et aux règles d'hygiène, de santé et de sécurité en vigueur dans l'Entreprise. {{ a.il_elle | capitalize }} s'engage à respecter les consignes de sécurité qui lui sont communiquées et à utiliser les équipements de protection éventuellement requis.</p>
 
   {{ art("Article 14 — Résiliation") }}
-  <p style="margin:0 0 8px;">Le présent contrat peut être résilié à tout moment, à l'initiative de l'une ou l'autre partie, notamment en cas d'abandon de poste, de faute ou de non-respect du règlement intérieur, sans indemnité. La résiliation est notifiée par écrit. {{ a.Le_La }} stagiaire restitue alors sans délai tout matériel, badge, document et bien appartenant à l'Entreprise.</p>
+  <p style="margin:0 0 8px;">Le présent contrat peut être résilié à tout moment, à l'initiative de l'une ou l'autre partie, notamment en cas d'abandon de poste, de faute ou de non-respect du règlement intérieur, sans indemnité de part ni d'autre. La résiliation est notifiée par écrit (courrier ou courriel) à l'autre partie. À la fin du stage ou en cas de résiliation, {{ a.le_la }} stagiaire restitue sans délai tout matériel, badge, document et bien appartenant à l'Entreprise.</p>
 
   {{ art("Article 15 — Litiges et droit applicable") }}
-  <p style="margin:0 0 8px;">Le présent contrat est régi par le droit togolais. Tout différend sera d'abord réglé à l'amiable ; à défaut, il sera porté devant la juridiction togolaise compétente, conformément à la Loi n° 2021-012 portant Code du travail.</p>
+  <p style="margin:0 0 8px;">Le présent contrat est régi par le droit togolais. Tout différend relatif à son exécution ou à son interprétation sera d'abord réglé à l'amiable entre les parties ; à défaut d'accord, il sera porté devant la juridiction togolaise compétente. Pour tout ce qui n'est pas prévu au présent contrat, les parties se réfèrent aux dispositions légales et réglementaires en vigueur au Togo, notamment la Loi n° 2021-012 portant Code du travail.</p>
 
   {{ art("Article 16 — Élection de domicile et exemplaires") }}
-  <p style="margin:0 0 8px;">Les parties élisent domicile aux adresses indiquées en tête du contrat. Le présent contrat est établi en trois (03) exemplaires originaux — un pour chaque partie — chaque page étant paraphée par les signataires.</p>
+  <p style="margin:0 0 8px;">Pour l'exécution des présentes, les parties élisent domicile aux adresses indiquées en tête du contrat. Le présent contrat est établi en trois (03) exemplaires originaux — un pour chaque partie — chaque page étant paraphée par les signataires.</p>
 
   <p style="margin:16px 0 0;">Fait à {{ doc.lieu or 'Lomé' }}, le {{ doc.fait_le() or blk }}.</p>
   <p style="margin:3px 0 12px;font-style:italic;font-size:10pt;">(*) La signature {{ a.du_dela }} stagiaire est précédée de la mention manuscrite « lu et approuvé ».</p>
