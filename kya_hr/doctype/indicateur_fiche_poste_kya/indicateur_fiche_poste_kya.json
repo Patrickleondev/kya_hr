@@ -1,0 +1,26 @@
+{
+ "name": "Indicateur Fiche Poste KYA",
+ "doctype": "DocType",
+ "module": "KYA HR",
+ "custom": 0,
+ "istable": 1,
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "creation": "2026-07-24 16:00:00.000000",
+ "modified": "2026-07-24 16:00:00.000000",
+ "field_order": [
+  "indicateur",
+  "cible",
+  "frequence",
+  "poids"
+ ],
+ "fields": [
+  {"fieldname": "indicateur", "label": "Indicateur", "fieldtype": "Data", "in_list_view": 1, "columns": 4, "reqd": 1},
+  {"fieldname": "cible", "label": "Cible de référence", "fieldtype": "Data", "in_list_view": 1, "columns": 3},
+  {"fieldname": "frequence", "label": "Fréquence", "fieldtype": "Select", "options": "\nMensuelle\nTrimestrielle\nSemestrielle\nAnnuelle\nPonctuelle", "in_list_view": 1, "columns": 2},
+  {"fieldname": "poids", "label": "Poids", "fieldtype": "Data", "in_list_view": 1, "columns": 2, "description": "Ex. : 10 %"}
+ ],
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

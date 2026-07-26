@@ -95,6 +95,8 @@ KYA_AUTO_SIDEBARS = [
             {"label": "Documents RH KYA", "link_to": "Document RH KYA", "link_type": "DocType", "icon": "file"},
             {"label": "Avenants au contrat KYA", "link_to": "Avenant Contrat KYA", "link_type": "DocType", "icon": "edit"},
             {"label": "Contrat Stage Immersion KYA", "link_to": "Contrat Stage Immersion KYA", "link_type": "DocType", "icon": "graduation-cap"},
+            {"label": "Fiches de poste", "url": "/fiches-poste", "link_type": "URL", "icon": "clipboard"},
+            {"label": "Fiches de poste (liste desk)", "link_to": "Fiche de Poste KYA", "link_type": "DocType", "icon": "list"},
             {"label": "Journal des modifications (fiches)", "link_to": "Modification Info Employe KYA", "link_type": "DocType", "icon": "list"},
         ],
     },

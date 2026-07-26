@@ -1,0 +1,22 @@
+{
+ "name": "Attribution Fiche Poste KYA",
+ "doctype": "DocType",
+ "module": "KYA HR",
+ "custom": 0,
+ "istable": 1,
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "creation": "2026-07-24 16:00:00.000000",
+ "modified": "2026-07-24 16:00:00.000000",
+ "field_order": [
+  "domaine",
+  "activites"
+ ],
+ "fields": [
+  {"fieldname": "domaine", "label": "Domaine / Rubrique", "fieldtype": "Data", "in_list_view": 1, "columns": 3, "reqd": 1, "description": "Ex. : Système d'information RH, Gestion de la paie…"},
+  {"fieldname": "activites", "label": "Activités / tâches (une par ligne)", "fieldtype": "Small Text", "in_list_view": 1, "columns": 7}
+ ],
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

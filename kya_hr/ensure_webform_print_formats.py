@@ -52,6 +52,7 @@ DOCTYPE_DEFAULT_PRINT_FORMATS = {
     "Document RH KYA": "Document RH KYA",
     "Avenant Contrat KYA": "Avenant Contrat KYA",
     "Contrat Stage Immersion KYA": "Contrat Stage Immersion KYA",
+    "Fiche de Poste KYA": "Fiche de Poste KYA",
 }
 
 
