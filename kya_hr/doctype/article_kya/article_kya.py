@@ -32,8 +32,8 @@ def creer_ou_recuperer(designation, categorie=None, unite=None, type_article=Non
     et ne jamais demander de code. Idempotent sur la désignation (unique).
     `type_article` est accepté mais ignoré (champ retiré — la catégorie suffit).
 
-    Classification (additive) : `type_stock` (Ingénierique/Industriel), `famille`
-    (Matière première/Produit fini), `groupe`. Sur un article DÉJÀ existant, on met
+    Classification (additive) : `type_stock` (Ingénierique/Industriel/Outils),
+    `famille` (Composants/Produit fini), `groupe`. Sur un article DÉJÀ existant, on met
     à jour ces champs s'ils sont fournis (permet de reclasser sans dupliquer) ;
     sur un nouvel article, le défaut du doctype (Ingénierique) s'applique si non
     précisé — jamais de valeur nulle."""

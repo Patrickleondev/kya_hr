@@ -250,7 +250,26 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
         <h3 style="margin:0;">Réapprovisionnement &amp; alertes</h3>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
           <label style="font-size:.82rem;font-weight:700;color:#334155;">
-            <input type="checkbox" id="rea-only" onchange="renderRea()"> N'afficher que les alertes
+            Statut :
+            <select id="rea-filtre" onchange="renderRea()" style="font-weight:700;">
+              <option value="">Tous</option>
+              <option value="RUPTURE">🔴 Rupture</option>
+              <option value="A COMMANDER">🟠 À commander</option>
+              <option value="OK">🟢 OK</option>
+              <option value="REFERENCE VIDE">⚪ Référence vide</option>
+            </select>
+          </label>
+          <label style="font-size:.82rem;font-weight:700;color:#334155;">
+            Catégorie :
+            <select id="rea-cat" onchange="renderRea()"><option value="">Toutes</option></select>
+          </label>
+          <label style="font-size:.82rem;font-weight:700;color:#334155;">
+            Classe :
+            <select id="rea-classe" onchange="renderRea()">
+              <option value="">Toutes</option>
+              <option value="A">A</option><option value="B">B</option>
+              <option value="C">C</option><option value="D">D</option>
+            </select>
           </label>
           <a class="ks-btn sec" href="/app/parametres-stock-kya" target="_blank">⚙️ Règles par catégorie &amp; alertes mail ↗</a>
         </div>
@@ -587,11 +606,20 @@ async function exportRap(){
 }
 
 // ── Réappro / alertes (modèle AEA-ENG-13) ──────────────────────────────────
-let REA=null;
+let REA=null, REA_CATS=null;
 async function renderRea(){
   if(!REA){ REA = (await frappe.call({method:'kya_hr.api.stock_kya.reapprovisionnement'})).message||[]; }
-  const only=document.getElementById('rea-only').checked;
-  const rows = only ? REA.filter(r=>r.statut==='RUPTURE'||r.statut==='A COMMANDER') : REA;
+  if(!REA_CATS){
+    REA_CATS = (await frappe.call({method:'kya_hr.api.stock_kya.categories'})).message||[];
+    const sel=document.getElementById('rea-cat');
+    sel.innerHTML='<option value="">Toutes</option>'+REA_CATS.map(c=>`<option value="${c}">${c}</option>`).join('');
+  }
+  const filtre=document.getElementById('rea-filtre').value;
+  const fcat=document.getElementById('rea-cat').value;
+  const fclasse=document.getElementById('rea-classe').value;
+  let rows = filtre ? REA.filter(r=>r.statut===filtre) : REA;
+  if(fcat) rows = rows.filter(r=>r.categorie===fcat);
+  if(fclasse) rows = rows.filter(r=>r.classe===fclasse);
   const dot={'RUPTURE':'🔴','A COMMANDER':'🟠','REFERENCE VIDE':'⚪','OK':'🟢'};
   const col={'RUPTURE':'#dc2626','A COMMANDER':'#d97706','REFERENCE VIDE':'#94a3b8','OK':'#166534'};
   kpage('ks-reabody', rows, r=>`<tr>

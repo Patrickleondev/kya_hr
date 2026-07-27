@@ -35,6 +35,13 @@ _STOCK_ROLES = {"System Manager", "Stock Manager", "Stock User",
 _WRITE_ROLES = {"System Manager", "Stock Manager",
                 "Responsable Stock", "Chargé des Stocks"}
 
+# Types de stock (Article KYA.type_stock) : Ingénierique (installation/projets),
+# Industriel (fabrication/assemblage), Outils (matériel du siège, ni l'un ni
+# l'autre — ex. outillage utilisé en interne).
+TYPES_STOCK = ("Ingénierique", "Industriel", "Outils")
+# Familles (Article KYA.famille), uniquement pour le stock Industriel.
+FAMILLES_STOCK = ("Composants", "Produit fini")
+
 
 def _guard(write=False):
     roles = set(frappe.get_roles(frappe.session.user))
@@ -315,7 +322,7 @@ def _rapport_lignes(magasin=None, date_ref=None, type_stock=None):
     if not date_ref:
         date_ref = add_days(today(), -7)
     date_ref = getdate(date_ref)
-    tf = type_stock if type_stock in ("Ingénierique", "Industriel") else None
+    tf = type_stock if type_stock in TYPES_STOCK else None
 
     agg_now = _bucketize(_raw_sums(magasin=magasin))
     agg_ref = _bucketize(_raw_sums(magasin=magasin, date_max=date_ref))
@@ -384,7 +391,7 @@ def export_rapport_hebdo_xlsx(magasin=None, date_ref=None, type_stock=None):
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
     lignes, dref = _rapport_lignes(magasin, date_ref, type_stock)
     mag_lbl = _mag_label(magasin) if magasin else "TOUS LES MAGASINS"
-    if type_stock in ("Ingénierique", "Industriel"):
+    if type_stock in TYPES_STOCK:
         mag_lbl += " — STOCK " + type_stock.upper()
     dref_fr = frappe.utils.formatdate(dref, "dd/MM/yyyy")
     today_fr = frappe.utils.formatdate(today(), "dd/MM/yyyy")
@@ -465,7 +472,7 @@ def export_rapport_hebdo_xlsx(magasin=None, date_ref=None, type_stock=None):
 
     buf = io.BytesIO(); wb.save(buf)
     tag = (magasin or "tous").split(" - ")[0].replace(" ", "-").lower()
-    if type_stock in ("Ingénierique", "Industriel"):
+    if type_stock in TYPES_STOCK:
         tag += "-" + type_stock.lower()[:4]
     return {"filename": "rapport-stock-{0}-{1}.xlsx".format(tag, today()),
             "content_base64": base64.b64encode(buf.getvalue()).decode("ascii"),
@@ -486,7 +493,7 @@ def articles_classification(magasin=None, type_stock=None, q=None):
     if magasin:
         soldes_map = {d["item"]: d for d in soldes(magasin=magasin, only_nonzero=0)}
     filters = {}
-    if type_stock in ("Ingénierique", "Industriel"):
+    if type_stock in TYPES_STOCK:
         filters["type_stock"] = type_stock
     arts = frappe.get_all(
         "Article KYA", filters=filters,
@@ -518,11 +525,11 @@ def reclasser_article(name, type_stock=None, famille=None, groupe=None, categori
         frappe.throw(_("Article introuvable."))
     vals = {}
     if type_stock is not None:
-        if type_stock not in ("Ingénierique", "Industriel"):
+        if type_stock not in TYPES_STOCK:
             frappe.throw(_("Type de stock invalide : {0}").format(type_stock))
         vals["type_stock"] = type_stock
     if famille is not None:
-        if famille and famille not in ("Matière première", "Produit fini"):
+        if famille and famille not in FAMILLES_STOCK:
             frappe.throw(_("Famille invalide : {0}").format(famille))
         vals["famille"] = famille or None
     if groupe is not None:
@@ -677,7 +684,7 @@ def saisir_stock_direct(magasin, lignes, date_saisie=None, type_stock=None):
         lignes = frappe.parse_json(lignes)
     if not magasin or not frappe.db.exists("Warehouse", magasin):
         frappe.throw(_("Choisissez un magasin valide."))
-    ts = type_stock if type_stock in ("Ingénierique", "Industriel") else None
+    ts = type_stock if type_stock in TYPES_STOCK else None
     from kya_hr.kya_hr.doctype.article_kya.article_kya import creer_ou_recuperer
     doc = frappe.new_doc("Saisie Stock KYA")
     doc.magasin = magasin
@@ -1068,7 +1075,7 @@ def modele_import_xlsx():
     for txt in [
         "• Une ligne avec SEULEMENT la désignation (autres colonnes vides) = un titre de section.",
         "• Elle classe automatiquement les articles listés EN DESSOUS :",
-        "   - « MATERIEL D'ASSEMBLAGE… » ou « COMPOSANTES… » → Industriel / Matière première.",
+        "   - « MATERIEL D'ASSEMBLAGE… » ou « COMPOSANTES… » → Industriel / Composants.",
         "   - « PRODUITS FINIS » → Industriel / Produit fini.",
         "   - « MAGASIN … » → simple séparateur (retour au stock d'ingénierie).",
         "• Le groupe (Assemblage Batteries, Luminaire Type 2…) est déduit du titre.",
@@ -1202,7 +1209,7 @@ def _classify_section(title):
     if "PRODUIT" in t and "FINI" in t:
         return ("Industriel", "Produit fini", "Produits finis")
     if "ASSEMBLAGE" in t or "COMPOSANTE" in t or "FABRICATION" in t:
-        return ("Industriel", "Matière première", _clean_groupe(title))
+        return ("Industriel", "Composants", _clean_groupe(title))
     return None
 
 
@@ -1227,7 +1234,7 @@ def _inject_sections(dict_rows):
             row["famille"] = ctx["famille"]
             row["groupe"] = ctx["groupe"]
         # Composants luminaires Type-1/2/3 : rendus distincts (suffixe « (Type N) »).
-        if row["type_stock"] == "Industriel" and row.get("famille") == "Matière première":
+        if row["type_stock"] == "Industriel" and row.get("famille") == "Composants":
             row["designation"] = _disambiguate_designation(row["designation"], row.get("groupe"))
         out.append(row)
     return out

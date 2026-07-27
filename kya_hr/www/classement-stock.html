@@ -50,6 +50,20 @@ table.cs-t { width:100%; border-collapse:collapse; font-size:.84rem; min-width:1
         <option value="">Tous les types</option>
         <option value="Ingénierique">Ingénierique</option>
         <option value="Industriel">Industriel</option>
+        <option value="Outils">Outils</option>
+      </select>
+    </div>
+    <div class="cs-f">
+      <label for="cs-cat">Catégorie</label>
+      <select id="cs-cat" onchange="charger()"><option value="">Toutes</option></select>
+    </div>
+    <div class="cs-f">
+      <label for="cs-fam">Famille</label>
+      <select id="cs-fam" onchange="charger()">
+        <option value="">Toutes</option>
+        <option value="Composants">Composants</option>
+        <option value="Produit fini">Produit fini</option>
+        <option value="__autre__">Autre (sans famille)</option>
       </select>
     </div>
     <div class="cs-f">
@@ -77,7 +91,7 @@ table.cs-t { width:100%; border-collapse:collapse; font-size:.84rem; min-width:1
       </table>
     </div>
   </div>
-  <div class="cs-note">« Ingénierique » = matériel d'installation / projets · « Industriel » = fabrication / assemblage (matières premières + produits finis). La <b>famille</b> et le <b>groupe</b> ne concernent que le stock industriel.</div>
+  <div class="cs-note">« Ingénierique » = matériel d'installation / projets · « Industriel » = fabrication / assemblage (composants + produits finis) · « Outils » = matériel du siège, ni installation ni fabrication. La <b>famille</b> et le <b>groupe</b> ne concernent que le stock industriel.</div>
 </div>
 
 <script>
@@ -94,6 +108,8 @@ async function init(){
   sel.innerHTML = '<option value="">— Tous les magasins —</option>' +
     mags.map(m=>`<option value="${esc(m.name)}">${esc(m.warehouse_name||m.name)}</option>`).join('');
   try { CATS=(await frappe.call({method:'kya_hr.api.stock_kya.categories'})).message||[]; } catch(e){}
+  document.getElementById('cs-cat').innerHTML = '<option value="">Toutes</option>' +
+    CATS.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
   await charger();
 }
 
@@ -103,12 +119,12 @@ function catSelect(name, cur){
   return `<select data-f="categorie" data-name="${esc(name)}" class="${!cur?'miss':''}" onchange="save(this)">${empty}${opts}</select>`;
 }
 function typeSelect(name, cur){
-  const v=['Ingénierique','Industriel'];
+  const v=['Ingénierique','Industriel','Outils'];
   return `<select data-f="type_stock" data-name="${esc(name)}" class="${cur==='Industriel'?'ind':''}" onchange="save(this)">`+
     v.map(x=>`<option value="${x}" ${x===cur?'selected':''}>${x}</option>`).join('')+`</select>`;
 }
 function familleSelect(name, cur){
-  const v=['','Matière première','Produit fini'];
+  const v=['','Composants','Produit fini'];
   return `<select data-f="famille" data-name="${esc(name)}" onchange="save(this)">`+
     v.map(x=>`<option value="${x}" ${x===(cur||'')?'selected':''}>${x||'—'}</option>`).join('')+`</select>`;
 }
@@ -116,6 +132,8 @@ function familleSelect(name, cur){
 async function charger(){
   const magasin=document.getElementById('cs-mag').value;
   const type_stock=document.getElementById('cs-type').value;
+  const categorie=document.getElementById('cs-cat').value;
+  const famille=document.getElementById('cs-fam').value;
   const q=document.getElementById('cs-q').value;
   const body=document.getElementById('cs-body');
   body.innerHTML='<tr><td colspan="7" class="cs-empty">Chargement…</td></tr>';
@@ -126,6 +144,8 @@ async function charger(){
   } catch(e){
     body.innerHTML='<tr><td colspan="7" class="cs-empty">Accès réservé au magasin / stock.</td></tr>'; return;
   }
+  if(categorie) rows = rows.filter(a=>a.categorie===categorie);
+  if(famille) rows = rows.filter(a=> famille==='__autre__' ? !a.famille : a.famille===famille);
   document.getElementById('cs-count').textContent = rows.length+' article'+(rows.length>1?'s':'');
   if(!rows.length){ body.innerHTML='<tr><td colspan="7" class="cs-empty">Aucun article.</td></tr>'; return; }
   body.innerHTML = rows.map(a=>{
