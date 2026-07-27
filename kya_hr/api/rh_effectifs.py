@@ -824,18 +824,35 @@ _CHAMPS_ESSENTIELS = [
 ]
 
 
+_LBL_SUPERIEUR = "Supérieur immédiat (reports_to)"
+
+
 def _data_quality_rows(departement=None):
     """Fiches Salarié ACTIVES dont un champ essentiel manque. Sans _guard (utilisé
-    aussi par le rappel programmé, hors session utilisateur)."""
+    aussi par le rappel programmé, hors session utilisateur).
+
+    Inclut le « Supérieur immédiat » (Employee.reports_to) : sans lui, la
+    notification de l'étape « En attente Chef » (Demande Achat, Permission de
+    sortie…) ne trouve aucun destinataire — la fiche reste silencieusement
+    bloquée sans que personne ne soit prévenu. Le sommet de la hiérarchie (DG)
+    est légitimement sans supérieur et n'est donc jamais signalé."""
     filters = {"departement": departement} if departement else {}
     champs = [f for f, _lbl in _CHAMPS_ESSENTIELS]
     rows = frappe.get_all(
         "Salarie KYA", filters=filters,
-        fields=["name", "date_debauchage", "motif_debauchage"] + champs,
+        fields=["name", "date_debauchage", "motif_debauchage", "employee_link"] + champs,
         limit_page_length=0)
 
+    liens = [r.employee_link for r in rows if r.get("employee_link")]
+    emp_by_name = {}
+    if liens:
+        emps = frappe.get_all("Employee", filters={"name": ["in", liens]},
+                              fields=["name", "reports_to", "designation"])
+        emp_by_name = {e.name: e for e in emps}
+
+    tous_champs = _CHAMPS_ESSENTIELS + [("_superieur", _LBL_SUPERIEUR)]
     incompletes = []
-    par_champ = {f: 0 for f, _lbl in _CHAMPS_ESSENTIELS}
+    par_champ = {f: 0 for f, _lbl in tous_champs}
     actifs = 0
     for r in rows:
         if _statut(r) != "Actif":
@@ -847,6 +864,12 @@ def _data_quality_rows(departement=None):
             if val is None or (isinstance(val, str) and not val.strip()):
                 manquants.append(lbl)
                 par_champ[f] += 1
+        emp = emp_by_name.get(r.get("employee_link"))
+        if emp and not emp.get("reports_to"):
+            est_sommet = "directeur general" in (emp.get("designation") or "").lower()
+            if not est_sommet:
+                manquants.append(_LBL_SUPERIEUR)
+                par_champ["_superieur"] += 1
         if manquants:
             incompletes.append({
                 "name": r.name,
@@ -861,7 +884,7 @@ def _data_quality_rows(departement=None):
         "incompletes": incompletes,
         "nb_incompletes": len(incompletes),
         "par_champ": [{"champ": lbl, "n": par_champ[f]}
-                      for f, lbl in _CHAMPS_ESSENTIELS if par_champ[f]],
+                      for f, lbl in tous_champs if par_champ[f]],
     }
 
 
