@@ -70,6 +70,7 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.setup_logistique_access.execute", "Sortie Vehicule visible Direction (DG/DGA) + roles logistiques sur espace Logistique"),
     ("kya_hr.equipe_member_sync.recompute_all", "Recalcule nombre_membres des Equipes KYA (corrige compteurs perimes apres assignation employes)"),
     ("kya_hr.ensure_chef_capabilities.execute", "Aligne capacites chef (Chef Service=Chef Equipe=Chef d'Equipe : approbation + assignation taches)"),
+    ("kya_hr.ensure_workflow_edit_roles.execute", "Grants sens unique chef -> +Chef Service +Superieur Immediat : sans eux, allow_edit des etats 'En attente Chef/Superieur' rend la fiche read-only -> pad de signature grise pour le signataire legitime"),
     ("kya_hr.link_employees_users.link_by_email", "Lie Employees aux Users par email (racine 'Nom du Demandeur vide')"),
     ("kya_hr.ensure_employee_roles.execute", "Ensure Employee/Stagiaire roles on linked Users"),
     ("kya_hr.employee_access.execute", "Accès Espace Employés : pose le rôle Employee ET débloque le module « KYA HR » (Block Modules) pour tout employé actif — sinon get_workspace_sidebar_items masque l'Espace Employés (module bloqué) et l'employé ne voit pas « Mon Espace »"),

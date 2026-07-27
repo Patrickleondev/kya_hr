@@ -346,7 +346,7 @@
     "update_value": "En attente Chef"
    },
    {
-    "allow_edit": "HR User",
+    "allow_edit": "Employee",
     "doc_status": "0",
     "is_optional_state": 0,
     "state": "En attente Resp. Stagiaires",
@@ -354,7 +354,7 @@
     "update_value": "En attente Resp. Stagiaires"
    },
    {
-    "allow_edit": "HR Manager",
+    "allow_edit": "Directeur Général",
     "doc_status": "0",
     "is_optional_state": 0,
     "state": "En attente DG",
@@ -511,7 +511,7 @@
     "update_value": "En attente Audit"
    },
    {
-    "allow_edit": "Directeur Général",
+    "allow_edit": "DGA",
     "doc_status": "0",
     "is_optional_state": 0,
     "send_email": 1,
@@ -709,7 +709,7 @@
     "update_value": "En attente RH"
    },
    {
-    "allow_edit": "HR Manager",
+    "allow_edit": "DGA",
     "doc_status": "0",
     "is_optional_state": 0,
     "state": "En attente Direction",
@@ -1025,7 +1025,7 @@
     "update_value": "En attente DAAF"
    },
    {
-    "allow_edit": "System Manager",
+    "allow_edit": "Directeur Général",
     "doc_status": "0",
     "is_optional_state": 0,
     "state": "En attente DG",
@@ -2000,7 +2000,7 @@
     "update_value": "En attente Visa Audit"
    },
    {
-    "allow_edit": "System Manager",
+    "allow_edit": "DGA",
     "doc_status": "0",
     "is_optional_state": 0,
     "state": "En attente Autorisation",
