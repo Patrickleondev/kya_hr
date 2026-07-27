@@ -473,6 +473,102 @@ def _ensure_gestion_equipe_content():
     print("  [MINIMAL] Gestion Équipe content + sidebar (Dashboard only)")
 
 
+# ── Espace RH : grille organisée par usage (demande RH « savoir où chercher »).
+# Chaque section référence des raccourcis PAR LABEL ; un label absent est
+# simplement ignoré (défensif). Miroir exact de la réorganisation prod du 26/07.
+ESPACE_RH_SECTIONS = [
+    ("📊 Tableaux de bord — pilotage", [
+        "👥 Effectifs (Tableau de bord)", "👥 Dashboard RH (détaillé)",
+        "🕒 Présences (Dashboard)", "🏖️ Gestion des Congés", "🎓 Formation",
+        "Tableau de Bord Employés", "Tableau de Bord Stagiaires",
+        "👥 Effectifs des équipes (détail)",
+    ]),
+    ("🗓️ Quotidien — congés, présences, permissions", [
+        "➕ Nouvelle Demande de Congé", "Demandes de Congé", "Plannings Congé",
+        "🚀 Campagne congés (RH)", "📆 Calendrier des congés",
+        "Demandes Congé Stagiaire", "Permissions Sortie Employé",
+        "Permissions Sortie Stagiaire", "Présences",
+        "Fiche Gestion Congés Annuels", "Fiche Gestion Congés",
+        "Rapport Présence Employés", "Rapport Présence Stagiaires",
+    ]),
+    ("📄 Contrats & documents officiels", [
+        "➕ Nouveau Contrat", "Contrats à signer", "Contrats KYA",
+        "📝 Avenants au contrat", "🎓 Contrats de stage d'immersion",
+        "📄 Documents RH (certificats/attestations)", "🧾 Fiches de poste",
+        "KYA Contract Template",
+    ]),
+    ("👤 Personnel & carrières", [
+        "Employés", "Registre du Personnel", "🧭 Parcours Salarié",
+        "Évolution de Carrière", "Solde de Tout Compte",
+        "🗂️ Journal des modifications (fiches)", "Stagiaires (registre RH)",
+        "Liste Stagiaires", "Bilans de Stage", "Prestataires externes",
+    ]),
+    ("🎓 Formation — préparation", [
+        "📝 Exprimer un besoin de formation",  # web form /besoin-formation (chefs)
+        "Besoin de Formation", "Plan de Formation",
+    ]),
+    ("📥 Imports Excel", [
+        "📥 Imports RH", "📤 Modèle Présences", "📤 Modèle Solde Congés",
+        "📤 Modèle Planning Congés", "📤 Modèle Fiche Gestion",
+        "📤 Modèle Gestion Équipe",
+    ]),
+    ("⚙️ Référentiels & paramètres", [
+        "Equipe KYA", "Département KYA", "Department", "Designation",
+        "⚙️ Paramètres RH (barèmes)", "Rapports HRMS",
+    ]),
+    ("📌 Mon compte", ["Mon Espace (Chef Service)", "Mes Demandes"]),
+]
+
+
+def _ensure_espace_rh_content():
+    """Reconstruit la grille de l'Espace RH en sections métier (idempotent).
+    Les raccourcis restent la source (rien n'est supprimé) ; le content ne
+    référence que ceux qui existent. Les non classés tombent dans « Divers »."""
+    if not frappe.db.exists("Workspace", "Espace RH"):
+        return
+
+    # Raccourcis récents (pages congés) — présents en prod, garantis au deploy.
+    _upsert_workspace_shortcut("Espace RH", "🚀 Campagne congés (RH)", "URL",
+                               url="/campagne-conges", icon="calendar", color="#0d7377")
+    _upsert_workspace_shortcut("Espace RH", "📆 Calendrier des congés", "URL",
+                               url="/calendrier-conges", icon="calendar", color="#0d7377")
+    _upsert_workspace_shortcut("Espace RH", "📝 Exprimer un besoin de formation", "URL",
+                               url="/besoin-formation", icon="edit", color="#7c3aed")
+
+    labels = set(frappe.get_all("Workspace Shortcut",
+                                filters={"parent": "Espace RH"}, pluck="label"))
+    content = [
+        {"id": "rh-titre", "type": "header",
+         "data": {"text": '<span class="h4">👥 Espace RH — Centre de pilotage</span>', "col": 12}},
+        {"id": "rh-sous-titre", "type": "paragraph",
+         "data": {"text": "<i>Rangé par usage : pilotage en haut, gestion du quotidien, "
+                          "contrats, personnel, imports, paramètres.</i>", "col": 12}},
+    ]
+    places = set()
+    for i, (titre, items) in enumerate(ESPACE_RH_SECTIONS):
+        presents = [x for x in items if x in labels]
+        if not presents:
+            continue
+        content.append({"id": f"rh-sp-{i}", "type": "spacer", "data": {"col": 12}})
+        content.append({"id": f"rh-h-{i}", "type": "header",
+                        "data": {"text": f"<b>{titre}</b>", "col": 12}})
+        for j, x in enumerate(presents):
+            content.append({"id": f"rh-s-{i}-{j}", "type": "shortcut",
+                            "data": {"shortcut_name": x, "col": 3}})
+            places.add(x)
+    restes = sorted(labels - places)
+    if restes:
+        content.append({"id": "rh-sp-z", "type": "spacer", "data": {"col": 12}})
+        content.append({"id": "rh-h-z", "type": "header",
+                        "data": {"text": "<b>🗃️ Divers</b>", "col": 12}})
+        for j, x in enumerate(restes):
+            content.append({"id": f"rh-s-z-{j}", "type": "shortcut",
+                            "data": {"shortcut_name": x, "col": 3}})
+    frappe.db.set_value("Workspace", "Espace RH", "content",
+                        json.dumps(content, ensure_ascii=False), update_modified=False)
+    print(f"  [ESPACE RH] grille réorganisée ({len(content)} blocs, {len(places)} classés, {len(restes)} divers)")
+
+
 # Icônes sûres pour les cartes workspace (tabWorkspace.icon).
 # Ne pas utiliser les noms ERPNext standards (buying, stock, hr, etc.) pour éviter les collisions.
 KYA_WORKSPACE_ICONS = {
@@ -695,6 +791,9 @@ def execute():
         _ensure_sidebar_item("Gestion Équipe", "Plans Trimestriels", "DocType", link_to="Plan Trimestriel", icon="list")
         _ensure_sidebar_item("Gestion Équipe", "Taches d'Equipe", "DocType", link_to="Tache Equipe", icon="task")
         _restrict_workspace_roles(gestion_ws, ["Chef d'Équipe", "Chef Service", "System Manager"])
+
+    # 8bis. Espace RH : grille organisée par sections métier (idempotent).
+    _ensure_espace_rh_content()
 
     espace_ws = _resolve_existing_workspace(["Espace Employes", "Espace Employés"])
     if espace_ws:
