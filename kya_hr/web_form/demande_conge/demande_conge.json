@@ -33,7 +33,7 @@
    "label": "Employe",
    "options": "Employee",
    "reqd": 1,
-   "description": "L'employé qui prend le congé. Si vous saisissez pour vous-même, c'est votre propre matricule."
+   "description": "L'employé qui prend le congé. Vous-même : tapez votre NOM, l'identifiant se remplit tout seul (pas besoin de connaître votre matricule)."
   },
   {
    "fieldname": "employee_name",

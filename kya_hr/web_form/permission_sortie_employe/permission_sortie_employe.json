@@ -33,7 +33,7 @@
    "label": "Employé",
    "options": "Employee",
    "reqd": 1,
-   "description": "L'employé qui sort. Si vous saisissez pour vous-même, c'est votre propre matricule."
+   "description": "L'employé qui sort. Vous-même : tapez votre NOM, l'identifiant se remplit tout seul (pas besoin de connaître votre matricule)."
   },
   {
    "fieldname": "employee_name",
