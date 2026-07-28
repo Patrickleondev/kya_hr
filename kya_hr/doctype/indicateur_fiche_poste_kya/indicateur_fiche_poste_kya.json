@@ -17,7 +17,7 @@
  "fields": [
   {"fieldname": "indicateur", "label": "Indicateur", "fieldtype": "Data", "in_list_view": 1, "columns": 4, "reqd": 1},
   {"fieldname": "cible", "label": "Cible de référence", "fieldtype": "Data", "in_list_view": 1, "columns": 3},
-  {"fieldname": "frequence", "label": "Fréquence", "fieldtype": "Select", "options": "\nMensuelle\nTrimestrielle\nSemestrielle\nAnnuelle\nPonctuelle", "in_list_view": 1, "columns": 2},
+  {"fieldname": "frequence", "label": "Fréquence", "fieldtype": "Select", "options": "\nMensuelle\nTrimestrielle\nSemestrielle\nAnnuelle\nHebdomadaire\nPar mission\nPar consultation\nPar ouverture\nPar sinistre\nPonctuelle", "in_list_view": 1, "columns": 2},
   {"fieldname": "poids", "label": "Poids", "fieldtype": "Data", "in_list_view": 1, "columns": 2, "description": "Ex. : 10 %"}
  ],
  "permissions": [],

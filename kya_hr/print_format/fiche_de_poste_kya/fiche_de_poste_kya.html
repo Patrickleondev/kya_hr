@@ -38,6 +38,30 @@
       <td style="padding:3px 6px;background:#f0fdf9;border:1px solid #d6efe8;"><b>Supérieur (N+1)</b></td>
       <td style="padding:3px 6px;border:1px solid #d6efe8;">{{ doc.superieur_hierarchique or "—" }}</td>
     </tr>
+    {% if doc.classification or doc.effectif_responsabilite or doc.plafond_engagement or doc.suppleance %}
+    <tr>
+      <td style="padding:3px 6px;background:#f0fdf9;border:1px solid #d6efe8;"><b>Classification</b></td>
+      <td style="padding:3px 6px;border:1px solid #d6efe8;">{{ doc.classification or "—" }}</td>
+      <td style="padding:3px 6px;background:#f0fdf9;border:1px solid #d6efe8;"><b>Effectif supervisé</b></td>
+      <td style="padding:3px 6px;border:1px solid #d6efe8;">{{ doc.effectif_responsabilite or "—" }}</td>
+    </tr>
+    <tr>
+      <td style="padding:3px 6px;background:#f0fdf9;border:1px solid #d6efe8;"><b>Plafond d'engagement</b></td>
+      <td style="padding:3px 6px;border:1px solid #d6efe8;">{{ doc.plafond_engagement or "—" }}</td>
+      <td style="padding:3px 6px;background:#f0fdf9;border:1px solid #d6efe8;"><b>Suppléance</b></td>
+      <td style="padding:3px 6px;border:1px solid #d6efe8;">{{ doc.suppleance or "—" }}</td>
+    </tr>
+    {% endif %}
+    {% if (doc.encadrement_direct or '').strip() or (doc.instances or '').strip() %}
+    <tr>
+      <td style="padding:3px 6px;background:#f0fdf9;border:1px solid #d6efe8;vertical-align:top;"><b>Encadrement direct</b></td>
+      <td style="padding:3px 6px;border:1px solid #d6efe8;" colspan="3">{{ doc.encadrement_direct or "—" }}</td>
+    </tr>
+    <tr>
+      <td style="padding:3px 6px;background:#f0fdf9;border:1px solid #d6efe8;vertical-align:top;"><b>Instances / comités</b></td>
+      <td style="padding:3px 6px;border:1px solid #d6efe8;" colspan="3">{{ doc.instances or "—" }}</td>
+    </tr>
+    {% endif %}
   </table>
 
   {% macro titre(n, t) %}

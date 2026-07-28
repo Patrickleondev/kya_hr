@@ -105,6 +105,7 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.maintenance.setup_compta_maison.execute", "Comptabilité MAISON : installe les DocTypes custom=1 (Facture KYA, Ecriture Comptable KYA/Grand Livre, Bulletin Paie KYA + Parametres Paie KYA/barèmes) + formats d'impression (custom=1 non resynchronisés par migrate) ; pose le barème IRPP par défaut si vide"),
     ("kya_hr.maintenance.disable_native_birthday.execute", "Éteint le rappel d'anniversaire NATIF ERPNext (HR Settings) : KYA garde son propre rappel maison (RH+DG, sans âge) ; évite le doublon"),
     ("kya_hr.maintenance.fix_contract_templates_genre.execute", "Rallume les modèles de contrat FÉMININS éteints par la règle d'unicité qui ignorait le genre (l'install de « CDD — Masculin » éteignait « CDD — Féminin » → les contrats de femmes sortaient au masculin, « Monsieur <nom> »)"),
+    ("kya_hr.maintenance.import_fiches_poste_kya.execute", "Contenu officiel des 33 fiches de poste du catalogue KYA-ORG-CIBLE-01 (mission/attributions/indicateurs/profil) : enrichit les 4 fiches employé déjà occupées (DG/DGA/IT/Achats) sans écraser un champ déjà rempli, crée les 29 autres postes comme modèles sans titulaire (réorganisation 2026-010/011 pas encore exécutée)"),
 ]
 
 AFTER_INSTALL: list[tuple[str, str]] = [
