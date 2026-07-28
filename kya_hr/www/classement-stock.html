@@ -26,7 +26,9 @@ table.cs-t { width:100%; border-collapse:collapse; font-size:.84rem; min-width:1
 .cs-t select, .cs-t input.grp { border:1px solid #cbd5e1; border-radius:7px; padding:5px 8px; font-size:.82rem; background:#fff; color:#0f172a; width:100%; min-width:130px; }
 .cs-t select.ind { border-color:#c4b5fd; } /* Industriel = teinte violette discrète */
 .cs-t select.miss { border-color:#dc2626; background:#fef2f2; color:#991b1b; font-weight:700; } /* catégorie à renseigner */
-.cs-t td.st { width:34px; text-align:center; }
+.cs-t td.st { width:56px; text-align:center; white-space:nowrap; }
+.rebal-btn { border:1px solid #cbd5e1; background:#fff; border-radius:7px; padding:2px 6px; font-size:.85rem; cursor:pointer; margin-left:4px; }
+.rebal-btn:hover { background:#f0fdf4; border-color:#0e7c4a; }
 .dot { display:inline-block; width:14px; height:14px; border-radius:50%; transition:background .2s; }
 .dot.ok { background:#16a34a; } .dot.err { background:#dc2626; } .dot.saving { background:#f59e0b; }
 .cs-empty { text-align:center; padding:30px; color:#94a3b8; }
@@ -79,7 +81,9 @@ table.cs-t { width:100%; border-collapse:collapse; font-size:.84rem; min-width:1
         <thead>
           <tr>
             <th>Désignation</th>
-            <th class="num">Qté (magasin)</th>
+            <th class="num">Bon état</th>
+            <th class="num">À réparer</th>
+            <th class="num">Défectueux</th>
             <th>Catégorie</th>
             <th>Type de stock</th>
             <th>Famille</th>
@@ -87,11 +91,29 @@ table.cs-t { width:100%; border-collapse:collapse; font-size:.84rem; min-width:1
             <th></th>
           </tr>
         </thead>
-        <tbody id="cs-body"><tr><td colspan="7" class="cs-empty">Chargement…</td></tr></tbody>
+        <tbody id="cs-body"><tr><td colspan="9" class="cs-empty">Chargement…</td></tr></tbody>
       </table>
     </div>
   </div>
-  <div class="cs-note">« Ingénierique » = matériel d'installation / projets · « Industriel » = fabrication / assemblage (composants + produits finis) · « Outils » = matériel du siège, ni installation ni fabrication. La <b>famille</b> et le <b>groupe</b> ne concernent que le stock industriel.</div>
+  <div class="cs-note">« Ingénierique » = matériel d'installation / projets · « Industriel » = fabrication / assemblage (composants + produits finis) · « Outils » = matériel du siège, ni installation ni fabrication. La <b>famille</b> et le <b>groupe</b> ne concernent que le stock industriel.<br>💡 Le bouton ⚖️ (visible quand un magasin est choisi) permet de <b>rééquilibrer un article entre Bon état / À réparer / Défectueux</b> sans changer la quantité totale — utile pour corriger un comptage erroné.</div>
+</div>
+
+<div id="rebal-modal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:50;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;padding:22px;width:360px;max-width:92vw;box-shadow:0 10px 40px rgba(0,0,0,.25);">
+    <div style="font-weight:800;color:#0e7c4a;font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Rééquilibrer les états</div>
+    <div id="rb-titre" style="font-weight:700;color:#1e293b;margin-bottom:14px;"></div>
+    <div class="cs-f" style="margin-bottom:10px;"><label>De</label>
+      <select id="rb-de" onchange="rbUpdateVers()"></select></div>
+    <div class="cs-f" style="margin-bottom:10px;"><label>Vers</label>
+      <select id="rb-vers"></select></div>
+    <div class="cs-f" style="margin-bottom:6px;"><label>Quantité à déplacer</label>
+      <input type="number" id="rb-qte" min="0" step="any"></div>
+    <div id="rb-msg" style="font-size:.78rem;min-height:16px;margin-bottom:10px;"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn sm" onclick="closeRebal()" style="background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;border-radius:8px;padding:7px 14px;">Annuler</button>
+      <button class="btn sm" onclick="submitRebal()" style="background:#0e7c4a;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-weight:700;">Valider</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -136,32 +158,85 @@ async function charger(){
   const famille=document.getElementById('cs-fam').value;
   const q=document.getElementById('cs-q').value;
   const body=document.getElementById('cs-body');
-  body.innerHTML='<tr><td colspan="7" class="cs-empty">Chargement…</td></tr>';
+  body.innerHTML='<tr><td colspan="9" class="cs-empty">Chargement…</td></tr>';
   let rows;
   try {
     rows=(await frappe.call({method:'kya_hr.api.stock_kya.articles_classification',
       args:{magasin:magasin||undefined, type_stock:type_stock||undefined, q:q||undefined}})).message||[];
   } catch(e){
-    body.innerHTML='<tr><td colspan="7" class="cs-empty">Accès réservé au magasin / stock.</td></tr>'; return;
+    body.innerHTML='<tr><td colspan="9" class="cs-empty">Accès réservé au magasin / stock.</td></tr>'; return;
   }
   if(categorie) rows = rows.filter(a=>a.categorie===categorie);
   if(famille) rows = rows.filter(a=> famille==='__autre__' ? !a.famille : a.famille===famille);
   document.getElementById('cs-count').textContent = rows.length+' article'+(rows.length>1?'s':'');
-  if(!rows.length){ body.innerHTML='<tr><td colspan="7" class="cs-empty">Aucun article.</td></tr>'; return; }
+  if(!rows.length){ body.innerHTML='<tr><td colspan="9" class="cs-empty">Aucun article.</td></tr>'; return; }
   body.innerHTML = rows.map(a=>{
     const ind = a.type_stock==='Industriel';
-    const qte = (magasin && a.qte_totale!=null) ? fmt(a.qte_totale) : '';
+    const has = magasin && a.qte_totale!=null;
+    const bon = has ? fmt(a.bon_etat) : '';
+    const repar = has ? fmt(a.reparation) : '';
+    const defect = has ? fmt(a.defectueux) : '';
+    const canRebal = has && (flt(a.bon_etat)>0 || flt(a.reparation)>0 || flt(a.defectueux)>0);
+    const rebalBtn = canRebal
+      ? `<button class="rebal-btn" title="Rééquilibrer entre états"
+           onclick='openRebal(${JSON.stringify(a.name)},${JSON.stringify(a.designation)},${flt(a.bon_etat)},${flt(a.reparation)},${flt(a.defectueux)})'>⚖️</button>`
+      : '';
     return `<tr>
       <td class="des">${esc(a.designation)}${ind?'<span class="badge-i">Ind</span>':''}</td>
-      <td class="num">${qte}</td>
+      <td class="num">${bon}</td>
+      <td class="num">${repar}</td>
+      <td class="num">${defect}</td>
       <td>${catSelect(a.name, a.categorie)}</td>
       <td>${typeSelect(a.name, a.type_stock)}</td>
       <td>${familleSelect(a.name, a.famille)}</td>
       <td><input class="grp" data-f="groupe" data-name="${esc(a.name)}" value="${esc(a.groupe||'')}"
             placeholder="—" oninput="debSave(this)"></td>
-      <td class="st"><span class="dot" data-dot="${esc(a.name)}"></span></td>
+      <td class="st"><span class="dot" data-dot="${esc(a.name)}"></span>${rebalBtn}</td>
     </tr>`;
   }).join('');
+}
+function flt(v){ const n=Number(v); return isNaN(n)?0:n; }
+
+// ── Rééquilibrage entre états (Bon état / À réparer / Défectueux) ──────────
+const ETATS = [['Bon état','bon'],['À réparer','repar'],['Défectueux','defect']];
+let REBAL = null;
+function openRebal(name, designation, bon, repar, defect){
+  REBAL = {name, magasin: document.getElementById('cs-mag').value, bon, repar, defect};
+  document.getElementById('rb-titre').textContent = designation;
+  const soldes = {bon, repar, defect};
+  const optsFor = (excl) => ETATS.filter(([,k])=>k!==excl && soldes[k]>0)
+    .map(([lbl,k])=>`<option value="${k}">${lbl} (dispo ${fmt(soldes[k])})</option>`).join('');
+  const from = document.getElementById('rb-de');
+  from.innerHTML = ETATS.filter(([,k])=>soldes[k]>0).map(([lbl,k])=>`<option value="${k}">${lbl} (dispo ${fmt(soldes[k])})</option>`).join('');
+  rbUpdateVers();
+  document.getElementById('rb-qte').value = '';
+  document.getElementById('rb-msg').textContent = '';
+  document.getElementById('rebal-modal').style.display = 'flex';
+}
+function rbUpdateVers(){
+  const de = document.getElementById('rb-de').value;
+  const soldes = {bon: REBAL.bon, repar: REBAL.repar, defect: REBAL.defect};
+  document.getElementById('rb-vers').innerHTML = ETATS.filter(([,k])=>k!==de)
+    .map(([lbl,k])=>`<option value="${k}">${lbl}</option>`).join('');
+}
+function closeRebal(){ document.getElementById('rebal-modal').style.display = 'none'; REBAL = null; }
+const ETAT_LABEL = {bon:'Bon état', repar:'À réparer', defect:'Défectueux'};
+async function submitRebal(){
+  const de = document.getElementById('rb-de').value;
+  const vers = document.getElementById('rb-vers').value;
+  const qte = flt(document.getElementById('rb-qte').value);
+  const msg = document.getElementById('rb-msg');
+  if(!qte || qte<=0){ msg.textContent = 'Quantité invalide.'; msg.style.color='#dc2626'; return; }
+  msg.textContent = 'Enregistrement…'; msg.style.color='#64748b';
+  try {
+    await frappe.call({method:'kya_hr.api.stock_kya.ajuster_etat_stock', args:{
+      item: REBAL.name, magasin: REBAL.magasin,
+      etat_source: ETAT_LABEL[de], etat_cible: ETAT_LABEL[vers], quantite: qte}});
+    closeRebal();
+    await charger();
+  } catch(e){
+    msg.textContent = (e && e.message) || 'Erreur — vérifiez la quantité disponible.'; msg.style.color='#dc2626';
+  }
 }
 
 const SAVEDEB={};

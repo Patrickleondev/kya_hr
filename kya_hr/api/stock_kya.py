@@ -511,8 +511,43 @@ def articles_classification(magasin=None, type_stock=None, q=None):
             s = soldes_map.get(a["name"], {})
             a["qte_totale"] = s.get("total", 0)
             a["bon_etat"] = s.get("bon_etat", 0)
+            a["reparation"] = s.get("reparation", 0)
+            a["defectueux"] = s.get("defectueux", 0)
         out.append(a)
     return out
+
+
+@frappe.whitelist()
+def ajuster_etat_stock(item, magasin, etat_source, etat_cible, quantite, remarque=None):
+    """Rééquilibre un article ENTRE 2 états (ex. 4 unités comptées « Bon état »
+    à requalifier « À réparer », ou l'inverse) sans changer la quantité totale
+    en magasin. Écrit 2 mouvements « Ajustement » (une sortie sur l'état
+    source, une entrée sur l'état cible), auditables et annulables comme tout
+    mouvement du grand livre. Réservé au magasin (droit d'écriture)."""
+    _guard(write=True)
+    if not frappe.db.exists("Article KYA", item):
+        frappe.throw(_("Article introuvable."))
+    if not frappe.db.exists("Warehouse", magasin):
+        frappe.throw(_("Magasin introuvable."))
+    if etat_source not in ETATS_STOCK or etat_cible not in ETATS_STOCK:
+        frappe.throw(_("État invalide."))
+    if etat_source == etat_cible:
+        frappe.throw(_("Choisissez deux états différents."))
+    qte = flt(quantite)
+    if qte <= 0:
+        frappe.throw(_("Quantité invalide."))
+    solde = solde_item_magasin(item, magasin)
+    dispo = flt(solde.get({ETAT_BON: "bon_etat", ETAT_REPARER: "reparation",
+                          ETAT_DEFECT: "defectueux"}.get(etat_source), 0))
+    if qte > dispo + 1e-6:
+        frappe.throw(_("Quantité demandée ({0}) supérieure au solde « {1} » disponible ({2}).")
+                     .format(qte, etat_source, dispo))
+    note = remarque or f"Rééquilibrage {etat_source} -> {etat_cible}"
+    n = enregistrer_mouvements([
+        {"item": item, "magasin": magasin, "quantite": -qte, "etat": etat_source, "remarque": note},
+        {"item": item, "magasin": magasin, "quantite": qte, "etat": etat_cible, "remarque": note},
+    ], type_mouvement="Ajustement", commit=True)
+    return {"ok": True, "lignes": n, "solde": solde_item_magasin(item, magasin)}
 
 
 @frappe.whitelist()
