@@ -152,7 +152,9 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
     <div class="ks-card">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
         <h3 style="margin:0;">État d'inventaire (temps réel)</h3>
-        <div style="display:flex;gap:8px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input type="text" id="ks-inv-q" oninput="renderInv()" placeholder="🔎 Rechercher un article…"
+            style="border:1px solid #cbd5e1;border-radius:9px;padding:8px 12px;font-size:.85rem;min-width:220px;">
           <select id="ks-mag-filter" class="ks-btn sec" style="font-weight:600;"></select>
           <button class="ks-btn" onclick="exportInv()">⬇️ Excel</button>
           <button class="ks-btn" onclick="exportInvPdf()">📄 PDF (fiche signée)</button>
@@ -271,6 +273,8 @@ textarea.ks-ta{width:100%;min-height:150px;border:1px solid #cbd5e1;border-radiu
               <option value="C">C</option><option value="D">D</option>
             </select>
           </label>
+          <input type="text" id="rea-q" oninput="renderRea()" placeholder="🔎 Rechercher un article…"
+            style="border:1px solid #cbd5e1;border-radius:8px;padding:6px 10px;font-size:.82rem;min-width:200px;">
           <a class="ks-btn sec" href="/app/parametres-stock-kya" target="_blank">⚙️ Règles par catégorie &amp; alertes mail ↗</a>
         </div>
       </div>
@@ -415,7 +419,7 @@ function render(){
       ${k.ruptures_stock?`<span class="chip">🚫 <b>${k.ruptures_stock}</b> rupture(s)</span>`:''}
       ${k.a_commander?`<span class="chip">🟠 <b>${k.a_commander}</b> à commander</span>`:''}
       ${k.defectueux_refs?`<span class="chip">🟣 <b>${k.defectueux_refs}</b> réf. avec défectueux</span>`:''}
-      <button class="ks-btn go" onclick="tab('rea');document.getElementById('rea-only').checked=true;renderRea();">Voir les alertes →</button>
+      <button class="ks-btn go" onclick="tab('rea');">Voir les alertes →</button>
     </div>` : `
     <div class="ks-prio ok"><span class="pt">🟢 Rien d'urgent</span>
       <span class="chip">Aucune rupture ni référence à commander</span></div>`;
@@ -465,15 +469,19 @@ function invRow(l){ return `<tr><td>${l.n}</td><td>${l.designation}</td>
   <td class="num">${l.qte_totale}</td><td class="num" style="color:#166534">${l.bon_etat}</td>
   <td class="num" style="color:#92400e">${l.reparation}</td>
   <td class="num" style="color:#7c3aed">${l.defectueux!=null?l.defectueux:0}</td></tr>`; }
+// Recherche insensible aux accents/casse (utilisée par tous les champs 🔎 de cette page).
+function normQ(s){ return (s||'').toString().normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim(); }
 function renderInv(){
   const f=document.getElementById('ks-mag-filter').value;
-  const secs = INV.sections.filter(s=>!f || s.magasin===f);
-  // reset pagination des sections (le filtre magasin peut changer le nombre de sections)
+  const q=normQ(document.getElementById('ks-inv-q').value);
+  let secs = INV.sections.filter(s=>!f || s.magasin===f);
+  if(q) secs = secs.map(s=>({...s, lignes:s.lignes.filter(l=>normQ(l.designation).includes(q))})).filter(s=>s.lignes.length);
+  // reset pagination des sections (le filtre magasin/recherche peut changer le nombre de sections)
   Object.keys(_KP).forEach(k=>{ if(k.indexOf('ks-inv-b')===0) delete _KP[k]; });
   const host=document.getElementById('ks-inv');
   if(!secs.length){ host.innerHTML=`<div style="text-align:center;color:#94a3b8;padding:20px;">Aucun stock à afficher.</div>`; return; }
   host.innerHTML = secs.map((s,i)=>`
-    <div class="ks-mag">🏬 ${s.magasin} — ${s.total_lignes} article(s)</div>
+    <div class="ks-mag">🏬 ${s.magasin} — ${s.lignes.length} article(s)${q?' (filtré)':''}</div>
     <div class="ks-scroll"><table class="ks-tbl ks-tbl-wide"><thead><tr><th style="width:5%">N°</th><th>Désignation</th>
       <th style="width:11%">Qté totale</th><th style="width:11%">Bon état</th><th style="width:11%">À réparer</th><th style="width:11%">Défectueux</th></tr></thead>
     <tbody id="ks-inv-b${i}"></tbody></table></div>`).join('');
@@ -617,9 +625,11 @@ async function renderRea(){
   const filtre=document.getElementById('rea-filtre').value;
   const fcat=document.getElementById('rea-cat').value;
   const fclasse=document.getElementById('rea-classe').value;
+  const q=normQ(document.getElementById('rea-q').value);
   let rows = filtre ? REA.filter(r=>r.statut===filtre) : REA;
   if(fcat) rows = rows.filter(r=>r.categorie===fcat);
   if(fclasse) rows = rows.filter(r=>r.classe===fclasse);
+  if(q) rows = rows.filter(r=>normQ(r.designation).includes(q));
   const dot={'RUPTURE':'🔴','A COMMANDER':'🟠','REFERENCE VIDE':'⚪','OK':'🟢'};
   const col={'RUPTURE':'#dc2626','A COMMANDER':'#d97706','REFERENCE VIDE':'#94a3b8','OK':'#166534'};
   kpage('ks-reabody', rows, r=>`<tr>
