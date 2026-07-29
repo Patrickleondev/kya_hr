@@ -82,9 +82,9 @@
         <div class="sign-actions">
           <button class="btn gray" id="pad-clear" type="button">Effacer</button>
           <span style="flex:1;"></span>
-          <button class="btn p" data-role="titulaire" id="sg-tit" type="button" style="display:none;">Signer (titulaire)</button>
-          <button class="btn p" data-role="n1" id="sg-n1" type="button" style="display:none;">Viser (N+1)</button>
-          <button class="btn p" data-role="drh" id="sg-drh" type="button" style="display:none;">Valider (DRH)</button>
+          <button class="btn p" data-role="titulaire" data-label="Signer (titulaire)" id="sg-tit" type="button" style="display:none;">Signer (titulaire)</button>
+          <button class="btn p" data-role="n1" data-label="Viser (N+1)" id="sg-n1" type="button" style="display:none;">Viser (N+1)</button>
+          <button class="btn p" data-role="drh" data-label="Valider (DRH)" id="sg-drh" type="button" style="display:none;">Valider (DRH)</button>
         </div>
         <div class="msg" id="fp-msg"></div>
       </div>
@@ -122,12 +122,22 @@ function openF(name){
   frappe.call({ method:'kya_hr.api.fiche_poste.apercu', args:{name:name},
     callback:function(r){ if(r.message){ frame.srcdoc='<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#fff;}body{padding:20px 24px;}</style></head><body>'+r.message+'</body></html>'; } },
     error:function(){ frame.srcdoc='<!doctype html><html><body style="margin:0;color:#b91c1c;font-family:sans-serif;padding:30px;">Accès non autorisé ou erreur.</body></html>'; }});
-  // panneau signature selon le rôle
+  // panneau signature selon le rôle — respecte l'ordre titulaire -> N+1 -> DRH
+  // et verrouille une étape déjà signée (pas de re-signature).
   document.getElementById('fp-sign').style.display='';
   clearPad();
-  document.getElementById('sg-tit').style.display=(IS_RH||row.is_mine)?'inline-block':'none';
-  document.getElementById('sg-n1').style.display=(IS_RH||IS_CHEF)?'inline-block':'none';
-  document.getElementById('sg-drh').style.display=IS_RH?'inline-block':'none';
+  var s=row.signed||{};
+  function setBtn(id, canSee, prevDone, doneAlready){
+    var b=document.getElementById(id);
+    if(!canSee){ b.style.display='none'; return; }
+    b.style.display='inline-block';
+    if(doneAlready){ b.disabled=true; b.textContent='✔ Déjà signé'; }
+    else if(!prevDone){ b.disabled=true; b.textContent=b.dataset.label+' (en attente de l’étape précédente)'; }
+    else { b.disabled=false; b.textContent=b.dataset.label; }
+  }
+  setBtn('sg-tit', IS_RH||row.is_mine, true, s.titulaire);
+  setBtn('sg-n1', IS_RH||IS_CHEF, s.titulaire, s.n1);
+  setBtn('sg-drh', IS_RH, s.n1, s.drh);
   document.getElementById('fp-msg').textContent='';
 }
 
@@ -165,7 +175,11 @@ function doSign(role){
 
 function load(){
   frappe.call({ method:'kya_hr.api.fiche_poste.liste',
-    callback:function(r){ ROWS=r.message||[]; renderList(''); },
+    callback:function(r){ ROWS=r.message||[]; renderList('');
+      // Lien direct depuis un e-mail : /fiches-poste?name=FDP-00041
+      var wanted=new URLSearchParams(window.location.search).get('name');
+      if(wanted && ROWS.some(function(x){return x.name===wanted;})){ openF(wanted); }
+    },
     error:function(){ document.getElementById('fp-list').innerHTML='<div class="empty">Erreur de chargement.</div>'; }});
 }
 

@@ -98,7 +98,11 @@
         <div class="f"><label>Type de garant</label><select id="c-garant"><option>Établissement</option><option>Tuteur Légal</option></select></div>
         <div class="f"><label>Établissement représenté par</label><input id="c-etabrep"></div>
       </div>
-      <div class="f"><label>Nom du garant (établissement / tuteur)</label><input id="c-garantnom"></div>
+      <div class="row2">
+        <div class="f"><label>Nom du garant (établissement / tuteur)</label><input id="c-garantnom"></div>
+        <div class="f"><label>Qualité (ex. Père, Tuteur légal désigné…)</label><input id="c-garantqualite"></div>
+      </div>
+      <div class="f"><label>E-mail du garant (optionnel — laisser vide = pas de signature en ligne pour cette étape)</label><input id="c-garantmail" type="email"></div>
 
       <div class="sec-title">Stage</div>
       <div class="f"><label>Autres objectifs pédagogiques (un par ligne)</label><textarea id="c-obj"></textarea></div>
@@ -119,6 +123,13 @@
       <div class="row2">
         <div class="f"><label>Maître de stage</label><input id="c-maitre"></div>
         <div class="f"><label style="visibility:hidden;">.</label><label class="chk" style="margin:8px 0 0;"><input type="checkbox" id="c-maitref"> Maître : féminin (« désignée »)</label></div>
+      </div>
+      <div class="row2">
+        <div class="f"><label>Maître de stage — fiche employé (optionnel)</label>
+          <input id="c-maitre-emp-search" placeholder="Rechercher un employé…" autocomplete="off">
+          <select id="c-maitre-emp" style="margin-top:6px;"><option value="">— Aucune (saisir l'e-mail directement) —</option></select>
+        </div>
+        <div class="f"><label>E-mail du maître de stage</label><input id="c-maitremail" type="email"></div>
       </div>
 
       <div class="sec-title">Assurance, évaluation, image</div>
@@ -172,7 +183,12 @@ function stCls(s){ s=s||''; if(/sign/i.test(s))return'sig'; if(/rejet/i.test(s))
 function v(id){ var e=document.getElementById(id); return e?(e.type==='checkbox'?(e.checked?1:0):e.value):''; }
 
 function fillEmp(list){
-  document.getElementById('c-emp').innerHTML='<option value="">— Aucune (saisie manuelle) —</option>'+
+  var opts='<option value="">— Aucune (saisie manuelle) —</option>'+
+    list.map(function(e){return '<option value="'+e.name+'">'+esc(e.employee_name||e.name)+(e.employment_type?(' · '+esc(e.employment_type)):'')+'</option>';}).join('');
+  document.getElementById('c-emp').innerHTML=opts;
+}
+function fillMaitreEmp(list){
+  document.getElementById('c-maitre-emp').innerHTML='<option value="">— Aucune (saisir l\'e-mail directement) —</option>'+
     list.map(function(e){return '<option value="'+e.name+'">'+esc(e.employee_name||e.name)+(e.employment_type?(' · '+esc(e.employment_type)):'')+'</option>';}).join('');
 }
 function collect(){
@@ -181,9 +197,11 @@ function collect(){
     domicile:v('c-dom'), pere:v('c-pere'), mere:v('c-mere'), telephone:v('c-tel'), email:v('c-mail'),
     sans_email:v('c-noemail'), etablissement:v('c-etab'), num_certificat_scolarite:v('c-cert'),
     type_garant:v('c-garant'), etablissement_represente_par:v('c-etabrep'), garant_nom:v('c-garantnom'),
+    garant_qualite:v('c-garantqualite'), garant_email:v('c-garantmail'),
     objectifs:v('c-obj'), duree_texte:v('c-duree'), date_debut:v('c-debut'), date_fin:v('c-fin'),
     lieu_stage:v('c-lieustage'), jour_debut:v('c-jourd'), jour_fin:v('c-jourf'), heure_debut:v('c-heured'),
     heure_fin:v('c-heuref'), maitre_stage_nom:v('c-maitre'), maitre_stage_feminin:v('c-maitref'),
+    maitre_stage_employee:v('c-maitre-emp'), maitre_stage_email:v('c-maitremail'),
     assurance_police:v('c-police'), assurance_compagnie:v('c-compagnie'), rapport_delai_jours:v('c-delai'),
     droit_image:v('c-image'), date_document:v('c-date'), lieu:v('c-ville'),
     utiliser_signature_enregistree:(document.querySelector('input[name=csig]:checked')||{}).value||'1' };
@@ -218,18 +236,30 @@ function action(name, act){
 }
 function rowActions(d){
   var s=d.workflow_state||'Brouillon', a=[];
-  if(s==='Brouillon') a.push('<button class="btn sm go" onclick="action(\''+d.name+'\',\'Soumettre au DG\')">Envoyer au DG</button>');
+  if(s==='Brouillon' && d.can_send_digital) a.push('<button class="btn sm go" onclick="envoyerStagiaire(\''+d.name+'\')">✉ Envoyer au stagiaire</button>');
+  if(s==='Brouillon') a.push('<button class="btn sm" onclick="action(\''+d.name+'\',\'Soumettre au DG\')">Envoyer au DG (direct)</button>');
   if(s==='En attente DG' && IS_DG){ a.push('<button class="btn sm dg" onclick="action(\''+d.name+'\',\'Signer\')">Signer</button>');
     a.push('<button class="btn sm rej" onclick="action(\''+d.name+'\',\'Rejeter\')">Rejeter</button>'); }
   if(s==='Rejeté') a.push('<button class="btn sm" onclick="action(\''+d.name+'\',\'Reprendre\')">Reprendre</button>');
   if(/sign/i.test(s)) a.push('<a class="btn sm pdf" href="'+d.pdf_url+'" target="_blank">📄 Imprimer</a>');
   return '<div class="acts">'+(a.join('')||'—')+'</div>';
 }
+function sigDots(d){
+  var s=d.signed||{};
+  function dot(ok,l){ return '<span style="font-size:.6rem;font-weight:800;padding:2px 7px;border-radius:20px;margin-right:3px;'+
+    (ok?'background:#dcfce7;color:#166534;':'background:#eef2f7;color:#94a3b8;')+'">'+(ok?'✔ ':'')+l+'</span>'; }
+  return dot(s.stagiaire,'Stagiaire')+dot(s.maitre,'Maître')+(d.garant_email?dot(s.garant,'Garant'):'')+dot(s.dg,'DG');
+}
+function envoyerStagiaire(name){
+  frappe.call({method:'kya_hr.api.contrat_immersion_signature.envoyer_stagiaire', args:{contract_id:name},
+    callback:function(r){ if(r.message&&r.message.ok){ frappe.show_alert&&frappe.show_alert({message:'✔ Envoyé au stagiaire',indicator:'green'}); charger(); } },
+    error:function(){ frappe.msgprint&&frappe.msgprint('Envoi impossible.'); }});
+}
 function charger(){
   frappe.call({method:'kya_hr.kya_hr.doctype.contrat_stage_immersion_kya.contrat_stage_immersion_kya.liste',
     callback:function(r){ var rows=r.message||[]; var tb=document.getElementById('c-list');
       if(!rows.length){ tb.innerHTML='<tr><td colspan="5" class="empty">Aucun contrat pour l’instant.</td></tr>'; return; }
-      tb.innerHTML=rows.map(function(d){ return '<tr><td><b>'+esc(d.beneficiaire_nom||'')+'</b>'+(d.sans_email?'<span class="pill-noemail">sans e-mail</span>':'')+'</td>'+
+      tb.innerHTML=rows.map(function(d){ return '<tr><td><b>'+esc(d.beneficiaire_nom||'')+'</b>'+(d.sans_email?'<span class="pill-noemail">sans e-mail</span>':'')+'<div style="margin-top:4px;">'+sigDots(d)+'</div></td>'+
         '<td>'+esc(d.type_garant||'')+'</td><td>'+dfr(d.date_document)+'</td>'+
         '<td><span class="st '+stCls(d.workflow_state)+'">'+esc(d.workflow_state||'Brouillon')+'</span></td><td>'+rowActions(d)+'</td></tr>'; }).join(''); }});
 }
@@ -252,13 +282,20 @@ frappe.ready(function(){
   document.getElementById('c-emp-search').addEventListener('input', function(){ var q=this.value.toLowerCase();
     fillEmp(EMPS.filter(function(e){return (e.employee_name||'').toLowerCase().indexOf(q)!==-1;})); });
   document.getElementById('c-emp').addEventListener('change', prefill);
+  document.getElementById('c-maitre-emp-search').addEventListener('input', function(){ var q=this.value.toLowerCase();
+    fillMaitreEmp(EMPS.filter(function(e){return (e.employee_name||'').toLowerCase().indexOf(q)!==-1;})); });
+  document.getElementById('c-maitre-emp').addEventListener('change', function(){
+    var id=this.value; if(!id) return;
+    var emp=EMPS.filter(function(e){return e.name===id;})[0];
+    if(emp && emp.employee_name && !v('c-maitre')) document.getElementById('c-maitre').value=emp.employee_name;
+    schedule(); });
   document.getElementById('c-create').addEventListener('click', creer);
   Array.prototype.forEach.call(document.querySelectorAll('.ci input, .ci select, .ci textarea'), function(el){
-    if(el.id==='c-emp-search') return;
+    if(el.id==='c-emp-search' || el.id==='c-maitre-emp-search') return;
     el.addEventListener(el.tagName==='SELECT'||el.type==='checkbox'||el.type==='radio'?'change':'input', schedule);
   });
   frappe.call({method:'kya_hr.kya_hr.doctype.contrat_stage_immersion_kya.contrat_stage_immersion_kya.liste_stagiaires',
-    callback:function(r){ EMPS=r.message||[]; fillEmp(EMPS); }});
+    callback:function(r){ EMPS=r.message||[]; fillEmp(EMPS); fillMaitreEmp(EMPS); }});
   charger();
   {% endif %}
 });

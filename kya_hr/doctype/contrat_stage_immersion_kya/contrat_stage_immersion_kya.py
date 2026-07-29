@@ -28,6 +28,12 @@ class ContratStageImmersionKYA(Document):
     def validate(self):
         if self.civilite and not self.gender:
             self.gender = "Female" if est_feminin(civilite=self.civilite) else "Male"
+        if self.maitre_stage_employee and not self.maitre_stage_email:
+            user_id = frappe.db.get_value("Employee", self.maitre_stage_employee, "user_id")
+            if user_id:
+                u = frappe.db.get_value("User", user_id, ["email", "enabled"], as_dict=True)
+                if u and u.enabled:
+                    self.maitre_stage_email = u.email
         self._stamp_signatures()
 
     def autofill(self):
@@ -97,6 +103,24 @@ class ContratStageImmersionKYA(Document):
     def on_submit(self):
         self._notify_if_signed()
 
+    def on_update(self):
+        self._notify_digital_transition()
+
+    def _notify_digital_transition(self):
+        """Circuit digital (28-29/07/2026) : stagiaire -> maître de stage ->
+        garant (optionnel) -> RH prévenue quand prêt pour le DG. N'envoie
+        qu'AU MOMENT de la transition (pas à chaque sauvegarde dans le même
+        état), comme pour KYA Contrat."""
+        before = self.get_doc_before_save()
+        before_state = before.workflow_state if before else None
+        if before_state == self.workflow_state:
+            return
+        try:
+            from kya_hr.api.contrat_immersion_signature import notifier_transition
+            notifier_transition(self, before_state)
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), "Contrat Immersion KYA: notif digitale")
+
     def _notify_if_signed(self):
         """Notifie le/la stagiaire à la signature — SAUF s'il/elle est sans e-mail
         (case cochée) : dans ce cas la RH imprime et fait signer physiquement."""
@@ -141,10 +165,12 @@ _RH_ROLES = {"Responsable RH", "HR Manager", "HR User", "Directeur Général", "
 _CHAMPS = ["civilite", "beneficiaire_nom", "date_naissance", "lieu_naissance",
            "nationalite", "piece_type", "piece_numero", "domicile", "pere", "mere",
            "telephone", "email", "etablissement", "num_certificat_scolarite",
-           "type_garant", "etablissement_represente_par", "garant_nom", "objectifs",
+           "type_garant", "etablissement_represente_par", "garant_nom",
+           "garant_qualite", "garant_email", "objectifs",
            "duree_texte", "date_debut", "date_fin", "lieu_stage", "jour_debut",
            "jour_fin", "heure_debut", "heure_fin", "maitre_stage_nom",
-           "maitre_stage_feminin", "assurance_police", "assurance_compagnie",
+           "maitre_stage_feminin", "maitre_stage_employee", "maitre_stage_email",
+           "assurance_police", "assurance_compagnie",
            "rapport_delai_jours", "droit_image", "date_document", "lieu", "sans_email"]
 
 
@@ -210,9 +236,19 @@ def liste(limit=60):
     rows = frappe.get_all(
         "Contrat Stage Immersion KYA",
         fields=["name", "beneficiaire_nom", "type_garant", "workflow_state",
-                "date_document", "sans_email", "modified"],
+                "date_document", "sans_email", "modified", "email",
+                "garant_email", "signature_stagiaire", "signature_maitre",
+                "signature_garant", "signature_finale"],
         order_by="modified desc", limit_page_length=int(limit or 60))
     for r in rows:
+        r["signed"] = {
+            "stagiaire": bool(r.pop("signature_stagiaire", None)),
+            "maitre": bool(r.pop("signature_maitre", None)),
+            "garant": bool(r.pop("signature_garant", None)),
+            "dg": bool(r.pop("signature_finale", None)),
+        }
+        r["can_send_digital"] = (r["workflow_state"] in (None, "", "Brouillon")
+                                  and not r["sans_email"] and bool(r.get("email")))
         r["pdf_url"] = ("/api/method/kya_hr.api.print_format.download_pdf"
                         "?doctype=Contrat%20Stage%20Immersion%20KYA&name=" + quote(r["name"])
                         + "&format=Contrat%20Stage%20Immersion%20KYA&language=fr")
