@@ -70,6 +70,7 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.setup_logistique_access.execute", "Sortie Vehicule visible Direction (DG/DGA) + roles logistiques sur espace Logistique"),
     ("kya_hr.equipe_member_sync.recompute_all", "Recalcule nombre_membres des Equipes KYA (corrige compteurs perimes apres assignation employes)"),
     ("kya_hr.ensure_chef_capabilities.execute", "Aligne capacites chef (Chef Service=Chef Equipe=Chef d'Equipe : approbation + assignation taches)"),
+    ("kya_hr.ensure_workflow_edit_roles.execute", "Grants sens unique chef -> +Chef Service +Superieur Immediat : sans eux, allow_edit des etats 'En attente Chef/Superieur' rend la fiche read-only -> pad de signature grise pour le signataire legitime"),
     ("kya_hr.link_employees_users.link_by_email", "Lie Employees aux Users par email (racine 'Nom du Demandeur vide')"),
     ("kya_hr.ensure_employee_roles.execute", "Ensure Employee/Stagiaire roles on linked Users"),
     ("kya_hr.employee_access.execute", "Accès Espace Employés : pose le rôle Employee ET débloque le module « KYA HR » (Block Modules) pour tout employé actif — sinon get_workspace_sidebar_items masque l'Espace Employés (module bloqué) et l'employé ne voit pas « Mon Espace »"),
@@ -93,6 +94,7 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.maintenance.backfill_clients_projets.execute", "Client KYA / Projet KYA (répertoires maison) créés depuis les PV Sortie existants — les Links repointés du Customer/Project natif gardent des valeurs valides"),
     ("kya_hr.maintenance.seed_categories_typologie.execute", "14 catégories (typologies d'équipement) de la fiche AEA-ENG-13 semées pour le picker de saisie/import (idempotent, n'écrase pas les catégories libres existantes)"),
     ("kya_hr.maintenance.align_stock_etats.execute", "Vocabulaire d'état stock UNIQUE : Bon état / À réparer / Défectueux (champ état à la réception PV Entrée + colonne Défectueux Inventaire, options Retour alignées, reclasse les mouvements hérités Neuf/En réparation/Hors service). Child doctypes custom=1 non resynchronisés par migrate → appliqué en base."),
+    ("kya_hr.maintenance.rename_famille_composants.execute", "Famille de stock industriel : reclasse les Article KYA existants 'Matière première' -> 'Composants' (le Select lui-même vient du JSON, custom=0)."),
     ("kya_hr.ensure_webform_table_columns.execute", "Re-cale la largeur des colonnes des tables web forms après ajout des champs état/défectueux (PV Entrée, Inventaire)"),
     ("kya_hr.maintenance.setup_rh_effectifs.execute", "Socle module RH Effectifs : départements (DST/DSS/DSC) + Paramètres RH KYA (barèmes Convention : licenciement/ancienneté/retraite/permissions) configurables, sans paie ERPNext"),
     ("kya_hr.maintenance.setup_documents_rh.execute", "Documents RH dynamiques (certificat de stage / attestation de travail / prestation) : circuit RH → DG (Flux Document RH KYA) + états + signataire DG par défaut ; signature en ligne OU image enregistrée estampillée"),
@@ -103,6 +105,7 @@ AFTER_MIGRATE: list[tuple[str, str]] = [
     ("kya_hr.maintenance.setup_compta_maison.execute", "Comptabilité MAISON : installe les DocTypes custom=1 (Facture KYA, Ecriture Comptable KYA/Grand Livre, Bulletin Paie KYA + Parametres Paie KYA/barèmes) + formats d'impression (custom=1 non resynchronisés par migrate) ; pose le barème IRPP par défaut si vide"),
     ("kya_hr.maintenance.disable_native_birthday.execute", "Éteint le rappel d'anniversaire NATIF ERPNext (HR Settings) : KYA garde son propre rappel maison (RH+DG, sans âge) ; évite le doublon"),
     ("kya_hr.maintenance.fix_contract_templates_genre.execute", "Rallume les modèles de contrat FÉMININS éteints par la règle d'unicité qui ignorait le genre (l'install de « CDD — Masculin » éteignait « CDD — Féminin » → les contrats de femmes sortaient au masculin, « Monsieur <nom> »)"),
+    ("kya_hr.maintenance.import_fiches_poste_kya.execute", "Contenu officiel des 33 fiches de poste du catalogue KYA-ORG-CIBLE-01 (mission/attributions/indicateurs/profil) : enrichit les 4 fiches employé déjà occupées (DG/DGA/IT/Achats) sans écraser un champ déjà rempli, crée les 29 autres postes comme modèles sans titulaire (réorganisation 2026-010/011 pas encore exécutée)"),
 ]
 
 AFTER_INSTALL: list[tuple[str, str]] = [

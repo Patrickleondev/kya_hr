@@ -33,7 +33,7 @@
    "label": "Stagiaire (Employé)",
    "options": "Employee",
    "reqd": 1,
-   "description": "Le stagiaire qui sort. Si vous saisissez pour vous-même, c'est votre propre matricule."
+   "description": "Le stagiaire qui sort. Vous-même : tapez votre NOM, l'identifiant se remplit tout seul (pas besoin de connaître votre matricule)."
   },
   {
    "fieldname": "employee_name",

@@ -1,0 +1,1334 @@
+[
+  {
+    "numero": "5.1",
+    "code_fp": "FP-01",
+    "categorie": "Haut Cadre (HC)",
+    "intitule_poste": "Directeur Général (DG)",
+    "identification": {
+      "Rattachement hiérarchique": "Gérance / Associé unique",
+      "Encadrement direct": "Directeur Général Adjoint · les 5 Directeurs d'activités · Directeur Scientifique ·  Directeur de l'Institut · Directeur Exécutif de la Fondation · Chefs de service Audit, QHSE et IT (rattachement administratif)",
+      "Effectif sous responsabilité": "Ensemble du Groupe : siège, agences, filiales",
+      "Classification": "Haut Cadre (HC) — mandat social — rémunération fixée par la Gérance",
+      "Plafond d'engagement": "Illimité dans les limites statutaires",
+      "Instances": "Préside le Comité de Direction · Préside la Revue de Direction Qualité · Préside l'Assemblée Générale du Personnel · Invité du Comité d'Audit",
+      "Suppléance": "Directeur Général Adjoint, sur délégation écrite"
+    },
+    "mission": "Définir et incarner la stratégie du Groupe, garantir sa pérennité économique et sa conformité, porter sa transformation industrielle et sa croissance panafricaine, et représenter KYA-Energy Group auprès des institutions, des bailleurs et des partenaires.",
+    "attributions": [
+      {"domaine": "Stratégie et allocation du capital", "activites": "- Élaborer, faire valider par la Gérance et déployer le plan stratégique du Groupe à l'horizon de la Vision KYA 2015– 2065 ; en assurer la déclinaison en objectifs annuels par direction et par Business Unit.\n- Arbitrer l'allocation du capital entre les Business Units : investissements industriels, recherche et développement, déploiement du réseau d'agences, expansion internationale.\n- Décider des implantations nouvelles — agences, filiales, partenariats, groupements d'intérêt économique — sur la base des business plans validés en Comité de Direction."},
+      {"domaine": "Gouvernance et organisation", "activites": "- Présider le Comité de Direction et garantir l'application de la charte de gouvernance : quorum, relevé de décisions sous 48 heures, suivi des actions jusqu'à clôture.\n- Nommer les directeurs, valider leurs lettres de mission et leurs fiches de poste, et conduire leur évaluation annuelle.\n- Garantir l'indépendance de l'audit interne : ne pas interférer dans le plan d'audit ni dans les conclusions des missions.\n- Faire vivre le système de management de la qualité ISO 9001:2015 et présider la revue de direction semestrielle.\n- Arrêter par décision les seuils de délégation financière du Groupe et les faire annexer à chaque fiche de poste."},
+      {"domaine": "Performance économique", "activites": "- Répondre devant la Gérance de la performance financière du Groupe : chiffre d'affaires, marge, trésorerie, rentabilité par Business Unit.\n- Approuver le budget annuel consolidé et arbitrer les révisions.\n- Prévenir toute dérive budgétaire dissimulée en imposant un reporting mensuel contradictoire associant la Direction Administrative & Financière, le contrôle de gestion et l'audit interne."},
+      {"domaine": "Représentation et développement", "activites": "- Représenter le Groupe auprès des bailleurs (BOAD, BAD, Banque Mondiale, GIZ, USAID), des autorités togolaises et régionales, de la Chambre de Commerce et d'Industrie du Togo et des instances CEDEAO/UEMOA.\n- Négocier et signer les partenariats stratégiques, les conventions de licence et les accords de groupement.\n- Porter la marque et le positionnement scientifique du Groupe : publications, conférences, plaidoyer sectoriel."},
+      {"domaine": "Capital humain et culture", "activites": "- Garantir que chaque poste d'encadrement dispose d'une fiche de poste signée et d'objectifs annuels écrits.\n- Garantir que la revue trimestrielle de performance est effectivement tenue dans toutes les entités, et que la part variable qui en résulte est versée chaque trimestre.\n- Veiller à ce que la culture de transparence interne du Groupe soit préservée : la remontée d'une mauvaise nouvelle ne doit jamais être sanctionnée."}
+    ],
+    "autorite": "- Engage le Groupe sans limitation de montant, dans les seules limites fixées par les statuts et par la Gérance.\n- Nomme, sanctionne et licencie l'ensemble du personnel, dans le respect du Code du travail togolais.\n- Peut, lorsque le résultat trimestriel du Groupe est significativement dégradé, réduire ou différer le versement de la part variable du trimestre. Cette décision est prise en Comité de Direction, motivée, et communiquée à l'ensemble du personnel — elle ne peut être ni tacite, ni sélective.\n- Ne peut ni modifier le plan d'audit interne, ni censurer un rapport d'audit, ni s'opposer à sa transmission au Comité d'Audit.\n- Ne peut céder d'actif stratégique ni engager le Groupe dans une opération de haut de bilan sans autorisation expresse de la Gérance.",
+    "indicateurs": [
+      {"indicateur": "Chiffre d'affaires consolidé vs budget", "cible": "≥ 100 %", "frequence": "Mensuelle", "poids": "17 %"},
+      {"indicateur": "Résultat net et marge par Business Unit", "cible": "Conforme au budget", "frequence": "Mensuelle", "poids": "16 %"},
+      {"indicateur": "Trésorerie nette et prévisionnel à 90 jours", "cible": "Positif en permanence", "frequence": "Mensuelle", "poids": "14 %"},
+      {"indicateur": "Proportion des décisions opérationnelles remontant au DG", "cible": "En décroissance chaque trimestre", "frequence": "Trimestrielle", "poids": "13 %"},
+      {"indicateur": "Couverture de l'encadrement en fiches de poste signées", "cible": "100 %", "frequence": "Semestrielle", "poids": "11 %"},
+      {"indicateur": "Maintien de la certification ISO 9001:2015", "cible": "Sans écart majeur", "frequence": "Annuelle", "poids": "10 %"},
+      {"indicateur": "Accidents du travail graves", "cible": "0", "frequence": "Mensuelle", "poids": "9 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "≥ 1/mois — ≥ 1 idée retenue/trimestre", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Ingénieur ou Bac+5 en énergie, sciences de l'ingénieur ou gestion ; titre de docteur ou HDR apprécié pour la crédibilité scientifique du Groupe.",
+      "experience": "Minimum 15 ans, dont 8 en direction générale ou en direction d'unité, en environnement industriel ou d'ingénierie.",
+      "competences_techniques": "Stratégie et allocation du capital · Lecture d'états financiers SYSCOHADA · Négociation avec les bailleurs et les institutions · Systèmes énergétiques solaires · Gouvernance d'entreprise et conformité.",
+      "competences_comportementales": "Capacité à déléguer réellement et à ne pas reprendre la main · Exemplarité dans le respect des règles qu'il édicte · Vision de long terme · Résistance à la pression des urgences.",
+      "langues": "Français courant · Anglais courant (bailleurs, partenaires internationaux, publications)."
+    },
+    "interfaces": "Gérance · Comité d'Audit & des Risques · Comité de Direction · Bailleurs et institutions financières · Autorités togolaises et régionales · Partenaires industriels et académiques · Ensemble du personnel (Assemblée Générale)."
+  },
+  {
+    "numero": "5.2",
+    "code_fp": "FP-02",
+    "categorie": "Haut Cadre (HC)",
+    "intitule_poste": "Directeur Général Adjoint (DGA)",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur Général",
+      "Encadrement direct": "Coordination fonctionnelle des 5 directions d'activités ; encadrement hiérarchique sur délégation expresse du Directeur Général",
+      "Effectif sous responsabilité": "Ensemble des opérations, par délégation",
+      "Classification": "Haut Cadre",
+      "Plafond d'engagement": "2 000 000 FCFA",
+      "Instances": "Membre du Comité de Direction · Préside la Revue Opérationnelle Hebdomadaire · Membre du Comité Élargi d'Encadrement",
+      "Suppléance": "Directeur d'activités désigné par le Directeur Général"
+    },
+    "mission": "Assurer la conduite opérationnelle quotidienne du Groupe, garantir la coordination entre les directions d'activités, arbitrer les ressources partagées, et suppléer le Directeur Général sur délégation écrite.",
+    "attributions": [
+      {"domaine": "Conduite opérationnelle", "activites": "- Présider la Revue Opérationnelle Hebdomadaire et y arbitrer, sur décision immédiate, l'affectation des ressources partagées de la semaine : équipes, véhicules, matériel de levage, engins de mesure.\n- Assurer la résolution des points bloquants inter-directions avant qu'ils ne remontent au Directeur Général.\n- Garantir la tenue des engagements de délai pris envers les clients et les bailleurs."},
+      {"domaine": "Coordination inter-directions", "activites": "- Prévenir les conflits d'allocation entre la Direction Technique & Projets et la Direction Industrielle, notamment lorsqu'une urgence de chantier vient perturber le plan de charge de l'usine : l'arbitrage est écrit et tracé.\n- Assurer la cohérence entre le carnet de commandes commercial, la capacité d'ingénierie et la capacité de production.\n- Veiller à la circulation effective de l'information entre le siège et les agences."},
+      {"domaine": "Suppléance et représentation", "activites": "- Suppléer le Directeur Général en son absence, dans le périmètre et pour la durée fixée par une délégation écrite.\n- Représenter le Groupe auprès des clients, des partenaires et des autorités, sur mandat du Directeur Général."},
+      {"domaine": "Pilotage de la performance", "activites": "- S'assurer que chaque direction produit son tableau de bord mensuel et que les écarts sont expliqués et suivis d'actions.\n- Suivre la mise en œuvre des décisions du Comité de Direction jusqu'à leur clôture effective."}
+    ],
+    "autorite": "- Engage la dépense jusqu'à 2 000 000 FCFA.\n- Valide les offres commerciales jusqu'à 50 000 000 FCFA.\n- Arbitre en dernier ressort, en Revue Opérationnelle, l'allocation des ressources partagées de la semaine.\n- N'exerce d'autorité hiérarchique sur les directeurs d'activités que sur délégation expresse et écrite du Directeur Général.\n- Ne peut ni nommer, ni licencier, ni modifier une politique du Groupe.",
+    "indicateurs": [
+      {"indicateur": "Taux de respect des jalons projets", "cible": "≥ 90 %", "frequence": "Mensuelle", "poids": "22 %"},
+      {"indicateur": "Décisions du Codir clôturées dans le délai fixé", "cible": "≥ 90 %", "frequence": "Mensuelle", "poids": "20 %"},
+      {"indicateur": "Points bloquants résolus sans arbitrage du DG", "cible": "≥ 80 %", "frequence": "Mensuelle", "poids": "18 %"},
+      {"indicateur": "Taux d'utilisation des ressources partagées", "cible": "≥ 80 %", "frequence": "Mensuelle", "poids": "16 %"},
+      {"indicateur": "Tenue effective de la Revue Opérationnelle hebdomadaire", "cible": "100 %", "frequence": "Mensuelle", "poids": "14 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "≥ 1/mois — ≥ 1 idée retenue/trimestre", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Ingénieur ou Bac+5, spécialité énergie, génie électrique ou génie industriel, en management ou en finance.",
+      "experience": "Minimum 12 ans, dont 5 en direction d'opérations multi-sites.",
+      "competences_techniques": "Pilotage d'opérations · Gestion de projets et de portefeuille · Planification de charge · Lecture d'un compte de résultat analytique · Systèmes solaires PV.",
+      "competences_comportementales": "Capacité d'arbitrage rapide et assumé · Sens de l'écoute des directions · Loyauté envers le Directeur Général · Refus des solutions de contournement.",
+      "langues": "Français courant · Anglais professionnel."
+    },
+    "interfaces": "Directeur Général · Les 5 directeurs d'activités · Chef de service QHSE · Chefs d'agence · Chefs d'équipe · Clients et soustraitants sur les points d'escalade."
+  },
+  {
+    "numero": "5.3",
+    "code_fp": "FP-03",
+    "categorie": "Cadre (C)",
+    "intitule_poste": "Directeur Technique & Projets (BU Engineering)",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur Général",
+      "Encadrement direct": "Chef de service Bureau d'études & Offres · Chef de service Installations & Chantiers · Chef de service SAV & Maintenance · Chef de service Contrôle & Supervision",
+      "Effectif sous responsabilité": "20 à 25 personnes",
+      "Classification": "Cadre (C)",
+      "Plafond d'engagement": "1 000 000 FCFA",
+      "Instances": "Membre du Comité de Direction · Membre de la Revue Opérationnelle Hebdomadaire · Membre de la Revue de Direction Qualité",
+      "Suppléance": "Chef de service Bureau d'études & Offres"
+    },
+    "mission": "Livrer les affaires d'ingénierie du Groupe dans les délais, la qualité et la marge contractés, et détenir la norme technique opposable à l'ensemble des entités, y compris les agences.",
+    "attributions": [
+      {"domaine": "Performance de la Business Unit Engineering", "activites": "- Répondre du compte de résultat analytique de la BU Engineering : chiffre d'affaires, marge brute par affaire, coûts de non-qualité.\n- Garantir la fiabilité du chiffrage à l'entrée : une marge d'affaire dégradée trouve presque toujours son origine dans un devis mal construit, non dans une exécution défaillante.\n- Suivre le taux de respect des jalons projets et en rendre compte mensuellement au Comité de Direction."},
+      {"domaine": "Ingénierie et études", "activites": "- Piloter le bureau d'études : dimensionnement, notes de calcul, plans d'exécution, choix des composants, réponses techniques aux appels d'offres.\n- Garantir la qualité technique des offres remises, en particulier sur les marchés financés par les bailleurs, où la conformité technique est éliminatoire.\n- Exploiter et faire évoluer les outils propriétaires du Groupe (KYA-SolDesign) en lien avec le Laboratory."},
+      {"domaine": "Chantiers et installations", "activites": "- Piloter l'exécution des chantiers : planning, ressources, sous-traitance, réception, levée des réserves.\n- Garantir la sécurité des intervenants sur site, en application des règles fixées par le QHSE."},
+      {"domaine": "SAV, maintenance et supervision", "activites": "- Garantir la disponibilité du parc installé sous contrat et le respect des engagements de délai d'intervention.\n- Exploiter la supervision à distance (KYA-SolMonitor) pour prévenir les défaillances et éviter les déplacements inutiles."},
+      {"domaine": "Norme technique du Groupe", "activites": "- Établir, maintenir et diffuser la norme technique d'installation et de maintenance, opposable au siège comme aux agences.\n- Exercer une autorité fonctionnelle sur les techniciens d'agence pour tout ce qui touche à la norme, sans jamais leur donner d'ordre hiérarchique direct.\n- Contribuer à l'habilitation technique des techniciens d'agence, en lien avec KYA-Institute of Technology."}
+    ],
+    "autorite": "- Engage la dépense jusqu'à 1 000 000 FCFA.\n- Valide les offres jusqu'à 25 000 000 FCFA et les remises jusqu'à 5 %.\n- Détient l'autorité normative exclusive en matière technique : aucune installation ne peut déroger à la norme du Groupe sans son accord écrit.\n- Peut suspendre une exécution non conforme, au siège comme en agence.\n- Ne dispose d'aucune autorité hiérarchique sur le personnel d'agence : son autorité y est fonctionnelle.\n- Ne fixe ni la politique de prix, ni la politique RH.",
+    "indicateurs": [
+      {"indicateur": "Marge brute par affaire vs marge devisée", "cible": "≥ 95 % de la marge devisée", "frequence": "Mensuelle", "poids": "17 %"},
+      {"indicateur": "Taux de respect des jalons projets", "cible": "≥ 90 %", "frequence": "Mensuelle", "poids": "16 %"},
+      {"indicateur": "Coût de non-qualité (reprises, pénalités)", "cible": "≤ 2 % du CA de la BU", "frequence": "Mensuelle", "poids": "14 %"},
+      {"indicateur": "Taux de disponibilité du parc sous contrat", "cible": "≥ 97 %", "frequence": "Mensuelle", "poids": "13 %"},
+      {"indicateur": "Respect du délai d'intervention SAV (SLA)", "cible": "≥ 95 %", "frequence": "Mensuelle", "poids": "11 %"},
+      {"indicateur": "Taux de conformité technique des offres remises", "cible": "100 %", "frequence": "Mensuelle", "poids": "10 %"},
+      {"indicateur": "Accidents du travail sur chantier", "cible": "", "frequence": "Mensuelle", "poids": "9 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Ingénieur en génie électrique, énergétique ou énergies renouvelables (Bac+5).",
+      "experience": "Minimum 10 ans en ingénierie et conduite de projets solaires, dont 5 en encadrement.",
+      "competences_techniques": "Dimensionnement PV et stockage · Réseaux BT/MT et raccordement · Conduite de chantier · Contrats FIDIC et marchés bailleurs · Logiciels de simulation (KYA-SolDesign, PVsyst, HOMER Pro).",
+      "competences_comportementales": "Intransigeance sur la norme et la sécurité · Capacité à dire non à une offre techniquement intenable · Rigueur dans le chiffrage · Pédagogie envers les agences.",
+      "langues": "Français courant · Anglais technique (documentation, appels d'offres internationaux)."
+    },
+    "interfaces": "Directeur Général · DGA · Directeur Industriel (approvisionnement produits) · Directeur du Développement & du Réseau (offres, chefs d'agence) · DAF (marges, achats) · QHSE · Laboratory (outils logiciels) · Institute (habilitations) · Clients, bureaux de contrôle et bailleurs."
+  },
+  {
+    "numero": "5.4",
+    "code_fp": "FP-04",
+    "categorie": "Cadre (C)",
+    "intitule_poste": "Directeur Industriel (BU Industry)",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur Général",
+      "Encadrement direct": "Chef de service Production & Assemblage · Chef de service Méthodes &  Industrialisation · Chef de service Qualité Produit · Chef de service Supply Chain & Magasins",
+      "Effectif sous responsabilité": "15 à 20 personnes",
+      "Classification": "Cadre (C)",
+      "Plafond d'engagement": "1 000 000 FCFA",
+      "Instances": "Membre du Comité de Direction · Membre de la Revue Opérationnelle Hebdomadaire · Membre de la Revue de Direction Qualité",
+      "Suppléance": "Chef de service Production & Assemblage"
+    },
+    "mission": "Produire les gammes KYA au coût de revient, à la cadence et à la qualité cibles, et faire de l'outil industriel du Groupe un avantage compétitif durable sur le marché ouest-africain.",
+    "attributions": [
+      {"domaine": "Performance de la Business Unit Industry", "activites": "- Répondre du compte de résultat analytique de la BU Industry : coût de revient unitaire, marge par unité produite, taux de rebut.\n- Établir et défendre le prix de cession interne des produits fournis aux chantiers et aux agences : ce prix conditionne la lisibilité des marges de toutes les autres Business Units.\n- Piloter le taux de rendement synthétique (TRS) de l'outil de production."},
+      {"domaine": "Production et cadence", "activites": "- Établir le plan de charge de l'usine et le tenir ; refuser les insertions non planifiées qui désorganisent la série, sauf arbitrage explicite en Revue Opérationnelle.\n- Garantir la sécurité et l'ergonomie des postes de l'atelier.\n- Déployer les démarches Lean et TPM : réduction des gaspillages, maintenance préventive des équipements, amélioration continue."},
+      {"domaine": "Méthodes et industrialisation", "activites": "- Industrialiser les produits issus du Laboratory : passage du prototype à la série, gammes de fabrication, outillages, temps standards.\n- Réduire le coût de revient unitaire par la conception, la standardisation des composants et l'amélioration des gammes."},
+      {"domaine": "Qualité produit", "activites": "- Garantir la conformité des produits sortis d'usine aux spécifications et aux normes applicables.\n- Piloter le traitement des non-conformités produit et des retours de garantie jusqu'à l'élimination de la cause racine."},
+      {"domaine": "Supply chain et magasins", "activites": "- Sécuriser l'approvisionnement des composants critiques : modules, onduleurs, batteries, structures.\n- Piloter le niveau de stock : un stock excessif immobilise la trésorerie, un stock insuffisant arrête la production et le chantier.\n- Garantir la fiabilité de l'inventaire permanent et l'exactitude des mouvements de magasin."}
+    ],
+    "autorite": "- Engage la dépense jusqu'à 1 000 000 FCFA.\n- Arrête le plan de charge de l'usine et peut refuser toute insertion non planifiée, sauf arbitrage contraire du DGA en Revue Opérationnelle.\n- Peut bloquer la sortie d'usine d'un produit non conforme, sans possibilité de dérogation par la ligne commerciale.\n- Ne fixe ni la norme d'installation sur site — qui relève de la Direction Technique — ni le prix de vente client.",
+    "indicateurs": [
+      {"indicateur": "Coût de revient unitaire vs cible", "cible": "≤ cible", "frequence": "Mensuelle", "poids": "16 %"},
+      {"indicateur": "Taux de rendement synthétique (TRS)", "cible": "≥ 75 %", "frequence": "Mensuelle", "poids": "14 %"},
+      {"indicateur": "Taux de rebut", "cible": "≤ 3 %", "frequence": "Mensuelle", "poids": "13 %"},
+      {"indicateur": "Taux de service usine (livraison à la date promise)", "cible": "≥ 95 %", "frequence": "Mensuelle", "poids": "12 %"},
+      {"indicateur": "Rotation du stock", "cible": "Conforme à la cible budgétaire", "frequence": "Mensuelle", "poids": "11 %"},
+      {"indicateur": "Écart d'inventaire", "cible": "≤ 1 %", "frequence": "Trimestrielle", "poids": "9 %"},
+      {"indicateur": "Retours de garantie sur produits fabriqués", "cible": "≤ 1 %", "frequence": "Trimestrielle", "poids": "8 %"},
+      {"indicateur": "Accidents du travail en atelier", "cible": "0", "frequence": "Mensuelle", "poids": "7 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "≥ 1/mois — ≥ 1 idée retenue/trimestre", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Ingénieur en génie industriel, génie électrique ou production (Bac+5).",
+      "experience": "Minimum 10 ans en production industrielle, dont 5 en direction d'unité de production ou d'atelier.",
+      "competences_techniques": "Pilotage de production et plan de charge · Lean manufacturing et TPM · Calcul de coût de revient · Gestion de la supply chain · Assurance qualité produit · Électronique de puissance et assemblage PV.",
+      "competences_comportementales": "Fermeté sur le plan de charge face à l'urgence commerciale · Rigueur analytique sur les coûts · Culture de l'amélioration continue · Présence terrain en atelier.",
+      "langues": "Français courant · Anglais technique (fournisseurs, documentation)."
+    },
+    "interfaces": "Directeur Général · DGA · Directeur Technique (spécifications, approvisionnement chantier) · Directeur du Développement & du Réseau (prévisions de vente) · DAF (achats, stock, coûts) · Laboratory (industrialisation) · QHSE · Fournisseurs et transitaires."
+  },
+  {
+    "numero": "5.5",
+    "code_fp": "FP-05",
+    "categorie": "Cadre (C)",
+    "intitule_poste": "Directeur du Développement & du Réseau Commercial",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur Général",
+      "Encadrement direct": "Chef de service Grands Comptes & Appels d'offres · Chef de service Ventes &  Distribution · Chef de service Marketing & Communication · Chef de service  Animation du Réseau d'agences · Ensemble des chefs d'agence",
+      "Effectif sous responsabilité": "10 à 12 personnes au siège + l'ensemble du réseau d'agences",
+      "Classification": "Cadre (C)",
+      "Plafond d'engagement": "1 000 000 FCFA",
+      "Instances": "Membre du Comité de Direction · Membre de la Revue Opérationnelle Hebdomadaire · Préside la revue mensuelle du réseau d'agences",
+      "Suppléance": "Chef de service Grands Comptes & Appels d'offres"
+    },
+    "mission": "Sécuriser le carnet de commandes du Groupe, gagner les marchés institutionnels et bailleurs, et déployer puis animer un réseau d'agences de proximité rentable au Togo comme à l'international.",
+    "attributions": [
+      {"domaine": "Carnet de commandes et grands comptes", "activites": "- Répondre du carnet de commandes du Groupe, exprimé en mois d'activité, et de sa reconstitution permanente.\n- Piloter la veille et la réponse aux appels d'offres institutionnels et bailleurs (BOAD, BAD, Banque Mondiale, KfW, ROGEAP, AT2ER), en coordination avec la Direction Technique pour le volet technique et la DAF pour le volet financier.\n- Constituer et animer les groupements et joint-ventures nécessaires aux appels d'offres exigeant un partenaire international."},
+      {"domaine": "Ventes et distribution", "activites": "- Piloter la force de vente : objectifs individuels, pipeline, taux de conversion, prix de vente effectif.\n- Structurer le réseau de distribution des produits KYA et en garantir la couverture géographique."},
+      {"domaine": "Déploiement et animation du réseau d'agences", "activites": "- Instruire les ouvertures d'agence : score IPI, parc installé à maintenir, business plan à 18 mois, proposition du format (antenne, agence standard, agence régionale) — pour décision du Comité de Direction.\n- Encadrer hiérarchiquement l'ensemble des chefs d'agence : objectifs, suivi mensuel de la trajectoire vers le point mort, évaluation annuelle.\n- Garantir l'homogénéité des pratiques commerciales, tarifaires et administratives sur l'ensemble du réseau.\n- Veiller à ce que toute implantation hors du Togo soit ouverte au format Agence Régionale, seul format autorisé à l'international."},
+      {"domaine": "Marketing et communication", "activites": "- Porter la marque et le positionnement du Groupe : communication institutionnelle, salons, publications commerciales, présence numérique.\n- Produire les supports commerciaux et les références de réalisations exploitables en appel d'offres."},
+      {"domaine": "Politique de prix", "activites": "- Proposer la politique de prix et de remise du Groupe, arrêtée conjointement avec la Direction Administrative & Financière, et en garantir l'application uniforme au siège comme en agence."}
+    ],
+    "autorite": "- Engage la dépense jusqu'à 1 000 000 FCFA.\n- Valide les offres jusqu'à 25 000 000 FCFA et les remises jusqu'à 5 %.\n- Détient l'autorité hiérarchique pleine sur les chefs d'agence : objectifs, évaluation, proposition de sanction.\n- Ne peut ouvrir ni fermer une agence sans décision du Comité de Direction fondée sur un business plan à 18 mois.\n- Ne fixe ni la norme technique — qui relève de la Direction Technique — ni la politique RH.\n- Ne peut consentir une remise au-delà de son seuil sans accord de la DAF.",
+    "indicateurs": [
+      {"indicateur": "Carnet de commandes", "cible": "≥ 6 mois d'activité", "frequence": "Mensuelle", "poids": "17 %"},
+      {"indicateur": "Chiffre d'affaires signé vs objectif", "cible": "", "frequence": "Mensuelle", "poids": "16 %"},
+      {"indicateur": "Taux de succès sur appels d'offres", "cible": "", "frequence": "Trimestrielle", "poids": "14 %"},
+      {"indicateur": "Prix de vente effectif vs prix catalogue", "cible": "≥ 95 %", "frequence": "Mensuelle", "poids": "13 %"},
+      {"indicateur": "Agences ayant atteint le point mort dans le délai fixé", "cible": "100 %", "frequence": "Trimestrielle", "poids": "11 %"},
+      {"indicateur": "Écart de trajectoire des agences vs business plan", "cible": "≤ 10 %", "frequence": "Mensuelle", "poids": "10 %"},
+      {"indicateur": "Taux de satisfaction client", "cible": "≥ 85 %", "frequence": "Semestrielle", "poids": "9 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "≥ 1/mois — ≥ 1 idée retenue/trimestre", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Bac+5 en commerce, ingénierie d'affaires ou école d'ingénieur avec spécialisation commerciale.",
+      "experience": "Minimum 10 ans en développement commercial B2B et institutionnel, dont 5 en encadrement d'une force de vente ou d'un réseau.",
+      "competences_techniques": "Réponse aux appels d'offres bailleurs · Ingénierie d'affaires · Animation de réseau multi-sites · Construction et lecture d'un business plan · Culture technique solaire suffisante pour dialoguer avec le bureau d'études · Constitution de groupements.",
+      "competences_comportementales": "Ténacité commerciale · Capacité à encadrer à distance · Discipline dans le respect de la politique tarifaire · Honnêteté dans la prévision du pipeline.",
+      "langues": "Français courant · Anglais courant (appels d'offres et partenaires internationaux)."
+    },
+    "interfaces": "Directeur Général · DGA · Chefs d'agence (hiérarchique) · Direction Technique (offres, norme) · Direction Industrielle (disponibilité produit) · DAF (prix, marges, cautions) · DRH (recrutement en agence) · Clients, bailleurs et partenaires de groupement."
+  },
+  {
+    "numero": "5.6",
+    "code_fp": "FP-06",
+    "categorie": "Cadre (C)",
+    "intitule_poste": "Directeur des Ressources Humaines & du Capital Humain (DRH)",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur Général",
+      "Encadrement direct": "Chef de service Recrutement & GPEC · Chef de service Administration du Personnel  & Paie · Chef de service Formation & Développement · Chef de service Relations  Sociales",
+      "Effectif sous responsabilité": "4 à 6 personnes",
+      "Classification": "Cadre (C)",
+      "Plafond d'engagement": "1 000 000 FCFA",
+      "Instances": "Membre du Comité de Direction · Anime le Comité de Sécurité et Santé au Travail avec le QHSE · Représente la direction auprès des Délégués du Personnel",
+      "Suppléance": "Chef de service Administration du Personnel & Paie"
+    },
+    "mission": "Attirer, développer, fidéliser et sécuriser juridiquement le capital humain du Groupe, et faire de la fonction RH un levier de performance et non un simple centre de gestion administrative.",
+    "attributions": [
+      {"domaine": "Politique de rémunération et conformité sociale", "activites": "- Maintenir et faire évoluer la grille indiciaire du Groupe (Indice × 196,3 FCFA), la garantir équitable, lisible et conforme au Code du travail togolais.\n- Garantir la conformité sociale : contrats, déclarations CIPRES, cotisations, registres obligatoires, durée du travail, congés.\n- Piloter la masse salariale et la part variable, en lien avec la Direction Administrative & Financière.\n- Garantir la tenue effective de la revue trimestrielle de performance dans toutes les directions et toutes les agences, et le versement trimestriel de la part variable qui en découle. Contrôler la cohérence des appréciations entre entités : la même performance doit produire la même appréciation, quel que soit le service.\n- Assurer la conformité sociale des salariés affectés hors du Togo, dans le respect du droit local applicable."},
+      {"domaine": "Recrutement et gestion prévisionnelle des compétences", "activites": "- Conduire les recrutements du Groupe, du technicien d'agence au directeur, et garantir qu'aucune nomination n'intervient sans fiche de poste signée.\n- Établir et tenir la cartographie des compétences et des postes clés ; identifier les compétences rares et organiser leur sécurisation (plan de succession, redondance).\n- Anticiper les besoins liés au déploiement du réseau d'agences et à la montée en charge industrielle."},
+      {"domaine": "Formation et développement", "activites": "- Établir le plan de formation annuel et en piloter l'exécution, en s'appuyant en priorité sur KYA-Institute of Technology.\n- Garantir que chaque technicien d'agence est habilité sur les deux volets — installation et maintenance — avant toute affectation.\n- Organiser le cycle de management : fixation des objectifs en janvier, revue trimestrielle de performance à chaque fin de trimestre, et revue du quatrième trimestre valant entretien annuel d'évaluation en décembre."},
+      {"domaine": "Relations sociales et climat", "activites": "- Organiser l'élection des Délégués du Personnel et entretenir un dialogue social régulier et loyal.\n- Traiter les procédures disciplinaires dans le strict respect du contradictoire et du Code du travail togolais.\n- Mesurer le climat social et alerter la Direction Générale sur toute dégradation."}
+    ],
+    "autorite": "- Engage la dépense jusqu'à 1 000 000 FCFA.\n- Valide tout recrutement du Groupe : aucune embauche ne peut intervenir sans son accord.\n- Valide toute sanction disciplinaire proposée par la ligne hiérarchique et en garantit la régularité juridique.\n- Peut s'opposer à une nomination non accompagnée d'une fiche de poste signée.\n- Valide, avant mise en paiement, les facteurs de performance individuels issus des revues trimestrielles, et peut faire corriger toute appréciation manifestement incohérente avec celles des autres entités.\n- Ne peut ni licencier seul — décision du Directeur Général — ni modifier la grille indiciaire ou les taux de part variable sans validation du Comité de Direction.",
+    "indicateurs": [
+      {"indicateur": "Taux de rotation du personnel", "cible": "≤ 10 % annualisé", "frequence": "Trimestrielle", "poids": "13 %"},
+      {"indicateur": "Postes clés vacants", "cible": "0", "frequence": "Mensuelle", "poids": "12 %"},
+      {"indicateur": "Délai moyen de recrutement", "cible": "≤ 60 jours", "frequence": "Trimestrielle", "poids": "11 %"},
+      {"indicateur": "Fiches de poste signées vs effectif", "cible": "100 %", "frequence": "Semestrielle", "poids": "10 %"},
+      {"indicateur": "Revues trimestrielles de performance effectivement tenues", "cible": "100 %", "frequence": "Trimestrielle", "poids": "9 %"},
+      {"indicateur": "Part variable versée dans le délai (paie du mois suivant la clôture)", "cible": "100 %", "frequence": "Trimestrielle", "poids": "9 %"},
+      {"indicateur": "Techniciens d'agence habilités sur les deux volets", "cible": "100 %", "frequence": "Semestrielle", "poids": "8 %"},
+      {"indicateur": "Exécution du plan de formation", "cible": "≥ 90 %", "frequence": "Annuelle", "poids": "7 %"},
+      {"indicateur": "Contentieux prud'homal perdu", "cible": "0", "frequence": "Annuelle", "poids": "6 %"},
+      {"indicateur": "Conformité des déclarations CIPRES", "cible": "100 %", "frequence": "Mensuelle", "poids": "5 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "≥ 1/mois — ≥ 1 idée retenue/trimestre", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Bac+5 en gestion des ressources humaines, droit social ou administration des entreprises.",
+      "experience": "Minimum 8 ans en RH, dont 4 en responsabilité, idéalement en environnement industriel ou multi-sites.",
+      "competences_techniques": "Droit du travail togolais et réglementation CIPRES · Construction et gestion d'une grille indiciaire · GPEC et plan de succession · Conduite d'entretiens et gestion des évaluations · Paie et administration du personnel · SIRH · Notions de droit social des pays d'implantation.",
+      "competences_comportementales": "Équité et cohérence dans le traitement des cas · Confidentialité absolue · Capacité à dire non à un directeur qui veut recruter hors procédure · Sens du dialogue social.",
+      "langues": "Français courant · Anglais professionnel apprécié."
+    },
+    "interfaces": "Directeur Général · Ensemble des directeurs · Chefs d'agence · QHSE (CSST) · DAF (masse salariale, paie) · KYA-Institute of Technology (formation) · Délégués du Personnel · Inspection du travail · CNSS / CIPRES."
+  },
+  {
+    "numero": "5.7",
+    "code_fp": "FP-07",
+    "categorie": "Cadre (C)",
+    "intitule_poste": "Directeur Administratif & Financier (DAF)",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur Général",
+      "Encadrement direct": "Chef de service Comptabilité & Fiscalité · Contrôleur de gestion · Chef de service Trésorerie & Financements · Chef de service Achats & Approvisionnements · Chef de service Juridique & Propriété Intellectuelle · Responsable Moyens Généraux",
+      "Effectif sous responsabilité": "8 à 10 personnes",
+      "Classification": "Cadre (C)",
+      "Plafond d'engagement": "1 000 000 FCFA",
+      "Instances": "Membre du Comité de Direction · Invité permanent du Comité d'Audit & des Risques",
+      "Suppléance": "Chef de service Comptabilité & Fiscalité"
+    },
+    "mission": "Garantir la solidité financière du Groupe, la fiabilité de ses comptes, sa conformité fiscale et réglementaire, et la protection de son patrimoine matériel et immatériel.",
+    "attributions": [
+      {"domaine": "Comptabilité, fiscalité et fiabilité des comptes", "activites": "- Garantir la tenue de la comptabilité selon le référentiel SYSCOHADA révisé et la production des états financiers dans les délais légaux.\n- Garantir la comptabilité analytique par Business Unit : sans elle, la notion même de Business Unit reste théorique.\n- Assurer la conformité fiscale du Groupe au Togo et dans les pays d'implantation ; sécuriser les prix de transfert entre entités."},
+      {"domaine": "Contrôle de gestion et budget", "activites": "- Piloter le processus budgétaire annuel et les révisions ; consolider le budget Groupe.\n- Produire mensuellement le tableau de bord Groupe et l'analyse des écarts, sans dissimulation de déficit opérationnel derrière un résultat consolidé favorable.\n- Contrôler l'application effective des plafonds de délégation financière et détecter les engagements fractionnés."},
+      {"domaine": "Trésorerie et financements", "activites": "- Piloter la trésorerie et le prévisionnel à 90 jours ; garantir la capacité du Groupe à honorer ses échéances.\n- Gérer la relation bancaire, les lignes de crédit, les cautions et garanties exigées sur les marchés.\n- Rechercher et structurer les financements adaptés au développement industriel et au déploiement du réseau.\n- Piloter le recouvrement des créances : le principal risque de trésorerie du Groupe est le retard de paiement des donneurs d'ordre publics."},
+      {"domaine": "Achats et approvisionnements", "activites": "- Garantir la régularité des achats : mise en concurrence, traçabilité, séparation des tâches entre le demandeur, l'acheteur et le payeur.\n- Négocier les conditions fournisseurs et sécuriser les approvisionnements critiques avec la Direction Industrielle."},
+      {"domaine": "Juridique et propriété intellectuelle", "activites": "- Sécuriser les contrats du Groupe : clients, fournisseurs, sous-traitants, partenaires, groupements.\n- Protéger le patrimoine immatériel : dépôts OAPI, marques, licences des logiciels propriétaires, en lien étroit avec le Laboratory qui en est le producteur."},
+      {"domaine": "Moyens généraux", "activites": "- Gérer le patrimoine immobilier, le parc automobile et les assurances du Groupe."}
+    ],
+    "autorite": "- Engage la dépense jusqu'à 1 000 000 FCFA.\n- Peut bloquer tout engagement irrégulier, quel qu'en soit l'auteur, y compris un directeur.\n- Détient l'autorité fonctionnelle sur la tenue de la caisse et du stock en agence.\n- Ne dispose d'aucune autorité sur le plan d'audit interne, dont il est lui-même un objet.\n- Ne peut engager le Groupe dans une opération de haut de bilan ni contracter un emprunt sans accord du Directeur Général et de la Gérance.",
+    "indicateurs": [
+      {"indicateur": "États financiers produits dans les délais légaux", "cible": "100 %", "frequence": "Annuelle", "poids": "16 %"},
+      {"indicateur": "Fiabilité de la comptabilité analytique par BU", "cible": "Sans réserve", "frequence": "Trimestrielle", "poids": "14 %"},
+      {"indicateur": "Trésorerie nette et prévisionnel à 90 jours", "cible": "Positif", "frequence": "Mensuelle", "poids": "13 %"},
+      {"indicateur": "Délai moyen de recouvrement client", "cible": "", "frequence": "Mensuelle", "poids": "12 %"},
+      {"indicateur": "Créances échues de plus de 90 jours", "cible": "", "frequence": "Mensuelle", "poids": "11 %"},
+      {"indicateur": "Écart budgétaire par direction", "cible": "≤ 5 %", "frequence": "Mensuelle", "poids": "9 %"},
+      {"indicateur": "Engagements hors plafond détectés", "cible": "0", "frequence": "Mensuelle", "poids": "8 %"},
+      {"indicateur": "Redressements fiscaux", "cible": "0", "frequence": "Annuelle", "poids": "7 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "≥ 1/mois — ≥ 1 idée retenue/trimestre", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Bac+5 en finance, comptabilité ou contrôle de gestion ; DESCOGEF, DECOFI ou équivalent apprécié.",
+      "experience": "Minimum 10 ans en direction financière, dont une expérience confirmée en environnement OHADA multi-entités.",
+      "competences_techniques": "SYSCOHADA révisé · Comptabilité analytique et contrôle de gestion · Fiscalité togolaise et UEMOA · Trésorerie et financement de projets · Cautions et garanties de marché · Droit OHADA des contrats · Contrôle interne (COSO).",
+      "competences_comportementales": "Intégrité sans faille · Capacité à refuser un engagement irrégulier venant de la hiérarchie · Rigueur et sens du détail · Transparence dans la présentation des résultats, y compris défavorables.",
+      "langues": "Français courant · Anglais professionnel (bailleurs, contrats internationaux)."
+    },
+    "interfaces": "Directeur Général · Gérance · Comité d'Audit & des Risques · Ensemble des directeurs · Chefs d'agence (caisse, stock, régularité) · Audit interne · Commissaire aux comptes · Banques et bailleurs · Administration fiscale · OAPI."
+  },
+  {
+    "numero": "5.8",
+    "code_fp": "FP-08",
+    "categorie": "Cadre (C)",
+    "intitule_poste": "Directeur Scientifique — KYA-Energy Laboratory",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur Général",
+      "Encadrement direct": "Chercheurs · Ingénieurs de recherche · Développeurs logiciels · Doctorants et stagiaires",
+      "Effectif sous responsabilité": "4 à 8 personnes",
+      "Classification": "Cadre (C)",
+      "Plafond d'engagement": "1 000 000 FCFA",
+      "Instances": "Invité du Comité de Direction · Membre de la Revue de Direction Qualité",
+      "Suppléance": "Ingénieur de recherche senior désigné"
+    },
+    "mission": "Produire et protéger les actifs immatériels du Groupe — logiciels propriétaires, procédés, brevets, publications — et transformer la recherche en avantage compétitif mesurable sur le chiffre d'affaires.",
+    "attributions": [
+      {"domaine": "Recherche et développement", "activites": "- Définir et conduire les axes de recherche du Laboratory, en cohérence avec la stratégie industrielle et commerciale du Groupe.\n- Développer et faire évoluer la suite logicielle propriétaire : KYA-SolDesign, KYA-SolMonitor, KYA-FlexyControl, KYA-SoP.\n- Conduire les travaux sur les systèmes hybrides autonomes, le stockage, la supervision intelligente et l'optimisation multi-objectifs."},
+      {"domaine": "Valorisation et protection", "activites": "- Protéger les résultats de la recherche : dépôts OAPI, brevets, marques, licences logicielles, en lien avec le service Juridique & Propriété Intellectuelle.\n- Transformer les résultats de recherche en produits industrialisables ; travailler avec la Direction Industrielle le passage du prototype à la série.\n- Développer les revenus issus des produits propriétaires : licences, abonnements de supervision, prestations d'expertise."},
+      {"domaine": "Partenariats scientifiques et financements", "activites": "- Entretenir les partenariats académiques (2iE, PROMES-CNRS, universités partenaires) et les collaborations internationales.\n- Rechercher les financements de recherche : subventions, programmes régionaux, coopération scientifique.\n- Encadrer les doctorants et publier dans des revues à comité de lecture, ce qui fonde la crédibilité scientifique du Groupe auprès des bailleurs."},
+      {"domaine": "Appui aux entités", "activites": "- Fournir un appui d'expertise à la Direction Technique sur les dimensionnements complexes et les architectures innovantes.\n- Alimenter KYA-Institute of Technology en contenus pédagogiques issus de la recherche."}
+    ],
+    "autorite": "- Engage la dépense jusqu'à 1 000 000 FCFA dans les limites du budget du Laboratory.\n- Décide de l'orientation des travaux de recherche dans le cadre des axes validés en Comité de Direction.\n- Ne peut céder, licencier ni divulguer un actif immatériel du Groupe sans accord du Directeur Général et de la DAF.\n- Ne dispose d'aucune autorité sur la norme d'installation, qui relève de la Direction Technique.",
+    "indicateurs": [
+      {"indicateur": "Part du chiffre d'affaires issue des produits propriétaires", "cible": "En progression annuelle", "frequence": "Annuelle", "poids": "19 %"},
+      {"indicateur": "Actifs immatériels protégés (dépôts OAPI, brevets, marques)", "cible": "Selon plan annuel", "frequence": "Annuelle", "poids": "18 %"},
+      {"indicateur": "Versions logicielles livrées et déployées", "cible": "Selon feuille de route", "frequence": "Trimestrielle", "poids": "16 %"},
+      {"indicateur": "Financements de recherche obtenus", "cible": "Selon objectif annuel", "frequence": "Annuelle", "poids": "14 %"},
+      {"indicateur": "Publications à comité de lecture", "cible": "≥ 2 par an", "frequence": "Annuelle", "poids": "12 %"},
+      {"indicateur": "Prototypes transférés en industrialisation", "cible": "", "frequence": "Annuelle", "poids": "11 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Doctorat en énergétique, génie électrique ou informatique ; HDR appréciée.",
+      "experience": "Minimum 8 ans en recherche appliquée, avec une expérience de valorisation industrielle.",
+      "competences_techniques": "Systèmes énergétiques hybrides et stockage · Optimisation et métaheuristiques multi-objectifs · Développement logiciel et jumeau numérique · Propriété intellectuelle et dépôts OAPI · Montage de projets de recherche financés.",
+      "competences_comportementales": "Capacité à faire aboutir la recherche en produit, et non seulement en publication · Rigueur scientifique · Aptitude à encadrer des profils très qualifiés · Sens de la confidentialité.",
+      "langues": "Français courant · Anglais scientifique courant."
+    },
+    "interfaces": "Directeur Général · Directeur Industriel (industrialisation) · Directeur Technique (expertise, outils) · Directeur de l'Institut (contenus) · DAF (protection PI, budget) · Chef de service IT (infrastructure de développement) · Partenaires académiques et bailleurs de recherche."
+  },
+  {
+    "numero": "5.9",
+    "code_fp": "FP-09",
+    "categorie": "Cadre (C)",
+    "intitule_poste": "Directeur de KYA-Institute of Technology",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur Général",
+      "Encadrement direct": "Responsable pédagogique · Formateurs permanents et vacataires · Assistant administratif",
+      "Effectif sous responsabilité": "3 à 6 personnes + vacataires",
+      "Classification": "Cadre (C)",
+      "Plafond d'engagement": "1 000 000 FCFA",
+      "Instances": "Invité du Comité de Direction · Membre du comité de pilotage du plan de formation avec la DRH",
+      "Suppléance": "Responsable pédagogique"
+    },
+    "mission": "Faire de l'Institut l'outil de qualification du capital humain du Groupe et un centre de formation externe rentable, reconnu comme référence en énergie solaire en Afrique de l'Ouest.",
+    "attributions": [
+      {"domaine": "Formation interne — la priorité", "activites": "- Exécuter le plan de formation interne arrêté avec la DRH : c'est la mission première de l'Institut.\n- Concevoir et délivrer les parcours d'habilitation des techniciens d'agence sur les deux volets — installation et maintenance — condition préalable à toute affectation en agence.\n- Assurer la formation continue des chefs d'équipe, des chefs d'agence et de l'encadrement sur les normes techniques, la sécurité et les outils du Groupe.\n- Certifier les acquis : nul n'est réputé habilité sans validation formelle de l'Institut."},
+      {"domaine": "Formation externe et modèle économique", "activites": "- Développer l'offre de formation externe : entreprises, institutions, techniciens indépendants, agents publics.\n- Répondre du compte de résultat de la BU Institute : heures-stagiaires, taux de remplissage, coût horaire, marge.\n- Rechercher les financements de formation : bailleurs, fonds de formation professionnelle, programmes régionaux."},
+      {"domaine": "Ingénierie pédagogique et qualité", "activites": "- Concevoir les référentiels de compétences, les programmes, les supports et les modalités d'évaluation.\n- Maintenir les plateaux techniques et les équipements pédagogiques en état opérationnel.\n- Intégrer les résultats du Laboratory et les retours d'expérience des chantiers dans les contenus."},
+      {"domaine": "Reconnaissance et partenariats", "activites": "- Rechercher les agréments et les reconnaissances institutionnelles des parcours délivrés.\n- Nouer des partenariats avec les établissements d'enseignement et les organismes de certification."}
+    ],
+    "autorite": "- Engage la dépense jusqu'à 1 000 000 FCFA dans les limites du budget de l'Institut.\n- Décide de l'attribution ou du refus d'une habilitation : cette décision n'est pas révocable par la ligne opérationnelle.\n- Fixe les tarifs de la formation externe dans le cadre de la politique de prix validée par la DAF.\n- Ne peut affecter les moyens de l'Institut à la formation externe au détriment du plan de formation interne.",
+    "indicateurs": [
+      {"indicateur": "Exécution du plan de formation interne", "cible": "≥ 90 %", "frequence": "Annuelle", "poids": "17 %"},
+      {"indicateur": "Techniciens d'agence habilités sur les deux volets", "cible": "100 %", "frequence": "Semestrielle", "poids": "16 %"},
+      {"indicateur": "Heures-stagiaires délivrées", "cible": "Selon objectif annuel", "frequence": "Trimestrielle", "poids": "14 %"},
+      {"indicateur": "Taux de remplissage des sessions externes", "cible": "≥ 75 %", "frequence": "Trimestrielle", "poids": "13 %"},
+      {"indicateur": "Marge de la BU Institute", "cible": "Positive", "frequence": "Trimestrielle", "poids": "11 %"},
+      {"indicateur": "Taux de réussite aux évaluations d'habilitation", "cible": "≥ 85 %", "frequence": "Semestrielle", "poids": "10 %"},
+      {"indicateur": "Satisfaction des stagiaires", "cible": "≥ 85 %", "frequence": "Trimestrielle", "poids": "9 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "≥ 1/mois — ≥ 1 idée retenue/trimestre", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Bac+5 en énergie ou génie électrique, complété d'une formation en ingénierie pédagogique ou d'une expérience d'enseignement confirmée.",
+      "experience": "Minimum 8 ans, associant expertise technique solaire et conduite de dispositifs de formation.",
+      "competences_techniques": "Ingénierie pédagogique et référentiels de compétences · Systèmes solaires PV et stockage · Conception de plateaux techniques · Gestion d'un centre de formation comme centre de profit · Dispositifs de financement de la formation professionnelle.",
+      "competences_comportementales": "Pédagogie et exigence · Refus de délivrer une habilitation non méritée, même sous pression opérationnelle · Sens du service envers les directions clientes · Capacité de développement commercial.",
+      "langues": "Français courant · Anglais professionnel."
+    },
+    "interfaces": "Directeur Général · DRH (plan de formation, habilitations) · Direction Technique (normes, contenus) · Directeur Scientifique (contenus issus de la recherche) · Directeur du Réseau (besoins des agences) · DAF (tarifs, marge) · Clients externes et organismes financeurs."
+  },
+  {
+    "numero": "5.10",
+    "code_fp": "FP-10",
+    "categorie": "Cadre (C)",
+    "intitule_poste": "Directeur Exécutif de la Fondation KYA",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur Général",
+      "Encadrement direct": "Chargé(s) de programme · Assistant administratif",
+      "Effectif sous responsabilité": "2 à 4 personnes",
+      "Classification": "Cadre (C)",
+      "Plafond d'engagement": "1 000 000 FCFA (fonds propres de la Fondation)",
+      "Instances": "Membre du Comité de Direction · Rend compte au conseil de la Fondation",
+      "Suppléance": "Chargé de programme senior"
+    },
+    "mission": "Conduire l'action sociétale du Groupe — accès à l'énergie, formation des jeunes, appui aux communautés — avec une séparation comptable stricte d'avec les activités marchandes, et faire de la Fondation un levier de crédibilité auprès des bailleurs.",
+    "attributions": [
+      {"domaine": "Programmes et impact", "activites": "- Concevoir et conduire les programmes de la Fondation : électrification de structures communautaires, bourses et formation de jeunes, appui aux femmes entrepreneures, sensibilisation à l'énergie propre.\n- Mesurer l'impact réel des programmes — bénéficiaires touchés, résultats vérifiés — et non le seul volume de moyens engagés.\n- Publier un rapport annuel d'activité et d'impact."},
+      {"domaine": "Financements et partenariats", "activites": "- Rechercher les financements : dotation du Groupe, bailleurs, mécénat, coopération décentralisée.\n- Développer l'effet de levier : chaque franc de la Fondation doit en mobiliser plusieurs auprès des partenaires.\n- Nouer et entretenir les partenariats avec les collectivités, les associations et les organisations communautaires."},
+      {"domaine": "Séparation et conformité", "activites": "- Garantir la séparation comptable et juridique stricte entre la Fondation et les activités marchandes du Groupe : toute confusion exposerait le Groupe à un risque fiscal et à un risque de réputation.\n- Veiller à ce que la Fondation ne serve jamais de véhicule de contournement des règles applicables aux Business Units."},
+      {"domaine": "Contribution à la stratégie du Groupe", "activites": "- Documenter la contribution RSE du Groupe pour les dossiers d'appels d'offres bailleurs, où elle est de plus en plus valorisée."}
+    ],
+    "autorite": "- Engage la dépense jusqu'à 1 000 000 FCFA sur les fonds propres de la Fondation.\n- Représente la Fondation auprès des partenaires et des communautés bénéficiaires.\n- Ne peut engager les moyens humains ou matériels du Groupe sans accord de la direction concernée et facturation ou refacturation régulière.\n- Ne peut ni recevoir un financement ni conclure un partenariat sans en informer le Directeur Général et la DAF.",
+    "indicateurs": [
+      {"indicateur": "Bénéficiaires touchés", "cible": "Selon objectif annuel", "frequence": "Trimestrielle", "poids": "22 %"},
+      {"indicateur": "Effet de levier sur les financements (fonds mobilisés / dotation)", "cible": "≥ 2", "frequence": "Annuelle", "poids": "20 %"},
+      {"indicateur": "Programmes achevés vs programmes engagés", "cible": "≥ 90 %", "frequence": "Annuelle", "poids": "18 %"},
+      {"indicateur": "Séparation comptable Fondation / Groupe", "cible": "Sans réserve d'audit", "frequence": "Annuelle", "poids": "16 %"},
+      {"indicateur": "Rapport annuel d'impact publié", "cible": "100 %", "frequence": "Annuelle", "poids": "14 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "≥ 1/mois — ≥ 1 idée retenue/trimestre", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Bac+5 en développement, gestion de projets ou sciences sociales ; culture technique énergie appréciée.",
+      "experience": "Minimum 6 ans en conduite de programmes de développement ou en fondation d'entreprise.",
+      "competences_techniques": "Montage et suivi de projets financés · Recherche de financements et mécénat · Mesure d'impact · Gestion associative et comptabilité d'organisation à but non lucratif · Relations avec les collectivités et les communautés.",
+      "competences_comportementales": "Intégrité et rigueur dans l'emploi des fonds · Refus de toute confusion entre l'action de la Fondation et l'intérêt commercial du Groupe · Sens de l'écoute des communautés.",
+      "langues": "Français courant · Langues nationales appréciées · Anglais professionnel (bailleurs)."
+    },
+    "interfaces": "Directeur Général · Conseil de la Fondation · DAF (séparation comptable) · Directeur du Réseau (ancrage territorial) · Directeur de l'Institut (formation des jeunes) · Collectivités, associations, bailleurs et mécènes."
+  },
+  {
+    "numero": "5.11",
+    "code_fp": "FP-11",
+    "categorie": "Cadre (C)",
+    "intitule_poste": "Chef de Service Audit Interne & Risques",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur Général (rattachement administratif)",
+      "Rattachement fonctionnel": "Gérance, par l'intermédiaire du Comité d'Audit & des Risques",
+      "Encadrement direct": "Auditeur(s) interne(s)",
+      "Effectif sous responsabilité": "1 à 2 personnes",
+      "Classification": "Cadre (C) — Indice C-1",
+      "Plafond d'engagement": "500 000 FCFA",
+      "Instances": "Secrétaire du Comité d'Audit & des Risques · Invité du Comité de Direction sur les points relevant de l'audit",
+      "Suppléance": "Auditeur interne senior"
+    },
+    "mission": "Donner à la Gérance une assurance raisonnable et indépendante sur la maîtrise des risques, la fiabilité de l'information financière et la conformité des opérations, sans dépendre hiérarchiquement de ce qu'il audite.",
+    "attributions": [
+      {"domaine": "Plan d'audit et missions", "activites": "- Établir le plan d'audit annuel sur la base d'une cartographie des risques, le faire valider par le Comité d'Audit et le conduire à son terme.\n- Conduire les missions d'audit du siège, des agences et des entités : régularité des achats, tenue de la caisse et du stock, application des plafonds de délégation, marges par affaire, conformité sociale et fiscale.\n- Détecter les engagements fractionnés, les contournements de plafond et les conflits d'intérêts non déclarés."},
+      {"domaine": "Cartographie et maîtrise des risques", "activites": "- Établir et actualiser la cartographie des risques du Groupe : risques opérationnels, financiers, de conformité, de réputation et de continuité.\n- Évaluer l'efficacité du dispositif de contrôle interne selon le référentiel COSO et proposer les renforcements nécessaires."},
+      {"domaine": "Rapports et suivi des plans d'action", "activites": "- Produire un rapport d'audit par mission, transmis simultanément au Directeur Général et au Comité d'Audit — sans possibilité de censure préalable.\n- Suivre la mise en œuvre effective des plans d'action jusqu'à leur clôture et alerter le Comité d'Audit sur toute recommandation non traitée."},
+      {"domaine": "Éthique et alerte", "activites": "- Recevoir et instruire les signalements internes dans le respect de la confidentialité et de la protection du signalant."}
+    ],
+    "autorite": "- Engage la dépense jusqu'à 500 000 FCFA.\n- Dispose d'un droit d'accès illimité à toute information, tout document, tout local et tout système du Groupe, sans préavis, y compris en agence et en filiale.\n- Ne peut recevoir d'instruction du Directeur Général ni d'aucun directeur sur le contenu de ses conclusions.\n- Ne dispose d'aucun pouvoir de décision opérationnelle : il constate, évalue et recommande ; il ne gère pas et n'engage pas le Groupe.\n- Ne peut auditer un processus qu'il aurait lui-même conçu ou mis en œuvre.",
+    "indicateurs": [
+      {"indicateur": "Missions d'audit réalisées vs plan annuel", "cible": "≥ 90 %", "frequence": "Trimestrielle", "poids": "19 %"},
+      {"indicateur": "Recommandations mises en œuvre dans le délai fixé", "cible": "≥ 80 %", "frequence": "Trimestrielle", "poids": "18 %"},
+      {"indicateur": "Délai de transmission des rapports après mission", "cible": "≤ 15 jours", "frequence": "Par mission", "poids": "16 %"},
+      {"indicateur": "Cartographie des risques actualisée", "cible": "1 fois par an", "frequence": "Annuelle", "poids": "14 %"},
+      {"indicateur": "Écarts détectés récurrents non traités", "cible": "0", "frequence": "Semestrielle", "poids": "12 %"},
+      {"indicateur": "Couverture des agences par le plan d'audit", "cible": "100 % sur 3 ans", "frequence": "Annuelle", "poids": "11 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "≥ 1/mois — ≥ 1 idée retenue/trimestre", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Bac+5 en audit, contrôle de gestion, comptabilité ou finance ; certification CIA ou équivalent appréciée.",
+      "experience": "Minimum 6 ans en audit interne ou en cabinet d'audit externe, idéalement en environnement OHADA.",
+      "competences_techniques": "Référentiels COSO et normes IIA · SYSCOHADA révisé · Cartographie et évaluation des risques · Techniques d'échantillonnage et de test · Audit des achats, des stocks et de la caisse · Détection de la fraude.",
+      "competences_comportementales": "Indépendance d'esprit et courage de conclure contre l'attente de la hiérarchie · Objectivité et absence de complaisance · Discrétion absolue · Capacité à documenter et à prouver.",
+      "langues": "Français courant · Anglais professionnel apprécié."
+    },
+    "interfaces": "Gérance · Comité d'Audit & des Risques · Directeur Général · Ensemble des directions (audités) · DAF · Chefs d'agence · Commissaire aux comptes."
+  },
+  {
+    "numero": "5.12",
+    "code_fp": "FP-12",
+    "categorie": "Cadre (C)",
+    "intitule_poste": "Chef de Service QHSE (Qualité, Hygiène, Sécurité, Environnement)",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur Général",
+      "Encadrement direct": "Animateur(s) QHSE · Correspondants QHSE en agence (autorité fonctionnelle)",
+      "Effectif sous responsabilité": "1 à 3 personnes + réseau de correspondants",
+      "Classification": "Cadre (C) — Indice C-1",
+      "Plafond d'engagement": "500 000 FCFA",
+      "Instances": "Membre du Comité de Direction · Membre de la Revue Opérationnelle  Hebdomadaire · Secrétaire de la Revue de Direction Qualité · Membre du Comité de Sécurité et Santé au Travail",
+      "Suppléance": "Animateur QHSE"
+    },
+    "mission": "Garantir l'efficacité du système de management de la qualité ISO 9001:2015, préserver l'intégrité physique des collaborateurs sur chantier et en atelier, et assurer la conformité environnementale des activités du Groupe.",
+    "attributions": [
+      {"domaine": "Système de management de la qualité", "activites": "- Maintenir la certification ISO 9001:2015 : documentation, processus, indicateurs, audits internes qualité, revues de direction, préparation des audits de certification.\n- Piloter le traitement des non-conformités, des réclamations clients et des actions correctives et préventives jusqu'à clôture.\n- Garantir que les processus documentés reflètent la réalité des pratiques — et non l'inverse."},
+      {"domaine": "Sécurité et santé au travail", "activites": "- Établir et maintenir le document d'évaluation des risques professionnels, chantier par chantier et poste par poste.\n- Définir les règles de sécurité, les équipements de protection individuelle et les habilitations requises ; en contrôler l'application effective sur site.\n- Animer le Comité de Sécurité et Santé au Travail avec la DRH ; analyser tout accident ou presque-accident et en tirer les actions correctives."},
+      {"domaine": "Environnement", "activites": "- Assurer la conformité environnementale des activités : gestion des déchets, en particulier des batteries et des équipements électroniques en fin de vie.\n- Répondre aux exigences environnementales des bailleurs : plans de gestion environnementale et sociale des projets financés."}
+    ],
+    "autorite": "- Détient le pouvoir d'arrêt immédiat de tout chantier, atelier ou intervention en cas de danger grave et imminent. Cette décision n'est pas révocable par la ligne opérationnelle et n'est levée qu'après mise en conformité constatée.\n- Peut interdire l'accès d'un site à tout intervenant, y compris sous-traitant, non conforme aux règles de sécurité.\n- Engage la dépense jusqu'à 500 000 FCFA.\n- Ne dispose d'aucune autorité hiérarchique sur les équipes opérationnelles : son autorité est fonctionnelle et normative.",
+    "indicateurs": [
+      {"indicateur": "Taux de fréquence des accidents avec arrêt (TF)", "cible": "0 accident grave · TF en baisse continue", "frequence": "Mensuelle", "poids": "19 %"},
+      {"indicateur": "Taux de port des EPI constaté lors des visites de site", "cible": "≥ 95 %", "frequence": "Mensuelle", "poids": "18 %"},
+      {"indicateur": "Non-conformités qualité clôturées dans les délais", "cible": "≥ 90 %", "frequence": "Mensuelle", "poids": "16 %"},
+      {"indicateur": "Audits internes qualité réalisés vs planifiés", "cible": "100 %", "frequence": "Annuelle", "poids": "14 %"},
+      {"indicateur": "Écarts majeurs lors de l'audit de certification", "cible": "0", "frequence": "Annuelle", "poids": "12 %"},
+      {"indicateur": "Taux de traitement conforme des déchets (batteries, DEEE)", "cible": "100 %", "frequence": "Trimestrielle", "poids": "11 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "≥ 1/mois — ≥ 1 idée retenue/trimestre", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Bac+4/5 en QHSE, génie industriel ou équivalent ; formation d'auditeur interne ISO 9001 exigée.",
+      "experience": "Minimum 5 ans en QHSE, dont une expérience significative en environnement de chantier et d'atelier.",
+      "competences_techniques": "ISO 9001:2015 · ISO 45001 (principes) · Évaluation des risques professionnels · Sécurité électrique et travail en hauteur · Gestion des DEEE · Plans de gestion environnementale et sociale des bailleurs.",
+      "competences_comportementales": "Fermeté sur la sécurité, sans compromis ni négociation · Pédagogie et présence terrain · Capacité à faire respecter une règle impopulaire · Sens de l'observation.",
+      "langues": "Français courant · Anglais professionnel (référentiels, exigences bailleurs)."
+    },
+    "interfaces": "Directeur Général · DGA · Directions Technique et Industrielle · DRH (CSST) · Chefs d'agence · Chefs d'équipe · Organismes de certification · Inspection du travail · Bailleurs."
+  },
+  {
+    "numero": "5.13",
+    "code_fp": "FP-13",
+    "categorie": "Cadre (C)",
+    "intitule_poste": "Chef du Service Informatique et de Logiciel (IT)",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur Général",
+      "Encadrement direct": "Technicien(s) support · Administrateur système · Développeur(s) applicatifs",
+      "Effectif sous responsabilité": "1 à 3 personnes",
+      "Classification": "Cadre (C) — Indice C-2",
+      "Plafond d'engagement": "500 000 FCFA",
+      "Instances": "Invité du Comité de Direction sur les points relevant du Service Informatique et de  Logiciel",
+      "Suppléance": "Administrateur système"
+    },
+    "mission": "Fournir au Groupe une infrastructure numérique fiable, sécurisée et disponible sur l'ensemble de ses sites, et piloter la digitalisation des processus de gestion : ERP, SIRH, CRM, supervision.",
+    "attributions": [
+      {"domaine": "Infrastructure et disponibilité", "activites": "- Garantir la disponibilité des systèmes, des réseaux et des connexions du siège, des agences et des filiales — condition sine qua non du fonctionnement en format hybride.\n- Assurer les sauvegardes, la continuité d'activité et la reprise après incident.\n- Gérer le parc matériel : postes de travail, serveurs, périphériques, équipements réseau."},
+      {"domaine": "Sécurité de l'information", "activites": "- Protéger les données du Groupe, en particulier le code source et la documentation des outils propriétaires, qui constituent le patrimoine immatériel critique.\n- Définir et faire appliquer la politique de sécurité : gestion des accès, mots de passe, chiffrement, sensibilisation du personnel."},
+      {"domaine": "Logiciels métier et digitalisation", "activites": "- Piloter le déploiement et l'exploitation des applications de gestion : ERP et comptabilité, SIRH, CRM, gestion de projets, supervision KYA-SolMonitor.\n- Garantir l'intégration entre applications afin d'éviter les doubles saisies et les écarts entre systèmes.\n- Appuyer le Laboratory sur l'infrastructure de développement et d'hébergement des outils propriétaires."},
+      {"domaine": "Support et accompagnement", "activites": "- Assurer le support aux utilisateurs, au siège comme en agence, et former le personnel aux outils déployés."}
+    ],
+    "autorite": "- Engage la dépense jusqu'à 500 000 FCFA dans les limites du budget du service.\n- Peut suspendre un accès utilisateur en cas de risque avéré pour la sécurité du système d'information.\n- Ne détient pas la propriété fonctionnelle des applications métier : elle appartient aux directions concernées. Le service construit et maintient l'outil ; la direction métier en définit l'usage.",
+    "indicateurs": [
+      {"indicateur": "Taux de disponibilité des systèmes critiques", "cible": "≥ 99 %", "frequence": "Mensuelle", "poids": "22 %"},
+      {"indicateur": "Délai moyen de résolution des incidents", "cible": "≤ 4 h (critique) / ≤ 24 h  (standard)", "frequence": "Mensuelle", "poids": "20 %"},
+      {"indicateur": "Sauvegardes testées avec succès", "cible": "100 %", "frequence": "Mensuelle", "poids": "18 %"},
+      {"indicateur": "Incidents de sécurité avec perte de données", "cible": "0", "frequence": "Annuelle", "poids": "16 %"},
+      {"indicateur": "Taux d'adoption des outils déployés", "cible": "≥ 85 % des utilisateurs cibles", "frequence": "Semestrielle", "poids": "14 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "≥ 1/mois — ≥ 1 idée retenue/trimestre", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Bac+4/5 en informatique, systèmes et réseaux ou équivalent.",
+      "experience": "Minimum 5 ans en administration de systèmes d'information et en déploiement d'applications de gestion, idéalement en contexte multi-sites.",
+      "competences_techniques": "Administration systèmes et réseaux · Cybersécurité · Déploiement d'ERP et de SIRH · Gestion de la donnée · Solutions de connectivité en contexte africain : redondance, contraintes de bande passante et d'alimentation électrique.",
+      "competences_comportementales": "Sens du service et disponibilité · Pédagogie envers des utilisateurs non techniciens · Rigueur en matière de sécurité · Autonomie et débrouillardise.",
+      "langues": "Français courant · Anglais technique."
+    },
+    "interfaces": "Directeur Général · Ensemble des directions · Chefs d'agence · Laboratory (développement logiciel) · DRH (SIRH) · DAF (ERP) · Prestataires et opérateurs télécoms."
+  },
+  {
+    "numero": "5.14",
+    "code_fp": "FP-14",
+    "categorie": "Cadre (C)",
+    "intitule_poste": "Chef de Service Grands Comptes & Appels d'offres",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur du Développement & du Réseau Commercial",
+      "Encadrement direct": "Chargé(s) d'appels d'offres · Ingénieur(s) d'affaires grands comptes",
+      "Effectif sous responsabilité": "2 à 4 personnes",
+      "Classification": "Cadre (C) — Indice C-2",
+      "Plafond d'engagement": "500 000 FCFA",
+      "Instances": "Invité du Comité de Direction sur les dossiers majeurs · Membre de la revue commerciale mensuelle",
+      "Suppléance": "Ingénieur d'affaires senior"
+    },
+    "mission": "Gagner les marchés institutionnels et financés par les bailleurs, en produisant des dossiers de candidature irréprochables sur la forme, conformes sur le fond et compétitifs sur le prix.",
+    "attributions": [
+      {"domaine": "Veille et qualification des opportunités", "activites": "- Assurer la veille systématique des avis d'appel d'offres : AT2ER, BOAD, BAD, Banque Mondiale, KfW, CEDEAO/ROGEAP, CEB, ministères, collectivités, plateformes internationales.\n- Qualifier chaque opportunité avant engagement : éligibilité, capacité technique et financière, probabilité de succès, marge attendue — et recommander formellement de candidater ou de renoncer.\n- Tenir à jour un tableau de bord des consultations en cours, avec les échéances, les pièces requises et les responsables de chaque lot."},
+      {"domaine": "Production des dossiers de candidature", "activites": "- Piloter la production du dossier complet : offre administrative, offre technique avec la Direction Technique, offre financière avec la DAF, dans le strict respect du canevas imposé par le maître d'ouvrage.\n- Garantir la complétude et la conformité administrative du dossier : une pièce manquante entraîne l'élimination, quelle que soit la qualité de l'offre technique.\n- Constituer et faire vivre la bibliothèque des pièces récurrentes : attestations, références, agréments, CV normalisés, états financiers, cautions.\n- Instruire les demandes de clarification et les justifications post-remise, notamment en cas de signalement d'offre anormalement basse."},
+      {"domaine": "Groupements et partenariats de candidature", "activites": "- Identifier, sélectionner et contractualiser les partenaires nécessaires aux consultations exigeant un groupement ou une association avec une firme internationale.\n- Négocier les accords de groupement et les répartitions de rôles, en lien avec le service Juridique & Propriété Intellectuelle."},
+      {"domaine": "Grands comptes", "activites": "- Développer et fidéliser les grands comptes du Groupe : opérateurs publics, industriels, institutions, organisations internationales.\n- Conduire les négociations et le suivi contractuel des marchés-cadres et des accords pluriannuels."}
+    ],
+    "autorite": "- Engage la dépense jusqu'à 500 000 FCFA (frais de dossier, achat de DAO, déplacements de remise).\n- Décide de la recommandation de candidater ou de renoncer ; la décision finale d'engagement appartient au Directeur du Développement.\n- Ne peut signer seul un accord de groupement, une offre ou un engagement contractuel : la signature relève du Directeur Général ou du directeur habilité.\n- Ne fixe ni le prix de l'offre — arrêté avec la DAF — ni la solution technique, arrêtée par la Direction Technique.",
+    "indicateurs": [
+      {"indicateur": "Taux de succès sur appels d'offres remis", "cible": "≥ 25 %", "frequence": "Trimestrielle", "poids": "19 %"},
+      {"indicateur": "Dossiers éliminés pour irrégularité administrative", "cible": "0", "frequence": "Par consultation", "poids": "18 %"},
+      {"indicateur": "Dossiers remis dans le délai imparti", "cible": "100 %", "frequence": "Par consultation", "poids": "16 %"},
+      {"indicateur": "Marge prévisionnelle des offres gagnées vs cible", "cible": "≥ 95 % de la cible", "frequence": "Trimestrielle", "poids": "14 %"},
+      {"indicateur": "Volume du carnet de commandes issu des marchés institutionnels", "cible": "Selon objectif annuel", "frequence": "Trimestrielle", "poids": "12 %"},
+      {"indicateur": "Délai de réponse aux demandes de clarification", "cible": "100 % dans le délai imparti", "frequence": "Par consultation", "poids": "11 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "≥ 1/mois — ≥ 1 idée retenue/trimestre", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Bac+5 en ingénierie d'affaires, commerce international, droit des marchés publics ou école d'ingénieur avec spécialisation commerciale.",
+      "experience": "Minimum 6 ans en réponse à appels d'offres, dont une expérience confirmée sur des marchés financés par des bailleurs multilatéraux.",
+      "competences_techniques": "Procédures de passation des bailleurs (Banque Mondiale, BAD, BOAD, KfW, UE) · Code des marchés publics togolais et directives UEMOA · Montage de groupements et de joint-ventures · Construction d'une offre financière et d'un bordereau de prix · Cautions et garanties de soumission · Culture technique solaire suffisante pour contrôler la cohérence de l'offre technique.",
+      "competences_comportementales": "Rigueur absolue sur la complétude des pièces · Résistance au stress des échéances non négociables · Capacité à recommander de renoncer à un dossier ingagnable · Sens de la négociation avec des partenaires internationaux.",
+      "langues": "Français courant · Anglais courant, à l'écrit comme à l'oral (dossiers et partenaires internationaux)."
+    },
+    "interfaces": "Directeur du Développement & du Réseau (hiérarchique) · Direction Technique (offre technique) · DAF (offre financière, cautions, états financiers) · Service Juridique & PI (accords de groupement) · DRH (CV et références du personnel) · Direction Générale (signature) · Maîtres d'ouvrage, bailleurs et partenaires de groupement."
+  },
+  {
+    "numero": "5.15",
+    "code_fp": "FP-15",
+    "categorie": "Cadre (C)",
+    "intitule_poste": "Chef de Service Ventes & Distribution",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur du Développement & du Réseau Commercial",
+      "Encadrement direct": "Commerciaux du siège · Coordination fonctionnelle des commerciaux d'agence",
+      "Effectif sous responsabilité": "3 à 5 personnes au siège + animation fonctionnelle du réseau",
+      "Classification": "Cadre (C) — Indice C-2",
+      "Plafond d'engagement": "500 000 FCFA",
+      "Instances": "Membre de la revue commerciale mensuelle · Membre du Comité Élargi d'Encadrement",
+      "Suppléance": "Commercial senior désigné"
+    },
+    "mission": "Développer les ventes directes et indirectes des produits et solutions du Groupe, structurer le réseau de distribution, et garantir que le prix de vente effectivement pratiqué respecte la politique tarifaire.",
+    "attributions": [
+      {"domaine": "Pilotage de la force de vente", "activites": "- Fixer les objectifs individuels des commerciaux, suivre leur pipeline et leur taux de conversion, et conduire leur évaluation.\n- Animer la discipline commerciale : qualification des prospects, mise à jour du CRM, respect du cycle de vente, honnêteté de la prévision.\n- Assurer l'appui fonctionnel aux commerciaux d'agence : argumentaires, outils, formation produit, accompagnement sur les affaires importantes."},
+      {"domaine": "Prix et marge", "activites": "- Garantir l'application uniforme de la politique de prix et de remise au siège comme en agence : une remise consentie hors procédure est une perte de marge non arbitrée.\n- Instruire les demandes de dérogation tarifaire et les soumettre au niveau de délégation compétent.\n- Suivre le prix de vente effectif rapporté au prix catalogue, indicateur central de la tenue de la marge commerciale."},
+      {"domaine": "Réseau de distribution", "activites": "- Structurer et animer le réseau de revendeurs, d'installateurs partenaires et de points de vente ; en garantir la couverture géographique.\n- Sélectionner les partenaires, contractualiser les conditions et contrôler le respect des engagements, notamment en matière de représentation de la marque."},
+      {"domaine": "Prévision de vente", "activites": "- Produire la prévision de vente qui alimente le plan de charge de l'usine : une prévision optimiste désorganise la production autant qu'une rupture de stock."}
+    ],
+    "autorite": "- Engage la dépense jusqu'à 500 000 FCFA.\n- Valide les offres jusqu'à 10 000 000 FCFA et les remises jusqu'à 3 %, dans le cadre de la politique tarifaire.\n- Détient l'autorité hiérarchique sur les commerciaux du siège et une autorité fonctionnelle sur les commerciaux d'agence, qui relèvent hiérarchiquement de leur chef d'agence.\n- Ne peut consentir de remise au-delà de son seuil ni modifier la politique tarifaire.\n- Ne peut contractualiser un partenaire distributeur sans validation du Directeur du Développement et du service Juridique.",
+    "indicateurs": [
+      {"indicateur": "Chiffre d'affaires signé vs objectif", "cible": "≥ 100 %", "frequence": "Mensuelle", "poids": "17 %"},
+      {"indicateur": "Prix de vente effectif vs prix catalogue", "cible": "≥ 95 %", "frequence": "Mensuelle", "poids": "16 %"},
+      {"indicateur": "Taux de conversion du pipeline", "cible": "≥ 20 %", "frequence": "Mensuelle", "poids": "14 %"},
+      {"indicateur": "Fiabilité de la prévision de vente à 3 mois", "cible": "Écart ≤ 15 %", "frequence": "Mensuelle", "poids": "13 %"},
+      {"indicateur": "Remises consenties hors procédure", "cible": "0", "frequence": "Mensuelle", "poids": "11 %"},
+      {"indicateur": "Couverture du réseau de distribution", "cible": "Selon plan annuel", "frequence": "Trimestrielle", "poids": "10 %"},
+      {"indicateur": "Taux de mise à jour du CRM", "cible": "≥ 95 %", "frequence": "Mensuelle", "poids": "9 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "≥ 1/mois — ≥ 1 idée retenue/trimestre", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Bac+4/5 en commerce, marketing ou gestion ; culture technique solaire indispensable.",
+      "experience": "Minimum 6 ans en vente B2B, dont 3 en encadrement d'une équipe commerciale.",
+      "competences_techniques": "Techniques de vente et de négociation · Pilotage d'un pipeline et d'un CRM · Construction d'une prévision de vente fiable · Animation d'un réseau de distribution · Lecture d'une marge commerciale · Connaissance des solutions solaires du Groupe.",
+      "competences_comportementales": "Exigence sur la discipline tarifaire, y compris face à un commercial performant · Honnêteté dans la prévision, même défavorable · Capacité à encadrer à distance · Ténacité.",
+      "langues": "Français courant · Langues nationales appréciées · Anglais professionnel."
+    },
+    "interfaces": "Directeur du Développement & du Réseau (hiérarchique) · Chefs d'agence (coordination des commerciaux) · Direction Industrielle (prévision, disponibilité produit) · Direction Technique (faisabilité, chiffrage) · DAF (prix, marge, recouvrement) · Chef de service Marketing & Communication · Clients, revendeurs et installateurs partenaires."
+  },
+  {
+    "numero": "5.16",
+    "code_fp": "FP-16",
+    "categorie": "Cadre (C)",
+    "intitule_poste": "Chef de Service Marketing & Communication",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur du Développement & du Réseau Commercial",
+      "Encadrement direct": "Chargé(s) de communication · Graphiste / créateur de contenus",
+      "Effectif sous responsabilité": "1 à 3 personnes",
+      "Classification": "Cadre (C) — Indice C-3",
+      "Plafond d'engagement": "500 000 FCFA",
+      "Instances": "Membre de la revue commerciale mensuelle · Invité du Comité de Direction sur les sujets de marque",
+      "Suppléance": "Chargé de communication senior"
+    },
+    "mission": "Porter la marque KYA-Energy Group, produire les supports qui soutiennent la vente et la candidature aux appels d'offres, et faire de la communication interne un instrument de la transformation organisationnelle.",
+    "attributions": [
+      {"domaine": "Marque et positionnement", "activites": "- Garantir la cohérence de l'identité visuelle et du discours du Groupe sur tous les supports, au siège comme en agence, au Togo comme à l'international.\n- Faire valoir le positionnement différenciant du Groupe : capacité industrielle propre, laboratoire de recherche, institut de formation, réseau de proximité."},
+      {"domaine": "Supports commerciaux et références", "activites": "- Produire les supports commerciaux : catalogues, fiches produits, plaquettes, présentations, argumentaires.\n- Constituer et tenir à jour la bibliothèque des références de réalisations, exploitable en appel d'offres — un dossier de candidature vaut d'abord par la qualité de ses références documentées.\n- Documenter les projets livrés : reportage photo, chiffres clés, témoignage client, autorisation de citation."},
+      {"domaine": "Communication externe et numérique", "activites": "- Piloter la présence numérique du Groupe : site institutionnel, réseaux professionnels, publications techniques.\n- Organiser la participation aux salons, conférences et événements sectoriels.\n- Gérer les relations presse et la communication institutionnelle sous le contrôle du Directeur Général."},
+      {"domaine": "Communication interne", "activites": "- Assurer la communication interne du Groupe : diffusion des décisions, valorisation des résultats, appui à l'Assemblée Générale du Personnel et aux instances.\n- Accompagner le déploiement de l'organisation cible auprès de l'ensemble du personnel, siège et agences."}
+    ],
+    "autorite": "- Engage la dépense jusqu'à 500 000 FCFA dans les limites du budget marketing.\n- Détient l'autorité normative sur l'identité visuelle et l'usage de la marque : aucun support ne peut être diffusé hors charte.\n- Ne s'exprime pas au nom du Groupe auprès de la presse sans mandat exprès du Directeur Général.\n- Ne peut publier une référence client sans autorisation écrite du client et accord de la Direction Technique sur les données techniques citées.",
+    "indicateurs": [
+      {"indicateur": "Références de réalisations documentées et exploitables", "cible": "100 % des projets livrés", "frequence": "Trimestrielle", "poids": "19 %"},
+      {"indicateur": "Supports commerciaux produits vs plan", "cible": "≥ 90 %", "frequence": "Trimestrielle", "poids": "18 %"},
+      {"indicateur": "Délai de mise à disposition d'un support demandé", "cible": "≤ 10 jours", "frequence": "Mensuelle", "poids": "16 %"},
+      {"indicateur": "Conformité des supports diffusés à la charte", "cible": "100 %", "frequence": "Trimestrielle", "poids": "14 %"},
+      {"indicateur": "Audience et engagement numériques", "cible": "En progression", "frequence": "Mensuelle", "poids": "12 %"},
+      {"indicateur": "Taux de lecture des communications internes", "cible": "≥ 80 %", "frequence": "Trimestrielle", "poids": "11 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "≥ 1/mois — ≥ 1 idée retenue/trimestre", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Bac+4/5 en marketing, communication ou école de commerce.",
+      "experience": "Minimum 5 ans en marketing et communication, idéalement en environnement technique ou industriel B2B.",
+      "competences_techniques": "Marketing B2B et industriel · Production de contenus et outils de création graphique · Communication numérique et référencement · Constitution de dossiers de références · Relations presse · Événementiel professionnel.",
+      "competences_comportementales": "Rigueur dans le respect de la charte · Capacité à vulgariser un contenu technique sans le trahir · Réactivité face aux échéances commerciales · Sens de l'écoute des équipes terrain.",
+      "langues": "Français courant (excellente expression écrite) · Anglais courant (supports internationaux)."
+    },
+    "interfaces": "Directeur du Développement & du Réseau (hiérarchique) · Directeur Général (communication institutionnelle) · Chef de service Grands Comptes (références pour les appels d'offres) · Chef de service Ventes (supports) · Direction Technique (validation des données techniques) · DRH (communication interne) · Fondation KYA · Agences · Prestataires, imprimeurs et médias."
+  },
+  {
+    "numero": "5.17",
+    "code_fp": "FP-17",
+    "categorie": "Cadre (C)",
+    "intitule_poste": "Chef de Service Animation du Réseau d'agences",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur du Développement & du Réseau Commercial",
+      "Encadrement direct": "Animateur(s) réseau · Chargé de déploiement",
+      "Effectif sous responsabilité": "1 à 3 personnes",
+      "Classification": "Cadre (C) — Indice C-2",
+      "Plafond d'engagement": "500 000 FCFA",
+      "Instances": "Membre de la revue mensuelle du réseau · Membre du Comité Élargi d'Encadrement · Rapporteur des dossiers d'ouverture d'agence en Comité de Direction",
+      "Suppléance": "Animateur réseau senior"
+    },
+    "mission": "Instruire les ouvertures d'agence, outiller le réseau et suivre la trajectoire économique de chaque implantation, afin qu'aucune agence ne s'écarte durablement de son business plan sans que la direction le sache.",
+    "attributions": [
+      {"domaine": "Instruction des ouvertures", "activites": "- Instruire chaque projet d'implantation : calcul du score IPI, estimation du parc installé à maintenir dans la zone de chalandise, pipeline commercial identifié, structure de coûts fixes, trajectoire de trésorerie et point mort.\n- Proposer le format d'agence — antenne, agence standard ou agence régionale — par application stricte de la typologie fondée sur la puissance du parc à maintenir.\n- Rappeler et faire appliquer la règle selon laquelle toute implantation hors du Togo est ouverte au format Agence Régionale, sans exception.\n- Présenter le business plan à 18 mois au Comité de Direction, seul habilité à décider de l'ouverture."},
+      {"domaine": "Suivi de la performance du réseau", "activites": "- Produire mensuellement le tableau de bord consolidé du réseau : chiffre d'affaires, marge, coûts fixes, avancement vers le point mort, écart au business plan par agence.\n- Alerter le Directeur du Développement dès qu'une agence s'écarte de sa trajectoire de plus de 10 % — avant que l'écart ne devienne structurel.\n- Proposer les plans de redressement des agences en difficulté et, le cas échéant, la reconversion de format ou la fermeture."},
+      {"domaine": "Standardisation et outillage", "activites": "- Constituer et maintenir le référentiel d'ouverture d'agence : cahier des charges des locaux, dotation en matériel et en outillage, stock avancé initial, procédures de caisse et de stock, signalétique.\n- Garantir l'homogénéité des pratiques du réseau : mêmes procédures, mêmes outils, mêmes formats de reporting, du siège à la préfecture la plus éloignée.\n- Organiser la montée en compétence des chefs d'agence avec la DRH et KYA-Institute of Technology."},
+      {"domaine": "Animation et lien siège-terrain", "activites": "- Organiser les visites d'agence et les séminaires du réseau ; assurer la remontée effective des difficultés du terrain vers le siège.\n- Diffuser les bonnes pratiques d'une agence à l'autre : ce qui fonctionne à Kara doit être connu à Dapaong."}
+    ],
+    "autorite": "- Engage la dépense jusqu'à 500 000 FCFA.\n- Dispose d'un droit de visite et d'accès à toute agence, avec accès aux documents de gestion, à la caisse et au stock.\n- Ne dispose d'aucune autorité hiérarchique sur les chefs d'agence, qui relèvent du Directeur du Développement : son autorité est fonctionnelle et normative.\n- Ne peut décider seul d'une ouverture, d'une fermeture ou d'un changement de format d'agence : il instruit et propose ; le Comité de Direction décide.",
+    "indicateurs": [
+      {"indicateur": "Agences ayant atteint leur point mort dans le délai fixé", "cible": "100 %", "frequence": "Trimestrielle", "poids": "17 %"},
+      {"indicateur": "Écart moyen de trajectoire des agences vs business plan", "cible": "≤ 10 %", "frequence": "Mensuelle", "poids": "16 %"},
+      {"indicateur": "Alertes émises avant que l'écart n'atteigne 10 %", "cible": "100 %", "frequence": "Mensuelle", "poids": "14 %"},
+      {"indicateur": "Délai de production du tableau de bord réseau", "cible": "≤ 10 jours après la clôture", "frequence": "Mensuelle", "poids": "13 %"},
+      {"indicateur": "Ouvertures conformes au référentiel et à la typologie", "cible": "100 %", "frequence": "Par ouverture", "poids": "11 %"},
+      {"indicateur": "Agences visitées dans l'année", "cible": "100 %", "frequence": "Annuelle", "poids": "10 %"},
+      {"indicateur": "Homogénéité des procédures constatée en audit", "cible": "Sans écart majeur", "frequence": "Annuelle", "poids": "9 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "≥ 1/mois — ≥ 1 idée retenue/trimestre", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Bac+4/5 en gestion, commerce ou ingénierie, avec une solide maîtrise de l'analyse économique.",
+      "experience": "Minimum 6 ans, dont une expérience confirmée en animation de réseau multi-sites ou en contrôle de gestion opérationnel.",
+      "competences_techniques": "Construction et suivi d'un business plan · Analyse d'un compte de résultat d'agence · Méthodologie de scoring d'implantation (IPI) · Standardisation des procédures · Culture technique solaire suffisante pour dialoguer avec les techniciens.",
+      "competences_comportementales": "Objectivité dans l'appréciation de la performance d'une agence, même dirigée par un collègue apprécié · Capacité à alerter tôt plutôt que tard · Aptitude au déplacement fréquent en préfecture · Sens de l'écoute du terrain.",
+      "langues": "Français courant · Langues nationales du Togo · Anglais professionnel apprécié."
+    },
+    "interfaces": "Directeur du Développement & du Réseau (hiérarchique) · Chefs d'agence et chefs d'antenne · DAF et contrôle de gestion (données économiques) · DRH (recrutement et formation en agence) · Direction Technique (norme, outillage) · Direction Industrielle (stock avancé) · QHSE · Audit interne."
+  },
+  {
+    "numero": "5.18",
+    "code_fp": "FP-18",
+    "categorie": "Cadre (C)",
+    "intitule_poste": "Chef de Service Recrutement & GPEC",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur des Ressources Humaines & du Capital Humain",
+      "Encadrement direct": "Chargé(s) de recrutement",
+      "Effectif sous responsabilité": "1 à 2 personnes",
+      "Classification": "Cadre (C) — Indice C-3",
+      "Plafond d'engagement": "500 000 FCFA",
+      "Instances": "Membre du comité de recrutement · Invité du Comité de Direction sur les postes clés",
+      "Suppléance": "Chargé de recrutement senior"
+    },
+    "mission": "Pourvoir les postes du Groupe dans les délais et avec le niveau de compétence requis, et anticiper les besoins en compétences liés au déploiement du réseau et à la montée en charge industrielle.",
+    "attributions": [
+      {"domaine": "Recrutement", "activites": "- Conduire l'ensemble du processus : définition du besoin avec la direction demandeuse, publication, sourcing, présélection, entretiens, tests techniques, vérification des références, proposition d'embauche.\n- Garantir qu'aucun recrutement n'est lancé sans fiche de poste établie et sans autorisation budgétaire : le poste doit exister avant la personne.\n- Sécuriser le recrutement en agence, où l'ancrage local et la maîtrise des langues nationales sont des critères de sélection à part entière.\n- Organiser l'intégration des nouveaux entrants : parcours d'accueil, remise et signature de la fiche de poste, formation initiale par KYA-Institute of Technology."},
+      {"domaine": "Gestion prévisionnelle des emplois et des compétences", "activites": "- Établir et tenir la cartographie des emplois et des compétences du Groupe : qui sait faire quoi, à quel niveau, et sur quels sites.\n- Identifier les compétences rares et les postes clés, et organiser leur sécurisation : plan de succession, redondance des savoir-faire critiques, transmission documentée.\n- Traduire le plan de déploiement du réseau et le plan de charge industriel en besoins de recrutement et de formation, à douze et vingt-quatre mois."},
+      {"domaine": "Mobilité interne et parcours", "activites": "- Organiser la mobilité interne — du siège vers les agences et réciproquement — et privilégier la promotion interne chaque fois que la compétence le permet.\n- Construire les parcours d'évolution qui rendent le Groupe attractif et fidélisent les profils techniques rares."}
+    ],
+    "autorite": "- Engage la dépense jusqu'à 500 000 FCFA (annonces, cabinets, tests, frais de recrutement).\n- Peut refuser de lancer un recrutement en l'absence de fiche de poste ou d'autorisation budgétaire.\n- Ne décide pas de l'embauche : il présélectionne et propose ; le DRH valide et la direction demandeuse choisit.\n- Ne peut négocier une rémunération hors grille indiciaire.",
+    "indicateurs": [
+      {"indicateur": "Délai moyen de recrutement (du besoin à la prise de poste)", "cible": "≤ 60 jours", "frequence": "Trimestrielle", "poids": "17 %"},
+      {"indicateur": "Postes clés vacants", "cible": "0", "frequence": "Mensuelle", "poids": "16 %"},
+      {"indicateur": "Taux de confirmation à l'issue de la période d'essai", "cible": "≥ 90 %", "frequence": "Trimestrielle", "poids": "14 %"},
+      {"indicateur": "Taux de départ dans les 12 premiers mois", "cible": "≤ 10 %", "frequence": "Annuelle", "poids": "13 %"},
+      {"indicateur": "Recrutements lancés sans fiche de poste", "cible": "0", "frequence": "Trimestrielle", "poids": "11 %"},
+      {"indicateur": "Cartographie des compétences actualisée", "cible": "2 fois par an", "frequence": "Semestrielle", "poids": "10 %"},
+      {"indicateur": "Part des postes pourvus par mobilité interne", "cible": "≥ 25 %", "frequence": "Annuelle", "poids": "9 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "≥ 1/mois — ≥ 1 idée retenue/trimestre", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Bac+4/5 en gestion des ressources humaines, psychologie du travail ou administration des entreprises.",
+      "experience": "Minimum 5 ans en recrutement, idéalement sur des profils techniques et en contexte multisites.",
+      "competences_techniques": "Techniques d'entretien et d'évaluation · Sourcing et marque employeur · GPEC et cartographie des compétences · Construction de plans de succession · Connaissance des métiers techniques du solaire, suffisante pour évaluer un candidat · Droit du travail togolais applicable à l'embauche.",
+      "competences_comportementales": "Objectivité et absence de favoritisme · Confidentialité · Capacité à résister à la pression d'un directeur pressé de recruter hors procédure · Sens de l'évaluation au-delà du diplôme.",
+      "langues": "Français courant · Langues nationales du Togo appréciées (recrutement en agence) · Anglais professionnel."
+    },
+    "interfaces": "DRH (hiérarchique) · Ensemble des directions (demandeurs) · Chefs d'agence · KYA-Institute of Technology (formation initiale, habilitations) · Chef de service Administration du Personnel & Paie (contrats) · DAF (autorisation budgétaire) · Cabinets, écoles et universités partenaires."
+  },
+  {
+    "numero": "5.19",
+    "code_fp": "FP-19",
+    "categorie": "Cadre (C)",
+    "intitule_poste": "Chef de Service Administration du Personnel & Paie",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur des Ressources Humaines & du Capital Humain",
+      "Encadrement direct": "Gestionnaire(s) de paie · Assistant administratif RH",
+      "Effectif sous responsabilité": "1 à 3 personnes",
+      "Classification": "Cadre (C) — Indice C-2",
+      "Plafond d'engagement": "500 000 FCFA",
+      "Instances": "Membre de la commission paritaire de suivi de la grille indiciaire · Suppléant du DRH",
+      "Suppléance": "Gestionnaire de paie senior"
+    },
+    "mission": "Garantir une paie juste, ponctuelle et conforme, et sécuriser juridiquement l'ensemble des actes de gestion du personnel, du contrat d'embauche au solde de tout compte.",
+    "attributions": [
+      {"domaine": "Paie et rémunération", "activites": "- Produire la paie mensuelle de l'ensemble du personnel — siège, agences, filiales — dans les délais et sans erreur : une erreur de paie détruit plus de confiance qu'un discours n'en construit.\n- Appliquer strictement la grille indiciaire du Groupe (Indice × 196,3 FCFA) et en contrôler la cohérence à chaque mouvement.\n- Calculer et mettre en paiement la part variable trimestrielle, sur la paie du mois suivant la clôture de chaque trimestre (avril, juillet, octobre, janvier), en appliquant le taux du poste pondéré par le facteur de performance individuel et collectif arrêté à l'issue de la revue trimestrielle.\n- Ne mettre en paiement aucune part variable non adossée à un compte rendu de revue trimestrielle signé — sauf lorsque la revue n'a pas été tenue du fait de l'encadrement, auquel cas le versement est calculé sur la moyenne des deux derniers trimestres et le manquement signalé à la DRH.\n- Produire les éléments de masse salariale nécessaires au budget et au contrôle de gestion."},
+      {"domaine": "Conformité sociale et déclarations", "activites": "- Établir et transmettre les déclarations sociales et fiscales dans les délais légaux : CNSS, CIPRES, impôt sur les salaires, autres cotisations obligatoires.\n- Tenir les registres obligatoires : registre du personnel, registre des congés, registre des accidents du travail.\n- Assurer la conformité sociale des salariés affectés hors du Togo, dans le respect du droit local applicable, en lien avec le DRH."},
+      {"domaine": "Contrats et actes de gestion", "activites": "- Établir les contrats de travail, les avenants, les lettres de mission, les décisions d'affectation et les soldes de tout compte, dans le strict respect du Code du travail togolais.\n- Veiller à ce que chaque contrat soit accompagné de la fiche de poste signée, qui lui est annexée et lui est opposable.\n- Gérer les absences, les congés, les arrêts de travail et le temps de travail, y compris les régimes particuliers des équipes de chantier."},
+      {"domaine": "Système d'information RH", "activites": "- Administrer le SIRH et garantir l'exactitude et la confidentialité des données du personnel, en lien avec le Service Informatique et de Logiciel."}
+    ],
+    "autorite": "- Engage la dépense jusqu'à 500 000 FCFA.\n- Peut refuser d'établir un contrat ou un avenant non conforme au Code du travail, à la grille indiciaire ou aux procédures du Groupe.\n- Peut bloquer la mise en paiement d'un élément de rémunération non justifié ou non validé.\n- Ne décide ni de l'embauche, ni de la sanction, ni du licenciement : il en prépare et en sécurise les actes.\n- Est tenu à une confidentialité absolue sur les rémunérations individuelles.",
+    "indicateurs": [
+      {"indicateur": "Paie versée à la date fixée", "cible": "100 %", "frequence": "Mensuelle", "poids": "13 %"},
+      {"indicateur": "Erreurs de paie constatées", "cible": "0", "frequence": "Mensuelle", "poids": "12 %"},
+      {"indicateur": "Déclarations sociales et fiscales dans les délais", "cible": "100 %", "frequence": "Mensuelle", "poids": "11 %"},
+      {"indicateur": "Conformité des déclarations CIPRES", "cible": "100 %", "frequence": "Mensuelle", "poids": "10 %"},
+      {"indicateur": "Contrats signés avant la prise de poste", "cible": "100 %", "frequence": "Mensuelle", "poids": "9 %"},
+      {"indicateur": "Fiches de poste annexées aux contrats", "cible": "100 %", "frequence": "Trimestrielle", "poids": "9 %"},
+      {"indicateur": "Part variable trimestrielle versée sur la paie du mois suivant la clôture", "cible": "100 %", "frequence": "Trimestrielle", "poids": "8 %"},
+      {"indicateur": "Erreurs de calcul sur la part variable", "cible": "0", "frequence": "Trimestrielle", "poids": "7 %"},
+      {"indicateur": "Redressements ou pénalités de nature sociale", "cible": "", "frequence": "Annuelle", "poids": "6 %"},
+      {"indicateur": "Écart entre la masse salariale réelle et le budget", "cible": "", "frequence": "Mensuelle", "poids": "5 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "≥ 1/mois — ≥ 1 idée retenue/trimestre", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Bac+3/5 en gestion des ressources humaines, droit social ou comptabilité, avec spécialisation paie.",
+      "experience": "Minimum 5 ans en administration du personnel et en paie, en environnement OHADA.",
+      "competences_techniques": "Code du travail togolais · Réglementation CNSS et CIPRES · Fiscalité des salaires · Traitement de la paie sur SIRH · Gestion d'une grille indiciaire · Droit social des pays d'implantation (notions).",
+      "competences_comportementales": "Rigueur et sens du détail — la paie ne tolère pas l'approximation · Confidentialité absolue · Ponctualité inconditionnelle sur les échéances · Capacité à refuser un acte irrégulier, quel qu'en soit l'auteur.",
+      "langues": "Français courant · Anglais professionnel apprécié."
+    },
+    "interfaces": "DRH (hiérarchique) · Ensemble du personnel · Chefs d'agence (éléments variables, absences) · DAF et contrôle de gestion (masse salariale, comptabilisation) · Chef de service IT (SIRH) · CNSS · Administration fiscale · Inspection du travail."
+  },
+  {
+    "numero": "5.20",
+    "code_fp": "FP-20",
+    "categorie": "Cadre (C)",
+    "intitule_poste": "Chef de Service Formation & Développement",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur des Ressources Humaines & du Capital Humain",
+      "Encadrement direct": "Chargé(s) de formation",
+      "Effectif sous responsabilité": "1 à 2 personnes",
+      "Classification": "Cadre (C) — Indice C-3",
+      "Plafond d'engagement": "500 000 FCFA",
+      "Instances": "Membre du comité de pilotage du plan de formation avec KYA-Institute of Technology",
+      "Suppléance": "Chargé de formation senior"
+    },
+    "mission": "Construire et exécuter le plan de formation du Groupe, garantir que chaque collaborateur détient les habilitations requises par son poste, et piloter le cycle annuel d'évaluation.",
+    "attributions": [
+      {"domaine": "Plan de formation", "activites": "- Recueillir les besoins auprès des directions et des agences, les confronter à la cartographie des compétences, et construire le plan de formation annuel.\n- Confier l'exécution en priorité à KYA-Institute of Technology, et n'externaliser que ce que l'Institut ne peut pas délivrer.\n- Piloter le budget de formation et rechercher les financements mobilisables auprès des dispositifs de formation professionnelle et des bailleurs.\n- Évaluer l'efficacité des formations : non pas le nombre d'heures suivies, mais la compétence effectivement acquise et mise en œuvre au poste."},
+      {"domaine": "Habilitations", "activites": "- Tenir le registre des habilitations du Groupe et garantir qu'aucun collaborateur n'est affecté à une tâche pour laquelle il n'est pas habilité — en particulier l'habilitation électrique et le travail en hauteur.\n- Suivre le parcours d'habilitation des techniciens d'agence sur les deux volets, installation et maintenance, condition préalable à toute affectation.\n- Anticiper les échéances de renouvellement et déclencher les recyclages avant expiration."},
+      {"domaine": "Cycle de management et revues trimestrielles de performance", "activites": "- Organiser et outiller le cycle : fixation des objectifs en janvier, revue trimestrielle de performance à chaque fin de trimestre, revue du quatrième trimestre valant entretien annuel d'évaluation en décembre.\n- Piloter le calendrier des revues trimestrielles et s'assurer qu'elles sont tenues, dans toutes les directions et toutes les agences, dans les quinze jours suivant la clôture du trimestre.\n- Former les managers à la conduite d'entretien : un entretien mal conduit produit une appréciation contestable et une part variable indéfendable. Cette formation est un préalable à l'exercice de toute responsabilité d'encadrement.\n- Contrôler la tenue effective des entretiens et la qualité des objectifs fixés — écrits, mesurables, au nombre de trois à cinq.\n- Consolider les facteurs de performance individuels issus des revues trimestrielles et les transmettre au service Paie pour le calcul et la mise en paiement de la part variable du trimestre.\n- Alerter la DRH de toute revue non tenue : le collaborateur ne peut supporter le préjudice d'un manquement de son encadrement."},
+      {"domaine": "Développement des compétences managériales", "activites": "- Construire les parcours de développement de l'encadrement, notamment des chefs d'équipe et des chefs d'agence promus en interne, dont la compétence technique ne garantit pas la compétence managériale."}
+    ],
+    "autorite": "- Engage la dépense jusqu'à 500 000 FCFA dans les limites du budget de formation.\n- Peut s'opposer à l'affectation d'un collaborateur non habilité à un poste ou à une tâche exigeant une habilitation.\n- Ne délivre pas les habilitations : elles relèvent de KYA-Institute of Technology, qui les décide et les certifie.\n- Ne fixe pas les objectifs individuels : il organise le processus ; le manager et le collaborateur les fixent.",
+    "indicateurs": [
+      {"indicateur": "Exécution du plan de formation", "cible": "≥ 90 %", "frequence": "Annuelle", "poids": "14 %"},
+      {"indicateur": "Revues trimestrielles de performance tenues dans le délai de 15 jours", "cible": "100 %", "frequence": "Trimestrielle", "poids": "13 %"},
+      {"indicateur": "Comptes rendus de revue signés et transmis à la Paie", "cible": "100 %", "frequence": "Trimestrielle", "poids": "12 %"},
+      {"indicateur": "Lettres d'objectifs signées avant fin janvier", "cible": "100 %", "frequence": "Annuelle", "poids": "11 %"},
+      {"indicateur": "Managers formés à la conduite d'entretien", "cible": "100 % de l'encadrement", "frequence": "Annuelle", "poids": "10 %"},
+      {"indicateur": "Collaborateurs affectés sans habilitation requise", "cible": "0", "frequence": "Mensuelle", "poids": "9 %"},
+      {"indicateur": "Habilitations arrivées à échéance sans recyclage", "cible": "0", "frequence": "Trimestrielle", "poids": "8 %"},
+      {"indicateur": "Techniciens d'agence habilités sur les deux volets", "cible": "100 %", "frequence": "Semestrielle", "poids": "7 %"},
+      {"indicateur": "Taux d'utilisation du budget de formation", "cible": "≥ 90 %", "frequence": "Annuelle", "poids": "6 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "≥ 1/mois — ≥ 1 idée retenue/trimestre", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Bac+4/5 en gestion des ressources humaines, ingénierie de formation ou sciences de l'éducation.",
+      "experience": "Minimum 5 ans en formation professionnelle, idéalement en environnement technique ou industriel.",
+      "competences_techniques": "Ingénierie de formation et référentiels de compétences · Gestion des habilitations réglementaires · Conduite du cycle d'évaluation et fixation d'objectifs · Dispositifs de financement de la formation professionnelle · Évaluation de l'efficacité des formations.",
+      "competences_comportementales": "Exigence sur la réalité de la compétence acquise, au-delà de l'attestation · Capacité à imposer un recyclage à un opérationnel qui s'estime compétent · Pédagogie envers les managers · Rigueur dans le suivi des échéances.",
+      "langues": "Français courant · Anglais professionnel apprécié."
+    },
+    "interfaces": "DRH (hiérarchique) · KYA-Institute of Technology (exécution, habilitations) · Ensemble des managers · Chefs d'agence · QHSE (habilitations sécurité) · Direction Technique (compétences techniques requises) · Chef de service Paie (part variable) · Organismes financeurs de la formation."
+  },
+  {
+    "numero": "5.21",
+    "code_fp": "FP-21",
+    "categorie": "Cadre (C)",
+    "intitule_poste": "Chef de Service Relations Sociales",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur des Ressources Humaines & du Capital Humain",
+      "Encadrement direct": "Chargé(s) des affaires sociales",
+      "Effectif sous responsabilité": "0 à 2 personnes",
+      "Classification": "Cadre (C) — Indice C-2",
+      "Plafond d'engagement": "500 000 FCFA",
+      "Instances": "Secrétaire de la réunion mensuelle des Délégués du Personnel · Membre du Comité de Sécurité et Santé au Travail · Membre du comité disciplinaire",
+      "Suppléance": "Chef de service Administration du Personnel & Paie"
+    },
+    "mission": "Entretenir un dialogue social loyal et régulier, sécuriser juridiquement les procédures disciplinaires et le contentieux, et mesurer le climat social pour permettre à la direction d'agir avant la crise.",
+    "attributions": [
+      {"domaine": "Dialogue social et instances représentatives", "activites": "- Organiser l'élection des Délégués du Personnel et garantir le fonctionnement régulier de l'institution, conformément au Code du travail togolais.\n- Préparer et tenir la réunion mensuelle des Délégués du Personnel : recueil préalable des réclamations, réponses écrites de la direction, tenue du registre.\n- Assurer la représentation effective des agences et des filiales dans le dialogue social — un salarié en préfecture a les mêmes droits qu'un salarié du siège.\n- Préparer le Comité de Sécurité et Santé au Travail avec le QHSE."},
+      {"domaine": "Procédures disciplinaires", "activites": "- Instruire les procédures disciplinaires proposées par la ligne hiérarchique : établissement des faits, respect du contradictoire, convocation, entretien, notification, proportionnalité de la sanction.\n- Garantir qu'aucune sanction n'est prononcée sans procédure régulière : une sanction irrégulière est une sanction annulée, et un précédent coûteux.\n- Tenir le registre des sanctions et veiller à l'égalité de traitement entre situations comparables."},
+      {"domaine": "Contentieux et prévention du risque", "activites": "- Prévenir le contentieux prud'homal par la sécurisation en amont des actes de gestion : ruptures, requalifications, temps de travail, heures supplémentaires.\n- Assurer le suivi des contentieux en cours, en lien avec le service Juridique & Propriété Intellectuelle et les conseils externes.\n- Assurer la relation avec l'Inspection du travail."},
+      {"domaine": "Climat social et médiation", "activites": "- Mesurer périodiquement le climat social — enquête, indicateurs de turnover, d'absentéisme et de réclamations — et en rendre compte au DRH.\n- Assurer une fonction de médiation et de traitement des conflits interpersonnels avant qu'ils ne deviennent des contentieux.\n- Recevoir et traiter les réclamations individuelles, y compris celles des agences, dans un délai fixé et avec une réponse écrite."}
+    ],
+    "autorite": "- Engage la dépense jusqu'à 500 000 FCFA.\n- Peut suspendre une procédure disciplinaire irrégulière et exiger sa reprise dans les formes, quel que soit le niveau hiérarchique du demandeur.\n- Ne prononce aucune sanction : il instruit et sécurise ; le DRH valide et le Directeur Général décide du licenciement.\n- Est tenu à une stricte confidentialité sur les situations individuelles et les signalements reçus.\n- Ne peut engager le Groupe dans une transaction ou un accord collectif sans mandat écrit du Directeur Général.",
+    "indicateurs": [
+      {"indicateur": "Réunions des Délégués du Personnel tenues", "cible": "100 % (mensuelles)", "frequence": "Mensuelle", "poids": "17 %"},
+      {"indicateur": "Réclamations traitées avec réponse écrite dans le délai fixé", "cible": "100 %", "frequence": "Mensuelle", "poids": "16 %"},
+      {"indicateur": "Procédures disciplinaires irrégulières", "cible": "0", "frequence": "Trimestrielle", "poids": "14 %"},
+      {"indicateur": "Contentieux prud'homal perdu", "cible": "0", "frequence": "Annuelle", "poids": "13 %"},
+      {"indicateur": "Taux d'absentéisme", "cible": "En baisse ou stable", "frequence": "Mensuelle", "poids": "11 %"},
+      {"indicateur": "Enquête de climat social réalisée", "cible": "1 fois par an", "frequence": "Annuelle", "poids": "10 %"},
+      {"indicateur": "Conflits résolus par médiation avant contentieux", "cible": "≥ 80 %", "frequence": "Annuelle", "poids": "9 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "≥ 1/mois — ≥ 1 idée retenue/trimestre", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Bac+4/5 en droit social, droit du travail ou gestion des ressources humaines.",
+      "experience": "Minimum 5 ans en relations sociales ou en droit social, avec une expérience de gestion d'instances représentatives.",
+      "competences_techniques": "Code du travail togolais et jurisprudence sociale · Conduite d'une procédure disciplinaire · Fonctionnement des institutions représentatives du personnel · Gestion du contentieux prud'homal · Techniques de médiation et de négociation sociale · Mesure du climat social.",
+      "competences_comportementales": "Équité et impartialité, y compris face à un cadre dirigeant · Sang-froid en situation de tension · Confidentialité absolue · Capacité à porter une mauvaise nouvelle à la direction quand le climat se dégrade.",
+      "langues": "Français courant · Langues nationales du Togo indispensables (dialogue avec le personnel d'exécution et les agences)."
+    },
+    "interfaces": "DRH (hiérarchique) · Délégués du Personnel · Ensemble du personnel · Chefs d'agence et chefs d'équipe · QHSE (CSST) · Service Juridique & PI · Inspection du travail · Conseils juridiques externes."
+  },
+  {
+    "numero": "5.22",
+    "code_fp": "FP-22",
+    "categorie": "Cadre (C)",
+    "intitule_poste": "Chef de Service Comptabilité & Fiscalité",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur Administratif & Financier",
+      "Encadrement direct": "Comptables · Aide-comptable(s)",
+      "Effectif sous responsabilité": "2 à 4 personnes",
+      "Classification": "Cadre (C) — Indice C-1",
+      "Plafond d'engagement": "500 000 FCFA",
+      "Instances": "Suppléant du DAF · Invité du Comité d'Audit sur les points comptables",
+      "Suppléance": "Comptable principal"
+    },
+    "mission": "Produire des comptes fiables, sincères et conformes au référentiel SYSCOHADA révisé, dans les délais légaux, et garantir la conformité fiscale du Groupe au Togo comme dans ses pays d'implantation.",
+    "attributions": [
+      {"domaine": "Tenue de la comptabilité et production des états financiers", "activites": "- Tenir la comptabilité générale du Groupe selon le SYSCOHADA révisé : saisie, lettrage, rapprochements bancaires, justification des comptes.\n- Produire les états financiers annuels — bilan, compte de résultat, tableau des flux de trésorerie, notes annexes — dans les délais légaux.\n- Justifier chaque compte de bilan : un compte non justifié est un risque non mesuré.\n- Préparer et assister les travaux du commissaire aux comptes et de l'audit interne."},
+      {"domaine": "Comptabilité analytique par Business Unit", "activites": "- Tenir la comptabilité analytique par Business Unit — Engineering, Industry, Laboratory, Institute — et par agence : sans elle, la notion de Business Unit reste une déclaration d'intention.\n- Garantir l'exactitude des affectations analytiques et l'application correcte des clés de répartition des charges communes.\n- Comptabiliser les prix de cession interne entre entités, en particulier entre l'usine et les chantiers ou les agences.\n- Garantir la séparation comptable stricte de la Fondation KYA d'avec les activités marchandes."},
+      {"domaine": "Fiscalité", "activites": "- Établir et transmettre les déclarations fiscales dans les délais : TVA, impôt sur les sociétés, retenues à la source, taxes locales.\n- Assurer la conformité fiscale des opérations conduites hors du Togo et sécuriser les prix de transfert entre entités du Groupe.\n- Gérer les relations avec l'administration fiscale et préparer les contrôles.\n- Assurer une veille fiscale et alerter le DAF sur toute évolution affectant le Groupe."},
+      {"domaine": "Contrôle interne comptable", "activites": "- Faire respecter la séparation des tâches entre l'engagement, la réception, la comptabilisation et le paiement.\n- Contrôler la régularité des pièces justificatives, y compris celles remontant des agences : une dépense sans pièce probante n'est pas une dépense, c'est une perte.\n- Peut refuser de comptabiliser une opération dépourvue de pièce justificative probante ou de fondement régulier."}
+    ],
+    "autorite": "- Peut bloquer un paiement en l'absence de pièce conforme ou de validation au bon niveau de délégation.\n- Ne décide ni de l'engagement de la dépense, ni de la politique fiscale : il applique et alerte.\n- Ne peut être à la fois ordonnateur et payeur d'une même opération.",
+    "indicateurs": [
+      {"indicateur": "États financiers produits dans les délais légaux", "cible": "100 %", "frequence": "Annuelle", "poids": "16 %"},
+      {"indicateur": "Comptes de bilan justifiés à la clôture", "cible": "100 %", "frequence": "Trimestrielle", "poids": "14 %"},
+      {"indicateur": "Délai de clôture mensuelle", "cible": "≤ 10 jours", "frequence": "Mensuelle", "poids": "13 %"},
+      {"indicateur": "Réserves ou observations du commissaire aux comptes", "cible": "0", "frequence": "Annuelle", "poids": "12 %"},
+      {"indicateur": "Déclarations fiscales dans les délais", "cible": "100 %", "frequence": "Mensuelle", "poids": "11 %"},
+      {"indicateur": "Redressements fiscaux", "cible": "0", "frequence": "Annuelle", "poids": "9 %"},
+      {"indicateur": "Fiabilité de l'affectation analytique par BU", "cible": "Sans écart significatif", "frequence": "Trimestrielle", "poids": "8 %"},
+      {"indicateur": "Dépenses comptabilisées sans pièce probante", "cible": "0", "frequence": "Mensuelle", "poids": "7 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "≥ 1/mois — ≥ 1 idée retenue/trimestre", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Bac+4/5 en comptabilité, finance ou audit ; DESCOGEF, DECOFI ou diplôme d'expertise comptable apprécié.",
+      "experience": "Minimum 6 ans en comptabilité, dont une expérience confirmée de production d'états financiers en environnement OHADA multi-entités.",
+      "competences_techniques": "SYSCOHADA révisé · Comptabilité analytique et clés de répartition · Fiscalité togolaise et directives UEMOA · Prix de transfert · Consolidation · Contrôle interne comptable (COSO) · Logiciel comptable et ERP.",
+      "competences_comportementales": "Intégrité sans compromis · Capacité à refuser une écriture de complaisance, y compris demandée par un supérieur · Rigueur et sens du détail · Transparence dans la présentation des comptes, y compris défavorables.",
+      "langues": "Français courant · Anglais professionnel apprécié (bailleurs, audits externes)."
+    },
+    "interfaces": "DAF (hiérarchique) · Contrôleur de gestion · Chef de service Trésorerie & Financements · Chef de service Achats · Chefs d'agence (pièces, caisse, stock) · Directeur Exécutif de la Fondation (séparation comptable) · Audit interne · Commissaire aux comptes · Administration fiscale."
+  },
+  {
+    "numero": "5.23",
+    "code_fp": "FP-23",
+    "categorie": "Cadre (C)",
+    "intitule_poste": "Contrôleur de Gestion (rang de chef de service)",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur Administratif & Financier",
+      "Encadrement direct": "Assistant(s) contrôle de gestion",
+      "Effectif sous responsabilité": "0 à 2 personnes",
+      "Classification": "Cadre (C) — Indice C-1",
+      "Plafond d'engagement": "500 000 FCFA",
+      "Instances": "Invité permanent du Comité de Direction pour la présentation du tableau de bord Groupe · Membre de la revue mensuelle du réseau",
+      "Suppléance": "Chef de service Comptabilité & Fiscalité"
+    },
+    "mission": "Éclairer la décision par une information de gestion fiable, produite à date, et alerter la direction sur les écarts avant qu'ils ne deviennent structurels — y compris lorsqu'un déficit opérationnel se trouve masqué par un résultat consolidé favorable.",
+    "attributions": [
+      {"domaine": "Budget et reprévisions", "activites": "- Piloter le processus budgétaire annuel : cadrage, collecte des budgets par direction, par Business Unit et par agence, arbitrages, consolidation Groupe.\n- Conduire les reprévisions périodiques et en mesurer l'écart avec le budget initial.\n- Contrôler la cohérence des hypothèses budgétaires : un budget construit sur un carnet de commandes optimiste est un budget faux."},
+      {"domaine": "Tableau de bord et analyse des écarts", "activites": "- Produire mensuellement le tableau de bord Groupe et les tableaux de bord de direction, à date fixe et sans exception.\n- Analyser les écarts et en identifier les causes réelles, sans se satisfaire de l'explication fournie par l'entité contrôlée.\n- Présenter les écarts en Comité de Direction, y compris ceux qui contrarient le message que la direction souhaiterait entendre."},
+      {"domaine": "Analyse de la performance économique", "activites": "- Calculer et suivre la marge par affaire, le coût de revient unitaire par produit, le compte de résultat par Business Unit et par agence.\n- Comparer systématiquement la marge réalisée à la marge devisée et remonter tout écart significatif à la Direction Technique et à la Direction Générale.\n- Suivre la trajectoire de chaque agence vers son point mort et alerter au premier écart durable au business plan.\n- Contrôler la pertinence des prix de cession interne entre entités."},
+      {"domaine": "Contrôle des délégations", "activites": "- Contrôler l'application effective des plafonds de délégation financière et détecter les engagements fractionnés : le plafond s'apprécie sur l'opération économique, non sur la facture.\n- Signaler au DAF et à l'audit interne tout dépassement ou tout contournement constaté.\n- Dispose d'un droit d'accès à toute donnée de gestion du Groupe, au siège comme en agence, sans filtre de la ligne hiérarchique concernée."}
+    ],
+    "autorite": "- Peut alerter directement le Directeur Général en cas de dérive significative non traitée par le DAF.\n- Ne dispose d'aucun pouvoir de décision opérationnelle : il mesure, analyse et alerte ; il n'arbitre pas.\n- Ne peut modifier une donnée comptable : il l'analyse, la comptabilité la produit.",
+    "indicateurs": [
+      {"indicateur": "Tableau de bord Groupe produit à date", "cible": "100 % · ≤ 10 jours après clôture", "frequence": "Mensuelle", "poids": "17 %"},
+      {"indicateur": "Budget consolidé livré à l'échéance", "cible": "100 %", "frequence": "Annuelle", "poids": "16 %"},
+      {"indicateur": "Fiabilité des données publiées (corrections a posteriori)", "cible": "0", "frequence": "Mensuelle", "poids": "14 %"},
+      {"indicateur": "Écarts significatifs signalés avant qu'ils ne soient structurels", "cible": "100 %", "frequence": "Mensuelle", "poids": "13 %"},
+      {"indicateur": "Engagements fractionnés ou hors plafond détectés et signalés", "cible": "100 %", "frequence": "Trimestrielle", "poids": "11 %"},
+      {"indicateur": "Marge réalisée vs marge devisée, par affaire", "cible": "Écart analysé à 100 %", "frequence": "Mensuelle", "poids": "10 %"},
+      {"indicateur": "Tableaux de bord de direction alimentés", "cible": "100 %", "frequence": "Mensuelle", "poids": "9 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "≥ 1/mois — ≥ 1 idée retenue/trimestre", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Bac+5 en contrôle de gestion, finance d'entreprise ou audit.",
+      "experience": "Minimum 5 ans en contrôle de gestion, idéalement en environnement industriel ou de projets.",
+      "competences_techniques": "Construction budgétaire et reprévision · Comptabilité analytique et calcul de coût de revient · Analyse d'écarts · Marge à l'affaire et suivi de projets · Modélisation sur tableur et ERP · SYSCOHADA révisé · Contrôle interne (COSO).",
+      "competences_comportementales": "Indépendance de jugement · Courage de présenter un résultat contrariant · Refus de l'arrondi complaisant · Ponctualité inconditionnelle sur la production du tableau de bord · Pédagogie envers les opérationnels non financiers.",
+      "langues": "Français courant · Anglais professionnel apprécié."
+    },
+    "interfaces": "DAF (hiérarchique) · Directeur Général · Comité de Direction · Ensemble des directeurs et chefs de service · Chefs d'agence · Chef de service Comptabilité (données) · Chef de service Animation du Réseau (trajectoire des agences) · Audit interne."
+  },
+  {
+    "numero": "5.24",
+    "code_fp": "FP-24",
+    "categorie": "Cadre (C)",
+    "intitule_poste": "Chef de Service Trésorerie & Financements",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur Administratif & Financier",
+      "Encadrement direct": "Trésorier · Chargé(s) de recouvrement",
+      "Effectif sous responsabilité": "1 à 3 personnes",
+      "Classification": "Cadre (C) — Indice C-2",
+      "Plafond d'engagement": "500 000 FCFA",
+      "Instances": "Membre du comité de trésorerie hebdomadaire présidé par le DAF",
+      "Suppléance": "Trésorier"
+    },
+    "mission": "Garantir que le Groupe est en mesure d'honorer ses échéances à tout moment, sécuriser les financements et les garanties exigées par les marchés, et recouvrer les créances — premier risque de trésorerie du Groupe.",
+    "attributions": [
+      {"domaine": "Trésorerie et prévisionnel", "activites": "- Tenir la position de trésorerie quotidienne, tous comptes et tous établissements confondus, y compris les caisses des agences.\n- Produire et actualiser le prévisionnel de trésorerie à 90 jours et alerter sans délai sur toute tension anticipée.\n- Optimiser les placements des excédents et le coût des financements de court terme.\n- Contrôler la tenue des caisses en agence et l'absence d'écart, en lien avec le service Comptabilité."},
+      {"domaine": "Recouvrement des créances", "activites": "- Piloter le recouvrement client, en particulier auprès des donneurs d'ordre publics et institutionnels, dont les délais de paiement constituent le principal risque de trésorerie du Groupe.\n- Tenir la balance âgée, relancer selon une procédure écrite et graduée, et engager les procédures précontentieuses avec le service Juridique.\n- Alerter la Direction du Développement lorsqu'un client présente un risque d'impayé, avant la prise de commande suivante."},
+      {"domaine": "Financements, cautions et garanties", "activites": "- Gérer la relation bancaire et négocier les lignes de crédit, les découverts et les financements d'exploitation.\n- Obtenir et suivre les cautions et garanties exigées par les marchés : soumission, bonne exécution, restitution d'avance, retenue de garantie — leur absence élimine une candidature, leur immobilisation prolongée pèse sur la trésorerie.\n- Rechercher et structurer, avec le DAF, les financements du développement industriel et du déploiement du réseau : bailleurs, crédit-bail, financement de projet.\n- Suivre les décaissements des bailleurs sur les projets financés et lever sans délai les conditions suspensives."},
+      {"domaine": "Relations financières internationales", "activites": "- Gérer les flux financiers avec les filiales, les groupements et les entités partenaires à l'étranger, dans le respect de la réglementation des changes de l'UEMOA."}
+    ],
+    "autorite": "- Peut refuser d'exécuter un paiement non validé au niveau de délégation requis ou dépourvu de pièce conforme.\n- Peut proposer la suspension des livraisons à un client en situation d'impayé caractérisé ; la décision appartient au DAF et au Directeur du Développement.\n- Ne peut ouvrir un compte bancaire, contracter un emprunt ni signer un engagement bancaire : ces actes relèvent du Directeur Général.\n- Ne peut être seul signataire d'un paiement : la double signature est la règle, sans exception.",
+    "indicateurs": [
+      {"indicateur": "Échéances honorées à la date due", "cible": "100 %", "frequence": "Mensuelle", "poids": "16 %"},
+      {"indicateur": "Prévisionnel de trésorerie à 90 jours actualisé", "cible": "Hebdomadaire", "frequence": "Hebdomadaire", "poids": "14 %"},
+      {"indicateur": "Fiabilité du prévisionnel à 30 jours", "cible": "Écart ≤ 10 %", "frequence": "Mensuelle", "poids": "13 %"},
+      {"indicateur": "Délai moyen de recouvrement client (DSO)", "cible": "", "frequence": "Mensuelle", "poids": "12 %"},
+      {"indicateur": "Créances échues de plus de 90 jours", "cible": "", "frequence": "Mensuelle", "poids": "11 %"},
+      {"indicateur": "Cautions obtenues dans le délai de remise des offres", "cible": "100 %", "frequence": "Par consultation", "poids": "9 %"},
+      {"indicateur": "Cautions libérées après achèvement", "cible": "100 % dans les 60 jours", "frequence": "Trimestrielle", "poids": "8 %"},
+      {"indicateur": "Écarts de caisse en agence", "cible": "0", "frequence": "Mensuelle", "poids": "7 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "≥ 1/mois — ≥ 1 idée retenue/trimestre", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Bac+4/5 en finance d'entreprise, banque ou comptabilité.",
+      "experience": "Minimum 5 ans en trésorerie ou en financement d'entreprise, avec une pratique confirmée des cautions de marché.",
+      "competences_techniques": "Gestion de trésorerie et prévisionnel · Recouvrement et procédures précontentieuses OHADA · Cautions et garanties de marché · Financement de projet et crédit-bail · Réglementation des changes UEMOA · Relation bancaire et négociation de conditions.",
+      "competences_comportementales": "Rigueur et anticipation — une tension de trésorerie annoncée trois jours avant n'est plus gérable · Fermeté dans la relance client, alliée au sens de la relation · Intégrité absolue dans le maniement des fonds · Confidentialité.",
+      "langues": "Français courant · Anglais professionnel (bailleurs, banques correspondantes)."
+    },
+    "interfaces": "DAF (hiérarchique) · Directeur Général · Chef de service Comptabilité · Contrôleur de gestion · Chef de service Grands Comptes (cautions de soumission) · Chef de service Ventes (risque client) · Chefs d'agence (caisse) · Banques · Bailleurs · Clients et administrations débitrices."
+  },
+  {
+    "numero": "5.25",
+    "code_fp": "FP-25",
+    "categorie": "Cadre (C)",
+    "intitule_poste": "Chef de Service Achats & Approvisionnements",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur Administratif & Financier",
+      "Rattachement fonctionnel": "Directeur Industriel pour les approvisionnements de production",
+      "Encadrement direct": "Acheteur(s) · Chargé(s) d'approvisionnement · Transitaire interne",
+      "Effectif sous responsabilité": "2 à 4 personnes",
+      "Classification": "Cadre (C) — Indice C-2",
+      "Plafond d'engagement": "500 000 FCFA",
+      "Instances": "Membre de la commission d'ouverture des offres fournisseurs · Invité de la Revue Opérationnelle sur les ruptures d'approvisionnement",
+      "Suppléance": "Acheteur senior"
+    },
+    "mission": "Acheter au meilleur coût complet, dans des conditions de régularité et de traçabilité irréprochables, et sécuriser l'approvisionnement des composants critiques dont dépendent l'usine, les chantiers et les agences.",
+    "attributions": [
+      {"domaine": "Régularité et contrôle interne des achats", "activites": "- Garantir la mise en concurrence effective : au-delà d'un seuil défini, tout achat fait l'objet d'une consultation d'au moins trois fournisseurs, documentée et archivée.\n- Faire respecter la séparation des tâches entre le demandeur, l'acheteur, le réceptionnaire et le payeur — principe de contrôle interne dont la violation est la première porte d'entrée de la fraude.\n- Détecter et signaler les conflits d'intérêts, les fractionnements de commande destinés à rester sous un plafond, et les fournisseurs privilégiés sans justification.\n- Tenir le fichier fournisseurs, avec évaluation périodique : qualité, respect des délais, tenue des prix."},
+      {"domaine": "Achats et négociation", "activites": "- Conduire les négociations et les appels d'offres fournisseurs pour les composants stratégiques : modules photovoltaïques, onduleurs, batteries, structures, câblerie.\n- Raisonner en coût complet — prix, transport, dédouanement, assurance, délai, coût de la non-qualité — et non au seul prix unitaire.\n- Négocier des accords-cadres sur les références récurrentes afin de sécuriser le prix et la disponibilité."},
+      {"domaine": "Approvisionnements et logistique internationale", "activites": "- Sécuriser l'approvisionnement des composants critiques : anticipation des délais d'importation, constitution de stocks de sécurité, identification de sources alternatives.\n- Piloter le transit et le dédouanement : les délais portuaires et douaniers sont un facteur de risque majeur pour la tenue des jalons de chantier.\n- Alerter la Direction Industrielle et la Direction Technique en cas de risque de rupture, suffisamment tôt pour permettre une replanification.\n- Approvisionner les stocks avancés des agences en lien avec le Chef de service Supply Chain & Magasins."},
+      {"domaine": "Performance achats", "activites": "- Mesurer et documenter les gains achats obtenus, à qualité et délai constants."}
+    ],
+    "autorite": "- Engage la dépense jusqu'à 500 000 FCFA ; au-delà, il instruit et le niveau de délégation compétent engage.\n- Peut refuser d'exécuter un achat en l'absence de mise en concurrence régulière ou d'expression de besoin validée.\n- Peut suspendre une relation fournisseur en cas de manquement grave, avec information du DAF.\n- Ne définit pas la spécification technique : elle relève de la Direction Technique ou de la Direction Industrielle. Il achète ce qui est spécifié ; il ne substitue pas un composant de son propre chef.\n- Ne peut être à la fois acheteur et réceptionnaire d'une même commande.",
+    "indicateurs": [
+      {"indicateur": "Achats au-dessus du seuil ayant fait l'objet de trois offres", "cible": "100 %", "frequence": "Mensuelle", "poids": "17 %"},
+      {"indicateur": "Ruptures d'approvisionnement ayant arrêté la production ou un chantier", "cible": "0", "frequence": "Mensuelle", "poids": "16 %"},
+      {"indicateur": "Taux de service fournisseur (livraison à la date promise)", "cible": "≥ 90 %", "frequence": "Mensuelle", "poids": "14 %"},
+      {"indicateur": "Délai moyen d'approvisionnement des composants critiques", "cible": "Conforme à la cible", "frequence": "Mensuelle", "poids": "13 %"},
+      {"indicateur": "Gains achats documentés", "cible": "Selon objectif annuel", "frequence": "Trimestrielle", "poids": "11 %"},
+      {"indicateur": "Écart entre le prix payé et le prix négocié", "cible": "0", "frequence": "Mensuelle", "poids": "10 %"},
+      {"indicateur": "Observations d'audit sur la régularité des achats", "cible": "0", "frequence": "Annuelle", "poids": "9 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "≥ 1/mois — ≥ 1 idée retenue/trimestre", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Bac+4/5 en achats, logistique, commerce international ou gestion.",
+      "experience": "Minimum 5 ans en achats et approvisionnements, avec une pratique confirmée de l'importation en Afrique de l'Ouest.",
+      "competences_techniques": "Négociation achats et raisonnement en coût complet · Incoterms, transit et dédouanement · Gestion des approvisionnements et des stocks de sécurité · Contrôle interne appliqué aux achats · Évaluation fournisseurs · Culture technique des composants PV suffisante pour dialoguer avec les prescripteurs.",
+      "competences_comportementales": "Intégrité absolue — le poste est le plus exposé du Groupe au risque de corruption · Refus des cadeaux et avantages fournisseurs · Transparence et traçabilité de chaque décision · Anticipation et sens de l'alerte précoce.",
+      "langues": "Français courant · Anglais courant (fournisseurs asiatiques et européens, documentation d'importation)."
+    },
+    "interfaces": "DAF (hiérarchique) · Directeur Industriel (fonctionnel, approvisionnements de production) · Direction Technique (spécifications) · Chef de service Supply Chain & Magasins · Chef de service Trésorerie (paiements, conditions) · Chef de service Comptabilité · Chefs d'agence (stock avancé) · Audit interne · Fournisseurs, transitaires et douanes."
+  },
+  {
+    "numero": "5.26",
+    "code_fp": "FP-26",
+    "categorie": "Cadre (C)",
+    "intitule_poste": "Chef de Service Juridique & Propriété Intellectuelle",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur Administratif & Financier",
+      "Encadrement direct": "Juriste(s) · Assistant juridique",
+      "Effectif sous responsabilité": "0 à 2 personnes",
+      "Classification": "Cadre (C) — Indice C-1",
+      "Plafond d'engagement": "500 000 FCFA",
+      "Instances": "Invité du Comité de Direction sur les dossiers contractuels majeurs · Invité du Comité d'Audit sur le risque juridique",
+      "Suppléance": "Juriste senior"
+    },
+    "mission": "Sécuriser juridiquement les engagements du Groupe, protéger son patrimoine immatériel — logiciels propriétaires, marques, procédés — et réduire l'exposition au risque contractuel et contentieux.",
+    "attributions": [
+      {"domaine": "Contrats et engagements", "activites": "- Rédiger, réviser et sécuriser l'ensemble des contrats du Groupe : clients, fournisseurs, sous-traitants, partenaires, bailleurs, groupements, conventions de licence.\n- Analyser les clauses à risque avant signature : pénalités de retard, garanties, limitation de responsabilité, force majeure, résiliation, droit applicable et juridiction compétente.\n- Alerter formellement, par écrit, sur tout engagement dont le risque juridique excède ce que le Groupe peut supporter — l'alerte doit être tracée, y compris lorsqu'elle n'est pas suivie.\n- Constituer et maintenir une bibliothèque de modèles contractuels et de clauses types, adaptés au droit OHADA."},
+      {"domaine": "Propriété intellectuelle", "activites": "- Protéger le patrimoine immatériel du Groupe : dépôts OAPI des marques, brevets et dessins, protection du code source et de la documentation des logiciels propriétaires — KYA-SolDesign, KYA-SolMonitor, KYA-FlexyControl, KYA-SoP.\n- Travailler étroitement avec le Laboratory, producteur de ces actifs, pour identifier ce qui doit être protégé et selon quelle modalité.\n- Rédiger et négocier les conventions de licence et les accords de transfert de technologie.\n- Surveiller les atteintes aux droits du Groupe et engager les actions nécessaires."},
+      {"domaine": "Conformité et vie sociale", "activites": "- Veiller à la conformité réglementaire du Groupe et à la régularité des actes de la vie sociale : statuts, procèsverbaux, registres, formalités.\n- Sécuriser les implantations à l'étranger : forme juridique, agréments, obligations locales, réglementation des investissements.\n- Assurer une veille juridique et alerter les directions concernées sur les évolutions affectant leur activité."},
+      {"domaine": "Contentieux et précontentieux", "activites": "- Gérer le précontentieux et le contentieux du Groupe, en lien avec les conseils externes ; en mesurer le coût et le risque provisionné.\n- Appuyer le service Relations Sociales sur le contentieux prud'homal et le service Trésorerie sur le recouvrement précontentieux."}
+    ],
+    "autorite": "- Engage la dépense jusqu'à 500 000 FCFA (honoraires, dépôts, formalités).\n- Peut s'opposer à la signature d'un contrat comportant une clause exposant le Groupe à un risque manifestement disproportionné ; l'opposition est écrite et motivée, et n'est levée que par décision expresse du Directeur Général, tracée.\n- Détient l'autorité fonctionnelle sur la conformité contractuelle : aucun contrat n'est signé sans son visa préalable.\n- Ne signe pas les contrats : la signature appartient au Directeur Général ou au directeur habilité.\n- Ne peut engager le Groupe dans une transaction sans mandat écrit du Directeur Général.",
+    "indicateurs": [
+      {"indicateur": "Contrats signés avec visa juridique préalable", "cible": "100 %", "frequence": "Mensuelle", "poids": "17 %"},
+      {"indicateur": "Délai moyen de revue contractuelle", "cible": "≤ 5 jours ouvrés", "frequence": "Mensuelle", "poids": "16 %"},
+      {"indicateur": "Contentieux perdus", "cible": "0", "frequence": "Annuelle", "poids": "14 %"},
+      {"indicateur": "Coût du contentieux (honoraires, condamnations)", "cible": "En baisse", "frequence": "Annuelle", "poids": "13 %"},
+      {"indicateur": "Actifs immatériels protégés vs plan de protection", "cible": "100 %", "frequence": "Annuelle", "poids": "11 %"},
+      {"indicateur": "Renouvellements de dépôts OAPI effectués avant échéance", "cible": "100 %", "frequence": "Annuelle", "poids": "10 %"},
+      {"indicateur": "Alertes juridiques écrites sur les engagements à risque", "cible": "100 % des cas identifiés", "frequence": "Trimestrielle", "poids": "9 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "≥ 1/mois — ≥ 1 idée retenue/trimestre", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Bac+5 en droit des affaires ; spécialisation en propriété intellectuelle ou en droit des contrats internationaux appréciée.",
+      "experience": "Minimum 6 ans en droit des affaires, en entreprise ou en cabinet, avec une pratique confirmée du droit OHADA.",
+      "competences_techniques": "Droit OHADA des contrats et des sociétés · Droit de la propriété intellectuelle et procédures OAPI · Contrats internationaux et accords de groupement · Contrats de marchés publics et conditions générales des bailleurs · Protection du logiciel et des bases de données · Gestion du contentieux.",
+      "competences_comportementales": "Capacité à dire non à une signature, y compris sous pression commerciale · Rigueur rédactionnelle · Sens du risque et de sa hiérarchisation · Confidentialité absolue.",
+      "langues": "Français courant · Anglais juridique courant (contrats internationaux, bailleurs)."
+    },
+    "interfaces": "DAF (hiérarchique) · Directeur Général (signature) · Directeur Scientifique (protection des actifs du Laboratory) · Chef de service Grands Comptes (accords de groupement) · Chef de service Ventes (conditions générales) · Chef de service Relations Sociales (prud'homal) · Chef de service Trésorerie (recouvrement) · OAPI · Conseils et avocats externes · Notaires."
+  },
+  {
+    "numero": "5.27",
+    "code_fp": "FP-27",
+    "categorie": "Agent de Maîtrise (AM)",
+    "intitule_poste": "Responsable des Moyens Généraux",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur Administratif & Financier",
+      "Encadrement direct": "Chauffeurs · Agents d'entretien · Agents de sécurité · Assistant logistique",
+      "Effectif sous responsabilité": "3 à 6 personnes",
+      "Classification": "Agent de Maîtrise (AM) — Indice AM-1",
+      "Plafond d'engagement": "150 000 FCFA",
+      "Instances": "Invité de la Revue Opérationnelle Hebdomadaire sur l'affectation des véhicules",
+      "Suppléance": "Assistant logistique"
+    },
+    "mission": "Assurer la disponibilité et la sécurité des moyens matériels du Groupe — locaux, véhicules, énergie, assurances — au siège comme en agence, au meilleur coût.",
+    "attributions": [
+      {"domaine": "Parc automobile", "activites": "- Gérer le parc de véhicules et d'engins du Groupe : affectation, entretien préventif, réparations, carburant, assurances, cartes grises et visites techniques.\n- Assurer l'affectation quotidienne des véhicules entre les chantiers, l'usine, les agences et le siège, sous l'arbitrage de la Revue Opérationnelle Hebdomadaire — le véhicule est une ressource partagée rare, et sa mauvaise allocation coûte des journées de chantier.\n- Suivre la consommation de carburant et les kilométrages, et détecter les anomalies."},
+      {"domaine": "Locaux et patrimoine immobilier", "activites": "- Assurer l'entretien, la sécurité, la propreté et la conformité des locaux du siège, de l'usine et des agences.\n- Gérer les contrats de bail, les charges, les abonnements (eau, électricité, connectivité) et en optimiser le coût.\n- Appuyer le Chef de service Animation du Réseau lors de l'ouverture d'une agence : recherche de locaux, aménagement, dotation initiale, signalétique."},
+      {"domaine": "Assurances et sécurité des biens", "activites": "- Gérer le portefeuille d'assurances du Groupe — flotte, locaux, matériel, responsabilité civile — et déclarer les sinistres dans les délais.\n- Organiser le gardiennage et la sécurité physique des sites, des stocks et des équipements."},
+      {"domaine": "Achats courants et intendance", "activites": "- Assurer les achats courants — fournitures, consommables, prestations d'entretien — dans le respect des procédures d'achat du Groupe.\n- Organiser la logistique des déplacements, des missions et des événements internes."}
+    ],
+    "autorite": "- Engage la dépense jusqu'à 150 000 FCFA pour les achats courants et les réparations d'urgence.\n- Peut immobiliser un véhicule dont l'état présente un danger, sans possibilité de dérogation par un opérationnel pressé.\n- Ne décide pas de l'affectation des véhicules en cas de conflit d'usage : il propose ; le DGA arbitre en Revue Opérationnelle.\n- Ne peut ni signer un bail, ni souscrire une assurance, ni engager une réparation lourde sans validation du DAF.",
+    "indicateurs": [
+      {"indicateur": "Taux de disponibilité du parc automobile", "cible": "≥ 90 %", "frequence": "Mensuelle", "poids": "17 %"},
+      {"indicateur": "Véhicules à jour de visite technique, d'assurance et d'entretien", "cible": "100 %", "frequence": "Mensuelle", "poids": "16 %"},
+      {"indicateur": "Coût kilométrique moyen du parc", "cible": "Conforme à la cible", "frequence": "Mensuelle", "poids": "14 %"},
+      {"indicateur": "Journées de chantier perdues faute de véhicule", "cible": "0", "frequence": "Mensuelle", "poids": "13 %"},
+      {"indicateur": "Sinistres déclarés dans le délai contractuel", "cible": "100 %", "frequence": "Par sinistre", "poids": "11 %"},
+      {"indicateur": "Locaux conformes aux exigences de sécurité", "cible": "100 %", "frequence": "Semestrielle", "poids": "10 %"},
+      {"indicateur": "Écart entre la consommation de carburant réelle et théorique", "cible": "≤ 5 %", "frequence": "Mensuelle", "poids": "9 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "≥ 1/mois — ≥ 1 idée retenue/trimestre", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Bac+2/3 en logistique, gestion ou maintenance ; une formation technique est un atout pour le suivi du parc.",
+      "experience": "Minimum 4 ans en moyens généraux, en logistique ou en gestion de flotte.",
+      "competences_techniques": "Gestion de flotte et maintenance préventive · Gestion immobilière et contrats de bail · Assurances et déclaration de sinistres · Procédures d'achat et de contrôle interne · Sécurité des sites.",
+      "competences_comportementales": "Sens du service et disponibilité · Rigueur dans le suivi des échéances (visites, assurances, entretiens) · Fermeté pour immobiliser un véhicule dangereux malgré la pression · Honnêteté irréprochable dans la gestion du carburant et des consommables.",
+      "langues": "Français courant · Langues nationales du Togo."
+    },
+    "interfaces": "DAF (hiérarchique) · DGA (arbitrage des ressources partagées) · Chefs d'équipe et chefs de chantier · Chefs d'agence · Chef de service Achats · QHSE (sécurité des locaux et des véhicules) · Chef de service Animation du Réseau (ouverture d'agence) · Assureurs, bailleurs immobiliers et prestataires."
+  },
+  {
+    "numero": "5.28",
+    "code_fp": "FP-28",
+    "categorie": "Cadre (C)",
+    "intitule_poste": "Chefs de Service de la Direction Technique & Projets",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur Technique & Projets",
+      "Postes concernés": "Chef de service Bureau d'études & Offres · Chef de service Installations & Chantiers · Chef de service SAV & Maintenance · Chef de service Contrôle & Supervision",
+      "Classification": "Cadre (C) — Indices C-1 à C-3 selon le service",
+      "Plafond d'engagement": "500 000 FCFA",
+      "Instances": "Membres du Comité Élargi d'Encadrement · Invités de la Revue Opérationnelle selon l'ordre du jour"
+    },
+    "mission": "Décliner, au niveau de leur service, les objectifs de la Business Unit Engineering : livrer les affaires dans les délais, la qualité et la marge contractés, et faire appliquer la norme technique du Groupe.",
+    "attributions": [
+      {"domaine": "Bureau d'études & Offres", "activites": "- Périmètre : Dimensionnement, notes de calcul, plans d'exécution, choix des composants, chiffrage et production de l'offre technique. Exploitation de KYA-SolDesign.\n- Indicateurs cardinaux du service : Marge devisée vs marge réalisée · Taux de conformité technique des offres · Délai de production d'un chiffrage"},
+      {"domaine": "Installations & Chantiers", "activites": "- Périmètre : Exécution des chantiers : planning, ressources, soustraitance, réception, levée des réserves. Encadrement des chefs d'équipe Installations.\n- Indicateurs cardinaux du service : Taux de respect des jalons · Coût de non-qualité · Taux de reprise · Accidents du travail"},
+      {"domaine": "SAV & Maintenance", "activites": "- Périmètre : Maintenance préventive et curative du parc installé sous contrat. Encadrement des chefs d'équipe SAV. Optimisation des tournées.\n- Indicateurs cardinaux du service : Disponibilité du parc sous contrat · Respect du délai d'intervention (SLA) · Taux de résolution au premier passage"},
+      {"domaine": "Contrôle & Supervision", "activites": "- Périmètre : Contrôle qualité des installations, essais et mise en service, exploitation de la supervision à distance KYA-SolMonitor, retour d'expérience vers le bureau d'études.\n- Indicateurs cardinaux du service : Taux de conformité à la réception · Défaillances détectées par supervision avant panne · Écarts de production vs modèle"}
+    ],
+    "autorite": "- Chaque chef de service engage la dépense jusqu'à 500 000 FCFA dans les limites du budget de son service.\n- Valide les devis jusqu'à 10 000 000 FCFA et les remises jusqu'à 3 %, selon la politique tarifaire.\n- Détient l'autorité hiérarchique sur les chefs d'équipe et les techniciens de son service.\n- Peut suspendre une intervention non conforme à la norme ou dangereuse.\n- Ne fixe ni la norme technique du Groupe — qui relève du Directeur Technique — ni la politique de prix.\n- Ne dispose d'aucune autorité hiérarchique sur le personnel des agences.",
+    "indicateurs": [],
+    "profil": {
+      "formation": "Ingénieur ou Bac+4/5 en génie électrique, énergétique ou énergies renouvelables ; habilitation électrique exigée.",
+      "experience": "Minimum 6 ans dans le domaine du service, dont 3 en encadrement d'équipe.",
+      "competences_techniques": "Dimensionnement et simulation PV · Conduite de chantier et de projet · Diagnostic et maintenance de systèmes PV et de stockage · Lecture d'un compte de résultat d'affaire · Outils propriétaires du Groupe.",
+      "competences_comportementales": "Intransigeance sur la sécurité et la norme · Fiabilité de l'engagement de délai · Loyauté dans la remontée des difficultés · Capacité à encadrer des équipes en déplacement.",
+      "langues": "Français courant · Anglais technique · Langues nationales pour les équipes de terrain."
+    },
+    "interfaces": "Directeur Technique & Projets (hiérarchique) · DGA (Revue Opérationnelle) · Directeur Industriel (produits, stock) · Direction du Développement (offres, clients) · DAF (marges, achats) · QHSE · Chefs d'agence (appui fonctionnel) · KYA-Institute of Technology (habilitations) · Clients, bureaux de contrôle et sous-traitants."
+  },
+  {
+    "numero": "5.29",
+    "code_fp": "FP-29",
+    "categorie": "Cadre (C)",
+    "intitule_poste": "Chefs de Service de la Direction Industrielle",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur Industriel",
+      "Postes concernés": "Chef de service Production & Assemblage · Chef de service Méthodes &  Industrialisation · Chef de service Qualité Produit · Chef de service Supply Chain & Magasins",
+      "Classification": "Cadre (C) — Indices C-1 à C-3 selon le service",
+      "Plafond d'engagement": "500 000 FCFA",
+      "Instances": "Membres du Comité Élargi d'Encadrement · Invités de la Revue Opérationnelle selon l'ordre du jour"
+    },
+    "mission": "Décliner, au niveau de leur service, les objectifs de la Business Unit Industry : produire au coût de revient, à la cadence et à la qualité cibles, en tenant le plan de charge.",
+    "attributions": [
+      {"domaine": "Production & Assemblage", "activites": "- Périmètre : Conduite de l'atelier : exécution du plan de charge, encadrement des chefs d'équipe Production, cadence, sécurité et ergonomie des postes, démarche Lean et TPM.\n- Indicateurs cardinaux du service : TRS · Cadence vs plan de charge · Taux de rebut · Accidents du travail en atelier"},
+      {"domaine": "Méthodes & Industrialisation", "activites": "- Périmètre : Passage du prototype à la série, gammes de fabrication, outillages, temps standards, réduction du coût de revient par la conception et la standardisation.\n- Indicateurs cardinaux du service : Coût de revient unitaire vs cible · Temps standard tenu · Produits industrialisés dans l'année"},
+      {"domaine": "Qualité Produit", "activites": "- Périmètre : Contrôle de conformité des produits sortis d'usine, traitement des non-conformités et des retours de garantie jusqu'à la cause racine.\n- Indicateurs cardinaux du service : Taux de conformité à la sortie · Retours de garantie · Non-conformités clôturées dans les délais"},
+      {"domaine": "Supply Chain & Magasins", "activites": "- Périmètre : Gestion des stocks et des magasins du Groupe, y compris les stocks avancés des agences. Fiabilité de l'inventaire permanent et des mouvements.\n- Indicateurs cardinaux du service : Rotation du stock · Écart d'inventaire · Ruptures ayant arrêté la production · Taux de service magasin"}
+    ],
+    "autorite": "- Chaque chef de service engage la dépense jusqu'à 500 000 FCFA dans les limites du budget de son service.\n- Détient l'autorité hiérarchique sur les chefs d'équipe et les opérateurs de son service.\n- Le Chef de service Qualité Produit peut bloquer la sortie d'usine de tout produit non conforme ; ce blocage n'est pas révocable par la ligne commerciale.\n- Le Chef de service Production ne peut insérer une commande hors plan de charge sans arbitrage du Directeur Industriel.\n- Ne fixent ni le prix de cession interne, ni la norme d'installation sur site, qui relève de la Direction Technique.",
+    "indicateurs": [],
+    "profil": {
+      "formation": "Ingénieur ou Bac+4/5 en génie industriel, génie électrique, qualité ou logistique selon le service.",
+      "experience": "Minimum 6 ans dans le domaine du service, dont 3 en encadrement d'équipe en environnement de production.",
+      "competences_techniques": "Pilotage de production et plan de charge · Lean manufacturing et TPM · Calcul de coût de revient et de temps standard · Assurance qualité produit · Gestion de stock et inventaire permanent · Électronique de puissance et assemblage PV.",
+      "competences_comportementales": "Fermeté sur le plan de charge face à l'urgence commerciale · Culture de l'amélioration continue · Rigueur sur la traçabilité · Présence terrain en atelier.",
+      "langues": "Français courant · Anglais technique (fournisseurs, documentation) · Langues nationales pour l'encadrement des opérateurs."
+    },
+    "interfaces": "Directeur Industriel (hiérarchique) · DGA (Revue Opérationnelle) · Direction Technique (spécifications, besoins chantier) · Chef de service Achats & Approvisionnements · Chef de service Ventes (prévision) · Contrôleur de gestion (coût de revient) · QHSE · Laboratory (industrialisation) · Chefs d'agence (stock avancé)."
+  },
+  {
+    "numero": "5.30",
+    "code_fp": "FP-30",
+    "categorie": "Cadre (C) — Agence Régionale · Agent de Maîtrise (AM) — Agence Standard",
+    "intitule_poste": "Chef d'Agence (Agence Standard et Agence Régionale)",
+    "identification": {
+      "Rattachement hiérarchique": "Directeur du Développement & du Réseau Commercial",
+      "Rattachement fonctionnel": "Directions métier, selon la matrice RACI Siège / Agences",
+      "Encadrement direct": "Agence Standard : 6 personnes · Agence Régionale : 11 à 14 personnes, y compris les chefs des antennes rattachées",
+      "Effectif sous responsabilité": "6 à 14 personnes",
+      "Classification": "Cadre (C) — Indice C-3 en Agence Régionale · Agent de Maîtrise (AM) — Indice AM1 en Agence Standard",
+      "Plafond d'engagement": "500 000 FCFA",
+      "Instances": "Membre du Comité Élargi d'Encadrement · Membre de la revue mensuelle du réseau · Invité du Codir selon l'ordre du jour",
+      "Suppléance": "Responsable technique (Agence Régionale) ou technicien senior désigné (Agence Standard)"
+    },
+    "mission": "Diriger l'agence comme un centre de profit : développer le chiffre d'affaires de la zone, garantir la qualité des installations et de la maintenance du parc, atteindre le point mort dans le délai fixé, et représenter le Groupe sur le territoire.",
+    "attributions": [
+      {"domaine": "Performance économique de l'agence", "activites": "- Répondre du compte de résultat de l'agence : chiffre d'affaires, marge, coûts fixes, trajectoire vers le point mort — 18 mois en Agence Standard, 24 mois en Agence Régionale — et vers l'autonomie financière.\n- Élaborer et tenir le budget annuel de l'agence ; alerter sans délai en cas de dérive, avant que l'écart n'atteigne 10 % du business plan."},
+      {"domaine": "Développement commercial local", "activites": "- Piloter les commerciaux de l'agence : objectifs individuels, prospection, suivi du pipeline, conversion.\n- Développer les relations avec les acteurs locaux : collectivités, entreprises, institutions, prescripteurs.\n- Émettre les devis relevant de sa délégation et instruire, avec le siège, les offres au-delà de son seuil."},
+      {"domaine": "Service technique et maintenance du parc", "activites": "- Garantir la qualité des installations et des interventions de maintenance réalisées par l'agence, dans le strict respect des normes techniques fixées par la Direction Technique.\n- Piloter le parc installé de la zone de chalandise, dont la puissance détermine le format même de l'agence : moins de 25 kWc pour une antenne, de 25 à 150 kWc pour une agence standard, de 150 à 500 kWc pour une agence régionale.\n- Exploiter la polyvalence des techniciens, mobilisés à la fois sur les installations et sur les maintenances : arbitrer quotidiennement leur affectation entre les deux activités, en tenant compte des engagements de délai. Cette polyvalence est le levier économique central de l'agence.\n- S'assurer que chaque technicien est effectivement habilité sur les deux volets avant toute affectation ; signaler à la DRH tout besoin de formation ou d'habilitation.\n- Optimiser les tournées et les déplacements — principal levier de coût du SAV décentralisé — et exploiter la supervision à distance (KYA-SolMonitor) pour éviter les déplacements inutiles.\n- Tenir les engagements de délai d'intervention (SLA) sur le parc installé de la zone."},
+      {"domaine": "Management de l'équipe", "activites": "- Animer, encadrer et évaluer l'équipe de l'agence ; proposer les recrutements à la DRH et au Directeur du Réseau.\n- Faire appliquer les règles de sécurité et le règlement intérieur ; proposer les sanctions à la DRH.\n- Assurer la remontée hebdomadaire d'information vers le siège, selon le format standard du réseau."},
+      {"domaine": "Représentation et conformité", "activites": "- Représenter le Groupe localement et en préserver l'image.\n- Garantir la régularité administrative, comptable et fiscale de l'agence, en lien avec la DAF ; assurer la sécurité de la caisse, du stock et des actifs.\n- En Agence Régionale : animer et contrôler les antennes rattachées, dont les chefs lui sont hiérarchiquement subordonnés."}
+    ],
+    "autorite": "- Engage la dépense jusqu'à 500 000 FCFA. Valide les devis jusqu'à 10 000 000 FCFA et les remises jusqu'à 3 %.\n- Détient l'autorité hiérarchique pleine sur le personnel de son agence et des antennes rattachées.\n- Ne fixe ni la norme technique, ni la politique de prix, ni la politique RH : il les applique.\n- Ne peut recruter, sanctionner ou licencier seul : il propose ; la DRH valide et le Directeur du Réseau approuve.\n- Ne peut modifier le format de son agence ni ouvrir une antenne : ces décisions relèvent du Comité de Direction.",
+    "indicateurs": [
+      {"indicateur": "Chiffre d'affaires de l'agence vs objectif", "cible": "≥ 100 %", "frequence": "Mensuelle", "poids": "13 %"},
+      {"indicateur": "Résultat d'exploitation de l'agence", "cible": "Positif au terme du délai de point mort", "frequence": "Mensuelle", "poids": "11 %"},
+      {"indicateur": "Écart de trajectoire vs business plan", "cible": "≤ 10 %", "frequence": "Mensuelle", "poids": "10 %"},
+      {"indicateur": "Délai moyen d'intervention SAV dans la zone", "cible": "≤ 48 h", "frequence": "Mensuelle", "poids": "10 %"},
+      {"indicateur": "Taux de disponibilité du parc installé sous contrat", "cible": "≥ 97 %", "frequence": "Mensuelle", "poids": "9 %"},
+      {"indicateur": "Taux de reprise ou de malfaçon", "cible": "≤ 3 %", "frequence": "Mensuelle", "poids": "8 %"},
+      {"indicateur": "Taux d'occupation des techniciens (installation + maintenance)", "cible": "≥ 80 %", "frequence": "Mensuelle", "poids": "7 %"},
+      {"indicateur": "Techniciens habilités sur les deux volets", "cible": "100 %", "frequence": "Semestrielle", "poids": "7 %"},
+      {"indicateur": "Écart de caisse et de stock", "cible": "", "frequence": "Mensuelle", "poids": "6 %"},
+      {"indicateur": "Taux de satisfaction des clients de la zone", "cible": "", "frequence": "Semestrielle", "poids": "5 %"},
+      {"indicateur": "Accidents du travail", "cible": "0", "frequence": "Mensuelle", "poids": "4 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "≥ 1/mois — ≥ 1 idée retenue/trimestre", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Bac+3 à Bac+5, technique (électricité, énergie) avec appétence commerciale, ou commercial avec solide culture technique.",
+      "experience": "Agence Standard : minimum 5 ans, dont 2 en encadrement d'équipe. Agence Régionale :  minimum 7 ans, dont 3 en encadrement.",
+      "competences_techniques": "Techniques solaires PV · Vente et négociation · Gestion d'un centre de profit et lecture d'un compte de résultat · Management d'équipe pluridisciplinaire · Gestion de stock et de caisse · Connaissance du tissu économique local.",
+      "competences_comportementales": "Autonomie et sens des responsabilités · Aptitude à décider seul dans le cadre de sa délégation · Loyauté dans la remontée d'information, y compris des mauvaises nouvelles · Proximité avec le terrain et les clients.",
+      "langues": "Français courant · Langues nationales de la zone · Anglais courant exigé pour les agences hors du Togo."
+    },
+    "interfaces": "Directeur du Développement & du Réseau (hiérarchique) · Chef de service Animation du Réseau (norme, outillage, suivi) · Direction Technique (norme technique) · DAF (comptabilité, caisse, stock) · DRH (personnel) · QHSE (sécurité) · Direction Industrielle (approvisionnement produits) · Chefs d'antenne rattachés · Clients et autorités locales. Note complémentaire (encadré du document) : Hors du Togo, toute implantation du Groupe est ouverte au format Agence Régionale : le chef d'agence y est nécessairement de catégorie Cadre, et la maîtrise de l'anglais ou de la langue de travail du pays d'accueil constitue un prérequis."
+  },
+  {
+    "numero": "5.31",
+    "code_fp": "FP-31",
+    "categorie": "Agent de Maîtrise (AM)",
+    "intitule_poste": "Chef d'Antenne",
+    "identification": {
+      "Rattachement hiérarchique": "Chef de l'Agence Régionale de rattachement",
+      "Rattachement fonctionnel": "Directeur du Développement & du Réseau Commercial",
+      "Encadrement direct": "2 techniciens polyvalents",
+      "Effectif sous responsabilité": "2 personnes",
+      "Classification": "Agent de Maîtrise (AM) — Indice AM-2",
+      "Plafond d'engagement": "150 000 FCFA",
+      "Instances": "Membre du Comité Élargi d'Encadrement (visioconférence)",
+      "Suppléance": "Technicien senior de l'antenne"
+    },
+    "mission": "Assurer la présence commerciale et technique du Groupe sur un territoire à potentiel émergent, avec une structure légère de trois personnes, en combinant prospection, installation et maintenance de proximité.",
+    "attributions": [
+      {"domaine": "Activité technico-commerciale", "activites": "- Prospecter, établir les devis standard du catalogue et conclure les ventes sur le territoire de l'antenne.\n- Réaliser et superviser les installations et les interventions de maintenance avec les deux techniciens polyvalents.\n- Entretenir le parc installé de la zone — inférieur à 25 kWc — qui définit le format même de l'antenne. Le franchissement durable de ce seuil justifie l'instruction d'un passage au format Agence Standard.\n- Constituer et entretenir la relation avec les prescripteurs locaux : collectivités, artisans, commerçants."},
+      {"domaine": "Gestion de l'antenne", "activites": "- Tenir la caisse, le stock avancé et les documents administratifs de l'antenne, sous le contrôle de l'agence régionale de rattachement.\n- Rendre compte hebdomadairement au chef d'agence régionale : activité, pipeline, incidents."},
+      {"domaine": "Sécurité et qualité", "activites": "- Faire appliquer les règles de sécurité et les normes techniques du Groupe sur toutes les interventions, sans exception liée à l'isolement du site."}
+    ],
+    "autorite": "- Engage la dépense jusqu'à 150 000 FCFA.\n- Valide les devis relevant strictement du catalogue standard, sans remise.\n- Ne peut ni recruter, ni sanctionner, ni consentir de remise.\n- Ne peut engager le Groupe sur un délai ou une prestation hors catalogue sans accord du chef d'agence régionale.",
+    "indicateurs": [
+      {"indicateur": "Chiffre d'affaires de l'antenne vs objectif", "cible": "≥ 100 %", "frequence": "Mensuelle", "poids": "19 %"},
+      {"indicateur": "Nombre d'interventions réalisées", "cible": "Selon objectif de la zone", "frequence": "Mensuelle", "poids": "18 %"},
+      {"indicateur": "Délai moyen d'intervention", "cible": "≤ 48 h", "frequence": "Mensuelle", "poids": "16 %"},
+      {"indicateur": "Écart de caisse et de stock", "cible": "0", "frequence": "Mensuelle", "poids": "14 %"},
+      {"indicateur": "Trajectoire vers le point mort (18 mois)", "cible": "Conforme", "frequence": "Trimestrielle", "poids": "12 %"},
+      {"indicateur": "Accidents du travail", "cible": "", "frequence": "Mensuelle", "poids": "11 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "Bac+2 à Bac+3 en électricité, électrotechnique ou énergies renouvelables ; habilitation électrique obligatoire.",
+      "experience": "Minimum 4 ans en installation et maintenance PV, avec une première expérience de vente ou de relation client.",
+      "competences_techniques": "Installation et maintenance PV · Diagnostic de panne · Vente de proximité · Tenue de caisse et de stock · Connaissance du territoire.",
+      "competences_comportementales": "Polyvalence et autonomie sur un site isolé · Sens du client · Honnêteté irréprochable dans la gestion des fonds et du stock · Débrouillardise.",
+      "langues": "Français courant · Langues nationales de la zone indispensables."
+    },
+    "interfaces": "Chef d'Agence Régionale (hiérarchique) · Techniciens de l'antenne · Chef de service Animation du Réseau · Direction Technique (norme, appui au diagnostic) · Clients et prescripteurs locaux."
+  },
+  {
+    "numero": "5.32",
+    "code_fp": "FP-32",
+    "categorie": "Agent de Maîtrise (AM)",
+    "intitule_poste": "Chefs d'Équipe — Installations, Production, SAV",
+    "identification": {
+      "Rattachement hiérarchique": "Chef de service dont relève l'équipe : Installations & Chantiers, Production & Assemblage, ou SAV & Maintenance",
+      "Encadrement direct": "3 à 8 personnes selon l'équipe",
+      "Classification": "Agent de Maîtrise (AM) — Indices AM-1 à AM-2",
+      "Plafond d'engagement": "150 000 FCFA",
+      "Instances": "Membres du Comité Élargi d'Encadrement (trimestriel)",
+      "Suppléance": "Technicien ou opérateur senior désigné"
+    },
+    "mission": "Conduire une équipe sur le terrain ou en atelier, tenir l'engagement de délai et de qualité qui lui est confié, et garantir qu'aucun collaborateur ne se blesse.",
+    "attributions": [
+      {"domaine": "Installations & Chantiers", "activites": "- Responsabilités spécifiques : Conduite du chantier : préparation, montage, câblage, essais, propreté du site, réception. Tenue du planning et du carnet de chantier. Encadrement des monteurs et des sous-traitants sur site.\n- Indicateurs cardinaux : Respect du délai de chantier · Taux de reprise · Conformité à la norme · Port des EPI · Accidents du travail"},
+      {"domaine": "Production & Assemblage", "activites": "- Responsabilités spécifiques : Conduite de la ligne : tenue de la cadence, respect des gammes et des temps standards, autocontrôle, maintenance de premier niveau, propreté et rangement du poste (5S).\n- Indicateurs cardinaux : Cadence vs plan de charge · Taux de rebut de l'équipe · Respect du temps standard · Accidents du travail"},
+      {"domaine": "SAV & Maintenance", "activites": "- Responsabilités spécifiques : Conduite des interventions curatives et préventives : diagnostic, réparation, remise en service, rapport d'intervention. Optimisation de la tournée. Exploitation de la supervision à distance.\n- Indicateurs cardinaux : Respect du délai d'intervention (SLA) · Taux de résolution au premier passage · Rapports transmis à date · Accidents du travail"}
+    ],
+    "autorite": "- Engage la dépense jusqu'à 150 000 FCFA pour les achats d'urgence sur site ou en atelier.\n- Détient l'autorité hiérarchique sur les membres de son équipe : affectation des tâches, planning, congés inférieurs à 3 jours.\n- Dispose du devoir — et non de la simple faculté — d'arrêter une tâche présentant un danger pour lui-même ou pour autrui.\n- Ne peut ni établir de devis, ni consentir de remise, ni engager le Groupe sur un délai ou une extension de garantie.\n- Ne peut modifier une spécification technique ni improviser une solution non conforme aux normes du Groupe.\n- Ne peut recruter ni sanctionner : il propose au chef de service.",
+    "indicateurs": [],
+    "profil": {
+      "formation": "BAC Pro / BTS / DUT en électricité, électrotechnique, énergies renouvelables ou production industrielle ; habilitation électrique obligatoire.",
+      "experience": "Minimum 4 ans dans le métier, dont une première expérience d'animation d'équipe.",
+      "competences_techniques": "Maîtrise technique du métier de l'équipe · Lecture de plans et de schémas électriques · Mesures, essais et diagnostic · Organisation du travail et tenue d'un planning · Travail en hauteur (chantiers).",
+      "competences_comportementales": "Exemplarité en matière de sécurité — l'équipe fait ce que fait son chef, non ce qu'il dit · Capacité à tenir un engagement de délai · Loyauté dans la remontée d'une difficulté · Autorité naturelle et sens du collectif.",
+      "langues": "Français · Langues nationales indispensables pour l'encadrement de l'équipe."
+    },
+    "interfaces": "Chef de service dont relève l'équipe (hiérarchique) · Membres de l'équipe · QHSE (sécurité) · Magasin (matériel et consommables) · Bureau d'études (plans, schémas) · Chefs d'agence lors des interventions en province · Clients sur site · Sous-traitants."
+  },
+  {
+    "numero": "5.33",
+    "code_fp": "FP-33",
+    "categorie": "Agent d'Exécution (AE)",
+    "intitule_poste": "Technicien d'Agence Polyvalent",
+    "identification": {
+      "Rattachement hiérarchique": "Chef d'agence ou chef d'antenne",
+      "Rattachement fonctionnel": "Direction Technique & Projets (norme, appui au diagnostic)",
+      "Encadrement direct": "Aucun",
+      "Classification": "Agent d'Exécution (AE) — Indices AE-1 à AE-3 selon l'expérience",
+      "Plafond d'engagement": "Aucun",
+      "Instances": "Assemblée Générale du Personnel",
+      "Suppléance": "Autre technicien de l'agence"
+    },
+    "mission": "Réaliser, sur le territoire de l'agence, aussi bien les installations neuves que les interventions de maintenance sur le parc existant — cette polyvalence étant la condition économique de la viabilité d'une structure de proximité.",
+    "attributions": [
+      {"domaine": "Installations", "activites": "- Réaliser le montage, le câblage, le raccordement et la mise en service des installations solaires photovoltaïques : centrales, kits, lampadaires, pompage.\n- Appliquer strictement les normes techniques et les procédures d'installation du Groupe, sans adaptation locale improvisée.\n- Rendre compte de l'intervention par un rapport complet, transmis à date."},
+      {"domaine": "Maintenance et dépannage", "activites": "- Réaliser la maintenance préventive du parc installé de la zone : contrôles, nettoyage, mesures, remplacements programmés.\n- Diagnostiquer et réparer les pannes : modules, onduleurs, batteries, régulation, câblage, structures.\n- Exploiter la supervision à distance (KYA-SolMonitor) pour préparer l'intervention et éviter les déplacements inutiles."},
+      {"domaine": "Relation client de proximité", "activites": "- Représenter le Groupe auprès du client sur site : présentation soignée, explication de l'intervention, respect des lieux.\n- Remonter au chef d'agence toute opportunité commerciale détectée en intervention."},
+      {"domaine": "Sécurité", "activites": "- Porter les équipements de protection individuelle et respecter les consignes de sécurité en toute circonstance, y compris lorsqu'il intervient seul et sans témoin."}
+    ],
+    "autorite": "- N'engage aucune dépense au nom du Groupe.\n- Dispose du devoir d'arrêter une tâche présentant un danger pour lui-même ou pour autrui, et d'en informer immédiatement le chef d'agence.\n- Ne peut ni établir de devis, ni consentir de remise, ni engager le Groupe sur un délai ou une extension de garantie.\n- Ne peut modifier une spécification technique ni improviser une solution non conforme aux normes du Groupe.",
+    "indicateurs": [
+      {"indicateur": "Interventions conformes du premier coup", "cible": "≥ 90 %", "frequence": "Mensuelle", "poids": "17 %"},
+      {"indicateur": "Taux de résolution au premier passage (dépannage)", "cible": "≥ 85 %", "frequence": "Mensuelle", "poids": "16 %"},
+      {"indicateur": "Respect des délais d'intervention (SLA)", "cible": "≥ 95 %", "frequence": "Mensuelle", "poids": "14 %"},
+      {"indicateur": "Rapports d'intervention complets et transmis à date", "cible": "100 %", "frequence": "Mensuelle", "poids": "13 %"},
+      {"indicateur": "Habilitations à jour (installation + maintenance)", "cible": "100 %", "frequence": "Semestrielle", "poids": "11 %"},
+      {"indicateur": "Port des EPI et respect des consignes de sécurité", "cible": "100 %", "frequence": "Mensuelle", "poids": "10 %"},
+      {"indicateur": "Accidents du travail", "cible": "0", "frequence": "Mensuelle", "poids": "9 %"},
+      {"indicateur": "Séances de brainstorming R&D & innovation animées", "cible": "≥ 1/mois — ≥ 1 idée retenue/trimestre", "frequence": "Mensuelle", "poids": "10 %"}
+    ],
+    "profil": {
+      "formation": "CAP / BAC Pro / BTS en électricité, électrotechnique ou énergies renouvelables ; habilitation électrique obligatoire.",
+      "experience": "Minimum 2 ans en installation ou en maintenance PV. Un profil venant d'un seul des deux volets est recevable, sous réserve d'un parcours de formation complémentaire délivré par KYA-Institute of Technology avant la prise de poste.",
+      "competences_techniques": "Montage et câblage PV · Lecture de schémas électriques · Mesures et essais · Diagnostic de pannes (modules, onduleurs, batteries, régulation) · Utilisation d'un outil de supervision à distance · Travail en hauteur.",
+      "competences_comportementales": "Polyvalence assumée et goût du terrain · Autonomie sur des sites isolés · Honnêteté et rigueur dans le compte rendu · Sens du client · Respect absolu des consignes de sécurité.",
+      "langues": "Français · Langues nationales de la zone d'intervention, indispensables pour la relation client en préfecture."
+    },
+    "interfaces": "Chef d'agence ou chef d'antenne (hiérarchique) · Autres techniciens de l'agence · Direction Technique (norme, appui au diagnostic) · Magasin de l'agence · KYA-Institute of Technology (habilitations) · Clients de la zone."
+  }
+]

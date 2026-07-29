@@ -41,8 +41,12 @@
   <p style="margin:0 0 3px;">Demeurant et {{ a.domicilie }} à : {{ doc.domicile or blk }}</p>
   <p style="margin:0 0 3px;">{{ a.fils_fille }} de : {{ doc.pere or blk }} et de : {{ doc.mere or blk }}</p>
   <p style="margin:0 0 3px;">Téléphone : {{ doc.telephone or blk }} — E-mail : {{ doc.email or blk }}</p>
-  <p style="margin:0 0 3px;">Établissement de formation (le cas échéant) : {{ doc.etablissement or blk }}</p>
-  <p style="margin:0 0 8px;">N° certificat de scolarité / attestation d'inscription : {{ doc.num_certificat_scolarite or blk }}</p>
+  {% if doc.etablissement %}
+  <p style="margin:0 0 3px;">Établissement de formation (le cas échéant) : {{ doc.etablissement }}</p>
+  {% endif %}
+  {% if doc.num_certificat_scolarite %}
+  <p style="margin:0 0 8px;">N° certificat de scolarité / attestation d'inscription : {{ doc.num_certificat_scolarite }}</p>
+  {% endif %}
   <p style="font-style:italic;margin:0 0 8px;">Ci-après {{ a.denomme }} «&nbsp;<b>{{ a.Le_La | upper }} STAGIAIRE</b>&nbsp;», d'autre part ;</p>
 
   {% if doc.type_garant == 'Établissement' and (doc.etablissement or doc.etablissement_represente_par) %}
@@ -95,7 +99,7 @@
   <p style="margin:0 0 8px;">S'agissant d'un stage d'immersion à finalité de découverte, non productif, aucune indemnité de stage n'est due, conformément à l'article 126 du Code du travail togolais, qui n'impose pas la rémunération du stage-études.</p>
 
   {{ art("Article 7 — Assurances") }}
-  <p style="margin:0 0 6px;">{{ a.Le_La }} stagiaire déclare être {{ a.couvert }} par une assurance responsabilité civile ({% if doc.type_garant == 'Tuteur Légal' %}personnelle souscrite par le tuteur légal{% else %}personnelle ou souscrite par l'Établissement{% endif %}) : police n° {{ doc.assurance_police or blk }}, compagnie {{ doc.assurance_compagnie or blk }}.</p>
+  <p style="margin:0 0 6px;">{{ a.Le_La }} stagiaire déclare être {{ a.couvert }} par une assurance responsabilité civile ({% if doc.type_garant == 'Tuteur Légal' %}personnelle souscrite par le tuteur légal{% else %}personnelle ou souscrite par l'Établissement{% endif %}){% if doc.assurance_police or doc.assurance_compagnie %} : police n° {{ doc.assurance_police or blk }}, compagnie {{ doc.assurance_compagnie or blk }}{% endif %}.</p>
   <p style="margin:0 0 8px;">L'Entreprise garantit la couverture des accidents susceptibles de survenir {{ a.au_ala }} stagiaire du fait ou à l'occasion du stage dans ses locaux, dans les conditions de sa police d'assurance. {{ a.Le_La }} stagiaire s'engage à signaler immédiatement tout incident ou accident au maître de stage.</p>
 
   {{ art("Article 8 — Évaluation et attestation") }}
@@ -152,7 +156,7 @@
       <td style="width:33%;padding:0 6px;">
         <div style="font-weight:bold;">Le Maître de stage</div>
         <div style="font-size:9.5pt;">{{ doc.maitre_stage_nom or '' }}</div>
-        <div style="height:48px;border-bottom:1px solid #000;margin:12px 14px 4px;"></div>
+        {% if doc.signature_maitre %}<img src="{{ doc.signature_maitre }}" style="max-height:70px;max-width:180px;object-fit:contain;margin:4px 0;">{% else %}<div style="height:48px;border-bottom:1px solid #000;margin:12px 14px 4px;"></div>{% endif %}
         <div style="font-style:italic;font-size:9.5pt;">Signature</div>
       </td>
       <td style="width:34%;padding:0 6px;">
@@ -166,8 +170,8 @@
 
   <div style="margin-top:16px;">
     <div style="font-weight:bold;">Pour {% if doc.type_garant == 'Tuteur Légal' %}le Tuteur Légal{% else %}l'Établissement de formation{% endif %} (le cas échéant)</div>
-    <div style="font-size:9.5pt;">{{ doc.garant_nom or '' }}</div>
-    <div style="height:44px;border-bottom:1px solid #000;margin:10px 0 4px;max-width:320px;"></div>
+    <div style="font-size:9.5pt;">{{ doc.garant_nom or '' }}{% if doc.garant_qualite %} — {{ doc.garant_qualite }}{% endif %}</div>
+    {% if doc.signature_garant %}<img src="{{ doc.signature_garant }}" style="max-height:60px;max-width:220px;object-fit:contain;margin:4px 0;">{% else %}<div style="height:44px;border-bottom:1px solid #000;margin:10px 0 4px;max-width:320px;"></div>{% endif %}
     <div style="font-style:italic;font-size:9.5pt;">Nom, qualité et signature</div>
   </div>
 

@@ -35,11 +35,11 @@
    "fieldname": "type_stock",
    "label": "Type de stock",
    "fieldtype": "Select",
-   "options": "Ingénierique\nIndustriel",
+   "options": "Ingénierique\nIndustriel\nOutils",
    "default": "Ingénierique",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "description": "Ingénierique = matériel d'installation / projets. Industriel = fabrication / assemblage (matières premières + produits finis)."
+   "description": "Ingénierique = matériel d'installation / projets. Industriel = fabrication / assemblage (composants + produits finis). Outils = matériel du siège, ni installation ni fabrication."
   },
   {
    "fieldname": "col_1",
@@ -57,10 +57,10 @@
    "fieldname": "famille",
    "label": "Famille (stock industriel)",
    "fieldtype": "Select",
-   "options": "\nMatière première\nProduit fini",
+   "options": "\nComposants\nProduit fini",
    "in_standard_filter": 1,
    "depends_on": "eval:doc.type_stock=='Industriel'",
-   "description": "Uniquement pour le stock industriel : matière première d'assemblage ou produit fini."
+   "description": "Uniquement pour le stock industriel : composants d'assemblage ou produit fini."
   },
   {
    "fieldname": "groupe",

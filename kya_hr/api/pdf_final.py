@@ -126,6 +126,8 @@ def attach_final_pdf(doc, method=None):
     try:
         if frappe.flags.in_migrate or frappe.flags.in_install or frappe.flags.in_patch:
             return
+        if doc.docstatus == 2:  # annulé : workflow_state peut être resté à l'état final,
+            return              # mais frappe.get_print refuse d'imprimer un doc annulé.
         states = FINAL_STATES.get(doc.doctype)
         if not states or (doc.get("workflow_state") or "") not in states:
             return
