@@ -334,6 +334,13 @@ scheduler_events = {
     },
 }
 
+# Pré-migration : purge les Custom Fields qui font doublon avec un champ
+# STANDARD du JSON des DocTypes (champs créés en prod via API faute de
+# déploiement, devenus standards depuis — ex. Fiche de Poste KYA
+# identification/signatures, Contrat Stage Immersion circuit digital).
+# DOIT tourner avant le sync des DocTypes ; ne lève jamais.
+before_migrate = "kya_hr.maintenance.remove_shadowing_custom_fields.execute"
+
 # Post-migration : la liste exacte des étapes est dans
 # kya_hr/safe_migrations.py:AFTER_MIGRATE. Le wrapper attrape les exceptions
 # par étape (un script qui plante n'avorte plus la migration globale)
