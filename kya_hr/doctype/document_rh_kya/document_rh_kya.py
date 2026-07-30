@@ -153,8 +153,8 @@ def prefill_from_employee(employee, type_document=None):
     }
 
 
-_RH_ROLES = {"Responsable RH", "HR Manager", "HR User", "Directeur Général",
-             "DGA", "System Manager"}
+_RH_ROLES = {"Responsable RH", "HR Manager", "HR User", "Assistant(e) RH",
+             "Directeur Général", "DGA", "System Manager"}
 
 
 def _guard_rh():

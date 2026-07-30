@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import frappe
 
-_RH_ROLES = {"Responsable RH", "HR Manager", "HR User", "System Manager",
-             "Directeur Général", "DGA"}
+_RH_ROLES = {"Responsable RH", "HR Manager", "HR User", "Assistant(e) RH",
+             "System Manager", "Directeur Général", "DGA"}
 
 
 def get_context(context):

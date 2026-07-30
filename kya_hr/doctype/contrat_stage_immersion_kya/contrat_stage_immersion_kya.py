@@ -160,8 +160,8 @@ class ContratStageImmersionKYA(Document):
 
 
 # ── API page RH ───────────────────────────────────────────────────────────────
-_RH_ROLES = {"Responsable RH", "HR Manager", "HR User", "Directeur Général", "DGA",
-             "System Manager", "Responsable des Stagiaires"}
+_RH_ROLES = {"Responsable RH", "HR Manager", "HR User", "Assistant(e) RH",
+             "Directeur Général", "DGA", "System Manager", "Responsable des Stagiaires"}
 _CHAMPS = ["civilite", "beneficiaire_nom", "date_naissance", "lieu_naissance",
            "nationalite", "piece_type", "piece_numero", "domicile", "pere", "mere",
            "telephone", "email", "etablissement", "num_certificat_scolarite",

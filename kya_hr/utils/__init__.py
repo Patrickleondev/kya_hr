@@ -6,13 +6,35 @@ hooks.py comme méthodes Jinja) et le module `approval_guards`.
 from __future__ import annotations
 
 
+def get_kya_pangolin_note() -> str:
+    """Rappel « code Pangolin » à glisser dans TOUT e-mail contenant un lien vers
+    la plateforme. Le site est derrière un proxy SSO (Pangolin) : un lien ouvert
+    hors session peut afficher un écran (souvent sombre) demandant un « code » à
+    6 chiffres avant même la page de connexion KYA — sans ce rappel, un
+    destinataire externe (garant, tuteur, établissement...) bloque dessus et
+    abandonne. Un seul point d'insertion (ici + `get_kya_email_footer` /
+    `kya_email_html`) pour que CHAQUE notification l'inclue automatiquement."""
+    return (
+        "<div style='background:#fff8e7;border-left:4px solid #e07b00;padding:12px 16px;"
+        "margin:14px 0;font-size:13px;color:#333;font-family:Arial,Helvetica,sans-serif;'>"
+        "🔒 <b>Aucun mot de passe supplémentaire à retenir.</b> Ouvrez simplement le lien avec "
+        "votre compte KYA habituel (ou sans compte si le lien est personnel/à jeton). "
+        "<b>Si une page (souvent sombre) vous demande un « code » à 6 chiffres</b>, tapez "
+        "<b>1 1 1 1 1 1</b> (le chiffre 1, six fois) puis continuez."
+        "</div>"
+    )
+
+
 def get_kya_email_footer() -> str:
     """Pied de page HTML standard pour les e-mails KYA-Energy Group.
 
     Utilisé dans les Email Templates via {{ get_kya_email_footer() }}.
-    Table-based pour compatibilité Outlook (moteur Word).
+    Table-based pour compatibilité Outlook (moteur Word). Inclut le rappel
+    Pangolin (cf. `get_kya_pangolin_note`) pour que tout e-mail qui l'utilise en
+    bénéficie automatiquement, sans avoir à retoucher chaque notification.
     """
     return (
+        get_kya_pangolin_note() +
         '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" '
         'style="margin-top:18px;border-top:1px solid #e0e0e0;font-family:Arial,Helvetica,sans-serif;">'
         '<tr><td style="padding-top:12px;font-size:12px;color:#666666;line-height:1.5;">'
@@ -41,7 +63,8 @@ def kya_email_html(title: str, body_html: str, subtitle: str = "",
         if subtitle else ""
     )
     foot = (
-        '<tr><td style="padding:14px 28px;border-top:1px solid #e0e0e0;color:#888888;'
+        ('<tr><td style="padding:14px 28px 0;">' + get_kya_pangolin_note() + '</td></tr>')
+        + '<tr><td style="padding:14px 28px;border-top:1px solid #e0e0e0;color:#888888;'
         'font-size:12px;line-height:1.5;font-family:Arial,Helvetica,sans-serif;">'
         '<strong style="color:#00897B;">KYA-Energy Group</strong> — LOMÉ, TOGO — '
         'Move beyond the sky!<br/>E-mail automatique, merci de ne pas y répondre.'
