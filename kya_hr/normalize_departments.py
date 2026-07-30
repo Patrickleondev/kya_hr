@@ -248,7 +248,7 @@ def execute(dry_run: bool = False) -> dict:
     if not dry_run:
         try:
             from frappe.utils.nestedset import rebuild_tree
-            rebuild_tree("Department", "parent_department")
+            rebuild_tree("Department")
         except Exception:
             frappe.log_error(frappe.get_traceback(), "normalize_departments: rebuild_tree")
         try:

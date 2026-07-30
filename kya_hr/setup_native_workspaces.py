@@ -51,8 +51,7 @@ def _needs_reload(ws_name: str) -> bool:
 def _reload_workspace(app: str, module: str, dn: str) -> bool:
     """Re-pose le workspace depuis le JSON natif de l'app."""
     try:
-        base_path = frappe.get_app_path(app)
-        frappe.reload_doc(module, "workspace", dn, base_path=base_path, force=True)
+        frappe.reload_doc(module, "workspace", dn, force=True)
         return True
     except Exception:
         try:

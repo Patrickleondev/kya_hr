@@ -12,34 +12,63 @@ câblé AFTER_MIGRATE pour auto-réparation à chaque déploiement.
 """
 from __future__ import annotations
 
+import re
+
 import frappe
 from frappe.utils import cint
 
 
 # Doctypes dont le compteur doit rester synchronisé (étendre au besoin).
+# Couvre aussi bien le style `naming_series:` (menu déroulant) que
+# `autoname: format:PREFIXE-{...}-{#####}` (la majorité des doctypes KYA) —
+# la détection des préfixes est désormais EMPIRIQUE (cf. _series_prefixes),
+# donc peu importe le mécanisme de nommage réel du doctype.
 DEFAULT_DOCTYPES = [
     "Employee",
     "Demande Achat KYA", "Bon Commande KYA", "Appel Offre KYA",
     "Brouillard Caisse", "Etat Recap Cheques",
     "PV Entree Materiel", "PV Sortie Materiel", "Retour Materiel KYA",
     "Inventaire KYA", "Sortie Vehicule",
+    # autoname format: — mêmes symptômes possibles (doublon de nom au
+    # premier insert après un import massif/backfill qui laisse le
+    # compteur en retard sur le max réel).
+    "Article KYA", "Avenant Contrat KYA", "Besoin de Formation",
+    "Contrat Stage Immersion KYA", "Demande Conge Stagiaire",
+    "Document RH KYA", "Document Vehicule", "Entretien Vehicule KYA",
+    "Evolution Carriere KYA", "Fiche de Poste KYA", "KYA Compta Import",
+    "KYA Contrat", "KYA Import RH", "KYA Reunion Sync Log",
+    "KYA SoP Client", "Marche KYA", "Modification Info Employe KYA",
+    "Mouvement Stock KYA", "Plan de Formation", "Plein Carburant KYA",
+    "Prestataire KYA", "Saisie Stock KYA", "Solde Tout Compte KYA",
+    "Stagiaire RH KYA",
 ]
 
 
 def _series_prefixes(doctype: str) -> set[str]:
-    """Préfixes déclarés dans les options du champ naming_series."""
+    """Préfixes REELS détectés empiriquement dans les noms déjà en base.
+
+    Ancienne version : ne lisait que les options du champ `naming_series`
+    (menu déroulant) — ratait tous les doctypes en `autoname: format:...`
+    (ex. Evolution Carriere KYA -> "EVOL-{#####}"), qui n'ont PAS de champ
+    naming_series du tout. Preuve du bug : duplicate 'EVOL-00171' en prod
+    (30/07) alors que ce script tournait déjà à chaque migrate, silencieux
+    car ce doctype n'était même pas dans DEFAULT_DOCTYPES ET la détection
+    par naming_series n'aurait de toute façon rien trouvé.
+
+    Approche empirique : on regarde les noms réellement stockés (ex.
+    "AVN-2026-00042") et on extrait tout ce qui précède le suffixe
+    numérique final comme préfixe ("AVN-2026-"). Fonctionne pour
+    naming_series ET format:, y compris les formats avec {YYYY} (chaque
+    année produit naturellement son propre préfixe/série)."""
     prefixes: set[str] = set()
     try:
-        meta = frappe.get_meta(doctype)
+        names = frappe.db.sql_list(f"SELECT name FROM `tab{doctype}`")
     except Exception:
         return prefixes
-    f = meta.get_field("naming_series")
-    if f and f.options:
-        for opt in f.options.split("\n"):
-            opt = opt.strip()
-            if opt:
-                prefixes.add(opt)
-    # Repli : si autoname = 'naming_series:' sans options, déduire des noms réels
+    for n in names or []:
+        m = re.match(r"^(.*?)(\d+)$", n or "")
+        if m and m.group(1):
+            prefixes.add(m.group(1))
     return prefixes
 
 
