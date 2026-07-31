@@ -18,7 +18,7 @@ from frappe.utils import today
 CHEF_FIELDS = ("attributions", "competences_cle")
 
 
-class FicheDePosteKYA(Document):
+class FichedePosteKYA(Document):
     def before_insert(self):
         self.autofill()
         if not self.date_document:

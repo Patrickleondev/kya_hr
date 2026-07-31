@@ -163,6 +163,7 @@
   {"read": 1, "write": 1, "create": 1, "submit": 1, "report": 1, "print": 1, "email": 1, "role": "Responsable RH"},
   {"read": 1, "write": 1, "create": 1, "submit": 1, "report": 1, "print": 1, "email": 1, "role": "HR Manager"},
   {"read": 1, "write": 1, "create": 1, "report": 1, "print": 1, "role": "HR User"},
+  {"read": 1, "write": 1, "create": 1, "report": 1, "print": 1, "role": "Assistant(e) RH"},
   {"read": 1, "write": 1, "submit": 1, "report": 1, "print": 1, "role": "Directeur Général"},
   {"read": 1, "write": 1, "submit": 1, "report": 1, "print": 1, "role": "DGA"},
   {"read": 1, "report": 1, "print": 1, "role": "Responsable des Stagiaires"}

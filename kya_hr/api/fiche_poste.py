@@ -22,9 +22,9 @@ import frappe
 from frappe import _
 from frappe.translate import print_language
 
-_RH_ROLES = {"Responsable RH", "HR Manager", "HR User", "System Manager",
-             "Directeur Général", "DGA"}
-_DRH_INVITE_ROLES = ("DGA", "Responsable RH", "HR Manager", "HR User")
+_RH_ROLES = {"Responsable RH", "HR Manager", "HR User", "Assistant(e) RH",
+             "System Manager", "Directeur Général", "DGA"}
+_DRH_INVITE_ROLES = ("DGA", "Responsable RH", "HR Manager", "HR User", "Assistant(e) RH")
 _ROLE_FIELD = {"titulaire": "signature_titulaire", "n1": "signature_n1", "drh": "signature_drh"}
 _ROLE_LABEL = {"titulaire": "le titulaire", "n1": "le supérieur hiérarchique (N+1)", "drh": "la DRH"}
 _ORDER = ("titulaire", "n1", "drh")

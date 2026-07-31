@@ -1,7 +1,7 @@
 {
  "app": "kya_hr",
  "charts": [],
- "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace RH'>👥 Espace RH — Centre de Pilotage</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"sub\", \"type\": \"paragraph\", \"data\": {\"text\": \"<i>Toutes les demandes (permissions, congés, contrats) et le pilotage RH centralisés.</i>\", \"col\": 12}}, {\"id\": \"sp0\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_dash\", \"type\": \"header\", \"data\": {\"text\": \"<b>📊 Tableaux de Bord & Pilotage</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"d1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Tableau de Bord Employés\", \"col\": 3}}, {\"id\": \"d2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Tableau de Bord Stagiaires\", \"col\": 3}}, {\"id\": \"d3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Mon Espace (Chef Service)\", \"col\": 3}}, {\"id\": \"d4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Mes Demandes\", \"col\": 3}}, {\"id\": \"d6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"HRMS Dashboard\", \"col\": 3}}, {\"id\": \"d7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Présences\", \"col\": 3}}, {\"id\": \"d8b\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"🏖️ Gestion des Congés\", \"col\": 3}}, {\"id\": \"d8\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fiche Gestion Congés Annuels\", \"col\": 3}}, {\"id\": \"d9\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fiche Gestion Congés\", \"col\": 3}}, {\"id\": \"d10\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Rapport Présence Employés\", \"col\": 3}}, {\"id\": \"d11\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Rapport Présence Stagiaires\", \"col\": 3}}, {\"id\": \"sp_d\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_demandes\", \"type\": \"header\", \"data\": {\"text\": \"<b>📋 Demandes en cours</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Permissions Sortie Employé\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Permissions Sortie Stagiaire\", \"col\": 3}}, {\"id\": \"s3b\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"➕ Nouvelle Demande de Congé\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Demandes de Congé\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Plannings Congé\", \"col\": 3}}, {\"id\": \"sp1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_contrats\", \"type\": \"header\", \"data\": {\"text\": \"<b>📑 Gestion des Contrats & Stages</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"c1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"➕ Nouveau Contrat\", \"col\": 3}}, {\"id\": \"c2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Contrats à signer\", \"col\": 3}}, {\"id\": \"c3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Contrats KYA\", \"col\": 3}}, {\"id\": \"c4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Bilans de Stage\", \"col\": 3}}, {\"id\": \"c5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Demandes Congé Stagiaire\", \"col\": 3}}, {\"id\": \"c6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Liste Stagiaires\", \"col\": 3}}, {\"id\": \"sp2\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_employees\", \"type\": \"header\", \"data\": {\"text\": \"<b>👤 Employés & Référentiels</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s13\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Employés\", \"col\": 3}}, {\"id\": \"sp_imp\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_imp\", \"type\": \"header\", \"data\": {\"text\": \"<b>📥 Imports RH (Excel)</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"i1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"📥 Imports RH\", \"col\": 3}}, {\"id\": \"i2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"📤 Mod\\u00e8le Pr\\u00e9sences\", \"col\": 3}}]",
+ "content": "[{\"id\": \"hero\", \"type\": \"header\", \"data\": {\"text\": \"<div class='ellipsis' title='Espace RH'>👥 Espace RH — Centre de Pilotage</div>\", \"level\": 3, \"col\": 12}}, {\"id\": \"sub\", \"type\": \"paragraph\", \"data\": {\"text\": \"<i>Toutes les demandes (permissions, congés, contrats) et le pilotage RH centralisés.</i>\", \"col\": 12}}, {\"id\": \"sp0\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_dash\", \"type\": \"header\", \"data\": {\"text\": \"<b>📊 Tableaux de Bord & Pilotage</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"d1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Tableau de Bord Employés\", \"col\": 3}}, {\"id\": \"d2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Tableau de Bord Stagiaires\", \"col\": 3}}, {\"id\": \"d3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Mon Espace (Chef Service)\", \"col\": 3}}, {\"id\": \"d4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Mes Demandes\", \"col\": 3}}, {\"id\": \"d6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"HRMS Dashboard\", \"col\": 3}}, {\"id\": \"d7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Présences\", \"col\": 3}}, {\"id\": \"d8b\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"🏖️ Gestion des Congés\", \"col\": 3}}, {\"id\": \"d8\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fiche Gestion Congés Annuels\", \"col\": 3}}, {\"id\": \"d9\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fiche Gestion Congés\", \"col\": 3}}, {\"id\": \"d10\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Rapport Présence Employés\", \"col\": 3}}, {\"id\": \"d11\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Rapport Présence Stagiaires\", \"col\": 3}}, {\"id\": \"sp_d\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_demandes\", \"type\": \"header\", \"data\": {\"text\": \"<b>📋 Demandes en cours</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Permissions Sortie Employé\", \"col\": 3}}, {\"id\": \"s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Permissions Sortie Stagiaire\", \"col\": 3}}, {\"id\": \"s3b\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"➕ Nouvelle Demande de Congé\", \"col\": 3}}, {\"id\": \"s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Demandes de Congé\", \"col\": 3}}, {\"id\": \"s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Plannings Congé\", \"col\": 3}}, {\"id\": \"sp1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_docs\", \"type\": \"header\", \"data\": {\"text\": \"<b>📄 Documents & Signatures RH</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"doc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"📄 Documents RH (certificats / attestations)\", \"col\": 3}}, {\"id\": \"doc2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"🎓 Contrats de stage d'immersion\", \"col\": 3}}, {\"id\": \"doc3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"📋 Fiches de poste\", \"col\": 3}}, {\"id\": \"sp1b\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_contrats\", \"type\": \"header\", \"data\": {\"text\": \"<b>📑 Gestion des Contrats & Stages</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"c1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"➕ Nouveau Contrat\", \"col\": 3}}, {\"id\": \"c2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Contrats à signer\", \"col\": 3}}, {\"id\": \"c3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Contrats KYA\", \"col\": 3}}, {\"id\": \"c4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Bilans de Stage\", \"col\": 3}}, {\"id\": \"c5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Demandes Congé Stagiaire\", \"col\": 3}}, {\"id\": \"c6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Liste Stagiaires\", \"col\": 3}}, {\"id\": \"sp2\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_employees\", \"type\": \"header\", \"data\": {\"text\": \"<b>👤 Employés & Référentiels</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"s13\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Employés\", \"col\": 3}}, {\"id\": \"sp_imp\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"h_imp\", \"type\": \"header\", \"data\": {\"text\": \"<b>📥 Imports RH (Excel)</b>\", \"level\": 4, \"col\": 12}}, {\"id\": \"i1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"📥 Imports RH\", \"col\": 3}}, {\"id\": \"i2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"📤 Mod\\u00e8le Pr\\u00e9sences\", \"col\": 3}}]",
  "creation": "2026-04-28 00:00:00.000000",
  "custom_blocks": [],
  "docstatus": 0,
@@ -160,6 +160,27 @@
    "url": "/mes-demandes",
    "color": "#0277bd",
    "icon": "inbox"
+  },
+  {
+   "label": "📄 Documents RH (certificats / attestations)",
+   "type": "URL",
+   "url": "/documents-rh",
+   "color": "#0e7c4a",
+   "icon": "file-text"
+  },
+  {
+   "label": "🎓 Contrats de stage d'immersion",
+   "type": "URL",
+   "url": "/contrats-immersion",
+   "color": "#0e7c4a",
+   "icon": "graduation-cap"
+  },
+  {
+   "label": "📋 Fiches de poste",
+   "type": "URL",
+   "url": "/fiches-poste",
+   "color": "#0e7c4a",
+   "icon": "clipboard"
   },
   {
    "label": "➕ Nouveau Contrat",
@@ -409,6 +430,65 @@
    "label": "Liste Stagiaires",
    "link_to": "/app/employee?employment_type=Stage",
    "link_type": "URL",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Card Break",
+   "label": "Documents & Signatures RH — vue avancée (desk)",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Document RH KYA (certificats / attestations)",
+   "link_to": "Document RH KYA",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Avenant Contrat KYA",
+   "link_to": "Avenant Contrat KYA",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Contrat Stage Immersion KYA",
+   "link_to": "Contrat Stage Immersion KYA",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Fiche de Poste KYA",
+   "link_to": "Fiche de Poste KYA",
+   "link_type": "DocType",
+   "hidden": 0,
+   "is_query_report": 0,
+   "link_count": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Journal des modifications (fiches employé)",
+   "link_to": "Modification Info Employe KYA",
+   "link_type": "DocType",
    "hidden": 0,
    "is_query_report": 0,
    "link_count": 0,

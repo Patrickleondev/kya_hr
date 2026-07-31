@@ -23,6 +23,8 @@ import frappe
 from frappe import _
 from frappe.utils import now_datetime
 
+from kya_hr.utils import get_kya_pangolin_note
+
 # Briques partagées avec le contrat (source unique).
 from kya_hr.api.kya_contracts import (
     _generate_token,
@@ -286,6 +288,7 @@ def _notify_rh_after_signataire(doc):
             <p style="text-align:center; margin:24px 0;">
               <a href="{desk_url}" style="display:inline-block; background:#1a5276; color:#fff; padding:12px 26px; text-decoration:none; border-radius:5px; font-weight:600;">→ Ouvrir l'avenant</a>
             </p>
+            {get_kya_pangolin_note()}
             <p style="font-size:13px; color:#666;">Référence : <b>{doc.name}</b></p>
           </div>
         </div>

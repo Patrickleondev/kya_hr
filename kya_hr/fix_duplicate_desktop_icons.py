@@ -82,7 +82,11 @@ def execute() -> dict:
     summary = {}
 
     # 1. Desktop Icon : doublons par (module_name, owner)
-    if frappe.db.exists("DocType", "Desktop Icon"):
+    # NB : la colonne module_name a disparu du schema Desktop Icon dans les
+    # versions recentes de Frappe -> on verifie sa presence avant de l'utiliser
+    # (sinon "Unknown column 'module_name'" a chaque migrate, log_error mais
+    # jamais reellement corrige).
+    if frappe.db.exists("DocType", "Desktop Icon") and frappe.db.has_column("Desktop Icon", "module_name"):
         try:
             summary["desktop_icon"] = _purge_doc_dups(
                 "Desktop Icon", "creation",

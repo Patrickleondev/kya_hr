@@ -110,6 +110,7 @@
   {"role": "Responsable RH", "read": 1, "write": 1, "create": 1, "delete": 1, "print": 1, "export": 1, "report": 1, "email": 1},
   {"role": "HR Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "print": 1, "export": 1, "report": 1, "email": 1},
   {"role": "HR User", "read": 1, "write": 1, "create": 1, "print": 1, "report": 1},
+  {"role": "Assistant(e) RH", "read": 1, "write": 1, "create": 1, "print": 1, "report": 1},
   {"role": "Chef d'Équipe", "read": 1, "write": 1, "print": 1, "report": 1},
   {"role": "Chef Equipe", "read": 1, "write": 1, "print": 1, "report": 1},
   {"role": "Responsable Equipe", "read": 1, "write": 1, "print": 1, "report": 1},

@@ -26,9 +26,31 @@ CHEF_ROLES = ["Chef Service", "Chef Equipe", "Chef d'Équipe"]
 TEAM_DOCTYPES = ["Tache Equipe", "Plan Trimestriel", "Equipe KYA"]
 
 
+def _sanitize_stale_import_flag(doctype: str) -> None:
+    """Corrige un import=1 orphelin sur une permission existante du doctype.
+
+    Frappe revalide TOUTES les lignes DocPerm/Custom DocPerm du doctype des
+    qu'on modifie UNE propriete (validate_permissions -> check_if_importable).
+    Si une ligne historique (ex: System Manager) porte import=1 sur un
+    doctype qui n'autorise pas l'import (allow_import=0, cas frequent pour
+    un custom=1), TOUT update_permission_property plante -> bloque
+    definitivement l'alignement des roles chef. On desactive ce flag orphelin
+    directement en base (bypass validation, pas de risque : on ne fait que
+    corriger une incoherence pre-existante, jamais de vraie fonctionnalite
+    d'import utilisee ici)."""
+    meta_allow_import = frappe.db.get_value("DocType", doctype, "allow_import")
+    if meta_allow_import:
+        return
+    for dt in ("Custom DocPerm", "DocPerm"):
+        rows = frappe.get_all(dt, filters={"parent": doctype, "import": 1}, pluck="name")
+        for name in rows:
+            frappe.db.set_value(dt, name, "import", 0, update_modified=False)
+
+
 def _ensure_perm(doctype: str, role: str) -> str:
     if not (frappe.db.exists("Role", role) and frappe.db.exists("DocType", doctype)):
         return "skip"
+    _sanitize_stale_import_flag(doctype)
     from frappe.permissions import add_permission, update_permission_property
 
     has_custom = frappe.db.exists("Custom DocPerm",
