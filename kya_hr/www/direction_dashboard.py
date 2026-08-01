@@ -135,6 +135,19 @@ def _sum(dt: str, field: str, filters=None) -> float:
         return 0.0
 
 
+def _count_series(dt: str, prefix: str) -> int:
+    """Compte uniquement les enregistrements dont le nom suit la naming_series
+    réelle (ex. 'FTB-%'). Exclut les brouillons de test du collègue (noms au
+    hasard saisis avant que la série ne soit branchée, ex. 'jop9cduv43',
+    'test 1') sans dépendre d'un champ statut qui n'existe pas partout."""
+    if not _dt_exists(dt):
+        return 0
+    try:
+        return frappe.db.count(dt, {"name": ["like", f"{prefix}-%"]})
+    except Exception:
+        return 0
+
+
 _WAIT_STATES = ("En attente Chef", "En attente DAAF", "En attente DG",
                 "En attente Direction", "En attente RH", "En attente Audit",
                 "En attente Magasin", "En attente Comptable", "En attente DFC",
@@ -304,6 +317,11 @@ def _build_overview() -> dict:
     # directeur nommé — peu de doctypes dédiés encore, on s'appuie sur les
     # équipes (effectif/présence) + le stock (Supply Chain & Magasins = stock).
     industrielle_teams = [t for t in macro_teams["industrielle"] if t["eff"] > 0]
+    # Fiches techniques produit (nouvelles web pages du collègue technique,
+    # remplacent les anciens web forms/doctypes CRM du même nom) — contrôle
+    # qualité batterie/lampadaire en sortie d'assemblage.
+    ftb_count = _count_series("Fiche Technique Batterie", "FTB")
+    ftl_count = _count_series("Fiche Technique Lampadaire", "FTL")
     industrielle_cards = [
         _card("Effectif industriel", str(_macro_eff("industrielle")),
               (f"{_macro_pres('industrielle')} présents" if _macro_eff("industrielle") else ""),
@@ -314,6 +332,8 @@ def _build_overview() -> dict:
               "Supply Chain & Magasins", icon="filecheck", accent="orange"),
         _card("Mouvements stock (sem.)", str(_count("Mouvement Stock KYA", {"creation": [">=", week_ago]})),
               "entrées/sorties", icon="route", accent="teal"),
+        _card("Fiches techniques produit", str(ftb_count + ftl_count),
+              f"{ftb_count} batteries · {ftl_count} lampadaires", icon="filecheck", accent="green"),
     ]
     industrielle_rows = []
     for t in sorted(industrielle_teams, key=lambda x: -x["eff"]):
@@ -338,21 +358,35 @@ def _build_overview() -> dict:
     ]
 
     # ════════ TECHNIQUES : équipes + ops terrain réelles (prod) ════════
-    # SAV/maintenance = fiche technique curative ; déplacements = fiche de
-    # mission (doctypes prod module CRM, absents en local → 0, défensif).
+    # 01/08/2026 : le collègue technique a abandonné ses anciens web forms/
+    # doctypes module CRM (fiche technique curative, fiche de mission,
+    # fiche_recep_tech_lampa, fiche de recpt de batt — laissés en l'état,
+    # plus alimentés) au profit de nouvelles Web Page (Frappe CMS + JS,
+    # signature terrain) adossées à de nouveaux doctypes "KYA HR"/"Custom" :
+    #   - Fiche Compte Rendu Intervention (FCRI-...) : SAV/maintenance curative.
+    #   - Ordre de mission2 : déplacements terrain (remplace "fiche de mission").
+    #   - Fiche Installation (+ Cellule PV Mesuree, Siege KYA) : installation &
+    #     audit contrôle double-signature technicien/auditeur — circuit prêt
+    #     mais tout juste mis en service (peut afficher 0 le temps que les
+    #     premières fiches terrain arrivent).
     tech_teams = [t for t in macro_teams["tech"] if t["eff"] > 0]
-    sav_count = _count("fiche technique curative")
-    mission_count = _count("fiche de mission")
-    recep_count = _count("fiche_recep_tech_lampa") + _count("fiche de recpt de batt")
+    sav_count = _count_series("Fiche Compte Rendu Intervention", "FCRI") or _count("fiche technique curative")
+    sav_ok = _count("Fiche Compte Rendu Intervention", {"etat_final": "Fonctionnel"})
+    mission_count = (_count("Ordre de mission2") or _count("Ordre de Mission")
+                     or _count("fiche de mission"))
+    install_count = _count("Fiche Installation")
+    install_cloture = _count("Fiche Installation", {"statut": "Cloture"})
     tech_cards = [
         _card("Effectif technique", str(_macro_eff("tech")),
               (f"{_macro_pres('tech')} présents" if _macro_eff("tech") else ""),
               icon="users", accent="teal"),
-        _card("Interventions SAV", str(sav_count), "fiches curatives",
+        _card("Interventions SAV", str(sav_count),
+              (f"{round(sav_ok / sav_count * 100)} % « Fonctionnel »" if sav_count else "fiches d'intervention"),
               icon="wrench", accent="orange"),
         _card("Ordres de mission", str(mission_count), "déplacements terrain",
               icon="route", accent="teal"),
-        _card("Réceptions techniques", str(recep_count), "lampadaires + batteries",
+        _card("Installations & audits", str(install_count),
+              (f"{install_cloture} clôturées" if install_count else "circuit prêt, en attente des 1ères fiches"),
               icon="filecheck", accent="green"),
     ]
     tech_rows = []
