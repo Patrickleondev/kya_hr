@@ -11,6 +11,23 @@ _ALLOWED_ROLES = {
     "Auditeur Interne", "System Manager",
 }
 
+# ── Directeurs de Direction (réorg 01/08/2026) : chacun ne doit voir QUE son
+# propre onglet, jamais les 5 autres. Mapping explicite par utilisateur plutôt
+# que par rôle Frappe générique ou par Employee.department : les 3 directeurs
+# nommés ont hérité des rôles larges de leur ancien poste (Foussenni garde
+# DAAF/DFC de son ex-fonction compta, Judith Messan a System Manager) qui leur
+# donneraient sinon un accès complet ; et Employee.department reste
+# volontairement "Direction Générale - KYA" pour les 3 (choix du script de
+# réorg — seul leur Equipe/Service porte la vraie Direction), donc la chaîne
+# de département ne permet pas de les classer automatiquement. Vérifié en
+# premier, avant tout rôle : un directeur nommé ici est TOUJOURS restreint,
+# même s'il porte par ailleurs un rôle qui semblerait tout-puissant.
+_DIRECTOR_USER_SCOPE = {
+    "fhad.tchangbedji@kya-energy.com": "tech",       # Directeur Technique & Projets
+    "mohamed.fousseni@kya-energy.com": "daf",        # Directeur Administratif & Financier
+    "judith.messan@kya-energy.com": "comm",          # Directrice Dév. Commercial (intérim)
+}
+
 # ════════════════════════════════════════════════════════════════════
 #  Macro-départements (6 onglets, réorg 01/08/2026 : 5 Directions officielles
 #  + DG/transversaux). Un onglet par Direction + un onglet DG qui regroupe
@@ -155,6 +172,30 @@ _WAIT_STATES = ("En attente Chef", "En attente DAAF", "En attente DG",
                 "En attente Resp. Stagiaires", "En attente Chef de Service",
                 "En attente du Supérieur Immédiat", "En attente Signature")
 _DG_STATES = ("En attente DG", "En attente Direction")
+
+
+def _user_scope(user: str) -> str | None:
+    """Clé macro à laquelle un directeur nommé est restreint, ou None pour un
+    accès complet (DG/DGA/Auditeur/System Manager — supervision transverse,
+    y compris DGA qui couvre temporairement Industrielle + DRH vacantes)."""
+    return _DIRECTOR_USER_SCOPE.get(user)
+
+
+def _apply_scope(overview: dict, scope: str | None) -> dict:
+    """Réduit la réponse à la seule Direction du scope (pas juste un masquage
+    côté client : les autres Directions ne doivent jamais transiter dans la
+    réponse JSON, sans quoi elles resteraient lisibles via l'inspecteur
+    réseau/la source de la page)."""
+    overview["scope"] = scope
+    if not scope or scope not in overview["depts"]:
+        return overview
+    overview["depts"] = {scope: overview["depts"][scope]}
+    overview["hero"] = []
+    overview["charts"] = {"presence": {"labels": [], "presents": [], "conges": [], "absents": []},
+                          "workflows": {}, "caisse": {"labels": [], "entrees": [], "sorties": []}}
+    overview["modules"] = {}
+    overview["modules_total"] = 0
+    return overview
 
 
 def _card(label, value, sub="", unit="", icon="layers", accent="slate", trend=None, dir=None):
@@ -521,10 +562,13 @@ def _build_overview() -> dict:
 
 @frappe.whitelist()
 def get_dg_overview() -> dict:
-    """Endpoint rafraîchissement du tableau de bord DG (4 macro-départements)."""
-    if not _ALLOWED_ROLES.intersection(set(frappe.get_roles(frappe.session.user))):
+    """Endpoint rafraîchissement du tableau de bord (6 onglets, ou 1 seul si
+    l'utilisateur est un directeur de Direction nommément restreint)."""
+    user = frappe.session.user
+    scope = _user_scope(user)
+    if scope is None and not _ALLOWED_ROLES.intersection(set(frappe.get_roles(user))):
         frappe.throw(_("Accès réservé à la Direction Générale."), frappe.PermissionError)
-    return _build_overview()
+    return _apply_scope(_build_overview(), scope)
 
 
 def get_context(context):
@@ -532,13 +576,14 @@ def get_context(context):
         frappe.throw(_("Veuillez vous connecter"), frappe.AuthenticationError)
 
     user_roles = set(frappe.get_roles(frappe.session.user))
-    if not _ALLOWED_ROLES.intersection(user_roles):
+    scope = _user_scope(frappe.session.user)
+    if scope is None and not _ALLOWED_ROLES.intersection(user_roles):
         frappe.throw(_("Accès réservé à la Direction Générale."), frappe.PermissionError)
 
     # Nouvelle vue par macro-départements (maquette DG). Rendu initial + refresh
     # via get_dg_overview(). Défensif : si ça casse, on garde l'ancien contexte.
     try:
-        context.overview_json = _json.dumps(_build_overview(), default=str)
+        context.overview_json = _json.dumps(_apply_scope(_build_overview(), scope), default=str)
     except Exception:
         context.overview_json = "null"
         frappe.log_error(frappe.get_traceback(), "direction-dashboard: overview")

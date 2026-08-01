@@ -157,7 +157,8 @@ function render(D){
 
   // ── SECTIONS ──
   const wrap=el('div'); wrap.id='dgx-secs'; root.appendChild(wrap);
-  // DG
+  // DG (absent si l'utilisateur est un directeur restreint à sa seule Direction)
+  if(D.depts.dg){
   const dg=D.depts.dg; const sdg=el('div','dgx-sec'); sdg.dataset.k='dg';
   sdg.appendChild(bandEl(dg.meta,dg.count,'linear-gradient(100deg,#0d7377,#0a5d61)','building'));
   sdg.appendChild(cardsGrid(dg.cards));
@@ -172,7 +173,9 @@ function render(D){
       const sc=el('span'); sc.appendChild(b); row.appendChild(sc); t.appendChild(row); });
     sdg.appendChild(t); }
   wrap.appendChild(sdg);
+  }
   // TECH
+  if(D.depts.tech){
   const te=D.depts.tech; const ste=el('div','dgx-sec'); ste.dataset.k='tech';
   ste.appendChild(bandEl(te.meta,te.count,'linear-gradient(100deg,#6fae2f,#5a8f24)','wrench'));
   ste.appendChild(cardsGrid(te.cards));
@@ -189,7 +192,9 @@ function render(D){
       cw.appendChild(bar); cw.appendChild(el('span',null,r.charge+'%')); row.appendChild(cw); t.appendChild(row); });
     ste.appendChild(t); }
   wrap.appendChild(ste);
+  }
   // INDUSTRIELLE
+  if(D.depts.industrielle){
   const ind=D.depts.industrielle; const sind=el('div','dgx-sec'); sind.dataset.k='industrielle';
   sind.appendChild(bandEl(ind.meta,ind.count,'linear-gradient(100deg,#7c5cbf,#5f3fa0)','package'));
   sind.appendChild(cardsGrid(ind.cards));
@@ -206,7 +211,9 @@ function render(D){
       cw.appendChild(bar); cw.appendChild(el('span',null,r.charge+'%')); row.appendChild(cw); t.appendChild(row); });
     sind.appendChild(t); }
   wrap.appendChild(sind);
+  }
   // COMM
+  if(D.depts.comm){
   const co=D.depts.comm; const sco=el('div','dgx-sec'); sco.dataset.k='comm';
   sco.appendChild(bandEl(co.meta,co.count,'linear-gradient(100deg,#0a5d61,#084a4d)','trending'));
   sco.appendChild(cardsGrid(co.cards));
@@ -246,12 +253,16 @@ function render(D){
       cw.appendChild(bar); cw.appendChild(el('span',null,r.part+'%')); row.appendChild(cw); t.appendChild(row); });
     sco.appendChild(t); }
   wrap.appendChild(sco);
+  }
   // RH (DRH)
+  if(D.depts.rh){
   const rh=D.depts.rh; const srh=el('div','dgx-sec'); srh.dataset.k='rh';
   srh.appendChild(bandEl(rh.meta,rh.count,'linear-gradient(100deg,#d64550,#a83540)','users'));
   srh.appendChild(cardsGrid(rh.cards));
   wrap.appendChild(srh);
+  }
   // DAF
+  if(D.depts.daf){
   const su=D.depts.daf; const ssu=el('div','dgx-sec'); ssu.dataset.k='daf';
   ssu.appendChild(bandEl(su.meta,su.count,'linear-gradient(100deg,#F58220,#e06f12)','briefcase'));
   const sup=el('div','dgx-sup');
@@ -260,8 +271,11 @@ function render(D){
   const p2=el('div','dgx-panel'); p2.appendChild(el('div','ph','<span style="width:9px;height:9px;border-radius:3px;background:#0d7377;display:inline-block;"></span><b>Comptabilité &amp; Fiscalité</b><span class="pn">'+su.compta.length+' indicateurs</span>'));
   p2.appendChild(cardsGrid(su.compta,true)); sup.appendChild(p2);
   ssu.appendChild(sup); wrap.appendChild(ssu);
+  }
 
-  // ── CHARTS ──
+  // ── CHARTS (masqués pour un directeur restreint : agrégats toutes-Directions,
+  // hors de son périmètre — le backend renvoie de toute façon des séries vides) ──
+  if(!D.scope){
   const cs=el('div'); cs.style.cssText='display:flex;flex-direction:column;gap:12px;margin-top:14px;';
   cs.appendChild(el('div',null,'<div style="font-size:15px;font-weight:700;padding-left:2px;">Synthèse graphique</div>'));
   const cg=el('div','dgx-charts');
@@ -269,9 +283,10 @@ function render(D){
     +'<div class="cc"><b>Répartition des workflows</b><div class="cwrap"><canvas id="dgxWf"></canvas></div></div>'
     +'<div class="cc"><b>Évolution caisse — 6 mois (M FCFA)</b><div class="cwrap"><canvas id="dgxCa"></canvas></div></div>';
   cs.appendChild(cg); root.appendChild(cs);
+  }
   root.appendChild(el('div','dgx-foot','KYA-Energy Group · Données en temps réel de l’ERP'));
 
-  activate('dg'); drawCharts(D.charts);
+  activate(D.scope || 'dg'); if(!D.scope) drawCharts(D.charts);
 }
 
 function activate(k){
