@@ -11,9 +11,18 @@
  "hide_custom": 0,
  "public": 1,
  "is_hidden": 0,
- "content": "[{\"id\": \"shortcut-home\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Gestion \\u00c9quipe\", \"col\": 6}}, {\"id\": \"shortcut-dashboard\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dashboard Equipe\", \"col\": 6}}, {\"id\": \"shortcut-plans\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Plans Trimestriels\", \"col\": 6}}, {\"id\": \"shortcut-taches\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Taches d'Equipe\", \"col\": 6}}]",
+ "content": "[{\"id\": \"shortcut-direction\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Tableau de bord Direction\", \"col\": 6}}, {\"id\": \"shortcut-home\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Gestion \\u00c9quipe\", \"col\": 6}}, {\"id\": \"shortcut-dashboard\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dashboard Equipe\", \"col\": 6}}, {\"id\": \"shortcut-plans\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Plans Trimestriels\", \"col\": 6}}, {\"id\": \"shortcut-taches\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Taches d'Equipe\", \"col\": 6}}]",
  "doctype": "Workspace",
  "shortcuts": [
+  {
+   "type": "URL",
+   "url": "/direction-dashboard",
+   "doc_view": "",
+   "label": "Tableau de bord Direction",
+   "icon": "building",
+   "color": "#0d7377",
+   "doctype": "Workspace Shortcut"
+  },
   {
    "type": "URL",
    "url": "/app/gestion-equipe",
