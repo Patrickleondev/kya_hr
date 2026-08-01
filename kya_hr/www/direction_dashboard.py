@@ -12,34 +12,36 @@ _ALLOWED_ROLES = {
 }
 
 # ════════════════════════════════════════════════════════════════════
-#  Macro-départements (4 onglets, réorg 01/08/2026 : 5 Directions officielles
-#  + transversaux DG derrière). Le tableau de bord garde 4 onglets pour
-#  l'instant (Industrielle -> onglet "tech", DRH -> onglet "supports") : un
-#  découpage en 6 onglets est la suite logique, pas encore fait (cf. mémoire
-#  KYA côté Claude — à faire quand la maquette est validée).
+#  Macro-départements (6 onglets, réorg 01/08/2026 : 5 Directions officielles
+#  + DG/transversaux). Un onglet par Direction + un onglet DG qui regroupe
+#  aussi les services transversaux (Audit, QHSE, IT, Laboratory, Institute,
+#  Fondation, Prospection, Agence Niger) : trop petits/vacants pour mériter
+#  chacun leur propre onglet pour l'instant.
 #
 #  Classification par ARBRE DE DÉPARTEMENT (pas par nom d'équipe) : une
 #  équipe est classée en remontant `parent_department` jusqu'à retomber sur
 #  l'une des 5 Directions/DG. Ancien système (liste de noms d'équipe en dur)
 #  abandonné : il devenait faux dès qu'une équipe changeait de département
 #  sans être renommée (cf. `Equipe KYA` ne supporte pas le renommage via API
-#  — les noms de équipe restent parfois datés même après une réorg réussie).
+#  — les noms d'équipe restent parfois datés même après une réorg réussie).
 # ════════════════════════════════════════════════════════════════════
-MACRO_ORDER = ["dg", "supports", "tech", "comm"]
+MACRO_ORDER = ["dg", "tech", "industrielle", "comm", "rh", "daf"]
 MACRO_META = {
-    "dg":       {"label": "Direction Générale",   "sub": "Informatique / SI · Audit · Transversaux DG"},
-    "supports": {"label": "DAF & RH",             "sub": "Achats & Stock · Comptabilité & Finance · RH · Moyens Généraux"},
-    "tech":     {"label": "Technique & Industrie", "sub": "Direction Technique & Projets · Direction Industrielle"},
-    "comm":     {"label": "Développement Commercial", "sub": "Leads · opportunités · devis · clients"},
+    "dg":           {"label": "Direction Générale",   "sub": "Informatique / SI · Audit · Transversaux DG"},
+    "tech":         {"label": "Direction Technique & Projets", "sub": "Bureau d'études · Installations & Chantiers · SAV · Contrôle & Supervision"},
+    "industrielle": {"label": "Direction Industrielle", "sub": "Production & Assemblage · Supply Chain & Magasins"},
+    "comm":         {"label": "Développement Commercial", "sub": "Grands Comptes · Ventes & Distribution · Marketing & Communication"},
+    "rh":           {"label": "Ressources Humaines (DRH)", "sub": "Recrutement · Administration & Paie · Formation · Relations Sociales"},
+    "daf":          {"label": "Administrative & Financière (DAF)", "sub": "Achats & Approvisionnements · Comptabilité & Fiscalité · Moyens Généraux"},
 }
 # Direction (Department racine, is_group=1) -> onglet du dashboard.
 _DIRECTION_TO_MACRO = {
     "direction générale": "dg",
     "direction technique & projets": "tech",
-    "direction industrielle": "tech",
+    "direction industrielle": "industrielle",
     "direction du développement commercial": "comm",
-    "direction des ressources humaines (drh)": "supports",
-    "direction administrative & financière (daf)": "supports",
+    "direction des ressources humaines (drh)": "rh",
+    "direction administrative & financière (daf)": "daf",
     "informatique & logiciel (it)": "dg",
 }
 # Services transversaux rattachés directement au DG (pas sous une Direction).
@@ -68,8 +70,8 @@ def _department_ancestor_chain(dept_name: str | None) -> list[str]:
 
 
 def _macro_of_team(equipe_name: str | None, dept_name: str | None = None) -> str:
-    """Renvoie la clé macro-département (dg|supports|tech|comm) d'une équipe
-    en remontant son Department jusqu'à la Direction/DG qui la porte."""
+    """Renvoie la clé macro-département (dg|tech|industrielle|comm|rh|daf)
+    d'une équipe en remontant son Department jusqu'à la Direction/DG qui la porte."""
     chain = _department_ancestor_chain(dept_name)
     for label in chain:
         if label in _TRANSVERSAL_DG:
@@ -77,16 +79,20 @@ def _macro_of_team(equipe_name: str | None, dept_name: str | None = None) -> str
         if label in _DIRECTION_TO_MACRO:
             return _DIRECTION_TO_MACRO[label]
     # Repli par mots-clés (équipe sans département résolu / instance locale
-    # encore sur l'ancien arbre à 4 macro-départements).
+    # encore sur l'ancien arbre à 4 macro-départements, ex. environnement de
+    # test qui n'a pas encore reçu la réorg du 01/08).
     blob = f"{(equipe_name or '').lower()} {(dept_name or '').lower()}"
     if any(k in blob for k in ("informat", "système d'info", "systeme d'info", " si ", "r&d", "research", "audit")):
         return "dg"
-    if any(k in blob for k in ("achat", "stock", "compt", "financ", "rh", "ressources humaines",
-                                "logist", "dispatch", "approvision", "magasin", "moyens gen")):
-        return "supports"
+    if any(k in blob for k in ("rh", "ressources humaines", "recrutement", "gpec", "relations sociales")):
+        return "rh"
+    if any(k in blob for k in ("achat", "stock", "compt", "financ", "logist", "dispatch",
+                                "approvision", "magasin", "moyens gen", "juridique", "tresorerie", "trésorerie")):
+        return "daf"
+    if any(k in blob for k in ("industr", "supply chain", "methode", "méthode", "qualite produit", "qualité produit")):
+        return "industrielle"
     if any(k in blob for k in ("install", "maintenance", "sav", "fabric", "assembl", "offre",
-                                "production", "operations", "technique", "génie", "genie",
-                                "industr", "supply chain")):
+                                "production", "operations", "technique", "génie", "genie", "controle", "contrôle")):
         return "tech"
     if any(k in blob for k in ("commerc", "vente", "sales", "communicat", "marketing")):
         return "comm"
@@ -253,7 +259,7 @@ def _build_overview() -> dict:
     except Exception:
         pass
 
-    # ════════ SUPPORTS : Achats & Stock + Comptabilité & Finance ════════
+    # ════════ DAF : Achats & Stock + Comptabilité & Finance + Moyens Généraux ════════
     achats_cards = [
         _card("Demandes d'achat en attente", str(_waiting("Demande Achat KYA", _WAIT_STATES)),
               "", icon="cart", accent="orange"),
@@ -292,6 +298,44 @@ def _build_overview() -> dict:
             compta_cards.append(_card("Fiches budgétaires mission", str(_waiting(dt_, _WAIT_STATES)),
                                       "en attente de visa", icon="briefcase", accent="orange"))
             break
+
+    # ════════ INDUSTRIELLE : Production & Assemblage + Supply Chain & Magasins ════════
+    # Direction neuve (réorg 01/08/2026), coordonnée par le DG en attendant un
+    # directeur nommé — peu de doctypes dédiés encore, on s'appuie sur les
+    # équipes (effectif/présence) + le stock (Supply Chain & Magasins = stock).
+    industrielle_teams = [t for t in macro_teams["industrielle"] if t["eff"] > 0]
+    industrielle_cards = [
+        _card("Effectif industriel", str(_macro_eff("industrielle")),
+              (f"{_macro_pres('industrielle')} présents" if _macro_eff("industrielle") else ""),
+              icon="users", accent="teal"),
+        _card("Articles au catalogue", str(_count("Article KYA")), "Production & Supply Chain",
+              icon="package", accent="slate"),
+        _card("Inventaires en attente", str(_waiting("Inventaire KYA", _WAIT_STATES)),
+              "Supply Chain & Magasins", icon="filecheck", accent="orange"),
+        _card("Mouvements stock (sem.)", str(_count("Mouvement Stock KYA", {"creation": [">=", week_ago]})),
+              "entrées/sorties", icon="route", accent="teal"),
+    ]
+    industrielle_rows = []
+    for t in sorted(industrielle_teams, key=lambda x: -x["eff"]):
+        charge = round(t["pres"] / t["eff"] * 100) if t["eff"] else 0
+        industrielle_rows.append({"equipe": t["equipe"], "eff": t["eff"], "pres": t["pres"], "charge": charge})
+
+    # ════════ RH (DRH) : effectif, congés, permissions, contrats, documents ════════
+    docs_rh_attente = (_waiting("Document RH KYA", _WAIT_STATES)
+                        + _waiting("Avenant Contrat KYA", _WAIT_STATES)
+                        + _waiting("Contrat Stage Immersion KYA", _WAIT_STATES)
+                        + _waiting("Fiche de Poste KYA", _WAIT_STATES))
+    rh_cards = [
+        _card("Effectif RH (équipe)", str(_macro_eff("rh")),
+              (f"{_macro_pres('rh')} présents" if _macro_eff("rh") else ""),
+              icon="users", accent="teal"),
+        _card("Effectif KYA total", str(effectif_actif), "tous départements", icon="usercheck", accent="slate"),
+        _card("Congés/permissions en attente", str(modules["Plannings congé"] + modules["Permissions sortie"]),
+              "", icon="calendar", accent="orange"),
+        _card("Contrats en attente", str(contrats_attente), "signature en cours", icon="filecheck", accent="teal"),
+        _card("Documents RH en attente", str(docs_rh_attente),
+              "certificats · avenants · immersion · fiches de poste", icon="file", accent="orange"),
+    ]
 
     # ════════ TECHNIQUES : équipes + ops terrain réelles (prod) ════════
     # SAV/maintenance = fiche technique curative ; déplacements = fiche de
@@ -411,10 +455,12 @@ def _build_overview() -> dict:
 
     counts = {
         "dg": len(contrat_rows) + achat_dg_n,
-        "supports": modules["Demandes d'achat"] + modules["Bons de commande"]
-                    + modules["Inventaires"] + modules["PV matériel"],
+        "daf": modules["Demandes d'achat"] + modules["Bons de commande"]
+               + modules["Inventaires"] + modules["PV matériel"],
+        "industrielle": _waiting("Inventaire KYA", _WAIT_STATES),
         "tech": sav_count + mission_count,
         "comm": leads_total,
+        "rh": modules["Plannings congé"] + modules["Permissions sortie"] + docs_rh_attente,
     }
 
     return {
@@ -423,13 +469,16 @@ def _build_overview() -> dict:
         "depts": {
             "dg": {"meta": MACRO_META["dg"], "count": counts["dg"], "cards": dg_cards,
                    "contrats": contrat_rows},
-            "supports": {"meta": MACRO_META["supports"], "count": counts["supports"],
-                         "achats": achats_cards, "compta": compta_cards},
             "tech": {"meta": MACRO_META["tech"], "count": counts["tech"],
                      "cards": tech_cards, "teams": tech_rows},
+            "industrielle": {"meta": MACRO_META["industrielle"], "count": counts["industrielle"],
+                              "cards": industrielle_cards, "teams": industrielle_rows},
             "comm": {"meta": MACRO_META["comm"], "count": counts["comm"],
                      "cards": comm_cards, "teams": comm_teams,
                      "leads_status": leads_status, "pipeline": pipe_rows},
+            "rh": {"meta": MACRO_META["rh"], "count": counts["rh"], "cards": rh_cards},
+            "daf": {"meta": MACRO_META["daf"], "count": counts["daf"],
+                    "achats": achats_cards, "compta": compta_cards},
         },
         "charts": {"presence": presence_chart, "workflows": wf_counts, "caisse": caisse_chart},
         "modules": modules, "modules_total": modules_total,

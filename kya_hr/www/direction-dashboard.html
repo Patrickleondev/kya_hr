@@ -141,14 +141,16 @@ function render(D){
     if(h.sub) c.appendChild(el('span','sub',h.sub)); hg.appendChild(c); });
   hero.appendChild(hg); root.appendChild(hero);
 
-  // ── TABS ──
-  const order=['dg','supports','tech','comm'];
-  const tabColor={dg:'#0d7377',supports:'#F58220',tech:'#5f9e2b',comm:'#0a5d61'};
-  const tabIcon={dg:'building',supports:'package',tech:'wrench',comm:'trending'};
+  // ── TABS (6 : DG + 5 Directions, réorg 01/08/2026) ──
+  const order=['dg','tech','industrielle','comm','rh','daf'];
+  const tabColor={dg:'#0d7377',tech:'#5f9e2b',industrielle:'#7c5cbf',comm:'#0a5d61',rh:'#d64550',daf:'#F58220'};
+  const tabTint={dg:'rgba(13,115,119,.10)',tech:'rgba(141,198,63,.18)',industrielle:'rgba(124,92,191,.14)',
+                 comm:'rgba(10,93,97,.10)',rh:'rgba(214,69,80,.12)',daf:'rgba(245,130,32,.12)'};
+  const tabIcon={dg:'building',tech:'wrench',industrielle:'package',comm:'trending',rh:'users',daf:'briefcase'};
   const tabs=el('div','dgx-tabs');
-  order.forEach(k=>{ const d=D.depts[k]; if(!d) return; const a=DGX_ACCENT[k==='supports'?'orange':(k==='tech'?'green':'teal')];
+  order.forEach(k=>{ const d=D.depts[k]; if(!d) return;
     const btn=el('button','dgx-tab'); btn.dataset.k=k;
-    const ti=el('span','ti'); ti.style.background=a.bg; ti.appendChild(svg(tabIcon[k],tabColor[k],17)); btn.appendChild(ti);
+    const ti=el('span','ti'); ti.style.background=tabTint[k]; ti.appendChild(svg(tabIcon[k],tabColor[k],17)); btn.appendChild(ti);
     const lab=el('span'); lab.appendChild(el('b',null,d.meta.label)); lab.appendChild(el('small',null,(d.count||0)+' en attente')); btn.appendChild(lab);
     btn.onclick=()=>activate(k); tabs.appendChild(btn); });
   root.appendChild(tabs);
@@ -170,15 +172,6 @@ function render(D){
       const sc=el('span'); sc.appendChild(b); row.appendChild(sc); t.appendChild(row); });
     sdg.appendChild(t); }
   wrap.appendChild(sdg);
-  // SUPPORTS
-  const su=D.depts.supports; const ssu=el('div','dgx-sec'); ssu.dataset.k='supports';
-  ssu.appendChild(bandEl(su.meta,su.count,'linear-gradient(100deg,#F58220,#e06f12)','package'));
-  const sup=el('div','dgx-sup');
-  const p1=el('div','dgx-panel'); p1.appendChild(el('div','ph','<span style="width:9px;height:9px;border-radius:3px;background:#F58220;display:inline-block;"></span><b>Achats &amp; Stock</b><span class="pn">'+su.achats.length+' indicateurs</span>'));
-  p1.appendChild(cardsGrid(su.achats,true)); sup.appendChild(p1);
-  const p2=el('div','dgx-panel'); p2.appendChild(el('div','ph','<span style="width:9px;height:9px;border-radius:3px;background:#0d7377;display:inline-block;"></span><b>Comptabilité &amp; Finance</b><span class="pn">'+su.compta.length+' indicateurs</span>'));
-  p2.appendChild(cardsGrid(su.compta,true)); sup.appendChild(p2);
-  ssu.appendChild(sup); wrap.appendChild(ssu);
   // TECH
   const te=D.depts.tech; const ste=el('div','dgx-sec'); ste.dataset.k='tech';
   ste.appendChild(bandEl(te.meta,te.count,'linear-gradient(100deg,#6fae2f,#5a8f24)','wrench'));
@@ -196,6 +189,23 @@ function render(D){
       cw.appendChild(bar); cw.appendChild(el('span',null,r.charge+'%')); row.appendChild(cw); t.appendChild(row); });
     ste.appendChild(t); }
   wrap.appendChild(ste);
+  // INDUSTRIELLE
+  const ind=D.depts.industrielle; const sind=el('div','dgx-sec'); sind.dataset.k='industrielle';
+  sind.appendChild(bandEl(ind.meta,ind.count,'linear-gradient(100deg,#7c5cbf,#5f3fa0)','package'));
+  sind.appendChild(cardsGrid(ind.cards));
+  if(ind.teams && ind.teams.length){ const t=el('div','dgx-table');
+    t.appendChild(el('div','th','<span>Charge par équipe</span><span style="font-weight:400;color:#98a2b3;">jour en cours</span>'));
+    const hr=el('div','dgx-row head'); hr.style.gridTemplateColumns='2fr 90px 90px 180px';
+    ['Équipe','Effectif','Présents','Charge'].forEach((x,i)=>{ const s=el('span',null,x); if(i>0&&i<3)s.style.textAlign='center'; hr.appendChild(s); }); t.appendChild(hr);
+    ind.teams.forEach(r=>{ const row=el('div','dgx-row'); row.style.gridTemplateColumns='2fr 90px 90px 180px';
+      row.appendChild(el('span',null,'<b>'+r.equipe+'</b>'));
+      const e1=el('span',null,r.eff); e1.style.textAlign='center'; row.appendChild(e1);
+      const e2=el('span',null,r.pres); e2.style.textAlign='center'; row.appendChild(e2);
+      const cw=el('span'); cw.style.cssText='display:flex;align-items:center;gap:9px;';
+      const bar=el('div','dgx-bar'); const i=el('i'); i.style.width=r.charge+'%'; i.style.background=r.charge>=80?'#F58220':(r.charge>=55?'#7c5cbf':'#8DC63F'); bar.appendChild(i);
+      cw.appendChild(bar); cw.appendChild(el('span',null,r.charge+'%')); row.appendChild(cw); t.appendChild(row); });
+    sind.appendChild(t); }
+  wrap.appendChild(sind);
   // COMM
   const co=D.depts.comm; const sco=el('div','dgx-sec'); sco.dataset.k='comm';
   sco.appendChild(bandEl(co.meta,co.count,'linear-gradient(100deg,#0a5d61,#084a4d)','trending'));
@@ -236,6 +246,20 @@ function render(D){
       cw.appendChild(bar); cw.appendChild(el('span',null,r.part+'%')); row.appendChild(cw); t.appendChild(row); });
     sco.appendChild(t); }
   wrap.appendChild(sco);
+  // RH (DRH)
+  const rh=D.depts.rh; const srh=el('div','dgx-sec'); srh.dataset.k='rh';
+  srh.appendChild(bandEl(rh.meta,rh.count,'linear-gradient(100deg,#d64550,#a83540)','users'));
+  srh.appendChild(cardsGrid(rh.cards));
+  wrap.appendChild(srh);
+  // DAF
+  const su=D.depts.daf; const ssu=el('div','dgx-sec'); ssu.dataset.k='daf';
+  ssu.appendChild(bandEl(su.meta,su.count,'linear-gradient(100deg,#F58220,#e06f12)','briefcase'));
+  const sup=el('div','dgx-sup');
+  const p1=el('div','dgx-panel'); p1.appendChild(el('div','ph','<span style="width:9px;height:9px;border-radius:3px;background:#F58220;display:inline-block;"></span><b>Achats &amp; Approvisionnements</b><span class="pn">'+su.achats.length+' indicateurs</span>'));
+  p1.appendChild(cardsGrid(su.achats,true)); sup.appendChild(p1);
+  const p2=el('div','dgx-panel'); p2.appendChild(el('div','ph','<span style="width:9px;height:9px;border-radius:3px;background:#0d7377;display:inline-block;"></span><b>Comptabilité &amp; Fiscalité</b><span class="pn">'+su.compta.length+' indicateurs</span>'));
+  p2.appendChild(cardsGrid(su.compta,true)); sup.appendChild(p2);
+  ssu.appendChild(sup); wrap.appendChild(ssu);
 
   // ── CHARTS ──
   const cs=el('div'); cs.style.cssText='display:flex;flex-direction:column;gap:12px;margin-top:14px;';
@@ -252,8 +276,9 @@ function render(D){
 
 function activate(k){
   document.querySelectorAll('#dgx-secs .dgx-sec').forEach(s=>s.classList.toggle('on', s.dataset.k===k));
-  const colors={dg:'#0d7377',supports:'#F58220',tech:'#5f9e2b',comm:'#0a5d61'};
-  const tints={dg:'rgba(13,115,119,.10)',supports:'rgba(245,130,32,.12)',tech:'rgba(141,198,63,.18)',comm:'rgba(10,93,97,.10)'};
+  const colors={dg:'#0d7377',tech:'#5f9e2b',industrielle:'#7c5cbf',comm:'#0a5d61',rh:'#d64550',daf:'#F58220'};
+  const tints={dg:'rgba(13,115,119,.10)',tech:'rgba(141,198,63,.18)',industrielle:'rgba(124,92,191,.14)',
+               comm:'rgba(10,93,97,.10)',rh:'rgba(214,69,80,.12)',daf:'rgba(245,130,32,.12)'};
   document.querySelectorAll('.dgx-tab').forEach(b=>{ const on=b.dataset.k===k;
     b.style.background=on?tints[b.dataset.k]:'transparent'; b.style.color=on?colors[b.dataset.k]:'#667085';
     b.style.boxShadow=on?('inset 0 0 0 1.5px '+colors[b.dataset.k]):'none'; });
