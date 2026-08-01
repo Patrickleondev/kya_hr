@@ -12,45 +12,81 @@ _ALLOWED_ROLES = {
 }
 
 # ════════════════════════════════════════════════════════════════════
-#  Macro-départements (4) — la classification se fait au niveau ÉQUIPE
-#  car en prod plusieurs équipes KYA partagent un même Department ERPNext
-#  (ex. « Sales - D » porte Commercial ET Offres). Source de vérité =
-#  Equipe KYA. Override explicite + repli par mots-clés pour les équipes
-#  inconnues. dept → équipes → opérations.
+#  Macro-départements (4 onglets, réorg 01/08/2026 : 5 Directions officielles
+#  + transversaux DG derrière). Le tableau de bord garde 4 onglets pour
+#  l'instant (Industrielle -> onglet "tech", DRH -> onglet "supports") : un
+#  découpage en 6 onglets est la suite logique, pas encore fait (cf. mémoire
+#  KYA côté Claude — à faire quand la maquette est validée).
+#
+#  Classification par ARBRE DE DÉPARTEMENT (pas par nom d'équipe) : une
+#  équipe est classée en remontant `parent_department` jusqu'à retomber sur
+#  l'une des 5 Directions/DG. Ancien système (liste de noms d'équipe en dur)
+#  abandonné : il devenait faux dès qu'une équipe changeait de département
+#  sans être renommée (cf. `Equipe KYA` ne supporte pas le renommage via API
+#  — les noms de équipe restent parfois datés même après une réorg réussie).
 # ════════════════════════════════════════════════════════════════════
 MACRO_ORDER = ["dg", "supports", "tech", "comm"]
 MACRO_META = {
-    "dg":       {"label": "Direction Générale",   "sub": "Informatique / SI · Administratif"},
-    "supports": {"label": "Services Supports",     "sub": "Achats & Stock · Comptabilité & Finance · RH · Logistique"},
-    "tech":     {"label": "Services Techniques",   "sub": "Interventions & SAV"},
-    "comm":     {"label": "Services Commerciaux",  "sub": "Leads · opportunités · devis · clients"},
+    "dg":       {"label": "Direction Générale",   "sub": "Informatique / SI · Audit · Transversaux DG"},
+    "supports": {"label": "DAF & RH",             "sub": "Achats & Stock · Comptabilité & Finance · RH · Moyens Généraux"},
+    "tech":     {"label": "Technique & Industrie", "sub": "Direction Technique & Projets · Direction Industrielle"},
+    "comm":     {"label": "Développement Commercial", "sub": "Leads · opportunités · devis · clients"},
 }
-# Override par nom exact d'Equipe KYA (les variantes d'accent sont tolérées).
-MACRO_TEAMS = {
-    "dg":       ["Equipe Informatique"],
-    "supports": ["Equipe Achats et Stocks", "Equipe Comptabilité et Finance",
-                 "Equipe Comptabilite et Finance", "Equipe RH",
-                 "Logistique", "Logistique et flotte"],
-    "tech":     ["Equipe Assemblage", "Equipe Fabrication", "Equipe Installation",
-                 "Equipe Maintenance et SAV", "Equipe Offres", "Equipe Audit Interne"],
-    "comm":     ["Equipe Commercial", "Equipe Communication"],
+# Direction (Department racine, is_group=1) -> onglet du dashboard.
+_DIRECTION_TO_MACRO = {
+    "direction générale": "dg",
+    "direction technique & projets": "tech",
+    "direction industrielle": "tech",
+    "direction du développement commercial": "comm",
+    "direction des ressources humaines (drh)": "supports",
+    "direction administrative & financière (daf)": "supports",
+    "informatique & logiciel (it)": "dg",
 }
-_TEAM_TO_MACRO = {n.lower(): m for m, names in MACRO_TEAMS.items() for n in names}
+# Services transversaux rattachés directement au DG (pas sous une Direction).
+_TRANSVERSAL_DG = {
+    "audit interne & risques", "qhse", "kya-energy laboratory",
+    "kya-institute of technology", "fondation kya",
+    "prospection & développement du réseau d'agences",
+    "agence kya-energy group niger",
+}
+
+
+def _department_ancestor_chain(dept_name: str | None) -> list[str]:
+    """Chaîne [dept, parent, grand-parent, ...] jusqu'à la racine (noms en
+    minuscule, sans le suffixe " - KYA"/" - D"). Mise en cache process (le
+    tableau de bord se recharge à chaque requête, la table Department ne
+    bouge pas assez souvent pour justifier plus)."""
+    chain: list[str] = []
+    seen = set()
+    cur = dept_name
+    while cur and cur not in seen:
+        seen.add(cur)
+        label = frappe.db.get_value("Department", cur, "department_name") or cur
+        chain.append(label.strip().lower())
+        cur = frappe.db.get_value("Department", cur, "parent_department")
+    return chain
 
 
 def _macro_of_team(equipe_name: str | None, dept_name: str | None = None) -> str:
-    """Renvoie la clé macro-département (dg|supports|tech|comm) d'une équipe."""
-    key = (equipe_name or "").strip().lower()
-    if key in _TEAM_TO_MACRO:
-        return _TEAM_TO_MACRO[key]
-    blob = f"{key} {(dept_name or '').lower()}"
-    if any(k in blob for k in ("informat", "système d'info", "systeme d'info", " si ", "r&d", "research")):
+    """Renvoie la clé macro-département (dg|supports|tech|comm) d'une équipe
+    en remontant son Department jusqu'à la Direction/DG qui la porte."""
+    chain = _department_ancestor_chain(dept_name)
+    for label in chain:
+        if label in _TRANSVERSAL_DG:
+            return "dg"
+        if label in _DIRECTION_TO_MACRO:
+            return _DIRECTION_TO_MACRO[label]
+    # Repli par mots-clés (équipe sans département résolu / instance locale
+    # encore sur l'ancien arbre à 4 macro-départements).
+    blob = f"{(equipe_name or '').lower()} {(dept_name or '').lower()}"
+    if any(k in blob for k in ("informat", "système d'info", "systeme d'info", " si ", "r&d", "research", "audit")):
         return "dg"
     if any(k in blob for k in ("achat", "stock", "compt", "financ", "rh", "ressources humaines",
-                                "logist", "dispatch", "approvision", "magasin")):
+                                "logist", "dispatch", "approvision", "magasin", "moyens gen")):
         return "supports"
     if any(k in blob for k in ("install", "maintenance", "sav", "fabric", "assembl", "offre",
-                                "audit", "production", "operations", "technique", "génie", "genie")):
+                                "production", "operations", "technique", "génie", "genie",
+                                "industr", "supply chain")):
         return "tech"
     if any(k in blob for k in ("commerc", "vente", "sales", "communicat", "marketing")):
         return "comm"
