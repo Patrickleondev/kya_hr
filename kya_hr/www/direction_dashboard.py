@@ -11,46 +11,105 @@ _ALLOWED_ROLES = {
     "Auditeur Interne", "System Manager",
 }
 
+# ── Directeurs de Direction (réorg 01/08/2026) : chacun ne doit voir QUE son
+# propre onglet, jamais les 5 autres. Mapping explicite par utilisateur plutôt
+# que par rôle Frappe générique ou par Employee.department : les 3 directeurs
+# nommés ont hérité des rôles larges de leur ancien poste (Foussenni garde
+# DAAF/DFC de son ex-fonction compta, Judith Messan a System Manager) qui leur
+# donneraient sinon un accès complet ; et Employee.department reste
+# volontairement "Direction Générale - KYA" pour les 3 (choix du script de
+# réorg — seul leur Equipe/Service porte la vraie Direction), donc la chaîne
+# de département ne permet pas de les classer automatiquement. Vérifié en
+# premier, avant tout rôle : un directeur nommé ici est TOUJOURS restreint,
+# même s'il porte par ailleurs un rôle qui semblerait tout-puissant.
+_DIRECTOR_USER_SCOPE = {
+    "fhad.tchangbedji@kya-energy.com": "tech",       # Directeur Technique & Projets
+    "mohamed.fousseni@kya-energy.com": "daf",        # Directeur Administratif & Financier
+    "judith.messan@kya-energy.com": "comm",          # Directrice Dév. Commercial (intérim)
+}
+
 # ════════════════════════════════════════════════════════════════════
-#  Macro-départements (4) — la classification se fait au niveau ÉQUIPE
-#  car en prod plusieurs équipes KYA partagent un même Department ERPNext
-#  (ex. « Sales - D » porte Commercial ET Offres). Source de vérité =
-#  Equipe KYA. Override explicite + repli par mots-clés pour les équipes
-#  inconnues. dept → équipes → opérations.
+#  Macro-départements (6 onglets, réorg 01/08/2026 : 5 Directions officielles
+#  + DG/transversaux). Un onglet par Direction + un onglet DG qui regroupe
+#  aussi les services transversaux (Audit, QHSE, IT, Laboratory, Institute,
+#  Fondation, Prospection, Agence Niger) : trop petits/vacants pour mériter
+#  chacun leur propre onglet pour l'instant.
+#
+#  Classification par ARBRE DE DÉPARTEMENT (pas par nom d'équipe) : une
+#  équipe est classée en remontant `parent_department` jusqu'à retomber sur
+#  l'une des 5 Directions/DG. Ancien système (liste de noms d'équipe en dur)
+#  abandonné : il devenait faux dès qu'une équipe changeait de département
+#  sans être renommée (cf. `Equipe KYA` ne supporte pas le renommage via API
+#  — les noms d'équipe restent parfois datés même après une réorg réussie).
 # ════════════════════════════════════════════════════════════════════
-MACRO_ORDER = ["dg", "supports", "tech", "comm"]
+MACRO_ORDER = ["dg", "tech", "industrielle", "comm", "rh", "daf"]
 MACRO_META = {
-    "dg":       {"label": "Direction Générale",   "sub": "Informatique / SI · Administratif"},
-    "supports": {"label": "Services Supports",     "sub": "Achats & Stock · Comptabilité & Finance · RH · Logistique"},
-    "tech":     {"label": "Services Techniques",   "sub": "Interventions & SAV"},
-    "comm":     {"label": "Services Commerciaux",  "sub": "Leads · opportunités · devis · clients"},
+    "dg":           {"label": "Direction Générale",   "sub": "Informatique / SI · Audit · Transversaux DG"},
+    "tech":         {"label": "Direction Technique & Projets", "sub": "Bureau d'études · Installations & Chantiers · SAV · Contrôle & Supervision"},
+    "industrielle": {"label": "Direction Industrielle", "sub": "Production & Assemblage · Supply Chain & Magasins"},
+    "comm":         {"label": "Développement Commercial", "sub": "Grands Comptes · Ventes & Distribution · Marketing & Communication"},
+    "rh":           {"label": "Ressources Humaines (DRH)", "sub": "Recrutement · Administration & Paie · Formation · Relations Sociales"},
+    "daf":          {"label": "Administrative & Financière (DAF)", "sub": "Achats & Approvisionnements · Comptabilité & Fiscalité · Moyens Généraux"},
 }
-# Override par nom exact d'Equipe KYA (les variantes d'accent sont tolérées).
-MACRO_TEAMS = {
-    "dg":       ["Equipe Informatique"],
-    "supports": ["Equipe Achats et Stocks", "Equipe Comptabilité et Finance",
-                 "Equipe Comptabilite et Finance", "Equipe RH",
-                 "Logistique", "Logistique et flotte"],
-    "tech":     ["Equipe Assemblage", "Equipe Fabrication", "Equipe Installation",
-                 "Equipe Maintenance et SAV", "Equipe Offres", "Equipe Audit Interne"],
-    "comm":     ["Equipe Commercial", "Equipe Communication"],
+# Direction (Department racine, is_group=1) -> onglet du dashboard.
+_DIRECTION_TO_MACRO = {
+    "direction générale": "dg",
+    "direction technique & projets": "tech",
+    "direction industrielle": "industrielle",
+    "direction du développement commercial": "comm",
+    "direction des ressources humaines (drh)": "rh",
+    "direction administrative & financière (daf)": "daf",
+    "informatique & logiciel (it)": "dg",
 }
-_TEAM_TO_MACRO = {n.lower(): m for m, names in MACRO_TEAMS.items() for n in names}
+# Services transversaux rattachés directement au DG (pas sous une Direction).
+_TRANSVERSAL_DG = {
+    "audit interne & risques", "qhse", "kya-energy laboratory",
+    "kya-institute of technology", "fondation kya",
+    "prospection & développement du réseau d'agences",
+    "agence kya-energy group niger",
+}
+
+
+def _department_ancestor_chain(dept_name: str | None) -> list[str]:
+    """Chaîne [dept, parent, grand-parent, ...] jusqu'à la racine (noms en
+    minuscule, sans le suffixe " - KYA"/" - D"). Mise en cache process (le
+    tableau de bord se recharge à chaque requête, la table Department ne
+    bouge pas assez souvent pour justifier plus)."""
+    chain: list[str] = []
+    seen = set()
+    cur = dept_name
+    while cur and cur not in seen:
+        seen.add(cur)
+        label = frappe.db.get_value("Department", cur, "department_name") or cur
+        chain.append(label.strip().lower())
+        cur = frappe.db.get_value("Department", cur, "parent_department")
+    return chain
 
 
 def _macro_of_team(equipe_name: str | None, dept_name: str | None = None) -> str:
-    """Renvoie la clé macro-département (dg|supports|tech|comm) d'une équipe."""
-    key = (equipe_name or "").strip().lower()
-    if key in _TEAM_TO_MACRO:
-        return _TEAM_TO_MACRO[key]
-    blob = f"{key} {(dept_name or '').lower()}"
-    if any(k in blob for k in ("informat", "système d'info", "systeme d'info", " si ", "r&d", "research")):
+    """Renvoie la clé macro-département (dg|tech|industrielle|comm|rh|daf)
+    d'une équipe en remontant son Department jusqu'à la Direction/DG qui la porte."""
+    chain = _department_ancestor_chain(dept_name)
+    for label in chain:
+        if label in _TRANSVERSAL_DG:
+            return "dg"
+        if label in _DIRECTION_TO_MACRO:
+            return _DIRECTION_TO_MACRO[label]
+    # Repli par mots-clés (équipe sans département résolu / instance locale
+    # encore sur l'ancien arbre à 4 macro-départements, ex. environnement de
+    # test qui n'a pas encore reçu la réorg du 01/08).
+    blob = f"{(equipe_name or '').lower()} {(dept_name or '').lower()}"
+    if any(k in blob for k in ("informat", "système d'info", "systeme d'info", " si ", "r&d", "research", "audit")):
         return "dg"
-    if any(k in blob for k in ("achat", "stock", "compt", "financ", "rh", "ressources humaines",
-                                "logist", "dispatch", "approvision", "magasin")):
-        return "supports"
+    if any(k in blob for k in ("rh", "ressources humaines", "recrutement", "gpec", "relations sociales")):
+        return "rh"
+    if any(k in blob for k in ("achat", "stock", "compt", "financ", "logist", "dispatch",
+                                "approvision", "magasin", "moyens gen", "juridique", "tresorerie", "trésorerie")):
+        return "daf"
+    if any(k in blob for k in ("industr", "supply chain", "methode", "méthode", "qualite produit", "qualité produit")):
+        return "industrielle"
     if any(k in blob for k in ("install", "maintenance", "sav", "fabric", "assembl", "offre",
-                                "audit", "production", "operations", "technique", "génie", "genie")):
+                                "production", "operations", "technique", "génie", "genie", "controle", "contrôle")):
         return "tech"
     if any(k in blob for k in ("commerc", "vente", "sales", "communicat", "marketing")):
         return "comm"
@@ -93,6 +152,19 @@ def _sum(dt: str, field: str, filters=None) -> float:
         return 0.0
 
 
+def _count_series(dt: str, prefix: str) -> int:
+    """Compte uniquement les enregistrements dont le nom suit la naming_series
+    réelle (ex. 'FTB-%'). Exclut les brouillons de test du collègue (noms au
+    hasard saisis avant que la série ne soit branchée, ex. 'jop9cduv43',
+    'test 1') sans dépendre d'un champ statut qui n'existe pas partout."""
+    if not _dt_exists(dt):
+        return 0
+    try:
+        return frappe.db.count(dt, {"name": ["like", f"{prefix}-%"]})
+    except Exception:
+        return 0
+
+
 _WAIT_STATES = ("En attente Chef", "En attente DAAF", "En attente DG",
                 "En attente Direction", "En attente RH", "En attente Audit",
                 "En attente Magasin", "En attente Comptable", "En attente DFC",
@@ -100,6 +172,30 @@ _WAIT_STATES = ("En attente Chef", "En attente DAAF", "En attente DG",
                 "En attente Resp. Stagiaires", "En attente Chef de Service",
                 "En attente du Supérieur Immédiat", "En attente Signature")
 _DG_STATES = ("En attente DG", "En attente Direction")
+
+
+def _user_scope(user: str) -> str | None:
+    """Clé macro à laquelle un directeur nommé est restreint, ou None pour un
+    accès complet (DG/DGA/Auditeur/System Manager — supervision transverse,
+    y compris DGA qui couvre temporairement Industrielle + DRH vacantes)."""
+    return _DIRECTOR_USER_SCOPE.get(user)
+
+
+def _apply_scope(overview: dict, scope: str | None) -> dict:
+    """Réduit la réponse à la seule Direction du scope (pas juste un masquage
+    côté client : les autres Directions ne doivent jamais transiter dans la
+    réponse JSON, sans quoi elles resteraient lisibles via l'inspecteur
+    réseau/la source de la page)."""
+    overview["scope"] = scope
+    if not scope or scope not in overview["depts"]:
+        return overview
+    overview["depts"] = {scope: overview["depts"][scope]}
+    overview["hero"] = []
+    overview["charts"] = {"presence": {"labels": [], "presents": [], "conges": [], "absents": []},
+                          "workflows": {}, "caisse": {"labels": [], "entrees": [], "sorties": []}}
+    overview["modules"] = {}
+    overview["modules_total"] = 0
+    return overview
 
 
 def _card(label, value, sub="", unit="", icon="layers", accent="slate", trend=None, dir=None):
@@ -217,7 +313,7 @@ def _build_overview() -> dict:
     except Exception:
         pass
 
-    # ════════ SUPPORTS : Achats & Stock + Comptabilité & Finance ════════
+    # ════════ DAF : Achats & Stock + Comptabilité & Finance + Moyens Généraux ════════
     achats_cards = [
         _card("Demandes d'achat en attente", str(_waiting("Demande Achat KYA", _WAIT_STATES)),
               "", icon="cart", accent="orange"),
@@ -257,22 +353,81 @@ def _build_overview() -> dict:
                                       "en attente de visa", icon="briefcase", accent="orange"))
             break
 
+    # ════════ INDUSTRIELLE : Production & Assemblage + Supply Chain & Magasins ════════
+    # Direction neuve (réorg 01/08/2026), coordonnée par le DG en attendant un
+    # directeur nommé — peu de doctypes dédiés encore, on s'appuie sur les
+    # équipes (effectif/présence) + le stock (Supply Chain & Magasins = stock).
+    industrielle_teams = [t for t in macro_teams["industrielle"] if t["eff"] > 0]
+    # Fiches techniques produit (nouvelles web pages du collègue technique,
+    # remplacent les anciens web forms/doctypes CRM du même nom) — contrôle
+    # qualité batterie/lampadaire en sortie d'assemblage.
+    ftb_count = _count_series("Fiche Technique Batterie", "FTB")
+    ftl_count = _count_series("Fiche Technique Lampadaire", "FTL")
+    industrielle_cards = [
+        _card("Effectif industriel", str(_macro_eff("industrielle")),
+              (f"{_macro_pres('industrielle')} présents" if _macro_eff("industrielle") else ""),
+              icon="users", accent="teal"),
+        _card("Articles au catalogue", str(_count("Article KYA")), "Production & Supply Chain",
+              icon="package", accent="slate"),
+        _card("Inventaires en attente", str(_waiting("Inventaire KYA", _WAIT_STATES)),
+              "Supply Chain & Magasins", icon="filecheck", accent="orange"),
+        _card("Mouvements stock (sem.)", str(_count("Mouvement Stock KYA", {"creation": [">=", week_ago]})),
+              "entrées/sorties", icon="route", accent="teal"),
+        _card("Fiches techniques produit", str(ftb_count + ftl_count),
+              f"{ftb_count} batteries · {ftl_count} lampadaires", icon="filecheck", accent="green"),
+    ]
+    industrielle_rows = []
+    for t in sorted(industrielle_teams, key=lambda x: -x["eff"]):
+        charge = round(t["pres"] / t["eff"] * 100) if t["eff"] else 0
+        industrielle_rows.append({"equipe": t["equipe"], "eff": t["eff"], "pres": t["pres"], "charge": charge})
+
+    # ════════ RH (DRH) : effectif, congés, permissions, contrats, documents ════════
+    docs_rh_attente = (_waiting("Document RH KYA", _WAIT_STATES)
+                        + _waiting("Avenant Contrat KYA", _WAIT_STATES)
+                        + _waiting("Contrat Stage Immersion KYA", _WAIT_STATES)
+                        + _waiting("Fiche de Poste KYA", _WAIT_STATES))
+    rh_cards = [
+        _card("Effectif RH (équipe)", str(_macro_eff("rh")),
+              (f"{_macro_pres('rh')} présents" if _macro_eff("rh") else ""),
+              icon="users", accent="teal"),
+        _card("Effectif KYA total", str(effectif_actif), "tous départements", icon="usercheck", accent="slate"),
+        _card("Congés/permissions en attente", str(modules["Plannings congé"] + modules["Permissions sortie"]),
+              "", icon="calendar", accent="orange"),
+        _card("Contrats en attente", str(contrats_attente), "signature en cours", icon="filecheck", accent="teal"),
+        _card("Documents RH en attente", str(docs_rh_attente),
+              "certificats · avenants · immersion · fiches de poste", icon="file", accent="orange"),
+    ]
+
     # ════════ TECHNIQUES : équipes + ops terrain réelles (prod) ════════
-    # SAV/maintenance = fiche technique curative ; déplacements = fiche de
-    # mission (doctypes prod module CRM, absents en local → 0, défensif).
+    # 01/08/2026 : le collègue technique a abandonné ses anciens web forms/
+    # doctypes module CRM (fiche technique curative, fiche de mission,
+    # fiche_recep_tech_lampa, fiche de recpt de batt — laissés en l'état,
+    # plus alimentés) au profit de nouvelles Web Page (Frappe CMS + JS,
+    # signature terrain) adossées à de nouveaux doctypes "KYA HR"/"Custom" :
+    #   - Fiche Compte Rendu Intervention (FCRI-...) : SAV/maintenance curative.
+    #   - Ordre de mission2 : déplacements terrain (remplace "fiche de mission").
+    #   - Fiche Installation (+ Cellule PV Mesuree, Siege KYA) : installation &
+    #     audit contrôle double-signature technicien/auditeur — circuit prêt
+    #     mais tout juste mis en service (peut afficher 0 le temps que les
+    #     premières fiches terrain arrivent).
     tech_teams = [t for t in macro_teams["tech"] if t["eff"] > 0]
-    sav_count = _count("fiche technique curative")
-    mission_count = _count("fiche de mission")
-    recep_count = _count("fiche_recep_tech_lampa") + _count("fiche de recpt de batt")
+    sav_count = _count_series("Fiche Compte Rendu Intervention", "FCRI") or _count("fiche technique curative")
+    sav_ok = _count("Fiche Compte Rendu Intervention", {"etat_final": "Fonctionnel"})
+    mission_count = (_count("Ordre de mission2") or _count("Ordre de Mission")
+                     or _count("fiche de mission"))
+    install_count = _count("Fiche Installation")
+    install_cloture = _count("Fiche Installation", {"statut": "Cloture"})
     tech_cards = [
         _card("Effectif technique", str(_macro_eff("tech")),
               (f"{_macro_pres('tech')} présents" if _macro_eff("tech") else ""),
               icon="users", accent="teal"),
-        _card("Interventions SAV", str(sav_count), "fiches curatives",
+        _card("Interventions SAV", str(sav_count),
+              (f"{round(sav_ok / sav_count * 100)} % « Fonctionnel »" if sav_count else "fiches d'intervention"),
               icon="wrench", accent="orange"),
         _card("Ordres de mission", str(mission_count), "déplacements terrain",
               icon="route", accent="teal"),
-        _card("Réceptions techniques", str(recep_count), "lampadaires + batteries",
+        _card("Installations & audits", str(install_count),
+              (f"{install_cloture} clôturées" if install_count else "circuit prêt, en attente des 1ères fiches"),
               icon="filecheck", accent="green"),
     ]
     tech_rows = []
@@ -375,10 +530,12 @@ def _build_overview() -> dict:
 
     counts = {
         "dg": len(contrat_rows) + achat_dg_n,
-        "supports": modules["Demandes d'achat"] + modules["Bons de commande"]
-                    + modules["Inventaires"] + modules["PV matériel"],
+        "daf": modules["Demandes d'achat"] + modules["Bons de commande"]
+               + modules["Inventaires"] + modules["PV matériel"],
+        "industrielle": _waiting("Inventaire KYA", _WAIT_STATES),
         "tech": sav_count + mission_count,
         "comm": leads_total,
+        "rh": modules["Plannings congé"] + modules["Permissions sortie"] + docs_rh_attente,
     }
 
     return {
@@ -387,13 +544,16 @@ def _build_overview() -> dict:
         "depts": {
             "dg": {"meta": MACRO_META["dg"], "count": counts["dg"], "cards": dg_cards,
                    "contrats": contrat_rows},
-            "supports": {"meta": MACRO_META["supports"], "count": counts["supports"],
-                         "achats": achats_cards, "compta": compta_cards},
             "tech": {"meta": MACRO_META["tech"], "count": counts["tech"],
                      "cards": tech_cards, "teams": tech_rows},
+            "industrielle": {"meta": MACRO_META["industrielle"], "count": counts["industrielle"],
+                              "cards": industrielle_cards, "teams": industrielle_rows},
             "comm": {"meta": MACRO_META["comm"], "count": counts["comm"],
                      "cards": comm_cards, "teams": comm_teams,
                      "leads_status": leads_status, "pipeline": pipe_rows},
+            "rh": {"meta": MACRO_META["rh"], "count": counts["rh"], "cards": rh_cards},
+            "daf": {"meta": MACRO_META["daf"], "count": counts["daf"],
+                    "achats": achats_cards, "compta": compta_cards},
         },
         "charts": {"presence": presence_chart, "workflows": wf_counts, "caisse": caisse_chart},
         "modules": modules, "modules_total": modules_total,
@@ -402,10 +562,26 @@ def _build_overview() -> dict:
 
 @frappe.whitelist()
 def get_dg_overview() -> dict:
-    """Endpoint rafraîchissement du tableau de bord DG (4 macro-départements)."""
-    if not _ALLOWED_ROLES.intersection(set(frappe.get_roles(frappe.session.user))):
+    """Endpoint rafraîchissement du tableau de bord (6 onglets, ou 1 seul si
+    l'utilisateur est un directeur de Direction nommément restreint)."""
+    user = frappe.session.user
+    scope = _user_scope(user)
+    if scope is None and not _ALLOWED_ROLES.intersection(set(frappe.get_roles(user))):
         frappe.throw(_("Accès réservé à la Direction Générale."), frappe.PermissionError)
-    return _build_overview()
+    return _apply_scope(_build_overview(), scope)
+
+
+#  Un Chef d'Équipe/Chef Service (pas un des 3 directeurs nommés, pas DG-tier)
+#  qui tombe sur /direction-dashboard n'a rien à y faire : SON tableau de bord
+#  existe déjà et est correctement centré sur sa propre équipe (kya_services.
+#  www.kya_dashboard_equipe, scope = Employee.department + sous-départements
+#  du chef connecté). On le renvoie là plutôt que de lui montrer une erreur
+#  d'accès brute — cf. demande explicite : "chaque directeur/chef ne doit voir
+#  QUE son périmètre", pas juste "bloquer ce qui n'est pas à lui".
+_TEAM_LEAD_ROLES = {
+    "Chef Equipe", "Chef d'Equipe", "Chef d'Équipe",
+    "Chef Service", "Supérieur Immédiat", "Responsable Equipe",
+}
 
 
 def get_context(context):
@@ -413,13 +589,20 @@ def get_context(context):
         frappe.throw(_("Veuillez vous connecter"), frappe.AuthenticationError)
 
     user_roles = set(frappe.get_roles(frappe.session.user))
-    if not _ALLOWED_ROLES.intersection(user_roles):
+    scope = _user_scope(frappe.session.user)
+    if scope is None and not _ALLOWED_ROLES.intersection(user_roles):
+        is_team_lead = bool(user_roles & _TEAM_LEAD_ROLES) or any(
+            r.startswith("DST - Chef Equipe") for r in user_roles
+        )
+        if is_team_lead:
+            frappe.local.flags.redirect_location = "/kya-dashboard-equipe"
+            raise frappe.Redirect
         frappe.throw(_("Accès réservé à la Direction Générale."), frappe.PermissionError)
 
     # Nouvelle vue par macro-départements (maquette DG). Rendu initial + refresh
     # via get_dg_overview(). Défensif : si ça casse, on garde l'ancien contexte.
     try:
-        context.overview_json = _json.dumps(_build_overview(), default=str)
+        context.overview_json = _json.dumps(_apply_scope(_build_overview(), scope), default=str)
     except Exception:
         context.overview_json = "null"
         frappe.log_error(frappe.get_traceback(), "direction-dashboard: overview")
