@@ -571,6 +571,19 @@ def get_dg_overview() -> dict:
     return _apply_scope(_build_overview(), scope)
 
 
+#  Un Chef d'Équipe/Chef Service (pas un des 3 directeurs nommés, pas DG-tier)
+#  qui tombe sur /direction-dashboard n'a rien à y faire : SON tableau de bord
+#  existe déjà et est correctement centré sur sa propre équipe (kya_services.
+#  www.kya_dashboard_equipe, scope = Employee.department + sous-départements
+#  du chef connecté). On le renvoie là plutôt que de lui montrer une erreur
+#  d'accès brute — cf. demande explicite : "chaque directeur/chef ne doit voir
+#  QUE son périmètre", pas juste "bloquer ce qui n'est pas à lui".
+_TEAM_LEAD_ROLES = {
+    "Chef Equipe", "Chef d'Equipe", "Chef d'Équipe",
+    "Chef Service", "Supérieur Immédiat", "Responsable Equipe",
+}
+
+
 def get_context(context):
     if frappe.session.user == "Guest":
         frappe.throw(_("Veuillez vous connecter"), frappe.AuthenticationError)
@@ -578,6 +591,12 @@ def get_context(context):
     user_roles = set(frappe.get_roles(frappe.session.user))
     scope = _user_scope(frappe.session.user)
     if scope is None and not _ALLOWED_ROLES.intersection(user_roles):
+        is_team_lead = bool(user_roles & _TEAM_LEAD_ROLES) or any(
+            r.startswith("DST - Chef Equipe") for r in user_roles
+        )
+        if is_team_lead:
+            frappe.local.flags.redirect_location = "/kya-dashboard-equipe"
+            raise frappe.Redirect
         frappe.throw(_("Accès réservé à la Direction Générale."), frappe.PermissionError)
 
     # Nouvelle vue par macro-départements (maquette DG). Rendu initial + refresh
