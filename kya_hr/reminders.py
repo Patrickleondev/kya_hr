@@ -4,7 +4,7 @@ KYA HR — Rappels automatiques (anniversaires de naissance et d'ancienneté).
 Envoi quotidien. Les stagiaires sont exclus. On NE précise PAS l'âge.
 - Anniversaire de NAISSANCE : envoyé à TOUT le personnel via la liste de
   diffusion `personnel@kya-energy.com` (plus de restriction RH/DG).
-- Anniversaire d'ANCIENNETÉ (service) : envoyé à la RH + Direction.
+- Anniversaire d'ANCIENNETÉ (service) : envoyé à la RH uniquement.
 """
 
 import frappe
@@ -15,14 +15,12 @@ from frappe.utils import today, getdate
 # y sont envoyés → toute l'entreprise reçoit, sans filtrer par rôle.
 STAFF_MAILING_LIST = "personnel@kya-energy.com"
 
-# Roles qui recoivent les rappels d'ancienneté : la RH et le DG uniquement (pas
-# System Manager, pour ne pas arroser les comptes techniques/admin).
+# Roles qui recoivent les rappels d'ancienneté : la RH uniquement (ni DG/DGA,
+# ni System Manager, pour ne pas arroser les comptes techniques/admin/direction).
 REMINDER_ROLES = (
     "HR Manager",
     "HR User",
     "Responsable RH",
-    "Directeur Général",  # DG
-    "DGA",
 )
 
 # Types d'emploi exclus (stagiaires)
