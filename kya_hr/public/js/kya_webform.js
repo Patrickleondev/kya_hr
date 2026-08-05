@@ -1681,15 +1681,16 @@
       var q = input.value.trim();
       if (debounce) clearTimeout(debounce);
       if (q.length < 2) { results.style.display = "none"; results.innerHTML = ""; return; }
+      var canSelectAny = canSelectAnyEmployee();
       debounce = setTimeout(function () {
         frappe.call({
-          method: "kya_hr.api.webform_helpers.search_employees",
-          args: { query: q, limit: 10 },
+          method: canSelectAny ? "kya_hr.api.webform_helpers.search_employees" : "kya_hr.api.webform_helpers.find_my_employee",
+          args: canSelectAny ? { query: q, limit: 10 } : { query: q },
           callback: function (r) {
             var rows = (r && r.message) || [];
             results.innerHTML = "";
             if (!rows.length) {
-              results.innerHTML = '<li style="padding:8px;color:#888;">Aucune correspondance. Vérifiez la saisie.</li>';
+              results.innerHTML = '<li style="padding:8px;color:#888;">Aucune correspondance autorisée. Vérifiez votre saisie.</li>';
               results.style.display = "block"; return;
             }
             rows.forEach(function (emp) {
@@ -2481,8 +2482,8 @@
       title: "ARTICLES REÇUS",
       addLabel: "+ Ajouter un article",
       columns: [
-        { fn: "item_code",     label: "Article",      type: "link", link: "Item", w: "14%",
-          fetch: { designation: "item_name", uom: "stock_uom" } },
+        { fn: "item_code",     label: "Article",      type: "link", link: "Article KYA", w: "14%",
+          fetch: { designation: "designation", uom: "unite" } },
         { fn: "designation",   label: "Désignation",  type: "text", grow: true },
         { fn: "uom",           label: "Unité",        type: "link", link: "UOM", w: "10%" },
         { fn: "qte_commandee", label: "Qté Cmd",      type: "float", w: "9%", align: "right" },
@@ -2499,8 +2500,8 @@
       title: "LISTE DU MATÉRIEL",
       addLabel: "+ Ajouter un article",
       columns: [
-        { fn: "item_code",             label: "Article",       type: "link", link: "Item", w: "16%",
-          fetch: { designation: "item_name", uom: "stock_uom" } },
+        { fn: "item_code",             label: "Article",       type: "link", link: "Article KYA", w: "16%",
+          fetch: { designation: "designation", uom: "unite" } },
         { fn: "designation",           label: "Désignation",   type: "text", grow: true },
         { fn: "uom",                   label: "Unité",         type: "link", link: "UOM", w: "10%" },
         { fn: "qte_demandee",          label: "Qté Demandée",  type: "float", w: "12%", align: "right" },
@@ -2514,8 +2515,8 @@
       title: "ARTICLES RETOURNÉS",
       addLabel: "+ Ajouter un article",
       columns: [
-        { fn: "item_code",      label: "Article",     type: "link", link: "Item", w: "15%",
-          fetch: { designation: "item_name", uom: "stock_uom" } },
+        { fn: "item_code",      label: "Article",     type: "link", link: "Article KYA", w: "15%",
+          fetch: { designation: "designation", uom: "unite" } },
         { fn: "designation",    label: "Désignation", type: "text", grow: true },
         { fn: "qte_retournee",  label: "Qté Retournée", type: "float", w: "11%", align: "right" },
         { fn: "warehouse",      label: "Magasin dest.", type: "link", link: "Warehouse", w: "16%" },
@@ -2529,8 +2530,8 @@
       title: "LIGNES D'INVENTAIRE",
       addLabel: "+ Ajouter un article",
       columns: [
-        { fn: "item_code",     label: "Article",       type: "link", link: "Item", w: "15%",
-          fetch: { designation: "item_name", uom: "stock_uom" } },
+        { fn: "item_code",     label: "Article",       type: "link", link: "Article KYA", w: "15%",
+          fetch: { designation: "designation", uom: "unite" } },
         { fn: "designation",   label: "Désignation",   type: "text", grow: true, ro: true },
         { fn: "warehouse",     label: "Magasin",       type: "link", link: "Warehouse", w: "16%" },
         { fn: "qte_theorique", label: "Qté Théorique", type: "float", w: "12%", align: "right", ro: true },
@@ -2752,6 +2753,7 @@
   /* Champ "titre" lisible par DocType (sinon on retombe sur le name/ID). */
   var _kyaTitleField = {
     "Item": "item_name",
+    "Article KYA": "designation",
     "Supplier": "supplier_name",
     "Employee": "employee_name",
     "Customer": "customer_name"
