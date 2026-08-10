@@ -8,7 +8,7 @@
  "title_field": "raison_sociale",
  "field_order": [
   "section_identite", "raison_sociale", "type_prestataire", "contact", "email",
-  "col_id2", "nature_prestation", "departement_beneficiaire",
+  "col_id2", "date_naissance", "nature_prestation", "departement_beneficiaire",
   "section_contrat", "date_debut_contrat", "date_fin_contrat", "duree", "statut",
   "col_ct2", "montant_contrat", "mode_paiement", "reference_contrat", "observation"
  ],
@@ -19,6 +19,9 @@
    "options": "\nPersonne physique\nEntreprise", "in_list_view": 1, "in_standard_filter": 1},
   {"fieldname": "contact", "fieldtype": "Data", "label": "Contact téléphonique"},
   {"fieldname": "email", "fieldtype": "Data", "label": "Email", "options": "Email"},
+  {"fieldname": "date_naissance", "fieldtype": "Date", "label": "Date de naissance",
+   "depends_on": "eval:doc.type_prestataire=='Personne physique'",
+   "description": "Optionnel — permet d'inclure ce prestataire dans le rappel d'anniversaire quotidien."},
   {"fieldname": "col_id2", "fieldtype": "Column Break"},
   {"fieldname": "nature_prestation", "fieldtype": "Small Text", "label": "Nature de la prestation"},
   {"fieldname": "departement_beneficiaire", "fieldtype": "Link", "label": "Département bénéficiaire", "options": "Departement KYA"},

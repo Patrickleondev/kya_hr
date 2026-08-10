@@ -51,7 +51,10 @@ def _email_close():
 
 
 def send_kya_birthday_reminders():
-    """Rappel quotidien : anniversaires de naissance des employes permanents."""
+    """Rappel quotidien : anniversaires de naissance des employes permanents
+    et des prestataires (personnes physiques) dont la date de naissance est
+    renseignee — ces derniers n'ont pas de fiche Employee, ils vivent dans
+    Prestataire KYA, d'ou une requete separee."""
     today_date = getdate(today())
 
     employees = frappe.db.sql(
@@ -67,6 +70,24 @@ def send_kya_birthday_reminders():
         {"excluded": EXCLUDED_TYPES, "day": today_date.day, "month": today_date.month},
         as_dict=True,
     )
+
+    prestataires = []
+    if frappe.db.exists("DocType", "Prestataire KYA") and frappe.db.has_column("Prestataire KYA", "date_naissance"):
+        prestataires = frappe.db.sql(
+            """
+            SELECT name, raison_sociale AS employee_name, date_naissance AS date_of_birth,
+                   'Prestataire' AS department, nature_prestation AS designation
+            FROM `tabPrestataire KYA`
+            WHERE type_prestataire = 'Personne physique'
+              AND date_naissance IS NOT NULL
+              AND DAY(date_naissance)   = %(day)s
+              AND MONTH(date_naissance) = %(month)s
+            """,
+            {"day": today_date.day, "month": today_date.month},
+            as_dict=True,
+        )
+
+    employees = list(employees) + list(prestataires)
     if not employees:
         return
 
