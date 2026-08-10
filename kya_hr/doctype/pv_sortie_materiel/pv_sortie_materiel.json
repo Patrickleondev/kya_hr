@@ -178,7 +178,8 @@
   {
    "fieldname": "demandeur_nom",
    "label": "Nom Demandeur",
-   "fieldtype": "Data"
+   "fieldtype": "Data",
+   "read_only": 1
   },
   {
    "fieldname": "demandeur_date",
