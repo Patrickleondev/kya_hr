@@ -128,7 +128,9 @@ def _count(dt: str, filters=None) -> int:
     if not _dt_exists(dt):
         return 0
     try:
-        return frappe.db.count(dt, filters or {})
+        f = dict(filters or {})
+        f.setdefault("docstatus", ["!=", 2])
+        return frappe.db.count(dt, f)
     except Exception:
         return 0
 
@@ -137,7 +139,7 @@ def _waiting(dt: str, states) -> int:
     if not _dt_exists(dt):
         return 0
     try:
-        return frappe.db.count(dt, {"workflow_state": ["in", tuple(states)]})
+        return frappe.db.count(dt, {"workflow_state": ["in", tuple(states)], "docstatus": ["!=", 2]})
     except Exception:
         return 0
 
@@ -743,7 +745,7 @@ def get_context(context):
     # ── 5.1 Bandeau MULTI-MODULES : tout ce qui est "en attente" partout ──
     def _count_waiting(doctype, states):
         try:
-            return frappe.db.count(doctype, {"workflow_state": ["in", states]})
+            return frappe.db.count(doctype, {"workflow_state": ["in", states], "docstatus": ["!=", 2]})
         except Exception:
             return 0
 

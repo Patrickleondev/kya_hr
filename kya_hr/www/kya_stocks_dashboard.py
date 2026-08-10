@@ -64,7 +64,9 @@ def _count(dt, filters=None):
     if not _exists(dt):
         return 0
     try:
-        return frappe.db.count(dt, filters or {})
+        f = dict(filters or {})
+        f.setdefault("docstatus", ["!=", 2])
+        return frappe.db.count(dt, f)
     except Exception:
         return 0
 

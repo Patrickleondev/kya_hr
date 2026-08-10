@@ -50,14 +50,17 @@ class PVSortieMateriel(Document):
                 frappe.throw(_("La quantité demandée pour '{0}' doit être positive.").format(item.designation))
 
     def set_demandeur_info(self):
-        """Auto-fill demandeur from session user's Employee record."""
-        if not self.demandeur_nom:
-            emp = frappe.db.get_value(
-                "Employee", {"user_id": frappe.session.user},
-                ["employee_name"], as_dict=True
-            )
-            if emp:
-                self.demandeur_nom = emp.employee_name
+        """Nom du demandeur = TOUJOURS le nom complet (employee_name) de
+        l'utilisateur connecté — champ read_only, jamais une saisie libre
+        (évite les noms partiels du type "ADJELI" au lieu de "Kokou Agossou
+        ADJELI", signalé par le DG)."""
+        emp = frappe.db.get_value(
+            "Employee", {"user_id": frappe.session.user},
+            ["employee_name"], as_dict=True
+        )
+        if emp:
+            self.demandeur_nom = emp.employee_name
+            if not self.demandeur_date:
                 self.demandeur_date = frappe.utils.today()
 
     # ------------------------------------------------------------------
