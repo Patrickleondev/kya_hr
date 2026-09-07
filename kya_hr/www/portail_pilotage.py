@@ -14,6 +14,8 @@ from __future__ import annotations
 
 import frappe
 
+from kya_hr.utils import ops_techniques as _ops
+
 
 # Rôles transverses qui voient tout le portail
 _DIR = {"System Manager", "Directeur General", "Directeur Général", "DG", "DGA",
@@ -99,9 +101,12 @@ def get_portail_tree() -> list:
     leads = _count("Lead", {"status": ["not in", ("Converted", "Do Not Contact", "Lost Quotation")]})
     da_attente = _count("Demande Achat KYA", {"workflow_state": ["not in",
                         ("Approuvé", "Approuve", "Rejeté", "Rejete", "Annulé", "Annule")]})
-    sav = _count("fiche technique curative")
-    # Missions : 2 flux prod coexistent (web form CRM + page workflow signature)
-    missions = _count("fiche de mission") + _count("Ordre de mission2")
+    # SAV et missions : les deux générations de fiches coexistent en prod
+    # (web forms CRM + pages à signature). Source unique des compteurs pour
+    # que le portail, le dashboard DG et celui des Services Techniques
+    # affichent le MÊME nombre — cf. kya_hr.utils.ops_techniques.
+    sav = _ops.compter("sav")
+    missions = _ops.compter("mission")
 
     tree = [
         {

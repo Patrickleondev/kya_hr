@@ -4,6 +4,8 @@ import frappe
 from frappe import _
 from frappe.utils import flt, formatdate, today, add_days
 
+from kya_hr.utils import ops_techniques as _ops
+
 no_cache = 1
 
 _ALLOWED_ROLES = {
@@ -176,11 +178,78 @@ _WAIT_STATES = ("En attente Chef", "En attente DAAF", "En attente DG",
 _DG_STATES = ("En attente DG", "En attente Direction")
 
 
+def _scope_depuis_organigramme(user: str) -> str | None:
+    """Direction d'un chef, DÉDUITE de l'organigramme réel.
+
+    Les 3 directeurs nommés sont listés en dur plus haut (leur fiche Employee
+    ne permet pas de les classer). Tous les autres encadrants — chefs de
+    service, chefs d'équipe — ne peuvent pas être maintenus dans une liste :
+    on remonte donc l'organigramme, dans cet ordre :
+
+      1. les `Equipe KYA` dont la personne est `chef_equipe` : c'est la piste
+         la plus fiable, le `departement` de l'équipe porte le rattachement
+         réel (c'est aussi lui que la réorg du 01/08 a mis à jour, alors que
+         les NOMS d'équipe, eux, n'ont pas pu être renommés) ;
+      2. à défaut, le département de sa propre fiche Employee.
+
+    Un chef de plusieurs équipes réparties sur des Directions différentes est
+    rattaché à celle où il en a le plus (départage déterministe par ordre
+    alphabétique, pour ne jamais afficher deux vues différentes au même
+    utilisateur d'une requête à l'autre).
+    """
+    try:
+        emp = frappe.db.get_value("Employee", {"user_id": user},
+                                  ["name", "department"], as_dict=True)
+    except Exception:
+        return None
+    if not emp:
+        return None
+
+    macros: list[str] = []
+    try:
+        for eq in frappe.get_all("Equipe KYA", filters={"chef_equipe": emp.name},
+                                 fields=["nom_equipe", "departement"]):
+            m = _macro_of_team(eq.get("nom_equipe"), eq.get("departement"))
+            if m:
+                macros.append(m)
+    except Exception:
+        pass
+
+    if macros:
+        # le plus fréquent, départage alphabétique
+        return sorted(set(macros), key=lambda m: (-macros.count(m), m))[0]
+
+    if emp.get("department"):
+        chaine = _department_ancestor_chain(emp["department"])
+        for label in chaine:
+            if label in _TRANSVERSAL_DG:
+                return "dg"
+            if label in _DIRECTION_TO_MACRO:
+                return _DIRECTION_TO_MACRO[label]
+    return None
+
+
 def _user_scope(user: str) -> str | None:
-    """Clé macro à laquelle un directeur nommé est restreint, ou None pour un
-    accès complet (DG/DGA/Auditeur/System Manager — supervision transverse,
-    y compris DGA qui couvre temporairement Industrielle + DRH vacantes)."""
-    return _DIRECTOR_USER_SCOPE.get(user)
+    """Clé macro à laquelle l'utilisateur est restreint, ou None pour un accès
+    complet aux 6 onglets.
+
+    ORDRE IMPORTANT :
+      1. directeur nommé -> toujours restreint, même s'il porte par ailleurs un
+         rôle large hérité de son ancien poste (cf. commentaire du mapping) ;
+      2. rôle de supervision transverse (DG/DGA/Auditeur/System Manager) ->
+         accès complet. Ce test passe AVANT la déduction par l'organigramme,
+         sinon un DG qui se trouve aussi être chef d'une équipe se verrait
+         enfermé dans la Direction de cette équipe ;
+      3. sinon, déduction par l'organigramme (chefs de direction/service).
+    """
+    if user in _DIRECTOR_USER_SCOPE:
+        return _DIRECTOR_USER_SCOPE[user]
+    try:
+        if _ALLOWED_ROLES.intersection(set(frappe.get_roles(user))):
+            return None
+    except Exception:
+        pass
+    return _scope_depuis_organigramme(user)
 
 
 def _apply_scope(overview: dict, scope: str | None) -> dict:
@@ -343,12 +412,19 @@ def _build_overview() -> dict:
               icon="arrowdown", accent="orange"),
         _card("Solde caisse", _fmt_m(solde), "cumulé", unit="M FCFA", icon="coins", accent="teal"),
     ]
-    # Ordres de mission + fiches budgétaires (prod) — masqués si absents
-    for dt_, lbl, ic in [("Ordre de Mission", "Ordres de mission en attente", "route"),
-                         ("Ordre de mission", "Ordres de mission en attente", "route")]:
-        if _dt_exists(dt_):
-            compta_cards.append(_card(lbl, str(_waiting(dt_, _WAIT_STATES)), "", icon=ic, accent="teal"))
-            break
+    # Ordres de mission en attente de signature — les DEUX générations.
+    # Cette carte ne s'affichait jamais : elle cherchait « Ordre de Mission » /
+    # « Ordre de mission », deux doctypes qui n'existent pas (les vrais noms
+    # sont « Ordre de mission2 » et « fiche de mission »). L'état d'attente ne
+    # porte pas le même nom d'un doctype à l'autre : `statut` (Soumis au DGA /
+    # Soumis au DG) sur la nouvelle fiche, `workflow_state` sur l'ancienne.
+    missions_attente = (
+        _count("Ordre de mission2", {"statut": ["in", ("Soumis au DGA", "Soumis au DG")]})
+        + _waiting("fiche de mission", _WAIT_STATES)
+    )
+    if missions_attente or _dt_exists("Ordre de mission2"):
+        compta_cards.append(_card("Ordres de mission en attente", str(missions_attente),
+                                  "signature DGA / DG", icon="route", accent="teal"))
     for dt_ in ("Fiche Budgetaire Mission", "Fiche Budgétaire de Mission", "Fiche Budgetaire de Mission"):
         if _dt_exists(dt_):
             compta_cards.append(_card("Fiches budgétaires mission", str(_waiting(dt_, _WAIT_STATES)),
@@ -363,8 +439,9 @@ def _build_overview() -> dict:
     # Fiches techniques produit (nouvelles web pages du collègue technique,
     # remplacent les anciens web forms/doctypes CRM du même nom) — contrôle
     # qualité batterie/lampadaire en sortie d'assemblage.
-    ftb_count = _count_series("Fiche Technique Batterie", "FTB")
-    ftl_count = _count_series("Fiche Technique Lampadaire", "FTL")
+    ftb = _ops.detail("recep_batterie")
+    ftl = _ops.detail("recep_lampadaire")
+    ftb_count, ftl_count = ftb["total"], ftl["total"]
     industrielle_cards = [
         _card("Effectif industriel", str(_macro_eff("industrielle")),
               (f"{_macro_pres('industrielle')} présents" if _macro_eff("industrielle") else ""),
@@ -413,20 +490,21 @@ def _build_overview() -> dict:
     #     mais tout juste mis en service (peut afficher 0 le temps que les
     #     premières fiches terrain arrivent).
     tech_teams = [t for t in macro_teams["tech"] if t["eff"] > 0]
-    sav_count = _count_series("Fiche Compte Rendu Intervention", "FCRI") or _count("fiche technique curative")
-    sav_ok = _count("Fiche Compte Rendu Intervention", {"etat_final": "Fonctionnel"})
-    mission_count = (_count("Ordre de mission2") or _count("Ordre de Mission")
-                     or _count("fiche de mission"))
+    # Ancienne + nouvelle génération de fiches ADDITIONNÉES (cf.
+    # kya_hr.utils.ops_techniques) : les équipes remplissent encore les deux.
+    # Avant, un `or` s'arrêtait au premier doctype non vide et faisait
+    # disparaître des stats DG toutes les fiches de l'ancienne génération.
+    sav = _ops.detail("sav")
+    mission = _ops.detail("mission")
     install_count = _count("Fiche Installation")
     install_cloture = _count("Fiche Installation", {"statut": "Cloture"})
     tech_cards = [
         _card("Effectif technique", str(_macro_eff("tech")),
               (f"{_macro_pres('tech')} présents" if _macro_eff("tech") else ""),
               icon="users", accent="teal"),
-        _card("Interventions SAV", str(sav_count),
-              (f"{round(sav_ok / sav_count * 100)} % « Fonctionnel »" if sav_count else "fiches d'intervention"),
-              icon="wrench", accent="orange"),
-        _card("Ordres de mission", str(mission_count), "déplacements terrain",
+        _card("Interventions SAV", str(sav["total"]),
+              _ops.sous_titre("sav"), icon="wrench", accent="orange"),
+        _card("Ordres de mission", str(mission["total"]), _ops.sous_titre("mission"),
               icon="route", accent="teal"),
         _card("Installations & audits", str(install_count),
               (f"{install_cloture} clôturées" if install_count else "circuit prêt, en attente des 1ères fiches"),
@@ -535,7 +613,7 @@ def _build_overview() -> dict:
         "daf": modules["Demandes d'achat"] + modules["Bons de commande"]
                + modules["Inventaires"] + modules["PV matériel"],
         "industrielle": _waiting("Inventaire KYA", _WAIT_STATES),
-        "tech": sav_count + mission_count,
+        "tech": sav["total"] + mission["total"],
         "comm": leads_total,
         "rh": modules["Plannings congé"] + modules["Permissions sortie"] + docs_rh_attente,
     }
@@ -564,8 +642,10 @@ def _build_overview() -> dict:
 
 @frappe.whitelist()
 def get_dg_overview() -> dict:
-    """Endpoint rafraîchissement du tableau de bord (6 onglets, ou 1 seul si
-    l'utilisateur est un directeur de Direction nommément restreint)."""
+    """Endpoint rafraîchissement du tableau de bord : 6 onglets pour la
+    supervision transverse, 1 seul (sa Direction) pour un directeur ou un chef
+    de service/d'équipe — le filtrage est fait CÔTÉ SERVEUR, les autres
+    Directions ne transitent jamais dans la réponse."""
     user = frappe.session.user
     scope = _user_scope(user)
     if scope is None and not _ALLOWED_ROLES.intersection(set(frappe.get_roles(user))):
@@ -573,13 +653,17 @@ def get_dg_overview() -> dict:
     return _apply_scope(_build_overview(), scope)
 
 
-#  Un Chef d'Équipe/Chef Service (pas un des 3 directeurs nommés, pas DG-tier)
-#  qui tombe sur /direction-dashboard n'a rien à y faire : SON tableau de bord
-#  existe déjà et est correctement centré sur sa propre équipe (kya_services.
-#  www.kya_dashboard_equipe, scope = Employee.department + sous-départements
-#  du chef connecté). On le renvoie là plutôt que de lui montrer une erreur
-#  d'accès brute — cf. demande explicite : "chaque directeur/chef ne doit voir
-#  QUE son périmètre", pas juste "bloquer ce qui n'est pas à lui".
+#  Repli pour un encadrant dont la Direction n'a PAS pu être déduite de
+#  l'organigramme (ni équipe dont il est chef, ni département exploitable sur
+#  sa fiche Employee) : plutôt qu'une erreur d'accès brute, on le renvoie vers
+#  le tableau de bord de son équipe (kya_services.www.kya_dashboard_equipe,
+#  centré sur Employee.department + sous-départements).
+#
+#  Depuis la généralisation du scope (cf. `_scope_depuis_organigramme`), ce cas
+#  est devenu l'EXCEPTION : un chef correctement rattaché dans l'organigramme
+#  obtient désormais la vue de SA Direction et n'est plus redirigé. Si un chef
+#  atterrit encore ici, c'est le signe d'un rattachement manquant côté RH
+#  (équipe sans `chef_equipe`, ou fiche Employee sans département).
 _TEAM_LEAD_ROLES = {
     "Chef Equipe", "Chef d'Equipe", "Chef d'Équipe",
     "Chef Service", "Supérieur Immédiat", "Responsable Equipe",

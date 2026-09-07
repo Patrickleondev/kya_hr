@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import frappe
 
+from kya_hr.utils import ops_techniques as _ops
+
 
 ACCESS_ROLES = {
     "System Manager", "Directeur General", "Directeur Général", "DG", "DGA",
@@ -118,11 +120,14 @@ def get_st_overview() -> dict:
     taux_moyen = round(sum(flt(t.taux_effectif) for t in actifs) / len(actifs)) if actifs else 0
     membres = sum(int(t.nombre_membres or 0) for t in actives)
 
-    # ── Opérations terrain (doctypes prod, module CRM ; absents en local) ──
-    # SAV / maintenance curative, ordres de mission, réceptions techniques,
-    # enquêtes de satisfaction client. Tout est défensif (_exists / try-except).
-    SAV_DT, MISSION_DT = "fiche technique curative", "fiche de mission"
-    LAMP_DT, BATT_DT, ENQ_DT = "fiche_recep_tech_lampa", "fiche de recpt de batt", "EnqueteSatisfactionClient"
+    # ── Opérations terrain (doctypes créés en prod ; absents en local) ──
+    # SAV, ordres de mission et réceptions : l'ANCIENNE génération (web forms
+    # module CRM) et la NOUVELLE (Web Pages du collègue technique) sont
+    # additionnées via kya_hr.utils.ops_techniques. Cette page ne lisait que
+    # les anciennes fiches : elle annonçait 31 ordres de mission là où le
+    # portail en comptait 59, pour exactement la même question.
+    # L'enquête de satisfaction, elle, n'a qu'une seule génération.
+    ENQ_DT = "EnqueteSatisfactionClient"
 
     def _safe_all(dt, fields, order_by="creation desc", limit=400):
         if not _exists(dt):
@@ -133,15 +138,13 @@ def get_st_overview() -> dict:
             frappe.log_error(frappe.get_traceback(), f"st-overview: {dt}")
             return []
 
-    fiches_sav = _safe_all(SAV_DT, ["name", "clientsite", "techname", "dateinter",
-                                    "objinter", "etatsys", "creation"],
-                           order_by="dateinter desc, creation desc")
-    fiches_mission = _safe_all(MISSION_DT, ["name", "chef_mission", "destination", "objet",
-                                            "date_emission", "workflow_state", "duree", "creation"],
-                               order_by="date_emission desc, creation desc")
-    n_sav = len(fiches_sav)
-    n_mission = len(fiches_mission)
-    n_recep = _count(LAMP_DT) + _count(BATT_DT)
+    sav_detail = _ops.detail("sav")
+    mission_detail = _ops.detail("mission")
+    fiches_sav = _ops.lignes("sav", limit=8)
+    fiches_mission = _ops.lignes("mission", limit=8)
+    n_sav = sav_detail["total"]
+    n_mission = mission_detail["total"]
+    n_recep = _ops.compter("recep_lampadaire") + _ops.compter("recep_batterie")
 
     # Satisfaction client moyenne (/5) — scores texte "1".."5"
     enquetes = _safe_all(ENQ_DT, ["efficacite_installation", "efficacite_sav",
@@ -159,8 +162,10 @@ def get_st_overview() -> dict:
 
     # ── Hero (6) — priorité aux ops terrain réelles ──
     hero = [
-        {"label": "Interventions SAV", "value": str(n_sav), "sub": "fiches curatives", "icon": "wrench"},
-        {"label": "Ordres de mission", "value": str(n_mission), "sub": "fiches de mission", "icon": "route"},
+        {"label": "Interventions SAV", "value": str(n_sav),
+         "sub": _ops.sous_titre("sav"), "icon": "wrench"},
+        {"label": "Ordres de mission", "value": str(n_mission),
+         "sub": _ops.sous_titre("mission"), "icon": "route"},
         {"label": "Réceptions techniques", "value": str(n_recep), "sub": "lampadaires + batteries", "icon": "check"},
         {"label": "Équipes techniques", "value": str(len(actives)), "unit": f"/ {len(teams)}",
          "sub": f"{membres} membres", "icon": "users"},
@@ -172,25 +177,32 @@ def get_st_overview() -> dict:
 
     # ── Tables ops terrain ──
     from frappe.utils import formatdate as _fd
+    # Les lignes viennent des deux générations, déjà fusionnées et triées par
+    # date : clés canoniques (client/intervenant/date/etat…), plus `generation`
+    # pour distinguer une fiche récente d'une fiche de l'ancien formulaire.
     sav_rows = []
-    for f in fiches_sav[:8]:
+    for f in fiches_sav:
+        etat = f.get("etat") or "—"
         sav_rows.append({
-            "client": f.clientsite or "—",
-            "tech": f.techname or "—",
-            "objet": f.objinter or "—",
-            "date": _fd(f.dateinter, "dd/MM/y") if f.dateinter else "—",
-            "etat": f.etatsys or "—",
-            "accent": "ok" if (f.etatsys or "").lower().startswith("fonction") else "wait",
+            "client": f.get("client") or "—",
+            "tech": f.get("intervenant") or "—",
+            "objet": f.get("objet") or "—",
+            "date": _fd(f.get("date"), "dd/MM/y") if f.get("date") else "—",
+            "etat": etat,
+            "generation": f.get("generation"),
+            "accent": "ok" if etat.lower().startswith("fonction") else "wait",
         })
     mission_rows = []
-    for m in fiches_mission[:8]:
-        st = m.workflow_state or "—"
+    for m in fiches_mission:
+        st = m.get("etat") or "—"
         mission_rows.append({
-            "ref": m.name, "chef": m.chef_mission or "—",
-            "destination": m.destination or "—", "objet": m.objet or "—",
-            "date": _fd(m.date_emission, "dd/MM/y") if m.date_emission else "—",
+            "ref": m.get("ref"), "chef": m.get("chef") or "—",
+            "destination": m.get("destination") or "—", "objet": m.get("objet") or "—",
+            "date": _fd(m.get("date"), "dd/MM/y") if m.get("date") else "—",
             "etat": st,
-            "accent": "ok" if st.lower() in ("approved", "approuvé", "approuve") else ("bad" if "reject" in st.lower() else "wait"),
+            "generation": m.get("generation"),
+            "accent": "ok" if st.lower() in ("approved", "approuvé", "approuve", "approuvé dg", "approuvé dga")
+                      else ("bad" if "reject" in st.lower() else "wait"),
         })
 
     # ── Tâches techniques en cours (table) ──

@@ -23,10 +23,23 @@ FEATURE_SHORTCUTS = {
         {"type": "URL", "label": "🎓 Contrats de stage d'immersion", "url": "/contrats-immersion", "color": "Blue"},
         {"type": "URL", "label": "👥 Effectifs des équipes (détail)", "url": "/equipe-effectifs", "color": "Green"},
         {"type": "DocType", "label": "🗂️ Journal des modifications (fiches)", "link_to": "Modification Info Employe KYA"},
+        {"type": "URL", "label": "🧭 Mon tableau de bord Direction", "url": "/direction-dashboard", "color": "Blue"},
     ],
-    # ── Chef d'équipe : édite les infos de ses membres ────────────────────────
+    # ── Chef d'équipe / de service : ses membres + SA Direction ───────────────
+    # « Mon tableau de bord Direction » pointe sur la même page que la Synthèse
+    # du DG, mais elle se filtre TOUTE SEULE sur la Direction de la personne
+    # connectée (cf. direction_dashboard._scope_depuis_organigramme). Le
+    # raccourci est posé ICI, et dans chaque espace métier ci-dessous, pour
+    # qu'un chef n'ait JAMAIS à passer par l'icône Direction Générale — qu'il
+    # ne peut d'ailleurs pas ouvrir, faute d'en porter les rôles.
+    #
+    # Ce raccourci existait dans `workspace/gestion_equipe.json` mais a disparu
+    # de la production (workspace réimporté le 31/08 depuis la définition
+    # concurrente de kya_services, qui ne le contient pas). D'où le passage par
+    # cette table : elle est rejouée à chaque migrate et survit au réimport.
     "Gestion Equipe": [
         {"type": "URL", "label": "👥 Effectifs de mon équipe (modifier)", "url": "/equipe-effectifs", "color": "Green"},
+        {"type": "URL", "label": "🧭 Mon tableau de bord Direction", "url": "/direction-dashboard", "color": "Blue"},
     ],
     # ── Direction : signe les documents + tableaux de bord ────────────────────
     "Direction Generale": [
@@ -45,6 +58,18 @@ FEATURE_SHORTCUTS = {
     "Espace Stock": [
         {"type": "URL", "label": "🛒 Catalogue des articles", "url": "/stock-catalogue", "color": "Orange"},
         {"type": "URL", "label": "📊 Rapport de stock (période/équipe)", "url": "/rapport-stock", "color": "Blue"},
+        {"type": "URL", "label": "🧭 Mon tableau de bord Direction", "url": "/direction-dashboard", "color": "Blue"},
+    ],
+    # ── Espaces métier des chefs de service : chacun accède à SA Direction
+    # depuis chez lui (vue filtrée côté serveur), sans passer par la DG.
+    "Espace Achats": [
+        {"type": "URL", "label": "🧭 Mon tableau de bord Direction", "url": "/direction-dashboard", "color": "Blue"},
+    ],
+    "Espace Comptabilite": [
+        {"type": "URL", "label": "🧭 Mon tableau de bord Direction", "url": "/direction-dashboard", "color": "Blue"},
+    ],
+    "Logistique": [
+        {"type": "URL", "label": "🧭 Mon tableau de bord Direction", "url": "/direction-dashboard", "color": "Blue"},
     ],
 }
 
